@@ -53,7 +53,7 @@ void TestInterface::async_eb_eventBaseAsync(
 }
 
 void TestInterface::async_tm_notCalledBack(
-    std::unique_ptr<apache::thrift::HandlerCallback<void>>) {}
+    apache::thrift::HandlerCallbackPtr<void>) {}
 
 void TestInterface::echoIOBuf(
     std::unique_ptr<folly::IOBuf>& ret, std::unique_ptr<folly::IOBuf> buf) {

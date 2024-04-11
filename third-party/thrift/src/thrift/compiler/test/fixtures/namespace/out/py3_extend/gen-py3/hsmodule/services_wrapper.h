@@ -24,7 +24,7 @@ class HsTestServiceWrapper : virtual public HsTestServiceSvIf {
     folly::Executor *executor;
   public:
     explicit HsTestServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<int64_t>> callback
+    void async_tm_init(apache::thrift::HandlerCallbackPtr<int64_t> callback
         , int64_t int1
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

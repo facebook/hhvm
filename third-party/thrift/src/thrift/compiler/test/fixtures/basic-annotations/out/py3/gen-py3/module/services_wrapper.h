@@ -44,23 +44,23 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
     folly::Executor *executor;
   public:
     explicit MyServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_getRandomData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) override;
-    void async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+    void async_tm_ping(apache::thrift::HandlerCallbackPtr<void> callback) override;
+    void async_tm_getRandomData(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback) override;
+    void async_tm_hasDataById(apache::thrift::HandlerCallbackPtr<bool> callback
         , int64_t id
     ) override;
-    void async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+    void async_tm_getDataById(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
         , int64_t id
     ) override;
-    void async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+    void async_tm_putDataById(apache::thrift::HandlerCallbackPtr<void> callback
         , int64_t id
         , std::unique_ptr<std::string> data
     ) override;
-    void async_tm_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
+    void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback
         , int64_t id
         , std::unique_ptr<std::string> dataStr
     ) override;
-    void async_tm_cppDoNothing(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_cppDoNothing(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -74,8 +74,8 @@ class MyServicePrioParentWrapper : virtual public MyServicePrioParentSvIf {
     folly::Executor *executor;
   public:
     explicit MyServicePrioParentWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_pong(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_ping(apache::thrift::HandlerCallbackPtr<void> callback) override;
+    void async_tm_pong(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -86,7 +86,7 @@ std::shared_ptr<apache::thrift::ServerInterface> MyServicePrioParentInterface(Py
 class MyServicePrioChildWrapper : public ::cpp2::MyServicePrioParentWrapper, virtual public MyServicePrioChildSvIf {
   public:
     explicit MyServicePrioChildWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_pang(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_pang(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -100,7 +100,7 @@ class BadServiceWrapper : virtual public GoodServiceSvIf {
     folly::Executor *executor;
   public:
     explicit BadServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) override;
+    void async_tm_bar(apache::thrift::HandlerCallbackPtr<int32_t> callback) override;
     std::unique_ptr<BadInteractionIf> createBadInteraction() override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
@@ -115,9 +115,9 @@ class FooBarBazServiceWrapper : virtual public FooBarBazServiceSvIf {
     folly::Executor *executor;
   public:
     explicit FooBarBazServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_baz(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_foo(apache::thrift::HandlerCallbackPtr<void> callback) override;
+    void async_tm_bar(apache::thrift::HandlerCallbackPtr<void> callback) override;
+    void async_tm_baz(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

@@ -22,7 +22,7 @@ SomeServiceWrapper::SomeServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void SomeServiceWrapper::async_tm_bounce_map(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::unordered_map<int32_t,std::string>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::unordered_map<int32_t,std::string>>> callback
     , std::unique_ptr<std::unordered_map<int32_t,std::string>> m
 ) {
   auto ctx = callback->getRequestContext();
@@ -44,7 +44,7 @@ m = std::move(m)    ]() mutable {
     });
 }
 void SomeServiceWrapper::async_tm_binary_keyed_map(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::map<std::string,int64_t>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::map<std::string,int64_t>>> callback
     , std::unique_ptr<std::vector<int64_t>> r
 ) {
   auto ctx = callback->getRequestContext();

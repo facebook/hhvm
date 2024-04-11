@@ -60,8 +60,8 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<bool> co_simple_function();
   virtual folly::coro::Task<bool> co_simple_function(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_simple_function(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback);
-  virtual void async_eb_throws_function(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_simple_function(apache::thrift::HandlerCallbackPtr<bool> callback);
+  virtual void async_eb_throws_function(apache::thrift::HandlerCallbackPtr<void> callback);
   virtual bool sync_throws_function2(bool /*param1*/);
   [[deprecated("Use sync_throws_function2 instead")]] virtual bool throws_function2(bool /*param1*/);
   virtual folly::Future<bool> future_throws_function2(bool p_param1);
@@ -70,7 +70,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<bool> co_throws_function2(bool p_param1);
   virtual folly::coro::Task<bool> co_throws_function2(apache::thrift::RequestParams params, bool p_param1);
 #endif
-  virtual void async_tm_throws_function2(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, bool p_param1);
+  virtual void async_tm_throws_function2(apache::thrift::HandlerCallbackPtr<bool> callback, bool p_param1);
   virtual void sync_throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/);
   [[deprecated("Use sync_throws_function3 instead")]] virtual void throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/);
   virtual folly::Future<::std::map<::std::int32_t, ::std::string>> future_throws_function3(bool p_param1, const ::std::string& p_param2);
@@ -79,7 +79,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(bool p_param1, const ::std::string& p_param2);
   virtual folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(apache::thrift::RequestParams params, bool p_param1, const ::std::string& p_param2);
 #endif
-  virtual void async_tm_throws_function3(std::unique_ptr<apache::thrift::HandlerCallback<::std::map<::std::int32_t, ::std::string>>> callback, bool p_param1, const ::std::string& p_param2);
+  virtual void async_tm_throws_function3(apache::thrift::HandlerCallbackPtr<::std::map<::std::int32_t, ::std::string>> callback, bool p_param1, const ::std::string& p_param2);
   virtual void sync_oneway_void_ret();
   [[deprecated("Use sync_oneway_void_ret instead")]] virtual void oneway_void_ret();
   virtual folly::Future<folly::Unit> future_oneway_void_ret();
@@ -88,7 +88,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<void> co_oneway_void_ret();
   virtual folly::coro::Task<void> co_oneway_void_ret(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_oneway_void_ret(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback);
+  virtual void async_tm_oneway_void_ret(apache::thrift::HandlerCallbackBase::Ptr callback);
   virtual void sync_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/);
   [[deprecated("Use sync_oneway_void_ret_i32_i32_i32_i32_i32_param instead")]] virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
@@ -97,8 +97,8 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   virtual folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RequestParams params, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 #endif
-  virtual void async_tm_oneway_void_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
-  virtual void async_eb_oneway_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  virtual void async_tm_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  virtual void async_eb_oneway_void_ret_map_setlist_param(apache::thrift::HandlerCallbackBase::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   virtual void sync_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/);
   [[deprecated("Use sync_oneway_void_ret_struct_param instead")]] virtual void oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
@@ -107,7 +107,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<void> co_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
   virtual folly::coro::Task<void> co_oneway_void_ret_struct_param(apache::thrift::RequestParams params, const ::some::valid::ns::MyStruct& p_param1);
 #endif
-  virtual void async_tm_oneway_void_ret_struct_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, const ::some::valid::ns::MyStruct& p_param1);
+  virtual void async_tm_oneway_void_ret_struct_param(apache::thrift::HandlerCallbackBase::Ptr callback, const ::some::valid::ns::MyStruct& p_param1);
   virtual void sync_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/);
   [[deprecated("Use sync_oneway_void_ret_listunion_param instead")]] virtual void oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
@@ -116,7 +116,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual folly::coro::Task<void> co_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   virtual folly::coro::Task<void> co_oneway_void_ret_listunion_param(apache::thrift::RequestParams params, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 #endif
-  virtual void async_tm_oneway_void_ret_listunion_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  virtual void async_tm_oneway_void_ret_listunion_param(apache::thrift::HandlerCallbackBase::Ptr callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
  private:
   static ::extra::svc::ExtraServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_function{apache::thrift::detail::si::InvocationType::AsyncTm};

@@ -96,8 +96,8 @@ class ServerOnRequest {
 
   template <class Request>
   void onRequestThrift(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          typename Request::reply_type>>&& callback,
+      apache::thrift::HandlerCallbackPtr<typename Request::reply_type>&&
+          callback,
       Request&& req) {
     if (HasKeyTrait<Request>::value) {
       req.key_ref()->update();

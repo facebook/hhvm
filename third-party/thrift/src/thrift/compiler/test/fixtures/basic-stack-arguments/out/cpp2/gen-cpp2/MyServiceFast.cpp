@@ -26,19 +26,19 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceFastServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t /*id*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_hasDataById(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t /*id*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("hasDataById"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<::std::string>> callback, ::std::int64_t /*id*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_getDataById(apache::thrift::HandlerCallbackPtr<::std::string> callback, ::std::int64_t /*id*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("getDataById"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_putDataById(apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("putDataById"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(apache::thrift::HandlerCallbackBase::Ptr /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
   LOG(DFATAL) << "Function lobDataById is unimplemented";
 }
 

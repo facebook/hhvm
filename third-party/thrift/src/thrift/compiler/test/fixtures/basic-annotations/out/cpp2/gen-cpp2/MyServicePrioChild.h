@@ -59,7 +59,7 @@ class ServiceHandler<::cpp2::MyServicePrioChild> : virtual public ::cpp2::MyServ
   virtual folly::coro::Task<void> co_pang();
   virtual folly::coro::Task<void> co_pang(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_pang(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_pang(apache::thrift::HandlerCallbackPtr<void> callback);
  private:
   static ::cpp2::MyServicePrioChildServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_pang{apache::thrift::detail::si::InvocationType::AsyncTm};

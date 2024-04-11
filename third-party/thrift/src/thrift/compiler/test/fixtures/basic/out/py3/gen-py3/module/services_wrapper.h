@@ -41,7 +41,7 @@ class FooServiceWrapper : virtual public FooServiceSvIf {
     folly::Executor *executor;
   public:
     explicit FooServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_simple_rpc(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -55,7 +55,7 @@ class FB303ServiceWrapper : virtual public FB303ServiceSvIf {
     folly::Executor *executor;
   public:
     explicit FB303ServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>> callback
+    void async_tm_simple_rpc(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> callback
         , int32_t int_parameter
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
@@ -71,30 +71,30 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
     folly::Executor *executor;
   public:
     explicit MyServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_getRandomData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) override;
-    void async_tm_sink(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+    void async_tm_ping(apache::thrift::HandlerCallbackPtr<void> callback) override;
+    void async_tm_getRandomData(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback) override;
+    void async_tm_sink(apache::thrift::HandlerCallbackPtr<void> callback
         , int64_t sink
     ) override;
-    void async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+    void async_tm_putDataById(apache::thrift::HandlerCallbackPtr<void> callback
         , int64_t id
         , std::unique_ptr<std::string> data
     ) override;
-    void async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+    void async_tm_hasDataById(apache::thrift::HandlerCallbackPtr<bool> callback
         , int64_t id
     ) override;
-    void async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+    void async_tm_getDataById(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
         , int64_t id
     ) override;
-    void async_tm_deleteDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+    void async_tm_deleteDataById(apache::thrift::HandlerCallbackPtr<void> callback
         , int64_t id
     ) override;
-    void async_tm_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
+    void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback
         , int64_t id
         , std::unique_ptr<std::string> data
     ) override;
-    void async_tm_invalid_return_for_hack(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<float>>>> callback) override;
-    void async_tm_rpc_skipped_codegen(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_invalid_return_for_hack(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::set<float>>> callback) override;
+    void async_tm_rpc_skipped_codegen(apache::thrift::HandlerCallbackPtr<void> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -108,10 +108,10 @@ class DbMixedStackArgumentsWrapper : virtual public DbMixedStackArgumentsSvIf {
     folly::Executor *executor;
   public:
     explicit DbMixedStackArgumentsWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_getDataByKey0(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+    void async_tm_getDataByKey0(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
         , std::unique_ptr<std::string> key
     ) override;
-    void async_tm_getDataByKey1(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+    void async_tm_getDataByKey1(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
         , std::unique_ptr<std::string> key
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

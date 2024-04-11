@@ -59,7 +59,7 @@ class ServiceHandler<::cpp2::MyLeaf> : virtual public ::cpp2::MyNodeSvIf {
   virtual folly::coro::Task<void> co_do_leaf();
   virtual folly::coro::Task<void> co_do_leaf(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_do_leaf(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_do_leaf(apache::thrift::HandlerCallbackPtr<void> callback);
  private:
   static ::cpp2::MyLeafServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_do_leaf{apache::thrift::detail::si::InvocationType::AsyncTm};

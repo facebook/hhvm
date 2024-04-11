@@ -52,24 +52,24 @@ class CustomerLookupHandler
   }
 
   void async_eb_lookupOneE(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          std::unique_ptr<folly::IOBuf>>> callback,
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<folly::IOBuf>>
+          callback,
       std::unique_ptr<::facebook::sbe::test::IOBuf> p_request) override {
     auto res = doLookupOne(std::move(p_request));
     callback->complete(folly::Try<decltype(res)>{std::move(res)});
   }
 
   void async_eb_lookupManyE(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          std::unique_ptr<folly::IOBuf>>> callback,
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<folly::IOBuf>>
+          callback,
       std::unique_ptr<::facebook::sbe::test::IOBuf> p_request) override {
     auto res = doLookupMany(std::move(p_request));
     callback->complete(folly::Try<decltype(res)>{std::move(res)});
   }
 
   void async_eb_lookupOneTE(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          std::unique_ptr<::facebook::sbe::test::TCustomerResponse>>> callback,
+      apache::thrift::HandlerCallbackPtr<
+          std::unique_ptr<::facebook::sbe::test::TCustomerResponse>> callback,
       std::unique_ptr<::facebook::sbe::test::TSingleCustomerLookup> p_request)
       override {
     auto res = doLookupOneT(std::move(p_request));
@@ -77,8 +77,8 @@ class CustomerLookupHandler
   }
 
   void async_eb_lookupManyTE(
-      std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<
-          ::facebook::sbe::test::TMultipleCustomerResponse>>> callback,
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<
+          ::facebook::sbe::test::TMultipleCustomerResponse>> callback,
       std::unique_ptr<::facebook::sbe::test::TMultipleCustomerLookup> p_request)
       override {
     auto res = doLookupManyT(std::move(p_request));

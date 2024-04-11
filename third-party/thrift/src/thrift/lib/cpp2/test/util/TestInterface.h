@@ -36,7 +36,7 @@ class TestInterface
   void async_eb_eventBaseAsync(std::unique_ptr<StringCob> callback) override;
 
   void async_tm_notCalledBack(
-      std::unique_ptr<apache::thrift::HandlerCallback<void>> cb) override;
+      apache::thrift::HandlerCallbackPtr<void> cb) override;
 
   void echoIOBuf(
       std::unique_ptr<folly::IOBuf>& ret,

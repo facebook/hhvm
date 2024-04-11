@@ -1528,8 +1528,7 @@ TEST_P(HeaderOrRocket, StickyToThreadPool) {
 TEST_P(HeaderOrRocket, CancellationTest) {
   class NotCalledBackHandler {
    public:
-    explicit NotCalledBackHandler(
-        std::unique_ptr<HandlerCallback<void>> callback)
+    explicit NotCalledBackHandler(HandlerCallbackPtr<void> callback)
         : thriftCallback_{std::move(callback)},
           cancelCallback_(
               thriftCallback_->getConnectionContext()
@@ -1549,7 +1548,7 @@ TEST_P(HeaderOrRocket, CancellationTest) {
       cancelBaton.post();
     }
 
-    std::unique_ptr<HandlerCallback<void>> thriftCallback_;
+    HandlerCallbackPtr<void> thriftCallback_;
     folly::CancellationCallback cancelCallback_;
   };
 
@@ -1559,8 +1558,7 @@ TEST_P(HeaderOrRocket, CancellationTest) {
     using NotCalledBackHandlers =
         std::vector<std::shared_ptr<NotCalledBackHandler>>;
 
-    void async_tm_notCalledBack(
-        std::unique_ptr<HandlerCallback<void>> cb) override {
+    void async_tm_notCalledBack(HandlerCallbackPtr<void> cb) override {
       auto handler = std::make_shared<NotCalledBackHandler>(std::move(cb));
       notCalledBackHandlers_.lock()->push_back(std::move(handler));
       handlersCV_.notify_one();
@@ -1968,8 +1966,7 @@ TEST_P(OverloadTest, Test) {
     void voidResponse() override { block.wait(); }
 
     void async_eb_eventBaseAsync(
-        std::unique_ptr<HandlerCallback<std::unique_ptr<::std::string>>>
-            callback) override {
+        HandlerCallbackPtr<std::unique_ptr<::std::string>> callback) override {
       callback->appOverloadedException("method loadshedding request");
     }
   };
@@ -4165,7 +4162,7 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
   class DummyStatusHandler : public apache::thrift::ServiceHandler<DummyStatus>,
                              public StatusServerInterface {
     void async_eb_getStatus(
-        std::unique_ptr<HandlerCallback<std::int64_t>> callback) override {
+        HandlerCallbackPtr<std::int64_t> callback) override {
       ThriftServer* server = callback->getRequestContext()
                                  ->getConnectionContext()
                                  ->getWorker()

@@ -58,8 +58,7 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
   virtual ~ThriftHandler() = default;
 
   void async_eb_hello(
-      std::unique_ptr<apache::thrift::HandlerCallback<hellogoodbye::HelloReply>>
-          callback,
+      apache::thrift::HandlerCallbackPtr<hellogoodbye::HelloReply> callback,
       const hellogoodbye::HelloRequest& request) override {
     LOG(INFO) << "Hello! Thrift server " << reinterpret_cast<uintptr_t>(this)
               << " got key " << request.key_ref()->fullKey().str();
@@ -101,8 +100,8 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
   }
 
   void async_eb_mcVersion(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McVersionReply>> callback,
+      apache::thrift::HandlerCallbackPtr<facebook::memcache::McVersionReply>
+          callback,
       const facebook::memcache::McVersionRequest& /* request */) override {
     callback->result(McVersionReply(carbon::Result::OK));
   }

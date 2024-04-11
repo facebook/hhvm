@@ -62,7 +62,7 @@ folly::coro::Task<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> apa
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>> callback, ::std::int32_t p_int_parameter) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::async_tm_simple_rpc(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> callback, ::std::int32_t p_int_parameter) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

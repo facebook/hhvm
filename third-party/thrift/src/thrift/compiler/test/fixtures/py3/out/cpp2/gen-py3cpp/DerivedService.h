@@ -59,7 +59,7 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
   virtual folly::coro::Task<::std::int32_t> co_get_six();
   virtual folly::coro::Task<::std::int32_t> co_get_six(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_get_six(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
+  virtual void async_tm_get_six(apache::thrift::HandlerCallbackPtr<::std::int32_t> callback);
  private:
   static ::py3::simple::DerivedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_six{apache::thrift::detail::si::InvocationType::AsyncTm};

@@ -29,25 +29,25 @@ class CarbonThriftTestServerOnRequestThrift : public thrift::CarbonThriftTestSvI
           std::shared_ptr<ServerOnRequest>> serverOnRequestMap)
       : serverOnRequestMap_(std::move(serverOnRequestMap)) {}
   void async_tm_customRequest(
-      std::unique_ptr<apache::thrift::HandlerCallback<carbon::test::CustomReply>> callback,
+      apache::thrift::HandlerCallbackPtr<carbon::test::CustomReply> callback,
       const class carbon::test::CustomRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_tm_thrift_test(
-      std::unique_ptr<apache::thrift::HandlerCallback<carbon::test::DummyThriftReply>> callback,
+      apache::thrift::HandlerCallbackPtr<carbon::test::DummyThriftReply> callback,
       const class carbon::test::DummyThriftRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_tm_test(
-      std::unique_ptr<apache::thrift::HandlerCallback<carbon::test::ThriftTestReply>> callback,
+      apache::thrift::HandlerCallbackPtr<carbon::test::ThriftTestReply> callback,
       const class carbon::test::ThriftTestRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_tm_mcVersion(
-      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
+      apache::thrift::HandlerCallbackPtr<facebook::memcache::McVersionReply> callback,
       const class facebook::memcache::McVersionRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
@@ -77,7 +77,7 @@ class CarbonThriftTestServerOnRequestThrift : public thrift::CarbonThriftTestSvI
   template <class Request>
    void onRequestThriftHelper(
        const Request& request,
-       std::unique_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
+       apache::thrift::HandlerCallbackPtr<typename Request::reply_type>
            callback) {
      getServerOnRequest(callback->getEventBase())
          ->onRequestThrift(

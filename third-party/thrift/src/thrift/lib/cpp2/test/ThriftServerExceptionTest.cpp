@@ -102,16 +102,16 @@ class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
   }
 
  protected:
-  void async_tm_doBland(unique_ptr<HandlerCallback<void>> cb) override {
+  void async_tm_doBland(HandlerCallbackPtr<void> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_doRaise(unique_ptr<HandlerCallback<void>> cb) override {
+  void async_tm_doRaise(HandlerCallbackPtr<void> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_get200(unique_ptr<HandlerCallback<string>> cb) override {
+  void async_tm_get200(HandlerCallbackPtr<string> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_get500(unique_ptr<HandlerCallback<string>> cb) override {
+  void async_tm_get500(HandlerCallbackPtr<string> cb) override {
     go_(std::move(cb));
   }
 

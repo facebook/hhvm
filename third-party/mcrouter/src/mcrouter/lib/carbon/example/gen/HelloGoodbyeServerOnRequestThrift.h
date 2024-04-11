@@ -28,19 +28,19 @@ class HelloGoodbyeServerOnRequestThrift : public thrift::HelloGoodbyeSvIf {
           std::shared_ptr<ServerOnRequest>> serverOnRequestMap)
       : serverOnRequestMap_(std::move(serverOnRequestMap)) {}
   void async_eb_goodbye(
-      std::unique_ptr<apache::thrift::HandlerCallback<hellogoodbye::GoodbyeReply>> callback,
+      apache::thrift::HandlerCallbackPtr<hellogoodbye::GoodbyeReply> callback,
       const hellogoodbye::GoodbyeRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_hello(
-      std::unique_ptr<apache::thrift::HandlerCallback<hellogoodbye::HelloReply>> callback,
+      apache::thrift::HandlerCallbackPtr<hellogoodbye::HelloReply> callback,
       const hellogoodbye::HelloRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcVersion(
-      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
+      apache::thrift::HandlerCallbackPtr<facebook::memcache::McVersionReply> callback,
       const facebook::memcache::McVersionRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
@@ -70,7 +70,7 @@ class HelloGoodbyeServerOnRequestThrift : public thrift::HelloGoodbyeSvIf {
   template <class Request>
    void onRequestThriftHelper(
        const Request& request,
-       std::unique_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
+       apache::thrift::HandlerCallbackPtr<typename Request::reply_type>
            callback) {
      getServerOnRequest(callback->getEventBase())
          ->onRequestThrift(

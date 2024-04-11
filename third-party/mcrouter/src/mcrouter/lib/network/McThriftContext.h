@@ -18,7 +18,7 @@ namespace memcache {
 template <class Reply>
 class McThriftContext {
  public:
-  McThriftContext(std::unique_ptr<apache::thrift::HandlerCallback<Reply>> ctx)
+  McThriftContext(apache::thrift::HandlerCallbackPtr<Reply> ctx)
       : underlying_(std::move(ctx)) {}
 
   static void
@@ -79,7 +79,7 @@ class McThriftContext {
   }
 
  private:
-  std::unique_ptr<apache::thrift::HandlerCallback<Reply>> underlying_;
+  apache::thrift::HandlerCallbackPtr<Reply> underlying_;
 };
 
 } // namespace memcache

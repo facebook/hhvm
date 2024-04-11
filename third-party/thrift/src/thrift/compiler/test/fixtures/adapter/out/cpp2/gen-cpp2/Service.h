@@ -58,7 +58,7 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
   virtual folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
   virtual folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RequestParams params, std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
 #endif
-  virtual void async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual void async_tm_func(apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
  private:
   static ::facebook::thrift::test::ServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_func{apache::thrift::detail::si::InvocationType::AsyncTm};

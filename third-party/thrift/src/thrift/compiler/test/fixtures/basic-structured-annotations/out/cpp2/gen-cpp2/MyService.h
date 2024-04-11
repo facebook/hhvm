@@ -60,7 +60,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> co_first();
   virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> co_first(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_first(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>> callback);
+  virtual void async_tm_first(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> callback);
   virtual bool sync_second(::std::int64_t /*count*/);
   [[deprecated("Use sync_second instead")]] virtual bool second(::std::int64_t /*count*/);
   virtual folly::Future<bool> future_second(::std::int64_t p_count);
@@ -69,7 +69,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   virtual folly::coro::Task<bool> co_second(::std::int64_t p_count);
   virtual folly::coro::Task<bool> co_second(apache::thrift::RequestParams params, ::std::int64_t p_count);
 #endif
-  virtual void async_tm_second(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_count);
+  virtual void async_tm_second(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t p_count);
  private:
   static ::test::fixtures::basic-structured-annotations::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_first{apache::thrift::detail::si::InvocationType::AsyncTm};

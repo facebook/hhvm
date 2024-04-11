@@ -19,7 +19,7 @@ MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceWrapper::async_tm_foo(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallbackPtr<void> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -37,7 +37,7 @@ void MyServiceWrapper::async_tm_foo(
     });
 }
 void MyServiceWrapper::async_tm_interact(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+  apache::thrift::HandlerCallbackPtr<void> callback
     , int32_t arg
 ) {
   auto ctx = callback->getRequestContext();
@@ -59,7 +59,7 @@ arg    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_interactFast(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallbackPtr<int32_t> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -77,7 +77,7 @@ void MyServiceWrapper::async_tm_interactFast(
     });
 }
 void MyServiceWrapper::async_tm_serialize(
-  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback) {
+  apache::thrift::HandlerCallbackPtr<apache::thrift::ResponseAndServerStream<int32_t,int32_t>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

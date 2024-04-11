@@ -58,7 +58,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
   virtual folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>> co_count();
   virtual folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>> co_count(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback);
+  virtual void async_tm_count(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>> callback);
   virtual void sync_adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/);
   [[deprecated("Use sync_adaptedTypes instead")]] virtual void adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/);
   virtual folly::Future<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> future_adaptedTypes(std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg);
@@ -67,7 +67,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
   virtual folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> co_adaptedTypes(std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg);
   virtual folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> co_adaptedTypes(apache::thrift::RequestParams params, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg);
 #endif
-  virtual void async_tm_adaptedTypes(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg);
+  virtual void async_tm_adaptedTypes(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> callback, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg);
  private:
   static ::facebook::thrift::test::AdapterServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_count{apache::thrift::detail::si::InvocationType::AsyncTm};

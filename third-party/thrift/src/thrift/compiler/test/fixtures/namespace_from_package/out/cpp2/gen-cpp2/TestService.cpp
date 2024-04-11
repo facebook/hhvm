@@ -60,7 +60,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::test::namespa
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_int1) {
+void apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::async_tm_init(apache::thrift::HandlerCallbackPtr<::std::int64_t> callback, ::std::int64_t p_int1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

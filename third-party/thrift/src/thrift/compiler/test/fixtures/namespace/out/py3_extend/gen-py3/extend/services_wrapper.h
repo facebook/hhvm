@@ -22,7 +22,7 @@ namespace cpp2 {
 class ExtendTestServiceWrapper : public ::cpp2::HsTestServiceWrapper, virtual public ExtendTestServiceSvIf {
   public:
     explicit ExtendTestServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_check(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+    void async_tm_check(apache::thrift::HandlerCallbackPtr<bool> callback
         , std::unique_ptr<::cpp2::HsFoo> struct1
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

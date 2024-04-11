@@ -20,7 +20,7 @@ SimpleServiceWrapper::SimpleServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void SimpleServiceWrapper::async_tm_get_five(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallbackPtr<int32_t> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -38,7 +38,7 @@ void SimpleServiceWrapper::async_tm_get_five(
     });
 }
 void SimpleServiceWrapper::async_tm_add_five(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , int32_t num
 ) {
   auto ctx = callback->getRequestContext();
@@ -60,7 +60,7 @@ num    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_do_nothing(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallbackPtr<void> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -78,7 +78,7 @@ void SimpleServiceWrapper::async_tm_do_nothing(
     });
 }
 void SimpleServiceWrapper::async_tm_concat(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<std::string> first
     , std::unique_ptr<std::string> second
 ) {
@@ -103,7 +103,7 @@ second = std::move(second)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_value(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<::py3::simple::SimpleStruct> simple_struct
 ) {
   auto ctx = callback->getRequestContext();
@@ -125,7 +125,7 @@ simple_struct = std::move(simple_struct)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_negate(
-  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+  apache::thrift::HandlerCallbackPtr<bool> callback
     , bool input
 ) {
   auto ctx = callback->getRequestContext();
@@ -147,7 +147,7 @@ input    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_tiny(
-  std::unique_ptr<apache::thrift::HandlerCallback<int8_t>> callback
+  apache::thrift::HandlerCallbackPtr<int8_t> callback
     , int8_t input
 ) {
   auto ctx = callback->getRequestContext();
@@ -169,7 +169,7 @@ input    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_small(
-  std::unique_ptr<apache::thrift::HandlerCallback<int16_t>> callback
+  apache::thrift::HandlerCallbackPtr<int16_t> callback
     , int16_t input
 ) {
   auto ctx = callback->getRequestContext();
@@ -191,7 +191,7 @@ input    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_big(
-  std::unique_ptr<apache::thrift::HandlerCallback<int64_t>> callback
+  apache::thrift::HandlerCallbackPtr<int64_t> callback
     , int64_t input
 ) {
   auto ctx = callback->getRequestContext();
@@ -213,7 +213,7 @@ input    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_two(
-  std::unique_ptr<apache::thrift::HandlerCallback<double>> callback
+  apache::thrift::HandlerCallbackPtr<double> callback
     , double input
 ) {
   auto ctx = callback->getRequestContext();
@@ -235,7 +235,7 @@ input    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_expected_exception(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallbackPtr<void> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -253,7 +253,7 @@ void SimpleServiceWrapper::async_tm_expected_exception(
     });
 }
 void SimpleServiceWrapper::async_tm_unexpected_exception(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallbackPtr<int32_t> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -271,7 +271,7 @@ void SimpleServiceWrapper::async_tm_unexpected_exception(
     });
 }
 void SimpleServiceWrapper::async_tm_sum_i16_list(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::vector<int16_t>> numbers
 ) {
   auto ctx = callback->getRequestContext();
@@ -293,7 +293,7 @@ numbers = std::move(numbers)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_sum_i32_list(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::vector<int32_t>> numbers
 ) {
   auto ctx = callback->getRequestContext();
@@ -315,7 +315,7 @@ numbers = std::move(numbers)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_sum_i64_list(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::vector<int64_t>> numbers
 ) {
   auto ctx = callback->getRequestContext();
@@ -337,7 +337,7 @@ numbers = std::move(numbers)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_concat_many(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<std::vector<std::string>> words
 ) {
   auto ctx = callback->getRequestContext();
@@ -359,7 +359,7 @@ words = std::move(words)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_count_structs(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::vector<::py3::simple::SimpleStruct>> items
 ) {
   auto ctx = callback->getRequestContext();
@@ -381,7 +381,7 @@ items = std::move(items)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_sum_set(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::set<int32_t>> numbers
 ) {
   auto ctx = callback->getRequestContext();
@@ -403,7 +403,7 @@ numbers = std::move(numbers)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_contains_word(
-  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+  apache::thrift::HandlerCallbackPtr<bool> callback
     , std::unique_ptr<std::set<std::string>> words
     , std::unique_ptr<std::string> word
 ) {
@@ -428,7 +428,7 @@ word = std::move(word)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_map_value(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<std::map<std::string,std::string>> words
     , std::unique_ptr<std::string> key
 ) {
@@ -453,7 +453,7 @@ key = std::move(key)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_map_length(
-  std::unique_ptr<apache::thrift::HandlerCallback<int16_t>> callback
+  apache::thrift::HandlerCallbackPtr<int16_t> callback
     , std::unique_ptr<std::map<std::string,::py3::simple::SimpleStruct>> items
 ) {
   auto ctx = callback->getRequestContext();
@@ -475,7 +475,7 @@ items = std::move(items)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_sum_map_values(
-  std::unique_ptr<apache::thrift::HandlerCallback<int16_t>> callback
+  apache::thrift::HandlerCallbackPtr<int16_t> callback
     , std::unique_ptr<std::map<std::string,int16_t>> items
 ) {
   auto ctx = callback->getRequestContext();
@@ -497,7 +497,7 @@ items = std::move(items)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_complex_sum_i32(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<::py3::simple::ComplexStruct> counter
 ) {
   auto ctx = callback->getRequestContext();
@@ -519,7 +519,7 @@ counter = std::move(counter)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_repeat_name(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<::py3::simple::ComplexStruct> counter
 ) {
   auto ctx = callback->getRequestContext();
@@ -541,7 +541,7 @@ counter = std::move(counter)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_struct(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback) {
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::SimpleStruct>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -559,7 +559,7 @@ void SimpleServiceWrapper::async_tm_get_struct(
     });
 }
 void SimpleServiceWrapper::async_tm_fib(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::vector<int32_t>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::vector<int32_t>>> callback
     , int16_t n
 ) {
   auto ctx = callback->getRequestContext();
@@ -581,7 +581,7 @@ n    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_unique_words(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<std::string>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::set<std::string>>> callback
     , std::unique_ptr<std::vector<std::string>> words
 ) {
   auto ctx = callback->getRequestContext();
@@ -603,7 +603,7 @@ words = std::move(words)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_words_count(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::map<std::string,int16_t>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::map<std::string,int16_t>>> callback
     , std::unique_ptr<std::vector<std::string>> words
 ) {
   auto ctx = callback->getRequestContext();
@@ -625,7 +625,7 @@ words = std::move(words)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_set_enum(
-  std::unique_ptr<apache::thrift::HandlerCallback<::py3::simple::AnEnum>> callback
+  apache::thrift::HandlerCallbackPtr<::py3::simple::AnEnum> callback
     , ::py3::simple::AnEnum in_enum
 ) {
   auto ctx = callback->getRequestContext();
@@ -647,7 +647,7 @@ in_enum    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_list_of_lists(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::vector<std::vector<int32_t>>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::vector<std::vector<int32_t>>>> callback
     , int16_t num_lists
     , int16_t num_items
 ) {
@@ -672,7 +672,7 @@ num_items    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_word_character_frequency(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::map<std::string,std::map<std::string,int32_t>>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::map<std::string,std::map<std::string,int32_t>>>> callback
     , std::unique_ptr<std::string> sentence
 ) {
   auto ctx = callback->getRequestContext();
@@ -694,7 +694,7 @@ sentence = std::move(sentence)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_list_of_sets(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::vector<std::set<std::string>>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::vector<std::set<std::string>>>> callback
     , std::unique_ptr<std::string> some_words
 ) {
   auto ctx = callback->getRequestContext();
@@ -716,7 +716,7 @@ some_words = std::move(some_words)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_nested_map_argument(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
+  apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::map<std::string,std::vector<::py3::simple::SimpleStruct>>> struct_map
 ) {
   auto ctx = callback->getRequestContext();
@@ -738,7 +738,7 @@ struct_map = std::move(struct_map)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_make_sentence(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<std::vector<std::vector<std::string>>> word_chars
 ) {
   auto ctx = callback->getRequestContext();
@@ -760,7 +760,7 @@ word_chars = std::move(word_chars)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_union(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<int32_t>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::set<int32_t>>> callback
     , std::unique_ptr<std::vector<std::set<int32_t>>> sets
 ) {
   auto ctx = callback->getRequestContext();
@@ -782,7 +782,7 @@ sets = std::move(sets)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_keys(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<std::string>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::set<std::string>>> callback
     , std::unique_ptr<std::vector<std::map<std::string,std::string>>> string_map
 ) {
   auto ctx = callback->getRequestContext();
@@ -804,7 +804,7 @@ string_map = std::move(string_map)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_lookup_double(
-  std::unique_ptr<apache::thrift::HandlerCallback<double>> callback
+  apache::thrift::HandlerCallbackPtr<double> callback
     , int32_t key
 ) {
   auto ctx = callback->getRequestContext();
@@ -826,7 +826,7 @@ key    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_retrieve_binary(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback
     , std::unique_ptr<std::string> something
 ) {
   auto ctx = callback->getRequestContext();
@@ -848,7 +848,7 @@ something = std::move(something)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_contain_binary(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<std::string>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::set<std::string>>> callback
     , std::unique_ptr<std::vector<std::string>> binaries
 ) {
   auto ctx = callback->getRequestContext();
@@ -870,7 +870,7 @@ binaries = std::move(binaries)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_contain_enum(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::vector<::py3::simple::AnEnum>>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::vector<::py3::simple::AnEnum>>> callback
     , std::unique_ptr<std::vector<::py3::simple::AnEnum>> the_enum
 ) {
   auto ctx = callback->getRequestContext();
@@ -892,7 +892,7 @@ the_enum = std::move(the_enum)    ]() mutable {
     });
 }
 void SimpleServiceWrapper::async_tm_get_binary_union_struct(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::BinaryUnionStruct>>> callback
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::BinaryUnionStruct>> callback
     , std::unique_ptr<::py3::simple::BinaryUnion> u
 ) {
   auto ctx = callback->getRequestContext();
@@ -941,7 +941,7 @@ DerivedServiceWrapper::DerivedServiceWrapper(PyObject *obj, folly::Executor* exc
   }
 
 void DerivedServiceWrapper::async_tm_get_six(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallbackPtr<int32_t> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -986,7 +986,7 @@ RederivedServiceWrapper::RederivedServiceWrapper(PyObject *obj, folly::Executor*
   }
 
 void RederivedServiceWrapper::async_tm_get_seven(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallbackPtr<int32_t> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

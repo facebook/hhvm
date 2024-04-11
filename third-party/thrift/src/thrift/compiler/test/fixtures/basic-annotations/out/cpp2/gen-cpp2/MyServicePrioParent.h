@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
   virtual folly::coro::Task<void> co_ping();
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_ping(apache::thrift::HandlerCallbackPtr<void> callback);
   virtual void sync_pong();
   [[deprecated("Use sync_pong instead")]] virtual void pong();
   virtual folly::Future<folly::Unit> future_pong();
@@ -63,7 +63,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
   virtual folly::coro::Task<void> co_pong();
   virtual folly::coro::Task<void> co_pong(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_pong(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_pong(apache::thrift::HandlerCallbackPtr<void> callback);
  private:
   static ::cpp2::MyServicePrioParentServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_ping{apache::thrift::detail::si::InvocationType::AsyncTm};

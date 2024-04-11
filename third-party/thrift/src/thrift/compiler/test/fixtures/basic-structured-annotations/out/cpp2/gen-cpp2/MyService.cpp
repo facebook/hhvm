@@ -62,7 +62,7 @@ folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_first(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>> callback) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_first(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -172,7 +172,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::test::fixtures::basic-s
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_second(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_count) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_second(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t p_count) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

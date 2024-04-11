@@ -3097,8 +3097,7 @@ class ServerResponseEnqueuedInterface : public TestInterface {
       : responseEnqueuedBaton_(responseEnqueuedBaton) {}
 
   void async_eb_eventBaseAsync(
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>
           callback) override {
     // Since `eventBaseAsync` is a `thread = 'eb'` method, this runs on
     // the IO thread, and we can guarantee that the baton is posted

@@ -90,8 +90,7 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
   }
 
   void async_eb_goodbye(
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<hellogoodbye::GoodbyeReply>> callback,
+      apache::thrift::HandlerCallbackPtr<hellogoodbye::GoodbyeReply> callback,
       const hellogoodbye::GoodbyeRequest& request) override {
     LOG(INFO) << "Good bye! Thrift server " << reinterpret_cast<uintptr_t>(this)
               << " got key " << request.key_ref()->fullKey().str();

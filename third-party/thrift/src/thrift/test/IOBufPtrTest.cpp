@@ -37,8 +37,7 @@ class IOBufPtrTestService
     : public apache::thrift::ServiceHandler<IOBufPtrTestService> {
  public:
   void async_tm_combine(
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<std::unique_ptr<IOBufPtr>>> callback,
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<IOBufPtr>> callback,
       std::unique_ptr<Request> req) override;
 };
 

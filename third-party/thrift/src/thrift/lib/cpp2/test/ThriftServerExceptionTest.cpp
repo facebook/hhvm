@@ -116,15 +116,15 @@ class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
   }
 
   template <typename E>
-  Function<void(unique_ptr<HandlerCallbackBase>)> wrap(E e) {
-    return [e = std::move(e)](unique_ptr<HandlerCallbackBase> cb) mutable {
+  Function<void(HandlerCallbackBase::Ptr)> wrap(E e) {
+    return [e = std::move(e)](HandlerCallbackBase::Ptr cb) mutable {
       cb->exception(e());
     };
   }
 
  private:
   vector<shared_ptr<TProcessorEventHandler>> handlers_;
-  Function<void(unique_ptr<HandlerCallbackBase>)> go_;
+  Function<void(HandlerCallbackBase::Ptr)> go_;
 };
 
 class BugServiceHandler : public apache::thrift::ServiceHandler<Bug> {

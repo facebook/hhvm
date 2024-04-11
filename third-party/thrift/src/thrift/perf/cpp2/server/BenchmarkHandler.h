@@ -59,7 +59,7 @@ class BenchmarkHandler
     callback->done();
   }
 
-  void async_eb_onewayNoop(std::unique_ptr<HandlerCallbackBase>) override {
+  void async_eb_onewayNoop(HandlerCallbackBase::Ptr) override {
     stats_->add(kNoop_);
   }
 

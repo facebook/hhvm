@@ -732,139 +732,6 @@ end = struct
     ty_super: locl_ty;
   }
 
-  (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
-  let rewrite_optional_supportdyn_r ~lhs ~rhs env =
-    let (env, ty_super) = Env.expand_type env rhs.ty_super in
-    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
-    match (deref ty_sub, deref ty_super) with
-    | ( ( _,
-          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
-          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
-        (r_super, Toption ty_inner) ) ->
-      let (env, ty_inner) = Env.expand_type env ty_inner in
-
-      (match get_node ty_inner with
-      | Tnewtype (name, [tyarg], _)
-        when String.equal name SN.Classes.cSupportDyn ->
-        let tyarg = MakeType.nullable r_super tyarg in
-        let ty_super = MakeType.supportdyn r_super tyarg in
-        let lhs = { lhs with ty_sub }
-        and rhs =
-          { super_like = rhs.super_like; super_supportdyn = false; ty_super }
-        in
-        (env, Some (lhs, rhs))
-      | _ -> (env, None))
-    | _ -> (env, None)
-
-  (** [rewrite_union_var_arraykey_l] implements a special purpose typing
-  rule for t <: arraykey | tvar by checking t & not arraykey <: tvar. It also works for
-  not arraykey | tvar. By only applying if B is a type variable, we avoid oscillating
-  forever between this rule and the generic one that moves from t1 & arraykey <: t2.
-  to t1 <: t2 | not arraykey. This is similar to our treatment of A <: ?B iff
-  A & nonnull <: B. This returns a subtyp_prop if the pattern this rule looks for matched,
-  and returns None if it did not, so that this rule does not apply. ) *)
-  let rewrite_union_var_arraykey_l ~lhs ~rhs env =
-    let (env, ty_super) = Env.expand_type env rhs.ty_super in
-    match get_node ty_super with
-    | Tunion [ty_super1; ty_super2] ->
-      let (env, ty_super1) = Env.expand_type env ty_super1 in
-      let (env, ty_super2) = Env.expand_type env ty_super2 in
-      (match (deref ty_super1, deref ty_super2) with
-      | ( ((_, Tvar _) as tvar_ty),
-          ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as
-          ak_ty) )
-      | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak_ty),
-          ((_, Tvar _) as tvar_ty) ) ->
-        let (env, neg_ty) =
-          Inter.negate_type
-            env
-            (get_reason (mk ak_ty))
-            ~approx:Inter.Utils.ApproxDown
-            (mk ak_ty)
-        in
-        let (env, inter_ty) =
-          Inter.intersect env ~r:(get_reason lhs.ty_sub) neg_ty lhs.ty_sub
-        in
-        let lhs = { lhs with ty_sub = inter_ty }
-        and rhs =
-          {
-            super_like = false;
-            super_supportdyn = false;
-            ty_super = mk tvar_ty;
-          }
-        in
-        (env, Some (lhs, rhs))
-      | _ -> (env, None))
-    | _ -> (env, None)
-
-  let rewrite_intersection_l_union_r ~lhs ~rhs env =
-    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
-    match deref ty_sub with
-    | (r_sub, Tintersection ty_subs) ->
-      let (env, ty_super) = Env.expand_type env rhs.ty_super in
-      (match
-         ( Subtype_negation.find_type_with_exact_negation env ty_subs,
-           get_node ty_super )
-       with
-      | ((env, Some non_ty, tyl), Tunion _) ->
-        let (env, ty_super) = TUtils.union env ty_super non_ty in
-        let ty_sub = MakeType.intersection r_sub tyl in
-        let lhs = { lhs with ty_sub }
-        and rhs = { super_like = false; super_supportdyn = false; ty_super } in
-        (env, Some (lhs, rhs))
-      | _ -> (env, None))
-    | _ -> (env, None)
-
-  (* A <: ?B iff A & nonnull <: B
-     Only apply if B is a type variable or an intersection, to avoid oscillating
-     forever between this case and the previous one. *)
-  let rewrite_intersection_l_option_r ~lhs ~rhs env =
-    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
-    let (env, ty_super) = Env.expand_type env rhs.ty_super in
-    match (deref ty_sub, deref ty_super) with
-    | ((_r_sub, Tintersection ty_subs), (r_super, Toption ty_inner_super))
-      when let (_, non_ty_opt, _) =
-             Subtype_negation.find_type_with_exact_negation env ty_subs
-           in
-           Option.is_none non_ty_opt ->
-      let (env, ty_inner_super) = Env.expand_type env ty_inner_super in
-      (match get_node ty_inner_super with
-      | Tvar _
-      | Tintersection _ ->
-        let (env, ty_sub) =
-          Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
-        in
-        let lhs = { lhs with ty_sub }
-        and rhs =
-          { rhs with super_supportdyn = false; ty_super = ty_inner_super }
-        in
-        (env, Some (lhs, rhs))
-      | _ -> (env, None))
-    | _ -> (env, None)
-
-  (** List of disjoint rewrite rules used to improve error reporting and completness
-      rather than implmenting our declarative subtyping rules *)
-  let rewrites =
-    [
-      rewrite_optional_supportdyn_r;
-      rewrite_union_var_arraykey_l;
-      rewrite_intersection_l_union_r;
-      rewrite_intersection_l_option_r;
-    ]
-
-  let rewrite_prop ~lhs ~rhs env =
-    let rec aux lhs rhs env rws =
-      match rws with
-      | [] -> (env, (lhs, rhs))
-      | rw :: rws ->
-        (match rw ~lhs ~rhs env with
-        | (env, Some (lhs, rhs)) -> (env, (lhs, rhs))
-        | (env, _) -> aux lhs rhs env rws)
-    in
-    aux lhs rhs env rewrites
-
   let log_simplify
       subtype_env
       this_ty
@@ -913,6 +780,45 @@ end = struct
 
   let expands_to_nonnull ty ~env = expands_to ty ~p:is_nonnull ~env
 
+  let expands_to_supportdyn ty ~env =
+    expands_to ty ~env ~p:(fun ty ->
+        match get_node ty with
+        | Tnewtype (name, [_], _) -> String.equal name SN.Classes.cSupportDyn
+        | _ -> false)
+
+  let expands_to_var_or_intersection ty ~env =
+    expands_to ty ~env ~p:(fun ty ->
+        match get_node ty with
+        | Tvar _
+        | Tintersection _ ->
+          true
+        | _ -> false)
+
+  (* Helper function for inspecting types occuring inside a union from a top-level
+     pattern match *)
+  let var_and_arraykey_opt ty1 ty2 ~env =
+    let (env, ty1) = Env.expand_type env ty1 in
+    let (env, ty2) = Env.expand_type env ty2 in
+    match (deref ty1, deref ty2) with
+    | ( ((_, Tvar _) as tv),
+        ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak) )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak),
+        ((_, Tvar _) as tv) ) ->
+      (env, Some (tv, ak))
+    | _ -> (env, None)
+
+  let var_and_arraykey_exn ty1 ty2 ~env =
+    match var_and_arraykey_opt ty1 ty2 ~env with
+    | (env, Some (tv, ak)) -> (env, (tv, ak))
+    | _ ->
+      failwith
+        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg (Neg_prim Tarraykey)]"
+
+  let expands_to_var_and_arraykey ty1 ty2 ~env =
+    match var_and_arraykey_opt ty1 ty2 ~env with
+    | (_, Some _) -> true
+    | _ -> false
+
   let expands_to_class ty ~env =
     expands_to ty ~env ~p:(fun ty ->
         match get_node ty with
@@ -924,6 +830,12 @@ end = struct
     match get_node ty with
     | Tclass (id, _, _) -> (env, id)
     | _ -> failwith "This type is not a Tclass"
+
+  let newtype_exn ty ~env =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tnewtype (name, tyargs, bound) -> (env, (name, tyargs, bound))
+    | _ -> failwith "This type is not a Tnewtype"
 
   let generic_lower_bounds env ty_super =
     let rec fixpoint new_set bounds_set =
@@ -2587,7 +2499,6 @@ end = struct
 
   and simplify ~subtype_env ~this_ty ~lhs ~rhs env =
     let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
-    let (env, (lhs, rhs)) = rewrite_prop ~lhs ~rhs env in
     let { sub_supportdyn; ty_sub } = lhs
     and { super_supportdyn; super_like; ty_super } = rhs in
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
@@ -2838,6 +2749,34 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super = ty_super' }
         env
+    (* Rewrite
+         t <: #1 | arraykey => t & !arraykey <: #1
+       or t <: #1 | !arraykey => t & arraykey <: #1
+       TODO(mjt) this is awkward because we need to expand and dereference types
+       in a nested position. This would be easier if we didn't have the
+       implmentation abstract within constraint solving and we had a function
+       (or set of functions) for expansion to a given depth *)
+    | (_, (_, Tunion [ty_super1; ty_super2]))
+      when expands_to_var_and_arraykey ty_super1 ty_super2 ~env ->
+      let (env, (tvar_ty, ak_ty)) =
+        var_and_arraykey_exn ty_super1 ty_super2 ~env
+      in
+
+      let (env, neg_ty) =
+        Inter.negate_type
+          env
+          (get_reason (mk ak_ty))
+          ~approx:Inter.Utils.ApproxDown
+          (mk ak_ty)
+      in
+      let (env, inter_ty) =
+        Inter.intersect env ~r:(get_reason lhs.ty_sub) neg_ty lhs.ty_sub
+      in
+      let lhs = { lhs with ty_sub = inter_ty }
+      and rhs =
+        { super_like = false; super_supportdyn = false; ty_super = mk tvar_ty }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
     | (_, (r_super, Tunion lty_supers)) -> begin
       match deref ty_sub with
       | (_, Tunion ty_subs) ->
@@ -2932,66 +2871,86 @@ end = struct
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = ty }
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-      | (_, Tintersection tyl) ->
-        let simplify_super_intersection env tyl_sub ty_super =
-          (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-           * not complete.
-           * TODO(T120921930): Don't do this if require_completeness is set.
-           *)
-          List.fold_left
-            tyl_sub
-            ~init:(env, TL.invalid ~fail)
-            ~f:(fun res ty_sub ->
-              res
-              ||| simplify
-                    ~subtype_env
-                    ~this_ty
-                    ~lhs:{ sub_supportdyn; ty_sub }
-                    ~rhs:
-                      { super_like = false; super_supportdyn = false; ty_super })
-        in
-        (* Heuristicky logic to decide whether to "break" the intersection
-            or the union first, based on observing that the following cases often occur:
-              - A & B <: (A & B) | C
-                In which case we want to "break" the union on the right first
-                in order to have the following recursive calls :
-                    A & B <: A & B
-                    A & B <: C
-              - A & (B | C) <: B | C
-                In which case we want to "break" the intersection on the left first
-                in order to have the following recursive calls:
-                    A <: B | C
-                    B | C <: B | C
-           If there is a type variable in the union, then generally it's helpful to
-           break the union apart.
+      | (r_sub, Tintersection tyl) ->
+        (* First try to rewrite
+            _ & ... & !t & _ <: _ | ... | _ => _ & ... & _ <: _ | ... | t | _
         *)
-        if
-          List.exists lty_supers ~f:(fun t ->
-              TUtils.is_tintersection env t
-              || TUtils.is_opt_tyvar env t
-              || TUtils.is_tyvar env t)
-        then
-          simplify_sub_union
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like
-            ~fail
-            ty_sub
-            (r_super, lty_supers)
-            env
-        else if List.exists tyl ~f:(TUtils.is_tunion env) then
-          simplify_super_intersection env tyl (mk (r_super, Tunion lty_supers))
-        else
-          simplify_sub_union
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like
-            ~fail
-            ty_sub
-            (r_super, lty_supers)
-            env
+        (match Subtype_negation.find_type_with_exact_negation env tyl with
+        | (env, Some non_ty, tyl) ->
+          let (env, ty_super) = TUtils.union env ty_super non_ty in
+          let ty_sub = MakeType.intersection r_sub tyl in
+          let lhs = { lhs with ty_sub }
+          and rhs =
+            { super_like = false; super_supportdyn = false; ty_super }
+          in
+          simplify ~subtype_env ~this_ty ~lhs ~rhs env
+        | _ ->
+          let simplify_super_intersection env tyl_sub ty_super =
+            (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+             * not complete.
+             * TODO(T120921930): Don't do this if require_completeness is set.
+             *)
+            List.fold_left
+              tyl_sub
+              ~init:(env, TL.invalid ~fail)
+              ~f:(fun res ty_sub ->
+                res
+                ||| simplify
+                      ~subtype_env
+                      ~this_ty
+                      ~lhs:{ sub_supportdyn; ty_sub }
+                      ~rhs:
+                        {
+                          super_like = false;
+                          super_supportdyn = false;
+                          ty_super;
+                        })
+          in
+          (* Heuristicky logic to decide whether to "break" the intersection
+              or the union first, based on observing that the following cases often occur:
+                - A & B <: (A & B) | C
+                  In which case we want to "break" the union on the right first
+                  in order to have the following recursive calls :
+                      A & B <: A & B
+                      A & B <: C
+                - A & (B | C) <: B | C
+                  In which case we want to "break" the intersection on the left first
+                  in order to have the following recursive calls:
+                      A <: B | C
+                      B | C <: B | C
+             If there is a type variable in the union, then generally it's helpful to
+             break the union apart.
+          *)
+          if
+            List.exists lty_supers ~f:(fun t ->
+                TUtils.is_tintersection env t
+                || TUtils.is_opt_tyvar env t
+                || TUtils.is_tyvar env t)
+          then
+            simplify_sub_union
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty
+              ~super_like
+              ~fail
+              ty_sub
+              (r_super, lty_supers)
+              env
+          else if List.exists tyl ~f:(TUtils.is_tunion env) then
+            simplify_super_intersection
+              env
+              tyl
+              (mk (r_super, Tunion lty_supers))
+          else
+            simplify_sub_union
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty
+              ~super_like
+              ~fail
+              ty_sub
+              (r_super, lty_supers)
+              env)
       | ( _,
           ( Tany _ | Tprim _ | Tnonnull | Tdynamic | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
@@ -3017,6 +2976,26 @@ end = struct
       when expands_to_nonnull ty_inner ~env ->
       valid env
     (* -- C-Option-R -------------------------------------------------------- *)
+    (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
+    | ( ( _,
+          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
+          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
+        (r_super, Toption ty_inner) )
+      when expands_to_supportdyn ty_inner ~env ->
+      let (env, ty_inner) = Env.expand_type env ty_inner in
+      (* Since we have guarded on [ty_inner] being a supportdyn new type,
+         the following calls will not generate exceptions *)
+      let (env, (_, tyargs, _)) = newtype_exn ty_inner ~env in
+      let tyarg = List.hd_exn tyargs in
+      let tyarg = MakeType.nullable r_super tyarg in
+      let ty_super = MakeType.supportdyn r_super tyarg in
+      let lhs = { lhs with ty_sub }
+      and rhs =
+        { super_like = rhs.super_like; super_supportdyn = false; ty_super }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
     (*   supportdyn<t> <: ?u   iff
      *   nonnull & supportdyn<t> <: u   iff
      *   supportdyn<nonnull & t> <: u
@@ -3052,6 +3031,24 @@ end = struct
             ty_super = mk (r_super, Toption lty_inner);
           }
         env
+    (* Rewrite _ & ...  & _ <: ?t => _ & .. & _ & nonnull <: t
+       but only when the intersection does not contain any type with an exact
+       negation (we apply a rewrite in the other direction for those cases) *)
+    | ((_, Tintersection ty_subs), (r_super, Toption ty_inner_super))
+      when expands_to_var_or_intersection ty_inner_super ~env
+           &&
+           let (_, non_ty_opt, _) =
+             Subtype_negation.find_type_with_exact_negation env ty_subs
+           in
+           Option.is_none non_ty_opt ->
+      let (env, ty_sub) =
+        Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
+      in
+      let lhs = { lhs with ty_sub }
+      and rhs =
+        { rhs with super_supportdyn = false; ty_super = ty_inner_super }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
     (* If the type on the left is disjoint from null, then the Toption on the right is not
        doing anything helpful. *)
     | ((_, (Tintersection _ | Tunion _)), (_, Toption lty_inner))

@@ -1769,10 +1769,17 @@ module Json = struct
         else
           []
       in
+      let optional_param opt =
+        if opt then
+          [("optional", JSON_Bool true)]
+        else
+          []
+      in
       let param fp =
         obj
         @@ callconv (get_fp_mode fp)
         @ readonly_param (get_fp_readonly fp)
+        @ optional_param (get_fp_has_default fp)
         @ typ fp.fp_type
       in
       let readonly_this ro =
@@ -2073,6 +2080,8 @@ module Json = struct
               params
               ~keytrace:params_keytrace
               ~f:(fun param ~keytrace ->
+                get_bool "optional" (param, keytrace)
+                >>= fun (optional, _optional_keytrace) ->
                 get_string "callConvention" (param, keytrace)
                 >>= fun (callconv, callconv_keytrace) ->
                 begin
@@ -2095,7 +2104,7 @@ module Json = struct
                       make_fp_flags
                         ~mode:callconv
                         ~accept_disposable:false
-                        ~has_default:false
+                        ~has_default:optional
                         ~readonly:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;

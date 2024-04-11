@@ -799,6 +799,32 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos-batch", "{root}foo_readonly.php:4:4"],
         )
 
+    def test_type_at_pos_batch_optional(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_optional.php",'
+                + '"line":4,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":23,"char_end":57}},'
+                + '"kind":"function",'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":33,"char_end":35}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal",'
+                + '"optional":true,'
+                + '"type":{{"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":47,"char_end":50}},"kind":"primitive","name":"bool"}}}}],'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":54,"char_end":56}},"kind":"primitive","name":"int"}}}}'
+                + "}}"
+            ],
+            options=["--type-at-pos-batch", "{root}foo_optional.php:4:4"],
+        )
+
     def test_ide_get_definition(self) -> None:
         """
         Test hh_client --ide-get-definition

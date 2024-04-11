@@ -1416,11 +1416,11 @@ fn rewrite_expr(
         // Desugared:
         //   $0v->visitXhp(
         //     new ExprPos(...),
-        //     :foo::class,
+        //     nameof :foo,
         //     dict["my-attr" => $0v->visitString(...)],
         //     vec[
         //       $0v->visitString(..., "text ")],
-        //       $0v->visitXhp(..., :foo-child::class, ...),
+        //       $0v->visitXhp(..., nameof :foo-child, ...),
         //     ],
         //   )
         Xml(xml) => {
@@ -1455,19 +1455,16 @@ fn rewrite_expr(
             let (virtual_children, desugar_children) =
                 rewrite_exprs(temps, children, visitor_name, errors);
 
-            // Construct :foo::class.
+            // Construct nameof :foo.
             let hint_pos = hint.0.clone();
-            let hint_class = Expr_::ClassConst(Box::new((
-                ClassId(
+            let hint_class = Expr_::Nameof(Box::new(ClassId(
+                (),
+                hint_pos.clone(),
+                ClassId_::CIexpr(Expr::new(
                     (),
                     hint_pos.clone(),
-                    ClassId_::CIexpr(Expr::new(
-                        (),
-                        hint_pos.clone(),
-                        Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
-                    )),
-                ),
-                (hint_pos, "class".to_string()),
+                    Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
+                )),
             )));
 
             let virtual_expr = Expr(

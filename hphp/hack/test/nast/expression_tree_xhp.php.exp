@@ -120,7 +120,7 @@
                                                                     ((SFlit_str ([4:19-58], "end_line")), ((), [4:19-58], (Int "4")));
                                                                     ((SFlit_str ([4:19-58], "start_column")), ((), [4:19-58], (Int "18")));
                                                                     ((SFlit_str ([4:19-58], "end_column")), ((), [4:19-58], (Int "57")))])));
-                                                               (Pnormal, ((), [4:19-58], (Class_const (((), [4:20-27], (CI ([4:20-27], "\\:foo:bar"))), ([4:20-27], "class")))));
+                                                               (Pnormal, ((), [4:19-58], (Nameof ((), [4:20-27], (CI ([4:20-27], "\\:foo:bar"))))));
                                                                (Pnormal,
                                                                 ((), [4:19-58],
                                                                  (KeyValCollection ((
@@ -163,7 +163,7 @@
                                                                     ((SFlit_str ([4:34-41], "end_line")), ((), [4:34-41], (Int "4")));
                                                                     ((SFlit_str ([4:34-41], "start_column")), ((), [4:34-41], (Int "33")));
                                                                     ((SFlit_str ([4:34-41], "end_column")), ((), [4:34-41], (Int "40")))])));
-                                                                    (Pnormal, ((), [4:34-41], (Class_const (((), [4:35-38], (CI ([4:35-38], "\\:baz"))), ([4:35-38], "class")))));
+                                                                    (Pnormal, ((), [4:34-41], (Nameof ((), [4:35-38], (CI ([4:35-38], "\\:baz"))))));
                                                                     (Pnormal, ((), [4:34-41], (KeyValCollection (([4:34-41], Dict), None, []))));
                                                                     (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))))]; 
                                                                     unpacked_arg = None }));

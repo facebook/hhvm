@@ -1,0 +1,48 @@
+<?hh
+<<file: __EnableUnstableFeatures('expression_trees')>>
+
+function f(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 5,
+      "end_line" => 5,
+      "start_column" => 13,
+      "end_column" => 33,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitXhp(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 5,
+            "end_line" => 5,
+            "start_column" => 13,
+            "end_column" => 33,
+          ],
+          nameof xhp_abc,
+          dict[],
+          vec[
+            $v->visitXhp(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 5,
+                "end_line" => 5,
+                "start_column" => 19,
+                "end_column" => 26,
+              ],
+              nameof xhp_def,
+              dict[],
+              vec[],
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}

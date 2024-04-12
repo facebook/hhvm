@@ -97,3 +97,18 @@ let option_null pos =
     Lint_warning
     pos
     "`?null` is a redundant typehint - just use `null`"
+
+let class_pointer_to_string pos cid_str =
+  let cid_str = Utils.strip_ns cid_str in
+  let nameof = "nameof " ^ cid_str in
+  let nameof_md = Markdown_lite.md_codify nameof in
+  let autofix = Some (nameof, pos) in
+  add
+    (Codes.to_enum Codes.ClassPointerToString)
+    Lint_warning
+    pos
+    ~autofix
+    ("Using `"
+    ^ cid_str
+    ^ "::class` in this position will trigger an implicit runtime conversion to string, please use "
+    ^ nameof_md)

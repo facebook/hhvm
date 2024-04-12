@@ -352,6 +352,9 @@ impl HhConfig {
                 "log_levels" => {
                     go.log_levels = parse_json(&value)?;
                 }
+                "class_pointer_levels" => {
+                    go.class_pointer_levels = parse_json(&value)?;
+                }
                 "const_default_func_args" => {
                     go.po_const_default_func_args = parse_json(&value)?;
                 }

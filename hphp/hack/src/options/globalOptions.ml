@@ -95,6 +95,7 @@ type t = {
   code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
+  class_pointer_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_remote_old_decls_no_limit: bool;
   tco_use_old_decls_from_cas: bool;
@@ -225,6 +226,7 @@ let default =
     code_agnostic_fixme = false;
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
+    class_pointer_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_remote_old_decls_no_limit = false;
     tco_use_old_decls_from_cas = false;
@@ -353,6 +355,7 @@ let set
     ?code_agnostic_fixme
     ?allowed_fixme_codes_strict
     ?log_levels
+    ?class_pointer_levels
     ?po_disable_lval_as_an_expression
     ?tco_remote_old_decls_no_limit
     ?tco_use_old_decls_from_cas
@@ -524,6 +527,8 @@ let set
     tco_disallow_byref_calls =
       setting tco_disallow_byref_calls options.tco_disallow_byref_calls;
     log_levels = setting log_levels options.log_levels;
+    class_pointer_levels =
+      setting class_pointer_levels options.class_pointer_levels;
     po_disable_lval_as_an_expression =
       setting
         po_disable_lval_as_an_expression

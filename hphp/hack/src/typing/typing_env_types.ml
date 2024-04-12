@@ -46,6 +46,7 @@ type env = {
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
   loaded_packages: SSet.t;
+  emit_string_coercion_error: bool;
 }
 
 (** See the .mli file for the documentation of fields. *)
@@ -120,6 +121,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     big_envs = ref [];
     fun_tast_info = None;
     loaded_packages = SSet.empty;
+    emit_string_coercion_error = true;
   }
 
 let get_log_level env key =

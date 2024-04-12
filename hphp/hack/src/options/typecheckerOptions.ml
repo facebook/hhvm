@@ -101,6 +101,10 @@ let disallow_byref_calls t = t.GlobalOptions.tco_disallow_byref_calls
 
 let log_levels t = t.GlobalOptions.log_levels
 
+let class_pointer_level t flag =
+  SMap.find_opt flag t.GlobalOptions.class_pointer_levels
+  |> Option.value ~default:0
+
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
 let use_old_decls_from_cas t = t.GlobalOptions.tco_use_old_decls_from_cas

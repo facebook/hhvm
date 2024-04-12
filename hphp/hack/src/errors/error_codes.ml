@@ -769,6 +769,7 @@ module Typing = struct
     | MatchOnUnsupportedType [@value 4479]
     | MultipleInstantiationInheritence [@value 4480]
     | InternalMethCaller [@value 4481]
+    | ClassPointerToString [@value 4482]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

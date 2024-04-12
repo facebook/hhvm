@@ -4814,6 +4814,29 @@ end = struct
       [],
       User_error_flags.empty )
 
+  let class_pointer_to_string pos cid_str =
+    let cid_str = Utils.strip_ns cid_str in
+    let nameof = "nameof " ^ cid_str in
+    let nameof_md = Markdown_lite.md_codify nameof in
+    let quickfixes =
+      [
+        Quickfix.make_eager_default_hint_style
+          ~title:("Change to " ^ nameof_md)
+          ~new_text:nameof
+          pos;
+      ]
+    in
+    ( Error_code.ClassPointerToString,
+      lazy
+        ( pos,
+          "Using `"
+          ^ cid_str
+          ^ "::class` in this position will trigger an implicit runtime conversion to string, please use "
+          ^ nameof_md ),
+      lazy [],
+      quickfixes,
+      User_error_flags.empty )
+
   let to_error t ~env =
     let open Typing_error.Primary in
     match t with
@@ -5387,6 +5410,8 @@ end = struct
         pos
         (Lazy.force expr_ty)
         (List.map unsupported_tys ~f:Lazy.force)
+    | Class_pointer_to_string { pos; cls_name } ->
+      class_pointer_to_string pos cls_name
 end
 
 module rec Eval_error : sig

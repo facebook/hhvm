@@ -597,6 +597,7 @@ let env_as_value env =
     big_envs = _;
     fun_tast_info;
     loaded_packages = _;
+    emit_string_coercion_error = _;
   } =
     env
   in

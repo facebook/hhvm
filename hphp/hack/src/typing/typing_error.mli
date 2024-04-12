@@ -1301,6 +1301,10 @@ module Primary : sig
         expr_ty: string Lazy.t;
         unsupported_tys: string Lazy.t list;
       }
+    | Class_pointer_to_string of {
+        pos: Pos.t;
+        cls_name: string;
+      }
   [@@deriving show]
 end
 

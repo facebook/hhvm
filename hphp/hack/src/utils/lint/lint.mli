@@ -23,3 +23,5 @@ val sealed_not_subtype : string -> Pos.t -> string -> string -> string -> unit
 val option_mixed : Pos.t -> unit
 
 val option_null : Pos.t -> unit
+
+val class_pointer_to_string : Pos.t -> string -> unit

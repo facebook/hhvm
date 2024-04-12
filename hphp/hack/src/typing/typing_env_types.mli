@@ -64,6 +64,8 @@ type env = {
       (** This is only filled in after type-checking the function in question *)
   loaded_packages: SSet.t;
       (** The set of packages loaded via a "package <pkg>" expression *)
+  emit_string_coercion_error: bool;
+      (** Gates which expressions emit class pointer to string coercion errors *)
 }
 
 and genv = {

@@ -380,6 +380,10 @@ let load_config config options =
       (bool_opt "profile_top_level_definitions" config)
     ?tco_is_systemlib:(bool_opt "is_systemlib" config)
     ?log_levels:(prepare_log_levels config)
+    ?class_pointer_levels:
+      (Option.map
+         (Config_file.Getters.string_opt "class_pointer_levels" config)
+         ~f:convert_log_levels_to_map)
     ?tco_allowed_files_for_module_declarations:
       (string_list_opt "allowed_files_for_module_declarations" config)
     ?tco_allow_all_files_for_module_declarations:

@@ -16,6 +16,7 @@ type t =
   | SealedNotSubtype [@value 5007]
   | OptionMixed [@value 5008]
   | OptionNull [@value 5009]
+  | ClassPointerToString [@value 5010]
 (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 [@@deriving enum]
 

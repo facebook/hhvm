@@ -94,6 +94,8 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
       (** Error codes for which we allow HH_FIXMEs in strict mode *)
   log_levels: int SMap.t;  (** Initial hh_log_level settings *)
+  class_pointer_levels: int SMap.t;
+      (** Map of restriction levels for class pointer migration *)
   po_disable_lval_as_an_expression: bool;
       (** Flag to disable using lvals as expressions. *)
   tco_remote_old_decls_no_limit: bool;
@@ -328,6 +330,7 @@ val set :
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->
+  ?class_pointer_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_remote_old_decls_no_limit:bool ->
   ?tco_use_old_decls_from_cas:bool ->

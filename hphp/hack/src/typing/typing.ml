@@ -6553,6 +6553,14 @@ end = struct
                   | Toption ety -> is_label env ety
                   | _ -> is_label env ety
                 in
+                let () =
+                  Typing_class_pointers.check_string_coercion_point
+                    env
+                    ~flag:"param"
+                    pos
+                    arg
+                    ety
+                in
                 match (arg, is_maybe_label) with
                 | (Aast.EnumClassLabel (None, label_name), Some (name, ty_enum))
                   ->
@@ -9393,6 +9401,8 @@ end = struct
       (* We'd like the class id's position here to be the use position of the attribute
          instead of the decl position of the class *)
       let (_decl_pos, cid_) = attr_cid in
+      let { emit_string_coercion_error; _ } = env in
+      let env = { env with emit_string_coercion_error = false } in
       let (env, _, _, _, _, _, _, _) =
         Expr.new_object
           ~expected:None
@@ -9408,7 +9418,7 @@ end = struct
           None
         (* no variadic arguments *)
       in
-      env
+      { env with emit_string_coercion_error }
     in
     let env = Typing_attributes.check_def env new_object kind attrs in
     let (env, user_attrs) = List.map_env env attrs ~f:user_attribute in

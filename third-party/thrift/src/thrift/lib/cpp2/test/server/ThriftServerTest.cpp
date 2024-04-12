@@ -100,7 +100,7 @@ using folly::test::find_resource;
 using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
-THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
+THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
 namespace {
@@ -3505,7 +3505,7 @@ class AccountingMemoryPool : public folly::detail::std_pmr::memory_resource {
 };
 
 TEST(ThriftServer, CustomParserAllocatorTest) {
-  THRIFT_FLAG_SET_MOCK(rocket_allocating_strategy_parser, true);
+  THRIFT_FLAG_SET_MOCK(rocket_frame_parser, "allocating");
   AccountingMemoryPool pool;
   auto alloc = std::make_shared<rocket::ParserAllocatorType>(&pool);
 

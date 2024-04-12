@@ -484,7 +484,7 @@ int main(int argc, char** argv) {
 
   folly::init(&argc, &argv);
 
-  THRIFT_FLAG_SET_MOCK(rocket_allocating_strategy_parser, true);
+  THRIFT_FLAG_SET_MOCK(rocket_frame_parser, "allocating");
 
   facebook::sbe::test::service_ = std::make_unique<BenchmarkService>();
   folly::runBenchmarks();

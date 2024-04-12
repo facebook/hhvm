@@ -41,7 +41,7 @@ const auto kPath =
     "thrift/lib/cpp2/test/sbe/integration_test/resources/test_data.txt";
 
 static void ensureSingleBufferParsing() {
-  THRIFT_FLAG_SET_MOCK(rocket_allocating_strategy_parser, true);
+  THRIFT_FLAG_SET_MOCK(rocket_frame_parser, "allocating");
 }
 
 TEST(IntegrationTest, TestSingleCustomerLookup) {

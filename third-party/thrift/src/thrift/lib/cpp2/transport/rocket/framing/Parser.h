@@ -31,6 +31,8 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
 
+THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
+// TODO: we can deprecate these boolean flags and prefer string flags
 THRIFT_FLAG_DECLARE_bool(rocket_strategy_parser);
 THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
 
@@ -48,8 +50,11 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
       T& owner, std::shared_ptr<ParserAllocatorType> alloc = nullptr)
       : owner_(owner),
         readBuffer_(folly::IOBuf::CreateOp(), bufferSize_),
-        useStrategyParser_(THRIFT_FLAG(rocket_strategy_parser)),
+        useStrategyParser_(
+            "strategy" == THRIFT_FLAG(rocket_frame_parser) ||
+            THRIFT_FLAG(rocket_strategy_parser)),
         useAllocatingStrategyParser_(
+            "allocating" == THRIFT_FLAG(rocket_frame_parser) ||
             THRIFT_FLAG(rocket_allocating_strategy_parser)),
         allocator_(alloc ? alloc : std::make_shared<ParserAllocatorType>()) {
     if (useStrategyParser_) {

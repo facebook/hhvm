@@ -87,10 +87,6 @@ add_library(
 
   ContextStack.cpp
   EventHandlerBase.cpp
-  async/TBinaryAsyncChannel.cpp
-  async/TFramedAsyncChannel.cpp
-  async/THttpAsyncChannel.cpp
-  async/TUnframedAsyncChannel.cpp
   server/TServerObserver.cpp
   ../cpp2/detail/EventHandlerRuntime.cpp
 )

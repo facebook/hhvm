@@ -24,6 +24,10 @@ include "thrift/lib/thrift/id.thrift"
 // @lint-ignore THRIFTCHECKS
 include "thrift/annotation/rust.thrift"
 
+// This is needed since hack.Name is required to rename the Patch struct
+// @lint-ignore THRIFTCHECKS
+include "thrift/annotation/hack.thrift"
+
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
 @thrift.TerseWrite

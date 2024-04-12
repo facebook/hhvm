@@ -76,8 +76,8 @@ std::optional<w_string> find_fstype_in_linux_proc_mounts(
           // This is a better match than any prior mount point
           bestMountPoint = mountPoint;
 
-          if (vfstype == "fuse") {
-            // For example: edenfs registers with fstype "fuse"
+          if (vfstype == "fuse" || vfstype == "fuse.edenfs") {
+            // For example: edenfs registers with fstype "fuse" or "fuse.edenfs"
             // and device "edenfs", so we take the device node
             // as the filesystem type
             bestVfsType = device;

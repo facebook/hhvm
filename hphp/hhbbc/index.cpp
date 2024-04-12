@@ -13520,7 +13520,7 @@ template <typename GetDeps>
 std::vector<HierarchicalWorkBucket>
 dfs_bucketize(SubclassMetadata& subclassMeta,
               std::vector<SString> roots,
-              TSStringToOneT<std::vector<SString>>& splitImmDeps,
+              const TSStringToOneT<std::vector<SString>>& splitImmDeps,
               size_t kMaxBucketSize,
               size_t maxClassIdx,
               bool alwaysCreateNew,
@@ -13538,14 +13538,14 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
 
   size_t cost = 0;
 
-  auto finishBucket = [&]() {
+  auto const finishBucket = [&]() {
     if (!cost) return;
     rootsToProcess.emplace_back();
     rootsCost.emplace_back(cost);
     cost = 0;
   };
 
-  auto addRoot = [&](SString c) {
+  auto const addRoot = [&](SString c) {
     rootsToProcess.back().emplace_back(c);
     cost += depsSize(c);
   };
@@ -13581,11 +13581,7 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
     } else {
       auto const immChildren = [&] {
         auto const it = subclassMeta.meta.find(root);
-        if (it == end(subclassMeta.meta)) {
-          auto const it2 = splitImmDeps.find(root);
-          always_assert(it2 != end(splitImmDeps));
-          return it2->second;
-        }
+        assertx(it != end(subclassMeta.meta));
         return it->second.children;
       }();
       for (auto const& child : immChildren) progress |= self(child, self);
@@ -13596,25 +13592,29 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
   // Sort the roots to keep it deterministic
   std::sort(
     begin(roots), end(roots),
-    [&] (SString& a, SString& b) {
-      return getDeps(a, getDeps).deps.size() > getDeps(b, getDeps).deps.size();
+    [&] (SString a, SString b) {
+      auto const s1 = getDeps(a, getDeps).deps.size();
+      auto const s2 = getDeps(b, getDeps).deps.size();
+      if (s1 != s2) return s1 > s2;
+      return string_data_lt_type{}(a, b);
     }
   );
 
   auto progress = false;
-  for (auto const& i : roots) {
-    assertx(depsSize(i)); // Should never be processing one leaf
-    progress |= visitSubgraph(i, visitSubgraph);
+  for (auto const r : roots) {
+    assertx(depsSize(r)); // Should never be processing one leaf
+    progress |= visitSubgraph(r, visitSubgraph);
   }
   assertx(progress);
   finishBucket();
 
   if (rootsToProcess.back().empty()) rootsToProcess.pop_back();
 
-  auto buckets = parallel::gen(
+  auto const buckets = parallel::gen(
     rootsToProcess.size(),
     [&] (size_t bucketIdx) {
-      auto numBuckets = (rootsCost[bucketIdx] + (kMaxBucketSize/2)) / kMaxBucketSize;
+      auto numBuckets =
+        (rootsCost[bucketIdx] + (kMaxBucketSize/2)) / kMaxBucketSize;
       if (!numBuckets) numBuckets = 1;
       return consistently_bucketize_by_num_buckets(rootsToProcess[bucketIdx],
         alwaysCreateNew ? rootsToProcess[bucketIdx].size() : numBuckets);
@@ -13622,11 +13622,11 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
   );
 
   std::vector<std::vector<SString>> flattened;
-  for (auto& b : buckets) {
+  for (auto const& b : buckets) {
     flattened.insert(flattened.end(), b.begin(), b.end());
   }
 
-  auto work = build_hierarchical_work(
+  auto const work = build_hierarchical_work(
     flattened,
     maxClassIdx,
     [&] (SString c) {
@@ -13678,7 +13678,13 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   for (size_t round = 0; !toProcess.empty(); ++round) {
     // If we have this many rounds, something has gone wrong, because
     // it should require an astronomical amount of classes.
-    always_assert(round < 10);
+    always_assert_flog(
+      round < 10,
+      "Worklist still has {} items after {} rounds. "
+      "This almost certainly means it's stuck in an infinite loop",
+      toProcess.size(),
+      round
+    );
 
     // The dependency information for every class, for just this
     // round. The information is calculated lazily and recursively by
@@ -13736,7 +13742,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     // processed if it's dependencies are less than the maximum bucket
     // size.
     auto const willProcess = [&] (SString cls) {
-      return depsSize(cls) <= kMaxBucketSize;
+      // NB: Not <=. When calculating splits, a class is included
+      // among it's own dependencies so we need to leave space for one
+      // more.
+      return depsSize(cls) < kMaxBucketSize;
     };
 
     // Process every remaining class in parallel and assign an action
@@ -13807,6 +13816,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
                 end(buckets)
               );
 
+              assertx(!buckets.empty());
               return buckets;
             }(),
             kMaxBucketSize,
@@ -13839,6 +13849,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
               deps->deps.insert(begin(childDeps), end(childDeps));
               deps->deps.emplace(child);
             }
+            assertx(deps->deps.size() <= kMaxBucketSize);
 
             std::sort(
               begin(split->children),
@@ -13906,30 +13917,24 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       );
     }
 
-    auto work = dfs_bucketize(subclassMeta,
-                              roots,
-                              splitImmDeps,
-                              kMaxBucketSize,
-                              maxClassIdx,
-                              round > 0,
-                              leafs,
-                              processed,
-                              findDeps);
+    auto work = dfs_bucketize(
+      subclassMeta,
+      std::move(roots),
+      splitImmDeps,
+      kMaxBucketSize,
+      maxClassIdx,
+      round > 0,
+      leafs,
+      processed,
+      findDeps
+    );
 
     // Bucketize root leafs.
     // These are cheaper since we will only be calculating
     // name-only func family entries.
-    auto rootLeafBuckets = consistently_bucketize(rootLeafs, kMaxBucketSize);
-    auto rootLeafWork = parallel::gen(
-      rootLeafBuckets.size(),
-      [&] (size_t idx) {
-        return HierarchicalWorkBucket{
-          std::move(rootLeafBuckets[idx])
-        };
-      }
-    );
-
-    work.insert(work.end(), rootLeafWork.begin(), rootLeafWork.end());
+    for (auto& b : consistently_bucketize(rootLeafs, kMaxBucketSize)) {
+      work.emplace_back(HierarchicalWorkBucket{ std::move(b) });
+    }
 
     std::vector<SString> markProcessed;
     markProcessed.reserve(actions.size());
@@ -13988,7 +13993,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       begin(out.buckets.back()), end(out.buckets.back()),
       [] (const SubclassWork::Bucket& a,
           const SubclassWork::Bucket& b) {
-            return a.cost > b.cost;
+        return a.cost > b.cost;
       }
     );
 
@@ -13996,6 +14001,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     // because we'd check it when building the buckets.
     processed.insert(begin(markProcessed), end(markProcessed));
 
+    auto const before = toProcess.size();
     toProcess.erase(
       std::remove_if(
         begin(toProcess), end(toProcess),
@@ -14003,6 +14009,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       ),
       end(toProcess)
     );
+    always_assert(toProcess.size() < before);
   }
 
   // Keep all split nodes created in the output

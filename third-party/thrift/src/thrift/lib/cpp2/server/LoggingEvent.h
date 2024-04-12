@@ -141,6 +141,7 @@ struct RequestLoggingContext {
   std::string clientId;
   // request id passed from the client
   std::string requestId;
+  uint32_t requestAttemptId;
 
   // timeout settings
   // final timeout values that are used by thrift server

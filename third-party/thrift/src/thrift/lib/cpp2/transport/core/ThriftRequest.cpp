@@ -213,6 +213,8 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
   if (const auto* requestId = reqContext->getClientRequestId()) {
     requestLoggingContext.requestId = *requestId;
   }
+  requestLoggingContext.requestAttemptId = reqContext->getRequestAttemptId();
+
   requestLoggingContext.requestStartedProcessing =
       thriftRequest.isStartedProcessing();
 

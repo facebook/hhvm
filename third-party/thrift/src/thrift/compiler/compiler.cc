@@ -703,8 +703,9 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
       diagnostic_context stdlib_ctx(
           source_mgr,
           [&](diagnostic&& d) {
-            ctx.warning(
+            ctx.report(
                 source_location{},
+                diagnostic_level::debug,
                 "Could not load Thrift standard libraries: {}",
                 d);
           },

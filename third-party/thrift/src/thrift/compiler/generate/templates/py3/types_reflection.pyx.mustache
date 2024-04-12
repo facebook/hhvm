@@ -45,11 +45,11 @@ from thrift.py3.reflection cimport (
 
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
-cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}{{> common/auto_migrate_prefix }}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{> common/auto_migrate_prefix }}types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
 
 from thrift.py3.types cimport (
     constant_shared_ptr,

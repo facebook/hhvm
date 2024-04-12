@@ -5,3 +5,5 @@ py3_empty: mstch_py3:py3cpp src/empty.thrift
 python_empty: mstch_python src/empty.thrift
 python_capi: mstch_python_capi src/empty.thrift
 python: mstch_python:base_library_package=fbcode.thrift.python,import_static src/module.thrift
+py3_auto_migrate: mstch_py3:auto_migrate,__fbthrift_generate_cython src/module.thrift
+py3_no_auto_migrate: mstch_py3:auto_migrate,__fbthrift_generate_cython,no_auto_migrate src/module.thrift

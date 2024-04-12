@@ -153,6 +153,8 @@ class py3_mstch_program : public mstch_program {
             {"program:python_capi_converter?",
              &py3_mstch_program::capi_converter},
             {"program:intercompatible?", &py3_mstch_program::intercompatible},
+            {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
+            {"program:no_auto_migrate?", &py3_mstch_program::no_auto_migrate},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
@@ -268,6 +270,10 @@ class py3_mstch_program : public mstch_program {
   mstch::node capi_converter() { return has_option("python_capi_converter"); }
 
   mstch::node intercompatible() { return has_option("intercompatible"); }
+
+  mstch::node auto_migrate() { return has_option("auto_migrate"); }
+
+  mstch::node no_auto_migrate() { return has_option("no_auto_migrate"); }
 
   mstch::node py_deprecated_module_path() {
     const std::string& module_path = program_->get_namespace("py");
@@ -1339,10 +1345,27 @@ void t_mstch_py3_generator::generate_file(
 }
 
 void t_mstch_py3_generator::generate_types() {
+  std::vector<std::string> pythonFiles{
+      "types.py",
+      "metadata.py",
+  };
+
+  std::vector<std::string> cythonCompatFiles{
+      "types.py",
+      "types.pxd",
+      "metadata.py",
+  };
+
   std::vector<std::string> cythonFilesWithTypeContext{
       "types.pyx",
       "types.pxd",
       "types.pyi",
+  };
+
+  std::vector<std::string> cythonMigrationFilesWithTypeContext{
+      "py3_types.pyx",
+      "py3_types.pxd",
+      "py3_types.pyi",
   };
 
   std::vector<std::string> cythonFilesNoTypeContext{
@@ -1367,17 +1390,46 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.cpp",
   };
 
-  for (const auto& file : cythonFilesWithTypeContext) {
-    generate_file(file, IsTypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFilesWithTypeContext) {
-    generate_file(file, IsTypesFile);
-  }
-  for (const auto& file : cythonFilesNoTypeContext) {
-    generate_file(file, NotTypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFilesWithNoTypeContext) {
-    generate_file(file, NotTypesFile);
+  // TODO this logic is a complete mess and I intend to clean it up later
+  // the gist is:
+  // - if auto_migrate is present, generate py3_types and either
+  // types.pxd or types.py depending on if no_auto_migrate is present
+  // - if auto_migrate isn't present, just generate all the normal files
+  if (has_option("auto_migrate")) {
+    for (const auto& file : cythonMigrationFilesWithTypeContext) {
+      generate_file(file, IsTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFilesWithTypeContext) {
+      generate_file(file, IsTypesFile);
+    }
+    for (const auto& file : cythonFilesNoTypeContext) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFilesWithNoTypeContext) {
+      generate_file(file, NotTypesFile);
+    }
+    if (has_option("no_auto_migrate")) {
+      for (const auto& file : cythonCompatFiles) {
+        generate_file(file, IsTypesFile, generateRootPath_);
+      }
+    } else {
+      for (const auto& file : pythonFiles) {
+        generate_file(file, IsTypesFile, generateRootPath_);
+      }
+    }
+  } else {
+    for (const auto& file : cythonFilesWithTypeContext) {
+      generate_file(file, IsTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFilesWithTypeContext) {
+      generate_file(file, IsTypesFile);
+    }
+    for (const auto& file : cythonFilesNoTypeContext) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFilesWithNoTypeContext) {
+      generate_file(file, NotTypesFile);
+    }
   }
 }
 
@@ -1390,14 +1442,38 @@ void t_mstch_py3_generator::generate_services() {
     return;
   }
 
-  std::vector<std::string> cythonFiles{
+  std::vector<std::string> pythonFiles{
+      "clients.py",
+      "services.py",
+  };
+
+  std::vector<std::string> cythonCompatFiles{
+      "clients.py",
+      "clients.pxd",
+      "services.py",
+      "services.pxd",
+  };
+
+  std::vector<std::string> normalCythonFiles{
       "clients.pxd",
       "clients.pyx",
       "clients.pyi",
-      "clients_wrapper.pxd",
       "services.pxd",
       "services.pyx",
       "services.pyi",
+  };
+
+  std::vector<std::string> migratedCythonFiles{
+      "py3_clients.pxd",
+      "py3_clients.pyx",
+      "py3_clients.pyi",
+      "py3_services.pxd",
+      "py3_services.pyx",
+      "py3_services.pyi",
+  };
+
+  std::vector<std::string> cythonFiles{
+      "clients_wrapper.pxd",
       "services_wrapper.pxd",
       "services_reflection.pxd",
       "services_reflection.pyx",
@@ -1410,11 +1486,41 @@ void t_mstch_py3_generator::generate_services() {
       "services_wrapper.cpp",
   };
 
-  for (const auto& file : cythonFiles) {
-    generate_file(file, NotTypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFiles) {
-    generate_file(file, NotTypesFile);
+  // TODO this logic is a complete mess and I intend to clean it up later
+  // the gist is:
+  // - if auto_migrate is present, generate py3_clients and either
+  // clients.pxd or clients.py depending on if no_auto_migrate is present
+  // - if auto_migrate isn't present, just generate all the normal files
+
+  if (has_option("auto_migrate")) {
+    for (const auto& file : migratedCythonFiles) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFiles) {
+      generate_file(file, NotTypesFile);
+    }
+    for (const auto& file : cythonFiles) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
+    if (has_option("no_auto_migrate")) {
+      for (const auto& file : cythonCompatFiles) {
+        generate_file(file, NotTypesFile, generateRootPath_);
+      }
+    } else {
+      for (const auto& file : pythonFiles) {
+        generate_file(file, NotTypesFile, generateRootPath_);
+      }
+    }
+  } else {
+    for (const auto& file : normalCythonFiles) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
+    for (const auto& file : cppFiles) {
+      generate_file(file, NotTypesFile);
+    }
+    for (const auto& file : cythonFiles) {
+      generate_file(file, NotTypesFile, generateRootPath_);
+    }
   }
 }
 

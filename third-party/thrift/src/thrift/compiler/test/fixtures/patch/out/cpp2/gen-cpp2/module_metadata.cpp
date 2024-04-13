@@ -278,6 +278,7 @@ StructMetadata<::test::fixtures::patch::MyDataPatchStruct>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     module_MyDataPatch.fields()->push_back(std::move(field));
   }
+  module_MyDataPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyDataPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_MyDataPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>") }, {"underlyingName", cvString("MyDataPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -374,6 +375,7 @@ StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::gen
     field.structured_annotations() = f.structured_annotations;
     module_MyDataWithCustomDefaultPatch.fields()->push_back(std::move(field));
   }
+  module_MyDataWithCustomDefaultPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyDataWithCustomDefaultPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_MyDataWithCustomDefaultPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>") }, {"underlyingName", cvString("MyDataWithCustomDefaultPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -614,6 +616,7 @@ StructMetadata<::test::fixtures::patch::MyStructPatchStruct>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     module_MyStructPatch.fields()->push_back(std::move(field));
   }
+  module_MyStructPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyStructPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_MyStructPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyStructPatchStruct>") }, {"underlyingName", cvString("MyStructPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -902,6 +905,7 @@ StructMetadata<::test::fixtures::patch::LateDefStructPatchStruct>::gen(ThriftMet
     field.structured_annotations() = f.structured_annotations;
     module_LateDefStructPatch.fields()->push_back(std::move(field));
   }
+  module_LateDefStructPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("LateDefStructPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_LateDefStructPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>") }, {"underlyingName", cvString("LateDefStructPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -974,6 +978,7 @@ StructMetadata<::test::fixtures::patch::RecursivePatchStruct>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_RecursivePatch.fields()->push_back(std::move(field));
   }
+  module_RecursivePatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("RecursivePatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_RecursivePatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RecursivePatchStruct>") }, {"underlyingName", cvString("RecursivePatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -1094,6 +1099,7 @@ StructMetadata<::test::fixtures::patch::BarPatchStruct>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     module_BarPatch.fields()->push_back(std::move(field));
   }
+  module_BarPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("BarPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_BarPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::BarPatchStruct>") }, {"underlyingName", cvString("BarPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -1190,6 +1196,7 @@ StructMetadata<::test::fixtures::patch::LoopPatchStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_LoopPatch.fields()->push_back(std::move(field));
   }
+  module_LoopPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("LoopPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_LoopPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>") }, {"underlyingName", cvString("LoopPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -1238,6 +1245,7 @@ StructMetadata<::test::fixtures::patch::RefFieldsPatchStruct>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_RefFieldsPatch.fields()->push_back(std::move(field));
   }
+  module_RefFieldsPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("RefFieldsPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_RefFieldsPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RefFieldsPatchStruct>") }, {"underlyingName", cvString("RefFieldsPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }

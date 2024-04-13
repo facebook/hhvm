@@ -131,7 +131,7 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * FBStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/hack/ns2/FBStructPatch'))>>
-class FBStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
+class FBStructPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -266,7 +266,7 @@ class FBStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function getName()[]: string {
-    return 'FBStructPatch';
+    return 'FBStructPatchStructInternalDoNotUse';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -391,6 +391,11 @@ class FBStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
+          shape(
+            "name" => "FBStructPatchStructInternalDoNotUse",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::hack::ns2::FBStructPatchStruct>",

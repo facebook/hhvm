@@ -680,6 +680,14 @@
       "MyDataPatch" : {
         "name" : "MyDataPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "MyDataPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -889,6 +897,14 @@
       "MyDataWithCustomDefaultPatch" : {
         "name" : "MyDataWithCustomDefaultPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "MyDataWithCustomDefaultPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -1453,6 +1469,14 @@
       "MyStructPatch" : {
         "name" : "MyStructPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "MyStructPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3204,6 +3228,14 @@
       "LateDefStructPatch" : {
         "name" : "LateDefStructPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "LateDefStructPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3353,6 +3385,14 @@
       "RecursivePatch" : {
         "name" : "RecursivePatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "RecursivePatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3580,6 +3620,14 @@
       "BarPatch" : {
         "name" : "BarPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "BarPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3774,6 +3822,14 @@
       "LoopPatch" : {
         "name" : "LoopPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "LoopPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3851,6 +3907,14 @@
       "RefFieldsPatch" : {
         "name" : "RefFieldsPatch",
         "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "RefFieldsPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",

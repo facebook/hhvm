@@ -205,7 +205,7 @@ pub fn from_text<'d>(
 
     if native_env.flags.enable_ir {
         let bc_to_ir_t = Instant::now();
-        let ir = bc_to_ir::bc_to_ir(&unit);
+        let ir = bc_to_ir::bc_to_ir(unit);
         profile.bc_to_ir_t = bc_to_ir_t.elapsed();
 
         let ir_to_bc_t = Instant::now();
@@ -273,11 +273,11 @@ pub fn unit_from_text_with_opts<'d>(
 pub fn unit_to_string(
     native_env: &NativeEnv,
     writer: &mut dyn std::io::Write,
-    program: &Unit,
+    unit: &Unit,
     profile: &mut Profile,
 ) -> Result<()> {
     if native_env.flags.dump_ir {
-        let ir = bc_to_ir::bc_to_ir(program);
+        let ir = bc_to_ir::bc_to_ir(unit.clone());
         struct FmtFromIo<'a>(&'a mut dyn std::io::Write);
         impl fmt::Write for FmtFromIo<'_> {
             fn write_str(&mut self, s: &str) -> fmt::Result {
@@ -293,7 +293,7 @@ pub fn unit_to_string(
     } else {
         let print_result;
         (print_result, profile.printing_t) = profile_rust::time(|| {
-            bytecode_printer::print_unit(&Context::new(Some(&native_env.filepath)), writer, program)
+            bytecode_printer::print_unit(&Context::new(Some(&native_env.filepath)), writer, unit)
         });
         print_result?;
     }

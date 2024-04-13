@@ -5,24 +5,26 @@
 
 use hhbc::Class;
 
-pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
-    unit.classes.push(ir::Class {
-        attributes: cls.attributes.clone().into(),
+pub(crate) fn convert_class(cls: Class) -> ir::Class {
+    ir::Class {
+        attributes: cls.attributes.into(),
         base: cls.base.into(),
-        constants: cls.constants.clone().into(),
-        ctx_constants: cls.ctx_constants.clone().into(),
-        doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
-        enum_includes: cls.enum_includes.clone().into(),
-        enum_type: cls.enum_type.clone().into(),
+        constants: cls.constants.into(),
+        ctx_constants: cls.ctx_constants.into(),
+        doc_comment: cls.doc_comment.map(|c| c.into()).into(),
+        enum_includes: cls.enum_includes.into(),
+        enum_type: cls.enum_type.into(),
         flags: cls.flags,
-        implements: cls.implements.clone().into(),
-        methods: Default::default(),
+        implements: cls.implements.into(),
+        methods: (cls.methods.into_iter())
+            .map(crate::func::convert_method)
+            .collect(),
         name: cls.name,
-        properties: cls.properties.clone().into(),
-        requirements: cls.requirements.clone().into(),
+        properties: cls.properties.into(),
+        requirements: cls.requirements.into(),
         span: cls.span,
-        type_constants: cls.type_constants.clone().into(),
-        upper_bounds: cls.upper_bounds.clone().into(),
-        uses: cls.uses.clone().into(),
-    });
+        type_constants: cls.type_constants.into(),
+        upper_bounds: cls.upper_bounds.into(),
+        uses: cls.uses.into(),
+    }
 }

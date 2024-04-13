@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Maybe;
-use hhbc::Fatal;
-
 /// Convert an ir::Unit to a hhbc::Unit
 ///
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
@@ -25,30 +22,19 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         ));
     }
 
-    let mut unit = unit.finish();
-
-    unit.file_attributes = ir_unit.file_attributes.into();
-    unit.typedefs = ir_unit.typedefs.into();
-    unit.constants = ir_unit.constants.into();
-    unit.modules = ir_unit.modules.into();
-    unit.module_use = ir_unit.module_use.into();
-    unit.symbol_refs = convert_symbol_refs(&ir_unit.symbol_refs);
-
-    if let Some(ir::Fatal { op, loc, message }) = ir_unit.fatal.as_ref() {
-        let op = match *op {
-            ir::FatalOp::Parse => hhbc::FatalOp::Parse,
-            ir::FatalOp::Runtime => hhbc::FatalOp::Runtime,
-            ir::FatalOp::RuntimeOmitFrame => hhbc::FatalOp::RuntimeOmitFrame,
-            _ => unreachable!(),
-        };
-        unit.fatal = Maybe::Just(Fatal {
-            op,
-            loc: *loc,
-            message: message.to_vec().into(),
-        });
+    hhbc::Unit {
+        functions: unit.functions.into(),
+        classes: unit.classes.into(),
+        file_attributes: ir_unit.file_attributes.into(),
+        typedefs: ir_unit.typedefs.into(),
+        constants: ir_unit.constants.into(),
+        modules: ir_unit.modules.into(),
+        module_use: ir_unit.module_use.into(),
+        symbol_refs: ir_unit.symbol_refs,
+        fatal: ir_unit.fatal.into(),
+        missing_symbols: Default::default(),
+        error_symbols: Default::default(),
     }
-
-    unit
 }
 
 #[derive(Default)]
@@ -56,31 +42,4 @@ pub(crate) struct UnitBuilder {
     pub adata_cache: hhbc::AdataState,
     pub functions: Vec<hhbc::Function>,
     pub classes: Vec<hhbc::Class>,
-}
-
-impl UnitBuilder {
-    fn finish(self) -> hhbc::Unit {
-        hhbc::Unit {
-            functions: self.functions.into(),
-            classes: self.classes.into(),
-            typedefs: Default::default(),
-            file_attributes: Default::default(),
-            modules: Default::default(),
-            module_use: Maybe::Nothing,
-            symbol_refs: Default::default(),
-            constants: Default::default(),
-            fatal: Default::default(),
-            missing_symbols: Default::default(),
-            error_symbols: Default::default(),
-        }
-    }
-}
-
-fn convert_symbol_refs(symbol_refs: &ir::SymbolRefs) -> hhbc::SymbolRefs {
-    hhbc::SymbolRefs {
-        classes: symbol_refs.classes.clone(),
-        constants: symbol_refs.constants.clone(),
-        functions: symbol_refs.functions.clone(),
-        includes: symbol_refs.includes.clone(),
-    }
 }

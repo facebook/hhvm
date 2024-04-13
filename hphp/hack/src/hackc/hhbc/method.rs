@@ -10,7 +10,7 @@ use crate::Body;
 use crate::MethodName;
 use crate::Visibility;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Method {
     pub visibility: Visibility,

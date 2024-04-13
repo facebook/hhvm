@@ -34,7 +34,7 @@ pub struct Requirement {
     pub kind: TraitReqKind,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Class {
     pub attributes: Vector<Attribute>,

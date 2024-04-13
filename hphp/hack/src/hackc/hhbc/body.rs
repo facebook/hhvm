@@ -19,7 +19,7 @@ use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Body {
     pub attributes: Vector<Attribute>,
@@ -38,7 +38,7 @@ pub struct Body {
     pub repr: BcRepr,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct BcRepr {
     /// Must have been compacted with InstrSeq::compact_iter().
@@ -51,7 +51,7 @@ pub struct BcRepr {
     pub params: Vector<ParamEntry>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct ParamEntry {
     pub param: Param,

@@ -10,7 +10,7 @@ use crate::Body;
 use crate::FunctionName;
 use crate::ParamEntry;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Function {
     pub name: FunctionName,

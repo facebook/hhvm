@@ -19,7 +19,7 @@ use crate::StringId;
 use crate::SymbolRefs;
 use crate::Typedef;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Unit {
     pub functions: Vector<Function>,

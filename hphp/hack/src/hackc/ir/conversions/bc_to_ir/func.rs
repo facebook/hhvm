@@ -17,36 +17,32 @@ use newtype::IdVec;
 use crate::context::Context;
 
 /// Convert a hhbc::Function to an ir::Function
-pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function) {
+pub(crate) fn convert_function(src: Function) -> ir::Function {
     trace!("--- convert_function {}", src.name.as_str());
 
     let func = convert_body(&src.body);
     ir::verify::verify_func(&func, &Default::default());
 
-    let function = ir::Function {
+    ir::Function {
         func,
         flags: src.flags,
         name: src.name,
-    };
-
-    unit.functions.push(function);
+    }
 }
 
 /// Convert a hhbc::Method to an ir::Method
-pub(crate) fn convert_method(unit: &mut ir::Unit, clsidx: usize, src: &Method) {
+pub(crate) fn convert_method(src: Method) -> ir::Method {
     trace!("--- convert_method {}", src.name.as_str());
 
     let func = convert_body(&src.body);
     ir::verify::verify_func(&func, &Default::default());
 
-    let method = ir::Method {
+    ir::Method {
         flags: src.flags,
         func,
         name: src.name,
         visibility: src.visibility,
-    };
-
-    unit.classes.get_mut(clsidx).unwrap().methods.push(method);
+    }
 }
 
 /// Convert a hhbc::Body to an ir::Func

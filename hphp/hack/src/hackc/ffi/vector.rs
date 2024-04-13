@@ -129,8 +129,17 @@ impl<'a, T> IntoIterator for &'a Vector<T> {
     type Item = &'a T;
     type IntoIter = std::slice::Iter<'a, T>;
 
-    fn into_iter(self) -> std::slice::Iter<'a, T> {
+    fn into_iter(self) -> Self::IntoIter {
         self.as_slice().iter()
+    }
+}
+
+impl<T> IntoIterator for Vector<T> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Vec::from(self).into_iter()
     }
 }
 

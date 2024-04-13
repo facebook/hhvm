@@ -2657,7 +2657,6 @@ dependencies = [
 name = "ir_to_bc"
 version = "0.0.0"
 dependencies = [
- "ffi",
  "hash",
  "hhbc",
  "instruction_sequence",

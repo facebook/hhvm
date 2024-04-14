@@ -5,12 +5,11 @@
 
 #pragma once
 
-// Forward declare bumpalo::Bump
-struct Bump;
+namespace HPHP::hackc {
+// these are newtype structs in Rust
 using BytesId = uint32_t;
 using StringId = BytesId;
 
-namespace HPHP::hackc {
 // OffsetArc<T> is defined to have the layout of const T*
 // https://docs.rs/triomphe/latest/triomphe/struct.OffsetArc.html
 template <typename T>

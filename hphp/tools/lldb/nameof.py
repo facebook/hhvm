@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 
 #------------------------------------------------------------------------------
-# `sizeof` command.
+# `nameof` command.
 
 class NameOfCommand(utils.Command):
     command = "nameof"

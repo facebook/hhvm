@@ -115,8 +115,7 @@ void t_json_generator::generate_program() {
   f_out_.open(fname.c_str());
   indent(f_out_) << "{" << endl;
   indent_up();
-  indent(f_out_) << "\"__fbthrift\": {\"@"
-                 << "generated\": 0}," << endl;
+  indent(f_out_) << "\"__fbthrift\": {\"@" << "generated\": 0}," << endl;
   indent(f_out_) << "\"thrift_module\" : \"" << module_name << "\"";
 
   if (!program_->consts().empty()) {
@@ -347,8 +346,7 @@ void t_json_generator::print_type(const t_type* ttype) {
 }
 
 void t_json_generator::print_name(const string& name) {
-  f_out_ << indent() << "\"name\" : "
-         << "\"" << name << "\"," << endl;
+  f_out_ << indent() << "\"name\" : " << "\"" << name << "\"," << endl;
 }
 
 /**
@@ -573,8 +571,8 @@ void t_json_generator::generate_enum(const t_enum* tenum) {
     // approach of compartmentalization, but may be backwards-incompatible.
     // Adding annotations as a separate top-level enum list/map would go
     // against this general approach.
-    indent(f_out_) << "\"" << (*val_iter)->get_name() << "\""
-                   << " : " << (*val_iter)->get_value();
+    indent(f_out_) << "\"" << (*val_iter)->get_name() << "\"" << " : "
+                   << (*val_iter)->get_value();
   }
   f_out_ << endl;
   indent_down();

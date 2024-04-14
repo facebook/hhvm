@@ -334,7 +334,9 @@ BENCHMARK(FlatBuffersRoundTrip) {
 BENCHMARK(SBESerializationBenchmark) {
   char* buffer = nullptr;
 
-  BENCHMARK_SUSPEND { buffer = new char[kMinAllocBytes]; }
+  BENCHMARK_SUSPEND {
+    buffer = new char[kMinAllocBytes];
+  }
 
   auto field_2_str = "hello, world";
   SBEStruct1 struct1;
@@ -353,7 +355,9 @@ BENCHMARK(SBESerializationBenchmark) {
     field_4.putMap_key("key" + std::to_string(i));
   }
 
-  BENCHMARK_SUSPEND { delete[] buffer; }
+  BENCHMARK_SUSPEND {
+    delete[] buffer;
+  }
 }
 
 BENCHMARK(SBEDeserializationBenchmark) {
@@ -399,7 +403,9 @@ BENCHMARK(SBEDeserializationBenchmark) {
     (void)field_4.next();
   }
 
-  BENCHMARK_SUSPEND { delete[] buffer; }
+  BENCHMARK_SUSPEND {
+    delete[] buffer;
+  }
 }
 
 BENCHMARK(SBERoundTripBenchmark) {
@@ -446,7 +452,9 @@ BENCHMARK(SBERoundTripBenchmark) {
     }
   }
 
-  BENCHMARK_SUSPEND { delete[] buffer; }
+  BENCHMARK_SUSPEND {
+    delete[] buffer;
+  }
 }
 
 } // namespace apache::thrift::benchmarks

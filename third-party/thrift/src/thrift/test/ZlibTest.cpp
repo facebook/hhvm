@@ -331,7 +331,9 @@ class ZlibTest : public testing::Test {
 } // namespace
 
 #define ADD_TEST_CASE(name, function, ...) \
-  TEST_F(ZlibTest, name##_##function) { test_##function(__VA_ARGS__); }
+  TEST_F(ZlibTest, name##_##function) {    \
+    test_##function(__VA_ARGS__);          \
+  }
 
 #define ADD_TESTS(name, buf)                                               \
   ADD_TEST_CASE(name, write_then_read, buf)                                \

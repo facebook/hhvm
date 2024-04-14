@@ -2586,8 +2586,8 @@ void t_java_deprecated_generator::generate_service_client(
     scope_up(f_service_);
 
     // Serialize the request
-    indent(f_service_) << "ContextStack ctx = "
-                       << "this.getContextStack();" << endl;
+    indent(f_service_) << "ContextStack ctx = " << "this.getContextStack();"
+                       << endl;
     indent(f_service_) << "super.preWrite(ctx, " << service_func_name
                        << ", null);" << endl;
 
@@ -2633,8 +2633,8 @@ void t_java_deprecated_generator::generate_service_client(
                          << endl;
       scope_up(f_service_);
 
-      indent(f_service_) << "ContextStack ctx = "
-                         << "super.getContextStack();" << endl; // newversion
+      indent(f_service_) << "ContextStack ctx = " << "super.getContextStack();"
+                         << endl; // newversion
       indent(f_service_) << "long bytes;" << endl;
 
       indent(f_service_) << "TMessageType mtype;" << endl
@@ -3347,8 +3347,7 @@ void t_java_deprecated_generator::generate_deserialize_container(
               // size the collection correctly,
               // use initial capacity of 0 if there is no explicit size
               << "(Math.max(0, " << (ttype->is_list() ? "" : "2*") << obj
-              << ".size"
-              << "));" << endl;
+              << ".size" << "));" << endl;
 
   // For loop iterates over elements
   // Use explicit size, if provided, or peek for one element at a time if not
@@ -3365,8 +3364,7 @@ void t_java_deprecated_generator::generate_deserialize_container(
     out << "iprot.peekList()";
   }
 
-  out << " : (" << i << " < " << obj << ".size"
-      << "); " << endl;
+  out << " : (" << i << " < " << obj << ".size" << "); " << endl;
   indent(out) << "     ++" << i << ")" << endl;
 
   scope_up(out);

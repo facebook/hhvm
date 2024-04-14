@@ -700,8 +700,8 @@ TEST(failoverRouteTest, ignoreTkoHardTkoAndTryAgain) {
   folly::dynamic excludeErrors = folly::dynamic::array;
   excludeErrors.push_back("try_again");
   folly::dynamic policyJson = folly::dynamic::object(
-      "type", "DeterministicOrderPolicy")("max_tries", 5)(
-      "max_error_tries", 2)("exclude_errors", excludeErrors);
+      "type", "DeterministicOrderPolicy")("max_tries", 5)("max_error_tries", 2)(
+      "exclude_errors", excludeErrors);
   folly::dynamic json = folly::dynamic::object("failover_policy", policyJson);
   auto rh = makeFailoverRouteDefault<McrouterRouterInfo, FailoverRoute>(
       json, get_route_handles(test_handles));

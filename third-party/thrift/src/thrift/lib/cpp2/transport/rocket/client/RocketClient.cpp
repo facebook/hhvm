@@ -716,7 +716,9 @@ void RocketClient::sendRequestResponse(
 
     void send(RocketClient& client, std::chrono::milliseconds timeout) && {
       if (auto ew = err(client.scheduleWrite(*rctx_))) {
-        SCOPE_EXIT { delete this; };
+        SCOPE_EXIT {
+          delete this;
+        };
         return callback_(folly::Try<rocket::Payload>(std::move(ew)));
       }
       rctx_->setTimeoutInfo(client.evb_->timer(), *this, timeout);
@@ -733,7 +735,9 @@ void RocketClient::sendRequestResponse(
       // On the timeout path, post() will be called once more in
       // abortSentRequest() within getResponse(). Avoid recursive misbehavior.
       if (auto rctx = std::move(rctx_)) {
-        SCOPE_EXIT { delete this; };
+        SCOPE_EXIT {
+          delete this;
+        };
         cancelTimeout();
         callback_(std::move(*rctx).getResponse());
       }
@@ -783,7 +787,9 @@ void RocketClient::sendRequestFnf(
 
     void send(RocketClient& client) && {
       if (auto ew = err(client.scheduleWrite(*rctx_))) {
-        SCOPE_EXIT { delete this; };
+        SCOPE_EXIT {
+          delete this;
+        };
         return callback_(folly::Try<void>(std::move(ew)));
       }
       rctx_->waitForWriteToCompleteSchedule(this);
@@ -796,7 +802,9 @@ void RocketClient::sendRequestFnf(
     std::unique_ptr<RequestContext> rctx_;
 
     void post() override {
-      SCOPE_EXIT { delete this; };
+      SCOPE_EXIT {
+        delete this;
+      };
       callback_(rctx_->waitForWriteToCompleteResult());
     }
   };
@@ -916,7 +924,9 @@ void RocketClient::sendRequestStreamChannel(
 
    private:
     void post() override {
-      SCOPE_EXIT { delete this; };
+      SCOPE_EXIT {
+        delete this;
+      };
 
       auto writeCompleted = ctx_.waitForWriteToCompleteResult();
       // If the write failed, check that the stream has not already received the

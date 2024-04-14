@@ -170,7 +170,9 @@ TEST_F(InitialThrowTest, InitialThrow) {
         FirstResponsePayload&&,
         folly::EventBase*,
         StreamServerCallback* serverCallback) override {
-      SCOPE_EXIT { responseReceived_.post(); };
+      SCOPE_EXIT {
+        responseReceived_.post();
+      };
       if (!onFirstResponseBool_) {
         serverCallback->onStreamCancel();
         return false;

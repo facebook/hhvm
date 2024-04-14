@@ -819,8 +819,7 @@ void SSLContextManager::verifyCertNames(
     altName->sort();
     VLOG(3) << "cert " << description << " SAN: " << flattenList(*altName);
   } else {
-    VLOG(3) << "cert " << description << " SAN: "
-            << "{none}";
+    VLOG(3) << "cert " << description << " SAN: " << "{none}";
   }
   if (firstCert) {
     groupIdentity = *identity;

@@ -354,8 +354,8 @@ struct gen_check_rec<type_class::map<KeyTypeClass, MappedTypeClass>> {
   using MappedTraits = gen_check_rec<MappedTypeClass>;
   template <typename Get, typename Type>
   static constexpr bool apply =
-      KeyTraits::template apply<Get, typename Type::key_type>&&
-          MappedTraits::template apply<Get, typename Type::mapped_type>;
+      KeyTraits::template apply<Get, typename Type::key_type> &&
+      MappedTraits::template apply<Get, typename Type::mapped_type>;
 };
 struct gen_check_rec_structure_variant {
   template <typename Get, typename Type>

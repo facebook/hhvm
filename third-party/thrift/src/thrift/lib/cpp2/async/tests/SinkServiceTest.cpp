@@ -193,7 +193,9 @@ TEST_F(SinkServiceTest, SinkInitialThrowsOnFinalResponseCalled) {
         FirstResponsePayload&&,
         folly::EventBase*,
         SinkServerCallback* serverCallback) override {
-      SCOPE_EXIT { responseReceived_.post(); };
+      SCOPE_EXIT {
+        responseReceived_.post();
+      };
       if (!onFirstResponseBool_) {
         serverCallback->onSinkError(std::runtime_error("stop sink"));
         return false;

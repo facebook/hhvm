@@ -142,7 +142,9 @@ struct ThriftClearDefault {
   const auto& operator()() const {
     static const auto& obj = *[] {
       auto* p = new type::native_type<Tag>();
-      SCOPE_FAIL { delete p; };
+      SCOPE_FAIL {
+        delete p;
+      };
       apache::thrift::clear(*p);
       return p;
     }();
@@ -213,7 +215,9 @@ struct GetDefault<
     static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto* s = new Struct{};
-      SCOPE_FAIL { delete s; };
+      SCOPE_FAIL {
+        delete s;
+      };
       auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
       folly::lsan_ignore_object(s);
       return adapted;
@@ -249,12 +253,16 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
     static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto* s = new Struct{};
-      SCOPE_FAIL { delete s; };
+      SCOPE_FAIL {
+        delete s;
+      };
       apache::thrift::clear(*s);
       auto adapted = new type::native_type<Tag>(AdapterT::fromThriftField(
           folly::copy(GetIntrinsicDefault<UTag>{}()),
           FieldContext<Struct, FieldId>{*s}));
-      SCOPE_FAIL { delete adapted; };
+      SCOPE_FAIL {
+        delete adapted;
+      };
       adapt_detail::construct<Adapter, FieldId>(adapted, *s);
       folly::lsan_ignore_object(s);
       return adapted;

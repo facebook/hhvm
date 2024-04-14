@@ -191,8 +191,8 @@ struct chained_data_member_accessor<V, A...> {
   template <typename T>
   FOLLY_ERASE constexpr auto operator()(T&& t) const noexcept(
       noexcept(chained_data_member_accessor<A...>{}(V{}(static_cast<T&&>(t)))))
-      -> decltype(
-          chained_data_member_accessor<A...>{}(V{}(static_cast<T&&>(t)))) {
+      -> decltype(chained_data_member_accessor<A...>{}(
+          V{}(static_cast<T&&>(t)))) {
     return chained_data_member_accessor<A...>{}(V{}(static_cast<T&&>(t)));
   }
 };

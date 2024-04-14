@@ -302,7 +302,9 @@ class RequestInstrumentationTest : public testing::Test {
   }
 
   ThriftServer::ServerSnapshot waitForRequestsThenSnapshot(size_t reqNum) {
-    SCOPE_EXIT { handler()->stopRequests(); };
+    SCOPE_EXIT {
+      handler()->stopRequests();
+    };
     handler()->waitForRequests(reqNum);
     return getServerSnapshot();
   }

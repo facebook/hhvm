@@ -30,7 +30,9 @@ folly::coro::Task<> ServerGeneratorStream::fromAsyncGeneratorImpl(
 
   bool pauseStream = false;
   int64_t credits = 0;
-  SCOPE_EXIT { stream->serverClose(); };
+  SCOPE_EXIT {
+    stream->serverClose();
+  };
 
   // ensure the generator is destroyed before the interaction TimeStreamGuard
   auto gen_ = std::move(gen);

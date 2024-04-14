@@ -223,8 +223,9 @@ TEST(ch3, verify_correctness) {
   }
 }
 
-static uint32_t __attribute__((__noinline__))
-inconsistent_hashing_lookup(uint32_t hash_value, uint32_t pool_size) {
+static uint32_t __attribute__((__noinline__)) inconsistent_hashing_lookup(
+    uint32_t hash_value,
+    uint32_t pool_size) {
   asm(""); /* Enforce noinline. */
   return hash_value % pool_size;
 }

@@ -704,9 +704,8 @@ void t_js_generator::generate_js_struct_writer(
         << endl;
     indent_up();
 
-    indent(out) << "output.writeFieldBegin("
-                << "'" << (*f_iter)->get_name() << "', "
-                << type_to_enum((*f_iter)->get_type()) << ", "
+    indent(out) << "output.writeFieldBegin(" << "'" << (*f_iter)->get_name()
+                << "', " << type_to_enum((*f_iter)->get_type()) << ", "
                 << (*f_iter)->get_key() << ");" << endl;
 
     // Write field contents
@@ -778,8 +777,7 @@ void t_js_generator::generate_service_processor(const t_service* tservice) {
   vector<t_function*>::iterator f_iter;
 
   f_service_ << js_namespace(tservice->program()) << service_name_
-             << "Processor = "
-             << "exports.Processor = function(handler) ";
+             << "Processor = " << "exports.Processor = function(handler) ";
 
   scope_up(f_service_);
 
@@ -967,8 +965,8 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
 
   if (gen_node_) {
     f_service_ << js_namespace(tservice->program()) << service_name_
-               << "Client = "
-               << "exports.Client = function(output, pClass) {" << endl;
+               << "Client = " << "exports.Client = function(output, pClass) {"
+               << endl;
   } else {
     f_service_ << js_namespace(tservice->program()) << service_name_
                << "Client = function(input, output) {" << endl;

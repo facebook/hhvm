@@ -83,7 +83,9 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
           }
         }};
   };
-  SCOPE_EXIT { evb_.reset(); };
+  SCOPE_EXIT {
+    evb_.reset();
+  };
 
   for (uint64_t credits = 0; !serverCancelSource_.isCancellationRequested();
        credits--) {

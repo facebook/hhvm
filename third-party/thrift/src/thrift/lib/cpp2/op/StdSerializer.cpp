@@ -43,7 +43,7 @@ namespace {
   registry(binary_t{});
   return 0;
 }();
-}
+} // namespace
 } // namespace type
 } // namespace thrift
 } // namespace apache

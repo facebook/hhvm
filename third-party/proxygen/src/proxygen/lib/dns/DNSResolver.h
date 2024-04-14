@@ -73,7 +73,7 @@ class DNSResolver : public folly::DelayedDestruction {
   /**
    * Status codes for resolution failures.
    */
-// clang-format off
+  // clang-format off
 #define DNSRESOLVER_RESOLUTION_STATUS_GEN(xx)                                 \
   xx(OK, "Success")                                                           \
   xx(TIMEOUT, "Timed out")                                                    \

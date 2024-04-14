@@ -73,10 +73,10 @@ constexpr bool supports_custom_protocol() {
 // including that might be calling this function (normally some other testing
 // code).
 template <typename T>
-requires(
-    is_thrift_class_v<std::remove_cvref_t<T>> ||
-    is_thrift_exception_v<
-        std::remove_cvref_t<T>>) void PrintTo(const T& obj, std::ostream* os) {
+  requires(
+      is_thrift_class_v<std::remove_cvref_t<T>> ||
+      is_thrift_exception_v<std::remove_cvref_t<T>>)
+void PrintTo(const T& obj, std::ostream* os) {
   if constexpr (detail::supports_custom_protocol<std::remove_cvref_t<T>>()) {
     *os << debugString(obj);
   } else {

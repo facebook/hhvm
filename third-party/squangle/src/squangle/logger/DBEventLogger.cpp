@@ -16,8 +16,8 @@ namespace db {
 void DBSimpleLogger::logQuerySuccess(
     const QueryLoggingData& data,
     const SquangleLoggingData&) const {
-  VLOG(2) << "[" << api_name_ << "]"
-          << " query (\"" << data.query << "\") succeeded.";
+  VLOG(2) << "[" << api_name_ << "]" << " query (\"" << data.query
+          << "\") succeeded.";
 }
 
 void DBSimpleLogger::logQueryFailure(
@@ -26,15 +26,15 @@ void DBSimpleLogger::logQueryFailure(
     unsigned int,
     const std::string&,
     const SquangleLoggingData&) const {
-  VLOG(2) << "[" << api_name_ << "]"
-          << " query (\"" << data.query << "\") failed.";
+  VLOG(2) << "[" << api_name_ << "]" << " query (\"" << data.query
+          << "\") failed.";
 }
 
 void DBSimpleLogger::logConnectionSuccess(
     const CommonLoggingData&,
     const SquangleLoggingData& connInfo) const {
-  VLOG(2) << "[" << api_name_ << "]"
-          << " connection with " << connInfo.connKey->host() << " succeeded";
+  VLOG(2) << "[" << api_name_ << "]" << " connection with "
+          << connInfo.connKey->host() << " succeeded";
 }
 
 void DBSimpleLogger::logConnectionFailure(
@@ -43,8 +43,8 @@ void DBSimpleLogger::logConnectionFailure(
     unsigned int,
     const std::string&,
     const SquangleLoggingData& connInfo) const {
-  VLOG(2) << "[" << api_name_ << "]"
-          << " connection with " << connInfo.connKey->host() << " failed";
+  VLOG(2) << "[" << api_name_ << "]" << " connection with "
+          << connInfo.connKey->host() << " failed";
 }
 } // namespace db
 } // namespace facebook

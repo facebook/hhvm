@@ -778,9 +778,8 @@ void CAresResolver::resolveAddress(DNSResolver::ResolutionCallback* cb,
                                    std::chrono::milliseconds timeout) {
   if (timeout > kMaxTimeout) {
     LOG(WARNING) << "Attempt to resolve " << address.getAddressStr()
-                 << " specified with "
-                 << "timeout of " << timeout.count() << "ms; "
-                 << "clamping to " << kMaxTimeout.count() << "ms";
+                 << " specified with " << "timeout of " << timeout.count()
+                 << "ms; " << "clamping to " << kMaxTimeout.count() << "ms";
     timeout = kMaxTimeout;
   }
 
@@ -956,9 +955,8 @@ void CAresResolver::resolveMailExchange(DNSResolver::ResolutionCallback* cb,
                                         std::chrono::milliseconds timeout) {
   if (timeout > kMaxTimeout) {
     LOG(WARNING) << "Attempt to resolve mail exchange info for " << domain
-                 << " specified with "
-                 << "timeout of " << timeout.count() << "ms; "
-                 << "clamping to " << kMaxTimeout.count() << "ms";
+                 << " specified with " << "timeout of " << timeout.count()
+                 << "ms; " << "clamping to " << kMaxTimeout.count() << "ms";
     timeout = kMaxTimeout;
   }
 

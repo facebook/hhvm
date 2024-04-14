@@ -148,7 +148,9 @@ void ThriftRequestCore::LogRequestSampleCallback::sendQueued() {
 }
 
 void ThriftRequestCore::LogRequestSampleCallback::messageSent() {
-  SCOPE_EXIT { delete this; };
+  SCOPE_EXIT {
+    delete this;
+  };
   requestLoggingContext_.timestamps.writeEnd = std::chrono::steady_clock::now();
   if (chainedCallback_ != nullptr) {
     chainedCallback_->messageSent();
@@ -157,7 +159,9 @@ void ThriftRequestCore::LogRequestSampleCallback::messageSent() {
 
 void ThriftRequestCore::LogRequestSampleCallback::messageSendError(
     folly::exception_wrapper&& e) {
-  SCOPE_EXIT { delete this; };
+  SCOPE_EXIT {
+    delete this;
+  };
   requestLoggingContext_.timestamps.writeEnd = std::chrono::steady_clock::now();
   if (chainedCallback_ != nullptr) {
     chainedCallback_->messageSendError(std::move(e));

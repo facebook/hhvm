@@ -217,7 +217,7 @@ constexpr bool is_thrift_union_v =
     apache::thrift::detail::st::IsThriftUnion<T>::value;
 
 template <typename T>
-constexpr bool is_thrift_exception_v = is_thrift_class_v<T>&&
+constexpr bool is_thrift_exception_v = is_thrift_class_v<T> &&
     std::is_base_of<apache::thrift::TException, T>::value;
 
 template <typename T>

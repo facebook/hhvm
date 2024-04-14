@@ -818,8 +818,8 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
 
   template <typename Protocol>
   static constexpr bool map_value_api_v =
-      folly::is_detected_v<map_value_begin_t, Protocol>&&
-          folly::is_detected_v<map_value_end_t, Protocol>;
+      folly::is_detected_v<map_value_begin_t, Protocol> &&
+      folly::is_detected_v<map_value_end_t, Protocol>;
 
   template <typename Protocol>
   static std::size_t writeMapValueBegin(Protocol& protocol) {

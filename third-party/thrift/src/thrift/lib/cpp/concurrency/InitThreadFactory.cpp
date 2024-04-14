@@ -40,7 +40,9 @@ class InitRunnable : public Runnable {
 
   void run() override {
     threadInitializer_();
-    SCOPE_EXIT { threadFinalizer_(); };
+    SCOPE_EXIT {
+      threadFinalizer_();
+    };
     runnable_->run();
   }
 

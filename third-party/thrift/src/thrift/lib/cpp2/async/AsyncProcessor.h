@@ -1341,8 +1341,7 @@ class HandlerCallbackBase {
 #if !FOLLY_HAS_COROUTINES
   [[noreturn]]
 #endif
-  void
-  sendReply(
+  void sendReply(
       [[maybe_unused]] std::pair<
           apache::thrift::SerializedResponse,
           apache::thrift::detail::SinkConsumerImpl>&& responseAndSinkConsumer);

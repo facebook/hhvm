@@ -29,7 +29,7 @@ double measure_time_concurrent(
     std::thread thread;
     pthread_rwlock_t* gate;
     unsigned idx;
-  } * ti;
+  }* ti;
   unsigned i;
   pthread_rwlock_t gate;
   timespec ts;

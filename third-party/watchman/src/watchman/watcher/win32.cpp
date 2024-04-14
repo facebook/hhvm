@@ -298,8 +298,8 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
             if (notify->NextEntryOffset == 0) {
               break;
             }
-            notify =
-                (PFILE_NOTIFY_INFORMATION)(notify->NextEntryOffset + (char*)notify);
+            notify = (PFILE_NOTIFY_INFORMATION)(notify->NextEntryOffset +
+                                                (char*)notify);
           }
         }
 

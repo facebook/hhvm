@@ -1499,10 +1499,9 @@ void HTTPTransaction::sendEOM() {
               << "ingressState=" << ingressState_ << ", "
               << "egressPaused=" << egressPaused_ << ", "
               << "ingressPaused=" << ingressPaused_ << ", "
-              << "aborted=" << aborted_ << ", "
-              << "enqueued=" << isEnqueued() << ", "
-              << "chainLength=" << deferredEgressBody_.chainLength() << ", "
-              << "bufferMetaLen=" << deferredBufferMeta_.length << "]"
+              << "aborted=" << aborted_ << ", " << "enqueued=" << isEnqueued()
+              << ", " << "chainLength=" << deferredEgressBody_.chainLength()
+              << ", " << "bufferMetaLen=" << deferredBufferMeta_.length << "]"
               << " on " << *this;
     }
   } else {

@@ -64,7 +64,9 @@ class TransportUpgradeSendCallback : public MessageChannel::SendCallback {
   void sendQueued() override {}
 
   void messageSent() override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     // do the transport upgrade
     for (auto& routingHandler :
          *cpp2Worker_->getServer()->getRoutingHandlers()) {

@@ -164,7 +164,7 @@ class HQDownstreamSession : public HQSession {
 
    private:
     hq::PushId pushId_; // The push id in context of which this stream is sent
-  };                    // HQEgressPushStream
+  }; // HQEgressPushStream
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

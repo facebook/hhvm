@@ -30,14 +30,14 @@ using Optional = decltype(struct_optional_list_i32{}.field_1());
 using Required = decltype(struct_required_list_i32{}.field_1());
 using Box = decltype(struct_optional_list_i32_box{}.field_1());
 using Union = decltype(union_list_i32{}.field_1_ref());
-using Unique = std::remove_reference_t<decltype(
-    struct_optional_list_i32_cpp_ref{}.field_1_ref())>;
-using Shared = std::remove_reference_t<decltype(
-    struct_optional_list_i32_shared_cpp_ref{}.field_1_ref())>;
-using InternBox = std::remove_reference_t<decltype(
-    cpp2::StructuredAnnotation{}.intern_box_field())>;
-using TerseInternBox = std::remove_reference_t<decltype(
-    terse_write::CppRefTerseStruct{}.intern_boxed_field())>;
+using Unique = std::remove_reference_t<
+    decltype(struct_optional_list_i32_cpp_ref{}.field_1_ref())>;
+using Shared = std::remove_reference_t<
+    decltype(struct_optional_list_i32_shared_cpp_ref{}.field_1_ref())>;
+using InternBox = std::remove_reference_t<
+    decltype(cpp2::StructuredAnnotation{}.intern_box_field())>;
+using TerseInternBox = std::remove_reference_t<
+    decltype(terse_write::CppRefTerseStruct{}.intern_boxed_field())>;
 using Terse =
     std::remove_reference_t<decltype(terse_write::MyStruct{}.field1())>;
 

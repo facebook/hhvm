@@ -90,8 +90,10 @@ void readBenchArena(size_t iters) {
   susp.rehire();
 }
 
-#define BENCHMARK_MACRO(proto, rdwr, bench) \
-  BENCHMARK(proto##_##rdwr##_##bench, iters) { rdwr##Bench<bench>(iters); }
+#define BENCHMARK_MACRO(proto, rdwr, bench)    \
+  BENCHMARK(proto##_##rdwr##_##bench, iters) { \
+    rdwr##Bench<bench>(iters);                 \
+  }
 
 #define BENCHMARK_MACRO_RELATIVE(proto, rdwr, bench)          \
   BENCHMARK_RELATIVE(proto##_Arena_##rdwr##_##bench, iters) { \

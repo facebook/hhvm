@@ -541,7 +541,9 @@ inline void CompactProtocolReader::readMessageBegin(
   }
 
   messageType =
-      (MessageType)((uint8_t)(versionAndType & apache::thrift::detail::compact::TYPE_MASK) >> apache::thrift::detail::compact::TYPE_SHIFT_AMOUNT);
+      (MessageType)((uint8_t)(versionAndType &
+                              apache::thrift::detail::compact::TYPE_MASK) >>
+                    apache::thrift::detail::compact::TYPE_SHIFT_AMOUNT);
   apache::thrift::util::readVarint(in_, seqid);
   readString(name);
 }

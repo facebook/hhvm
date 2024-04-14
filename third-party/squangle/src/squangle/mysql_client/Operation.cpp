@@ -1964,30 +1964,34 @@ folly::StringPiece FetchOperation::toString(FetchAction action) {
 // and this provides a way to log the string version of this enum
 folly::fbstring Operation::connectStageString(connect_stage stage) {
   static const folly::F14FastMap<connect_stage, folly::fbstring>
-      stageToStringMap =
-  { {connect_stage::CONNECT_STAGE_INVALID, "CONNECT_STAGE_INVALID"},
-    {connect_stage::CONNECT_STAGE_NOT_STARTED, "CONNECT_STAGE_NOT_STARTED"},
-    {connect_stage::CONNECT_STAGE_NET_BEGIN_CONNECT,
-     "CONNECT_STAGE_NET_BEGIN_CONNECT"},
+      stageToStringMap = {
+          {connect_stage::CONNECT_STAGE_INVALID, "CONNECT_STAGE_INVALID"},
+          {connect_stage::CONNECT_STAGE_NOT_STARTED,
+           "CONNECT_STAGE_NOT_STARTED"},
+          {connect_stage::CONNECT_STAGE_NET_BEGIN_CONNECT,
+           "CONNECT_STAGE_NET_BEGIN_CONNECT"},
 #if MYSQL_VERSION_ID >= 80020 // csm_wait_connect added in 8.0.20
-    {connect_stage::CONNECT_STAGE_NET_WAIT_CONNECT,
-     "CONNECT_STAGE_NET_WAIT_CONNECT"},
+          {connect_stage::CONNECT_STAGE_NET_WAIT_CONNECT,
+           "CONNECT_STAGE_NET_WAIT_CONNECT"},
 #endif
-    {connect_stage::CONNECT_STAGE_NET_COMPLETE_CONNECT,
-     "CONNECT_STAGE_NET_COMPLETE_CONNECT"},
-    {connect_stage::CONNECT_STAGE_READ_GREETING, "CONNECT_STAGE_READ_GREETING"},
-    {connect_stage::CONNECT_STAGE_PARSE_HANDSHAKE,
-     "CONNECT_STAGE_PARSE_HANDSHAKE"},
-    {connect_stage::CONNECT_STAGE_ESTABLISH_SSL, "CONNECT_STAGE_ESTABLISH_SSL"},
-    {connect_stage::CONNECT_STAGE_AUTHENTICATE, "CONNECT_STAGE_AUTHENTICATE"},
-    {connect_stage::CONNECT_STAGE_PREP_SELECT_DATABASE,
-     "CONNECT_STAGE_PREP_SELECT_DATABASE"},
-    {connect_stage::CONNECT_STAGE_PREP_INIT_COMMANDS,
-     "CONNECT_STAGE_PREP_INIT_COMMANDS"},
-    {connect_stage::CONNECT_STAGE_SEND_ONE_INIT_COMMAND,
-     "CONNECT_STAGE_SEND_ONE_INIT_COMMAND"},
-    {connect_stage::CONNECT_STAGE_COMPLETE, "CONNECT_STAGE_COMPLETE"},
-  };
+          {connect_stage::CONNECT_STAGE_NET_COMPLETE_CONNECT,
+           "CONNECT_STAGE_NET_COMPLETE_CONNECT"},
+          {connect_stage::CONNECT_STAGE_READ_GREETING,
+           "CONNECT_STAGE_READ_GREETING"},
+          {connect_stage::CONNECT_STAGE_PARSE_HANDSHAKE,
+           "CONNECT_STAGE_PARSE_HANDSHAKE"},
+          {connect_stage::CONNECT_STAGE_ESTABLISH_SSL,
+           "CONNECT_STAGE_ESTABLISH_SSL"},
+          {connect_stage::CONNECT_STAGE_AUTHENTICATE,
+           "CONNECT_STAGE_AUTHENTICATE"},
+          {connect_stage::CONNECT_STAGE_PREP_SELECT_DATABASE,
+           "CONNECT_STAGE_PREP_SELECT_DATABASE"},
+          {connect_stage::CONNECT_STAGE_PREP_INIT_COMMANDS,
+           "CONNECT_STAGE_PREP_INIT_COMMANDS"},
+          {connect_stage::CONNECT_STAGE_SEND_ONE_INIT_COMMAND,
+           "CONNECT_STAGE_SEND_ONE_INIT_COMMAND"},
+          {connect_stage::CONNECT_STAGE_COMPLETE, "CONNECT_STAGE_COMPLETE"},
+      };
 
   try {
     return stageToStringMap.at(stage);

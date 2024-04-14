@@ -69,9 +69,8 @@ TEST(McrouterFiberContextTest, testExtraDataCallback) {
   folly::EventBase evb;
   auto& fm = folly::fibers::getFiberManagerT<fiber_local<RouterInfo>>(evb);
   fm.addTask([]() {
-    fiber_local<RouterInfo>::addExtraDataCallbacks([]() -> ExtraDataMap {
-      return {{"0", "0"}};
-    });
+    fiber_local<RouterInfo>::addExtraDataCallbacks(
+        []() -> ExtraDataMap { return {{"0", "0"}}; });
 
     // Run in new fiber by copying fiber context, similar to shadow route.
     for (int i = 1; i < 6; i++) {

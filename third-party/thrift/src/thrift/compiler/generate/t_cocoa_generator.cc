@@ -433,8 +433,8 @@ void t_cocoa_generator::generate_enum(const t_enum* tenum) {
   indent_down();
   f_impl_ << indent() << "}" << std::endl;
   f_impl_ << indent() << "return [NSString stringWithFormat:@\""
-          << cocoa_prefix_ << tenum->name() << "_"
-          << "%d\", (int)value];" << std::endl;
+          << cocoa_prefix_ << tenum->name() << "_" << "%d\", (int)value];"
+          << std::endl;
   indent_down();
   f_impl_ << indent() << "}" << std::endl;
   f_impl_ << std::endl;
@@ -734,8 +734,8 @@ void t_cocoa_generator::generate_cocoa_struct_field_accessor_declarations(
     }
     // out << indent() << "#endif" << std::endl;
     if (is_declare_isset_getter) {
-      out << indent() << "- (BOOL) " << field.name() << "IsSet"
-          << ";" << std::endl;
+      out << indent() << "- (BOOL) " << field.name() << "IsSet" << ";"
+          << std::endl;
     }
   }
 }
@@ -1421,9 +1421,8 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       ttype = ttype->get_true_type();
     }
     if (ttype->is_struct()) {
-      out << indent() << "if (" << field_name << " && "
-          << "![" << field_name << " isImmutable]"
-          << ") {" << std::endl;
+      out << indent() << "if (" << field_name << " && " << "![" << field_name
+          << " isImmutable]" << ") {" << std::endl;
       indent_up();
       out << indent() << "[" << field_name << " makeImmutable];" << std::endl;
       indent_down();
@@ -1445,8 +1444,8 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       // [copy] on it
       indent_down();
       out << indent() << "}" << std::endl;
-      out << indent() << field_name << " = "
-          << "[" << field_name << " copy];" << std::endl;
+      out << indent() << field_name << " = " << "[" << field_name << " copy];"
+          << std::endl;
       indent_down();
       out << indent() << "}" << std::endl;
     } else if (ttype->is_map()) {
@@ -1464,8 +1463,8 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
       // [copy] on it
       indent_down();
       out << indent() << "}" << std::endl;
-      out << indent() << field_name << " = "
-          << "[" << field_name << " copy];" << std::endl;
+      out << indent() << field_name << " = " << "[" << field_name << " copy];"
+          << std::endl;
       indent_down();
       out << indent() << "}" << std::endl;
     } else {
@@ -1494,8 +1493,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
   out << indent()
       << "NSMutableDictionary *ret = [NSMutableDictionary dictionary];"
       << std::endl;
-  indent(out) << "ret[@\"" << kFieldPrefix << "struct_name\"]"
-              << " = "
+  indent(out) << "ret[@\"" << kFieldPrefix << "struct_name\"]" << " = "
               << "@\"" + tstruct->name() + "\";" << std::endl;
 
   for (const auto& field : tstruct->fields()) {
@@ -1602,14 +1600,13 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
 
     if (ttype->is_struct() || ttype->is_list() || ttype->is_set() ||
         ttype->is_map()) {
-      out << indent() << "newCopy->" << field_name << " = "
-          << "[self->" << field_name << " mutableCopyWithZone:zone];"
-          << std::endl;
+      out << indent() << "newCopy->" << field_name << " = " << "[self->"
+          << field_name << " mutableCopyWithZone:zone];" << std::endl;
     } else if (
         ttype->is_string_or_binary() || ttype->is_base_type() ||
         ttype->is_enum()) {
-      out << indent() << "newCopy->" << field_name << " = "
-          << "self->" << field_name << ";" << std::endl;
+      out << indent() << "newCopy->" << field_name << " = " << "self->"
+          << field_name << ";" << std::endl;
     } else {
       std::cout << "WAT?! " << ttype->name() << std::endl;
       assert(false);
@@ -1714,8 +1711,7 @@ void t_cocoa_generator::generate_cocoa_service_protocol(
       << std::endl;
 
   for (const auto* function : tservice->get_functions()) {
-    out << "- " << function_signature(function) << ";"
-        << "  // throws ";
+    out << "- " << function_signature(function) << ";" << "  // throws ";
     for (const t_field& x : get_elems(function->exceptions())) {
       out << type_name(x.get_type()) + ", ";
     }
@@ -1828,9 +1824,8 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
 
     // Serialize the request
     out << indent() << "[outProtocol writeMessageBeginWithName: @\"" << funname
-        << "\""
-        << " type: TMessageType_CALL"
-        << " sequenceID: 0];" << std::endl;
+        << "\"" << " type: TMessageType_CALL" << " sequenceID: 0];"
+        << std::endl;
 
     out << indent() << "[outProtocol writeStructBeginWithName: @\"" << argsname
         << "\"];" << std::endl;
@@ -2288,8 +2283,7 @@ void t_cocoa_generator::generate_deserialize_container(
   std::string i = tmp("_i");
   indent(out) << "int " << i << ";" << std::endl
               << indent() << "for (" << i << " = 0; " << i << " < " << size
-              << "; "
-              << "++" << i << ")" << std::endl;
+              << "; " << "++" << i << ")" << std::endl;
 
   scope_up(out);
 
@@ -2936,8 +2930,7 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
       // << ", getter=" << decapitalize(get_cocoa_property_name(tfield))
       // << ", setter=set" << capitalize(get_cocoa_property_name(tfield)) +
       // ":"
-      << ")"
-      << " " << type_name(tfield->get_type()) << " "
+      << ")" << " " << type_name(tfield->get_type()) << " "
       << get_cocoa_property_name(tfield) << ";";
   return render.str();
 }

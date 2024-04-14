@@ -1152,9 +1152,8 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
       const std::string& accept =
           hdrs.getSingleOrEmpty(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT);
       if (accept != websockAcceptKey_) {
-        LOG(ERROR) << "Mismatch in expected ws accept key: "
-                   << "upstream: " << accept
-                   << " expected: " << websockAcceptKey_;
+        LOG(ERROR) << "Mismatch in expected ws accept key: " << "upstream: "
+                   << accept << " expected: " << websockAcceptKey_;
         return -1;
       }
     } else {

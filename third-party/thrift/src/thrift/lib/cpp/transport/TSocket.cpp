@@ -49,8 +49,7 @@ static int msTimeFromTimeval(struct timeval s) {
 }
 
 ostream& operator<<(ostream& os, const TSocket::Options& o) {
-  os << "SOCKET OPTIONS"
-     << "\n";
+  os << "SOCKET OPTIONS" << "\n";
   os << "connTimeout = " << o.connTimeout << "\n";
   os << "sendTimeout = " << o.sendTimeout << "\n";
   os << "recvTimeout = " << o.recvTimeout << "\n";

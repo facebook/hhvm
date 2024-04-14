@@ -200,7 +200,7 @@ struct LocatorBase {
 
 template <typename T>
 static constexpr bool IsTrivialColocatedArrayType =
-    std::is_trivially_constructible_v<T>&& std::is_trivially_destructible_v<T>;
+    std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>;
 
 template <bool kIsConst>
 class UnsafeCursorBase {

@@ -250,7 +250,7 @@ inline constexpr bool is_a_v<set<K1>, set<K2>> = is_a_v<K1, K2>;
 
 template <typename K1, typename V1, typename K2, typename V2>
 inline constexpr bool is_a_v<map<K1, V1>, map<K2, V2>> =
-    is_a_v<K1, K2>&& is_a_v<V1, V2>;
+    is_a_v<K1, K2> && is_a_v<V1, V2>;
 
 template <typename A, typename Tag, typename CTag>
 inline constexpr bool is_a_v<adapted<A, Tag>, CTag> = is_a_v<Tag, CTag>;

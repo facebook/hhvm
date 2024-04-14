@@ -396,9 +396,13 @@ namespace test {
 #define _THRIFT_ASSIGN_Delete _THRIFT_CON_Delete
 #define _THRIFT_ASSIGN_Trivial _THRIFT_CON_Trivial
 #define _THRIFT_ASSIGN_NoThrow \
-  noexcept(true) { return *this; }
+  noexcept(true) {             \
+    return *this;              \
+  }
 #define _THRIFT_ASSIGN_Throw \
-  noexcept(false) { return *this; }
+  noexcept(false) {          \
+    return *this;            \
+  }
 
 #define _THRIFT_CON(type) _THRIFT_CON_##type
 #define _THRIFT_ASSIGN(type) _THRIFT_ASSIGN_##type

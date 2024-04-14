@@ -213,7 +213,8 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
   uint64_t hash = 0;
   uint64_t hint = 0;
   RouteHandleTraverser<typename RouterInfo::RouteHandleIf> t(
-      /* start */ nullptr,
+      /* start */
+      nullptr,
       /* end */ nullptr,
       [&hash](const AccessPoint& ap, const PoolContext& poolContext) mutable {
         if (!poolContext.isShadow) {

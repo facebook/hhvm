@@ -159,9 +159,8 @@ class HQUpstreamSession : public HQSession {
     void onPushMessageBegin(HTTPCodec::StreamID pushId,
                             HTTPCodec::StreamID parentTxnId,
                             HTTPMessage* /* msg */) override {
-      LOG(ERROR) << "Push promise on push stream"
-                 << " txn=" << txn_ << " pushID=" << pushId
-                 << " parentTxnId=" << parentTxnId;
+      LOG(ERROR) << "Push promise on push stream" << " txn=" << txn_
+                 << " pushID=" << pushId << " parentTxnId=" << parentTxnId;
       session_.dropConnectionAsync(
           quic::QuicError(HTTP3::ErrorCode::HTTP_FRAME_UNEXPECTED,
                           "Push promise on push stream"),
@@ -193,7 +192,7 @@ class HQUpstreamSession : public HQSession {
    private:
     hq::PushId pushId_; // The push id in context of which this stream is
                         // received
-  };                    // HQIngressPushStream
+  }; // HQIngressPushStream
 
 #ifdef _MSC_VER
 #pragma warning(pop)

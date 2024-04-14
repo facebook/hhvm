@@ -430,8 +430,8 @@ Connection* MultiQueryStreamHandler::connection() const {
 }
 
 EphemeralRowFields* StreamedQueryResult::getRowFields() const {
-  CHECK(stream_handler_ != nullptr) << "Trying to get the row fileds after "
-                                    << "query end";
+  CHECK(stream_handler_ != nullptr)
+      << "Trying to get the row fileds after " << "query end";
   return stream_handler_->operation_->rowStream()->getEphemeralRowFields();
 }
 } // namespace mysql_client

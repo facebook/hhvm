@@ -50,7 +50,7 @@ class Variant {
   }
 
   Variant& operator=(Variant&& other) noexcept {
-    using MoverFun = void (*)(Variant&, Variant &&);
+    using MoverFun = void (*)(Variant&, Variant&&);
     static constexpr MoverFun dispatcher[sizeof...(Ts)] = {
         &Variant::mover<Ts>...};
 

@@ -1222,8 +1222,7 @@ void t_hack_generator::generate_json_struct(
     const std::string& prefix_thrift,
     const std::string& prefix_json) {
   std::string enc = namer("$_tmp");
-  indent(out) << enc << " = "
-              << "\\json_encode(" << prefix_json << ");\n";
+  indent(out) << enc << " = " << "\\json_encode(" << prefix_json << ");\n";
   std::string tmp = namer("$_tmp");
   t_field felem(tstruct, tmp);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
@@ -3398,8 +3397,7 @@ void t_hack_generator::generate_php_struct_stringifyMapKeys_method(
   }
 
   indent(out) << "public static function __stringifyMapKeys<T>("
-              << "dict<arraykey, T> $m)[]: "
-              << "dict<string, T> {\n";
+              << "dict<arraykey, T> $m)[]: " << "dict<string, T> {\n";
   indent_up();
   indent(out) << "return Dict\\map_keys($m, $key ==> (string)$key);\n";
   indent_down();
@@ -5502,8 +5500,8 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
 
 void t_hack_generator::_generate_sendImplHelper(
     std::ofstream& out, const t_function* tfunction) {
-  out << "$this->sendImplHelper($args, "
-      << "\"" << find_hack_name(tfunction) << "\", "
+  out << "$this->sendImplHelper($args, " << "\"" << find_hack_name(tfunction)
+      << "\", "
       << (tfunction->qualifier() == t_function_qualifier::oneway ? "true"
                                                                  : "false")
       << ");\n";
@@ -5920,8 +5918,7 @@ void t_hack_generator::generate_service_interactions(
     f_service_ << indent() << "private \\InteractionId $interactionId;\n\n";
 
     f_service_
-        << indent() << "public function __construct("
-        << "\\TProtocol $input, "
+        << indent() << "public function __construct(" << "\\TProtocol $input, "
         << "?\\TProtocol $output = null, "
         << "?\\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {\n";
     indent_up();
@@ -6174,8 +6171,7 @@ void t_hack_generator::generate_php_docstring(
   if (tfunction->has_doc()) {
     indent(out) << " * \n";
   }
-  indent(out) << " * "
-              << "Original thrift definition:-\n";
+  indent(out) << " * " << "Original thrift definition:-\n";
   // Return type.
   indent(out) << " * ";
   if (tfunction->qualifier() == t_function_qualifier::oneway) {
@@ -6253,8 +6249,7 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " * \n";
   }
-  indent(out) << " * "
-              << "Original thrift field:-\n";
+  indent(out) << " * " << "Original thrift field:-\n";
   indent(out) << " * " << tfield->get_key() << ": "
               << tfield->get_type()->get_full_name() << " " << tfield->name()
               << "\n";
@@ -6284,9 +6279,8 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " *\n";
   }
-  indent(out) << " * "
-              << "Original thrift " << (is_exception ? "exception" : "struct")
-              << ":-\n";
+  indent(out) << " * " << "Original thrift "
+              << (is_exception ? "exception" : "struct") << ":-\n";
   indent(out) << " * " << tstruct->name() << "\n";
   indent(out) << " */\n";
 }
@@ -6314,8 +6308,7 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " * \n";
   }
-  indent(out) << " * "
-              << "Original thrift enum:-\n";
+  indent(out) << " * " << "Original thrift enum:-\n";
   indent(out) << " * " << tenum->name() << "\n";
   indent(out) << " */\n";
 }
@@ -6343,8 +6336,7 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " * \n";
   }
-  indent(out) << " * "
-              << "Original thrift service:-\n";
+  indent(out) << " * " << "Original thrift service:-\n";
   indent(out) << " * " << tservice->name() << "\n";
   indent(out) << " */\n";
 }
@@ -6372,8 +6364,7 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " * \n";
   }
-  indent(out) << " * "
-              << "Original thrift constant:-\n";
+  indent(out) << " * " << "Original thrift constant:-\n";
   indent(out) << " * " << tconst->type()->get_full_name() << " "
               << tconst->name() << "\n";
   // no value because it could have characters that mess up the comment
@@ -6905,8 +6896,7 @@ void t_hack_generator::_generate_sendImpl(
       << indent()
       << "  case \\THandlerShortCircuitException::R_UNEXPECTED_EX:\n"
       << indent() << "    $this->eventHandler_->sendError('"
-      << rpc_function_name << "', $args, $currentseqid, $ex->result);"
-      << "\n"
+      << rpc_function_name << "', $args, $currentseqid, $ex->result);" << "\n"
       << indent() << "    throw $ex->result;\n"
       << indent() << "  case \\THandlerShortCircuitException::R_SUCCESS:\n"
       << indent() << "  default:\n"
@@ -7090,8 +7080,8 @@ void t_hack_generator::_generate_service_client_children(
                    return_typehint)
             << " {\n"
             << indent() << "  " << (is_void ? "" : "return ")
-            << "$this->recvImplHelper(" << resultname << "::class, "
-            << "\"" << funname << "\", " << (is_void ? "true" : "false")
+            << "$this->recvImplHelper(" << resultname << "::class, " << "\""
+            << funname << "\", " << (is_void ? "true" : "false")
             << ", $expectedsequenceid);\n"
             << indent() << "}\n";
       }
@@ -7170,8 +7160,8 @@ void t_hack_generator::_generate_service_client_child_fn(
     std::string resultname = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::RESULT);
     bool is_void = tfunction->return_type()->is_void();
-    out << "await $this->genAwaitResponse(" << resultname << "::class, "
-        << "\"" << tfunction->name() << "\", " << (is_void ? "true" : "false")
+    out << "await $this->genAwaitResponse(" << resultname << "::class, " << "\""
+        << tfunction->name() << "\", " << (is_void ? "true" : "false")
         << ", $currentseqid, $rpc_options";
     if (legacy_arrays) {
       out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
@@ -7232,8 +7222,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
       tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
   out << indent() << "return await $this->genAwaitStreamResponse("
       << first_response_type << "::class, " << stream_response_type
-      << "::class, "
-      << "\"" << tfunction->name() << "\", "
+      << "::class, " << "\"" << tfunction->name() << "\", "
       << (!tfunction->has_return_type() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
@@ -7293,9 +7282,8 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
       tservice, tfunction, PhpFunctionNameSuffix::SINK_FINAL_RESPONSE);
   out << indent() << "return await $this->genAwaitSinkResponse("
       << first_response_type << "::class, " << sink_payload_type << "::class, "
-      << final_response_type << "::class, "
-      << "\"" << tfunction->name() << "\", "
-      << (!tfunction->has_return_type() ? "true" : "false")
+      << final_response_type << "::class, " << "\"" << tfunction->name()
+      << "\", " << (!tfunction->has_return_type() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";

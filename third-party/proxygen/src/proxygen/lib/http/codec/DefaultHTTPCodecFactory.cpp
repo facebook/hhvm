@@ -38,9 +38,8 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
   } else {
     if (!chosenProto.empty() &&
         !HTTP1xCodec::supportsNextProtocol(chosenProto)) {
-      LOG(ERROR) << "Chosen upstream protocol "
-                 << "\"" << chosenProto << "\" is unimplemented. "
-                 << "Attempting to use HTTP/1.1";
+      LOG(ERROR) << "Chosen upstream protocol " << "\"" << chosenProto
+                 << "\" is unimplemented. " << "Attempting to use HTTP/1.1";
     }
 
     return std::make_unique<HTTP1xCodec>(

@@ -1163,7 +1163,9 @@ static PyObject* decode(PyObject* /*self*/, PyObject* args, PyObject* kws) {
     return nullptr;
   }
 
-  SCOPE_EXIT { free_decodebuf(&input); };
+  SCOPE_EXIT {
+    free_decodebuf(&input);
+  };
 
   if (protoid == 0) {
     if (!decodeT<BinaryProtocolReaderWithRefill>(

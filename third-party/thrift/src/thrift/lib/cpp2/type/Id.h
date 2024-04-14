@@ -66,7 +66,7 @@ template <typename Id>
 inline constexpr bool is_ident_v<
     Id,
     decltype(__fbthrift_check_whether_type_is_ident_via_adl(
-        FOLLY_DECLVAL(Id &&)))> = true;
+        FOLLY_DECLVAL(Id&&)))> = true;
 
 namespace detail {
 // We can't use std::is_base_of since it's undefined behavior to use it on
@@ -78,7 +78,7 @@ template <class Id, class = void>
 inline constexpr bool is_type_tag_v = false;
 template <class Id>
 inline constexpr bool
-    is_type_tag_v<Id, decltype(is_type_tag_impl(FOLLY_DECLVAL(Id &&)))> = true;
+    is_type_tag_v<Id, decltype(is_type_tag_impl(FOLLY_DECLVAL(Id&&)))> = true;
 
 // TODO(afuller): Static assert bounds check.
 template <size_t pos>

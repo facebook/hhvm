@@ -182,11 +182,9 @@ static void loadTest(size_t numTasks, int64_t timeout, size_t numWorkers) {
   }
   averageTime /= numTasks;
 
-  LOG(INFO) << "first start: " << firstTime << "ms "
-            << "last end: " << lastTime << "ms "
-            << "min: " << minTime << "ms "
-            << "max: " << maxTime << "ms "
-            << "average: " << averageTime << "ms";
+  LOG(INFO) << "first start: " << firstTime << "ms " << "last end: " << lastTime
+            << "ms " << "min: " << minTime << "ms " << "max: " << maxTime
+            << "ms " << "average: " << averageTime << "ms";
 
   double idealTime = ((numTasks + (numWorkers - 1)) / numWorkers) * timeout;
   double actualTime = endTime - startTime;

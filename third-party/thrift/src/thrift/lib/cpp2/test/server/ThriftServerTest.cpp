@@ -2356,7 +2356,9 @@ TEST_P(HeaderOrRocket, FailureInjection) {
   auto client = makeClient(sst, &base);
 
   auto& server = sst.getThriftServer();
-  SCOPE_EXIT { server.setFailureInjection(ThriftServer::FailureInjection()); };
+  SCOPE_EXIT {
+    server.setFailureInjection(ThriftServer::FailureInjection());
+  };
 
   RpcOptions rpcOptions;
   rpcOptions.setTimeout(std::chrono::milliseconds(100));

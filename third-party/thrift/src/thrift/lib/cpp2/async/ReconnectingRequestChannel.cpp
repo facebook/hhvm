@@ -58,13 +58,17 @@ class ChannelKeepAliveStream : public StreamClientCallback {
       FirstResponsePayload&& firstResponsePayload,
       folly::EventBase* evb,
       StreamServerCallback* serverCallback) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     serverCallback->resetClientCallback(clientCallback_);
     return clientCallback_.onFirstResponse(
         std::move(firstResponsePayload), evb, serverCallback);
   }
   void onFirstResponseError(folly::exception_wrapper ew) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     return clientCallback_.onFirstResponseError(std::move(ew));
   }
 
@@ -91,13 +95,17 @@ class ChannelKeepAliveSink : public SinkClientCallback {
       FirstResponsePayload&& firstResponsePayload,
       folly::EventBase* evb,
       SinkServerCallback* serverCallback) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     serverCallback->resetClientCallback(clientCallback_);
     return clientCallback_.onFirstResponse(
         std::move(firstResponsePayload), evb, serverCallback);
   }
   void onFirstResponseError(folly::exception_wrapper ew) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     return clientCallback_.onFirstResponseError(std::move(ew));
   }
 

@@ -61,9 +61,38 @@ TEST(CarbonMessageConversionUtils, toFollyDynamic_Complex) {
   r.testIOBufList_ref() =
       std::vector<folly::IOBuf>({folly::IOBuf(), folly::IOBuf()});
 
-  folly::dynamic expected =
-      folly::dynamic::object(
-          "dummy2", false)("dummy22", false)("dummy23", false)("dummy31", "")("key", "/test/key/")("testBool", true)("testChar", 97)("testInt8", -123)("testInt16", -7890)("testInt32", -123456789)("testInt64", -9876543210123ll)("testUInt8", 123)("testUInt16", 7890)("testUInt32", 123456789)("testUInt64", 9876543210123ll)("testFloat", 1.5)("testDouble", 5.6)("testShortString", "abcdef")("testLongString", "asdfghjkl;'eqtirgwuifhiivlzkhbvjkhc3978y42h97*&687gba")("testIobuf", "TestTheBuf")("testList", folly::dynamic::array("abc", "bce", "xyz"))("testNestedVec", folly::dynamic::array(folly::dynamic::array(1, 1, 1), folly::dynamic::array(2, 2, 2)))("testUMap", folly::dynamic::object("key", "value")("adele", "beyonce"))("testMap", folly::dynamic::object("3.14", 2.7)("0.577", 0.2))("testF14FastMap", folly::dynamic::object("Fast", "Map")("hello", "F14"))("testF14NodeMap", folly::dynamic::object("Node", "Map")("hello", "F14"))("testF14ValueMap", folly::dynamic::object("Value", "Map")("hello", "F14"))("testF14VectorMap", folly::dynamic::object("Vector", "Map")("hello", "F14"))("testComplexMap", folly::dynamic::object("hello", folly::dynamic::array(1, 1, 1))("world", folly::dynamic::array(2, 2, 2)))("testUSet", folly::dynamic::array("hello", "world"))("testF14FastSet", folly::dynamic::array("F14FastSet", "hello"))("testF14NodeSet", folly::dynamic::array("F14NodeSet", "hello"))("testF14ValueSet", folly::dynamic::array("F14ValueSet", "hello"))("testF14VectorSet", folly::dynamic::array("F14VectorSet", "hello"))("testSet", folly::dynamic::array(123, 456))("testIOBufList", folly::dynamic::array("", ""));
+  folly::dynamic expected = folly::dynamic::object("dummy2", false)(
+      "dummy22", false)("dummy23", false)("dummy31", "")("key", "/test/key/")(
+      "testBool", true)("testChar", 97)("testInt8", -123)("testInt16", -7890)(
+      "testInt32", -123456789)("testInt64", -9876543210123ll)("testUInt8", 123)(
+      "testUInt16", 7890)("testUInt32", 123456789)(
+      "testUInt64", 9876543210123ll)("testFloat", 1.5)("testDouble", 5.6)(
+      "testShortString", "abcdef")(
+      "testLongString",
+      "asdfghjkl;'eqtirgwuifhiivlzkhbvjkhc3978y42h97*&687gba")(
+      "testIobuf", "TestTheBuf")(
+      "testList", folly::dynamic::array("abc", "bce", "xyz"))(
+      "testNestedVec",
+      folly::dynamic::array(
+          folly::dynamic::array(1, 1, 1), folly::dynamic::array(2, 2, 2)))(
+      "testUMap", folly::dynamic::object("key", "value")("adele", "beyonce"))(
+      "testMap", folly::dynamic::object("3.14", 2.7)("0.577", 0.2))(
+      "testF14FastMap", folly::dynamic::object("Fast", "Map")("hello", "F14"))(
+      "testF14NodeMap", folly::dynamic::object("Node", "Map")("hello", "F14"))(
+      "testF14ValueMap",
+      folly::dynamic::object("Value", "Map")("hello", "F14"))(
+      "testF14VectorMap",
+      folly::dynamic::object("Vector", "Map")("hello", "F14"))(
+      "testComplexMap",
+      folly::dynamic::object("hello", folly::dynamic::array(1, 1, 1))(
+          "world", folly::dynamic::array(2, 2, 2)))(
+      "testUSet", folly::dynamic::array("hello", "world"))(
+      "testF14FastSet", folly::dynamic::array("F14FastSet", "hello"))(
+      "testF14NodeSet", folly::dynamic::array("F14NodeSet", "hello"))(
+      "testF14ValueSet", folly::dynamic::array("F14ValueSet", "hello"))(
+      "testF14VectorSet", folly::dynamic::array("F14VectorSet", "hello"))(
+      "testSet", folly::dynamic::array(123, 456))(
+      "testIOBufList", folly::dynamic::array("", ""));
 
   auto dynamic = carbon::convertToFollyDynamic(r);
 

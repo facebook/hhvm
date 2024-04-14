@@ -260,9 +260,9 @@ void HQSession::onStopSending(quic::StreamId id,
 void HQSession::onKnob(uint64_t knobSpace,
                        uint64_t knobId,
                        quic::Buf knobBlob) {
-  VLOG(3) << __func__ << " sess=" << *this << " knob frame received: "
-          << " KnobSpace: " << std::hex << knobSpace << " KnobId: " << knobId
-          << " KnobBlob: "
+  VLOG(3) << __func__ << " sess=" << *this
+          << " knob frame received: " << " KnobSpace: " << std::hex << knobSpace
+          << " KnobId: " << knobId << " KnobBlob: "
           << std::string(reinterpret_cast<const char*>(knobBlob->data()),
                          knobBlob->length());
 }
@@ -1157,8 +1157,7 @@ void HQSession::readAvailable(quic::StreamId id) noexcept {
           << ": readAvailable on streamID=" << id;
   if (readsPerLoop_ >= kMaxReadsPerLoop) {
     VLOG(2) << __func__ << ": skipping read for streamID=" << id
-            << " maximum reads per loop reached"
-            << " sess=" << *this;
+            << " maximum reads per loop reached" << " sess=" << *this;
     return;
   }
   readsPerLoop_++;

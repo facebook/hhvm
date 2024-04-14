@@ -127,7 +127,9 @@ class CppServerEventHandler : public TServerEventHandler {
   void callPythonHandler(TConnectionContext* ctx, const char* method) {
     if (!_Py_IsFinalizing()) {
       PyGILState_STATE state = PyGILState_Ensure();
-      SCOPE_EXIT { PyGILState_Release(state); };
+      SCOPE_EXIT {
+        PyGILState_Release(state);
+      };
 
       // This cast always succeeds because it is called from Cpp2Connection.
       Cpp2ConnContext* cpp2Ctx = dynamic_cast<Cpp2ConnContext*>(ctx);
@@ -205,7 +207,9 @@ class CppServerObserver : public TServerObserver {
   template <class... Types>
   void call(const char* method_name, Types... args) {
     PyGILState_STATE state = PyGILState_Ensure();
-    SCOPE_EXIT { PyGILState_Release(state); };
+    SCOPE_EXIT {
+      PyGILState_Release(state);
+    };
 
     // check if the object has an attribute, because we want to be accepting
     // if we added a new listener callback and didn't yet update call the
@@ -314,7 +318,9 @@ class PythonAsyncProcessor : public AsyncProcessor {
     }
 
     PyGILState_STATE state = PyGILState_Ensure();
-    SCOPE_EXIT { PyGILState_Release(state); };
+    SCOPE_EXIT {
+      PyGILState_Release(state);
+    };
 
     try {
       auto fname = ctx->getMethodName();
@@ -361,7 +367,9 @@ class PythonAsyncProcessor : public AsyncProcessor {
 
     {
       PyGILState_STATE state = PyGILState_Ensure();
-      SCOPE_EXIT { PyGILState_Release(state); };
+      SCOPE_EXIT {
+        PyGILState_Release(state);
+      };
 
 #if PY_MAJOR_VERSION == 2
       auto input =
@@ -477,7 +485,9 @@ class PythonAsyncProcessor : public AsyncProcessor {
 
   void getPythonOnewayMethods() {
     PyGILState_STATE state = PyGILState_Ensure();
-    SCOPE_EXIT { PyGILState_Release(state); };
+    SCOPE_EXIT {
+      PyGILState_Release(state);
+    };
     object ret = adapter_->attr("oneway_methods")();
     if (ret.is_none()) {
       LOG(ERROR) << "Unexpected error in processor method";
@@ -548,7 +558,9 @@ class CppServerWrapper : public ThriftServer {
 
   void loop() {
     PyThreadState* save_state = PyEval_SaveThread();
-    SCOPE_EXIT { PyEval_RestoreThread(save_state); };
+    SCOPE_EXIT {
+      PyEval_RestoreThread(save_state);
+    };
 
     // Thrift main loop.  This will run indefinitely, until stop() is
     // called.
@@ -563,7 +575,9 @@ class CppServerWrapper : public ThriftServer {
 
   void setup() {
     PyThreadState* save_state = PyEval_SaveThread();
-    SCOPE_EXIT { PyEval_RestoreThread(save_state); };
+    SCOPE_EXIT {
+      PyEval_RestoreThread(save_state);
+    };
 
     // This check is only useful for C++-based Thrift servers.
     ThriftServer::setAllowCheckUnimplementedExtraInterfaces(false);
@@ -663,7 +677,9 @@ class CppServerWrapper : public ThriftServer {
     // only once thrift is all cleaned up.
 
     PyThreadState* save_state = PyEval_SaveThread();
-    SCOPE_EXIT { PyEval_RestoreThread(save_state); };
+    SCOPE_EXIT {
+      PyEval_RestoreThread(save_state);
+    };
     ThriftServer::cleanUp();
   }
 

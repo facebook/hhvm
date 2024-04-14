@@ -130,7 +130,9 @@ int Extractor<bool>::typeCheck(PyObject* obj) {
   ExtractorResult<py_type> Extractor<py_type>::operator()(PyObject* obj) { \
     return extract_fn<cpp_type>(obj);                                      \
   }                                                                        \
-  int Extractor<py_type>::typeCheck(PyObject* obj) { return check_capi(obj); }
+  int Extractor<py_type>::typeCheck(PyObject* obj) {                       \
+    return check_capi(obj);                                                \
+  }
 
 SPECIALIZE_STR(Bytes, std::string, extractFromBytes, PyBytes_CheckExact)
 SPECIALIZE_STR(

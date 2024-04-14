@@ -88,8 +88,7 @@ class URL {
       uint16_t port = 0,
       const std::string& path = "",
       const std::string& query = "",
-      const std::string& fragment = "")
-  noexcept
+      const std::string& fragment = "") noexcept
       : host_(host),
         port_(port),
         path_(path),

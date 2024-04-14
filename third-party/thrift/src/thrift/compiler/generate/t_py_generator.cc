@@ -732,8 +732,8 @@ void t_py_generator::generate_json_reader(
 
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     string field = (*f_iter)->get_name();
-    indent(out) << "if '" << field << "' in json_obj "
-                << "and json_obj['" << field << "'] is not None:" << endl;
+    indent(out) << "if '" << field << "' in json_obj " << "and json_obj['"
+                << field << "'] is not None:" << endl;
     indent_up();
     generate_json_field(
         out, *f_iter, "self.", "", "json_obj['" + (*f_iter)->get_name() + "']");
@@ -1466,12 +1466,10 @@ void t_py_generator::generate_py_union(
   indent_down();
   out << endl;
   if (compare_t_fields_only_) {
-    out << indent() << "return "
-        << "self.field == other.field and "
+    out << indent() << "return " << "self.field == other.field and "
         << "self.value == other.value" << endl;
   } else {
-    out << indent() << "return "
-        << "self.__dict__ == other.__dict__" << endl;
+    out << indent() << "return " << "self.__dict__ == other.__dict__" << endl;
   }
 
   indent_down();
@@ -1503,12 +1501,12 @@ void t_py_generator::generate_py_thrift_spec(
   for (m_iter = sorted_members.begin(); m_iter != sorted_members.end();
        ++m_iter) {
     indent(out) << "(" << (*m_iter)->get_key() << ", "
-                << type_to_enum((*m_iter)->get_type()) << ", "
-                << "'" << rename_reserved_keywords((*m_iter)->get_name()) << "'"
+                << type_to_enum((*m_iter)->get_type()) << ", " << "'"
+                << rename_reserved_keywords((*m_iter)->get_name()) << "'"
                 << ", " << type_to_spec_args((*m_iter)->get_type()) << ", "
                 << render_field_default_value(*m_iter) << ", "
-                << static_cast<int>((*m_iter)->get_req()) << ", ),"
-                << " # " << (*m_iter)->get_key() << endl;
+                << static_cast<int>((*m_iter)->get_req()) << ", )," << " # "
+                << (*m_iter)->get_key() << endl;
   }
 
   indent_down();
@@ -1810,8 +1808,8 @@ void t_py_generator::generate_py_struct_definition(
           << "== getattr(other, field.name, field.default)"
           << " for field in spec_t_fields)" << endl;
     } else {
-      out << indent() << "return "
-          << "self.__dict__ == other.__dict__ " << endl;
+      out << indent() << "return " << "self.__dict__ == other.__dict__ "
+          << endl;
     }
     indent_down();
     out << endl;
@@ -2044,15 +2042,13 @@ void t_py_generator::generate_py_struct_writer(
       // An optional field with a value set should not be serialized if
       // the value equals the default value
       out << " and self." << rename_reserved_keywords((*f_iter)->get_name())
-          << " != "
-          << "self.thrift_spec[" << get_thrift_spec_key(tstruct, *f_iter)
-          << "][4]";
+          << " != " << "self.thrift_spec["
+          << get_thrift_spec_key(tstruct, *f_iter) << "][4]";
     }
     out << ":" << endl;
     indent_up();
-    indent(out) << "oprot.writeFieldBegin("
-                << "'" << (*f_iter)->get_name() << "', "
-                << type_to_enum((*f_iter)->get_type()) << ", "
+    indent(out) << "oprot.writeFieldBegin(" << "'" << (*f_iter)->get_name()
+                << "', " << type_to_enum((*f_iter)->get_type()) << ", "
                 << (*f_iter)->get_key() << ")" << endl;
 
     // Write field contents
@@ -2197,8 +2193,8 @@ void t_py_generator::generate_py_converter_helpers(
       << python_namespace << ".thrift_types\")" << endl
       << indent()
       << "return thrift.python.converter.to_python_struct(python_types."
-      << rename_reserved_keywords(tstruct->get_name()) << ", self"
-      << ")" << endl
+      << rename_reserved_keywords(tstruct->get_name()) << ", self" << ")"
+      << endl
       << endl;
   indent_down();
 
@@ -2210,8 +2206,8 @@ void t_py_generator::generate_py_converter_helpers(
       << indent() << "py3_types = importlib.import_module(\"" << py3_namespace
       << ".types\")" << endl
       << indent() << "return thrift.py3.converter.to_py3_struct(py3_types."
-      << rename_reserved_keywords(tstruct->get_name()) << ", self"
-      << ")" << endl
+      << rename_reserved_keywords(tstruct->get_name()) << ", self" << ")"
+      << endl
       << endl;
   indent_down();
 
@@ -2903,8 +2899,8 @@ void t_py_generator::generate_service_server(
                << "Processor." << (gen_future_ ? "future_process_" : "process_")
                << (*f_iter)->get_name() << endl
                << indent() << "self._priorityMap["
-               << render_string((*f_iter)->get_name()) << "] = "
-               << "TPriority." << function_prio << endl;
+               << render_string((*f_iter)->get_name()) << "] = " << "TPriority."
+               << function_prio << endl;
   }
   indent_down();
   f_service_ << endl;

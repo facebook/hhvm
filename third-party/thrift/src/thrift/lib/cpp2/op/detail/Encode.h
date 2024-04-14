@@ -43,8 +43,8 @@ namespace detail {
 
 template <typename T, typename Tag>
 inline constexpr bool kIsStrongType =
-    std::is_enum<folly::remove_cvref_t<T>>::value&&
-        type::is_a_v<Tag, type::integral_c>;
+    std::is_enum<folly::remove_cvref_t<T>>::value &&
+    type::is_a_v<Tag, type::integral_c>;
 
 template <typename T, typename Tag>
 inline constexpr bool kIsIntegral = type::is_a_v<Tag, type::integral_c>;

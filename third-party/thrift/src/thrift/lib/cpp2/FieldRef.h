@@ -2010,8 +2010,8 @@ class union_field_ref {
               std::is_constructible<value_type, U&&>::value,
           int> = 0>
   FOLLY_ERASE union_field_ref& operator=(U&& other) noexcept(
-      std::is_nothrow_constructible<value_type, U>::value&&
-          std::is_nothrow_assignable<value_type, U>::value) {
+      std::is_nothrow_constructible<value_type, U>::value &&
+      std::is_nothrow_assignable<value_type, U>::value) {
     if (has_value() &&
         !detail::is_shared_or_unique_ptr_v<folly::remove_cvref_t<T>>) {
       get_value() = static_cast<U&&>(other);

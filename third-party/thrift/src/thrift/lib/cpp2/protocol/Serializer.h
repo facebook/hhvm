@@ -316,7 +316,7 @@ std::unique_ptr<folly::IOBuf> serializeError(
   return nullptr;
 }
 
-// For places where we can't currently invoke the templated version directly,
+//  For places where we can't currently invoke the templated version directly,
 inline std::unique_ptr<folly::IOBuf> serializeErrorWithEnvelope(
     int protId,
     const TApplicationException& obj,

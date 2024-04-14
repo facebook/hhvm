@@ -62,8 +62,8 @@ class HasHTTPHeaderMatcherImpl
     if (!value_) {
       *os << "does not have the '" << name_ << "' header";
     } else {
-      *os << "does not have the '" << name_ << "' header "
-          << "equal to '" << *value_ << "'";
+      *os << "does not have the '" << name_ << "' header " << "equal to '"
+          << *value_ << "'";
     }
   }
 

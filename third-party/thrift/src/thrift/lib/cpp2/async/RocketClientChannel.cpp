@@ -388,7 +388,9 @@ class FirstRequestProcessorStream : public StreamClientCallback,
       FirstResponsePayload&& firstResponse,
       folly::EventBase* evb,
       StreamServerCallback* serverCallback) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     DCHECK_EQ(evb, evb_);
     LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
     if (auto error = processFirstResponse(
@@ -405,7 +407,9 @@ class FirstRequestProcessorStream : public StreamClientCallback,
         std::move(firstResponse), evb, serverCallback);
   }
   void onFirstResponseError(folly::exception_wrapper ew) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     ew.handle(
         [&](rocket::RocketException& ex) {
           LegacyResponseSerializationHandler handler(
@@ -461,7 +465,9 @@ class FirstRequestProcessorSink : public SinkClientCallback,
       FirstResponsePayload&& firstResponse,
       folly::EventBase* evb,
       SinkServerCallback* serverCallback) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
     if (auto error = processFirstResponse(
             protocolId_,
@@ -480,7 +486,9 @@ class FirstRequestProcessorSink : public SinkClientCallback,
         std::move(firstResponse), evb, serverCallback);
   }
   void onFirstResponseError(folly::exception_wrapper ew) override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     ew.handle(
         [&](rocket::RocketException& ex) {
           LegacyResponseSerializationHandler handler(

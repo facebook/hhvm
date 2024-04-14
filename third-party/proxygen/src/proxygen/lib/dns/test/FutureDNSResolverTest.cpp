@@ -188,8 +188,8 @@ TEST_F(FutureDNSResolverTest, TestResolveAddressSuccess) {
 
 TEST_F(FutureDNSResolverTest, TestResolveAddressFail) {
   auto addr = folly::SocketAddress(folly::IPAddress("6.7.8.9"), 0);
-  EXPECT_THROW({ resolver_->resolveAddress(addr).getVia(evb_); },
-               FakeResolverError);
+  EXPECT_THROW(
+      { resolver_->resolveAddress(addr).getVia(evb_); }, FakeResolverError);
 }
 
 TEST_F(FutureDNSResolverTest, TestResolveHostnameSuccess) {
@@ -207,8 +207,9 @@ TEST_F(FutureDNSResolverTest, TestResolveHostnameSuccess) {
 }
 
 TEST_F(FutureDNSResolverTest, TestResolveHostnameFail) {
-  EXPECT_THROW({ resolver_->resolveHostname("unknown-host.com").getVia(evb_); },
-               FakeResolverError);
+  EXPECT_THROW(
+      { resolver_->resolveHostname("unknown-host.com").getVia(evb_); },
+      FakeResolverError);
 }
 
 TEST_F(FutureDNSResolverTest, TestResolveMailExchangeSuccess) {

@@ -15,12 +15,12 @@ namespace proxygen {
 
 class DummyHTTPSessionStats : public HTTPSessionStats {
  public:
-  void recordTransactionOpened() noexcept override{};
-  void recordTransactionClosed() noexcept override{};
+  void recordTransactionOpened() noexcept override {};
+  void recordTransactionClosed() noexcept override {};
   void recordTransactionsServed(uint64_t) noexcept override{};
-  void recordSessionReused() noexcept override{};
+  void recordSessionReused() noexcept override {};
   // virtual void recordSessionIdleTime(std::chrono::seconds) noexcept {};
-  void recordTransactionStalled() noexcept override{};
+  void recordTransactionStalled() noexcept override {};
   void recordSessionStalled() noexcept override {
   }
   void recordEgressContentLengthMismatches() noexcept override {

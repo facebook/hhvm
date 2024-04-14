@@ -141,7 +141,9 @@ class RetryingRequestChannel::StreamCallback
       FirstResponsePayload&& pload,
       folly::EventBase* evb,
       StreamServerCallback* serverCallback) noexcept override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     serverCallback->resetClientCallback(clientCallback_);
     return clientCallback_.onFirstResponse(
         std::move(pload), evb, serverCallback);
@@ -210,7 +212,9 @@ class RetryingRequestChannel::SinkCallback
       FirstResponsePayload&& pload,
       folly::EventBase* evb,
       SinkServerCallback* serverCallback) noexcept override {
-    SCOPE_EXIT { delete this; };
+    SCOPE_EXIT {
+      delete this;
+    };
     serverCallback->resetClientCallback(clientCallback_);
     return clientCallback_.onFirstResponse(
         std::move(pload), evb, serverCallback);

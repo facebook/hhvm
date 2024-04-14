@@ -528,10 +528,11 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   bool early = false;
   std::string proxyHost = "";
   uint16_t proxyPort = 0;
-  std::vector<CipherSuite> ciphers {
-    CipherSuite::TLS_AES_128_GCM_SHA256, CipherSuite::TLS_AES_256_GCM_SHA384,
+  std::vector<CipherSuite> ciphers{
+      CipherSuite::TLS_AES_128_GCM_SHA256,
+      CipherSuite::TLS_AES_256_GCM_SHA384,
 #if FOLLY_OPENSSL_HAS_CHACHA
-        CipherSuite::TLS_CHACHA20_POLY1305_SHA256,
+      CipherSuite::TLS_CHACHA20_POLY1305_SHA256,
 #endif
   };
   std::vector<SignatureScheme> sigSchemes{

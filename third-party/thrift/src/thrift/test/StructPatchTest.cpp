@@ -257,9 +257,7 @@ TEST(StructPatchTest, RemoveField) {
 }
 
 template <typename T, typename Id>
-concept isFieldRemovable = requires {
-  T{}.template remove<Id>();
-};
+concept isFieldRemovable = requires { T{}.template remove<Id>(); };
 
 TEST(StructPatchTest, OnlyOptionalFieldCanBeRemoved) {
   EXPECT_TRUE((isFieldRemovable<MyStructPatch, ident::optI32Val>));

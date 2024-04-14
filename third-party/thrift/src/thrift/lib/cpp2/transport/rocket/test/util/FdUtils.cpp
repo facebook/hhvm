@@ -69,7 +69,9 @@ void InterceptedAsyncFdSocket::writeChainWithFds(
   CHECK_EQ(checkFdStr, fdStr);
 
   regexFromWriteChainWithFds_ = *checkRe;
-  SCOPE_EXIT { regexFromWriteChainWithFds_.reset(); };
+  SCOPE_EXIT {
+    regexFromWriteChainWithFds_.reset();
+  };
   return folly::AsyncFdSocket::writeChainWithFds(
       callback, std::move(buf), std::move(fds), flags);
 }

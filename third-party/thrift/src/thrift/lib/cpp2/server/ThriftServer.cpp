@@ -352,7 +352,9 @@ std::unique_ptr<RequestPileInterface> ThriftServer::makeStandardRequestPile(
 ThriftServer::~ThriftServer() {
   tracker_.reset();
 
-  SCOPE_EXIT { stopController_.join(); };
+  SCOPE_EXIT {
+    stopController_.join();
+  };
 
   if (stopWorkersOnStopListening_) {
     // Everything is already taken care of.
@@ -1414,7 +1416,9 @@ void ThriftServer::ensureResourcePools() {
  */
 void ThriftServer::serve() {
   setup();
-  SCOPE_EXIT { this->cleanUp(); };
+  SCOPE_EXIT {
+    this->cleanUp();
+  };
 
   auto sslContextConfigCallbackHandle = sslContextObserver_
       ? getSSLCallbackHandle()
@@ -1505,7 +1509,9 @@ void ThriftServer::stopListening() {
   {
     auto sockets = getSockets();
     folly::Baton<> done;
-    SCOPE_EXIT { done.wait(); };
+    SCOPE_EXIT {
+      done.wait();
+    };
     std::shared_ptr<folly::Baton<>> doneGuard(
         &done, [](folly::Baton<>* done) { done->post(); });
 
@@ -1565,7 +1571,9 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
   {
     auto sockets = getSockets();
     folly::Baton<> done;
-    SCOPE_EXIT { done.wait(); };
+    SCOPE_EXIT {
+      done.wait();
+    };
     std::shared_ptr<folly::Baton<>> doneGuard(
         &done, [](folly::Baton<>* done) { done->post(); });
 

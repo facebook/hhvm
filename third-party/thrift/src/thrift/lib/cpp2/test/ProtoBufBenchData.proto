@@ -65,10 +65,18 @@ message LargeMapInt {
 }
 
 message NestedMap {
-  message NestedMap1 { map<int32, int32> m = 1; }
-  message NestedMap2 { map<int32, NestedMap1> m = 1; }
-  message NestedMap3 { map<int32, NestedMap2> m = 1; }
-  message NestedMap4 { map<int32, NestedMap3> m = 1; }
+  message NestedMap1 {
+    map<int32, int32> m = 1;
+  }
+  message NestedMap2 {
+    map<int32, NestedMap1> m = 1;
+  }
+  message NestedMap3 {
+    map<int32, NestedMap2> m = 1;
+  }
+  message NestedMap4 {
+    map<int32, NestedMap3> m = 1;
+  }
   map<int32, NestedMap4> m = 1;
 }
 

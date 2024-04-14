@@ -656,12 +656,11 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 #ifdef FIZZ_TOOL_ENABLE_OQS
   bool useHybridKexFactory = false;
 #endif
-  std::vector<std::vector<CipherSuite>> ciphers {
-    {CipherSuite::TLS_AES_128_GCM_SHA256, CipherSuite::TLS_AES_256_GCM_SHA384},
+  std::vector<std::vector<CipherSuite>> ciphers{
+      {CipherSuite::TLS_AES_128_GCM_SHA256,
+       CipherSuite::TLS_AES_256_GCM_SHA384},
 #if FOLLY_OPENSSL_HAS_CHACHA
-    {
-      CipherSuite::TLS_CHACHA20_POLY1305_SHA256
-    }
+      {CipherSuite::TLS_CHACHA20_POLY1305_SHA256}
 #endif
   };
   std::vector<SignatureScheme> sigSchemes{

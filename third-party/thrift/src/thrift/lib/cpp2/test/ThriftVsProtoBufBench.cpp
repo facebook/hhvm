@@ -261,7 +261,9 @@ int readBenchArenaMemory(size_t iters) {
   }
 
 #define BENCHMARK_MACRO_NORM(proto, rdwr, bench) \
-  BENCHMARK(proto##_##rdwr##_##bench, iter) { rdwr##Bench<p##bench>(iter); }
+  BENCHMARK(proto##_##rdwr##_##bench, iter) {    \
+    rdwr##Bench<p##bench>(iter);                 \
+  }
 
 #define BENCHMARK_MACRO(bench)                    \
   BENCHMARK_MACRO_NORM(ProtoBuf, read, bench)     \

@@ -6,15 +6,17 @@
 use bitflags::bitflags;
 use serde::Serialize;
 
-use crate::Body;
+use crate::BodyImpl;
 use crate::FunctionName;
 use crate::ParamEntry;
 
+pub type Function = FunctionImpl<crate::BcRepr>;
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
-pub struct Function {
+pub struct FunctionImpl<R> {
     pub name: FunctionName,
-    pub body: Body,
+    pub body: BodyImpl<R>,
     pub flags: FunctionFlags,
 }
 

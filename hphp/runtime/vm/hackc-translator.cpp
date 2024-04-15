@@ -526,7 +526,7 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
 }
 
 void translateClassBody(TranslationState& ts,
-                        const hhbc::Class& c,
+                        const hhbc::ClassImpl<hhbc::BcRepr>& c,
                         const UpperBoundMap& classUbs) {
   auto props = range(c.properties);
   for (auto const& p : props) {
@@ -1075,7 +1075,7 @@ void translateParameter(TranslationState& ts,
 }
 
 void translateFunctionBody(TranslationState& ts,
-                           const hhbc::Body& b,
+                           const hhbc::BodyImpl<hhbc::BcRepr>& b,
                            const UpperBoundMap& ubs,
                            const UpperBoundMap& classUbs,
                            const TParamNameVec& shadowedTParams,
@@ -1213,7 +1213,8 @@ if (coeffects.caller) {
   }
 }
 
-void translateFunction(TranslationState& ts, const hhbc::Function& f) {
+void translateFunction(TranslationState& ts,
+    const hhbc::FunctionImpl<hhbc::BcRepr>& f) {
   UpperBoundMap ubs;
   auto upper_bounds = range(f.body.upper_bounds);
   for (auto const& u : upper_bounds) {
@@ -1259,7 +1260,8 @@ void translateShadowedTParams(TParamNameVec& vec, const Vector<ClassName>& tpms)
   }
 }
 
-void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBoundMap& classUbs) {
+void translateMethod(TranslationState& ts,
+    const hhbc::MethodImpl<hhbc::BcRepr>& m, const UpperBoundMap& classUbs) {
   UpperBoundMap ubs;
   auto upper_bounds = range(m.body.upper_bounds);
   for (auto const& u : upper_bounds) {
@@ -1301,7 +1303,8 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   checkNative(ts);
 }
 
-void translateClass(TranslationState& ts, const hhbc::Class& c) {
+void translateClass(TranslationState& ts,
+    const hhbc::ClassImpl<hhbc::BcRepr>& c) {
   UpperBoundMap classUbs;
   auto upper_bounds = range(c.upper_bounds);
   for (auto const& u : upper_bounds) {

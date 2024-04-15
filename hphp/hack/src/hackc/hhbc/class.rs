@@ -12,7 +12,7 @@ use crate::Attribute;
 use crate::ClassName;
 use crate::Constant;
 use crate::CtxConstant;
-use crate::Method;
+use crate::MethodImpl;
 use crate::Property;
 use crate::Span;
 use crate::TypeConstant;
@@ -34,9 +34,11 @@ pub struct Requirement {
     pub kind: TraitReqKind,
 }
 
+pub type Class = ClassImpl<crate::BcRepr>;
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
-pub struct Class {
+pub struct ClassImpl<R> {
     pub attributes: Vector<Attribute>,
     pub base: Maybe<ClassName>,
     pub implements: Vector<ClassName>,
@@ -45,7 +47,7 @@ pub struct Class {
     pub span: Span,
     pub uses: Vector<ClassName>,
     pub enum_type: Maybe<TypeInfo>,
-    pub methods: Vector<Method>,
+    pub methods: Vector<MethodImpl<R>>,
     pub properties: Vector<Property>,
     pub constants: Vector<Constant>,
     pub type_constants: Vector<TypeConstant>,

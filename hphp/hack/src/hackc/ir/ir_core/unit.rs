@@ -3,26 +3,29 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::class::ClassImpl;
+use crate::func::FunctionImpl;
 use crate::Attribute;
-use crate::Class;
 use crate::Constant;
 use crate::Fatal;
-use crate::Function;
+use crate::IrRepr;
 use crate::Module;
 use crate::ModuleName;
 use crate::SymbolRefs;
 use crate::Typedef;
 
+pub type Unit = UnitImpl<IrRepr>;
+
 /// Unit represents a single parsed file.
 #[derive(Debug, Default)]
-pub struct Unit {
+pub struct UnitImpl<R> {
     /// The list of classes defined in this Unit. This also includes enums which
     /// are transformed into classes internally.
     ///
     /// ```
     /// class MyClass { ... }
     /// ```
-    pub classes: Vec<Class>,
+    pub classes: Vec<ClassImpl<R>>,
 
     /// The list of top-level constants.
     ///
@@ -45,7 +48,7 @@ pub struct Unit {
     /// ```
     /// function my_fn(int $a, int $b) { ... }
     /// ```
-    pub functions: Vec<Function>,
+    pub functions: Vec<FunctionImpl<R>>,
 
     /// If the Unit failed to parse or compile this defines the error that
     /// should be reported and the rest of the Unit will be empty.

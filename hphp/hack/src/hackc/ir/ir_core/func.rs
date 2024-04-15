@@ -124,6 +124,8 @@ impl TryCatchId {
     }
 }
 
+pub type Func = FuncImpl<IrRepr>;
+
 /// A Func represents a body of code. It's used for both Function and Method.
 ///
 /// Code is organized into basic-Blocks which contain a series of 0 or more
@@ -152,7 +154,7 @@ impl TryCatchId {
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
 #[derive(Clone, Debug, Default)]
-pub struct Func {
+pub struct FuncImpl<R> {
     pub attributes: Vec<Attribute>,
     pub attrs: Attr,
     pub coeffects: Coeffects,
@@ -166,7 +168,7 @@ pub struct Func {
     pub shadowed_tparams: Vec<ClassName>,
     pub span: Span,
     pub upper_bounds: Vec<UpperBound>,
-    pub repr: IrRepr,
+    pub repr: R,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -409,19 +411,22 @@ impl Func {
     }
 }
 
+pub type Function = FunctionImpl<IrRepr>;
+pub type Method = MethodImpl<IrRepr>;
+
 /// A top-level Hack function.
 #[derive(Debug)]
-pub struct Function {
+pub struct FunctionImpl<R> {
     pub flags: FunctionFlags,
     pub name: FunctionName,
-    pub func: Func,
+    pub func: FuncImpl<R>,
 }
 
 /// A Hack method contained within a Class.
 #[derive(Debug)]
-pub struct Method {
+pub struct MethodImpl<R> {
     pub flags: MethodFlags,
-    pub func: Func,
+    pub func: FuncImpl<R>,
     pub name: MethodName,
     pub visibility: Visibility,
 }

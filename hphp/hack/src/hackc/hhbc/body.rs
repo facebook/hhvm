@@ -19,9 +19,11 @@ use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
 
+pub type Body = BodyImpl<BcRepr>;
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
-pub struct Body {
+pub struct BodyImpl<R> {
     pub attributes: Vector<Attribute>,
     pub attrs: Attr,
     pub coeffects: Coeffects,
@@ -35,7 +37,7 @@ pub struct Body {
     pub return_type: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
     pub span: Span,
-    pub repr: BcRepr,
+    pub repr: R,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::func::MethodImpl;
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
 use crate::Constant;
 use crate::CtxConstant;
-use crate::Method;
+use crate::IrRepr;
 use crate::PropName;
 use crate::Property;
 use crate::Requirement;
@@ -17,9 +18,11 @@ use crate::TypeConstant;
 use crate::TypeInfo;
 use crate::UpperBound;
 
+pub type Class = ClassImpl<IrRepr>;
+
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
-pub struct Class {
+pub struct ClassImpl<R> {
     /// Class attributes.
     pub attributes: Vec<Attribute>,
 
@@ -49,7 +52,7 @@ pub struct Class {
     pub implements: Vec<ClassName>,
 
     /// The methods defined in this class.
-    pub methods: Vec<Method>,
+    pub methods: Vec<MethodImpl<R>>,
 
     pub name: ClassName,
     pub properties: Vec<Property>,

@@ -6,16 +6,18 @@
 use bitflags::bitflags;
 use serde::Serialize;
 
-use crate::Body;
+use crate::BodyImpl;
 use crate::MethodName;
 use crate::Visibility;
 
+pub type Method = MethodImpl<crate::BcRepr>;
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
-pub struct Method {
+pub struct MethodImpl<R> {
     pub visibility: Visibility,
     pub name: MethodName,
-    pub body: Body,
+    pub body: BodyImpl<R>,
     pub flags: MethodFlags,
 }
 

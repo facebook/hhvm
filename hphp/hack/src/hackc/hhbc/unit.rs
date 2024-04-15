@@ -8,10 +8,10 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
-use crate::Class;
+use crate::ClassImpl;
 use crate::Constant;
 use crate::FatalOp;
-use crate::Function;
+use crate::FunctionImpl;
 use crate::Module;
 use crate::ModuleName;
 use crate::SrcLoc;
@@ -19,11 +19,13 @@ use crate::StringId;
 use crate::SymbolRefs;
 use crate::Typedef;
 
+pub type Unit = UnitImpl<crate::BcRepr>;
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
-pub struct Unit {
-    pub functions: Vector<Function>,
-    pub classes: Vector<Class>,
+pub struct UnitImpl<R> {
+    pub functions: Vector<FunctionImpl<R>>,
+    pub classes: Vector<ClassImpl<R>>,
     pub modules: Vector<Module>,
     pub typedefs: Vector<Typedef>,
     pub file_attributes: Vector<Attribute>,

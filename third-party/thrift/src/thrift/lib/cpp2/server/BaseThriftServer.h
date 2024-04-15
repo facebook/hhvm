@@ -69,8 +69,7 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
  *   Base class for thrift servers using cpp2 style generated code.
  */
 
-class BaseThriftServer : public apache::thrift::concurrency::Runnable,
-                         public apache::thrift::server::ServerConfigs {
+class BaseThriftServer : public apache::thrift::server::ServerConfigs {
  private:
   friend ThriftServerConfig& detail::getThriftServerConfig(BaseThriftServer&);
 
@@ -481,19 +480,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   getMethodsBypassMaxRequestsLimit() const {
     return thriftConfig_.getMethodsBypassMaxRequestsLimit();
   }
-
-  virtual void serve() = 0;
-
-  virtual void stop() = 0;
-
-  // This API is intended to stop listening on the server
-  // socket and stop accepting new connection first while
-  // still letting the established connections to be
-  // processed on the server.
-  virtual void stopListening() = 0;
-
-  // Allows running the server as a Runnable thread
-  void run() override { serve(); }
 
   /**
    * Return the maximum memory usage by each debug payload.

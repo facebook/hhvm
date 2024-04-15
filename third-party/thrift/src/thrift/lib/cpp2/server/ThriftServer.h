@@ -197,6 +197,7 @@ class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
  */
 
 class ThriftServer : public apache::thrift::BaseThriftServer,
+                     public apache::thrift::concurrency::Runnable,
                      public wangle::ServerBootstrap<Pipeline> {
  public:
   struct Metadata {
@@ -1960,7 +1961,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * starts worker threads, enters accept loop; when
    * the accept loop exits, shuts down and joins workers.
    */
-  void serve() override;
+  virtual void serve();
 
   /**
    * Call this to stop the server, if started by serve()
@@ -1975,9 +1976,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * Instead you should use StopController (see getStopController()) which lets
    * you guard against destruction (by way of folly::PrimaryPtr).
    */
-  void stop() override;
+  virtual void stop();
 
   using StopController = ThriftServerStopController;
+
+  // Allows running the server as a Runnable thread
+  virtual void run() override { serve(); }
 
  private:
   folly::PrimaryPtr<StopController> stopController_{
@@ -1996,7 +2000,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * existing connections. stop() still needs to be called to clear
    * up the worker threads.
    */
-  void stopListening() override;
+  virtual void stopListening();
 
   const std::vector<std::unique_ptr<TransportRoutingHandler>>*
   getRoutingHandlers() const {

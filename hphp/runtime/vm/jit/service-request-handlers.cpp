@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -155,6 +156,14 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
+  auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(args.kind == TransKind::Live);
+    mcgen::enqueueAsyncTranslateRequest(ctx, 0);
+    return TranslationResult::failTransiently();
+  }
+
   LeaseHolder writer(sk.func(), args.kind);
   if (!writer) return TranslationResult::failTransiently();
 
@@ -175,10 +184,7 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{tca};
   }
 
-  return mcgen::retranslate(
-    args,
-    getContext(args.sk, args.kind == TransKind::Profile)
-  );
+  return mcgen::retranslate(args, ctx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,6 +194,11 @@ TranslationResult getTranslation(SrcKey sk) {
 JitResumeAddr getFuncEntry(const Func* func) {
   if (auto const addr = func->getFuncEntry()) {
     return JitResumeAddr::transFuncEntry(addr);
+  }
+
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    // JIT will be enqueued in handleResume
+    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
   }
 
   LeaseHolder writer(func, TransKind::Profile);
@@ -294,13 +305,44 @@ TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
   return resume(sk, getTranslation(sk));
 }
 
+TranslationResult::Scope shouldEnqueueForRetranslate(
+  const RegionContext& context) {
+  return tc::shouldTranslate(context.sk, TransKind::Live);
+}
+
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   syncRegs(spOff);
   FTRACE(1, "handleRetranslate {}\n", vmfp()->func()->fullName()->data());
 
   INC_TPC(retranslate);
   auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
-  auto const context = getContext(sk, tc::profileFunc(sk.func()));
+  auto const isProfile = tc::profileFunc(sk.func());
+  auto const context = getContext(sk, isProfile);
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!isProfile);
+    auto const res = shouldEnqueueForRetranslate(context);
+    if (res != TranslationResult::Scope::Success) {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
+      return resume(sk, TranslationResult{res});
+    }
+    auto const srcRec = tc::findSrcRec(sk);
+    assertx(srcRec);
+    auto const currNumTrans = srcRec->numTrans();
+    if (currNumTrans > Cfg::Jit::MaxTranslations) {
+      always_assert(currNumTrans == Cfg::Jit::MaxTranslations + 1);
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "Max translations reached for sk {}\n", show(context.sk));
+      return resume(sk, TranslationResult::failForProcess());
+    } else {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "Enqueueing sk {} from handleRetranslate\n",
+                 show(context.sk));
+      mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+      return resume(sk, TranslationResult::failTransiently());
+    }
+  }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
@@ -314,7 +356,33 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
 
   INC_TPC(retranslate);
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
-  auto const context = getContext(sk, tc::profileFunc(sk.func()));
+  auto const isProfile = tc::profileFunc(sk.func());
+  auto const context = getContext(sk, isProfile);
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!isProfile);
+    auto const res = shouldEnqueueForRetranslate(context);
+    if (res != TranslationResult::Scope::Success) {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
+      return resume(sk, TranslationResult{res});
+    }
+    auto const srcRec = tc::findSrcRec(sk);
+    assertx(srcRec);
+    auto const currNumTrans = srcRec->numTrans();
+    if (currNumTrans > Cfg::Jit::MaxTranslations) {
+      always_assert(currNumTrans == Cfg::Jit::MaxTranslations + 1);
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "Max translations reached for sk {}\n", show(context.sk));
+      return resume(sk, TranslationResult::failForProcess());
+    } else {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "Enqueueing sk {} from handleRetranslateFuncEntry\n",
+                 show(context.sk));
+      mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+      return resume(sk, TranslationResult::failTransiently());
+    }
+  }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
@@ -436,7 +504,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 
-  auto const findOrTranslate = [&] () -> JitResumeAddr {
+  auto const findOrTranslate = [&] (ResumeFlags flags) -> JitResumeAddr {
     if (!flags.m_noTranslate) {
       auto const trans = getTranslation(sk);
       if (auto const addr = trans.addr()) {
@@ -464,7 +532,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   };
 
   auto start = JitResumeAddr::none();
-  if (!flags.m_interpFirst) start = findOrTranslate();
+  if (!flags.m_interpFirst) start = findOrTranslate(flags);
   if (!flags.m_noTranslate && flags.m_interpFirst) INC_TPC(interp_bb_force);
 
   vmJitReturnAddr() = nullptr;
@@ -497,6 +565,10 @@ JitResumeAddr handleResume(ResumeFlags flags) {
       sk.advance();
     }
 
+    // If background jit is enabled, enqueueing a new translation request
+    // after every basic block may generate too many overlapping translations
+    // because no thread takes a function-level lease.
+    if (RuntimeOption::EvalEnableAsyncJIT) flags = flags.noTranslate();
     do {
       INC_TPC(interp_bb);
       if (auto const retAddr = HPHP::dispatchBB()) {
@@ -504,7 +576,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
       } else {
         assertx(vmpc());
         sk = liveSK();
-        start = findOrTranslate();
+        start = findOrTranslate(flags);
       }
     } while (!start);
   }

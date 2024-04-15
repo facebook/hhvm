@@ -149,7 +149,9 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   if (*s_jittingTimeLimitExceeded) return TranslationResult::Scope::Request;
 
   auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
-  if (maxTransTime >= 0 && RuntimeOption::ServerExecutionMode()) {
+  if (maxTransTime >= 0 &&
+      RuntimeOption::ServerExecutionMode() &&
+      !RuntimeOption::EvalEnableAsyncJIT) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
       if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
@@ -432,7 +434,7 @@ LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
   TCA fakeStart = code().threadLocalStart();
   auto const sz = initialSize / 4;
   auto initBlock = [&] (DataBlock& block, size_t mxSz, const char* nm) {
-    always_assert(sz <= mxSz);
+    always_assert_flog(sz <= mxSz, "sz: {} mxSz: {}\n", sz, mxSz);
     block.init(fakeStart, start, sz, mxSz, nm);
     fakeStart += mxSz;
     start += sz;

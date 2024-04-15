@@ -93,6 +93,7 @@ namespace Trace {
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(apc)           \
       TM(asmx64)        \
+      TM(async_jit)     \
       TM(atomicvector)  \
       TM(bcinterp)      \
       TM(bespoke)       \

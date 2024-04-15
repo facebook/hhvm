@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
@@ -54,6 +55,9 @@ void processInit() {
 
   Debug::initDebugInfo();
   tc::processInit();
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    initAsyncTranslationDispatcher();
+  }
 
   if (Trace::moduleEnabledRelease(Trace::printir) &&
       !Cfg::Jit::Enabled) {

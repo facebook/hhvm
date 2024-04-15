@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -158,6 +159,22 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
 
   tc::PrologueTranslator translator(func, nPassed);
+
+  if (RuntimeOption::EvalEnableAsyncJIT) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!tc::profileFunc(func));
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Attempting async prologue generation for func {}\n", func->name());
+    if (auto const tcAddr = translator.getCached()) {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "Found prologue for func {}, skipping enqueue\n", func->name());
+      return *tcAddr;
+    }
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Enqueueing func {} for prologue generation\n", func->name());
+    mcgen::enqueueAsyncPrologueRequest(func, nPassed);
+    return TranslationResult::failTransiently();
+  }
 
   auto const tcAddr = translator.acquireLeaseAndRequisitePaperwork();
   if (tcAddr) return *tcAddr;

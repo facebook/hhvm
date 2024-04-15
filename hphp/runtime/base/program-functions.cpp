@@ -80,6 +80,7 @@
 #include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -1152,7 +1153,7 @@ static int start_server(const std::string &username) {
     start_cli_server();
   }
 
-  if (jit::mcgen::retranslateAllScheduled()) {
+	if (jit::mcgen::retranslateAllScheduled()) {
     // We ran retranslateAll from deserialized profile.
     BootStats::Block timer("waitForRetranslateAll", true);
     jit::mcgen::joinWorkerThreads();
@@ -2989,6 +2990,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
+  LOG_AND_IGNORE(jit::mcgen::joinAsyncTranslationWorkerThreads())
   LOG_AND_IGNORE(jit::tc::processExit())
   LOG_AND_IGNORE(bespoke::waitOnExportProfiles())
   LOG_AND_IGNORE(PageletServer::Stop())

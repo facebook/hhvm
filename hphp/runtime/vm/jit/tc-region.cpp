@@ -771,7 +771,7 @@ void RegionTranslator::publishCodeImpl() {
   const auto& loc = transMeta->range.loc();
   const auto srcRec = srcDB().find(sk);
   always_assert(srcRec);
-  assertx(checkLimit(kind, srcRec->numTrans()));
+  assert_flog(checkLimit(kind, srcRec->numTrans()), "sk: {}", show(sk));
 
   if (kind == TransKind::Profile) {
     always_assert(region);

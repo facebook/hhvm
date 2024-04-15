@@ -1653,6 +1653,7 @@ public:
     Optimized        = 1 << 0,
     Locked           = 1 << 1,
     MaybeIntercepted = 1 << 2,
+    LockedForPrologueGen = 1 << 3,
   };
 
  /*

@@ -444,6 +444,8 @@ struct RuntimeOption {
    */                                                                   \
   F(uint64_t, VMStackElms, kEvalVMStackElmsDefault)                     \
   F(int, StackCheckLeafPadding, 100)                                    \
+  F(bool, EnableAsyncJIT, false)                                        \
+  F(int, AsyncJitWorkerThreads, 4)                                      \
   /*                                                                    \
    * Initial space reserved for the global variable environment (in     \
    * number of global variables).                                       \

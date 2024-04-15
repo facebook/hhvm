@@ -4,9 +4,9 @@ use newtype::IdVec;
 
 use crate::instr::HasOperands;
 use crate::BlockId;
-use crate::Func;
 use crate::Instr;
 use crate::InstrId;
+use crate::IrRepr;
 use crate::TryCatchId;
 use crate::ValueId;
 use crate::ValueIdMap;
@@ -38,9 +38,9 @@ impl Block {
 
     /// A well-formed Block is always terminated. This is only useful when
     /// building a Block.
-    pub fn is_terminated(&self, func: &Func) -> bool {
+    pub fn is_terminated(&self, repr: &IrRepr) -> bool {
         if let Some(&iid) = self.iids.last() {
-            func.instr(iid).is_terminal()
+            repr.instrs[iid].is_terminal()
         } else {
             false
         }

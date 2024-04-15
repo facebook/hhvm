@@ -336,7 +336,7 @@ impl Func {
     }
 
     pub fn is_terminated(&self, bid: BlockId) -> bool {
-        self.block(bid).is_terminated(self)
+        self.block(bid).is_terminated(&self.repr)
     }
 
     pub fn is_terminal(&self, vid: ValueId) -> bool {

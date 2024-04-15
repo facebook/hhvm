@@ -143,7 +143,7 @@ impl<'b> VerifyFunc<'b> {
     fn verify_block(&mut self, bid: BlockId, block: &Block) {
         check!(
             self,
-            block.is_terminated(self.func),
+            self.func.is_terminated(bid),
             "block {} is unterminated",
             bid
         );

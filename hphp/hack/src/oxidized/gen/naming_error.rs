@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<31b8dd8fbd9ab0ce6ed54ab3a8f2dceb>>
+// @generated SignedSource<<f5c575b16601d531eb9b5bafd2fad591>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -191,6 +191,8 @@ pub enum NamingError {
     DynamicNewInStrictMode(pos::Pos),
     #[rust_to_ocaml(name = "Invalid_type_access_root")]
     InvalidTypeAccessRoot { pos: pos::Pos, id: Option<String> },
+    #[rust_to_ocaml(name = "Invalid_type_access_in_where")]
+    InvalidTypeAccessInWhere(pos::Pos),
     #[rust_to_ocaml(name = "Duplicate_user_attribute")]
     DuplicateUserAttribute {
         pos: pos::Pos,

@@ -1,3 +1,5 @@
+File "tconst_on_generics8.php", line 50, characters 47-48:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "tconst_on_generics8.php", line 60, characters 21-30:
 Invalid argument (Typing[4110])
   File "tconst_on_generics8.php", line 50, characters 47-51:

@@ -1,3 +1,7 @@
+File "this_access_union_intersect.php", line 37, characters 64-64:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+File "this_access_union_intersect.php", line 41, characters 57-57:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "this_access_union_intersect.php", line 42, characters 12-14:
 No instance method `get` in `IEmpty` (Typing[4053])
   File "this_access_union_intersect.php", line 41, characters 27-32:

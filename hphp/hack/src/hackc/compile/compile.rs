@@ -492,6 +492,7 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
             )
         }
         NamingError::ToplevelStatement(_) => todo!(),
+        NamingError::InvalidTypeAccessInWhere(_) => todo!(),
     }
 }
 

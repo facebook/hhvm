@@ -1,3 +1,9 @@
+File "covariant-dep-1.php", line 39, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+File "covariant-dep-1.php", line 45, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+File "covariant-dep-1.php", line 51, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 51, characters 6-7:

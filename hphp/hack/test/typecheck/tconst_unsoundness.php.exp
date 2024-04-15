@@ -1,3 +1,7 @@
+File "tconst_unsoundness.php", line 12, characters 44-45:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+File "tconst_unsoundness.php", line 14, characters 60-61:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "tconst_unsoundness.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "tconst_unsoundness.php", line 14, characters 49-52:

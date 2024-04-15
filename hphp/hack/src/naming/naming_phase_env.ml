@@ -22,6 +22,7 @@ module Elab_haccess_hint = struct
   type t = {
     current_class: (Ast_defs.id * Ast_defs.classish_kind * bool) option;
     in_where_clause: bool;
+    in_generated_where_clause: bool;
     in_context: bool;
     in_haccess: bool;
   }
@@ -30,6 +31,7 @@ module Elab_haccess_hint = struct
     {
       current_class = None;
       in_where_clause = false;
+      in_generated_where_clause = false;
       in_context = false;
       in_haccess = false;
     }

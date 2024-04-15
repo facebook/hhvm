@@ -50,10 +50,27 @@ module Env = struct
           Elab_haccess_hint.{ t.elab_haccess_hint with in_where_clause };
       }
 
+  let set_in_generated_where_clause t ~in_generated_where_clause =
+    Naming_phase_env.
+      {
+        t with
+        elab_haccess_hint =
+          Elab_haccess_hint.
+            { t.elab_haccess_hint with in_generated_where_clause };
+      }
+
   let in_where_clause
       Naming_phase_env.
         { elab_haccess_hint = Elab_haccess_hint.{ in_where_clause; _ }; _ } =
     in_where_clause
+
+  let in_generated_where_clause
+      Naming_phase_env.
+        {
+          elab_haccess_hint = Elab_haccess_hint.{ in_generated_where_clause; _ };
+          _;
+        } =
+    in_generated_where_clause
 
   let in_context
       Naming_phase_env.
@@ -68,8 +85,37 @@ end
 
 let on_class_ c ~ctx = (Env.in_class ctx c, Ok c)
 
-let on_where_constraint_hint cstr ~ctx =
-  (Env.set_in_where_clause ctx ~in_where_clause:true, Ok cstr)
+let on_where_constraint_hint ((hint1, _, hint2) as cstr) ~ctx =
+  let is_generated_hint =
+    let visitor =
+      object
+        inherit [_] Aast.reduce as super
+
+        method zero = false
+
+        method plus = ( || )
+
+        method! on_hint () hint =
+          match snd hint with
+          | Aast.Happly ((_, name), _)
+            when String.is_prefix
+                   ~prefix:SN.Coeffects.generated_generic_prefix
+                   name ->
+            true
+          | _ -> super#on_hint () hint
+      end
+    in
+    visitor#on_hint ()
+  in
+  let in_generated_where_clause =
+    is_generated_hint hint1 || is_generated_hint hint2
+  in
+  let ctx =
+    ctx
+    |> Env.set_in_where_clause ~in_where_clause:true
+    |> Env.set_in_generated_where_clause ~in_generated_where_clause
+  in
+  (ctx, Ok cstr)
 
 let on_contexts ctxts ~ctx = (Env.set_in_context ctx ~in_context:true, Ok ctxts)
 
@@ -99,8 +145,11 @@ let on_hint on_error hint ~ctx =
             @@ Naming_error.Invalid_type_access_root
                  { pos = tycon_pos; id = Some tycon_name } )
       | (_, Aast.(Hthis | Happly _)) -> Ok hint
-      | (_, Aast.Habstr _) when Env.in_where_clause ctx || Env.in_context ctx ->
+      | (_, Aast.Habstr _)
+        when Env.in_generated_where_clause ctx || Env.in_context ctx ->
         Ok hint
+      | (pos, Aast.Habstr _) when Env.in_where_clause ctx ->
+        Error (hint, Err.naming @@ Naming_error.Invalid_type_access_in_where pos)
       (* TODO[mjt] why are we allow `Hvar`? *)
       | (_, Aast.Hvar _) -> Ok hint
       | (pos, _) ->

@@ -9,16 +9,16 @@ abstract class HasteJSDep {
 <<__SupportDynamicType>>
 abstract final class SpinHelper {
 
-  public static function getCompDepData<TDep as HasteJSDep, TIndex>(
+  public static function getCompDepData<TDep as HasteJSDep with { type TIndex = TIndex }, TIndex as int>(
     TDep $dep
-  ): int where TIndex = TDep::TIndex {
+  ): int {
     $x = self::decode($dep);
     return $x[0];
   }
 
-  private static function decode<TDep  as HasteJSDep, TIndex>(
+  private static function decode<TDep as HasteJSDep with { type TIndex = TIndex }, TIndex>(
     TDep $dep,
-   ): vec<TIndex> where TIndex = TDep::TIndex {
+   ): vec<TIndex> {
     return vec[];
   }
 }

@@ -103,6 +103,7 @@ type t =
       pos: Pos.t;
       id: string option;
     }
+  | Invalid_type_access_in_where of Pos.t
   | Duplicate_user_attribute of {
       pos: Pos.t;
       attr_name: string;
@@ -696,6 +697,14 @@ let invalid_type_access_root pos id_opt =
       Format.sprintf "Type access is only valid for a class, `self`, or `this`"
   in
   User_error.make Error_code.(to_enum InvalidTypeAccessRoot) (pos, msg) []
+
+let invalid_type_access_in_where pos =
+  let msg =
+    "Type access is only valid for a class, `self`, or `this`."
+    ^ " To relate type parameters and type constants,"
+    ^ " you likely want to use the 'with refinement' feature instead."
+  in
+  User_error.make Error_code.(to_enum InvalidTypeAccessInWhere) (pos, msg) []
 
 let duplicate_user_attribute attr_name prev_pos pos =
   User_error.make
@@ -1305,6 +1314,7 @@ let to_user_error = function
     primitive_invalid_alias pos ty_name_used ty_name_canon
   | Dynamic_new_in_strict_mode pos -> dynamic_new_in_strict_mode pos
   | Invalid_type_access_root { pos; id } -> invalid_type_access_root pos id
+  | Invalid_type_access_in_where pos -> invalid_type_access_in_where pos
   | Duplicate_user_attribute { attr_name; prev_pos; pos } ->
     duplicate_user_attribute attr_name prev_pos pos
   | Invalid_memoize_label { attr_name; pos } ->

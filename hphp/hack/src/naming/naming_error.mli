@@ -99,6 +99,7 @@ type t =
       pos: Pos.t;
       id: string option;
     }
+  | Invalid_type_access_in_where of Pos.t
   | Duplicate_user_attribute of {
       pos: Pos.t;
       attr_name: string;

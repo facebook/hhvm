@@ -4,7 +4,7 @@ class Cm {
   const type T = mixed;
 }
 
-function f0<T as Cm, Tm>(mixed $x): Tm where Tm = T::T {
+function f0<T as Cm with { type T = Tm }, Tm>(mixed $x): Tm {
   return $x;
 }
 

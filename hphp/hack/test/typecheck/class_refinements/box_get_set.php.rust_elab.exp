@@ -1,0 +1,14 @@
+File "box_get_set.php", line 44, characters 34-36:
+Invalid argument (Typing[4110])
+  File "box_get_set.php", line 44, characters 10-15:
+  Expected `string`
+  File "box_get_set.php", line 33, characters 20-20:
+    via this generic `T`
+  File "box_get_set.php", line 28, characters 18-20:
+  But got `int`
+File "box_get_set.php", line 46, characters 18-21:
+Invalid argument (Typing[4110])
+  File "box_get_set.php", line 28, characters 18-20:
+  Expected `int`
+  File "box_get_set.php", line 46, characters 18-21:
+  But got `string`

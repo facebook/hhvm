@@ -1,3 +1,5 @@
+File "t30337175.php", line 14, characters 54-54:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "t30337175.php", line 18, characters 3-5:
 Some type arguments violate their constraints (Typing[4323])
   File "t30337175.php", line 8, characters 19-24:

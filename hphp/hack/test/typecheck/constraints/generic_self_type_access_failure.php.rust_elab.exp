@@ -1,0 +1,10 @@
+File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `T = TX::T`

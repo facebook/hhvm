@@ -1,3 +1,5 @@
+File "runner-pattern.php", line 20, characters 13-16:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "runner-pattern.php", line 37, characters 12-17:
 A `where` type constraint is violated here (Typing[4323])
   File "runner-pattern.php", line 24, characters 19-24:

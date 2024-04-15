@@ -1,3 +1,5 @@
+File "tconst_union_bad.php", line 13, characters 56-56:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 File "tconst_union_bad.php", line 13, characters 59-60:
 No type constant `TP` in `C` (Typing[4090])
   File "tconst_union_bad.php", line 5, characters 7-7:

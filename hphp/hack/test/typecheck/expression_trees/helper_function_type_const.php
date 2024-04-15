@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees')>>
+<<file: __EnableUnstableFeatures('expression_trees')>>
 
 class Wrapper<T> {}
 
@@ -12,14 +12,18 @@ class IntBox extends MyBox {
   const type TInner = ExampleInt;
 }
 
-async function setState<T as MyBox, TVal>(
-  ExampleContext $_visitor,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(Wrapper<T>, TVal): void)>>>
-where
-  TVal = T::TInner {
+async function setState<T as MyBox, TVal>(ExampleContext $_visitor): Awaitable<
+  ExprTree<
+    ExampleDsl,
+    ExampleDsl::TAst,
+    ExampleFunction<(function(Wrapper<T>, TVal): void)>,
+  >,
+> where T as MyBox with { type TInner = TVal } {
   throw new \Exception();
 }
 
-function test(ExprTree<ExampleDsl, ExampleDsl::TAst, Wrapper<IntBox>> $x): void {
+function test(
+  ExprTree<ExampleDsl, ExampleDsl::TAst, Wrapper<IntBox>> $x,
+): void {
   ExampleDsl`setState(${$x}, 1)`;
 }

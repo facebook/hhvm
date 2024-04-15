@@ -8,14 +8,11 @@ use newtype::IdVec;
 
 use crate::block::BlockIdIterator;
 use crate::instr::Terminator;
-use crate::Attr;
-use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
+use crate::BodyImpl;
 use crate::BytesId;
-use crate::ClassName;
-use crate::Coeffects;
 use crate::FunctionFlags;
 use crate::FunctionName;
 use crate::HasEdges;
@@ -28,10 +25,7 @@ use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
 use crate::Param;
-use crate::Span;
 use crate::SrcLoc;
-use crate::TypeInfo;
-use crate::UpperBound;
 use crate::ValueId;
 use crate::ValueIdMap;
 use crate::Visibility;
@@ -124,11 +118,9 @@ impl TryCatchId {
     }
 }
 
-pub type Func = FuncImpl<IrRepr>;
+pub type Func = crate::BodyImpl<IrRepr>;
 
-/// A Func represents a body of code. It's used for both Function and Method.
-///
-/// Code is organized into basic-Blocks which contain a series of 0 or more
+/// IrRepr code is organized into basic-Blocks which contain a series of 0 or more
 /// non-terminal instructions ending with a terminal instruction.
 ///
 /// A Block can take parameters which are used to pass data when control is
@@ -154,24 +146,6 @@ pub type Func = FuncImpl<IrRepr>;
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
 #[derive(Clone, Debug, Default)]
-pub struct FuncImpl<R> {
-    pub attributes: Vec<Attribute>,
-    pub attrs: Attr,
-    pub coeffects: Coeffects,
-    pub doc_comment: Option<Vec<u8>>,
-    pub is_memoize_wrapper: bool,
-    pub is_memoize_wrapper_lsb: bool,
-    pub num_iters: usize,
-    pub return_type: Option<TypeInfo>,
-    /// shadowed_tparams are the set of tparams on a method which shadow a
-    /// tparam on the containing class.
-    pub shadowed_tparams: Vec<ClassName>,
-    pub span: Span,
-    pub upper_bounds: Vec<UpperBound>,
-    pub repr: R,
-}
-
-#[derive(Clone, Debug, Default)]
 pub struct IrRepr {
     pub blocks: IdVec<BlockId, Block>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
@@ -181,37 +155,37 @@ pub struct IrRepr {
     pub params: Vec<(Param, Option<DefaultValue>)>,
 }
 
-impl Func {
+impl IrRepr {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
 
     pub fn alloc_imm(&mut self, imm: Immediate) -> ImmId {
-        let cid = ImmId::from_usize(self.repr.imms.len());
-        self.repr.imms.push(imm);
+        let cid = ImmId::from_usize(self.imms.len());
+        self.imms.push(imm);
         cid
     }
 
     pub fn alloc_instr(&mut self, i: Instr) -> InstrId {
-        let iid = InstrId::from_usize(self.repr.instrs.len());
-        self.repr.instrs.push(i);
+        let iid = InstrId::from_usize(self.instrs.len());
+        self.instrs.push(i);
         iid
     }
 
     pub fn alloc_instr_in(&mut self, bid: BlockId, i: Instr) -> InstrId {
         let iid = self.alloc_instr(i);
-        self.repr.blocks[bid].iids.push(iid);
+        self.blocks[bid].iids.push(iid);
         iid
     }
 
     pub fn alloc_param_in(&mut self, bid: BlockId) -> InstrId {
         let iid = self.alloc_instr(Instr::param());
-        self.repr.blocks[bid].params.push(iid);
+        self.blocks[bid].params.push(iid);
         iid
     }
 
     pub fn alloc_bid(&mut self, block: Block) -> BlockId {
-        let bid = BlockId::from_usize(self.repr.blocks.len());
-        self.repr.blocks.push(block);
+        let bid = BlockId::from_usize(self.blocks.len());
+        self.blocks.push(block);
         bid
     }
 
@@ -223,32 +197,31 @@ impl Func {
     pub fn block_ids(&self) -> BlockIdIterator {
         BlockIdIterator {
             current: Self::ENTRY_BID,
-            limit: BlockId(self.repr.blocks.len() as u32),
+            limit: BlockId(self.blocks.len() as u32),
         }
     }
 
     pub fn block_mut(&mut self, bid: BlockId) -> &mut Block {
-        self.repr.blocks.get_mut(bid).unwrap()
+        self.blocks.get_mut(bid).unwrap()
     }
 
     /// Yields normal instructions in bodies (not immediates or params).
     pub fn body_iids(&self) -> impl DoubleEndedIterator<Item = InstrId> + '_ {
-        self.block_ids()
-            .flat_map(|bid| self.repr.blocks[bid].iids())
+        self.block_ids().flat_map(|bid| self.blocks[bid].iids())
     }
 
     pub fn body_instrs(&self) -> impl DoubleEndedIterator<Item = &Instr> + '_ {
-        self.body_iids().map(|iid| &self.repr.instrs[iid])
+        self.body_iids().map(|iid| &self.instrs[iid])
     }
 
     pub fn catch_target(&self, bid: BlockId) -> BlockId {
-        fn get_catch_frame(func: &Func, tcid: TryCatchId) -> Option<&ExFrame> {
+        fn get_catch_frame(repr: &IrRepr, tcid: TryCatchId) -> Option<&ExFrame> {
             match tcid {
                 TryCatchId::None => None,
-                TryCatchId::Try(exid) => Some(&func.repr.ex_frames[&exid]),
+                TryCatchId::Try(exid) => Some(&repr.ex_frames[&exid]),
                 TryCatchId::Catch(exid) => {
-                    let parent = func.repr.ex_frames[&exid].parent;
-                    get_catch_frame(func, parent)
+                    let parent = repr.ex_frames[&exid].parent;
+                    get_catch_frame(repr, parent)
                 }
             }
         }
@@ -280,11 +253,11 @@ impl Func {
     }
 
     pub fn get_block(&self, bid: BlockId) -> Option<&Block> {
-        self.repr.blocks.get(bid)
+        self.blocks.get(bid)
     }
 
     pub fn get_imm(&self, cid: ImmId) -> Option<&Immediate> {
-        self.repr.imms.get(cid)
+        self.imms.get(cid)
     }
 
     pub fn get_edges(&self, bid: BlockId) -> Option<&[BlockId]> {
@@ -292,23 +265,24 @@ impl Func {
     }
 
     pub fn get_instr(&self, iid: InstrId) -> Option<&Instr> {
-        self.repr.instrs.get(iid)
+        self.instrs.get(iid)
     }
 
     pub fn get_instr_mut(&mut self, iid: InstrId) -> Option<&mut Instr> {
-        self.repr.instrs.get_mut(iid)
+        self.instrs.get_mut(iid)
     }
 
     pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param> {
         match lid {
-            LocalId::Named(name) => (self.repr.params.iter())
-                .find_map(|(p, _)| if p.name == name { Some(p) } else { None }),
+            LocalId::Named(name) => {
+                (self.params.iter()).find_map(|(p, _)| if p.name == name { Some(p) } else { None })
+            }
             LocalId::Unnamed(_) => None,
         }
     }
 
     pub fn get_loc(&self, loc: LocId) -> Option<&SrcLoc> {
-        self.repr.locs.get(loc)
+        self.locs.get(loc)
     }
 
     pub fn get_terminator(&self, bid: BlockId) -> Option<&Terminator> {
@@ -326,7 +300,7 @@ impl Func {
     }
 
     pub fn instrs_len(&self) -> usize {
-        self.repr.instrs.len()
+        self.instrs.len()
     }
 
     pub fn instr_mut(&mut self, iid: InstrId) -> &mut Instr {
@@ -338,18 +312,12 @@ impl Func {
     }
 
     pub fn is_terminated(&self, bid: BlockId) -> bool {
-        self.block(bid).is_terminated(&self.repr)
+        self.block(bid).is_terminated(self)
     }
 
     pub fn is_terminal(&self, vid: ValueId) -> bool {
         vid.instr()
             .map_or(false, |iid| self.instr(iid).is_terminal())
-    }
-
-    pub fn is_reified(&self) -> bool {
-        self.attributes
-            .iter()
-            .any(|attr| attr.name.as_str() == "__Reified")
     }
 
     pub fn loc(&self, loc: LocId) -> &SrcLoc {
@@ -360,8 +328,8 @@ impl Func {
     // Visits all the instructions in the block and uses the `remap` mapping on
     // them. Does not renumber the instructions of the block itself.
     pub fn remap_block_vids(&mut self, bid: BlockId, remap: &ValueIdMap<ValueId>) {
-        let block = self.repr.blocks.get_mut(bid).unwrap();
-        block.remap_vids(&mut self.repr.instrs, remap)
+        let block = self.blocks.get_mut(bid).unwrap();
+        block.remap_vids(&mut self.instrs, remap)
     }
 
     // Rewrite instructions using the remap mapping. Won't renumber the
@@ -377,13 +345,13 @@ impl Func {
     /// themselves (so a remapping with b1 -> b2 won't remap block b1 to b2,
     /// just references to b1 will be remapped to b2).
     pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
-        for (_, dv) in &mut self.repr.params {
+        for (_, dv) in &mut self.params {
             if let Some(dv) = dv.as_mut() {
                 dv.init = remap.get(&dv.init).copied().unwrap_or(dv.init);
             }
         }
 
-        for instr in self.repr.instrs.iter_mut() {
+        for instr in self.instrs.iter_mut() {
             for bid in instr.edges_mut() {
                 *bid = remap.get(bid).copied().unwrap_or(*bid);
             }
@@ -405,10 +373,6 @@ impl Func {
             _ => panic!("Non-Terminator found in terminator location {}", iid),
         }
     }
-
-    pub fn return_type(&self) -> TypeInfo {
-        self.return_type.clone().unwrap_or_else(TypeInfo::empty)
-    }
 }
 
 pub type Function = FunctionImpl<IrRepr>;
@@ -419,14 +383,14 @@ pub type Method = MethodImpl<IrRepr>;
 pub struct FunctionImpl<R> {
     pub flags: FunctionFlags,
     pub name: FunctionName,
-    pub func: FuncImpl<R>,
+    pub func: BodyImpl<R>,
 }
 
 /// A Hack method contained within a Class.
 #[derive(Debug)]
 pub struct MethodImpl<R> {
     pub flags: MethodFlags,
-    pub func: FuncImpl<R>,
+    pub func: BodyImpl<R>,
     pub name: MethodName,
     pub visibility: Visibility,
 }

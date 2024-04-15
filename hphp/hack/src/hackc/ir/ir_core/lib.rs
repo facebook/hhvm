@@ -48,6 +48,7 @@ pub use hhbc::ArcVec;
 pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::Attribute;
 pub use hhbc::BareThisOp;
+pub use hhbc::BodyImpl;
 pub use hhbc::BytesId;
 pub use hhbc::CcParam;
 pub use hhbc::CcReified;

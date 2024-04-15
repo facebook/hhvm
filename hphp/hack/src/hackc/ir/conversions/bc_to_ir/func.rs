@@ -71,17 +71,17 @@ fn convert_body(body: &Body) -> ir::Func {
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
     locs.push(ir::SrcLoc::from_span(&span));
     let func = ir::Func {
-        attributes: attributes.to_vec(),
+        attributes: attributes.clone(),
         attrs,
         coeffects: coeffects.clone(),
-        doc_comment: doc_comment.clone().map(|c| c.clone().into()).into(),
+        doc_comment: doc_comment.clone().map(|c| c.clone()),
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         num_iters,
-        return_type: return_type.clone().into(),
-        shadowed_tparams: shadowed_tparams.clone().into(),
+        return_type: return_type.clone(),
+        shadowed_tparams: shadowed_tparams.clone(),
         span,
-        upper_bounds: upper_bounds.clone().into(),
+        upper_bounds: upper_bounds.clone(),
         repr: ir::IrRepr {
             blocks: Default::default(),
             ex_frames: Default::default(),
@@ -117,7 +117,7 @@ fn convert_body(body: &Body) -> ir::Func {
     }
 
     let cur_bid = ctx.builder.cur_bid();
-    if !ctx.builder.func.is_terminated(cur_bid) {
+    if !ctx.builder.func.repr.is_terminated(cur_bid) {
         // This is not a valid input - but might as well do something
         // reasonable.
         ctx.emit(Instr::Terminator(Terminator::Unreachable));
@@ -126,10 +126,13 @@ fn convert_body(body: &Body) -> ir::Func {
     // Mark any empty blocks with 'unreachable'. These will be cleaned up
     // later but for now need to be valid IR (so they must end with a
     // terminator).
-    for bid in ctx.builder.func.block_ids() {
-        let block = ctx.builder.func.block_mut(bid);
+    for bid in ctx.builder.func.repr.block_ids() {
+        let block = ctx.builder.func.repr.block_mut(bid);
         if block.is_empty() {
-            ctx.builder.func.alloc_instr_in(bid, Instr::unreachable());
+            ctx.builder
+                .func
+                .repr
+                .alloc_instr_in(bid, Instr::unreachable());
         }
     }
 

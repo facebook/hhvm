@@ -45,6 +45,7 @@ use ir_core::IterId;
 use ir_core::LocId;
 use ir_core::LocalId;
 use ir_core::MOpMode;
+use ir_core::Maybe;
 use ir_core::MethodFlags;
 use ir_core::ObjMethodOp;
 use ir_core::PropName;
@@ -214,9 +215,9 @@ impl<'b> FunctionParser<'b> {
         // Undo the effects of Func::return_type() mapping None to EMPTY in
         // print_function() and print_method().
         let mut builder = FuncBuilder::with_func(Func {
-            return_type,
-            upper_bounds: tparams,
-            shadowed_tparams,
+            return_type: return_type.into(),
+            upper_bounds: tparams.into(),
+            shadowed_tparams: shadowed_tparams.into(),
             attrs,
             repr: ir_core::IrRepr {
                 params,
@@ -1212,7 +1213,7 @@ impl FunctionParser<'_> {
 
     fn parse_doc(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let doc = tokenizer.expect_any_string()?.unescaped_string()?;
-        self.builder.func.doc_comment = Some(doc);
+        self.builder.func.doc_comment = Maybe::Just(doc.into());
         Ok(())
     }
 

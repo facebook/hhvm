@@ -84,7 +84,7 @@ impl SeqBuilder<'_> {
         let bid = self.builder.alloc_bid();
         let loc_id = crate::context::add_loc(self.builder, src_loc);
         let tcid = self.tc_stack.last().copied().unwrap_or_default();
-        self.builder.func.block_mut(bid).tcid = tcid;
+        self.builder.func.repr.block_mut(bid).tcid = tcid;
         let sequence = Sequence {
             kind,
             bid,

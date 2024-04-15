@@ -16,6 +16,7 @@ use ir_core::Func;
 use ir_core::FuncBuilder;
 use ir_core::Instr;
 use ir_core::InstrId;
+use ir_core::IrRepr;
 use ir_core::ValueId;
 use ir_core::VarId;
 use itertools::Itertools;
@@ -181,7 +182,7 @@ impl MakeSSA {
         let mut dataflow_stack: Vec<(BlockId, InstrId, VarId)> = Vec::new();
 
         // First analyze each block locally to see what it reads and writes.
-        for bid in func.block_ids() {
+        for bid in func.repr.block_ids() {
             let info = &mut self.block_info[bid];
 
             for &iid in &func.repr.blocks[bid].iids {
@@ -220,7 +221,7 @@ impl MakeSSA {
 
         // Propagate local variable liveness around the CFG.
         while let Some((bid, get_local_iid, var)) = dataflow_stack.pop() {
-            if bid == Func::ENTRY_BID {
+            if bid == IrRepr::ENTRY_BID {
                 // Uh oh, the entry block needs the value of a local variable on
                 // entry. That must mean it's used uninitialized by
                 // get_local_iid.
@@ -251,7 +252,7 @@ impl MakeSSA {
         // are always passed the same value or themselves. We clean those up
         // elsewhere rather than trying to get too clever here.
 
-        for bid in func.block_ids() {
+        for bid in func.repr.block_ids() {
             let pred_bids = &self.predecessors[&bid];
 
             // Sort to make param creation order deterministic. Also, we need
@@ -315,7 +316,7 @@ impl MakeSSA {
 
                 if value.is_none() {
                     // We aren't sure what the value is. So make a Param.
-                    let iid = func.alloc_instr(Instr::param());
+                    let iid = func.repr.alloc_instr(Instr::param());
                     value = ValueId::from_instr(iid);
                     info.extra_params.push((var, iid));
                 };
@@ -333,7 +334,7 @@ impl MakeSSA {
     // Step (4).
     fn rewrite_instrs(&mut self, func: &mut Func) {
         FuncBuilder::borrow_func(func, |rw| {
-            for bid in rw.func.block_ids() {
+            for bid in rw.func.repr.block_ids() {
                 let info = &mut self.block_info[bid];
 
                 // Record any additional Params.
@@ -429,6 +430,7 @@ fn note_live(
 
 pub(crate) fn is_ssa(func: &Func) -> bool {
     !func
+        .repr
         .body_instrs()
         .any(|i| matches!(i, Instr::Special(Special::Tmp(..))))
 }
@@ -497,14 +499,14 @@ mod test {
         assert!(res);
 
         assert_eq!(func.repr.blocks.len(), 1);
-        let mut it = func.body_instrs();
+        let mut it = func.repr.body_instrs();
 
         let instr = it.next();
         assert!(matches!(instr, Some(Instr::Call(..))));
         let ops = instr.unwrap().operands();
         assert_eq!(ops.len(), 1);
         assert!(matches!(
-            ops[0].imm().map(|lit| func.imm(lit)),
+            ops[0].imm().map(|lit| func.repr.imm(lit)),
             Some(Immediate::Int(42))
         ));
 
@@ -603,7 +605,7 @@ mod test {
         //   %5 = call direct "my_fn"(#0, %3, %4) num_rets(0) NONE
         //   %6 = ret #6
 
-        let mut it = func.body_instrs();
+        let mut it = func.repr.body_instrs();
 
         assert!(match it.next() {
             Some(Instr::Terminator(Terminator::JmpOp {

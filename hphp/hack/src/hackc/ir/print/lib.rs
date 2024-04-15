@@ -63,12 +63,13 @@ impl fmt::Display for DisplayFunc<'_> {
             let mut unused: InstrIdSet = (0..func.repr.instrs.len())
                 .map(InstrId::from_usize)
                 .collect();
-            for iid in func.body_iids() {
+            for iid in func.repr.body_iids() {
                 unused.remove(&iid);
             }
             for iid in func
+                .repr
                 .block_ids()
-                .flat_map(|bid| func.block(bid).params.iter().copied())
+                .flat_map(|bid| func.repr.block(bid).params.iter().copied())
             {
                 unused.remove(&iid);
             }

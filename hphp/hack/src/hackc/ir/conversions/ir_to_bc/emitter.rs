@@ -122,8 +122,9 @@ impl Labeler {
         }
 
         for (bid, label) in func
+            .repr
             .block_ids()
-            .map(|bid| (bid, func.block(bid)))
+            .map(|bid| (bid, func.repr.block(bid)))
             .filter_map(|(bid, block)| block.pname_hint.as_ref().map(|pname| (bid, pname)))
             .filter_map(|(bid, pname)| pname_to_label(pname).map(|label| (bid, label)))
         {
@@ -164,9 +165,9 @@ fn compute_block_entry_edges(func: &ir::Func) -> BlockIdMap<usize> {
             edges.entry(dv.init).and_modify(|e| *e += 1).or_insert(1);
         }
     }
-    for bid in func.block_ids() {
+    for bid in func.repr.block_ids() {
         edges.entry(bid).or_insert(0);
-        for &edge in func.edges(bid) {
+        for &edge in func.repr.edges(bid) {
             edges.entry(edge).and_modify(|e| *e += 1).or_insert(1);
         }
     }
@@ -234,7 +235,7 @@ impl<'b> InstrEmitter<'b> {
 
         // Now go through and collect the named and unnamed locals. Once we know
         // how many named locals there are we can fixup the unnamed ones.
-        for instr in func.body_instrs() {
+        for instr in func.repr.body_instrs() {
             for lid in instr.locals() {
                 match lid {
                     LocalId::Named(_) => {
@@ -624,7 +625,7 @@ impl<'b> InstrEmitter<'b> {
 
     fn emit_loc(&mut self, loc_id: ir::LocId) {
         if self.loc_id != loc_id {
-            if let Some(loc) = self.func.get_loc(loc_id) {
+            if let Some(loc) = self.func.repr.get_loc(loc_id) {
                 self.loc_id = loc_id;
                 self.instrs
                     .push(Instruct::Pseudo(Pseudo::SrcLoc(hhbc::SrcLoc {
@@ -1010,7 +1011,7 @@ impl<'b> InstrEmitter<'b> {
     }
 
     fn convert_block(&mut self, bid: BlockId) {
-        let block = self.func.block(bid);
+        let block = self.func.repr.block(bid);
         trace!(
             "Block {}{}{}",
             bid,
@@ -1042,7 +1043,7 @@ impl<'b> InstrEmitter<'b> {
             trace!("  skipped label (run_on = {run_on})");
         }
 
-        for (iid, instr) in block.iids().map(|iid| (iid, self.func.instr(iid))) {
+        for (iid, instr) in block.iids().map(|iid| (iid, self.func.repr.instr(iid))) {
             self.emit_instr(iid, instr);
         }
     }

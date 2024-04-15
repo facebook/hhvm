@@ -12,6 +12,7 @@ use ir_core::FunctionName;
 use ir_core::HasEdges;
 use ir_core::Immediate;
 use ir_core::Instr;
+use ir_core::IrRepr;
 use ir_core::LocId;
 use ir_core::ValueId;
 
@@ -24,7 +25,7 @@ pub fn build_test_func(testcase: &[Block]) -> Func {
         let mut name_to_vid = HashMap::default();
         for (i, block) in testcase.iter().enumerate() {
             let bid = if i == 0 {
-                Func::ENTRY_BID
+                IrRepr::ENTRY_BID
             } else {
                 fb.alloc_bid()
             };
@@ -242,7 +243,7 @@ macro_rules! cmp_eq {
 fn cmp_func_struct_eq(func_a: &Func, func_b: &Func) -> Result<(), String> {
     let mut block_eq: HashSet<(BlockId, BlockId)> = HashSet::default();
 
-    let mut pending_cmp: Vec<(BlockId, BlockId)> = vec![(Func::ENTRY_BID, Func::ENTRY_BID)];
+    let mut pending_cmp: Vec<(BlockId, BlockId)> = vec![(IrRepr::ENTRY_BID, IrRepr::ENTRY_BID)];
     cmp_eq!(
         func_a.repr.params.len(),
         func_b.repr.params.len(),
@@ -262,8 +263,8 @@ fn cmp_func_struct_eq(func_a: &Func, func_b: &Func) -> Result<(), String> {
         block_eq.insert((bid_a, bid_b));
         cmp_block_struct_eq(func_a, bid_a, func_b, bid_b)?;
 
-        let term_a = func_a.terminator(bid_a);
-        let term_b = func_b.terminator(bid_b);
+        let term_a = func_a.repr.terminator(bid_a);
+        let term_b = func_b.repr.terminator(bid_b);
         cmp_eq!(
             term_a.edges().len(),
             term_b.edges().len(),
@@ -283,8 +284,8 @@ fn cmp_block_struct_eq(
     func_b: &Func,
     bid_b: BlockId,
 ) -> Result<(), String> {
-    let block_a = func_a.block(bid_a);
-    let block_b = func_b.block(bid_b);
+    let block_a = func_a.repr.block(bid_a);
+    let block_b = func_b.repr.block(bid_b);
 
     cmp_eq!(
         block_a.params.len(),
@@ -312,8 +313,8 @@ fn cmp_block_struct_eq(
         .zip(block_b.iids.iter().copied())
     {
         cmp_eq!(
-            std::mem::discriminant(func_a.instr(iid_a)),
-            std::mem::discriminant(func_b.instr(iid_b)),
+            std::mem::discriminant(func_a.repr.instr(iid_a)),
+            std::mem::discriminant(func_b.repr.instr(iid_b)),
             "instr mismatch",
         )?;
     }

@@ -319,8 +319,8 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
     cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
     cmp_option(
-        a_return_type.as_ref(),
-        b_return_type.as_ref(),
+        a_return_type.as_ref().into(),
+        b_return_type.as_ref().into(),
         cmp_type_info,
     )
     .qualified("return_type")?;
@@ -478,7 +478,9 @@ fn cmp_operand((a, a_func): (ValueId, &Func), (b, b_func): (ValueId, &Func)) -> 
         (I::Instr(a), I::Instr(b)) => cmp_eq(a, b).qualified("instr")?,
         (I::Instr(_), _) => bail!("Mismatch in ValueId (instr)"),
 
-        (I::Imm(a), I::Imm(b)) => cmp_imm(a_func.imm(a), b_func.imm(b)).qualified("constant")?,
+        (I::Imm(a), I::Imm(b)) => {
+            cmp_imm(a_func.repr.imm(a), b_func.repr.imm(b)).qualified("constant")?
+        }
         (I::Imm(_), _) => bail!("Mismatch in ValueId (immediate)"),
     }
 
@@ -1186,8 +1188,8 @@ fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
 }
 
 fn cmp_loc_id((a, a_func): (LocId, &Func), (b, b_func): (LocId, &Func)) -> Result {
-    let a_src_loc = a_func.get_loc(a);
-    let b_src_loc = b_func.get_loc(b);
+    let a_src_loc = a_func.repr.get_loc(a);
+    let b_src_loc = b_func.repr.get_loc(b);
     cmp_option(a_src_loc, b_src_loc, cmp_src_loc)
 }
 

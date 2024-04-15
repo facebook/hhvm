@@ -32,7 +32,7 @@ pub fn rpo_sort(func: &mut Func) {
     for (old, &new) in remap.iter().enumerate() {
         if new != BlockId::NONE {
             let bid = BlockId(old as u32);
-            for edge in func.edges_mut(bid) {
+            for edge in func.repr.edges_mut(bid) {
                 let target = remap[*edge];
                 debug_assert_ne!(target, BlockId::NONE);
                 *edge = target;
@@ -361,6 +361,7 @@ mod tests {
                 .enumerate()
                 .map(|(i, b)| {
                     let succ = func
+                        .repr
                         .edges(BlockId(i as u32))
                         .iter()
                         .map(|e| bname(&func, *e))
@@ -378,6 +379,7 @@ mod tests {
                 .iter()
                 .map(|b| {
                     let succ = rfunc
+                        .repr
                         .edges(*b)
                         .iter()
                         .rev()

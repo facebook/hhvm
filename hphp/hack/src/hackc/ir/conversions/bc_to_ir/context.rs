@@ -103,7 +103,7 @@ impl<'b> Context<'b> {
     pub(crate) fn alloc_bid(&mut self) -> BlockId {
         let bid = self.builder.alloc_bid();
         let tcid = self.builder.cur_block().tcid;
-        self.builder.func.block_mut(bid).tcid = tcid;
+        self.builder.func.repr.block_mut(bid).tcid = tcid;
         bid
     }
 

@@ -9,6 +9,7 @@ use ir::Func;
 use ir::FuncBuilder;
 use ir::Immediate;
 use ir::Instr;
+use ir::IrRepr;
 use ir::LocId;
 use ir::LocalId;
 use ir::MemberOpBuilder;
@@ -141,7 +142,7 @@ fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     // doesn't exist if there aren't any). For textual we change that to use it
     // to initialize all properties and be guaranteed to exist.
 
-    builder.start_block(Func::ENTRY_BID);
+    builder.start_block(IrRepr::ENTRY_BID);
     let saved = std::mem::take(&mut builder.cur_block_mut().iids);
     let loc = builder.add_loc(SrcLoc::from_span(&builder.func.span));
 
@@ -172,7 +173,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     // use it to initialize all properties and be guaranteed to exist.  We also
     // use it to initialize class constants.
 
-    builder.start_block(Func::ENTRY_BID);
+    builder.start_block(IrRepr::ENTRY_BID);
     let saved = std::mem::take(&mut builder.cur_block_mut().iids);
     let loc = builder.add_loc(SrcLoc::from_span(&builder.func.span));
 
@@ -263,12 +264,18 @@ fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>) {
         // Property names are the variable names without the '$'.
         let var = format!("${}", prop.name);
         let lid = LocalId::Named(ir::intern(var));
-        let iid = func.alloc_instr(Instr::MemberOp(
+        let iid = func.repr.alloc_instr(Instr::MemberOp(
             MemberOpBuilder::base_h(loc).query_pt(prop.name),
         ));
         instrs.push(iid);
-        instrs.push(func.alloc_instr(Instr::Hhbc(Hhbc::SetL(iid.into(), lid, loc))));
+        instrs.push(
+            func.repr
+                .alloc_instr(Instr::Hhbc(Hhbc::SetL(iid.into(), lid, loc))),
+        );
     }
 
-    func.block_mut(Func::ENTRY_BID).iids.splice(0..0, instrs);
+    func.repr
+        .block_mut(IrRepr::ENTRY_BID)
+        .iids
+        .splice(0..0, instrs);
 }

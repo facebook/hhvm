@@ -87,7 +87,7 @@ pub(crate) fn convert_sequence(ctx: &mut Context<'_>, addr: Addr) {
                 trace!(
                     "  [{idx}] {bid},%{iid} stack: [{stack}] instr {instr:?}, loc {loc:?}",
                     bid = FmtRawBid(ctx.builder.cur_bid()),
-                    iid = ctx.builder.func.instrs_len(),
+                    iid = ctx.builder.func.repr.instrs_len(),
                     stack = FmtSep::comma(ctx.debug_get_stack().iter(), |w, vid| FmtRawVid(*vid)
                         .fmt(w)),
                     loc = ctx.loc
@@ -119,7 +119,7 @@ pub(crate) fn convert_sequence(ctx: &mut Context<'_>, addr: Addr) {
         }
     }
 
-    if !ctx.builder.func.is_terminated(ctx.builder.cur_bid()) {
+    if !ctx.builder.func.repr.is_terminated(ctx.builder.cur_bid()) {
         trace!("  Non-terminated sequence. Next = {:?}", seq.next);
 
         // This sequence ended on a non-terminal. That probably means it falls

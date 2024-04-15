@@ -56,7 +56,7 @@ pub(crate) fn run(func: Func) -> Func {
     };
 
     // Run the blocks in RPO so we see definitions before use.
-    for bid in pusher.builder.func.block_ids() {
+    for bid in pusher.builder.func.repr.block_ids() {
         pusher.run_block(bid);
     }
 
@@ -105,7 +105,7 @@ impl PushInserter {
 
         trace!("BLOCK {bid}");
 
-        let block = self.builder.func.block_mut(bid);
+        let block = self.builder.func.repr.block_mut(bid);
         let params = std::mem::take(&mut block.params);
         let mut instrs = std::mem::take(&mut block.iids);
 
@@ -156,7 +156,7 @@ impl PushInserter {
             ir::print::FmtInstr(&self.builder.func, iid)
         );
 
-        let instr = self.builder.func.instr(iid);
+        let instr = self.builder.func.repr.instr(iid);
         // Handle weird instructions
         match instr {
             Instr::Special(Special::Select(..)) => return self.run_select(iid),
@@ -172,7 +172,7 @@ impl PushInserter {
         // Push instr
         if !is_param {
             let bid = self.builder.cur_bid();
-            self.builder.func.block_mut(bid).iids.push(iid);
+            self.builder.func.repr.block_mut(bid).iids.push(iid);
         }
 
         // Pop/Transfer items off the stack.
@@ -217,13 +217,14 @@ impl PushInserter {
 
         let bid = self.builder.cur_bid();
 
-        let instr = self.builder.func.instr(iid);
+        let instr = self.builder.func.repr.instr(iid);
         match *instr {
             // terminals
             Instr::Terminator(Terminator::JmpArgs(target, _, loc)) => {
                 // The args have already been pushed as operands.
                 // Convert the JmpArgs into a Jmp
-                *self.builder.func.instr_mut(iid) = Instr::Terminator(Terminator::Jmp(target, loc));
+                *self.builder.func.repr.instr_mut(iid) =
+                    Instr::Terminator(Terminator::Jmp(target, loc));
             }
 
             Instr::Terminator(_) => {
@@ -234,7 +235,7 @@ impl PushInserter {
             _ => unreachable!(),
         }
 
-        self.builder.func.block_mut(bid).iids.push(iid);
+        self.builder.func.repr.block_mut(bid).iids.push(iid);
     }
 
     fn push_vids(&mut self, cur_iid: InstrId, vids: &[ValueId]) {
@@ -281,7 +282,7 @@ impl PushInserter {
                     // Peephole: If the previous instr was a PopL(lid) then
                     // we just elide the pair.
                     if let Some(iid) = self.builder.cur_block().iids.last() {
-                        match self.builder.func.instr(*iid) {
+                        match self.builder.func.repr.instr(*iid) {
                             Instr::Special(Special::IrToBc(IrToBc::PopL(popl))) if *popl == lid => {
                                 self.builder.cur_block_mut().iids.pop();
                                 return;
@@ -309,7 +310,7 @@ impl PushInserter {
     }
 
     fn push_operands(&mut self, iid: InstrId) {
-        let instr = self.builder.func.instr(iid);
+        let instr = self.builder.func.repr.instr(iid);
         match *instr {
             Instr::Call(..) | Instr::Terminator(Terminator::CallAsync(..)) => {
                 self.push_call_operands(iid)
@@ -322,7 +323,7 @@ impl PushInserter {
     }
 
     fn push_call_operands(&mut self, iid: InstrId) {
-        let instr = self.builder.func.instr(iid);
+        let instr = self.builder.func.repr.instr(iid);
 
         let call = match instr {
             Instr::Call(call) | Instr::Terminator(Terminator::CallAsync(call, _)) => call,
@@ -368,7 +369,7 @@ impl PushInserter {
 fn find_next_unnamed_local_idx(func: &Func) -> usize {
     let mut next_unnamed_local_idx: usize = 0;
 
-    for instr in func.body_instrs() {
+    for instr in func.repr.body_instrs() {
         if let Some(idx) = instr
             .locals()
             .iter()

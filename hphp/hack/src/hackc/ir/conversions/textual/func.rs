@@ -25,6 +25,7 @@ use ir::Immediate;
 use ir::IncDecOp;
 use ir::Instr;
 use ir::InstrId;
+use ir::IrRepr;
 use ir::LocId;
 use ir::LocalId;
 use ir::MethodFlags;
@@ -293,17 +294,21 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
-                let new_vec = func.alloc_imm(ir::TypedValue::vec(vec![]).into());
+                let new_vec = func.repr.alloc_imm(ir::TypedValue::vec(vec![]).into());
                 let lid = LocalId::Named(orig_func.repr.params[variadic_idx].0.name);
-                let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
+                let iid = func
+                    .repr
+                    .alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);
             }
 
-            let iid = func.alloc_instr(Instr::Terminator(ir::instr::Terminator::Jmp(
-                target_bid, loc,
-            )));
+            let iid = func
+                .repr
+                .alloc_instr(Instr::Terminator(ir::instr::Terminator::Jmp(
+                    target_bid, loc,
+                )));
             block.push(iid);
-            func.block_mut(Func::ENTRY_BID).iids = block;
+            func.repr.block_mut(IrRepr::ENTRY_BID).iids = block;
         }
 
         // And turn the 'enter' calls into a tail call into the non-default
@@ -313,14 +318,14 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             let mut params = Vec::new();
             for (param, _) in &orig_func.repr.params {
                 let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
-                let iid = func.alloc_instr(instr);
+                let iid = func.repr.alloc_instr(instr);
                 block.iids.push(iid);
                 params.push(ValueId::from(iid));
             }
             if has_reified {
                 let name = ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME);
                 let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(name), loc));
-                let iid = func.alloc_instr(instr);
+                let iid = func.repr.alloc_instr(instr);
                 block.iids.push(iid);
                 params.push(ValueId::from(iid));
             }
@@ -329,17 +334,17 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
                 FuncInfo::Method(mi) => {
                     let this_str = ir::intern(special_idents::THIS);
                     let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(this_str), loc));
-                    let receiver = func.alloc_instr(instr);
+                    let receiver = func.repr.alloc_instr(instr);
                     block.iids.push(receiver);
                     Instr::simple_method_call(mi.name, receiver.into(), &params, loc)
                 }
             };
-            let iid = func.alloc_instr(instr);
+            let iid = func.repr.alloc_instr(instr);
             block.iids.push(iid);
-            let iid = func.alloc_instr(Instr::ret(iid.into(), loc));
+            let iid = func.repr.alloc_instr(Instr::ret(iid.into(), loc));
             block.iids.push(iid);
 
-            func.alloc_bid(block)
+            func.repr.alloc_bid(block)
         };
 
         for instr in func.repr.instrs.iter_mut() {
@@ -368,6 +373,7 @@ fn write_func(
     let ret_ty = compute_func_ret_ty(&func.return_type());
 
     let lids = func
+        .repr
         .body_instrs()
         .flat_map(HasLocals::locals)
         .cloned()
@@ -427,7 +433,7 @@ fn write_func(
 
                 let mut state = FuncState::new(fb, &func, func_info);
 
-                for bid in func.block_ids() {
+                for bid in func.repr.block_ids() {
                     write_block(&mut state, bid)?;
                 }
 
@@ -572,7 +578,7 @@ fn write_instance_stub(
 
 fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
     trace!("  Block {bid}");
-    let block = state.func.block(bid);
+    let block = state.func.repr.block(bid);
 
     let params = block
         .params
@@ -580,7 +586,7 @@ fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
         .map(|iid| state.alloc_sid_for_iid(*iid))
         .collect_vec();
     // The entry BID is always included for us.
-    if bid != Func::ENTRY_BID {
+    if bid != IrRepr::ENTRY_BID {
         state.fb.write_label(bid, &params)?;
     }
 
@@ -594,7 +600,7 @@ fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
     write_terminator(state, block.terminator_iid())?;
 
     // Exception handler.
-    let handler = state.func.catch_target(bid);
+    let handler = state.func.repr.catch_target(bid);
     if handler != BlockId::NONE {
         state.fb.write_exception_handler(handler)?;
     }
@@ -604,7 +610,7 @@ fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
 
 #[allow(clippy::todo)]
 fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
-    let instr = state.func.instr(iid);
+    let instr = state.func.repr.instr(iid);
     trace!("    Instr {iid}: {instr:?}");
 
     state.update_loc(instr.loc_id())?;
@@ -816,7 +822,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // else should be handled in lower().
             textual_todo! {
                 message = ("Non-lowered hhbc instr: {hhbc:?} (from {})",
-                           ir::print::formatters::FmtFullLoc(state.func.loc(hhbc.loc_id()))),
+                           ir::print::formatters::FmtFullLoc(state.func.repr.loc(hhbc.loc_id()))),
                 use ir::instr::HasOperands;
                 let name = mangle::FunctionName::Unmangled(format!("TODO_hhbc_{}", hhbc));
                 let operands = instr
@@ -843,7 +849,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
 
     match vid.full() {
         ir::FullInstrId::Imm(cid) => {
-            let imm = state.func.imm(cid);
+            let imm = state.func.repr.imm(cid);
             let expr = match imm {
                 Immediate::Bool(false) => Expr::Const(Const::False),
                 Immediate::Bool(true) => Expr::Const(Const::True),
@@ -880,7 +886,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
 }
 
 fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
-    let terminator = match state.func.instr(iid) {
+    let terminator = match state.func.repr.instr(iid) {
         Instr::Terminator(terminator) => terminator,
         _ => unreachable!(),
     };
@@ -1336,7 +1342,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 
         // The iid wasn't found.  Maybe it's a "special" reference (like a
         // Deref()) - pessimistically look for that.
-        match self.func.instr(iid) {
+        match self.func.repr.instr(iid) {
             Instr::Special(Special::Textual(Textual::Deref(lid))) => {
                 return textual::Expr::deref(*lid);
             }
@@ -1356,7 +1362,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
             ir::FullInstrId::Imm(c) => {
                 use hack::Builtin;
                 use ir::CollectionType;
-                let c = self.func.imm(c);
+                let c = self.func.repr.imm(c);
                 match c {
                     Immediate::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
                     Immediate::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
@@ -1447,8 +1453,8 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 /// This inserts the needed 'assert_true' and 'assert_false' statements but
 /// leaves the original JmpOp as a marker for where to jump to.
 fn rewrite_jmp_ops(mut func: ir::Func) -> ir::Func {
-    for bid in func.block_ids() {
-        match *func.terminator(bid) {
+    for bid in func.repr.block_ids() {
+        match *func.repr.terminator(bid) {
             Terminator::JmpOp {
                 cond,
                 pred,
@@ -1466,15 +1472,19 @@ fn rewrite_jmp_ops(mut func: ir::Func) -> ir::Func {
                     Predicate::NonZero => {}
                 }
 
-                let iid = func.alloc_instr(Instr::Special(Special::Textual(Textual::AssertTrue(
-                    cond, loc,
-                ))));
-                func.block_mut(true_bid).iids.insert(0, iid);
+                let iid =
+                    func.repr
+                        .alloc_instr(Instr::Special(Special::Textual(Textual::AssertTrue(
+                            cond, loc,
+                        ))));
+                func.repr.block_mut(true_bid).iids.insert(0, iid);
 
-                let iid = func.alloc_instr(Instr::Special(Special::Textual(Textual::AssertFalse(
-                    cond, loc,
-                ))));
-                func.block_mut(false_bid).iids.insert(0, iid);
+                let iid =
+                    func.repr
+                        .alloc_instr(Instr::Special(Special::Textual(Textual::AssertFalse(
+                            cond, loc,
+                        ))));
+                func.repr.block_mut(false_bid).iids.insert(0, iid);
             }
             _ => {}
         }
@@ -1593,7 +1603,7 @@ pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Imme
     loop {
         match vid.full() {
             FullInstrId::Instr(iid) => {
-                let instr = func.instr(iid);
+                let instr = func.repr.instr(iid);
                 match instr {
                     // If the pointed-at instr is a copy then follow it and try
                     // again.
@@ -1609,7 +1619,7 @@ pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Imme
                 }
             }
             FullInstrId::Imm(cid) => {
-                return Some(func.imm(cid));
+                return Some(func.repr.imm(cid));
             }
             FullInstrId::None => {
                 return None;

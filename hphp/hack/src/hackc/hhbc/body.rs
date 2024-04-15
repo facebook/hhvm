@@ -19,9 +19,11 @@ use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
 
+/// A hhbc bytecode body
 pub type Body = BodyImpl<BcRepr>;
 
-#[derive(Debug, Clone, Serialize)]
+/// A BodyImpl represents a body of code. It's used for both Function and Method.
+#[derive(Debug, Default, Clone, Serialize)]
 #[repr(C)]
 pub struct BodyImpl<R> {
     pub attributes: Vector<Attribute>,
@@ -38,6 +40,21 @@ pub struct BodyImpl<R> {
     pub doc_comment: Maybe<Vector<u8>>,
     pub span: Span,
     pub repr: R,
+}
+
+impl<R> BodyImpl<R> {
+    pub fn is_reified(&self) -> bool {
+        self.attributes
+            .iter()
+            .any(|attr| attr.name.as_str() == "__Reified")
+    }
+
+    pub fn return_type(&self) -> TypeInfo {
+        match &self.return_type {
+            Maybe::Just(t) => t.clone(),
+            Maybe::Nothing => TypeInfo::empty(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]

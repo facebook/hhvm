@@ -49,18 +49,18 @@ fn merge_simple_jumps(func: &mut Func) {
         },
     );
 
-    for bid in func.block_ids() {
+    for bid in func.repr.block_ids() {
         loop {
-            let terminator = func.get_terminator(bid);
+            let terminator = func.repr.get_terminator(bid);
             match terminator {
                 Some(Terminator::Jmp(target_bid, _)) => {
                     let target_bid = *target_bid;
-                    let tcid = func.block(bid).tcid;
-                    let target_tcid = func.block(target_bid).tcid;
+                    let tcid = func.repr.block(bid).tcid;
+                    let target_tcid = func.repr.block(target_bid).tcid;
                     let has_compatible_tcid = tcid == target_tcid ||
                     // Single jump block can be merged even when it's not in the same try-catch block
                     // with the target
-                        (tcid.is_none() && func.block(bid).iids.len() == 1);
+                        (tcid.is_none() && func.repr.block(bid).iids.len() == 1);
                     if has_compatible_tcid && (predecessors[&target_bid].len() == 1) {
                         trace!(
                             "Merge blocks: {}[{:?}] <- {}[{:?}]",
@@ -72,9 +72,9 @@ fn merge_simple_jumps(func: &mut Func) {
 
                         // Steal the target's iids.  If the target is later then
                         // it will show as having no terminator.
-                        let target_iids = std::mem::take(&mut func.block_mut(target_bid).iids);
+                        let target_iids = std::mem::take(&mut func.repr.block_mut(target_bid).iids);
 
-                        let block = func.block_mut(bid);
+                        let block = func.repr.block_mut(bid);
                         // ...remove the terminator
                         block.iids.pop();
                         // ...amend the target block
@@ -122,8 +122,8 @@ fn remove_common_args(func: &mut Func) {
     while changed {
         changed = false;
 
-        for bid in func.block_ids() {
-            if func.block(bid).params.is_empty() {
+        for bid in func.repr.block_ids() {
+            if func.repr.block(bid).params.is_empty() {
                 continue;
             }
 
@@ -148,7 +148,7 @@ fn remove_common_args(func: &mut Func) {
 
                     if let Some(preds) = predecessors.get(&bid) {
                         for &pred in preds.iter() {
-                            let terminator = func.terminator_mut(pred);
+                            let terminator = func.repr.terminator_mut(pred);
                             match *terminator {
                                 Terminator::JmpArgs(target, _, loc) => {
                                     *terminator = Terminator::Jmp(target, loc);
@@ -158,7 +158,7 @@ fn remove_common_args(func: &mut Func) {
                         }
                     }
 
-                    let block = func.block_mut(bid);
+                    let block = func.repr.block_mut(bid);
                     for (param, common) in block.params.drain(..).zip(common_params.into_iter()) {
                         trace!("    remap: {} => {}", param, FmtRawVid(common));
                         remap[param] = common;
@@ -175,6 +175,7 @@ fn remove_common_args(func: &mut Func) {
 
                     let mut remove = Vec::with_capacity(common_params.len());
                     for (i, (&param, common)) in func
+                        .repr
                         .block(bid)
                         .params
                         .iter()
@@ -194,7 +195,7 @@ fn remove_common_args(func: &mut Func) {
                     // Remove the unused args from the predecessors.
                     if let Some(preds) = predecessors.get(&bid) {
                         for &pred in preds.iter() {
-                            let terminator = func.terminator_mut(pred);
+                            let terminator = func.repr.terminator_mut(pred);
                             match terminator {
                                 Terminator::JmpArgs(_, old_values, _) => {
                                     let values = remove_multi(
@@ -210,7 +211,7 @@ fn remove_common_args(func: &mut Func) {
                     }
 
                     // Remove the unused args from the block params.
-                    let params = &mut func.block_mut(bid).params;
+                    let params = &mut func.repr.block_mut(bid).params;
                     *params =
                         remove_multi(params.iter().copied(), remove.iter().copied()).collect();
                 }
@@ -226,7 +227,7 @@ fn remove_common_args(func: &mut Func) {
             if src == dst { None } else { Some((src, dst)) }
         })
         .collect();
-    func.remap_vids(&remap_vids);
+    func.repr.remap_vids(&remap_vids);
 }
 
 /// Produce an iterator with the indices of `remove` removed.  `remove` must be
@@ -286,7 +287,7 @@ fn compute_common_args(
                 return CommonArgs::CatchArgs;
             }
 
-            let pred_terminator = func.terminator(first_pred);
+            let pred_terminator = func.repr.terminator(first_pred);
             if !matches!(pred_terminator, Terminator::JmpArgs(..)) {
                 // The predecessor is not a JmpArgs - we can't do anything here.
                 return CommonArgs::Ignore;
@@ -307,7 +308,7 @@ fn compute_common_args(
                     .join(", ")
             );
             for next_pred in pred_iter {
-                let next_terminator = func.terminator(next_pred);
+                let next_terminator = func.repr.terminator(next_pred);
                 if !matches!(next_terminator, Terminator::JmpArgs(..)) {
                     // The predecessor is not a JmpArgs - we can't do anything here.
                     return CommonArgs::Ignore;
@@ -384,16 +385,16 @@ fn lookup(remap: &mut IdVec<InstrId, ValueId>, vid: ValueId) -> ValueId {
 fn renumber(func: &mut Func) {
     let mut remap: ValueIdMap<ValueId> = ValueIdMap::default();
     let mut src_instrs = std::mem::take(&mut func.repr.instrs);
-    let mut dst_instrs: IdVec<InstrId, Instr> = IdVec::with_capacity(func.instrs_len());
+    let mut dst_instrs: IdVec<InstrId, Instr> = IdVec::with_capacity(func.repr.instrs_len());
 
-    for bid in func.block_ids() {
-        let block = func.block_mut(bid);
+    for bid in func.repr.block_ids() {
+        let block = func.repr.block_mut(bid);
         block.params = remapper(&mut remap, &mut src_instrs, &block.params, &mut dst_instrs);
         block.iids = remapper(&mut remap, &mut src_instrs, &block.iids, &mut dst_instrs);
     }
 
     func.repr.instrs = dst_instrs;
-    func.remap_vids(&remap);
+    func.repr.remap_vids(&remap);
 }
 
 fn remapper(

@@ -27,11 +27,14 @@ pub fn unasync(func: &mut Func) {
     let mut changed = false;
 
     FuncBuilder::borrow_func(func, |builder| {
-        for bid in builder.func.block_ids() {
+        for bid in builder.func.repr.block_ids() {
             builder.start_block(bid);
 
             // Steal the terminator so we can dissect it.
-            let term = std::mem::replace(builder.func.terminator_mut(bid), Terminator::Unreachable);
+            let term = std::mem::replace(
+                builder.func.repr.terminator_mut(bid),
+                Terminator::Unreachable,
+            );
 
             match term {
                 Terminator::CallAsync(box call, [lazy, eager]) => {
@@ -41,7 +44,7 @@ pub fn unasync(func: &mut Func) {
                     rewrite_async_call(builder, call, [lazy, eager]);
                 }
                 term => {
-                    *builder.func.terminator_mut(bid) = term;
+                    *builder.func.repr.terminator_mut(bid) = term;
                 }
             }
         }

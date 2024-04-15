@@ -143,7 +143,7 @@ impl<'b> VerifyFunc<'b> {
     fn verify_block(&mut self, bid: BlockId, block: &Block) {
         check!(
             self,
-            self.func.is_terminated(bid),
+            self.func.repr.is_terminated(bid),
             "block {} is unterminated",
             bid
         );
@@ -155,7 +155,7 @@ impl<'b> VerifyFunc<'b> {
         }
 
         for &iid in &block.params {
-            let instr = self.func.instr(iid);
+            let instr = self.func.repr.instr(iid);
             check!(
                 self,
                 instr.is_param(),
@@ -167,7 +167,7 @@ impl<'b> VerifyFunc<'b> {
 
         let terminator_iid = block.terminator_iid();
         for (iid_idx, iid) in block.iids().enumerate() {
-            let instr = self.func.instr(iid);
+            let instr = self.func.repr.instr(iid);
 
             // Only the last Instr should be terminal.
             if iid == terminator_iid {
@@ -192,16 +192,16 @@ impl<'b> VerifyFunc<'b> {
                 block,
                 iid,
                 iid_idx,
-                self.func.instr(iid),
+                self.func.repr.instr(iid),
                 &mut dominated_iids,
             );
         }
 
         // Push the dominated IIDs into the successors.
-        for &edge in self.func.edges(bid) {
+        for &edge in self.func.repr.edges(bid) {
             self.push_dominated_iids(edge, &dominated_iids);
         }
-        let handler = self.func.catch_target(bid);
+        let handler = self.func.repr.catch_target(bid);
         if handler != BlockId::NONE {
             // Push the dominated IIDs into the catch handler.
             self.push_dominated_iids(handler, &dominated_iids);
@@ -211,7 +211,7 @@ impl<'b> VerifyFunc<'b> {
         if !self.flags.allow_critical_edges {
             // If we have multiple successors then our successors must all have
             // only a single predecessor.
-            let i = self.func.terminator(bid);
+            let i = self.func.repr.terminator(bid);
             let successors = i.edges();
             if successors.len() > 1 {
                 for t in successors {
@@ -245,21 +245,22 @@ impl<'b> VerifyFunc<'b> {
         let rpo = analysis::compute_rpo(self.func);
         check!(
             self,
-            rpo == self.func.block_ids().collect_vec(),
+            rpo == self.func.repr.block_ids().collect_vec(),
             "Func Blocks are not in RPO order.  Expected\n[{}]\nbut got\n[{}]",
             rpo.iter()
                 .map(|&bid| FmtBid(self.func, bid, true).to_string())
                 .collect_vec()
                 .join(", "),
             self.func
+                .repr
                 .block_ids()
                 .map(|bid| FmtBid(self.func, bid, true).to_string())
                 .collect_vec()
                 .join(", "),
         );
 
-        for bid in self.func.block_ids() {
-            self.verify_block(bid, self.func.block(bid));
+        for bid in self.func.repr.block_ids() {
+            self.verify_block(bid, self.func.repr.block(bid));
         }
     }
 
@@ -267,7 +268,7 @@ impl<'b> VerifyFunc<'b> {
         // InstrIds should never be used twice (although zero times is valid for
         // dead InstrIds).
         let mut seen = InstrIdSet::default();
-        for iid in self.func.body_iids() {
+        for iid in self.func.repr.body_iids() {
             check!(
                 self,
                 seen.insert(iid),
@@ -295,7 +296,7 @@ impl<'b> VerifyFunc<'b> {
                 )
             }
             FullInstrId::Instr(op_iid) => {
-                let op_instr = self.func.get_instr(op_iid);
+                let op_instr = self.func.repr.get_instr(op_iid);
                 // Technically this is a subset of the following domination
                 // check - but gives a better error message.
                 check!(
@@ -334,7 +335,7 @@ impl<'b> VerifyFunc<'b> {
 
     fn verify_block_args(&self, iid: InstrId, bid: BlockId, args: usize) {
         // Make sure that the target block is expecting the args.
-        let expected_args = self.func.block(bid).params.len();
+        let expected_args = self.func.repr.block(bid).params.len();
         check!(
             self,
             expected_args == args,
@@ -359,7 +360,7 @@ impl<'b> VerifyFunc<'b> {
             check!(
                 self,
                 matches!(
-                    self.func.instr(select_iid),
+                    self.func.repr.instr(select_iid),
                     Instr::Special(Special::Select(..))
                 ),
                 "iid {} returns {} values but is only followed by {} selects",
@@ -387,7 +388,10 @@ impl<'b> VerifyFunc<'b> {
             iid
         );
         let prev_vid = prev_vid.unwrap();
-        let prev_instr = self.func.instr(prev_vid.expect_instr("instr expected"));
+        let prev_instr = self
+            .func
+            .repr
+            .instr(prev_vid.expect_instr("instr expected"));
         if prev_vid != target_vid {
             // If the previous vid is not our target then it must be a
             // select with the same target as us.

@@ -505,7 +505,7 @@ pub(crate) fn print_func_body(
     f_pre_block: Option<&dyn Fn(&mut dyn Write, BlockId) -> Result>,
     f_pre_instr: Option<&dyn Fn(&mut dyn Write, InstrId) -> Result>,
 ) -> Result {
-    if let Some(doc_comment) = func.doc_comment.as_ref() {
+    if let Maybe::Just(doc_comment) = func.doc_comment.as_ref() {
         writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment.as_ref()))?;
     }
     if func.num_iters != 0 {
@@ -581,7 +581,7 @@ pub(crate) fn print_func_body(
             if let Some(f_pre_instr) = f_pre_instr.as_ref() {
                 f_pre_instr(w, iid)?;
             }
-            let instr = func.instr(iid);
+            let instr = func.repr.instr(iid);
             if crate::print::print_instr(w, &mut ctx, func, iid, instr)? {
                 writeln!(w)?;
             }
@@ -619,8 +619,8 @@ fn print_top_level_span(w: &mut dyn Write, span: Option<&Span>) -> Result {
 fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
     print_top_level_loc(w, Some(&SrcLoc::from_span(&f.func.span)))?;
     let ret_type = match &f.func.return_type {
-        Some(t) => format!(" {}", FmtTypeInfo(t)),
-        None => String::new(),
+        Maybe::Just(t) => format!(" {}", FmtTypeInfo(t)),
+        Maybe::Nothing => String::new(),
     };
     writeln!(
         w,
@@ -1443,7 +1443,7 @@ pub(crate) fn print_ir_to_bc(
 }
 
 fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
-    if let Some(loc) = func.get_loc(loc_id) {
+    if let Some(loc) = func.repr.get_loc(loc_id) {
         if ctx.cur_loc != *loc {
             ctx.cur_loc = *loc;
             write!(w, "<srcloc {}> ", FmtLoc(loc))?;
@@ -1453,7 +1453,7 @@ fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id
 }
 
 fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
-    if let Some(loc) = func.get_loc(loc_id) {
+    if let Some(loc) = func.repr.get_loc(loc_id) {
         if ctx.cur_loc != *loc {
             ctx.cur_loc = *loc;
             writeln!(w, "  .srcloc {}", FmtLoc(loc))?;
@@ -1734,8 +1734,8 @@ fn print_member_key(
 fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: bool) -> Result {
     print_top_level_loc(w, Some(&SrcLoc::from_span(&method.func.span)))?;
     let ret_type = match &method.func.return_type {
-        Some(t) => format!(" {}", FmtTypeInfo(t)),
-        None => String::new(),
+        Maybe::Just(t) => format!(" {}", FmtTypeInfo(t)),
+        Maybe::Nothing => String::new(),
     };
     writeln!(
         w,

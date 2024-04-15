@@ -7,6 +7,7 @@ use ir_core::BlockId;
 use ir_core::BlockIdMap;
 use ir_core::BlockIdSet;
 use ir_core::Func;
+use ir_core::IrRepr;
 use newtype::IdVec;
 
 pub type Predecessors = BlockIdMap<BlockIdSet>;
@@ -23,7 +24,7 @@ pub fn compute_predecessor_blocks(func: &Func, flags: PredecessorFlags) -> Prede
     if flags.mark_entry_blocks {
         // Insert BlockId::NONE as a source of ENTRY_BID to indicate that it's
         // called externally.
-        mark_edge(&mut predecessors, BlockId::NONE, Func::ENTRY_BID);
+        mark_edge(&mut predecessors, BlockId::NONE, IrRepr::ENTRY_BID);
 
         // Handle the default params.
         for (_, dv) in &func.repr.params {
@@ -33,9 +34,9 @@ pub fn compute_predecessor_blocks(func: &Func, flags: PredecessorFlags) -> Prede
         }
     }
 
-    for bid in func.block_ids() {
+    for bid in func.repr.block_ids() {
         predecessors.entry(bid).or_default();
-        for &target_bid in func.edges(bid) {
+        for &target_bid in func.repr.edges(bid) {
             mark_edge(&mut predecessors, bid, target_bid);
         }
 
@@ -69,7 +70,7 @@ impl PredecessorCatchMode {
             return;
         }
 
-        let dst = func.catch_target(src);
+        let dst = func.repr.catch_target(src);
         if dst == BlockId::NONE {
             return;
         }
@@ -114,12 +115,12 @@ pub fn compute_num_predecessors(func: &Func, flags: PredecessorFlags) -> IdVec<B
 
     let note_catch = !matches!(flags.catch, PredecessorCatchMode::Ignore);
 
-    for bid in func.block_ids() {
-        for &target in func.edges(bid) {
+    for bid in func.repr.block_ids() {
+        for &target in func.repr.edges(bid) {
             counts[target] += 1;
         }
         if note_catch {
-            let dst = func.catch_target(bid);
+            let dst = func.repr.catch_target(bid);
             if dst != BlockId::NONE {
                 counts[dst] += 1;
             }

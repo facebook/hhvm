@@ -23,7 +23,6 @@ use ir::type_struct::TypeStruct;
 use ir::BareThisOp;
 use ir::Call;
 use ir::FCallArgsFlags;
-use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
 use ir::GlobalId;
@@ -31,6 +30,7 @@ use ir::Immediate;
 use ir::InitPropOp;
 use ir::Instr;
 use ir::InstrId;
+use ir::IrRepr;
 use ir::IsTypeOp;
 use ir::LocId;
 use ir::LocalId;
@@ -62,7 +62,7 @@ pub(crate) fn lower_instrs(builder: &mut FuncBuilder, func_info: &FuncInfo<'_>) 
         func_info,
     };
 
-    let mut bid = Func::ENTRY_BID;
+    let mut bid = IrRepr::ENTRY_BID;
     while bid.0 < builder.func.repr.blocks.len() as u32 {
         lowerer.changed = true;
         while lowerer.changed {
@@ -86,7 +86,7 @@ impl LowerInstrs<'_> {
         // A lot of times the name for the global comes from a static
         // string name - see if we can dig it up and turn this into a
         // Textual::LoadGlobal.
-        vid.imm().and_then(|cid| match builder.func.imm(cid) {
+        vid.imm().and_then(|cid| match builder.func.repr.imm(cid) {
             Immediate::String(s) => {
                 match ir::StringId::from_bytes(*s) {
                     Ok(s) => {
@@ -451,6 +451,7 @@ impl LowerInstrs<'_> {
     ) -> Instr {
         let param = builder
             .func
+            .repr
             .get_param_by_lid(lid)
             .expect("Unknown parameter in verify_out_type()");
         let param_type = ir::EnforceableType::from_type_info(&param.ty());
@@ -529,7 +530,7 @@ impl LowerInstrs<'_> {
         // this with a Textual::SetPropD.
         if let Some(propname) = lookup_constant_string(&builder.func, field) {
             if let Some(class) = class.instr() {
-                let class_instr = builder.func.instr(class);
+                let class_instr = builder.func.repr.instr(class);
                 // The ClassGetC will have already been converted to a
                 // textual builtin.
                 if let Instr::Special(Special::Textual(Textual::HackBuiltin {

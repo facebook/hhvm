@@ -82,14 +82,14 @@ impl std::fmt::Debug for LiveInstrs {
 impl LiveInstrs {
     pub fn compute(func: &Func) -> Self {
         let mut live = LiveInstrs {
-            instr_last_use: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
-            instrs_dead_at: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
+            instr_last_use: IdVec::new_from_vec(vec![Default::default(); func.repr.instrs_len()]),
+            instrs_dead_at: IdVec::new_from_vec(vec![Default::default(); func.repr.instrs_len()]),
             blocks: IdVec::new_from_vec(vec![Default::default(); func.repr.blocks.len()]),
         };
 
         // Start by computing what InstrIds are introduced and referenced in
         // each block.
-        for bid in func.block_ids() {
+        for bid in func.repr.block_ids() {
             live.compute_referenced(func, bid);
         }
 
@@ -106,7 +106,7 @@ impl LiveInstrs {
         // Because we'll add stuff back to the work queue as necessary this
         // doesn't actually have to start in post-order - it's just more
         // efficient.
-        let mut work: VecDeque<BlockId> = func.block_ids().rev().collect_vec().into();
+        let mut work: VecDeque<BlockId> = func.repr.block_ids().rev().collect_vec().into();
         while let Some(bid) = work.pop_front() {
             live.compute_exit(&mut work, func, &predecessor_blocks, bid);
         }
@@ -117,12 +117,12 @@ impl LiveInstrs {
         // LiveBlockInfo::exit values - in case one successor expanded the exit
         // of a predecessor (see the example at the end of
         // compute_instr_use_by_block()).
-        for bid in func.block_ids() {
+        for bid in func.repr.block_ids() {
             live.expand_entry(func, bid);
         }
 
         // Finally compute where each instruction is last used.
-        for bid in func.block_ids() {
+        for bid in func.repr.block_ids() {
             live.compute_instr_use_by_block(func, bid);
         }
 
@@ -133,10 +133,12 @@ impl LiveInstrs {
         // Nothing in self is valid here.
         let block_info = &mut self.blocks[bid];
         block_info.referenced = func
+            .repr
             .block(bid)
             .iids()
             .flat_map(|iid| {
-                func.instr(iid)
+                func.repr
+                    .instr(iid)
                     .operands()
                     .iter()
                     .copied()
@@ -164,9 +166,10 @@ impl LiveInstrs {
         //   until we hit a steady state).
         let block_info = &self.blocks[bid];
         let created: InstrIdSet = func
+            .repr
             .block(bid)
             .iids()
-            .chain(func.block(bid).params.iter().copied())
+            .chain(func.repr.block(bid).params.iter().copied())
             .collect();
         let entry = &(&block_info.exit | &block_info.referenced) - &created;
 
@@ -188,11 +191,11 @@ impl LiveInstrs {
 
     fn expand_entry(&mut self, func: &Func, bid: BlockId) {
         let exit = self.blocks[bid].exit.clone();
-        for &edge in func.edges(bid) {
+        for &edge in func.repr.edges(bid) {
             self.blocks[edge].entry.extend(exit.iter().copied());
         }
 
-        let catch_bid = func.catch_target(bid);
+        let catch_bid = func.repr.catch_target(bid);
         if catch_bid != BlockId::NONE {
             self.blocks[catch_bid].entry.extend(exit.iter().copied());
         }
@@ -205,7 +208,7 @@ impl LiveInstrs {
         // We start with the InstrIds that are live on block exit and walk
         // backward through the block.
 
-        let block = func.block(bid);
+        let block = func.repr.block(bid);
         let mut live = self.blocks[bid].exit.clone();
 
         for iid in block.iids().rev() {
@@ -215,7 +218,7 @@ impl LiveInstrs {
                 self.instrs_dead_at[iid].insert(iid);
             }
 
-            for &op in func.instr(iid).operands() {
+            for &op in func.repr.instr(iid).operands() {
                 if let Some(op) = op.instr() {
                     if live.insert(op) {
                         // If we're just seeing this ValueId for the first time then
@@ -229,7 +232,7 @@ impl LiveInstrs {
 
         let mostly_dead = {
             let mut s: InstrIdSet = self.blocks[bid].entry.clone();
-            s.extend(func.block(bid).params.iter());
+            s.extend(func.repr.block(bid).params.iter());
             s.retain(|item| !live.contains(item));
             s
         };

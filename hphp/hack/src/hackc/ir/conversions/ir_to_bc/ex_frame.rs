@@ -10,8 +10,8 @@ use ir::TryCatchId;
 pub(crate) fn collect_tc_sections(func: &ir::Func) -> Vec<BlockIdOrExFrame> {
     let mut root: ExFrame = ExFrame::default();
 
-    for bid in func.block_ids() {
-        let tcid = func.block(bid).tcid;
+    for bid in func.repr.block_ids() {
+        let tcid = func.repr.block(bid).tcid;
         let frame = get_frame(&mut root, func, tcid);
         let bid = BlockIdOrExFrame::Block(bid);
         frame.push(bid);
@@ -68,7 +68,7 @@ impl ExFrame {
     fn sort_fn(_func: &ir::Func, a: &BlockIdOrExFrame, b: &BlockIdOrExFrame) -> std::cmp::Ordering {
         let a_bid = a.bid();
         let b_bid = b.bid();
-        if a_bid == ir::Func::ENTRY_BID || b_bid == ir::Func::ENTRY_BID {
+        if a_bid == ir::IrRepr::ENTRY_BID || b_bid == ir::IrRepr::ENTRY_BID {
             return a_bid.cmp(&b_bid);
         }
         a_bid.cmp(&b_bid)

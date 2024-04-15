@@ -185,7 +185,7 @@ pub struct FmtBid<'a>(pub &'a Func, pub BlockId, /* verbose */ pub bool);
 impl Display for FmtBid<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtBid(body, bid, verbose) = *self;
-        if let Some(block) = body.get_block(bid) {
+        if let Some(block) = body.repr.get_block(bid) {
             let pname = block.pname_hint.as_ref();
             if !verbose {
                 if let Some(pname) = pname {
@@ -390,7 +390,7 @@ impl Display for FmtVid<'_> {
                 }
             }
             FullInstrId::Instr(iid) => {
-                if let Some(instr) = body.get_instr(iid) {
+                if let Some(instr) = body.repr.get_instr(iid) {
                     if matches!(instr, Instr::Special(Special::Tombstone)) {
                         write!(f, "tombstone(%{})", iid.as_usize())
                     } else {
@@ -457,9 +457,9 @@ pub struct FmtInstr<'a>(pub &'a Func, pub InstrId);
 impl Display for FmtInstr<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtInstr(func, iid) = self;
-        let instr = func.get_instr(*iid).unwrap();
+        let instr = func.repr.get_instr(*iid).unwrap();
         let mut ctx = FuncContext {
-            cur_loc: *func.get_loc(instr.loc_id()).unwrap(),
+            cur_loc: *func.repr.get_loc(instr.loc_id()).unwrap(),
             live_instrs: Default::default(),
             verbose: true,
         };
@@ -525,7 +525,7 @@ pub(crate) struct FmtImmId<'a>(pub(crate) &'a Func, pub(crate) ImmId);
 impl Display for FmtImmId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtImmId(body, cid) = *self;
-        let imm = body.imm(cid);
+        let imm = body.repr.imm(cid);
         FmtImmediate(imm).fmt(f)
     }
 }
@@ -708,7 +708,7 @@ impl Display for FmtTParams<'_> {
     }
 }
 
-pub(crate) struct FmtShadowedTParams<'a>(pub(crate) &'a Vec<ClassName>);
+pub(crate) struct FmtShadowedTParams<'a>(pub(crate) &'a [ClassName]);
 
 impl Display for FmtShadowedTParams<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

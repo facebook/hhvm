@@ -67,7 +67,7 @@ impl FuncBuilderEx for FuncBuilder {
         ));
         self.start_block(true_bid);
         f(self);
-        if !self.func.is_terminated(self.cur_bid()) {
+        if !self.func.repr.is_terminated(self.cur_bid()) {
             self.emit(Instr::jmp(join_bid, loc));
         }
         self.start_block(join_bid);

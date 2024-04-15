@@ -137,10 +137,11 @@ impl Display for FmtEscapedString<'_> {
 /// need to print their SSA variable names.
 pub(crate) fn compute_live_instrs(func: &Func, verbose: bool) -> InstrIdSet {
     if verbose {
-        return func.body_iids().collect();
+        return func.repr.body_iids().collect();
     }
 
-    func.body_instrs()
+    func.repr
+        .body_instrs()
         .flat_map(|instr| instr.operands().iter().copied())
         .filter_map(ValueId::instr)
         .collect()

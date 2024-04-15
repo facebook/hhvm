@@ -33,7 +33,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
-    trace!("{}", ir::print::DisplayFunc::new(&func, true,));
+    trace!("{}", ir::print::DisplayFunc::new(&func, true));
     trace!("--------------------");
 
     // Start by inserting stack pushes and pops (which are normally not in the
@@ -43,7 +43,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     trace!(
         "-- after pushes:\n{}",
-        ir::print::DisplayFunc::new(&func, true,)
+        ir::print::DisplayFunc::new(&func, true)
     );
 
     // Now emit the instructions.
@@ -51,9 +51,6 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let mut labeler = emitter::Labeler::new(&func);
     let (instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, adata);
 
-    let return_type = func.return_type.into();
-
-    let span = func.span;
     let params = Vec::from_iter(func.repr.params.into_iter().map(|(param, dv)| {
         ParamEntry {
             param,
@@ -66,25 +63,21 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
         }
     }));
 
-    let doc_comment = func.doc_comment.map(|c| c.into()).into();
-    let upper_bounds = func.upper_bounds.into();
-
-    let shadowed_tparams = func.shadowed_tparams;
     let instrs = instrs.to_vec();
     let stack_depth = stack_depth::compute_stack_depth(&params, &instrs).unwrap();
 
     hhbc::Body {
-        attributes: func.attributes.into(),
+        attributes: func.attributes,
         attrs: func.attrs,
         coeffects: func.coeffects,
-        doc_comment,
+        doc_comment: func.doc_comment,
         is_memoize_wrapper: func.is_memoize_wrapper,
         is_memoize_wrapper_lsb: func.is_memoize_wrapper_lsb,
         num_iters: func.num_iters,
-        return_type,
-        shadowed_tparams: shadowed_tparams.into(),
-        upper_bounds,
-        span,
+        return_type: func.return_type,
+        shadowed_tparams: func.shadowed_tparams,
+        upper_bounds: func.upper_bounds,
+        span: func.span,
         repr: hhbc::BcRepr {
             instrs: instrs.into(),
             decl_vars: decl_vars.into(),

@@ -151,13 +151,13 @@ impl FuncBuilder {
     }
 
     pub fn alloc_param(&mut self) -> ValueId {
-        let iid = self.func.alloc_param_in(self.cur_bid);
+        let iid = self.func.repr.alloc_param_in(self.cur_bid);
         ValueId::from_instr(iid)
     }
 
     pub fn emit(&mut self, i: Instr) -> ValueId {
         assert!(!i.is_param());
-        let iid = self.func.alloc_instr_in(self.cur_bid, i);
+        let iid = self.func.repr.alloc_instr_in(self.cur_bid, i);
         ValueId::from_instr(iid)
     }
 
@@ -165,7 +165,7 @@ impl FuncBuilder {
         let lit_id = self
             .imm_lookup
             .entry(imm)
-            .or_insert_with_key(|imm| self.func.alloc_imm(imm.clone()));
+            .or_insert_with_key(|imm| self.func.repr.alloc_imm(imm.clone()));
         ValueId::from_imm(*lit_id)
     }
 

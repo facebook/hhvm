@@ -1623,12 +1623,7 @@ void RuntimeOption::Load(
                  EvalInitialTypeTableSize);
     Config::Bind(EvalInitialFuncTableSize, ini, config,
                  "Eval.InitialFuncTableSize",
-                 EvalInitialTypeTableSize);
-    if (EvalInitialTypeTableSize / 200 > EvalInitialTypeTableSize) {
-      // Assume InitialFuncTableSize was not provided; compute initial func
-      // table size from a conservative type/func ratio.
-      EvalInitialFuncTableSize = EvalInitialTypeTableSize / 200;
-    }
+                 EvalInitialFuncTableSize);
     Config::Bind(EvalInitialStaticStringTableSize, ini, config,
                  "Eval.InitialStaticStringTableSize",
                  EvalInitialStaticStringTableSize);

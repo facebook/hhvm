@@ -12,6 +12,7 @@ use crate::ParamEntry;
 
 pub type Function = FunctionImpl<crate::BcRepr>;
 
+/// A top-level Hack function.
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct FunctionImpl<R> {

@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::class::ClassImpl;
-use crate::func::FunctionImpl;
 use crate::Attribute;
 use crate::Constant;
 use crate::Fatal;
+use crate::FunctionImpl;
 use crate::IrRepr;
 use crate::Module;
 use crate::ModuleName;

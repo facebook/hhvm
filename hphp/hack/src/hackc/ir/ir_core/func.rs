@@ -11,10 +11,8 @@ use crate::instr::Terminator;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
-use crate::BodyImpl;
 use crate::BytesId;
-use crate::FunctionFlags;
-use crate::FunctionName;
+use crate::FunctionImpl;
 use crate::HasEdges;
 use crate::ImmId;
 use crate::Immediate;
@@ -22,13 +20,14 @@ use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
 use crate::LocalId;
-use crate::MethodFlags;
-use crate::MethodName;
+use crate::MethodImpl;
 use crate::Param;
 use crate::SrcLoc;
 use crate::ValueId;
 use crate::ValueIdMap;
-use crate::Visibility;
+
+pub type Function = FunctionImpl<IrRepr>;
+pub type Method = MethodImpl<IrRepr>;
 
 #[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Filename(pub BytesId);
@@ -373,24 +372,4 @@ impl IrRepr {
             _ => panic!("Non-Terminator found in terminator location {}", iid),
         }
     }
-}
-
-pub type Function = FunctionImpl<IrRepr>;
-pub type Method = MethodImpl<IrRepr>;
-
-/// A top-level Hack function.
-#[derive(Debug)]
-pub struct FunctionImpl<R> {
-    pub flags: FunctionFlags,
-    pub name: FunctionName,
-    pub body: BodyImpl<R>,
-}
-
-/// A Hack method contained within a Class.
-#[derive(Debug)]
-pub struct MethodImpl<R> {
-    pub flags: MethodFlags,
-    pub body: BodyImpl<R>,
-    pub name: MethodName,
-    pub visibility: Visibility,
 }

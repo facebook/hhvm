@@ -12,6 +12,7 @@ use crate::Visibility;
 
 pub type Method = MethodImpl<crate::BcRepr>;
 
+/// A Hack method contained within a Class.
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct MethodImpl<R> {

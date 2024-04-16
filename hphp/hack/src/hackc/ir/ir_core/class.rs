@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::func::MethodImpl;
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
 use crate::Constant;
 use crate::CtxConstant;
 use crate::IrRepr;
+use crate::MethodImpl;
 use crate::PropName;
 use crate::Property;
 use crate::Requirement;

@@ -65,11 +65,10 @@ class BaseThriftServer {
   BaseThriftServer() {}
   ~BaseThriftServer() {}
 
- public:
-  /**
-   * Get the number of connections dropped by the AsyncServerSocket
-   */
-  virtual uint64_t getNumDroppedConnections() const = 0;
+  /*
+  The base abstract class has been deprecated.
+  Please add all new code to the ThriftServer class.
+  */
 };
 } // namespace thrift
 } // namespace apache

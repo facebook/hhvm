@@ -2481,7 +2481,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   /**
    * Get the number of connections dropped by the AsyncServerSocket
    */
-  uint64_t getNumDroppedConnections() const override;
+  uint64_t getNumDroppedConnections() const;
 
   /**
    * Clear all the workers.

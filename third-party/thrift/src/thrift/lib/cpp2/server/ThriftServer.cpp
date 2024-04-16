@@ -251,6 +251,7 @@ TLSCredentialWatcher::TLSCredentialWatcher(ThriftServer* server)
 
 ThriftServer::ThriftServer()
     : BaseThriftServer(),
+      thriftConfig_(),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver(),
@@ -268,7 +269,8 @@ ThriftServer::ThriftServer()
 }
 
 ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
-    : BaseThriftServer(initialConfig),
+    : BaseThriftServer(),
+      thriftConfig_(initialConfig),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver(),
@@ -2347,6 +2349,60 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   }
 
   return result;
+}
+
+bool ThriftServer::getTaskExpireTimeForRequest(
+    const apache::thrift::transport::THeader& requestHeader,
+    std::chrono::milliseconds& queueTimeout,
+    std::chrono::milliseconds& taskTimeout) const {
+  return getTaskExpireTimeForRequest(
+      requestHeader.getClientQueueTimeout(),
+      requestHeader.getClientTimeout(),
+      queueTimeout,
+      taskTimeout);
+}
+
+bool ThriftServer::getTaskExpireTimeForRequest(
+    std::chrono::milliseconds clientQueueTimeoutMs,
+    std::chrono::milliseconds clientTimeoutMs,
+    std::chrono::milliseconds& queueTimeout,
+    std::chrono::milliseconds& taskTimeout) const {
+  taskTimeout = getTaskExpireTime();
+
+  // Client side always take precedence in deciding queue_timetout.
+  queueTimeout = clientQueueTimeoutMs;
+  if (queueTimeout == std::chrono::milliseconds(0)) {
+    queueTimeout = getQueueTimeout();
+  }
+  auto useClientTimeout = getUseClientTimeout() && clientTimeoutMs.count() >= 0;
+  // If queue timeout was set to 0 explicitly, this request has opt-out of queue
+  // timeout.
+  if (queueTimeout != std::chrono::milliseconds(0)) {
+    auto queueTimeoutPct = getQueueTimeoutPct();
+    // If queueTimeoutPct was set, we use it to calculate another queue timeout
+    // based on client timeout. And then use the max of the explicite setting
+    // and inferenced queue timeout.
+    if (queueTimeoutPct > 0 && queueTimeoutPct < 100 && useClientTimeout) {
+      queueTimeout =
+          max(queueTimeout,
+              std::chrono::milliseconds(
+                  (clientTimeoutMs.count() * queueTimeoutPct / 100)));
+    }
+  }
+
+  if (taskTimeout != std::chrono::milliseconds(0) && useClientTimeout) {
+    // we add 10% to the client timeout so that the request is much more likely
+    // to timeout on the client side than to read the timeout from the server
+    // as a TApplicationException (which can be confusing)
+    taskTimeout =
+        std::chrono::milliseconds((uint32_t)(clientTimeoutMs.count() * 1.1));
+  }
+  // Queue timeout shouldn't be greater than task timeout
+  if (taskTimeout < queueTimeout &&
+      taskTimeout != std::chrono::milliseconds(0)) {
+    queueTimeout = taskTimeout;
+  }
+  return queueTimeout != taskTimeout;
 }
 } // namespace thrift
 } // namespace apache

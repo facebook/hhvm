@@ -37,7 +37,7 @@
 #include <wangle/ssl/SSLContextConfig.h>
 
 using namespace apache::thrift;
-using apache::thrift::BaseThriftServer;
+using apache::thrift::ThriftServer;
 using apache::thrift::concurrency::PosixThreadFactory;
 using apache::thrift::concurrency::ThreadManager;
 using apache::thrift::server::TConnectionContext;
@@ -776,15 +776,15 @@ class CppServerWrapper : public ThriftServer {
   }
 
   void setNumIOWorkerThreads(size_t numIOWorkerThreads) {
-    BaseThriftServer::setNumIOWorkerThreads(numIOWorkerThreads);
+    ThriftServer::setNumIOWorkerThreads(numIOWorkerThreads);
   }
 
   void setListenBacklog(int listenBacklog) {
-    BaseThriftServer::setListenBacklog(listenBacklog);
+    ThriftServer::setListenBacklog(listenBacklog);
   }
 
   void setMaxConnections(uint32_t maxConnections) {
-    BaseThriftServer::setMaxConnections(maxConnections);
+    ThriftServer::setMaxConnections(maxConnections);
   }
 
   void setNumCPUWorkerThreads(size_t numCPUWorkerThreads) {

@@ -67,12 +67,12 @@ class ServerConfigs {
   virtual ~ServerConfigs() = default;
 
   /**
-   * @see BaseThriftServer::getMaxResponseSize function.
+   * @see ThriftServer::getMaxResponseSize function.
    */
   virtual uint64_t getMaxResponseSize() const = 0;
 
   /**
-   * @see BaseThriftServer::getTaskExpireTimeForRequest function.
+   * @see ThriftServer::getTaskExpireTimeForRequest function.
    */
   virtual bool getTaskExpireTimeForRequest(
       std::chrono::milliseconds clientQueueTimeoutMs,
@@ -80,10 +80,10 @@ class ServerConfigs {
       std::chrono::milliseconds& queueTimeout,
       std::chrono::milliseconds& taskTimeout) const = 0;
 
-  // @see BaseThriftServer::getObserver function.
+  // @see ThriftServer::getObserver function.
   virtual server::TServerObserver* getObserver() const = 0;
 
-  // @see BaseThriftServer::getAdaptiveConcurrencyController function.
+  // @see ThriftServer::getAdaptiveConcurrencyController function.
   virtual AdaptiveConcurrencyController& getAdaptiveConcurrencyController() = 0;
   virtual const AdaptiveConcurrencyController&
   getAdaptiveConcurrencyController() const = 0;
@@ -92,13 +92,13 @@ class ServerConfigs {
   virtual const CPUConcurrencyController& getCPUConcurrencyController()
       const = 0;
 
-  // @see BaseThriftServer::getNumIOWorkerThreads function.
+  // @see ThriftServer::getNumIOWorkerThreads function.
   virtual size_t getNumIOWorkerThreads() const = 0;
 
-  // @see BaseThriftServer::getStreamExpireTime function.
+  // @see ThriftServer::getStreamExpireTime function.
   virtual std::chrono::milliseconds getStreamExpireTime() const = 0;
 
-  // @see BaseThriftServer::getLoad function.
+  // @see ThriftServer::getLoad function.
   virtual int64_t getLoad(
       const std::string& counter = "", bool check_custom = true) const = 0;
 
@@ -119,12 +119,12 @@ class ServerConfigs {
 
   virtual bool resourcePoolEnabled() const { return false; }
 
-  // @see BaseThriftServer::resourcePoolSet function.
+  // @see ThriftServer::resourcePoolSet function.
   virtual const ResourcePoolSet& resourcePoolSet() const {
     LOG(FATAL) << "Unimplemented resourcePoolSet const";
   }
 
-  // @see BaseThriftServer::resourcePoolSet function.
+  // @see ThriftServer::resourcePoolSet function.
   virtual ResourcePoolSet& resourcePoolSet() {
     LOG(FATAL) << "Unimplemented resourcePoolSet";
   }

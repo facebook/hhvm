@@ -40,7 +40,7 @@ class ServerConfigsMock : public ServerConfigs {
   }
 
   /**
-   * @see BaseThriftServer::getTaskExpireTimeForRequest function.
+   * @see ThriftServer::getTaskExpireTimeForRequest function.
    */
   bool getTaskExpireTimeForRequest(
       std::chrono::milliseconds,

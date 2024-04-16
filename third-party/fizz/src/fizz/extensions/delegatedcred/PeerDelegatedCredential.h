@@ -10,6 +10,7 @@
 
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/OpenSSLPeerCertImpl.h>
+#include <fizz/protocol/clock/SystemClock.h>
 
 namespace fizz {
 namespace extensions {
@@ -32,8 +33,14 @@ class PeerDelegatedCredential : public OpenSSLPeerCertImpl<T> {
 
   SignatureScheme getExpectedScheme() const;
 
+  /* for testing only */
+  void setClock(std::shared_ptr<Clock> clock) {
+    clock_ = clock;
+  }
+
  private:
   DelegatedCredential credential_;
+  std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();
 };
 } // namespace extensions
 } // namespace fizz

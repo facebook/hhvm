@@ -36,6 +36,7 @@ void DelegatedCredentialUtils::checkExtensions(
 
 namespace {
 static constexpr folly::StringPiece kDelegatedOid{"1.3.6.1.4.1.44363.44"};
+static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
 
 folly::ssl::ASN1ObjUniquePtr generateCredentialOid() {
   folly::ssl::ASN1ObjUniquePtr oid;
@@ -156,6 +157,29 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
       toSign->coalesce());
 
   return cred;
+}
+
+void DelegatedCredentialUtils::checkCredentialTimeValidity(
+    const folly::ssl::X509UniquePtr& parentCert,
+    const DelegatedCredential& credential,
+    const std::shared_ptr<Clock>& clock) {
+  auto notBefore = X509_get0_notBefore(parentCert.get());
+  auto notBeforeTime =
+      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
+  auto credentialExpiresTime =
+      notBeforeTime + std::chrono::seconds(credential.valid_time);
+  auto now = clock->getCurrentTime();
+  if (now >= credentialExpiresTime) {
+    throw FizzException(
+        "credential is no longer valid", AlertDescription::illegal_parameter);
+  }
+
+  // Credentials may be valid for max 1 week according to spec
+  if (credentialExpiresTime - now > kMaxDelegatedCredentialLifetime) {
+    throw FizzException(
+        "credential validity is longer than a week from now",
+        AlertDescription::illegal_parameter);
+  }
 }
 } // namespace extensions
 } // namespace fizz

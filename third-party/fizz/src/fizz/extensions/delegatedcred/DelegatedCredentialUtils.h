@@ -10,6 +10,7 @@
 
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/clock/Clock.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
 namespace fizz {
@@ -28,6 +29,11 @@ class DelegatedCredentialUtils {
    * the certificate passed in.
    */
   static bool hasDelegatedExtension(const folly::ssl::X509UniquePtr& cert);
+
+  static void checkCredentialTimeValidity(
+      const folly::ssl::X509UniquePtr& parentCert,
+      const DelegatedCredential& credential,
+      const std::shared_ptr<Clock>& clock);
 
   /**
    * Constructs the buffer used for verifying the signature on the

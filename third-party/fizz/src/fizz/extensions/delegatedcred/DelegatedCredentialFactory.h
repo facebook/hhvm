@@ -10,7 +10,6 @@
 
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/OpenSSLFactory.h>
-#include <fizz/protocol/clock/SystemClock.h>
 
 namespace fizz {
 namespace extensions {
@@ -25,14 +24,9 @@ class DelegatedCredentialFactory : public OpenSSLFactory {
   std::shared_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
       const override;
 
-  void setClock(std::shared_ptr<Clock> clock);
-
-  static std::shared_ptr<PeerCert> makePeerCert(
+  static std::shared_ptr<PeerCert> makePeerCertStatic(
       CertificateEntry entry,
-      const std::shared_ptr<Clock>& clock);
-
- private:
-  std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();
+      bool leaf);
 };
 } // namespace extensions
 } // namespace fizz

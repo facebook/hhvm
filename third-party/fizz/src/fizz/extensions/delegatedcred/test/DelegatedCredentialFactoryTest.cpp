@@ -14,7 +14,6 @@
 #include <fizz/extensions/delegatedcred/DelegatedCredentialFactory.h>
 #include <fizz/extensions/delegatedcred/PeerDelegatedCredential.h>
 #include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/clock/test/Mocks.h>
 
 using namespace folly;
 
@@ -49,62 +48,10 @@ FghrPnYCODq235mY2A==
 -----END CERTIFICATE-----
 )";
 
-StringPiece kCertNoDelegatedExtension = R"(
------BEGIN CERTIFICATE-----
-MIIB2DCCAX6gAwIBAgIJAIEdGlbc/R/BMAoGCCqGSM49BAMCMEIxCzAJBgNVBAYT
-AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
-cGFueSBMdGQwHhcNMTkwNjEwMjExNjEwWhcNMjAwNjA5MjExNjEwWjBCMQswCQYD
-VQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0
-IENvbXBhbnkgTHRkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7cnufRVxTjuK
-xcBV4IQ35xkjIIICtm05sLlsriVbIcMj55kAVZHkEHnezgEIq6io8BRy+4m8gXYs
-X52uCjXmMKNdMFswHQYDVR0OBBYEFBXp/0ABAVMfEpQFDi0K8MK5HEUsMB8GA1Ud
-IwQYMBaAFBXp/0ABAVMfEpQFDi0K8MK5HEUsMAwGA1UdEwQFMAMBAf8wCwYDVR0P
-BAQDAgHmMAoGCCqGSM49BAMCA0gAMEUCIQDV1EqSNhLD+v6XhSGmoCxw6mnuHv2p
-wLj4M2gxgs6VmQIgBLB8W3th4WlHE7+C6YPeX6n834ceZ5dBi6FQLYKgpXY=
------END CERTIFICATE-----
-)";
-
-StringPiece kCertNoKeyUsage = R"(
------BEGIN CERTIFICATE-----
-MIIB3DCCAYKgAwIBAgIJAIueLstLYzuHMAoGCCqGSM49BAMCMEIxCzAJBgNVBAYT
-AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
-cGFueSBMdGQwHhcNMTkwNjEwMjExNjM1WhcNMjAwNjA5MjExNjM1WjBCMQswCQYD
-VQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0
-IENvbXBhbnkgTHRkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOiX1bVPJgpse
-oV8UxhOZ5kBynFLu0Iazp8axzziiILdW3j9dG7z2sCBaPiJntn7whfEOwD41mcJq
-UNssOm18IKNhMF8wHQYDVR0OBBYEFHdcgbW5+8piYNQdNy2dnXGuPvBQMB8GA1Ud
-IwQYMBaAFHdcgbW5+8piYNQdNy2dnXGuPvBQMAwGA1UdEwQFMAMBAf8wDwYJKwYB
-BAGC2kssBAIFADAKBggqhkjOPQQDAgNIADBFAiEAl01tUrb6x6E/SsRuPOKteKHZ
-qf+khcoJYtl3FQiBNrECIHP6Qxr3ZXysyHi0uGfkGqPVVLN9Knl7DXVo6CYVQKKl
------END CERTIFICATE-----
-)";
-
-StringPiece kCertWrongKeyUsage = R"(
------BEGIN CERTIFICATE-----
-MIIB6TCCAY+gAwIBAgIJAMfSoojFcEPAMAoGCCqGSM49BAMCMEIxCzAJBgNVBAYT
-AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
-cGFueSBMdGQwHhcNMTkwNjEwMjEzMDQwWhcNMjAwNjA5MjEzMDQwWjBCMQswCQYD
-VQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0
-IENvbXBhbnkgTHRkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEgyT1AYOI+lLL
-SGKWkPAIXOkQtYXMdhz1+YmvlD4O/tUpedv9UzKb+6YQ/pZj0Kg+IzilwIJSL+aT
-SAG8fLAzS6NuMGwwHQYDVR0OBBYEFHB8ZwSEBZitRX6GbOxW0+ProEX4MB8GA1Ud
-IwQYMBaAFHB8ZwSEBZitRX6GbOxW0+ProEX4MAwGA1UdEwQFMAMBAf8wCwYDVR0P
-BAQDAgFmMA8GCSsGAQQBgtpLLAQCBQAwCgYIKoZIzj0EAwIDSAAwRQIgUMEK+LqG
-x+n8WLnzTOj0bIQOfyerUEIRnEiDzwZtM2ACIQDyDF4Gibr14YHUs8ZbP3l37A9c
-wNMYE5qiSvpfGd77lw==
------END CERTIFICATE-----
-)";
-
 class DelegatedCredentialFactoryTest : public Test {
  public:
   void SetUp() override {
     CryptoUtils::init();
-    clock_ = std::make_shared<MockClock>();
-    factory_.setClock(clock_);
-    // Default return time to June 10, 2019 6:08:58 PM
-    ON_CALL(*clock_, getCurrentTime())
-        .WillByDefault(Return(std::chrono::system_clock::time_point(
-            std::chrono::seconds(1560190138))));
   }
 
   CertificateEntry generateEntry() const {
@@ -131,7 +78,6 @@ class DelegatedCredentialFactoryTest : public Test {
   }
 
   DelegatedCredentialFactory factory_;
-  std::shared_ptr<MockClock> clock_;
 };
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsing) {
@@ -148,49 +94,6 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {
   EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
 }
 
-TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoX509Extension) {
-  // "Wrong" certs have different time, adjust to compensate.
-  // Date: 06/27/2019 @ 7:32pm (UTC)
-  EXPECT_CALL(*clock_, getCurrentTime())
-      .WillOnce(Return(std::chrono::system_clock::time_point(
-          std::chrono::seconds(1561663956))));
-  auto entry = generateEntry();
-  entry.cert_data = getCertData(kCertNoDelegatedExtension);
-  // Note: factory doesn't do signature checks, so we expect this to fail due to
-  // the x509 extension missing.
-  expectThrows(
-      [&]() { factory_.makePeerCert(std::move(entry), true); },
-      "cert is missing DelegationUsage extension");
-}
-
-TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoKeyUsage) {
-  // "Wrong" certs have different time, adjust to compensate.
-  // Date: 06/27/2019 @ 7:32pm (UTC)
-  EXPECT_CALL(*clock_, getCurrentTime())
-      .WillOnce(Return(std::chrono::system_clock::time_point(
-          std::chrono::seconds(1561663956))));
-  auto entry = generateEntry();
-  entry.cert_data = getCertData(kCertNoKeyUsage);
-  // Expect the DelegationUsage check to pass, but missing keyusage
-  expectThrows(
-      [&]() { factory_.makePeerCert(std::move(entry), true); },
-      "cert is missing KeyUsage extension");
-}
-
-TEST_F(DelegatedCredentialFactoryTest, TestCredentialWrongKeyUsage) {
-  // "Wrong" certs have different time, adjust to compensate.
-  // Date: 06/27/2019 @ 7:32pm (UTC)
-  EXPECT_CALL(*clock_, getCurrentTime())
-      .WillOnce(Return(std::chrono::system_clock::time_point(
-          std::chrono::seconds(1561663956))));
-  auto entry = generateEntry();
-  entry.cert_data = getCertData(kCertWrongKeyUsage);
-  // This one has keyusage extension, but it lacks the digitalsignature usage
-  expectThrows(
-      [&]() { factory_.makePeerCert(std::move(entry), true); },
-      "cert lacks digital signature key usage");
-}
-
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
   auto entry = generateEntry();
   entry.extensions.clear();
@@ -198,31 +101,6 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
   EXPECT_TRUE(cert);
   EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
 }
-
-TEST_F(DelegatedCredentialFactoryTest, TestCertExpiredCredential) {
-  auto entry = generateEntry();
-  auto credential = getExtension<DelegatedCredential>(entry.extensions);
-  // Make it expire immediately after cert is valid
-  credential->valid_time = 0;
-  entry.extensions.clear();
-  entry.extensions.push_back(encodeExtension(*credential));
-  expectThrows(
-      [&]() { factory_.makePeerCert(std::move(entry), true); },
-      "credential is no longer valid");
-}
-
-TEST_F(DelegatedCredentialFactoryTest, TestCredentialValidForTooLong) {
-  auto entry = generateEntry();
-  auto credential = getExtension<DelegatedCredential>(entry.extensions);
-  // Add an extra week to the valid time to make it longer than the max
-  credential->valid_time += 604800;
-  entry.extensions.clear();
-  entry.extensions.push_back(encodeExtension(*credential));
-  expectThrows(
-      [&]() { factory_.makePeerCert(std::move(entry), true); },
-      "credential validity is longer than a week from now");
-}
-
 } // namespace test
 } // namespace extensions
 } // namespace fizz

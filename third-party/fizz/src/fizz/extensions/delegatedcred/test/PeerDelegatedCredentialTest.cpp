@@ -12,6 +12,7 @@
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/PeerDelegatedCredential.h>
+#include <fizz/protocol/clock/test/Mocks.h>
 
 using namespace folly;
 
@@ -30,14 +31,11 @@ namespace test {
  *  Output: Randomly generated ECDSA-P256 private key
  */
 StringPiece kP256CredCertKey = R"(
------BEGIN EC PARAMETERS-----
-BggqhkjOPQMBBw==
------END EC PARAMETERS-----
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEILzXE+AGe6Bg3yQ45nrENlmsJJbOhYBI3nJim5V18MQjoAoGCCqGSM49
-AwEHoUQDQgAEBvXlRUvxOcYCjrRSOAoQ28kFYS7X1R6a/YozsLjlSv+g1sZVPunK
-LCKJ7GnAlE2Ezs5aGDutdPJV5Uj8e1FpCw==
------END EC PRIVATE KEY-----
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOe/v6hxwTP9uA5dE
+se5CO6ARqeOYXEy1ede9eRCmDduhRANCAATsRtkwp2zrkRhyJpJQsUfjBkq385OG
+JQvi5Bb1zJuvYcjMrrxyis4kJ4dc6xXeWlhLjpvf1IFmvUZmmsUcfmAd
+-----END PRIVATE KEY-----
 )";
 
 // clang-format off
@@ -52,17 +50,18 @@ LCKJ7GnAlE2Ezs5aGDutdPJV5Uj8e1FpCw==
 // clang-format on
 StringPiece kP256CredCert = R"(
 -----BEGIN CERTIFICATE-----
-MIICBTCCAaygAwIBAgIJAOsXblJ0XNeJMAoGCCqGSM49BAMCMFExCzAJBgNVBAYT
+MIICKzCCAdGgAwIBAgIJAPi2vMRfOVd0MAoGCCqGSM49BAMCMGIxCzAJBgNVBAYT
 AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
-cGFueSBMdGQxDTALBgNVBAMMBEZpenowHhcNMjAwNjE3MjMyNzEzWhcNMjEwNjE3
-MjMyNzEzWjBRMQswCQYDVQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRww
-GgYDVQQKDBNEZWZhdWx0IENvbXBhbnkgTHRkMQ0wCwYDVQQDDARGaXp6MFkwEwYH
-KoZIzj0CAQYIKoZIzj0DAQcDQgAEBvXlRUvxOcYCjrRSOAoQ28kFYS7X1R6a/Yoz
-sLjlSv+g1sZVPunKLCKJ7GnAlE2Ezs5aGDutdPJV5Uj8e1FpC6NtMGswHQYDVR0O
-BBYEFLJ7AdynN3OOrZnG4jcCimwssWZyMB8GA1UdIwQYMBaAFLJ7AdynN3OOrZnG
-4jcCimwssWZyMAwGA1UdEwQFMAMBAf8wCwYDVR0PBAQDAgHmMA4GCSsGAQQBgtpL
-LAQBADAKBggqhkjOPQQDAgNHADBEAiAOHfxiKeMC4ZndoOiqjsip2S803ePrxRqu
-TrE2DBm4lwIgFEzqvc8SduigoB8k6i2reloeQcC03yX9AbM6ucPiIiA=
+cGFueSBMdGQxHjAcBgNVBAMMFXJldnByb3h5LWRlbGVnYXRlZC1lYzAgFw0xOTA5
+MjMwMjAyMzVaGA8yMTE5MDgzMDAyMDIzNVowYjELMAkGA1UEBhMCWFgxFTATBgNV
+BAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEe
+MBwGA1UEAwwVcmV2cHJveHktZGVsZWdhdGVkLWVjMFkwEwYHKoZIzj0CAQYIKoZI
+zj0DAQcDQgAE7EbZMKds65EYciaSULFH4wZKt/OThiUL4uQW9cybr2HIzK68corO
+JCeHXOsV3lpYS46b39SBZr1GZprFHH5gHaNuMGwwHQYDVR0OBBYEFMLkRMB4SclK
+8K8uYMQBaYw0gNP7MB8GA1UdIwQYMBaAFMLkRMB4SclK8K8uYMQBaYw0gNP7MAwG
+A1UdEwQFMAMBAf8wCwYDVR0PBAQDAgHmMA8GCSsGAQQBgtpLLAQCBQAwCgYIKoZI
+zj0EAwIDSAAwRQIgB2EWbwWohYziQ2LmY8Qmn8y0WKR6Mbm5aad0rUBvtK4CIQCv
+0U6Z/gFrVr0Cb2kc7M37KD9z5eeTwkQuGqs5GXF8Ow==
 -----END CERTIFICATE-----
 )";
 
@@ -76,9 +75,9 @@ StringPiece kP256DelegatedCredKey = R"(
 BggqhkjOPQMBBw==
 -----END EC PARAMETERS-----
 -----BEGIN EC PRIVATE KEY-----
-MHcCAQEEIOGZVfvLK8gObg4sM/K98plCrApsNvZMg0FPW/zJZf/yoAoGCCqGSM49
-AwEHoUQDQgAEbApTBiqLqh8gwgWKfiePUwy56THkhCla2elokwvJxbJ6VZFjVxJ9
-n29CHucXPw+V0ob2w9DBjgBas6kwJ9hLeQ==
+MHcCAQEEIA8/keRkilh8bwUPxH9jiP5SsP4QiZtfofayTsRSI59poAoGCCqGSM49
+AwEHoUQDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI97cwq4obtPHyKFF2ukoG+6
+/pXOUrEbsIH+/QBpZsnRHjvxryib97Ay+Q==
 -----END EC PRIVATE KEY-----
 )";
 
@@ -94,12 +93,30 @@ n29CHucXPw+V0ob2w9DBjgBas6kwJ9hLeQ==
  */
 // clang-format on
 StringPiece kP256DelegatedCred{
-    "000155ce040300005b3059301306072a8648ce3d020106082a8648ce3d03"
-    "0107034200046c0a53062a8baa1f20c2058a7e278f530cb9e931e484295a"
-    "d9e968930bc9c5b27a55916357127d9f6f421ee7173f0f95d286f6c3d0c1"
-    "8e005ab3a93027d84b79040300473045022021b29022bfdfac5e4c21a9c9"
-    "a50eedb086be632747f1e1dccddd24fa52606953022100a1b9d58e2c3064"
-    "e1ad2b7929c80eb9a99fef69343e8ade527c8a984c2e01bbb8"};
+    "088eb534040300005b3059301306072a"
+    "8648ce3d020106082a8648ce3d030107"
+    "03420004f2657fc0301a6e725b3cbb85"
+    "fea77f14c2161c396b248f7b730ab8a1"
+    "bb4f1f2285176ba4a06fbafe95ce52b1"
+    "1bb081fefd006966c9d11e3bf1af289b"
+    "f7b032f9040300473045022052b6e667"
+    "dbaad3b074332834ea1663d2e52ad9fd"
+    "38788e028b454844fed71a10022100ea"
+    "724cf5014aab5f5804c390d504af1643"
+    "743aa58485e16238831229bdc08c11"};
+
+StringPiece kBadP256DelegatedCred{
+    "00130914040300005b3059301306072a"
+    "8648ce3d020106082a8648ce3d030107"
+    "03420004f2657fc0301a6e725b3cbb85"
+    "fea77f14c2161c396b248f7b730ab8a1"
+    "bb4f1f2285176ba4a06fbafe95ce52b1"
+    "1bb081fefd006966c9d11e3bf1af289b"
+    "f7b032f90403004630440220302bfeec"
+    "446a45b1b37000395c6e15b9c9ff93bc"
+    "c405a322ead08e2f970e69110220489e"
+    "6825efac5ebe13f2ed8dbca2b5419e58"
+    "371f6fe47af04622d6b162d7ebd6"};
 
 // Buffer used for signature/verification
 StringPiece kVerifyBuffer{
@@ -107,9 +124,11 @@ StringPiece kVerifyBuffer{
 
 // Signature of kVerifyBuffer using kP256DelegatedCred
 StringPiece kP256Signature{
-    "304402203c8a625e97a07ec562f326dfd95e3e891ea049d24e0bfe44dbb8"
-    "a099a58d83cc0220101afdd3f0e51c771d0ea872293e006d0546d8821b0f"
-    "a45d6c64a14fcf918ffb"};
+    "3045022052b6e667dbaad3b074332834"
+    "ea1663d2e52ad9fd38788e028b454844"
+    "fed71a10022100ea724cf5014aab5f58"
+    "04c390d504af1643743aa58485e16238"
+    "831229bdc08c11"};
 
 class PeerDelegatedCredentialTest : public Test {
  public:
@@ -122,10 +141,10 @@ class PeerDelegatedCredentialTest : public Test {
     return IOBuf::copyBuffer(data.data(), data.size());
   }
 
-  DelegatedCredential getCredential() {
+  DelegatedCredential getCredential(folly::StringPiece dcBuf) {
     Extension ext;
     ext.extension_type = ExtensionType::delegated_credential;
-    ext.extension_data = toBuf(kP256DelegatedCred);
+    ext.extension_data = toBuf(dcBuf);
     std::vector<Extension> exts;
     exts.push_back(std::move(ext));
     return *getExtension<DelegatedCredential>(exts);
@@ -144,24 +163,36 @@ class PeerDelegatedCredentialTest : public Test {
 };
 
 TEST_F(PeerDelegatedCredentialTest, TestCredentialVerify) {
-  auto cred = getCredential();
+  auto cred = getCredential(kP256DelegatedCred);
   auto cert = getCert(kP256CredCert);
   auto pubKeyRange = cred.public_key->coalesce();
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
+
+  auto clock = std::make_shared<MockClock>();
+  ON_CALL(*clock, getCurrentTime())
+      .WillByDefault(Return(std::chrono::system_clock::time_point(
+          std::chrono::seconds(1712700000))));
   auto peerCred = std::make_shared<PeerDelegatedCredential<KeyType::P256>>(
       std::move(cert), std::move(pubKey), std::move(cred));
+  peerCred->setClock(clock);
 
-  peerCred->verify(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      toBuf(kVerifyBuffer)->coalesce(),
-      toBuf(kP256Signature)->coalesce());
+  // We expect all other verification steps to pass and only the final parent
+  // cert verifiation to fail
+  EXPECT_THAT(
+      [&]() {
+        peerCred->verify(
+            SignatureScheme::ecdsa_secp256r1_sha256,
+            CertificateVerifyContext::Server,
+            toBuf(kVerifyBuffer)->coalesce(),
+            toBuf(kP256Signature)->coalesce());
+      },
+      ThrowsMessage<std::runtime_error>("Signature verification failed"));
 }
 
-TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongCert) {
-  auto cred = getCredential();
+TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyNoExtension) {
+  auto cred = getCredential(kP256DelegatedCred);
   auto cert = getCert(kP256Certificate);
   auto pubKeyRange = cred.public_key->coalesce();
   auto addr = pubKeyRange.data();
@@ -178,11 +209,38 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongCert) {
             toBuf(kVerifyBuffer)->coalesce(),
             toBuf(kP256Signature)->coalesce());
       },
+      "cert is missing DelegationUsage extension");
+}
+
+TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBadSignature) {
+  // Credential wqas not signed by the right cert
+  auto cred = getCredential(kBadP256DelegatedCred);
+  auto cert = getCert(kP256CredCert);
+  auto pubKeyRange = cred.public_key->coalesce();
+  auto addr = pubKeyRange.data();
+  folly::ssl::EvpPkeyUniquePtr pubKey(
+      d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
+  auto clock = std::make_shared<MockClock>();
+  ON_CALL(*clock, getCurrentTime())
+      .WillByDefault(Return(std::chrono::system_clock::time_point(
+          std::chrono::seconds(1570400000))));
+  auto peerCred = std::make_shared<PeerDelegatedCredential<KeyType::P256>>(
+      std::move(cert), std::move(pubKey), std::move(cred));
+  peerCred->setClock(clock);
+
+  expectThrows(
+      [&]() {
+        peerCred->verify(
+            SignatureScheme::ecdsa_secp256r1_sha256,
+            CertificateVerifyContext::Server,
+            toBuf(kVerifyBuffer)->coalesce(),
+            toBuf(kP256Signature)->coalesce());
+      },
       "failed to verify signature on credential");
 }
 
 TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongAlgo) {
-  auto cred = getCredential();
+  auto cred = getCredential(kP256DelegatedCred);
   auto cert = getCert(kP256CredCert);
   auto pubKeyRange = cred.public_key->coalesce();
   auto addr = pubKeyRange.data();
@@ -204,7 +262,7 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongAlgo) {
 }
 
 TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBitFlip) {
-  auto cred = getCredential();
+  auto cred = getCredential(kP256DelegatedCred);
   auto cert = getCert(kP256CredCert);
   auto pubKeyRange = cred.public_key->coalesce();
   auto addr = pubKeyRange.data();
@@ -225,7 +283,7 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBitFlip) {
 }
 
 TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifySizeMismatch) {
-  auto cred = getCredential();
+  auto cred = getCredential(kP256DelegatedCred);
   auto cert = getCert(kP256CredCert);
   auto pubKeyRange = cred.public_key->coalesce();
   auto addr = pubKeyRange.data();

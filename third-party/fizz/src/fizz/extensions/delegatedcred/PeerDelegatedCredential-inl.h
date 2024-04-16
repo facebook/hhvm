@@ -6,10 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/protocol/clock/SystemClock.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
 namespace extensions {
+
 template <KeyType T>
 PeerDelegatedCredential<T>::PeerDelegatedCredential(
     folly::ssl::X509UniquePtr cert,
@@ -32,14 +34,16 @@ void PeerDelegatedCredential<T>::verify(
         "certificate verify didn't use credential's algorithm",
         AlertDescription::illegal_parameter);
   }
+  auto x509 = OpenSSLPeerCertImpl<T>::getX509();
+  // Check extensions on cert
+  DelegatedCredentialUtils::checkExtensions(x509);
+  DelegatedCredentialUtils::checkCredentialTimeValidity(
+      x509, credential_, clock_);
 
   // Verify signature
-  auto parentCert = std::make_unique<OpenSSLPeerCertImpl<T>>(
-      OpenSSLPeerCertImpl<T>::getX509());
   auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(
-      credential_,
-      folly::ssl::OpenSSLCertUtils::derEncode(
-          *OpenSSLPeerCertImpl<T>::getX509()));
+      credential_, folly::ssl::OpenSSLCertUtils::derEncode(*x509));
+  auto parentCert = std::make_unique<OpenSSLPeerCertImpl<T>>(std::move(x509));
 
   try {
     parentCert->verify(
@@ -63,6 +67,5 @@ template <KeyType T>
 SignatureScheme PeerDelegatedCredential<T>::getExpectedScheme() const {
   return credential_.expected_verify_scheme;
 }
-
 } // namespace extensions
 } // namespace fizz

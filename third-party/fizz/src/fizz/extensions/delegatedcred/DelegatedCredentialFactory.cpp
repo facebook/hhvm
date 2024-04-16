@@ -53,11 +53,12 @@ std::shared_ptr<PeerCert> makeCredential(
 }
 } // namespace
 
-static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
-
-std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
+std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
     CertificateEntry entry,
-    const std::shared_ptr<Clock>& clock) {
+    bool leaf) {
+  if (!leaf || entry.extensions.empty()) {
+    return CertUtils::makePeerCert(std::move(entry.cert_data));
+  }
   auto parentCert = CertUtils::makePeerCert(entry.cert_data->clone());
   auto parentX509 = parentCert->getX509();
   auto credential = getExtension<DelegatedCredential>(entry.extensions);
@@ -67,28 +68,6 @@ std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
     return std::move(parentCert);
   }
 
-  // Check validity period first.
-  auto notBefore = X509_get0_notBefore(parentX509.get());
-  auto notBeforeTime =
-      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
-  auto credentialExpiresTime =
-      notBeforeTime + std::chrono::seconds(credential->valid_time);
-  auto now = clock->getCurrentTime();
-  if (now >= credentialExpiresTime) {
-    throw FizzException(
-        "credential is no longer valid", AlertDescription::illegal_parameter);
-  }
-
-  // Credentials may be valid for max 1 week according to spec
-  if (credentialExpiresTime - now > kMaxDelegatedCredentialLifetime) {
-    throw FizzException(
-        "credential validity is longer than a week from now",
-        AlertDescription::illegal_parameter);
-  }
-
-  // Check extensions on cert
-  DelegatedCredentialUtils::checkExtensions(parentX509);
-
   // Create credential
   return makeCredential(std::move(credential.value()), std::move(parentX509));
 }
@@ -96,15 +75,7 @@ std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
 std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
     CertificateEntry entry,
     bool leaf) const {
-  if (!leaf || entry.extensions.empty()) {
-    return CertUtils::makePeerCert(std::move(entry.cert_data));
-  }
-  return makePeerCert(std::move(entry), clock_);
+  return makePeerCertStatic(std::move(entry), leaf);
 }
-
-void DelegatedCredentialFactory::setClock(std::shared_ptr<Clock> clock) {
-  clock_ = clock;
-}
-
 } // namespace extensions
 } // namespace fizz

@@ -228,7 +228,7 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
       // count towards the Eval.JitThreads limit.
       tl_ownedFunc.insert(fid);
       m_acquiredFunc = true;
-      if (!isWorker && level == LockLevel::Func) {
+      if (!isWorker && level == LockLevel::Func && !isProfiling(kind)) {
         auto threads = s_jittingThreads.load(std::memory_order_relaxed);
         if (threads >= Cfg::Jit::Threads) return;
 

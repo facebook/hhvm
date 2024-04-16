@@ -268,6 +268,16 @@ class State {
     return extensions_.get();
   }
 
+  /*
+   * Gets the extensions sent as part of the servers CertificateRequest message.
+   * Returns an empty vector if no client cert was requested
+   *
+   * Should not be used outside of the state machine.
+   */
+  const std::vector<ExtensionType>& certReqExtensions() const {
+    return certReqExtensions_;
+  }
+
   /**
    * Resumption master secret.
    */
@@ -416,6 +426,9 @@ class State {
   auto& extensions() {
     return extensions_;
   }
+  auto& certReqExtensions() {
+    return certReqExtensions_;
+  }
   auto& resumptionMasterSecret() {
     return resumptionMasterSecret_;
   }
@@ -479,6 +492,7 @@ class State {
   folly::Optional<Buf> appToken_;
   std::unique_ptr<AppTokenValidator> appTokenValidator_;
   std::shared_ptr<ServerExtensions> extensions_;
+  std::vector<ExtensionType> certReqExtensions_;
   std::vector<uint8_t> resumptionMasterSecret_;
   folly::Optional<std::chrono::system_clock::time_point> handshakeTime_;
   ECHStatus echStatus_{ECHStatus::NotRequested};

@@ -1023,23 +1023,27 @@ static Buf getCertificateVerify(
   return encodedCertificateVerify;
 }
 
-static Buf getCertificateRequest(
+static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
     const std::vector<SignatureScheme>& acceptableSigSchemes,
     const CertificateVerifier* const verifier,
     HandshakeContext& handshakeContext) {
+  std::vector<ExtensionType> certReqExtensions;
   CertificateRequest request;
   SignatureAlgorithms algos;
   algos.supported_signature_algorithms = acceptableSigSchemes;
+  certReqExtensions.push_back(algos.extension_type);
   request.extensions.push_back(encodeExtension(std::move(algos)));
   if (verifier) {
     auto verifierExtensions = verifier->getCertificateRequestExtensions();
     for (auto& ext : verifierExtensions) {
+      certReqExtensions.push_back(ext.extension_type);
       request.extensions.push_back(std::move(ext));
     }
   }
   auto encodedCertificateRequest = encodeHandshake(std::move(request));
   handshakeContext.appendToTranscript(encodedCertificateRequest);
-  return encodedCertificateRequest;
+  return std::make_pair(
+      std::move(certReqExtensions), std::move(encodedCertificateRequest));
 }
 
 static std::string getSNI(const ClientHello& chlo) {
@@ -1650,11 +1654,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                       ClientAuthMode::None &&
                   !resState;
               Optional<Buf> encodedCertRequest;
+              std::vector<ExtensionType> certReqExtensions;
               if (requestClientAuth) {
-                encodedCertRequest = getCertificateRequest(
-                    state.context()->getSupportedSigSchemes(),
-                    state.context()->getClientCertVerifier().get(),
-                    *handshakeContext);
+                std::tie(certReqExtensions, encodedCertRequest) =
+                    getCertificateRequest(
+                        state.context()->getSupportedSigSchemes(),
+                        state.context()->getClientCertVerifier().get(),
+                        *handshakeContext);
               }
 
               /*
@@ -1730,6 +1736,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                    encodedCertificate = std::move(encodedCertificate),
                    encodedCertRequest = std::move(encodedCertRequest),
                    requestClientAuth,
+                   certReqExtensions = std::move(certReqExtensions),
                    pskType,
                    pskMode,
                    sigScheme,
@@ -1876,7 +1883,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                          echStatus,
                          echState = std::move(echState),
                          clientRandom = std::move(clientRandom),
-                         handshakeTime = std::move(handshakeTime)](
+                         handshakeTime = std::move(handshakeTime),
+                         certReqExtensions = std::move(certReqExtensions)](
                             State& newState) mutable {
                           newState.writeRecordLayer() =
                               std::move(appTrafficWriteRecordLayer);
@@ -1906,6 +1914,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                           newState.clientRandom() = std::move(clientRandom);
                           newState.echStatus() = echStatus;
                           newState.echState() = std::move(echState);
+                          newState.certReqExtensions() =
+                              std::move(certReqExtensions);
                         });
 
                     if (earlyDataType == EarlyDataType::Accepted) {
@@ -2130,14 +2140,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
 
   std::vector<std::shared_ptr<const PeerCert>> clientCerts;
   bool leaf = true;
+  const auto& certExtensionsSupported = state.certReqExtensions();
   for (auto& certEntry : certMsg.certificate_list) {
-    // We don't request any extensions, so this ought to be empty
-    if (!certEntry.extensions.empty()) {
-      throw FizzException(
-          "certificate extensions must be empty",
-          AlertDescription::illegal_parameter);
-    }
-
+    Protocol::checkAllowedExtensions(certEntry, certExtensionsSupported);
     clientCerts.emplace_back(state.context()->getFactory()->makePeerCert(
         std::move(certEntry), leaf));
     leaf = false;

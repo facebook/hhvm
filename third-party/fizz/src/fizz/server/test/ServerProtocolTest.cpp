@@ -6265,6 +6265,60 @@ TEST_F(ServerProtocolTest, TestCertificateEmptyPermitted) {
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
 }
 
+TEST_F(ServerProtocolTest, TestCertificateExtensionsNotSupported) {
+  setUpExpectingCertificate();
+  clientLeafCert_ = std::make_shared<MockPeerCert>();
+  clientIntCert_ = std::make_shared<MockPeerCert>();
+
+  auto certificate = TestMessages::certificate();
+  CertificateEntry entry1;
+  entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
+  SignatureAlgorithms algos;
+  entry1.extensions.push_back(encodeExtension(std::move(algos)));
+  certificate.certificate_list.push_back(std::move(entry1));
+  CertificateEntry entry2;
+  entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
+  certificate.certificate_list.push_back(std::move(entry2));
+  auto actions =
+      getActions(detail::processEvent(state_, std::move(certificate)));
+
+  expectError<FizzException>(
+      actions,
+      AlertDescription::illegal_parameter,
+      "Unexpected extension in cert");
+}
+
+TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
+  setUpExpectingCertificate();
+  clientLeafCert_ = std::make_shared<MockPeerCert>();
+  clientIntCert_ = std::make_shared<MockPeerCert>();
+  EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
+      .WillOnce(Return(clientLeafCert_));
+  EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
+      .WillOnce(Return(clientIntCert_));
+
+  auto certificate = TestMessages::certificate();
+  CertificateEntry entry1;
+  entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
+  SignatureAlgorithms algos;
+  entry1.extensions.push_back(encodeExtension(std::move(algos)));
+  certificate.certificate_list.push_back(std::move(entry1));
+  CertificateEntry entry2;
+  entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
+  certificate.certificate_list.push_back(std::move(entry2));
+
+  state_.certReqExtensions().push_back(algos.extension_type);
+  auto actions =
+      getActions(detail::processEvent(state_, std::move(certificate)));
+
+  expectActions<MutateState>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.unverifiedCertChain()->size(), 2);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(0), clientLeafCert_);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(1), clientIntCert_);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificateVerify);
+}
+
 TEST_F(ServerProtocolTest, TestCertificateVerifyNoVerifier) {
   setUpExpectingCertificateVerify();
   context_->setClientCertVerifier(nullptr);

@@ -142,6 +142,30 @@ class Protocol {
     checkDuplicateExtensions(hrr.extensions);
   }
 
+  /*
+   * Checks that the presented extensions in the cert are a subset of the
+   * requested. Used for the response to the servers cert req msg
+   */
+  static void checkAllowedExtensions(
+      const CertificateEntry& certEntry,
+      const std::vector<ExtensionType>& requestedExtensions) {
+    // Extensions in cert must be a subset of extensions sent in the cert
+    // request msg
+    if (!std::all_of(
+            certEntry.extensions.begin(),
+            certEntry.extensions.end(),
+            [&requestedExtensions](const auto& ext) {
+              return std::find(
+                         requestedExtensions.begin(),
+                         requestedExtensions.end(),
+                         ext.extension_type) != requestedExtensions.end();
+            })) {
+      throw FizzException(
+          "Unexpected extension in cert", AlertDescription::illegal_parameter);
+    }
+    checkDuplicateExtensions(certEntry.extensions);
+  }
+
   static void checkDuplicateExtensions(const std::vector<Extension>& exts) {
     std::vector<ExtensionType> extensionList;
     for (const auto& extension : exts) {

@@ -243,18 +243,34 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
       m_preciseTypeMask |= kUnionTypeClass;
-      // We should never get both resolved and unresolved objects in a single union.
-      assertx(m_resolved.value_or(true));
-      m_resolved = true;
+      switch (m_resolved) {
+      case ResolvedType::Unspecified:
+        m_resolved = ResolvedType::Resolved;
+        break;
+      case ResolvedType::Unresolved:
+        m_resolved = ResolvedType::Mixed;
+        break;
+      case ResolvedType::Resolved:
+      case ResolvedType::Mixed:
+        break;
+      }
       break;
     }
     case AnnotType::Unresolved: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
       m_preciseTypeMask |= kUnionTypeClass;
-      // We should never get both resolved and unresolved objects in a single union.
-      assertx(!m_resolved.value_or(false));
-      m_resolved = false;
+      switch (m_resolved) {
+      case ResolvedType::Unspecified:
+        m_resolved = ResolvedType::Unresolved;
+        break;
+      case ResolvedType::Resolved:
+        m_resolved = ResolvedType::Mixed;
+        break;
+      case ResolvedType::Unresolved:
+      case ResolvedType::Mixed:
+        break;
+      }
       break;
     }
   }
@@ -297,8 +313,14 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
 
   // If we haven't seen any objects or unresolved then we're just simple
   // primitives - which are resolved.
-  if (m_resolved.value_or(true)) {
+  switch (m_resolved) {
+  case ResolvedType::Unspecified:
+  case ResolvedType::Resolved:
     m_flags |= TypeConstraintFlags::Resolved;
+    break;
+  case ResolvedType::Unresolved:
+  case ResolvedType::Mixed:
+    break;
   }
 
   return TypeConstraint{ m_flags, m_preciseTypeMask, m_typeName, classes };

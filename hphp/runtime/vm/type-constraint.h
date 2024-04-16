@@ -589,11 +589,23 @@ private:
   friend struct TcUnionPieceIterator;
   friend struct TcUnionPieceView;
 
+  enum class ResolvedType {
+    // We haven't yet specified a resolved or unresolved class.
+    Unspecified,
+    // We only have unresolved classes.
+    Unresolved,
+    // We only have resolved classes.
+    Resolved,
+    // We have a mix of resolved and unresolved classes. This isn't legal in a
+    // TypeConstraint so it has to be dealt with before finishing.
+    Mixed,
+  };
+
   struct UnionBuilder {
     const LowStringPtr m_typeName;
     TypeConstraintFlags m_flags = TypeConstraintFlags::Union;
     UnionTypeMask m_preciseTypeMask = 0;
-    Optional<bool> m_resolved;
+    ResolvedType m_resolved = ResolvedType::Unspecified;
     UnionClassList m_classes;
     bool m_containsNonnull = false;
 

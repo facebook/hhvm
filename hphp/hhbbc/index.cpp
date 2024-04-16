@@ -11009,6 +11009,9 @@ void flatten_type_mappings(IndexData& index,
         }
       }
       assertx(!tvu.empty());
+      // If any of the subtypes end up unresolved then the final union will also
+      // be unresolved. But it's important to try the `makeUnion` anyway because
+      // it will deal with some of the canonicalizations like `bool`.
       auto value = TypeConstraint::makeUnion(typeMapping->name, std::move(tvu));
       return TypeMapping { typeMapping->name, firstEnum, value };
     }

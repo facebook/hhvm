@@ -36,11 +36,10 @@ class _fbthrift_TestService_test_args(metaclass=_fbthrift_python_types.StructMet
 
 class _fbthrift_TestService_test_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(c.thrift_types.E),  # typeinfo
             None,  # default value
             None,  # adapter info

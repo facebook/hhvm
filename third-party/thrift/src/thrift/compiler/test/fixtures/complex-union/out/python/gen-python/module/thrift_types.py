@@ -15,61 +15,55 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "intValue",  # name
-            "intValue",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "intListValue",  # name
-            "intListValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "stringListValue",  # name
-            "stringListValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "stringValue",  # name
-            "stringValue",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "typedefValue",  # name
-            "typedefValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             14,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "stringRef",  # name
-            "stringRef",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -111,21 +105,19 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "intListValue",  # name
-            "intListValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "stringListValue",  # name
-            "stringListValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -167,21 +159,19 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "binaryData",  # name
-            "binaryData",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "stringData",  # name
-            "stringData",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -223,31 +213,28 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class Val(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "strVal",  # name
-            "strVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "intVal",  # name
-            "intVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "typedefValue",  # name
-            "typedefValue",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -289,21 +276,19 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
 
 class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "v1",  # name
-            "v1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "v2",  # name
-            "v2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -345,21 +330,19 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "thingOne",  # name
-            "thingOne",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "thingTwo",  # name
-            "thingTwo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -401,11 +384,10 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "num",  # name
-            "num",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -447,11 +429,10 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "s",  # name
-            "s",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(NonCopyableStruct),  # typeinfo
             None,  # default value
             None,  # adapter info

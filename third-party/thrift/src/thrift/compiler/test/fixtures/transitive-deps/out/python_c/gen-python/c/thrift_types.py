@@ -15,11 +15,10 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 class C(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "i",  # name
-            "i",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info

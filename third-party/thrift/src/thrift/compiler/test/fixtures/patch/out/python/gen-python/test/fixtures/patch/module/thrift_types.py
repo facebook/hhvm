@@ -19,21 +19,19 @@ import apache.thrift.type.standard.thrift_types
 
 class MyData(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -75,21 +73,19 @@ class MyData(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataWithCustomDefault(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             "1",  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             2,  # default value
             None,  # adapter info
@@ -131,11 +127,10 @@ class MyDataWithCustomDefault(metaclass=_fbthrift_python_types.StructMeta):
 
 class InnerUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "innerOption",  # name
-            "innerOption",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -177,31 +172,28 @@ class InnerUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "option1",  # name
-            "option1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "option2",  # name
-            "option2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "option3",  # name
-            "option3",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -243,331 +235,298 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -32,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithCustomDefault",  # name
-            "structWithCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefault),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -31,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i32WithCustomDefault",  # name
-            "i32WithCustomDefault",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             1,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -30,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "mapMap",  # name
-            "mapMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -29,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "listMap",  # name
-            "listMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -28,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optMapVal",  # name
-            "optMapVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -27,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optSetVal",  # name
-            "optSetVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -26,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optListVal",  # name
-            "optListVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -25,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optLateStructVal",  # name
-            "optLateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -24,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optStructVal",  # name
-            "optStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -23,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optEnumVal",  # name
-            "optEnumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -22,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optBinaryVal",  # name
-            "optBinaryVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -21,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optStringVal",  # name
-            "optStringVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -20,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optDoubleVal",  # name
-            "optDoubleVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -19,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optFloatVal",  # name
-            "optFloatVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -18,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI64Val",  # name
-            "optI64Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -17,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI32Val",  # name
-            "optI32Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -16,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI16Val",  # name
-            "optI16Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -15,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optByteVal",  # name
-            "optByteVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -14,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optBoolVal",  # name
-            "optBoolVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -13,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "lateStructVal",  # name
-            "lateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -12,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "unionVal",  # name
-            "unionVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -11,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structVal",  # name
-            "structVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -10,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "enumVal",  # name
-            "enumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "binaryVal",  # name
-            "binaryVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "stringVal",  # name
-            "stringVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "doubleVal",  # name
-            "doubleVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "floatVal",  # name
-            "floatVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i64Val",  # name
-            "i64Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i32Val",  # name
-            "i32Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i16Val",  # name
-            "i16Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "byteVal",  # name
-            "byteVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "boolVal",  # name
-            "boolVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithFieldCustomDefault",  # name
-            "structWithFieldCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             lambda: MyData(data1="1", data2=2),  # default value
             None,  # adapter info
@@ -645,11 +604,10 @@ class LateDefStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class Recursive(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "nodes",  # name
-            "nodes",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(Recursive)),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -691,11 +649,10 @@ class Recursive(metaclass=_fbthrift_python_types.StructMeta):
 
 class Bar(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "loop",  # name
-            "loop",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Loop),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -737,11 +694,10 @@ class Bar(metaclass=_fbthrift_python_types.StructMeta):
 
 class Loop(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "bar",  # name
-            "bar",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Bar),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -783,71 +739,64 @@ class Loop(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "unique",  # name
-            "unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "shared_const",  # name
-            "shared_const",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "shared_mustable",  # name
-            "shared_mustable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_unique",  # name
-            "opt_unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_shared_const",  # name
-            "opt_shared_const",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_shared_mustable",  # name
-            "opt_shared_mustable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_box",  # name
-            "opt_box",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -889,61 +838,55 @@ class RefFields(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -985,21 +928,19 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1041,21 +982,19 @@ class MyDataFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1097,21 +1036,19 @@ class MyDataEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1153,61 +1090,55 @@ class MyDataSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefault),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1249,21 +1180,19 @@ class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataWithCustomDefaultFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1305,21 +1234,19 @@ class MyDataWithCustomDefaultFieldPatch(metaclass=_fbthrift_python_types.StructM
 
 class MyDataWithCustomDefaultEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "data1",  # name
-            "data1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "data2",  # name
-            "data2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1361,21 +1288,19 @@ class MyDataWithCustomDefaultEnsureStruct(metaclass=_fbthrift_python_types.Struc
 
 class MyDataWithCustomDefaultSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1417,51 +1342,46 @@ class MyDataWithCustomDefaultSafePatch(metaclass=_fbthrift_python_types.StructMe
 
 class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1503,11 +1423,10 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class InnerUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "innerOption",  # name
-            "innerOption",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1549,21 +1468,19 @@ class InnerUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class InnerUnionSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1605,51 +1522,46 @@ class InnerUnionSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1691,31 +1603,28 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "option1",  # name
-            "option1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "option2",  # name
-            "option2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "option3",  # name
-            "option3",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1757,21 +1666,19 @@ class MyUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyUnionSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1813,61 +1720,55 @@ class MyUnionSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1909,21 +1810,19 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField10Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -1965,21 +1864,19 @@ class MyStructField10Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2021,41 +1918,37 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
-            "prepend",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
-            "append",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2097,41 +1990,37 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField27Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
-            "add",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2173,71 +2062,64 @@ class MyStructField27Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
-            "add",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
-            "put",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2279,41 +2161,37 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
-            "prepend",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
-            "append",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2355,71 +2233,64 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(MyStructField30Patch1)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
-            "add",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(MyStructField30Patch1)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
-            "put",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2461,71 +2332,64 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
-            "add",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
-            "put",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2567,331 +2431,298 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -32,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithCustomDefault",  # name
-            "structWithCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -31,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i32WithCustomDefault",  # name
-            "i32WithCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -30,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "mapMap",  # name
-            "mapMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField30Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -29,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "listMap",  # name
-            "listMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField29Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -28,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optMapVal",  # name
-            "optMapVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField28Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -27,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optSetVal",  # name
-            "optSetVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField27Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -26,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optListVal",  # name
-            "optListVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField26Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -25,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optLateStructVal",  # name
-            "optLateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -24,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optStructVal",  # name
-            "optStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -23,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optEnumVal",  # name
-            "optEnumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -22,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optBinaryVal",  # name
-            "optBinaryVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -21,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optStringVal",  # name
-            "optStringVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -20,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optDoubleVal",  # name
-            "optDoubleVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.DoublePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -19,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optFloatVal",  # name
-            "optFloatVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.FloatPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -18,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optI64Val",  # name
-            "optI64Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -17,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optI32Val",  # name
-            "optI32Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -16,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optI16Val",  # name
-            "optI16Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -15,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optByteVal",  # name
-            "optByteVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BytePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -14,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optBoolVal",  # name
-            "optBoolVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -13,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "lateStructVal",  # name
-            "lateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -12,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "unionVal",  # name
-            "unionVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -11,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structVal",  # name
-            "structVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -10,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "enumVal",  # name
-            "enumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField10Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "binaryVal",  # name
-            "binaryVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "stringVal",  # name
-            "stringVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "doubleVal",  # name
-            "doubleVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.DoublePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "floatVal",  # name
-            "floatVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.FloatPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i64Val",  # name
-            "i64Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i32Val",  # name
-            "i32Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "i16Val",  # name
-            "i16Val",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "byteVal",  # name
-            "byteVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BytePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "boolVal",  # name
-            "boolVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithFieldCustomDefault",  # name
-            "structWithFieldCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -2933,331 +2764,298 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -32,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "structWithCustomDefault",  # name
-            "structWithCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefault),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -31,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "i32WithCustomDefault",  # name
-            "i32WithCustomDefault",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -30,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "mapMap",  # name
-            "mapMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -29,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "listMap",  # name
-            "listMap",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -28,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optMapVal",  # name
-            "optMapVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -27,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optSetVal",  # name
-            "optSetVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -26,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optListVal",  # name
-            "optListVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -25,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optLateStructVal",  # name
-            "optLateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -24,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optStructVal",  # name
-            "optStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -23,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optEnumVal",  # name
-            "optEnumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -22,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optBinaryVal",  # name
-            "optBinaryVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -21,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optStringVal",  # name
-            "optStringVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -20,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optDoubleVal",  # name
-            "optDoubleVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -19,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optFloatVal",  # name
-            "optFloatVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -18,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI64Val",  # name
-            "optI64Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -17,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI32Val",  # name
-            "optI32Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -16,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optI16Val",  # name
-            "optI16Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -15,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optByteVal",  # name
-            "optByteVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -14,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optBoolVal",  # name
-            "optBoolVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -13,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "lateStructVal",  # name
-            "lateStructVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -12,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "unionVal",  # name
-            "unionVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -11,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "structVal",  # name
-            "structVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -10,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "enumVal",  # name
-            "enumVal",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -9,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "binaryVal",  # name
-            "binaryVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -8,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "stringVal",  # name
-            "stringVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -7,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "doubleVal",  # name
-            "doubleVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -6,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "floatVal",  # name
-            "floatVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -5,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "i64Val",  # name
-            "i64Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -4,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "i32Val",  # name
-            "i32Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -3,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "i16Val",  # name
-            "i16Val",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "byteVal",  # name
-            "byteVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "boolVal",  # name
-            "boolVal",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "structWithFieldCustomDefault",  # name
-            "structWithFieldCustomDefault",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3299,21 +3097,19 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3355,61 +3151,55 @@ class MyStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3523,21 +3313,19 @@ class LateDefStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class LateDefStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3579,61 +3367,55 @@ class LateDefStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Recursive),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3675,21 +3457,19 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RecursiveField1Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(Recursive)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3731,11 +3511,10 @@ class RecursiveField1Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RecursiveFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "nodes",  # name
-            "nodes",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveField1Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3777,11 +3556,10 @@ class RecursiveFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RecursiveEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "nodes",  # name
-            "nodes",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(Recursive)),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3823,21 +3601,19 @@ class RecursiveEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class RecursiveSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3879,61 +3655,55 @@ class RecursiveSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Bar),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(BarFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(BarEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(BarFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -3975,11 +3745,10 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class BarFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "loop",  # name
-            "loop",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(LoopPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4021,11 +3790,10 @@ class BarFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class BarEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             -1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "loop",  # name
-            "loop",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Loop),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4067,21 +3835,19 @@ class BarEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class BarSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4123,21 +3889,19 @@ class BarSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Loop),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4179,21 +3943,19 @@ class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class LoopSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4235,61 +3997,55 @@ class LoopSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFields),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
-            "patchPrior",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
-            "ensure",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
-            "patch",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            "remove",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4331,41 +4087,37 @@ class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsField1Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
-            "prepend",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
-            "append",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4407,41 +4159,37 @@ class RefFieldsField1Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsField4Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
-            "prepend",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
-            "append",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4483,41 +4231,37 @@ class RefFieldsField4Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsField7Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            "assign",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
-            "clear",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
-            "prepend",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
-            "append",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4559,31 +4303,28 @@ class RefFieldsField7Patch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "unique",  # name
-            "unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField1Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "opt_unique",  # name
-            "opt_unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField4Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "opt_box",  # name
-            "opt_box",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField7Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4625,71 +4366,64 @@ class RefFieldsFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "unique",  # name
-            "unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "shared_const",  # name
-            "shared_const",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "shared_mustable",  # name
-            "shared_mustable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_unique",  # name
-            "opt_unique",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_shared_const",  # name
-            "opt_shared_const",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_shared_mustable",  # name
-            "opt_shared_mustable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "opt_box",  # name
-            "opt_box",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -4731,21 +4465,19 @@ class RefFieldsEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class RefFieldsSafePatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "version",  # name
-            "version",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "data",  # name
-            "data",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info

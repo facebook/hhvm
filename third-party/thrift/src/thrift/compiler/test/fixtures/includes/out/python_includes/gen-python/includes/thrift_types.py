@@ -17,21 +17,19 @@ import transitive.thrift_types
 
 class Included(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        _fbthrift_python_types.FieldInfo(
+        (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyIntField",  # name
-            "MyIntField",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             0,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        _fbthrift_python_types.FieldInfo(
+        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyTransitiveField",  # name
-            "MyTransitiveField",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(transitive.thrift_types.Foo),  # typeinfo
             lambda: transitive.thrift_types.Foo(a=2),  # default value
             None,  # adapter info

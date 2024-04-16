@@ -49,7 +49,6 @@ from testing.thrift_types import (
     I32List,
     Integers,
     IOBufListStruct,
-    Reserved,
     SetI32,
     StringBucket,
     StrStrMap,
@@ -392,10 +391,3 @@ class SerializerTests(unittest.TestCase):
         )
         self.assertEqual(serialize(s, protocol=Protocol.JSON), json_bytes)
         self.assertEqual(deserialize(Complex, json_bytes, protocol=Protocol.JSON), s)
-
-    def test_json_deserialize_python_name(self) -> None:
-        json_bytes = b'{"from":"fromVal","nonlocal":0,"ok":"ok","cpdef":true,"move":"","inst":"","changes":"","__mangled_str":"","__mangled_int":0}'
-        r = Reserved(from_="fromVal", ok="ok", is_cpdef=True)
-        print(serialize(r, protocol=Protocol.JSON))
-        self.assertEqual(serialize(r, protocol=Protocol.JSON), json_bytes)
-        self.assertEqual(deserialize(Reserved, json_bytes, protocol=Protocol.JSON), r)

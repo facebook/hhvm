@@ -10,18 +10,21 @@ on:
     branches:
     - main
 
+permissions:
+  contents: read  #  to fetch code (actions/checkout)
+
 jobs:
   build:
     runs-on: windows-2019
     steps:
     - name: Export boost environment
-      run: "echo BOOST_ROOT=%BOOST_ROOT_1_78_0% >> %GITHUB_ENV%"
+      run: "echo BOOST_ROOT=%BOOST_ROOT_1_83_0% >> %GITHUB_ENV%"
       shell: cmd
     - name: Fix Git config
       run: git config --system core.longpaths true
     - name: Disable autocrlf
       run: git config --system core.autocrlf false
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Fetch libsodium
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libsodium
     - name: Fetch ninja
@@ -60,6 +63,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests folly
     - name: Fetch fizz
       run: python build/fbcode_builder/getdeps.py fetch --no-tests fizz
+    - name: Fetch mvfst
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests mvfst
     - name: Fetch wangle
       run: python build/fbcode_builder/getdeps.py fetch --no-tests wangle
     - name: Build libsodium
@@ -100,6 +105,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --no-tests folly
     - name: Build fizz
       run: python build/fbcode_builder/getdeps.py build --no-tests fizz
+    - name: Build mvfst
+      run: python build/fbcode_builder/getdeps.py build --no-tests mvfst
     - name: Build wangle
       run: python build/fbcode_builder/getdeps.py build --no-tests wangle
     - name: Build fbthrift

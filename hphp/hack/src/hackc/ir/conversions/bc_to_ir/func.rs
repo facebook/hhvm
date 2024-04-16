@@ -20,11 +20,11 @@ use crate::context::Context;
 pub(crate) fn convert_function(src: Function) -> ir::Function {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let func = convert_body(&src.body);
-    ir::verify::verify_func(&func, &Default::default());
+    let body = convert_body(&src.body);
+    ir::verify::verify_func(&body, &Default::default());
 
     ir::Function {
-        func,
+        body,
         flags: src.flags,
         name: src.name,
     }
@@ -34,12 +34,12 @@ pub(crate) fn convert_function(src: Function) -> ir::Function {
 pub(crate) fn convert_method(src: Method) -> ir::Method {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let func = convert_body(&src.body);
-    ir::verify::verify_func(&func, &Default::default());
+    let body = convert_body(&src.body);
+    ir::verify::verify_func(&body, &Default::default());
 
     ir::Method {
         flags: src.flags,
-        func,
+        body,
         name: src.name,
         visibility: src.visibility,
     }

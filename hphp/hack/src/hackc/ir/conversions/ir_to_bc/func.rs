@@ -92,7 +92,7 @@ pub(crate) fn convert_function(function: ir::Function, adata: &mut AdataState) -
     hhbc::Function {
         flags: function.flags,
         name: function.name,
-        body: convert_func(function.func, adata),
+        body: convert_func(function.body, adata),
     }
 }
 
@@ -102,6 +102,6 @@ pub(crate) fn convert_method(method: ir::Method, adata: &mut AdataState) -> Meth
         name: method.name,
         flags: method.flags,
         visibility: method.visibility,
-        body: convert_func(method.func, adata),
+        body: convert_func(method.body, adata),
     }
 }

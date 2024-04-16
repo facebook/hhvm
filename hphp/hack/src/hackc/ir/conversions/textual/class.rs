@@ -282,7 +282,7 @@ impl ClassState<'_, '_> {
     fn write_method(&mut self, method: ir::Method) -> Result {
         trace!("Convert Method {}::{}", self.class.name, method.name);
 
-        let is_static = match method.func.attrs.is_static() {
+        let is_static = match method.body.attrs.is_static() {
             true => IsStatic::Static,
             false => IsStatic::NonStatic,
         };
@@ -291,16 +291,16 @@ impl ClassState<'_, '_> {
 
         let func_info = FuncInfo::Method(MethodInfo {
             name: method.name,
-            attrs: method.func.attrs,
+            attrs: method.body.attrs,
             class: &self.class,
             is_static,
             flags: method.flags,
         });
 
-        if method.func.attrs.is_abstract() {
-            func::write_func_decl(self.txf, this_ty, method.func, Arc::new(func_info))?;
+        if method.body.attrs.is_abstract() {
+            func::write_func_decl(self.txf, this_ty, method.body, Arc::new(func_info))?;
         } else {
-            func::lower_and_write_func(self.txf, this_ty, method.func, func_info)?;
+            func::lower_and_write_func(self.txf, this_ty, method.body, func_info)?;
         }
 
         Ok(())
@@ -340,8 +340,8 @@ fn compute_base(class: &ir::Class) -> Option<ir::ClassName> {
 }
 
 fn cmp_method(a: &ir::Method, b: &ir::Method) -> Ordering {
-    let line_a = a.func.span.line_begin as usize;
-    let line_b = b.func.span.line_begin as usize;
+    let line_a = a.body.span.line_begin as usize;
+    let line_b = b.body.span.line_begin as usize;
     line_a
         .cmp(&line_b)
         .then_with(|| {
@@ -350,6 +350,6 @@ fn cmp_method(a: &ir::Method, b: &ir::Method) -> Ordering {
         })
         .then_with(|| {
             // Same name - use param count.
-            a.func.repr.params.len().cmp(&b.func.repr.params.len())
+            a.body.repr.params.len().cmp(&b.body.repr.params.len())
         })
 }

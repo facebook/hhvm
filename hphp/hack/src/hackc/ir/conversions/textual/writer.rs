@@ -110,7 +110,7 @@ impl Thing {
     fn line(&self) -> usize {
         match self {
             Thing::Class(c) => c.span.line_begin as usize,
-            Thing::Func(f) => f.func.span.line_begin as usize,
+            Thing::Func(f) => f.body.span.line_begin as usize,
         }
     }
 
@@ -124,7 +124,7 @@ impl Thing {
     fn num_params(&self) -> usize {
         match self {
             Thing::Class(_) => 0,
-            Thing::Func(f) => f.func.repr.params.len(),
+            Thing::Func(f) => f.body.repr.params.len(),
         }
     }
 

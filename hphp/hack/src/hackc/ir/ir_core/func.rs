@@ -383,14 +383,14 @@ pub type Method = MethodImpl<IrRepr>;
 pub struct FunctionImpl<R> {
     pub flags: FunctionFlags,
     pub name: FunctionName,
-    pub func: BodyImpl<R>,
+    pub body: BodyImpl<R>,
 }
 
 /// A Hack method contained within a Class.
 #[derive(Debug)]
 pub struct MethodImpl<R> {
     pub flags: MethodFlags,
-    pub func: BodyImpl<R>,
+    pub body: BodyImpl<R>,
     pub name: MethodName,
     pub visibility: Visibility,
 }

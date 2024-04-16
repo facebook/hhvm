@@ -130,11 +130,11 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     for method in &mut class.methods {
         if method.name.is_86pinit() {
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
-            method.func.attrs -= Attr::AttrStatic;
+            method.body.attrs -= Attr::AttrStatic;
         }
         if method.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
             // We want closure bodies to be 'instance' but hackc marks it as 'static'.
-            method.func.attrs -= Attr::AttrStatic;
+            method.body.attrs -= Attr::AttrStatic;
         }
     }
 
@@ -223,7 +223,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
 fn create_default_closure_constructor(class: &mut Class) {
     let name = MethodName::constructor();
 
-    let func = FuncBuilder::build_func(|fb| {
+    let body = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(ir::SrcLoc::from_span(&class.span));
         fb.func.span = class.span;
 
@@ -251,7 +251,7 @@ fn create_default_closure_constructor(class: &mut Class) {
 
     let method = Method {
         flags: MethodFlags::empty(),
-        func,
+        body,
         name,
         visibility: Visibility::Public,
     };
@@ -263,7 +263,7 @@ fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsSt
         return;
     }
 
-    let func = FuncBuilder::build_func(|fb| {
+    let body = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(ir::SrcLoc::from_span(&class.span));
         fb.func.span = class.span;
         fb.func.attrs = is_static.as_attr();
@@ -273,7 +273,7 @@ fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsSt
 
     let method = Method {
         flags: MethodFlags::empty(),
-        func,
+        body,
         name,
         visibility: Visibility::Private,
     };

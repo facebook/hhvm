@@ -263,7 +263,7 @@ fn cmp_fatal(a: &Fatal, b: &Fatal) -> Result {
     Ok(())
 }
 
-fn cmp_func(a: &Func, b: &Func) -> Result {
+fn cmp_body(a: &Func, b: &Func) -> Result {
     let Func {
         attributes: a_attributes,
         attrs: a_attrs,
@@ -352,17 +352,17 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
     let Function {
         flags: a_flags,
         name: a_name,
-        func: a_func,
+        body: a_body,
     } = a;
     let Function {
         flags: b_flags,
         name: b_name,
-        func: b_func,
+        body: b_body,
     } = b;
 
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_func(a_func, b_func).qualified("func")?;
+    cmp_body(a_body, b_body).qualified("body")?;
 
     Ok(())
 }
@@ -1196,18 +1196,18 @@ fn cmp_loc_id((a, a_func): (LocId, &Func), (b, b_func): (LocId, &Func)) -> Resul
 fn cmp_method(a: &Method, b: &Method) -> Result {
     let Method {
         flags: a_flags,
-        func: a_func,
+        body: a_body,
         name: a_name,
         visibility: a_visibility,
     } = a;
     let Method {
         flags: b_flags,
-        func: b_func,
+        body: b_body,
         name: b_name,
         visibility: b_visibility,
     } = b;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_func(a_func, b_func).qualified("func")?;
+    cmp_body(a_body, b_body).qualified("body")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     Ok(())

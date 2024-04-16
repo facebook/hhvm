@@ -68,11 +68,11 @@ pub(crate) fn write_function(txf: &mut TextualFile<'_>, function: ir::Function) 
 
     let func_info = FuncInfo::Function(FunctionInfo {
         name: function.name,
-        attrs: function.func.attrs,
+        attrs: function.body.attrs,
         flags: function.flags,
     });
 
-    lower_and_write_func(txf, textual::Ty::VoidPtr, function.func, func_info)
+    lower_and_write_func(txf, textual::Ty::VoidPtr, function.body, func_info)
 }
 
 fn add_attr<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, s: impl Into<Cow<'a, str>>) {

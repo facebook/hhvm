@@ -197,12 +197,12 @@ impl UnitParser {
             let Function {
                 flags: _,
                 name,
-                func,
+                body,
             } = f;
 
             class.methods.push(Method {
                 flags: cs.flags,
-                func,
+                body,
                 name: MethodName::new(name.as_string_id()),
                 visibility: cs.visibility,
             });

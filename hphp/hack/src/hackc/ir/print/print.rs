@@ -617,8 +617,8 @@ fn print_top_level_span(w: &mut dyn Write, span: Option<&Span>) -> Result {
 }
 
 fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
-    print_top_level_loc(w, Some(&SrcLoc::from_span(&f.func.span)))?;
-    let ret_type = match &f.func.return_type {
+    print_top_level_loc(w, Some(&SrcLoc::from_span(&f.body.span)))?;
+    let ret_type = match &f.body.return_type {
         Maybe::Just(t) => format!(" {}", FmtTypeInfo(t)),
         Maybe::Nothing => String::new(),
     };
@@ -626,15 +626,15 @@ fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
         w,
         "function {name}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {{",
         name = FmtIdentifierId(f.name.as_bytes_id()),
-        tparams = FmtTParams(&f.func.upper_bounds),
-        shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams),
-        params = FmtFuncParams(&f.func),
-        attr = FmtAttr(f.func.attrs, AttrContext::Function),
+        tparams = FmtTParams(&f.body.upper_bounds),
+        shadowed_tparams = FmtShadowedTParams(&f.body.shadowed_tparams),
+        params = FmtFuncParams(&f.body),
+        attr = FmtAttr(f.body.attrs, AttrContext::Function),
     )?;
     print_function_flags(w, f.flags)?;
-    print_attributes(w, &f.func.attributes)?;
-    print_coeffects(w, &f.func.coeffects)?;
-    print_func_body(w, &f.func, verbose, None, None)?;
+    print_attributes(w, &f.body.attributes)?;
+    print_coeffects(w, &f.body.coeffects)?;
+    print_func_body(w, &f.body, verbose, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }
@@ -1732,8 +1732,8 @@ fn print_member_key(
 }
 
 fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: bool) -> Result {
-    print_top_level_loc(w, Some(&SrcLoc::from_span(&method.func.span)))?;
-    let ret_type = match &method.func.return_type {
+    print_top_level_loc(w, Some(&SrcLoc::from_span(&method.body.span)))?;
+    let ret_type = match &method.body.return_type {
         Maybe::Just(t) => format!(" {}", FmtTypeInfo(t)),
         Maybe::Nothing => String::new(),
     };
@@ -1742,16 +1742,16 @@ fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: b
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {vis} {{",
         clsid = FmtIdentifierId(clsid.as_bytes_id()),
         method = FmtIdentifierId(method.name.as_bytes_id()),
-        tparams = FmtTParams(&method.func.upper_bounds),
-        shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams),
-        params = FmtFuncParams(&method.func),
+        tparams = FmtTParams(&method.body.upper_bounds),
+        shadowed_tparams = FmtShadowedTParams(&method.body.shadowed_tparams),
+        params = FmtFuncParams(&method.body),
         vis = FmtVisibility(method.visibility),
-        attr = FmtAttr(method.func.attrs, AttrContext::Method),
+        attr = FmtAttr(method.body.attrs, AttrContext::Method),
     )?;
     print_method_flags(w, method.flags)?;
-    print_attributes(w, &method.func.attributes)?;
-    print_coeffects(w, &method.func.coeffects)?;
-    print_func_body(w, &method.func, verbose, None, None)?;
+    print_attributes(w, &method.body.attributes)?;
+    print_coeffects(w, &method.body.coeffects)?;
+    print_func_body(w, &method.body, verbose, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }

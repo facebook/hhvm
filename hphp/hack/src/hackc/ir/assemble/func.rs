@@ -298,7 +298,7 @@ impl<'b> FunctionParser<'b> {
         Ok(Function {
             flags: state.flags,
             name,
-            func: state.builder.finish(),
+            body: state.builder.finish(),
         })
     }
 

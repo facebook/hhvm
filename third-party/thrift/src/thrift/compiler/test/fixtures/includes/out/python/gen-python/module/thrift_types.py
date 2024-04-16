@@ -17,28 +17,31 @@ import includes.thrift_types
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyIncludedField",  # name
+            "MyIncludedField",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             lambda: includes.thrift_types.Included(MyIntField=2, MyTransitiveField=transitive.thrift_types.Foo(a=2)),  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyOtherIncludedField",  # name
+            "MyOtherIncludedField",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyIncludedInt",  # name
+            "MyIncludedInt",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             42,  # default value
             None,  # adapter info

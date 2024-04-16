@@ -145,19 +145,21 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 class _fbthrift_PubSubStreamingService_returnstream_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "i32_from",  # name
+            "i32_from",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "i32_to",  # name
+            "i32_to",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -173,10 +175,11 @@ class _fbthrift_PubSubStreamingService_returnstream_result(metaclass=_fbthrift_p
 
 class _fbthrift_PubSubStreamingService_returnstream_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -187,10 +190,11 @@ class _fbthrift_PubSubStreamingService_returnstream_result_stream(metaclass=_fbt
 
 class _fbthrift_PubSubStreamingService_streamthrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -206,19 +210,21 @@ class _fbthrift_PubSubStreamingService_streamthrows_result(metaclass=_fbthrift_p
 
 class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -229,10 +235,11 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbt
 
 class _fbthrift_PubSubStreamingService_servicethrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -243,10 +250,11 @@ class _fbthrift_PubSubStreamingService_servicethrows_args(metaclass=_fbthrift_py
 
 class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -257,10 +265,11 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
 
 class _fbthrift_PubSubStreamingService_servicethrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -271,10 +280,11 @@ class _fbthrift_PubSubStreamingService_servicethrows_result_stream(metaclass=_fb
 
 class _fbthrift_PubSubStreamingService_servicethrows2_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -285,19 +295,21 @@ class _fbthrift_PubSubStreamingService_servicethrows2_args(metaclass=_fbthrift_p
 
 class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e1",  # name
+            "e1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e2",  # name
+            "e2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx2),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -308,10 +320,11 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
 
 class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -322,10 +335,11 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(metaclass=_f
 
 class _fbthrift_PubSubStreamingService_boththrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -336,10 +350,11 @@ class _fbthrift_PubSubStreamingService_boththrows_args(metaclass=_fbthrift_pytho
 
 class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -350,19 +365,21 @@ class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_pyt
 
 class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -373,10 +390,11 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthr
 
 class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -387,10 +405,11 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(metacl
 
 class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -401,19 +420,21 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(meta
 
 class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -424,10 +445,11 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
 
 class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -438,19 +460,21 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(metac
 
 class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -461,10 +485,11 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
 
 class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -475,10 +500,11 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_str
 
 class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "foo",  # name
+            "foo",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -489,19 +515,21 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(metaclas
 
 class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -512,19 +540,21 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
 
 class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "e",  # name
+            "e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -535,19 +565,21 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
 
 class _fbthrift_PubSubStreamingService_returnstreamFast_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "i32_from",  # name
+            "i32_from",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "i32_to",  # name
+            "i32_to",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -563,10 +595,11 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result(metaclass=_fbthri
 
 class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info

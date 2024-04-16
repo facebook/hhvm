@@ -1976,15 +1976,15 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, exports: Self, imports: Self, right_brace: Self) -> Self {
+    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, imports: Self, exports: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(ctx.get_arena().alloc(ModuleDeclarationChildren {
             attribute_spec,
             new_keyword,
             module_keyword,
             name,
             left_brace,
-            exports,
             imports,
+            exports,
             right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

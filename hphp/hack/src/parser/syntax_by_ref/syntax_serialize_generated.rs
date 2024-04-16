@@ -1632,7 +1632,7 @@ ss.serialize_field("enum_class_label_hash", &self.with(hash))?;
 ss.serialize_field("enum_class_label_expression", &self.with(expression))?;
       ss.end()
 } 
-SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,new_keyword,module_keyword,name,left_brace,exports,imports,right_brace} ) => {
+SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,new_keyword,module_keyword,name,left_brace,imports,exports,right_brace} ) => {
       let mut ss = s.serialize_struct("", 9)?;
       ss.serialize_field("kind", "module_declaration")?;
       ss.serialize_field("module_declaration_attribute_spec", &self.with(attribute_spec))?;
@@ -1640,8 +1640,8 @@ ss.serialize_field("module_declaration_new_keyword", &self.with(new_keyword))?;
 ss.serialize_field("module_declaration_module_keyword", &self.with(module_keyword))?;
 ss.serialize_field("module_declaration_name", &self.with(name))?;
 ss.serialize_field("module_declaration_left_brace", &self.with(left_brace))?;
-ss.serialize_field("module_declaration_exports", &self.with(exports))?;
 ss.serialize_field("module_declaration_imports", &self.with(imports))?;
+ss.serialize_field("module_declaration_exports", &self.with(exports))?;
 ss.serialize_field("module_declaration_right_brace", &self.with(right_brace))?;
       ss.end()
 } 

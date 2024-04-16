@@ -2575,8 +2575,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
-            module_declaration_exports;
             module_declaration_imports;
+            module_declaration_exports;
             module_declaration_right_brace;
           } ->
         let acc = f acc module_declaration_attribute_spec in
@@ -2584,8 +2584,8 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc module_declaration_module_keyword in
         let acc = f acc module_declaration_name in
         let acc = f acc module_declaration_left_brace in
-        let acc = f acc module_declaration_exports in
         let acc = f acc module_declaration_imports in
+        let acc = f acc module_declaration_exports in
         let acc = f acc module_declaration_right_brace in
         acc
       | ModuleExports
@@ -4337,8 +4337,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
-            module_declaration_exports;
             module_declaration_imports;
+            module_declaration_exports;
             module_declaration_right_brace;
           } ->
         [
@@ -4347,8 +4347,8 @@ module WithToken (Token : TokenType) = struct
           module_declaration_module_keyword;
           module_declaration_name;
           module_declaration_left_brace;
-          module_declaration_exports;
           module_declaration_imports;
+          module_declaration_exports;
           module_declaration_right_brace;
         ]
       | ModuleExports
@@ -6133,8 +6133,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
-            module_declaration_exports;
             module_declaration_imports;
+            module_declaration_exports;
             module_declaration_right_brace;
           } ->
         [
@@ -6143,8 +6143,8 @@ module WithToken (Token : TokenType) = struct
           "module_declaration_module_keyword";
           "module_declaration_name";
           "module_declaration_left_brace";
-          "module_declaration_exports";
           "module_declaration_imports";
+          "module_declaration_exports";
           "module_declaration_right_brace";
         ]
       | ModuleExports
@@ -8152,8 +8152,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
-            module_declaration_exports;
             module_declaration_imports;
+            module_declaration_exports;
             module_declaration_right_brace;
           ] ) ->
         ModuleDeclaration
@@ -8163,8 +8163,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
-            module_declaration_exports;
             module_declaration_imports;
+            module_declaration_exports;
             module_declaration_right_brace;
           }
       | ( SyntaxKind.ModuleExports,
@@ -10751,8 +10751,8 @@ module WithToken (Token : TokenType) = struct
           module_declaration_module_keyword
           module_declaration_name
           module_declaration_left_brace
-          module_declaration_exports
           module_declaration_imports
+          module_declaration_exports
           module_declaration_right_brace =
         let syntax =
           ModuleDeclaration
@@ -10762,8 +10762,8 @@ module WithToken (Token : TokenType) = struct
               module_declaration_module_keyword;
               module_declaration_name;
               module_declaration_left_brace;
-              module_declaration_exports;
               module_declaration_imports;
+              module_declaration_exports;
               module_declaration_right_brace;
             }
         in

@@ -2525,8 +2525,8 @@ let schema : schema_node list =
           ("module_keyword", Token);
           ("name", Aggregate Name);
           ("left_brace", Token);
-          ("exports", Just "ModuleExports");
           ("imports", Just "ModuleImports");
+          ("exports", Just "ModuleExports");
           ("right_brace", Token);
         ];
     };

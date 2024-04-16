@@ -14,14 +14,14 @@ new module hackfmt.test3 {
 
 // all on one line to the right shape
 new module hackfmt.test4 {
-  exports {
-    d,
-    e,
-    f,
-  }
   imports {
     a,
     b,
     c,
+  }
+  exports {
+    d,
+    e,
+    f,
   }
 }

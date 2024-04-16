@@ -778,8 +778,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_enum_class_label_expression(self, qualifier, hash, expression)
     }
 
-    fn make_module_declaration(&mut self, attribute_spec: Self::Output, new_keyword: Self::Output, module_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, exports: Self::Output, imports: Self::Output, right_brace: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_module_declaration(self, attribute_spec, new_keyword, module_keyword, name, left_brace, exports, imports, right_brace)
+    fn make_module_declaration(&mut self, attribute_spec: Self::Output, new_keyword: Self::Output, module_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, imports: Self::Output, exports: Self::Output, right_brace: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_module_declaration(self, attribute_spec, new_keyword, module_keyword, name, left_brace, imports, exports, right_brace)
     }
 
     fn make_module_exports(&mut self, exports_keyword: Self::Output, left_brace: Self::Output, exports: Self::Output, right_brace: Self::Output) -> Self::Output {

@@ -1629,8 +1629,8 @@ pub struct ModuleDeclarationChildren<'a, T, V> {
     pub module_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
-    pub exports: Syntax<'a, T, V>,
     pub imports: Syntax<'a, T, V>,
+    pub exports: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
 }
 

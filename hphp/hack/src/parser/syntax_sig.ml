@@ -1073,8 +1073,8 @@ module type Syntax_S = sig
         module_declaration_module_keyword: t;
         module_declaration_name: t;
         module_declaration_left_brace: t;
-        module_declaration_exports: t;
         module_declaration_imports: t;
+        module_declaration_exports: t;
         module_declaration_right_brace: t;
       }
     | ModuleExports of {

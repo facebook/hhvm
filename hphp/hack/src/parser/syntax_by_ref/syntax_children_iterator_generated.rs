@@ -1816,8 +1816,8 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.module_keyword),
                     3 => Some(&x.name),
                     4 => Some(&x.left_brace),
-                    5 => Some(&x.exports),
-                    6 => Some(&x.imports),
+                    5 => Some(&x.imports),
+                    6 => Some(&x.exports),
                     7 => Some(&x.right_brace),
                         _ => None,
                     }

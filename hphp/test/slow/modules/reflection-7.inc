@@ -3,12 +3,12 @@
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module a {
-    exports {
+    imports {
         global,
         x,
         y.*
     }
-    imports {
+    exports {
         global,
         x,
         y.*

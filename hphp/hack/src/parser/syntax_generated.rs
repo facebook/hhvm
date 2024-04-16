@@ -1970,15 +1970,15 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(_: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_exports: Self, module_declaration_imports: Self, module_declaration_right_brace: Self) -> Self {
+    fn make_module_declaration(_: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_imports: Self, module_declaration_exports: Self, module_declaration_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
             module_declaration_attribute_spec,
             module_declaration_new_keyword,
             module_declaration_module_keyword,
             module_declaration_name,
             module_declaration_left_brace,
-            module_declaration_exports,
             module_declaration_imports,
+            module_declaration_exports,
             module_declaration_right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -3459,14 +3459,14 @@ where
                 acc
             },
             SyntaxVariant::ModuleDeclaration(x) => {
-                let ModuleDeclarationChildren { module_declaration_attribute_spec, module_declaration_new_keyword, module_declaration_module_keyword, module_declaration_name, module_declaration_left_brace, module_declaration_exports, module_declaration_imports, module_declaration_right_brace } = *x;
+                let ModuleDeclarationChildren { module_declaration_attribute_spec, module_declaration_new_keyword, module_declaration_module_keyword, module_declaration_name, module_declaration_left_brace, module_declaration_imports, module_declaration_exports, module_declaration_right_brace } = *x;
                 let acc = f(module_declaration_attribute_spec, acc);
                 let acc = f(module_declaration_new_keyword, acc);
                 let acc = f(module_declaration_module_keyword, acc);
                 let acc = f(module_declaration_name, acc);
                 let acc = f(module_declaration_left_brace, acc);
-                let acc = f(module_declaration_exports, acc);
                 let acc = f(module_declaration_imports, acc);
+                let acc = f(module_declaration_exports, acc);
                 let acc = f(module_declaration_right_brace, acc);
                 acc
             },
@@ -4933,8 +4933,8 @@ where
              })),
              (SyntaxKind::ModuleDeclaration, 8) => SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
                  module_declaration_right_brace: ts.pop().unwrap(),
-                 module_declaration_imports: ts.pop().unwrap(),
                  module_declaration_exports: ts.pop().unwrap(),
+                 module_declaration_imports: ts.pop().unwrap(),
                  module_declaration_left_brace: ts.pop().unwrap(),
                  module_declaration_name: ts.pop().unwrap(),
                  module_declaration_module_keyword: ts.pop().unwrap(),
@@ -6951,8 +6951,8 @@ pub struct ModuleDeclarationChildren<T, V> {
     pub module_declaration_module_keyword: Syntax<T, V>,
     pub module_declaration_name: Syntax<T, V>,
     pub module_declaration_left_brace: Syntax<T, V>,
-    pub module_declaration_exports: Syntax<T, V>,
     pub module_declaration_imports: Syntax<T, V>,
+    pub module_declaration_exports: Syntax<T, V>,
     pub module_declaration_right_brace: Syntax<T, V>,
 }
 
@@ -8974,8 +8974,8 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.module_declaration_module_keyword),
                     3 => Some(&x.module_declaration_name),
                     4 => Some(&x.module_declaration_left_brace),
-                    5 => Some(&x.module_declaration_exports),
-                    6 => Some(&x.module_declaration_imports),
+                    5 => Some(&x.module_declaration_imports),
+                    6 => Some(&x.module_declaration_exports),
                     7 => Some(&x.module_declaration_right_brace),
                         _ => None,
                     }

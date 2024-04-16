@@ -2581,6 +2581,9 @@ where
                     if !imports_block.is_missing() {
                         self.with_error(Errors::error1067, Vec::new());
                     }
+                    if !exports_block.is_missing() {
+                        self.with_error(Errors::error1069, Vec::new());
+                    }
 
                     imports_block = self
                         .sc_mut()
@@ -2594,8 +2597,8 @@ where
                         module_kw,
                         name,
                         lb,
-                        exports_block,
                         imports_block,
+                        exports_block,
                         rb,
                     );
                 }

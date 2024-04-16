@@ -13,54 +13,10 @@
 namespace fizz {
 namespace extensions {
 
-static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
-
-std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
-    CertificateEntry entry,
-    bool leaf) const {
-  // Only leaf cert needs different processing, and only if it has the extension
-  if (!leaf || entry.extensions.empty()) {
-    return CertUtils::makePeerCert(std::move(entry.cert_data));
-  }
-
-  auto parentCert = CertUtils::makePeerCert(entry.cert_data->clone());
-  auto parentX509 = parentCert->getX509();
-  auto credential = getExtension<DelegatedCredential>(entry.extensions);
-
-  // No credential, just leave as is
-  if (!credential) {
-    return std::move(parentCert);
-  }
-
-  // Check validity period first.
-  auto notBefore = X509_get0_notBefore(parentX509.get());
-  auto notBeforeTime =
-      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
-  auto credentialExpiresTime =
-      notBeforeTime + std::chrono::seconds(credential->valid_time);
-  auto now = clock_->getCurrentTime();
-  if (now >= credentialExpiresTime) {
-    throw FizzException(
-        "credential is no longer valid", AlertDescription::illegal_parameter);
-  }
-
-  // Credentials may be valid for max 1 week according to spec
-  if (credentialExpiresTime - now > kMaxDelegatedCredentialLifetime) {
-    throw FizzException(
-        "credential validity is longer than a week from now",
-        AlertDescription::illegal_parameter);
-  }
-
-  // Check extensions on cert
-  DelegatedCredentialUtils::checkExtensions(parentX509);
-
-  // Create credential
-  return makeCredential(std::move(credential.value()), std::move(parentX509));
-}
-
-std::shared_ptr<PeerCert> DelegatedCredentialFactory::makeCredential(
+namespace {
+std::shared_ptr<PeerCert> makeCredential(
     DelegatedCredential&& credential,
-    folly::ssl::X509UniquePtr cert) const {
+    folly::ssl::X509UniquePtr cert) {
   VLOG(4) << "Making delegated credential";
   // Parse pubkey
   auto pubKeyRange = credential.public_key->coalesce();
@@ -94,6 +50,56 @@ std::shared_ptr<PeerCert> DelegatedCredentialFactory::makeCredential(
   throw FizzException(
       "unknown cert type for delegated credential",
       AlertDescription::illegal_parameter);
+}
+} // namespace
+
+static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
+
+std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
+    CertificateEntry entry,
+    const std::shared_ptr<Clock>& clock) {
+  auto parentCert = CertUtils::makePeerCert(entry.cert_data->clone());
+  auto parentX509 = parentCert->getX509();
+  auto credential = getExtension<DelegatedCredential>(entry.extensions);
+
+  // No credential, just leave as is
+  if (!credential) {
+    return std::move(parentCert);
+  }
+
+  // Check validity period first.
+  auto notBefore = X509_get0_notBefore(parentX509.get());
+  auto notBeforeTime =
+      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
+  auto credentialExpiresTime =
+      notBeforeTime + std::chrono::seconds(credential->valid_time);
+  auto now = clock->getCurrentTime();
+  if (now >= credentialExpiresTime) {
+    throw FizzException(
+        "credential is no longer valid", AlertDescription::illegal_parameter);
+  }
+
+  // Credentials may be valid for max 1 week according to spec
+  if (credentialExpiresTime - now > kMaxDelegatedCredentialLifetime) {
+    throw FizzException(
+        "credential validity is longer than a week from now",
+        AlertDescription::illegal_parameter);
+  }
+
+  // Check extensions on cert
+  DelegatedCredentialUtils::checkExtensions(parentX509);
+
+  // Create credential
+  return makeCredential(std::move(credential.value()), std::move(parentX509));
+}
+
+std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
+    CertificateEntry entry,
+    bool leaf) const {
+  if (!leaf || entry.extensions.empty()) {
+    return CertUtils::makePeerCert(std::move(entry.cert_data));
+  }
+  return makePeerCert(std::move(entry), clock_);
 }
 
 void DelegatedCredentialFactory::setClock(std::shared_ptr<Clock> clock) {

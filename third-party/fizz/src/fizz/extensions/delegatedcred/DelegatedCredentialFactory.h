@@ -27,12 +27,11 @@ class DelegatedCredentialFactory : public OpenSSLFactory {
 
   void setClock(std::shared_ptr<Clock> clock);
 
- private:
-  // Generates delegated credential cert based on credential + signing cert
-  std::shared_ptr<PeerCert> makeCredential(
-      DelegatedCredential&& credential,
-      folly::ssl::X509UniquePtr cert) const;
+  static std::shared_ptr<PeerCert> makePeerCert(
+      CertificateEntry entry,
+      const std::shared_ptr<Clock>& clock);
 
+ private:
   std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();
 };
 } // namespace extensions

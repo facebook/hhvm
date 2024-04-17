@@ -57,13 +57,12 @@ class ExceptionTests(unittest.TestCase):
         self.assertNotEqual(str(y), str(z))
 
     def test_application_error_fmt(self) -> None:
-        # TODO: make this like the below to match thrift-py3 version, which
-        # formats as "ApplicationErrorType.UNKNOWN".
-        # The python.ApplicationErrorType behavior is incorrect
-        self.assertEqual(f"{ApplicationErrorType.UNKNOWN}", "0")
+        self.assertEqual(
+            f"{ApplicationErrorType.UNKNOWN}", "ApplicationErrorType.UNKNOWN"
+        )
         err = ApplicationError(ApplicationErrorType.UNKNOWN, "oops")
         self.assertIsInstance(err.type, ApplicationErrorType)
-        self.assertEqual(f"{err.type}", "0")
+        self.assertEqual(f"{err.type}", "ApplicationErrorType.UNKNOWN")
 
     def test_creation(self) -> None:
         msg = "something broke"

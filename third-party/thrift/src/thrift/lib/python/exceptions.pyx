@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import copy
+from enum import Enum
 
 from cython.operator cimport dereference as deref
 from thrift.python.serializer cimport cserialize, cdeserialize
@@ -27,11 +28,30 @@ cdef class Error(Exception):
         super().__init__(*args)
 
 
+class ApplicationErrorType(Enum):
+    UNKNOWN = cTApplicationExceptionType__UNKNOWN
+    UNKNOWN_METHOD = cTApplicationExceptionType__UNKNOWN_METHOD
+    INVALID_MESSAGE_TYPE = cTApplicationExceptionType__INVALID_MESSAGE_TYPE
+    WRONG_METHOD_NAME = cTApplicationExceptionType__WRONG_METHOD_NAME
+    BAD_SEQUENCE_ID = cTApplicationExceptionType__BAD_SEQUENCE_ID
+    MISSING_RESULT = cTApplicationExceptionType__MISSING_RESULT
+    INTERNAL_ERROR = cTApplicationExceptionType__INTERNAL_ERROR
+    PROTOCOL_ERROR = cTApplicationExceptionType__PROTOCOL_ERROR
+    INVALID_TRANSFORM = cTApplicationExceptionType__INVALID_TRANSFORM
+    INVALID_PROTOCOL = cTApplicationExceptionType__INVALID_PROTOCOL
+    UNSUPPORTED_CLIENT_TYPE = cTApplicationExceptionType__UNSUPPORTED_CLIENT_TYPE
+    LOADSHEDDING = cTApplicationExceptionType__LOADSHEDDING
+    TIMEOUT = cTApplicationExceptionType__TIMEOUT
+    INJECTED_FAILURE = cTApplicationExceptionType__INJECTED_FAILURE
+
+
 cdef class ApplicationError(Error):
     """All Application Level Errors (TApplicationException)"""
 
-    def __init__(ApplicationError self, ApplicationErrorType type, str message):
+    def __init__(ApplicationError self, type, str message):
         assert message, "message is empty"
+        if not isinstance(type, (int, ApplicationErrorType)):
+            raise TypeError(f"{type} is not an ApplicationErrorType")
 
     @property
     def type(self):
@@ -62,11 +82,31 @@ cdef class LibraryError(Error):
         super().__init__(*args)
 
 
+class TransportErrorType(Enum):
+    UNKNOWN = cTTransportExceptionType__UNKNOWN
+    NOT_OPEN = cTTransportExceptionType__NOT_OPEN
+    ALREADY_OPEN = cTTransportExceptionType__ALREADY_OPEN
+    TIMED_OUT = cTTransportExceptionType__TIMED_OUT
+    END_OF_FILE = cTTransportExceptionType__END_OF_FILE
+    INTERRUPTED = cTTransportExceptionType__INTERRUPTED
+    BAD_ARGS = cTTransportExceptionType__BAD_ARGS
+    CORRUPTED_DATA = cTTransportExceptionType__CORRUPTED_DATA
+    INTERNAL_ERROR = cTTransportExceptionType__INTERNAL_ERROR
+    NOT_SUPPORTED = cTTransportExceptionType__NOT_SUPPORTED
+    INVALID_STATE = cTTransportExceptionType__INVALID_STATE
+    INVALID_FRAME_SIZE = cTTransportExceptionType__INVALID_FRAME_SIZE
+    SSL_ERROR = cTTransportExceptionType__SSL_ERROR
+    COULD_NOT_BIND = cTTransportExceptionType__COULD_NOT_BIND
+    NETWORK_ERROR = cTTransportExceptionType__NETWORK_ERROR
+
+
 cdef class TransportError(LibraryError):
     """All Transport Level Errors (TTransportException)"""
 
-    def __init__(TransportError self, TransportErrorType type, str message, int errno, int options):
+    def __init__(TransportError self, type, str message, int errno, int options):
         super().__init__(type, message, errno, options)
+        if not isinstance(type, TransportErrorType):
+            raise TypeError(f"{type} is not a TransportErrorType")
 
     @property
     def type(self):

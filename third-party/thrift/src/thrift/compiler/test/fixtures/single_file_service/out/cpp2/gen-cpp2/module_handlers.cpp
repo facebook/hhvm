@@ -125,7 +125,7 @@ determineInvocationType:
       {
         ::cpp2::Foo _return;
         sync_foo(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

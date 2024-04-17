@@ -446,7 +446,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_concat(_return, std::move(p_first), std::move(p_second));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1748,7 +1748,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_concat_many(_return, std::move(p_words));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2184,7 +2184,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_get_map_value(_return, std::move(p_words), std::move(p_key));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2620,7 +2620,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_repeat_name(_return, std::move(p_counter));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2732,7 +2732,7 @@ determineInvocationType:
       {
         ::py3::simple::SimpleStruct _return;
         sync_get_struct(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2844,7 +2844,7 @@ determineInvocationType:
       {
         ::std::vector<::std::int32_t> _return;
         sync_fib(_return, p_n);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2956,7 +2956,7 @@ determineInvocationType:
       {
         ::std::set<::std::string> _return;
         sync_unique_words(_return, std::move(p_words));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3068,7 +3068,7 @@ determineInvocationType:
       {
         ::std::map<::std::string, ::std::int16_t> _return;
         sync_words_count(_return, std::move(p_words));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3288,7 +3288,7 @@ determineInvocationType:
       {
         ::std::vector<::std::vector<::std::int32_t>> _return;
         sync_list_of_lists(_return, p_num_lists, p_num_items);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3400,7 +3400,7 @@ determineInvocationType:
       {
         ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>> _return;
         sync_word_character_frequency(_return, std::move(p_sentence));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3512,7 +3512,7 @@ determineInvocationType:
       {
         ::std::vector<::std::set<::std::string>> _return;
         sync_list_of_sets(_return, std::move(p_some_words));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3732,7 +3732,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_make_sentence(_return, std::move(p_word_chars));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3844,7 +3844,7 @@ determineInvocationType:
       {
         ::std::set<::std::int32_t> _return;
         sync_get_union(_return, std::move(p_sets));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -3956,7 +3956,7 @@ determineInvocationType:
       {
         ::std::set<::std::string> _return;
         sync_get_keys(_return, std::move(p_string_map));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -4176,7 +4176,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_retrieve_binary(_return, std::move(p_something));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -4288,7 +4288,7 @@ determineInvocationType:
       {
         ::std::set<::std::string> _return;
         sync_contain_binary(_return, std::move(p_binaries));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -4400,7 +4400,7 @@ determineInvocationType:
       {
         ::std::vector<::py3::simple::AnEnum> _return;
         sync_contain_enum(_return, std::move(p_the_enum));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -4512,7 +4512,7 @@ determineInvocationType:
       {
         ::py3::simple::BinaryUnionStruct _return;
         sync_get_binary_union_struct(_return, std::move(p_u));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -4624,7 +4624,7 @@ determineInvocationType:
       {
         ::py3::simple::SimpleStruct _return;
         sync_get_struct_hidden(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

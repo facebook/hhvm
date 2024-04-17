@@ -340,7 +340,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_get200(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -452,7 +452,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_get500(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

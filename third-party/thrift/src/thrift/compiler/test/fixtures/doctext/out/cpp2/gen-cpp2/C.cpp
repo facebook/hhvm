@@ -338,7 +338,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_thing(_return, p_a, std::move(p_b), std::move(p_c));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

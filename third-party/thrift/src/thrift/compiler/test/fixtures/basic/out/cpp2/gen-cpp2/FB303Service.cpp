@@ -120,7 +120,7 @@ determineInvocationType:
       {
         ::test::fixtures::basic::ReservedKeyword _return;
         sync_simple_rpc(_return, p_int_parameter);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

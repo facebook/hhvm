@@ -120,7 +120,7 @@ determineInvocationType:
       {
         ::test::fixtures::basic-structured-annotations::annotated_inline_string _return;
         sync_first(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

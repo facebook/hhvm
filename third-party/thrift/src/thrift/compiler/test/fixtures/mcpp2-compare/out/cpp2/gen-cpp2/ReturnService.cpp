@@ -776,7 +776,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_binaryReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -888,7 +888,7 @@ determineInvocationType:
       {
         ::std::map<::std::string, ::std::int64_t> _return;
         sync_mapReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1108,7 +1108,7 @@ determineInvocationType:
       {
         ::some::valid::ns::complexStructTypeDef _return;
         sync_complexTypedefReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1220,7 +1220,7 @@ determineInvocationType:
       {
         ::std::vector<::some::valid::ns::mostComplexTypeDef> _return;
         sync_list_mostComplexTypedefReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1340,7 +1340,7 @@ determineInvocationType:
       {
         ::some::valid::ns::MyStruct _return;
         sync_structReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1452,7 +1452,7 @@ determineInvocationType:
       {
         ::std::set<::some::valid::ns::MyStruct> _return;
         sync_set_StructReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1568,7 +1568,7 @@ determineInvocationType:
       {
         ::std::vector<::some::valid::ns::ComplexUnion> _return;
         sync_list_UnionReturn(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1684,7 +1684,7 @@ determineInvocationType:
       {
         ::some::valid::ns::IOBufPtr _return;
         sync_readData(_return, p_size);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

@@ -162,7 +162,7 @@ determineInvocationType:
 {{#function:sync_returns_by_outparam?}}
         {{type:cpp_type}} _return;
         sync_{{function:cpp_name}}(_return{{function:comma}}{{ > service_common/param_list_move}});
-        callback->result(_return);
+        callback->result(std::move(_return));
 {{/function:sync_returns_by_outparam?}}
         return;
       }

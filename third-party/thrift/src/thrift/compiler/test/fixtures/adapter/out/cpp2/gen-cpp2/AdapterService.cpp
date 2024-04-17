@@ -120,7 +120,7 @@ determineInvocationType:
       {
         ::facebook::thrift::test::CountingStruct _return;
         sync_count(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -232,7 +232,7 @@ determineInvocationType:
       {
         ::facebook::thrift::test::HeapAllocated _return;
         sync_adaptedTypes(_return, std::move(p_arg));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

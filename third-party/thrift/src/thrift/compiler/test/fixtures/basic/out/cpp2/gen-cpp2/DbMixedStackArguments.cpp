@@ -120,7 +120,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_getDataByKey0(_return, std::move(p_key));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -232,7 +232,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_getDataByKey1(_return, std::move(p_key));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

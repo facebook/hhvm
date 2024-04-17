@@ -556,7 +556,7 @@ determineInvocationType:
       {
         ::test_cpp2::cpp_reflection::struct2 _return;
         sync_methodE(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -668,7 +668,7 @@ determineInvocationType:
       {
         ::test_cpp2::cpp_reflection::struct3 _return;
         sync_methodF(_return, p_l, std::move(p_m), p_n);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

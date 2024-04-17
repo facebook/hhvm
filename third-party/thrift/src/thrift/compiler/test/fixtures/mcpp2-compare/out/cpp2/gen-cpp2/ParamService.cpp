@@ -1546,7 +1546,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_string_ret_string_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1658,7 +1658,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_binary_ret_binary_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1770,7 +1770,7 @@ determineInvocationType:
       {
         ::std::map<::std::string, ::std::int64_t> _return;
         sync_map_ret_bool_param(_return, p_param1);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1882,7 +1882,7 @@ determineInvocationType:
       {
         ::std::vector<bool> _return;
         sync_list_ret_map_setlist_param(_return, std::move(p_param1), std::move(p_param2));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -1994,7 +1994,7 @@ determineInvocationType:
       {
         ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> _return;
         sync_mapsetlistmapliststring_ret_listlistlist_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2434,7 +2434,7 @@ determineInvocationType:
       {
         ::std::vector<::some::valid::ns::MyEnumA> _return;
         sync_listenum_ret_map_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2550,7 +2550,7 @@ determineInvocationType:
       {
         ::std::set<::some::valid::ns::MyStruct> _return;
         sync_setstruct_ret_set_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2662,7 +2662,7 @@ determineInvocationType:
       {
         ::some::valid::ns::ComplexUnion _return;
         sync_union_ret_i32_i32_param(_return, p_param1, p_param2);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -2774,7 +2774,7 @@ determineInvocationType:
       {
         ::std::vector<::some::valid::ns::ComplexUnion> _return;
         sync_listunion_string_param(_return, std::move(p_param1));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

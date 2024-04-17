@@ -1369,6 +1369,7 @@ class HandlerCallbackBase {
 template <typename T>
 class HandlerCallback : public HandlerCallbackBase {
   using Helper = apache::thrift::detail::HandlerCallbackHelper<T>;
+  using InnerType = typename Helper::InnerType;
   using InputType = typename Helper::InputType;
   using cob_ptr = typename Helper::CobPtr;
 
@@ -1404,7 +1405,7 @@ class HandlerCallback : public HandlerCallbackBase {
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
-  void result(InputType r) { doResult(std::forward<InputType>(r)); }
+  void result(InnerType r) { doResult(std::forward<InputType>(r)); }
   [[deprecated("Pass the inner value directly to result()")]] void result(
       std::unique_ptr<ResultType> r);
 
@@ -1852,7 +1853,8 @@ struct inner_type<std::unique_ptr<S>> {
 
 template <typename T>
 struct HandlerCallbackHelper {
-  using InputType = const typename apache::thrift::detail::inner_type<T>::type&;
+  using InnerType = typename apache::thrift::detail::inner_type<T>::type;
+  using InputType = const InnerType&;
   using CobPtr =
       apache::thrift::SerializedResponse (*)(ContextStack*, InputType);
   static apache::thrift::SerializedResponse call(
@@ -1863,6 +1865,7 @@ struct HandlerCallbackHelper {
 
 template <typename StreamInputType>
 struct HandlerCallbackHelperServerStream {
+  using InnerType = StreamInputType&&;
   using InputType = StreamInputType&&;
   using CobPtr = ResponseAndServerStreamFactory (*)(
       ContextStack*, folly::Executor::KeepAlive<>, InputType);
@@ -1883,6 +1886,7 @@ struct HandlerCallbackHelper<ServerStream<StreamItem>>
 
 template <typename SinkInputType>
 struct HandlerCallbackHelperSink {
+  using InnerType = SinkInputType&&;
   using InputType = SinkInputType&&;
   using CobPtr =
       std::pair<apache::thrift::SerializedResponse, SinkConsumerImpl> (*)(

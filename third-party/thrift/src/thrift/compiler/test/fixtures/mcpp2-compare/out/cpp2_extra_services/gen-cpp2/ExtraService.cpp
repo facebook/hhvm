@@ -341,7 +341,7 @@ determineInvocationType:
       {
         ::std::map<::std::int32_t, ::std::string> _return;
         sync_throws_function3(_return, p_param1, p_param2);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

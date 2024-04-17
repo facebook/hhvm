@@ -120,7 +120,7 @@ determineInvocationType:
       {
         ::apache::thrift::fixtures::types::SomeMap _return;
         sync_bounce_map(_return, std::move(p_m));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -232,7 +232,7 @@ determineInvocationType:
       {
         ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t> _return;
         sync_binary_keyed_map(_return, std::move(p_r));
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

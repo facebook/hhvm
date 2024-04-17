@@ -230,7 +230,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_getRandomData(_return);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:
@@ -450,7 +450,7 @@ determineInvocationType:
       {
         ::std::string _return;
         sync_getDataById(_return, p_id);
-        callback->result(_return);
+        callback->result(std::move(_return));
         return;
       }
       default:

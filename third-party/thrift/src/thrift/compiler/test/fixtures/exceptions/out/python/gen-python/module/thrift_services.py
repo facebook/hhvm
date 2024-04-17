@@ -28,8 +28,7 @@ class RaiserInterface(
     def service_name() -> bytes:
         return b"Raiser"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"doBland": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doBland),
             b"doRaise": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doRaise),

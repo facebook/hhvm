@@ -28,8 +28,7 @@ class PubSubStreamingServiceInterface(
     def service_name() -> bytes:
         return b"PubSubStreamingService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"returnstream": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_returnstream),
             b"streamthrows": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_streamthrows),

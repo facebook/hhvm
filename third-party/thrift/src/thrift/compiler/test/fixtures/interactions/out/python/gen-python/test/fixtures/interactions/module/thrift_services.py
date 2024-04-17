@@ -28,8 +28,7 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),

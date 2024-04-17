@@ -30,8 +30,7 @@ class SimpleServiceInterface(
     def service_name() -> bytes:
         return b"SimpleService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"get_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_five),
             b"add_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_add_five),
@@ -735,8 +734,7 @@ SimpleServiceInterface,
     def service_name() -> bytes:
         return b"DerivedService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"get_six": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_six),
         }
@@ -778,8 +776,7 @@ DerivedServiceInterface,
     def service_name() -> bytes:
         return b"RederivedService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"get_seven": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_seven),
         }

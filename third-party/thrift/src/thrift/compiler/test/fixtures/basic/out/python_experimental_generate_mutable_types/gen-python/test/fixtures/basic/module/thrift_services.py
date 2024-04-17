@@ -28,8 +28,7 @@ class FooServiceInterface(
     def service_name() -> bytes:
         return b"FooService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
@@ -71,8 +70,7 @@ class FB303ServiceInterface(
     def service_name() -> bytes:
         return b"FB303Service"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
@@ -115,8 +113,7 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"ping": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_ping),
             b"getRandomData": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getRandomData),
@@ -299,8 +296,7 @@ class DbMixedStackArgumentsInterface(
     def service_name() -> bytes:
         return b"DbMixedStackArguments"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"getDataByKey0": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey0),
             b"getDataByKey1": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey1),

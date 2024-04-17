@@ -60,8 +60,7 @@ class {{service:name}}Interface(
     def service_name() -> bytes:
         return b"{{service:name}}"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
         {{#service:supported_service_functions}}
             b"{{function:name}}": ({{> services/function_kind }}, self._fbthrift__handler_{{function:name}}),

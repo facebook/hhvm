@@ -28,8 +28,7 @@ class HsTestServiceInterface(
     def service_name() -> bytes:
         return b"HsTestService"
 
-    # pyre-ignore[3]: it can return anything
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
             b"init": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_init),
         }

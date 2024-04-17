@@ -617,7 +617,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         // Check if we're stopping, or get the next field id
         let idx = match (tty, didx) {
             (TType::Stop, _) => 0,
-            (_, 0) => self.read_varint_i16()?,
+            (_, 0) => self.read_varint_i64()? as i16,
             (_, didx) => self.state.lastidx + (didx as i16),
         };
 

@@ -198,6 +198,7 @@ type t = {
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;
   po_stack_size: int;
+  tco_extended_reasons: bool;
 }
 [@@deriving eq, show]
 
@@ -330,6 +331,7 @@ let default =
     po_nameof_precedence = false;
     po_stack_size = 32 * 1024 * 1024;
     (* The largest stack size we can use without requiring sudo *)
+    tco_extended_reasons = false;
   }
 
 let set
@@ -459,6 +461,7 @@ let set
     ?tco_autocomplete_sort_text
     ?po_nameof_precedence
     ?po_stack_size
+    ?tco_extended_reasons
     options =
   let setting setting option =
     match setting with
@@ -795,6 +798,8 @@ let set
     po_nameof_precedence =
       setting po_nameof_precedence options.po_nameof_precedence;
     po_stack_size = setting po_stack_size options.po_stack_size;
+    tco_extended_reasons =
+      setting tco_extended_reasons options.tco_extended_reasons;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

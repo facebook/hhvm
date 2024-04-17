@@ -304,6 +304,8 @@ type t = {
   po_nameof_precedence: bool;  (** Make nameof bind tighter *)
   po_stack_size: int;
       (** Stack size to use for parallel workers inside the parser. *)
+  tco_extended_reasons: bool;
+      (** Controls whether we retain the full path for reasons or only simple witnesses *)
 }
 [@@deriving eq, show]
 
@@ -434,6 +436,7 @@ val set :
   ?tco_autocomplete_sort_text:bool ->
   ?po_nameof_precedence:bool ->
   ?po_stack_size:int ->
+  ?tco_extended_reasons:bool ->
   t ->
   t
 

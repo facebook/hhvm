@@ -451,7 +451,8 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
 #if defined USE_FOLLY_SYMBOLIZER
 
 void StackTraceNoHeap::printStackTrace(int fd) const {
-  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SignalSafeElfCache elfCache;
+  folly::symbolizer::Symbolizer symbolizer(&elfCache);
   folly::symbolizer::SymbolizedFrame frames[kMaxFrame];
   symbolizer.symbolize((uintptr_t*)m_frames, frames, m_frame_count);
   for (int i = 0, fr = 0; i < m_frame_count; i++) {

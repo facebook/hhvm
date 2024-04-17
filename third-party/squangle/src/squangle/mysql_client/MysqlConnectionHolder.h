@@ -106,14 +106,6 @@ class MysqlConnectionHolder {
     return ret;
   }
 
-  void setNeedResetBeforeReuse() {
-    needResetBeforeReuse_ = true;
-  }
-
-  bool needResetBeforeReuse() {
-    return needResetBeforeReuse_;
-  }
-
   // This constructor takes ownership of the origin holder and copies the data
   // from it, then steals the ownership of the MYSQL* connection. After that the
   // origin is deleted.
@@ -134,7 +126,6 @@ class MysqlConnectionHolder {
   Timepoint last_activity_time_;
   bool connection_opened_ = false;
   bool close_fd_on_destroy_ = true;
-  bool needResetBeforeReuse_ = false;
 
   bool can_reuse_;
   std::optional<std::string> current_schema_;

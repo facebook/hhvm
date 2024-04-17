@@ -471,9 +471,6 @@ class ConnectionPool
         }
       }
       openNewConnection(raw_pool_op, pool_key);
-    } else if (mysql_conn->needResetBeforeReuse()) {
-      // reset connection before reusing the connection
-      resetConnection(raw_pool_op, pool_key, std::move(mysql_conn));
     } else {
       // Cache hit
       stats()->incrPoolHits();

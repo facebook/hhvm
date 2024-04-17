@@ -88,7 +88,7 @@ else:
             os.environ["CHGDISABLE"] = "1"
 
             # Start the EdenFS instance
-            self.eden.start()
+            self.eden.start(extra_args=["--enable_fault_injection"])
 
         def _restoreHome(self) -> None:
             assert self.save_home is not None

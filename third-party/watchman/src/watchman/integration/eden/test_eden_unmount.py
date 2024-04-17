@@ -11,12 +11,14 @@ import pywatchman
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
+def populate(repo):
+    repo.write_file(".watchmanconfig", '{"ignore_dirs":[".buckd"]}')
+    repo.write_file("hello", "hola\n")
+    repo.commit("initial commit.")
+
+
 class TestEdenUnmount(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_unmount(self) -> None:
-        def populate(repo):
-            repo.write_file(".watchmanconfig", '{"ignore_dirs":[".buckd"]}')
-            repo.write_file("hello", "hola\n")
-            repo.commit("initial commit.")
 
         root = self.makeEdenMount(populate)
         self.watchmanCommand("watch", root)
@@ -28,5 +30,14 @@ class TestEdenUnmount(WatchmanEdenTestCase.WatchmanEdenTestCase):
 
         with self.assertRaises(pywatchman.CommandError) as ctx:
             self.watchmanCommand("query", root, {"fields": ["name"], "since": clock})
+
+        self.assertRegex(str(ctx.exception), "unable to resolve root")
+
+    def test_eden_unmount_watch(self) -> None:
+        root = self.makeEdenMount(populate)
+        self.eden.unmount(root)
+
+        with self.assertRaises(pywatchman.CommandError) as ctx:
+            self.watchmanCommand("watch", root)
 
         self.assertRegex(str(ctx.exception), "unable to resolve root")

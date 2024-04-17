@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa6c005dfd889852f5d2b36779d2fd0b>>
+// @generated SignedSource<<882f68605ec9cbd3cec642c52155b3c1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -124,6 +124,46 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
 #[repr(C, u8)]
 pub enum Blame {
     Blame(pos::Pos, BlameSource),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum Prj {
+    #[rust_to_ocaml(name = "Prj_union")]
+    PrjUnion,
+    #[rust_to_ocaml(name = "Prj_inter")]
+    PrjInter,
+    #[rust_to_ocaml(name = "Prj_neg")]
+    PrjNeg,
+    #[rust_to_ocaml(name = "Prj_class")]
+    PrjClass(String, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_newtype")]
+    PrjNewtype(String, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_tuple")]
+    PrjTuple(isize),
+    #[rust_to_ocaml(name = "Prj_shape")]
+    PrjShape(String),
+    #[rust_to_ocaml(name = "Prj_fn_arg")]
+    PrjFnArg(isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_fn_ret")]
+    PrjFnRet,
+    #[rust_to_ocaml(name = "Prj_access")]
+    PrjAccess,
 }
 
 /// The reason why something is expected to have a certain type
@@ -330,6 +370,9 @@ pub enum T_ {
     #[rust_to_ocaml(name = "Runsafe_cast")]
     RunsafeCast(pos::Pos),
     Rpattern(pos::Pos),
+    Rflow(Box<T_>, Box<T_>),
+    Rrev(Box<T_>),
+    Rprj(Prj, Box<T_>),
 }
 
 pub type Reason = T_;

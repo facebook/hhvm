@@ -247,6 +247,9 @@ pub trait Reason:
                 OR::RpessimisedReturn(pos) => RI::RpessimisedReturn(pos.into()),
                 OR::RpessimisedProp(pos) => RI::RpessimisedProp(pos.into()),
                 OR::Rpattern(pos) => RI::Rpattern(pos.into()),
+                OR::Rflow(_) => RI::Rnone,
+                OR::Rrev(_) => RI::Rnone,
+                OR::Rprj(_) => RI::Rnone,
             }
         })
     }

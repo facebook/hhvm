@@ -50,6 +50,20 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
+(** A projection into a type constructor *)
+type prj =
+  | Prj_union
+  | Prj_inter
+  | Prj_neg
+  | Prj_class of string * int * Ast_defs.variance
+  | Prj_newtype of string * int * Ast_defs.variance
+  | Prj_tuple of int
+  | Prj_shape of string
+  | Prj_fn_arg of int * Ast_defs.variance
+  | Prj_fn_ret
+  | Prj_access
+[@@deriving hash]
+
 (** The reason why something is expected to have a certain type *)
 type _ t_ =
   | Rnone : 'phase t_
@@ -173,6 +187,13 @@ type _ t_ =
   | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
   | Rpattern : Pos.t -> locl_phase t_
+  | Rflow : locl_phase t_ * locl_phase t_ -> locl_phase t_
+      (** Reasons record a linear path through the program, so we have a constructor
+      to concatenate two paths *)
+  | Rrev : locl_phase t_ -> locl_phase t_
+      (** Paths are reversed with contravariance; we use this constructor to perform reversals lazily *)
+  | Rprj : prj * locl_phase t_ -> locl_phase t_
+      (** Records reasons through type constructors *)
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

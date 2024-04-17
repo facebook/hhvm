@@ -29,6 +29,15 @@ impl<'a> Reason<'a> {
         Reason::Rinstantiate(args)
     }
 
+    pub fn rev_pos(&self) -> Option<&'a Pos<'a>> {
+        match self {
+            T_::Rflow(r) => r.0.rev_pos(),
+            T_::Rprj(r) => r.1.rev_pos(),
+            T_::Rrev(r) => r.pos(),
+            _ => self.pos(),
+        }
+    }
+
     pub fn pos(&self) -> Option<&'a Pos<'a>> {
         use T_::*;
         match self {
@@ -131,6 +140,9 @@ impl<'a> Reason<'a> {
             | RinvariantGeneric((r, _)) => r.pos(),
             RopaqueTypeFromModule((p, _, _)) => Some(p),
             RdynamicCoercion(r) => r.pos(),
+            Rflow(r) => r.0.pos(),
+            Rprj(r) => r.1.pos(),
+            Rrev(r) => r.rev_pos(),
         }
     }
 }
@@ -270,6 +282,9 @@ impl<'a> std::fmt::Debug for T_<'a> {
             RunsafeCast(p) => f.debug_tuple("RunsafeCast").field(p).finish(),
             Rinvalid => f.debug_tuple("Rinvalid").finish(),
             Rpattern(p) => f.debug_tuple("Rpattern").field(p).finish(),
+            Rflow(p) => f.debug_tuple("Rflow").field(p).finish(),
+            Rrev(p) => f.debug_tuple("Rrev").field(p).finish(),
+            Rprj(p) => f.debug_tuple("Rprj").field(p).finish(),
         }
     }
 }

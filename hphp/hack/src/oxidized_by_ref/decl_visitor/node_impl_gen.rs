@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b5f31d22a4a76c588b3c0bc7f0ad7cf9>>
+// @generated SignedSource<<216fd0b13b814fa6b87c4f5530ae0701>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1030,6 +1030,25 @@ impl<'a> Node<'a> for Blame<'a> {
         }
     }
 }
+impl<'a> Node<'a> for Prj<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_prj(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Prj::PrjUnion => {}
+            Prj::PrjInter => {}
+            Prj::PrjNeg => {}
+            Prj::PrjClass(ref __binding_0) => __binding_0.accept(v),
+            Prj::PrjNewtype(ref __binding_0) => __binding_0.accept(v),
+            Prj::PrjTuple(ref __binding_0) => __binding_0.accept(v),
+            Prj::PrjShape(ref __binding_0) => __binding_0.accept(v),
+            Prj::PrjFnArg(ref __binding_0) => __binding_0.accept(v),
+            Prj::PrjFnRet => {}
+            Prj::PrjAccess => {}
+        }
+    }
+}
 impl<'a> Node<'a> for T_<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_t_(self)
@@ -1134,6 +1153,9 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RpessimisedProp(ref __binding_0) => __binding_0.accept(v),
             T_::RunsafeCast(ref __binding_0) => __binding_0.accept(v),
             T_::Rpattern(ref __binding_0) => __binding_0.accept(v),
+            T_::Rflow(ref __binding_0) => __binding_0.accept(v),
+            T_::Rrev(ref __binding_0) => __binding_0.accept(v),
+            T_::Rprj(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<370f96cf9948d010e11e34f209a080d1>>
+// @generated SignedSource<<8ac9eb46ab70c71827c41eaf892fd7bb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -84,6 +84,56 @@ pub enum Blame<'a> {
 }
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum Prj<'a> {
+    #[rust_to_ocaml(name = "Prj_union")]
+    PrjUnion,
+    #[rust_to_ocaml(name = "Prj_inter")]
+    PrjInter,
+    #[rust_to_ocaml(name = "Prj_neg")]
+    PrjNeg,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Prj_class")]
+    #[rust_to_ocaml(inline_tuple)]
+    PrjClass(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Prj_newtype")]
+    #[rust_to_ocaml(inline_tuple)]
+    PrjNewtype(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    #[rust_to_ocaml(name = "Prj_tuple")]
+    PrjTuple(isize),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Prj_shape")]
+    PrjShape(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Prj_fn_arg")]
+    #[rust_to_ocaml(inline_tuple)]
+    PrjFnArg(&'a (isize, oxidized::ast_defs::Variance)),
+    #[rust_to_ocaml(name = "Prj_fn_ret")]
+    PrjFnRet,
+    #[rust_to_ocaml(name = "Prj_access")]
+    PrjAccess,
+}
+impl<'a> TrivialDrop for Prj<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Prj<'arena>);
 
 /// The reason why something is expected to have a certain type
 #[derive(
@@ -432,6 +482,14 @@ pub enum T_<'a> {
     RunsafeCast(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rpattern(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Rflow(&'a (T_<'a>, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Rrev(&'a T_<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Rprj(&'a (Prj<'a>, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

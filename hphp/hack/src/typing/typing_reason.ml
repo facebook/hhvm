@@ -48,6 +48,19 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
+type prj =
+  | Prj_union
+  | Prj_inter
+  | Prj_neg
+  | Prj_class of string * int * Ast_defs.variance
+  | Prj_newtype of string * int * Ast_defs.variance
+  | Prj_tuple of int
+  | Prj_shape of string
+  | Prj_fn_arg of int * Ast_defs.variance
+  | Prj_fn_ret
+  | Prj_access
+[@@deriving hash]
+
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
  * to prevent a decl ty from using it.
@@ -184,7 +197,22 @@ type _ t_ =
   | Rpessimised_prop : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
   | Rpattern : Pos.t -> locl_phase t_
+  | Rflow : locl_phase t_ * locl_phase t_ -> locl_phase t_
+  | Rrev : locl_phase t_ -> locl_phase t_
+  | Rprj : prj * locl_phase t_ -> locl_phase t_
 [@@deriving hash]
+
+let rec normalize : locl_phase t_ -> locl_phase t_ = function
+  | Rflow (t1, t2) -> Rflow (normalize t1, normalize t2)
+  | Rrev t -> reverse t
+  | Rprj (prj, t) -> Rprj (prj, normalize t)
+  | t -> t
+
+and reverse : locl_phase t_ -> locl_phase t_ = function
+  | Rflow (t1, t2) -> Rflow (reverse t2, reverse t1)
+  | Rrev t -> normalize t
+  | Rprj (prj, t) -> Rprj (prj, reverse t)
+  | t -> t
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -293,6 +321,9 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ropaque_type_from_module (p, _, _) -> p
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
   | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
+  | Rflow (from, _into) -> to_raw_pos from
+  | Rrev r -> to_raw_pos @@ normalize r
+  | Rprj (_prj, r) -> to_raw_pos r
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
@@ -393,6 +424,9 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rpessimised_prop _ -> "Rpessimised_prop"
   | Runsafe_cast _ -> "Runsafe_cast"
   | Rpattern _ -> "Rpattern"
+  | Rflow _ -> "Rflow"
+  | Rrev _ -> "Rrev"
+  | Rprj _ -> "Rprj"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -613,7 +647,10 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       comma ();
       pp_blame fmt b
     | Rdynamic_coercion r -> pp_t_ fmt r
-    | Runsafe_cast p -> Pos.pp fmt p);
+    | Runsafe_cast p -> Pos.pp fmt p
+    | Rflow (from, _into) -> pp_t_ fmt from
+    | Rrev t -> pp_t_ fmt @@ normalize t
+    | Rprj (_, t) -> pp_t_ fmt t);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1145,6 +1182,9 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
+  | Rflow (from, _into) -> to_string prefix from
+  | Rrev r -> to_string prefix @@ normalize r
+  | Rprj (_prj, r) -> to_string prefix r
 
 type ureason =
   | URnone
@@ -1375,6 +1415,9 @@ module Visitor = struct
         | Rpessimised_prop x -> Rpessimised_prop x
         | Runsafe_cast x -> Runsafe_cast x
         | Rpattern x -> Rpattern x
+        | Rflow (from, into) -> Rflow (this#on_reason from, this#on_reason into)
+        | Rrev t -> Rrev (this#on_reason t)
+        | Rprj (prj, t) -> Rprj (prj, this#on_reason t)
 
       method on_lazy l = l
     end

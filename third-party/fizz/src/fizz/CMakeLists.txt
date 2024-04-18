@@ -98,6 +98,11 @@ else()
   list(APPEND FIZZ_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
 endif()
 
+find_package(liboqs CONFIG)
+if (liboqs_FOUND)
+  set(FIZZ_HAVE_OQS TRUE)
+endif()
+
 # Fizz build time options
 include(FizzOptions)
 
@@ -113,6 +118,7 @@ set(FIZZ_HEADER_DIRS
   crypto/hpke
   crypto/signature
   crypto/openssl
+  experimental/crypto/exchange
   experimental/ktls
   experimental/util
   extensions/delegatedcred
@@ -164,6 +170,7 @@ set(FIZZ_SOURCES
   compression/ZstdCertificateCompressor.cpp
   compression/ZstdCertificateDecompressor.cpp
   crypto/Utils.cpp
+  crypto/exchange/HybridKeyExchange.cpp
   crypto/exchange/X25519.cpp
   crypto/aead/OpenSSLEVPCipher.cpp
   crypto/aead/IOBufUtil.cpp
@@ -235,6 +242,10 @@ set(FIZZ_SOURCES
   util/Tracing.cpp
 )
 
+if (liboqs_FOUND)
+  set(FIZZ_SOURCES ${FIZZ_SOURCES}
+    experimental/crypto/exchange/OQSKeyExchange.cpp)
+endif()
 
 add_library(fizz
   ${FIZZ_HEADERS}
@@ -280,6 +291,10 @@ target_link_libraries(fizz
     ${DOUBLE_CONVERSION_LIBRARY}
     ${CMAKE_DL_LIBS}
     ${LIBRT_LIBRARIES})
+
+if (liboqs_FOUND)
+  target_link_libraries(fizz PRIVATE OQS::oqs)
+endif()
 
 if ($FIZZ_SHINY_DEPENDENCIES)
   add_dependencies(fizz ${FIZZ_SHINY_DEPENDENCIES})

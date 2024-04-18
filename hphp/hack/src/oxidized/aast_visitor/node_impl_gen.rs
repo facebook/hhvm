@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ecbb2c3d1a4d3489eaf140ef80ed942d>>
+// @generated SignedSource<<f1fa31bb428a79e8ec895bbdce8ca82b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -746,6 +746,23 @@ impl<P: Params> Node<P> for Enum_ {
         self.includes.accept(c, v)
     }
 }
+impl<P: Params> Node<P> for EtSplice<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_et_splice(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.extract_client_type.accept(c, v)?;
+        self.spliced_expr.accept(c, v)
+    }
+}
 impl<P: Params> Node<P> for Expr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
@@ -1079,7 +1096,6 @@ impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::En> {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.class.accept(c, v)?;
-        self.splices.accept(c, v)?;
         self.function_pointers.accept(c, v)?;
         self.runtime_expr.accept(c, v)?;
         self.dollardollar_pos.accept(c, v)

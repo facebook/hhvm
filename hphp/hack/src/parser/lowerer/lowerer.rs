@@ -2189,8 +2189,11 @@ fn p_prefixed_code_expr<'a>(
 fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) -> Result<Expr_> {
     let inner_pos = p_pos(expr, env);
     let inner_expr_ = p_expr_recurse(location, expr, env, None)?;
-    let inner_expr = ast::Expr::new((), inner_pos, inner_expr_);
-    Ok(Expr_::ETSplice(Box::new(inner_expr)))
+    let spliced_expr = ast::Expr::new((), inner_pos, inner_expr_);
+    Ok(Expr_::ETSplice(Box::new(aast::EtSplice {
+        spliced_expr,
+        extract_client_type: true,
+    })))
 }
 
 fn p_conditional_expr<'a>(

@@ -78,13 +78,12 @@ let find_shape_field name fields =
 
 let get_return_from_fun e =
   match e with
-  | (_, _, Lfun ({ f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ }, _))
-  | ( _,
-      _,
-      Efun
-        { ef_fun = { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ }; _ }
-    ) ->
-    Some e
+  | (_, _, Lfun ({ f_body = { fb_ast; _ }; _ }, _))
+  | (_, _, Efun { ef_fun = { f_body = { fb_ast; _ }; _ }; _ }) ->
+    List.find_map fb_ast ~f:(fun s ->
+        match s with
+        | (_, Return (Some e)) -> Some e
+        | _ -> None)
   | _ -> None
 
 let get_virtual_expr_from_et et =
@@ -102,6 +101,23 @@ let get_virtual_expr_from_et et =
     | Some e -> get_body_helper e
     | None -> get_body_helper et.et_runtime_expr)
   | _ -> get_body_helper et.et_runtime_expr
+
+let is_assign (s : ('a, 'b) stmt) =
+  match s with
+  | (_, Expr (_, _, Binop { bop = Eq None; _ })) -> true
+  | _ -> false
+
+let get_splices_from_fun e =
+  match e with
+  | (_, _, Lfun ({ f_body = { fb_ast; _ }; _ }, _))
+  | (_, _, Efun { ef_fun = { f_body = { fb_ast; _ }; _ }; _ }) ->
+    List.filter fb_ast ~f:is_assign
+  | _ -> []
+
+let get_splices_from_et et =
+  match et.et_runtime_expr with
+  | (_, _, Call { func = e; _ }) -> get_splices_from_fun e
+  | _ -> []
 
 let get_virtual_expr expr =
   match expr with

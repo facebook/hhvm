@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77ce853fcbe4ee2fdca4efd5bf1da872>>
+// @generated SignedSource<<7b352ff28582f14d8348ba2910e42d6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -253,6 +253,22 @@ pub trait Pass: PassClone {
     }
     #[inline(always)]
     fn on_ty_as__bottom_up(&mut self, env: &Env, elem: &mut As_<Ex, En>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_et_splice_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut EtSplice<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_et_splice_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut EtSplice<Ex, En>,
+    ) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -1566,6 +1582,28 @@ impl Pass for Passes {
     fn on_ty_as__bottom_up(&mut self, env: &Env, elem: &mut As_<Ex, En>) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_as__bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_et_splice_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut EtSplice<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_et_splice_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_et_splice_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut EtSplice<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_et_splice_bottom_up(env, elem)?;
         }
         Continue(())
     }

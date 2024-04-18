@@ -140,7 +140,9 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         | Expr_::Import(box (_, expr))
         | Expr_::Hole(box (expr, _, _, _))
         | Expr_::Yield(box Afield::AFvalue(expr))
-        | Expr_::ETSplice(box expr)
+        | Expr_::ETSplice(box nast::EtSplice {
+            spliced_expr: expr, ..
+        })
         | Expr_::Unop(box (_, expr))
         | Expr_::ArrayGet(box (expr, None)) => check_await_usage(expr),
 
@@ -239,32 +241,10 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
         Expr_::ExpressionTree(box nast::ExpressionTree {
             class: _,
-            splices,
             function_pointers: _,
             runtime_expr,
             dollardollar_pos: _,
-        }) => splices
-            .iter()
-            .map(|stmt| {
-                if let Stmt(
-                    _,
-                    Stmt_::Expr(box Expr(
-                        (),
-                        _,
-                        Expr_::Binop(box nast::Binop {
-                            bop: Bop::Eq(None),
-                            lhs: _,
-                            rhs: expr,
-                        }),
-                    )),
-                ) = stmt
-                {
-                    check_await_usage(expr)
-                } else {
-                    NoAwait
-                }
-            })
-            .fold(check_await_usage(runtime_expr), combine_con),
+        }) => check_await_usage(runtime_expr),
         // lvalues: shouldn't contain await or $$
         Expr_::List(_) => NoAwait,
     };
@@ -526,7 +506,9 @@ impl LiftAwait {
             | Expr_::Import(box (_, expr))
             | Expr_::Hole(box (expr, _, _, _))
             | Expr_::Yield(box Afield::AFvalue(expr))
-            | Expr_::ETSplice(box expr)
+            | Expr_::ETSplice(box nast::EtSplice {
+                spliced_expr: expr, ..
+            })
             | Expr_::Unop(box (_, expr))
             | Expr_::ArrayGet(box (expr, None)) => self.extract_await(expr, con, seq, tmps),
 
@@ -640,30 +622,10 @@ impl LiftAwait {
 
             Expr_::ExpressionTree(box nast::ExpressionTree {
                 class: _,
-                splices,
                 function_pointers: _,
                 runtime_expr,
                 dollardollar_pos: _,
-            }) => {
-                for stmt in splices {
-                    if let Stmt(
-                        _,
-                        Stmt_::Expr(box Expr(
-                            (),
-                            _,
-                            Expr_::Binop(box nast::Binop {
-                                bop: Bop::Eq(None),
-                                lhs: _,
-                                rhs: expr,
-                            }),
-                        )),
-                    ) = stmt
-                    {
-                        self.extract_await(expr, con, seq, tmps)
-                    }
-                }
-                self.extract_await(runtime_expr, con, seq, tmps)
-            }
+            }) => self.extract_await(runtime_expr, con, seq, tmps),
 
             // lvalues: shouldn't contain await or $$
             Expr_::List(_) => {}

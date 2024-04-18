@@ -661,9 +661,9 @@ fn print_expr(
                 .into())
             }
         }
-        Expr_::ETSplice(splice) => {
+        Expr_::ETSplice(box ast::EtSplice { spliced_expr, .. }) => {
             w.write_all(b"${")?;
-            print_expr(ctx, w, env, splice)?;
+            print_expr(ctx, w, env, spliced_expr)?;
             w.write_all(b"}")
         }
         Expr_::EnumClassLabel(ecl) => match &ecl.0 {

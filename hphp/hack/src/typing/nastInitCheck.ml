@@ -624,7 +624,7 @@ and expr_ env acc p e =
   | Import _ -> acc
   | Collection _ -> acc
   | FunctionPointer _ -> acc
-  | ET_Splice e -> expr acc e
+  | ET_Splice { spliced_expr = e; extract_client_type = _ } -> expr acc e
   | ReadonlyExpr e -> expr acc e
   | Hole (e, _, _, _) -> expr acc e
   (* Don't analyze invalid expressions *)

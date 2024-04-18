@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de77615a174ee02984a87f773d4ab905>>
+// @generated SignedSource<<dc2ec8b4c141f01747289e5be5c44544>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -823,12 +823,6 @@ pub struct ExpressionTree<'a, Ex, En> {
     /// The hint before the backtick, so Foo in this example.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub class: &'a ClassName<'a>,
-    /// The values spliced into expression tree at runtime are assigned
-    /// to temporaries.
-    ///
-    ///     $0tmp1 = $x; $0tmp2 = bar();
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub splices: &'a [&'a Stmt<'a, Ex, En>],
     /// The list of global functions and static methods assigned to
     /// temporaries.
     ///
@@ -881,6 +875,33 @@ pub struct As_<'a, Ex, En> {
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for As_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(As_<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct EtSplice<'a, Ex, En> {
+    pub extract_client_type: bool,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub spliced_expr: &'a Expr<'a, Ex, En>,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for EtSplice<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(EtSplice<'arena, Ex, En>);
 
 #[derive(
     Clone,
@@ -1347,7 +1368,7 @@ pub enum Expr_<'a, Ex, En> {
     ///     ${$foo}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "ET_Splice")]
-    ETSplice(&'a Expr<'a, Ex, En>),
+    ETSplice(&'a EtSplice<'a, Ex, En>),
     /// Label used for enum classes.
     ///
     ///     enum_name#label_name or #label_name

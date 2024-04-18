@@ -14,8 +14,7 @@
             (Expr
                ((), [5:3-21],
                 (ExpressionTree
-                   { et_class = ([5:3-13], "\\ExampleDsl"); et_splices = []; 
-                     et_function_pointers = [];
+                   { et_class = ([5:3-13], "\\ExampleDsl"); et_function_pointers = [];
                      et_runtime_expr =
                      ((), [5:3-13],
                       (Call

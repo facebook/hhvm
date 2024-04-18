@@ -347,11 +347,6 @@ and ('ex, 'en) function_ptr_id =
 and ('ex, 'en) expression_tree = {
   et_class: class_name;
       (** The hint before the backtick, so Foo in this example. *)
-  et_splices: ('ex, 'en) stmt list;
-      (** The values spliced into expression tree at runtime are assigned
-       * to temporaries.
-       *
-       *     $0tmp1 = $x; $0tmp2 = bar(); *)
   et_function_pointers: ('ex, 'en) stmt list;
       (** The list of global functions and static methods assigned to
        * temporaries.
@@ -374,6 +369,11 @@ and ('ex, 'en) as_ = {
   hint: hint;
   is_nullable: bool;
   enforce_deep: bool;
+}
+
+and ('ex, 'en) et_splice = {
+  extract_client_type: bool;
+  spliced_expr: ('ex, 'en) expr;
 }
 
 and ('ex, 'en) expr_ =
@@ -721,7 +721,7 @@ and ('ex, 'en) expr_ =
       (** Pair literal.
        *
        *     Pair {$foo, $bar} *)
-  | ET_Splice of ('ex, 'en) expr
+  | ET_Splice of ('ex, 'en) et_splice
       (** Expression tree splice expression. Only valid inside an
        * expression tree literal (backticks). See also `ExpressionTree`.
        *

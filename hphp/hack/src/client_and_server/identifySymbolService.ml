@@ -406,7 +406,6 @@ let visitor =
         (Aast.
            {
              et_class;
-             et_splices;
              et_function_pointers;
              et_runtime_expr;
              et_dollardollar_pos = _;
@@ -417,6 +416,8 @@ let visitor =
       let acc =
         process_class_id ~class_id_type:ExpressionTreeVisitor et_class
       in
+
+      let et_splices = Aast_utils.get_splices_from_et expr in
       let acc = self#plus acc (self#on_Block env None et_splices) in
 
       (* We're overriding super#on_expression_tree, so we need to

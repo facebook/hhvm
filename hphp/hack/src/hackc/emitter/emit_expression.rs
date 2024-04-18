@@ -528,9 +528,9 @@ pub fn emit_expr<'a, 'd>(
                 unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
             }
             Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.runtime_expr),
-            Expr_::ETSplice(_) => Err(Error::unrecoverable(
-                "expression trees: splice should be erased during rewriting",
-            )),
+            Expr_::ETSplice(box aast::EtSplice { spliced_expr, .. }) => {
+                emit_expr(emitter, env, spliced_expr)
+            }
             Expr_::Invalid(_) => Err(Error::unrecoverable(
                 "emit_expr: Invalid should never be encountered by codegen",
             )),

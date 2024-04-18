@@ -12,13 +12,13 @@ class IntBox extends MyBox {
   const type TInner = ExampleInt;
 }
 
-async function setState<T as MyBox, TVal>(ExampleContext $_visitor): Awaitable<
-  ExprTree<
-    ExampleDsl,
-    ExampleDsl::TAst,
-    ExampleFunction<(function(Wrapper<T>, TVal): void)>,
-  >,
-> where T as MyBox with { type TInner = TVal } {
+async function setState<T as MyBox with { type TInner = TVal }, TVal>(
+  ExampleContext $_visitor,
+): Awaitable<ExprTree<
+  ExampleDsl,
+  ExampleDsl::TAst,
+  ExampleFunction<(function(Wrapper<T>, TVal): void)>,
+>> {
   throw new \Exception();
 }
 

@@ -237,18 +237,14 @@ pub fn desugar(
     let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {
         make_tree
     } else {
-        let body = match env.codegen {
-            Mode::ForCodegen => {
-                let mut b = splice_assignments.clone();
-                b.extend(function_pointers.clone());
-                b.push(wrap_return(make_tree, &et_literal_pos));
-                b
+        let body = {
+            let mut b = splice_assignments.clone();
+            if matches!(env.codegen, Mode::ForCodegen) {
+                b.extend(function_pointers.clone())
             }
-            Mode::ForTypecheck => {
-                vec![wrap_return(make_tree, &et_literal_pos)]
-            }
+            b.push(wrap_return(make_tree, &et_literal_pos));
+            b
         };
-
         let lambda_args = match &dollardollar_pos {
             Some(pipe_pos) => vec![(
                 (et::DOLLARDOLLAR_TMP_VAR.to_string(), pipe_pos.clone()),
@@ -265,7 +261,6 @@ pub fn desugar(
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
             class: Id(visitor_pos.clone(), visitor_name.clone()),
-            splices: splice_assignments,
             function_pointers,
             runtime_expr,
             dollardollar_pos,
@@ -327,10 +322,8 @@ impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
                 }
                 Ok(())
             }
-            // Don't need to recurse into the new scopes of lambdas
-            Lfun(_) | Efun(_) => Ok(()),
-            // Don't recurse into Expression Trees
-            ExpressionTree(_) | ETSplice(_) => Ok(()),
+            // Don't need to recurse into the new scopes of lambdas or expression trees
+            Lfun(_) | Efun(_) | ExpressionTree(_) => Ok(()),
             // Only recurse into the left hand side of any pipe as the rhs has new $$
             Pipe(p) => {
                 let x = &mut p.1;
@@ -1346,14 +1339,24 @@ fn rewrite_expr(
         // Source: MyDsl`${ ... }`
         // Virtualized to `${ ... }`
         // Desugared to `$0v->splice(new ExprPos(...), '$var_name', ...)`
-        ETSplice(e) => {
-            if let Err(err) = check_nested_splice(&e) {
+        ETSplice(box aast::EtSplice {
+            spliced_expr,
+            extract_client_type,
+        }) => {
+            if let Err(err) = check_nested_splice(&spliced_expr) {
                 errors.push(err);
             };
 
             let len = temps.splices.len();
-            let expr_pos = e.1.clone();
-            temps.splices.push(*e);
+            let expr_pos = spliced_expr.1.clone();
+            temps.splices.push(Expr(
+                (),
+                expr_pos.clone(),
+                ETSplice(Box::new(aast::EtSplice {
+                    spliced_expr,
+                    extract_client_type: false,
+                })),
+            ));
             let temp_variable = temp_splice_lvar(&expr_pos, len);
             let temp_variable_string = string_literal(expr_pos, &temp_splice_lvar_string(len));
             let desugar_expr = v_meth_call(
@@ -1361,7 +1364,14 @@ fn rewrite_expr(
                 vec![pos_expr, temp_variable_string, temp_variable.clone()],
                 &pos,
             );
-            let virtual_expr = Expr((), pos, ETSplice(Box::new(temp_variable)));
+            let virtual_expr = Expr(
+                (),
+                pos,
+                ETSplice(Box::new(aast::EtSplice {
+                    spliced_expr: temp_variable,
+                    extract_client_type,
+                })),
+            );
             RewriteResult {
                 virtual_expr,
                 desugar_expr,

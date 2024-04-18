@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d2f9510af91380f6c1785e27a7592d1c>>
+// @generated SignedSource<<e42a066ebab607720fff3cab8a99f081>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -576,9 +576,8 @@ impl Transform for ExpressionTree {
         match self {
             ExpressionTree {
                 class: ref mut __binding_0,
-                splices: ref mut __binding_1,
-                function_pointers: ref mut __binding_2,
-                runtime_expr: ref mut __binding_3,
+                function_pointers: ref mut __binding_1,
+                runtime_expr: ref mut __binding_2,
                 ..
             } => {
                 {
@@ -587,10 +586,7 @@ impl Transform for ExpressionTree {
                 {
                     __binding_1.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_2.transform(env, &mut pass.clone())
-                }
-                { __binding_3.transform(env, &mut pass.clone()) }
+                { __binding_2.transform(env, &mut pass.clone()) }
             }
         }
     }
@@ -622,6 +618,29 @@ impl Transform for As_ {
                     __binding_2.transform(env, &mut pass.clone())
                 }
                 { __binding_3.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for EtSplice {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_et_splice_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_et_splice_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            EtSplice {
+                extract_client_type: ref mut __binding_0,
+                spliced_expr: ref mut __binding_1,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                { __binding_1.transform(env, &mut pass.clone()) }
             }
         }
     }

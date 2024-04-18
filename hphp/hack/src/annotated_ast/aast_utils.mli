@@ -34,6 +34,10 @@ return None
 *)
 val get_virtual_expr_from_et :
   ('a, 'b) Aast_defs.expression_tree -> ('a, 'b) Aast_defs.expr option
+(** Get the leading assignments in an expression tree's lambda expression. *)
+
+val get_splices_from_et :
+  ('a, 'b) Aast_defs.expression_tree -> ('a, 'b) Aast_defs.stmt list
 
 (** Gets the fun_ of a (possibly Hole wrapped) Efun or Lfun *)
 val get_fun_expr : ('a, 'b) Aast_defs.expr -> ('a, 'b) Aast_defs.fun_ option

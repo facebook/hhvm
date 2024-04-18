@@ -4727,9 +4727,9 @@ end = struct
         p
         (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
         (MakeType.closed_shape (Reason.Rshape_literal p) fdm)
-    | ET_Splice e ->
+    | ET_Splice splice ->
       Env.with_outside_expr_tree env (fun env dsl_name ->
-          et_splice env dsl_name p e)
+          et_splice env dsl_name p splice)
     | EnumClassLabel (None, s) ->
       let (env, expect_label, lty_opt) =
         match expected with
@@ -4834,7 +4834,7 @@ end = struct
     in
     make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-  and et_splice env dsl_opt p e =
+  and et_splice env dsl_opt p { spliced_expr; extract_client_type } =
     let open Option.Let_syntax in
     let dsl_opt =
       let* (_, dsl_name) = dsl_opt in
@@ -4887,33 +4887,45 @@ end = struct
          Cls.get_docs_url cls)
     in
 
-    let (env, te, ty) = expr ~expected:None ~ctxt:Context.default env e in
-    let (env, ty_visitor) = Env.fresh_type env p in
-    let (env, ty_res) = Env.fresh_type env p in
-    let (env, ty_infer) = Env.fresh_type env p in
-    let spliceable_type =
-      let raw_spliceable_type =
-        MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
-      in
-      if TCO.pessimise_builtins (Env.get_tcopt env) then
-        MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
-      else
-        raw_spliceable_type
+    let (env, te, ty) =
+      expr ~expected:None ~ctxt:Context.default env spliced_expr
     in
+    let (env, ty) =
+      if extract_client_type then (
+        let (env, ty_visitor) = Env.fresh_type env p in
+        let (env, ty_res) = Env.fresh_type env p in
+        let (env, ty_infer) = Env.fresh_type env p in
+        let spliceable_type =
+          let raw_spliceable_type =
+            MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
+          in
+          if TCO.pessimise_builtins (Env.get_tcopt env) then
+            MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
+          else
+            raw_spliceable_type
+        in
 
-    let (_, expr_pos, _) = e in
-    let (env, ty_err_opt) =
-      SubType.sub_type env ty spliceable_type
-      @@ Some
-           (Typing_error.Reasons_callback.expr_tree_splice_error
-              p
-              ~expr_pos:(Pos_or_decl.of_raw_pos expr_pos)
-              ~contextual_reasons:(contextual_reasons ~ty env)
-              ~dsl_opt
-              ~docs_url)
+        let (_, expr_pos, _) = spliced_expr in
+        let (env, ty_err_opt) =
+          SubType.sub_type env ty spliceable_type
+          @@ Some
+               (Typing_error.Reasons_callback.expr_tree_splice_error
+                  p
+                  ~expr_pos:(Pos_or_decl.of_raw_pos expr_pos)
+                  ~contextual_reasons:(contextual_reasons ~ty env)
+                  ~dsl_opt
+                  ~docs_url)
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        (env, ty_infer)
+      ) else
+        (env, ty)
     in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    make_result env p (Aast.ET_Splice te) ty_infer
+    make_result
+      env
+      p
+      (Aast.ET_Splice { spliced_expr = te; extract_client_type })
+      ty
 
   and new_object
       ~(expected : ExpectedTy.t option)
@@ -10134,65 +10146,10 @@ and Expression_tree : sig
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
   let expression_tree env p et =
-    let {
-      et_class;
-      et_splices;
-      et_function_pointers;
-      et_runtime_expr;
-      et_dollardollar_pos;
-    } =
+    let { et_class; et_function_pointers; et_runtime_expr; et_dollardollar_pos }
+        =
       et
     in
-
-    (* Slight hack to deal with |> $$ support *)
-    let env =
-      match et_dollardollar_pos with
-      | Some dd_pos ->
-        let dollardollar_var =
-          Local_id.make_unscoped SN.ExpressionTrees.dollardollarTmpVar
-        in
-        let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
-        let dd_defined = Env.is_local_present env dd_var in
-        if not dd_defined then
-          let () =
-            Errors.add_error
-              Naming_error.(
-                to_user_error
-                @@ Undefined
-                     {
-                       pos = dd_pos;
-                       var_name = SN.SpecialIdents.dollardollar;
-                       did_you_mean = None;
-                     })
-          in
-          let nothing_ty = MakeType.nothing Reason.Rnone in
-          Env.set_local
-            ~is_defined:true
-            ~bound_ty:None
-            env
-            dollardollar_var
-            nothing_ty
-            Pos.none
-        else
-          let dd_local = Env.get_local env dd_var in
-          Typing_local_types.(
-            Env.set_local
-              ~is_defined:true
-              ~bound_ty:None
-              env
-              dollardollar_var
-              dd_local.ty
-              dd_local.pos)
-      | None -> env
-    in
-
-    (* Given the expression tree literal:
-
-       MyVisitor`1 + ${ foo() }`
-
-       First, type check the expressions that are spliced in, so foo() in
-       this example. *)
-    let (env, t_splices) = Stmt.block env et_splices in
 
     (* Next, typecheck the function pointer assignments *)
     let (env, _, t_function_pointers) =
@@ -10227,7 +10184,6 @@ end = struct
       (Aast.ExpressionTree
          {
            et_class;
-           et_splices = t_splices;
            et_function_pointers = t_function_pointers;
            et_runtime_expr = t_runtime_expr;
            et_dollardollar_pos;

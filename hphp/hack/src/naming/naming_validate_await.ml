@@ -83,7 +83,7 @@ and check_await_usage expr =
     | Import (_, expr)
     | Hole (expr, _, _, _)
     | Yield (AFvalue expr)
-    | ET_Splice expr
+    | ET_Splice { spliced_expr = expr; _ }
     | Unop (_, expr)
     | Array_get (expr, None) ->
       check_await_usage expr
@@ -176,21 +176,11 @@ and check_await_usage expr =
     | ExpressionTree
         {
           et_class = _;
-          et_splices = splices;
           et_function_pointers = _;
           et_runtime_expr = runtime_expr;
           et_dollardollar_pos = _;
         } ->
-      List.fold_right
-        splices
-        ~init:(check_await_usage runtime_expr)
-        ~f:(fun stmt await ->
-          match stmt with
-          | ( _,
-              Expr ((), _, Binop { bop = Ast_defs.Eq None; lhs = _; rhs = expr })
-            ) ->
-            combine_con (check_await_usage expr) await
-          | _ -> await)
+      check_await_usage runtime_expr
     (* lvalues: shouldn't contain await or $$ *)
     | List _ -> NoAwait
   in

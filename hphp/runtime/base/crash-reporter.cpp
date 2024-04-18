@@ -251,24 +251,32 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
         write(fd, msg.begin(), msg.size());
       }
       [[fallthrough]];
-    case CrashReportStage::ReportPhpStack:
+    case CrashReportStage::ReportPhpStack: {
       // flush so if php stack-walking crashes, we still have this output so far
       ::fsync(fd);
 
       s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
       // Don't attempt to determine function arguments in the PHP backtrace, as
       // that might involve re-entering the VM.
+      auto done = true;
       if (!g_context.isNull() && !tl_sweeping) {
-        dprintf(fd, "\nPHP Stacktrace:\n\n%s",
-                debug_string_backtrace(
-                    /*skip*/false,
-                    /*ignore_args*/true
-                ).data());
+        VMRegAnchor _(VMRegAnchor::Soft);
+        if (regState() == VMRegState::CLEAN) {
+          dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+                  debug_string_backtrace(
+                      /*skip*/false,
+                      /*ignore_args*/true
+                  ).data());
+        } else {
+          done = false;
+        }
       }
-      ::close(fd);
 
-      s_crash_report_stage = CrashReportStage::DumpTransDB;
-
+      if (done) {
+        ::close(fd);
+        s_crash_report_stage = CrashReportStage::DumpTransDB;
+      }
+    }
       [[fallthrough]];
     case CrashReportStage::ReportApproximatePhpStack:
       if (s_crash_report_stage == CrashReportStage::ReportApproximatePhpStack) {

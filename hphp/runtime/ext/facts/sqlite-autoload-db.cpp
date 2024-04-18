@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
+#include "hphp/runtime/base/sandbox-events.h"
 
 #include <chrono>
 #include <exception>
@@ -672,6 +673,11 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         throw std::runtime_error{exception_str};
       }
     }();
+
+    if (!db.passesQuickCheck()) {
+      rareSboxEvent(
+          "ext_facts", "SQLite DB failed quick_check", key.toDebugString());
+    }
 
     switch (key.m_mode) {
       case SQLite::OpenMode::ReadOnly:

@@ -486,9 +486,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
   const std::string& mysql_error() const {
     return mysql_error_;
   }
-  const std::string& mysql_normalize_error() const {
-    return mysql_normalize_error_;
-  }
 
   // Get the state and result, as well as readable string versions.
   OperationResult result() const {
@@ -618,10 +615,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   MysqlClientBase* client() const;
 
-  void setAsyncClientError(
-      unsigned int mysql_errno,
-      folly::StringPiece msg,
-      folly::StringPiece normalizeMsg = "");
+  void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);
 
   virtual db::OperationType getOperationType() const = 0;
 
@@ -768,7 +762,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
   // Errors that may have occurred.
   unsigned int mysql_errno_;
   std::string mysql_error_;
-  std::string mysql_normalize_error_;
 
   // Connection or query attributes (depending on the Operation type)
   AttributeMap attributes_;

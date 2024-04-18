@@ -294,21 +294,14 @@ void Operation::snapshotMysqlErrors() {
     } else {
       mysql_error_ = ::mysql_error(mysql);
     }
-
-    mysql_normalize_error_ = mysql_error_;
   }
 }
 
 void Operation::setAsyncClientError(
     unsigned int mysql_errno,
-    folly::StringPiece msg,
-    folly::StringPiece normalizeMsg) {
-  if (normalizeMsg.empty()) {
-    normalizeMsg = msg;
-  }
+    folly::StringPiece msg) {
   mysql_errno_ = mysql_errno;
   mysql_error_ = msg.toString();
-  mysql_normalize_error_ = normalizeMsg.toString();
 }
 
 void Operation::wait() {
@@ -811,10 +804,7 @@ void ConnectOperation::timeoutHandler(
   }
   parts.push_back(fmt::format("(TcpTimeout:{})", (isTcpTimeout ? 1 : 0)));
 
-  setAsyncClientError(
-      CR_SERVER_LOST,
-      folly::join(" ", parts),
-      fmt::format("Connect timed out{}", stalled ? " (loop stalled)" : ""));
+  setAsyncClientError(CR_SERVER_LOST, folly::join(" ", parts));
   attemptFailed(OperationResult::TimedOut);
 }
 
@@ -1035,8 +1025,7 @@ void FetchOperation::specializedRunImpl() {
   } catch (std::invalid_argument& e) {
     setAsyncClientError(
         static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
-        std::string("Unable to parse Query: ") + e.what(),
-        "Unable to parse Query");
+        std::string("Unable to parse Query: ") + e.what());
     completeOperation(OperationResult::Failed);
   }
 }
@@ -1484,10 +1473,7 @@ void FetchOperation::specializedTimeoutTriggered() {
     parts.push_back(threadOverloadMessage(cbDelayUs));
   }
 
-  setAsyncClientError(
-      CR_NET_READ_INTERRUPTED,
-      folly::join(" ", parts),
-      fmt::format("Query timed out{}", stalled ? " (loop stalled)" : ""));
+  setAsyncClientError(CR_NET_READ_INTERRUPTED, folly::join(" ", parts));
   completeOperation(OperationResult::TimedOut);
 }
 

@@ -210,8 +210,7 @@ class ConnectionPoolBase {
 
   virtual ~ConnectionPoolBase() {}
 
-  using ThrottlingCallback =
-      std::function<void(uint32_t, const std::string&, const std::string&)>;
+  using ThrottlingCallback = std::function<void(uint32_t, const std::string&)>;
   using ShouldThrottleCallback = std::function<bool(
       const PoolKey&,
       std::shared_ptr<db::ConnectionContextBase> context,
@@ -628,10 +627,8 @@ class ConnectionPool
     tryRequestNewConnection(
         poolKey,
         pool_op->connection_context_,
-        [&](uint32_t errnum,
-            const std::string& error,
-            const std::string& normalizedMsg) {
-          pool_op->setAsyncClientError(errnum, error, normalizedMsg);
+        [&](uint32_t errnum, const std::string& error) {
+          pool_op->setAsyncClientError(errnum, error);
           pool_op->attemptFailed(OperationResult::Failed);
 
           // We are still in the same thread so no one else should have had a
@@ -859,8 +856,7 @@ class ConnectPoolOperation : public ConnectOperation {
              locked_pool->canCreateMoreConnections(pool_key)))) {
         setAsyncClientError(
             static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
-            createTimeoutErrorMessage(key_stats, locked_pool->perKeyLimit()),
-            "Connection timed out in pool");
+            createTimeoutErrorMessage(key_stats, locked_pool->perKeyLimit()));
         attemptFailed(OperationResult::TimedOut);
         return;
       }

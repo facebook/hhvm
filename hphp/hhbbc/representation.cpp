@@ -216,6 +216,7 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (userAttributes)
     (enumBaseTy)
     (methods, this)
+    (closures)
     ;
 
   SERDE_BITFIELD(hasReifiedGenerics, sd);

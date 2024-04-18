@@ -155,40 +155,6 @@ std::vector<Context> all_unit_contexts(const Index& index,
   return ret;
 }
 
-std::vector<Context> const_pass_contexts(const Index& index) {
-  /*
-   * Set of functions that should be processed in the constant
-   * propagation pass.
-   *
-   * None are needed for correctness. cinit, pinit, sinit, and linit
-   * functions are processed to improve overall performance.
-   */
-  std::vector<Context> ret;
-  for (auto const& c : index.program().classes) {
-    for (auto const& m : c->methods) {
-      if (!is_86init_func(*m)) continue;
-      ret.emplace_back(
-        Context {
-          c->unit,
-          m.get(),
-          c.get()
-        }
-      );
-    }
-  }
-  for (auto const& f : index.program().funcs) {
-    if (!Constant::nameFromFuncName(f->name)) continue;
-    ret.emplace_back(
-      Context {
-        f->unit,
-        f.get(),
-        nullptr
-      }
-    );
-  }
-  return ret;
-}
-
 // Return all the WorkItems we'll need to start analyzing this
 // program.
 std::vector<WorkItem> initial_work(const Index& index) {
@@ -196,11 +162,7 @@ std::vector<WorkItem> initial_work(const Index& index) {
 
   auto const& program = index.program();
   for (auto const& c : program.classes) {
-    if (c->closureContextCls) {
-      // For class-at-a-time analysis, closures that are associated
-      // with a class context are analyzed as part of that context.
-      continue;
-    }
+    assertx(!c->closureContextCls);
     if (is_used_trait(*c)) {
       for (auto const& f : c->methods) {
         ret.emplace_back(
@@ -498,8 +460,15 @@ struct AnalyzeConstantsJob {
                     AnalysisInput::Meta meta) {
     // Pre-populate the worklist with everything to begin with.
     AnalysisWorklist start;
-    for (auto const& c : classes.vals) start.schedule(c.get());
-    for (auto const& f : funcs.vals)   start.schedule(f.get());
+    for (auto const& c : classes.vals) {
+      if (is_closure(*c)) {
+        assertx(!c->closureContextCls);
+        assertx(c->closureDeclFunc);
+        continue;
+      }
+      start.schedule(c.get());
+    }
+    for (auto const& f : funcs.vals) start.schedule(f.get());
     // Make a copy of it. We'll need the original list after the index
     // is frozen.
     auto worklist = start;
@@ -562,6 +531,7 @@ private:
 
   static std::vector<FuncAnalysisResult> analyze(const php::Class& c,
                                                  AnalysisIndex& index) {
+    assertx(!is_closure(c));
     std::vector<FuncAnalysisResult> results;
     results.reserve(c.methods.size());
     for (auto const& m : c.methods) {
@@ -787,9 +757,8 @@ struct WholeProgramInput::Key::Impl {
     LSString name;
     LSString context;
     LSString unit;
+    std::vector<SString> closures;
     std::vector<SString> dependencies;
-    bool isClosure;
-    bool closureDeclInFunc;
     bool has86init;
     Optional<TypeMapping> typeMapping;
     UnresolvedTypes unresolvedTypes;
@@ -797,9 +766,8 @@ struct WholeProgramInput::Key::Impl {
       sd(name)
         (context)
         (unit)
+        (closures)
         (dependencies)
-        (isClosure)
-        (closureDeclInFunc)
         (has86init)
         (typeMapping)
         (unresolvedTypes, string_data_lt_type{})
@@ -994,34 +962,68 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     }
     add(std::move(info), std::move(parsed.unit));
   }
-  for (auto& c : parsed.classes) {
-    auto const name = c->name;
-    auto const context = c->closureContextCls;
-    auto const isClosure = is_closure(*c);
-    auto const declFunc = c->closureDeclFunc;
-    auto const unit = c->unit;
-    auto deps = Index::Input::makeDeps(*c);
-    auto has86init = false;
 
-    php::ClassBytecode bc{name};
-    KeyI::UnresolvedTypes types;
+  auto const onCls = [&] (std::unique_ptr<php::Class>& c,
+                          php::ClassBytecode& bc,
+                          KeyI::UnresolvedTypes& types,
+                          std::vector<SString>& deps,
+                          bool& has86init) {
+    assertx(IMPLIES(is_closure(*c), c->methods.size() == 1));
+
     for (auto& m : c->methods) {
       addFuncTypes(types, *m, c.get());
       bc.methodBCs.emplace_back(m->name, std::move(m->rawBlocks));
+      assertx(IMPLIES(is_closure(*c), !is_86init_func(*m)));
       has86init |= is_86init_func(*m);
     }
     for (auto const& p : c->properties) {
       addType(types, p.typeConstraint, c.get(), &p.ubs);
     }
 
+    auto const d = Index::Input::makeDeps(*c);
+    deps.insert(end(deps), begin(d), end(d));
+
+    assertx(IMPLIES(is_closure(*c), !(c->attrs & AttrEnum)));
+  };
+
+  for (auto& c : parsed.classes) {
+    auto const name = c->name;
+    auto const declFunc = c->closureDeclFunc;
+    auto const unit = c->unit;
+
+    assertx(IMPLIES(is_closure(*c), !c->closureContextCls));
+    assertx(IMPLIES(is_closure(*c), declFunc));
+
+    auto has86init = false;
+    php::ClassBytecode bc{name};
+    KeyI::UnresolvedTypes types;
+    std::vector<SString> deps;
+    std::vector<SString> closures;
+
+    onCls(c, bc, types, deps, has86init);
+    for (auto& clo : c->closures) {
+      assertx(is_closure(*clo));
+      onCls(clo, bc, types, deps, has86init);
+      closures.emplace_back(clo->name);
+    }
+
     Optional<TypeMapping> typeMapping;
     if (c->attrs & AttrEnum) {
+      assertx(!is_closure(*c));
       auto tc = c->enumBaseTy;
       assertx(!tc.isNullable());
       addType(types, tc, nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
       typeMapping.emplace(TypeMapping{c->name, c->name, tc, false});
     }
+
+    std::sort(begin(deps), end(deps), string_data_lt_type{});
+    deps.erase(
+      std::unique(begin(deps), end(deps), string_data_tsame{}),
+      end(deps)
+    );
+
+    std::sort(begin(closures), end(closures), string_data_lt_type{});
 
     add(
       KeyI::ClassBytecodeInfo{name},
@@ -1030,11 +1032,10 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     add(
       KeyI::ClassInfo{
         name,
-        declFunc ? declFunc : context,
+        declFunc,
         unit,
+        std::move(closures),
         std::move(deps),
-        isClosure,
-        (bool)declFunc,
         has86init,
         std::move(typeMapping),
         std::move(types)
@@ -1042,6 +1043,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       std::move(c)
     );
   }
+
   for (auto& f : parsed.funcs) {
     auto const name = f->name;
     auto const unit = f->unit;
@@ -1129,9 +1131,8 @@ Index::Input make_index_input(WholeProgramInput input) {
               p.first.m_impl->cls.name,
               std::move(p.first.m_impl->cls.dependencies),
               p.first.m_impl->cls.context,
+              std::move(p.first.m_impl->cls.closures),
               p.first.m_impl->cls.unit,
-              p.first.m_impl->cls.isClosure,
-              p.first.m_impl->cls.closureDeclInFunc,
               p.first.m_impl->cls.has86init,
               std::move(p.first.m_impl->cls.typeMapping),
               std::vector<SString>{

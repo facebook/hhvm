@@ -1017,33 +1017,47 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
 void assign_closure_context(const ParseUnitState&, php::Class*);
 
-LSString find_closure_context(const ParseUnitState& puState,
-                              php::Func* createClFunc) {
+std::pair<LSString, bool>
+find_closure_context(const ParseUnitState& puState,
+                     php::Func* createClFunc) {
   if (auto const cls = createClFunc->cls) {
     if (is_closure(*cls)) {
       // We have a closure created by a closure's invoke method, which
       // means it should inherit the outer closure's context, so we
       // have to know that first.
       assign_closure_context(puState, cls);
-      return cls->closureContextCls;
+      if (cls->closureContextCls) {
+        return std::make_pair(cls->closureContextCls, true);
+      }
+      if (cls->closureDeclFunc) {
+        return std::make_pair(cls->closureDeclFunc, false);
+      }
+      always_assert(false);
     }
-    return cls->name;
+    return std::make_pair(cls->name, true);
   }
-  return nullptr;
+  return std::make_pair(createClFunc->name, false);
 }
 
 void assign_closure_context(const ParseUnitState& puState,
                             php::Class* clo) {
-  if (clo->closureContextCls) return;
+  assertx(is_closure(*clo));
+
+  if (clo->closureContextCls || clo->closureDeclFunc) return;
+
   auto const clIt = puState.createClMap.find(clo->name);
   if (clIt == end(puState.createClMap)) {
     // Unused closure class.  Technically not prohibited by the spec.
     return;
   }
-  clo->closureContextCls = find_closure_context(puState, clIt->second);
-  if (!clIt->second->cls) {
-    assertx(!clo->closureContextCls);
-    clo->closureDeclFunc = clIt->second->name;
+
+  auto const [ctx, isClass] = find_closure_context(puState, clIt->second);
+  if (isClass) {
+    clo->closureContextCls = ctx;
+    clo->closureDeclFunc = nullptr;
+  } else {
+    clo->closureContextCls = nullptr;
+    clo->closureDeclFunc = ctx;
   }
 }
 
@@ -1169,18 +1183,40 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     ret.unit->modules.emplace_back(parse_module(m));
   }
 
-  for (auto& c : ret.classes) {
-    if (!is_closure(*c)) continue;
-    assign_closure_context(puState, c.get());
+  TSStringToOneT<php::Class*> classMap;
+  classMap.reserve(ret.classes.size());
+  for (auto const& c : ret.classes) {
+    classMap.try_emplace(c->name, c.get());
   }
+
+  // Remove closures declared in other classes from the unit's class
+  // list. These are owned by their declaring classes, not the unit.
+  ret.classes.erase(
+    std::remove_if(
+      begin(ret.classes), end(ret.classes),
+      [&] (std::unique_ptr<php::Class>& c) {
+        if (!is_closure(*c)) return false;
+        assign_closure_context(puState, c.get());
+        if (!c->closureContextCls) return false;
+        auto const ctx = folly::get_default(classMap, c->closureContextCls);
+        always_assert(ctx);
+        ctx->closures.emplace_back(std::move(c));
+        return true;
+      }
+    ),
+    end(ret.classes)
+  );
 
   if (debug) {
     // Make sure all closures in our createClMap (which are just
     // strings) actually exist in this unit (CreateCls should not be
     // referring to classes outside of their unit).
     TSStringSet classes;
-    for (auto const& c : ret.classes) classes.emplace(c->name);
-    for (auto const [name, _] : puState.createClMap) {
+    for (auto const& c : ret.classes) {
+      classes.emplace(c->name);
+      for (auto const& clo : c->closures) classes.emplace(clo->name);
+    }
+      for (auto const [name, _] : puState.createClMap) {
       always_assert(classes.count(name));
     }
 

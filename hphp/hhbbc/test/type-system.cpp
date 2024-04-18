@@ -27,6 +27,7 @@
 
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -640,6 +641,12 @@ Index make_index() {
     }
 
     .function N test() {
+      CreateCl 0 "Closure$ChildClosure1"
+      CreateCl 0 "Closure$ChildClosure2"
+      CreateCl 0 "Closure$ChildClosure3"
+      PopC
+      PopC
+      PopC
       Int 1
       RetC
     }
@@ -696,11 +703,23 @@ Index make_index() {
       }
     );
   }
-  for (auto& c : parse.classes) {
+
+  auto const onCls = [&] (std::unique_ptr<php::Class> c) {
     auto const name = c->name;
     auto deps = Index::Input::makeDeps(*c);
-    auto const isClosure = is_closure(*c);
     auto const unit = c->unit;
+    auto const closureDeclFunc = c->closureDeclFunc;
+
+    std::vector<SString> closures;
+    for (auto const& clo : c->closures) {
+      closures.emplace_back(clo->name);
+    }
+
+    auto const has86init = std::any_of(
+      begin(c->methods),
+      end(c->methods),
+      [] (auto const& m) { return is_86init_func(*m); }
+    );
 
     auto bytecode = std::make_unique<php::ClassBytecode>();
     for (auto& meth : c->methods) {
@@ -715,11 +734,10 @@ Index make_index() {
         std::move(stored),
         name,
         std::move(deps),
-        nullptr,
+        closureDeclFunc,
+        std::move(closures),
         unit,
-        isClosure,
-        false,
-        false
+        has86init
       }
     );
     indexInput.classBC.emplace_back(
@@ -728,7 +746,13 @@ Index make_index() {
         name
       }
     );
+  };
+
+  for (auto& c : parse.classes) {
+    for (auto& clo : c->closures) onCls(std::move(clo));
+    onCls(std::move(c));
   }
+
   for (auto& f : parse.funcs) {
     auto const name = f->name;
     auto const unit = f->unit;

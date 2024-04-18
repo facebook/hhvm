@@ -554,6 +554,11 @@ struct ClassBase {
    * Methods on the class. If there's an 86cinit, it must be last.
    */
   CompactVector<std::unique_ptr<php::Func>> methods;
+
+  /*
+   * Closures declared by this class.
+   */
+  CompactVector<std::unique_ptr<php::Class>> closures;
 };
 
 /*
@@ -603,7 +608,7 @@ struct Class : ClassBase {
    * If this class represents a closure defined in a top level
    * function (not a method), this points to the name of that
    * function. Nullptr otherwise. (For closures defined within
-  * classes, use closureContextCls).
+   * classes, use closureContextCls).
    */
   LSString closureDeclFunc;
 
@@ -671,6 +676,10 @@ struct ClassBytecode {
   ClassBytecode() = default;
   explicit ClassBytecode(SString cls) : cls{cls} {}
   SString cls;
+  // This stores both the class' bytecode and the bytecode for any
+  // closures declared in the class. The bytecode for the methods is
+  // provided first, and the remaining bytecode is for each closure's
+  // __invoke method (in closure vec order).
   CompactVector<FuncBytecode> methodBCs;
   template <typename SerDe> void serde(SerDe&);
 };
@@ -768,7 +777,7 @@ std::string local_string(const Func&, LocalId);
 //////////////////////////////////////////////////////////////////////
 
 bool check(const Func&);
-bool check(const Class&);
+bool check(const Class&, bool checkMeths = true);
 bool check(const Unit&, const Index&);
 bool check(const Program&);
 

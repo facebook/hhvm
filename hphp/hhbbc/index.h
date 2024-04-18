@@ -943,12 +943,11 @@ struct Index {
       R<php::Class> cls;
       LSString name;
       std::vector<SString> dependencies;
-      LSString closureContext;
+      // If this class is a closure declared in a top-level func, this
+      // is the name of that func.
+      LSString closureFunc;
+      std::vector<SString> closures;
       LSString unit;
-      bool isClosure;
-      // Whether this closure was declared inside a class or func
-      // (which determines the meaning of closureContext).
-      bool closureDeclInFunc;
       bool has86init;
       // If this class is an enum, the type-mapping representing it's
       // base type.
@@ -1905,8 +1904,15 @@ struct AnalysisDeps {
   Type add(MethRef, Type);
   Type add(Func, Type);
 
-  // Combine two sets of dependencies into one.
-  AnalysisDeps& operator|=(const AnalysisDeps&);
+  bool empty() const {
+    return
+      funcs.empty() &&
+      methods.empty() &&
+      classes.empty() &&
+      clsConstants.empty() &&
+      constants.empty() &&
+      typeAliases.empty();
+  }
 
   template <typename SerDe> void serde(SerDe& sd) {
     sd(funcs, string_data_lt_func{})
@@ -2171,7 +2177,8 @@ private:
   void addDepConstantToInput(SString, SString, AnalysisInput&) const;
   void addDepTypeAliasToInput(SString, SString, AnalysisInput&) const;
   void addDepUnitToInput(SString, SString, AnalysisInput&) const;
-  void addDepClassToInput(SString, SString, bool, AnalysisInput&) const;
+  void addDepClassToInput(SString, SString, bool, AnalysisInput&,
+                          bool = false) const;
   void addDepFuncToInput(SString, SString, Type, AnalysisInput&) const;
 
   Index& index;

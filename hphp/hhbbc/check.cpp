@@ -160,26 +160,43 @@ bool check(const php::Func& f) {
   return true;
 }
 
-bool check(const php::Class& c) {
-  assertx(checkName(c.name));
-  for (DEBUG_ONLY auto& m : c.methods) {
-    if (!m) continue;
-    assertx(check(*m));
+bool check(const php::Class& c, bool checkMeths) {
+  if (!debug) return true;
+
+  always_assert(checkName(c.name));
+  if (checkMeths) {
+    for (auto& m : c.methods) {
+      if (!m) continue;
+      always_assert(check(*m));
+    }
   }
 
-  assertx(IMPLIES(c.attrs & AttrNoOverride, c.attrs & AttrNoOverrideRegular));
+  always_assert(
+    IMPLIES(c.attrs & AttrNoOverride, c.attrs & AttrNoOverrideRegular)
+  );
 
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);
-  assertx(IMPLIES(c.closureContextCls, isClo));
+  always_assert(IMPLIES(c.closureContextCls, isClo));
+  always_assert(IMPLIES(c.closureDeclFunc, isClo));
+  always_assert(IMPLIES(c.closureDeclFunc, !c.closureContextCls));
+  always_assert(IMPLIES(c.closureContextCls, !c.closureDeclFunc));
   if (isClo) {
-    assertx(c.methods.size() == 1 || c.methods.size() == 2);
-    assertx(IMPLIES(c.closureDeclFunc, isClo));
-    assertx(IMPLIES(c.closureDeclFunc, !c.closureContextCls));
-    assertx(c.methods[0]->name == s_invoke.get());
-    assertx(c.methods[0]->isClosureBody);
-    assertx(c.methods.size() == 1);
+    always_assert(c.closures.empty());
+    always_assert(c.closureContextCls || c.closureDeclFunc);
+    always_assert(c.methods.size() == 1);
+    always_assert(c.methods[0]->name == s_invoke.get());
+    always_assert(c.methods[0]->isClosureBody);
+  } else {
+    for (auto const& clo : c.closures) {
+      always_assert(is_closure(*clo));
+      always_assert(clo->closureContextCls &&
+                    clo->closureContextCls->tsame(c.name));
+      always_assert(!clo->closureDeclFunc);
+      always_assert(check(*clo, checkMeths));
+    }
   }
+
   return true;
 }
 

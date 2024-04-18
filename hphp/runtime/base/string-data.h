@@ -594,7 +594,6 @@ struct string_data_same;
 struct string_data_tsame; // for type names
 struct string_data_fsame; // for func names
 struct string_data_lt;
-struct string_data_lti;
 struct string_data_lt_type; // for type names
 struct string_data_hash_tsame; // for type names
 

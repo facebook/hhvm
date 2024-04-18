@@ -465,9 +465,13 @@ struct MethodsWithoutCInfo {
   SString cls;
   // Same order as the methods vector on the associated php::Class.
   CompactVector<std::unique_ptr<FuncInfo2>> finfos;
+  // __invoke methods on any closures declared in this class. Same
+  // order as closures vector on the associated php::Class.
+  CompactVector<std::unique_ptr<FuncInfo2>> closureInvokes;
   template <typename SerDe> void serde(SerDe& sd) {
     sd(cls)
       (finfos)
+      (closureInvokes)
       ;
   }
 };
@@ -3919,9 +3923,11 @@ struct ClassInfo2 {
   MethRefSet extraMethods;
 
   /*
-   * A vector of names of all the closures associated with this class.
+   * A vector of the closures class-infos declared in this class. Such
+   * closures are stored in their declaring class, not as a top-level
+   * class.
    */
-  CompactVector<SString> closures;
+  CompactVector<std::unique_ptr<ClassInfo2>> closures;
 
   /*
    * A (case-sensitive) map from method names to associated
@@ -5242,7 +5248,7 @@ struct Index::IndexData {
   // func family with that id.
   hphp_fast_map<FuncFamily2::Id, Ref<FuncFamilyGroup>> funcFamilyRefs;
 
-  // Maps classes and functions to the names of closures defined
+  // Maps of functions and classes to the names of closures defined
   // within.
   TSStringToOneT<TSStringSet> classToClosures;
   FSStringToOneT<TSStringSet> funcToClosures;
@@ -5254,6 +5260,10 @@ struct Index::IndexData {
   // If bool is true, then the constant is "dynamic" and has an
   // associated 86cinit function.
   SStringToOneT<std::pair<SString, bool>> constantToUnit;
+
+  // Maps a closure to it's declaring class or function.
+  TSStringToOneT<SString> closureToClass;
+  TSStringToOneT<SString> closureToFunc;
 
   // All the classes that have a 86*init function.
   TSStringSet classesWith86Inits;
@@ -5436,23 +5446,37 @@ struct AnalysisIndex::IndexData {
   AnalysisWorklist& worklist;
   std::unique_ptr<DepTracker> deps;
 
-  std::vector<SString> classNames;
-  std::vector<SString> funcNames;
-  std::vector<SString> unitNames;
+  // The names of classes/funcs/units which will be in the output of
+  // the job.
+  std::vector<SString> outClassNames;
+  std::vector<SString> outFuncNames;
+  std::vector<SString> outUnitNames;
 
-  TSStringToOneT<std::unique_ptr<php::Class>> classes;
-  TSStringToOneT<std::unique_ptr<ClassInfo2>> cinfos;
-  TSStringToOneT<std::unique_ptr<MethodsWithoutCInfo>> minfos;
+  // Maps names to various data-structures. This works for both normal
+  // classes and closures.
+  TSStringToOneT<php::Class*> classes;
+  TSStringToOneT<ClassInfo2*> cinfos;
+  TSStringToOneT<MethodsWithoutCInfo*> minfos;
 
-  FSStringToOneT<std::unique_ptr<php::Func>> funcs;
-  FSStringToOneT<std::unique_ptr<FuncInfo2>> finfos;
+  FSStringToOneT<php::Func*> funcs;
+  FSStringToOneT<FuncInfo2*> finfos;
 
-  SStringToOneT<std::unique_ptr<php::Unit>> units;
+  SStringToOneT<php::Unit*> units;
 
   SStringToOneT<php::Constant*> constants;
   TSStringToOneT<php::TypeAlias*> typeAliases;
 
   std::vector<FuncInfo2*> finfosByIdx;
+
+  // "Owns" the actual data structures. Closures will not be on these
+  // maps, as they are owned by another Class. Generally look ups
+  // should use the other maps above.
+  TSStringToOneT<std::unique_ptr<php::Class>> allClasses;
+  TSStringToOneT<std::unique_ptr<ClassInfo2>> allCInfos;
+  TSStringToOneT<std::unique_ptr<MethodsWithoutCInfo>> allMInfos;
+  FSStringToOneT<std::unique_ptr<php::Func>> allFuncs;
+  FSStringToOneT<std::unique_ptr<FuncInfo2>> allFInfos;
+  SStringToOneT<std::unique_ptr<php::Unit>> allUnits;
 
   // Anything on these lists is known to definitely not exist.
   TSStringSet badClasses;
@@ -5590,8 +5614,8 @@ struct DepTracker {
       // the job.
       t &= AnalysisDeps::kValidForChanges;
       if (t == Type::None) return;
-      if (auto const p = folly::get_ptr(index.funcs, f.name)) {
-        funcs[p->get()][fc] |= t;
+      if (auto const p = folly::get_default(index.funcs, f.name)) {
+        funcs[p][fc] |= t;
       }
     }
   }
@@ -5675,23 +5699,39 @@ private:
   // a top-level function, use that.
   FuncOrCls context() const {
     auto const& ctx = context_for_deps(index);
-    if (ctx.cls) return ctx.cls;
+    if (ctx.cls) {
+      // If this is a closure, the context is the closure's declaring
+      // class or function.
+      if (ctx.cls->closureContextCls) {
+        auto const c =
+          folly::get_default(index.classes, ctx.cls->closureContextCls);
+        always_assert(c);
+        return c;
+      }
+      if (ctx.cls->closureDeclFunc) {
+        auto const f =
+          folly::get_default(index.funcs, ctx.cls->closureDeclFunc);
+        always_assert(f);
+        return f;
+      }
+      return ctx.cls;
+    }
     assertx(ctx.func);
     return ctx.func;
   }
 
   const php::Func* from(MethRef m) const {
-    if (auto const cls = folly::get_ptr(index.classes, m.cls)) {
-      assertx(m.idx < cls->get()->methods.size());
-      return cls->get()->methods[m.idx].get();
+    if (auto const cls = folly::get_default(index.classes, m.cls)) {
+      assertx(m.idx < cls->methods.size());
+      return cls->methods[m.idx].get();
     }
     return nullptr;
   }
 
   const php::Const* from(ConstIndex cns) const {
-    if (auto const cls = folly::get_ptr(index.classes, cns.cls)) {
-      assertx(cns.idx < cls->get()->constants.size());
-      return &cls->get()->constants[cns.idx];
+    if (auto const cls = folly::get_default(index.classes, cns.cls)) {
+      assertx(cns.idx < cls->constants.size());
+      return &cls->constants[cns.idx];
     }
     return nullptr;
   }
@@ -5867,7 +5907,7 @@ const php::Func* func_from_meth_ref(const IndexData& index,
 const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
                                     const MethRef& meth) {
   index.deps->add(AnalysisDeps::Class { meth.cls });
-  auto const cls = folly::get_ptr(index.classes, meth.cls);
+  auto const cls = folly::get_default(index.classes, meth.cls);
   if (!cls) {
     always_assert_flog(
       !index.badClasses.count(meth.cls),
@@ -5876,8 +5916,8 @@ const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
     );
     return nullptr;
   }
-  assertx(meth.idx < cls->get()->methods.size());
-  return cls->get()->methods[meth.idx].get();
+  assertx(meth.idx < cls->methods.size());
+  return cls->methods[meth.idx].get();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6114,15 +6154,21 @@ void add_program_to_index(IndexData& index) {
   }
   for (auto const& c : program.classes) {
     add_class_to_index(index, *c);
+    for (auto const& clo : c->closures) {
+      add_class_to_index(index, *clo);
+    }
   }
   for (auto const& f : program.funcs) {
     add_func_to_index(index, *f);
   }
 
   for (auto const& c : program.classes) {
-    if (!c->closureContextCls) continue;
-    auto& s = index.classClosureMap[index.classes.at(c->closureContextCls)];
-    s.emplace_back(c.get());
+    assertx(!c->closureContextCls);
+    for (auto const& clo : c->closures) {
+      assertx(clo->closureContextCls);
+      auto& s = index.classClosureMap[index.classes.at(clo->closureContextCls)];
+      s.emplace_back(clo.get());
+    }
   }
 
   // All funcs have been assigned indices above. Now for each func we
@@ -6145,6 +6191,10 @@ void add_program_to_index(IndexData& index) {
     program.classes,
     [&] (const std::unique_ptr<php::Class>& cls) {
       for (auto const& m : cls->methods) create(*m);
+      for (auto const& clo : cls->closures) {
+        assertx(clo->methods.size() == 1);
+        create(*clo->methods[0]);
+      }
     }
   );
 
@@ -6279,188 +6329,203 @@ struct CheckClassInfoInvariantsJob {
                   std::unique_ptr<php::Class> cls) {
     SCOPE_ASSERT_DETAIL("class") { return cls->name->toCppString(); };
 
-    // ClassGraph stored in a ClassInfo should not be missing, always
-    // have the ClassInfo stored, and have complete children
-    // information.
-    always_assert(cinfo->classGraph);
-    always_assert(!cinfo->classGraph.isMissing());
-    always_assert(cinfo->classGraph.name()->tsame(cinfo->name));
-    always_assert(cinfo->classGraph.cinfo2() == cinfo.get());
-    if (is_closure_base(cinfo->name)) {
-      // The closure base class is special. We don't store it's
-      // children information because it's too large.
-      always_assert(!cinfo->classGraph.hasCompleteChildren());
-      always_assert(cinfo->classGraph.isConservative());
-    } else {
-      always_assert(cinfo->classGraph.hasCompleteChildren() ||
-                    cinfo->classGraph.isConservative());
-    }
+    always_assert(check(*cls, false));
 
-    // This class and withoutNonRegular should be equivalent when
-    // ignoring non-regular classes. The withoutNonRegular class
-    // should be a fixed-point.
-    if (auto const without = cinfo->classGraph.withoutNonRegular()) {
-      always_assert(without.hasCompleteChildren() ||
-                    without.isConservative());
-      always_assert(without.subSubtypeOf(cinfo->classGraph, false, false));
-      always_assert(cinfo->classGraph.subSubtypeOf(without, false, false));
-      always_assert(without.withoutNonRegular() == without);
-      always_assert(cinfo->classGraph.mightBeRegular() ||
-                    cinfo->classGraph.mightHaveRegularSubclass());
-      always_assert(IMPLIES(cinfo->classGraph.mightBeRegular(),
-                            without == cinfo->classGraph));
-    } else if (!is_used_trait(*cls)) {
-      always_assert(!cinfo->classGraph.mightBeRegular());
-      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
-    }
-
-    // AttrNoOverride is a superset of AttrNoOverrideRegular
-    always_assert(
-      IMPLIES(!(cls->attrs & AttrNoOverrideRegular),
-              !(cls->attrs & AttrNoOverride))
-    );
-
-    // Override attrs and what we know about the subclasses should be in
-    // agreement.
-    if (cls->attrs & AttrNoOverride) {
-      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
-      always_assert(!cinfo->classGraph.mightHaveNonRegularSubclass());
-    } else if (cls->attrs & AttrNoOverrideRegular) {
-      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
-      always_assert(cinfo->classGraph.mightHaveNonRegularSubclass());
-    }
-
-    // Make sure the information stored on the ClassInfo matches that
-    // which the ClassGraph reports.
-    if (cls->attrs & AttrNoMock) {
-      always_assert(!cinfo->isMocked);
-      always_assert(!cinfo->isSubMocked);
-    } else {
-      always_assert(cinfo->isSubMocked);
-    }
-
-    always_assert(
-      bool(cls->attrs & AttrNoExpandTrait) ==
-      cinfo->classGraph.usedTraits().empty()
-    );
-
-    for (auto const& [name, mte] : cinfo->methods) {
-      // Interface method tables should only contain its own methods.
-      if (cls->attrs & AttrInterface) {
-        always_assert(mte.meth().cls->tsame(cinfo->name));
-      }
-
-      // AttrNoOverride implies noOverrideRegular
-      always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular()));
-
-      if (!is_special_method_name(name)) {
-        // If the class isn't overridden, none of it's methods can be
-        // either.
-        always_assert(IMPLIES(cls->attrs & AttrNoOverride,
-                              mte.attrs & AttrNoOverride));
+    auto const check = [] (const ClassInfo2* cinfo,
+                           const php::Class* cls) {
+      // ClassGraph stored in a ClassInfo should not be missing, always
+      // have the ClassInfo stored, and have complete children
+      // information.
+      always_assert(cinfo->classGraph);
+      always_assert(!cinfo->classGraph.isMissing());
+      always_assert(cinfo->classGraph.name()->tsame(cinfo->name));
+      always_assert(cinfo->classGraph.cinfo2() == cinfo);
+      if (is_closure_base(cinfo->name)) {
+        // The closure base class is special. We don't store it's
+        // children information because it's too large.
+        always_assert(!cinfo->classGraph.hasCompleteChildren());
+        always_assert(cinfo->classGraph.isConservative());
       } else {
-        always_assert(!(mte.attrs & AttrNoOverride));
-        always_assert(!mte.noOverrideRegular());
+        always_assert(cinfo->classGraph.hasCompleteChildren() ||
+                      cinfo->classGraph.isConservative());
       }
 
-      if (cinfo->name->tsame(s_Closure.get()) || is_closure_name(cinfo->name)) {
-        always_assert(mte.attrs & AttrNoOverride);
+      // This class and withoutNonRegular should be equivalent when
+      // ignoring non-regular classes. The withoutNonRegular class
+      // should be a fixed-point.
+      if (auto const without = cinfo->classGraph.withoutNonRegular()) {
+        always_assert(without.hasCompleteChildren() ||
+                      without.isConservative());
+        always_assert(without.subSubtypeOf(cinfo->classGraph, false, false));
+        always_assert(cinfo->classGraph.subSubtypeOf(without, false, false));
+        always_assert(without.withoutNonRegular() == without);
+        always_assert(cinfo->classGraph.mightBeRegular() ||
+                      cinfo->classGraph.mightHaveRegularSubclass());
+        always_assert(IMPLIES(cinfo->classGraph.mightBeRegular(),
+                              without == cinfo->classGraph));
+      } else if (!is_used_trait(*cls)) {
+        always_assert(!cinfo->classGraph.mightBeRegular());
+        always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
       }
 
-      // Don't store method families for special methods.
-      auto const famIt = cinfo->methodFamilies.find(name);
-      if (is_special_method_name(name)) {
-        always_assert(famIt == end(cinfo->methodFamilies));
-        continue;
-      }
-      if (famIt == end(cinfo->methodFamilies)) {
-        always_assert(is_closure_name(cinfo->name));
-        continue;
-      }
-      auto const& entry = famIt->second;
-
-      // No override methods should always have a single entry.
-      if (mte.attrs & AttrNoOverride) {
-        always_assert(
-          boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
-          boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
-        );
-        continue;
-      }
-
-      if (cinfo->isRegularClass) {
-        // "all" should only be a func family. It can't be empty,
-        // because we know there's at least one method in it (the one in
-        // cinfo->methods). It can't be a single func, because one of
-        // the methods must be the cinfo->methods method, and we know it
-        // isn't AttrNoOverride, so there *must* be another method. So,
-        // it must be a func family.
-        always_assert(
-          boost::get<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
-          boost::get<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
-        );
-        // This is a regular class, so we cannot have an incomplete
-        // entry (can only happen with interfaces).
-        always_assert(!entry.m_regularIncomplete);
-      }
-    }
-
-    // If the class is marked as having not having bad initial prop
-    // values, all of it's properties should have
-    // AttrInitialSatisfiesTC set. Likewise, if it is, at least one
-    // property should not have it set.
-    if (!cinfo->hasBadInitialPropValues) {
-      auto const all = std::all_of(
-        begin(cls->properties),
-        end(cls->properties),
-        [] (const php::Prop& p) {
-          return p.attrs & AttrInitialSatisfiesTC;
-        }
-      );
-      always_assert(all);
-    } else {
-      auto const someBad = std::any_of(
-        begin(cls->properties),
-        end(cls->properties),
-        [] (const php::Prop& p) {
-          return !(p.attrs & AttrInitialSatisfiesTC);
-        }
-      );
-      always_assert(someBad);
-    }
-
-    if (is_closure_name(cinfo->name)) {
-      assertx(cinfo->classGraph.hasCompleteChildren());
-      // Closures have no children.
-      auto const subclasses = cinfo->classGraph.children();
-      always_assert(subclasses.size() == 1);
-      always_assert(subclasses[0].name()->tsame(cinfo->name));
-    } else if (cinfo->classGraph.hasCompleteChildren()) {
-      // Otherwise the children list is non-empty, contains this
-      // class, and contains only unique elements.
-      auto const subclasses = cinfo->classGraph.children();
+      // AttrNoOverride is a superset of AttrNoOverrideRegular
       always_assert(
-        std::find_if(
-          begin(subclasses),
-          end(subclasses),
-          [&] (ClassGraph g) { return g.name()->tsame(cinfo->name); }
-        ) != end(subclasses)
+        IMPLIES(!(cls->attrs & AttrNoOverrideRegular),
+                !(cls->attrs & AttrNoOverride))
       );
-      auto cpy = subclasses;
-      std::sort(begin(cpy), end(cpy));
-      cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
-      always_assert(cpy.size() == subclasses.size());
-    }
 
-    // The base list is non-empty, and the last element is this class.
-    auto const bases = cinfo->classGraph.bases();
-    always_assert(!bases.empty());
-    always_assert(cinfo->classGraph == bases.back());
-    if (is_closure_base(cinfo->name)) {
-      always_assert(bases.size() == 1);
-    } else if (is_closure_name(cinfo->name)) {
-      always_assert(bases.size() == 2);
-      always_assert(bases[0].name()->tsame(s_Closure.get()));
+      // Override attrs and what we know about the subclasses should be in
+      // agreement.
+      if (cls->attrs & AttrNoOverride) {
+        always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+        always_assert(!cinfo->classGraph.mightHaveNonRegularSubclass());
+      } else if (cls->attrs & AttrNoOverrideRegular) {
+        always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+        always_assert(cinfo->classGraph.mightHaveNonRegularSubclass());
+      }
+
+      // Make sure the information stored on the ClassInfo matches that
+      // which the ClassGraph reports.
+      if (cls->attrs & AttrNoMock) {
+        always_assert(!cinfo->isMocked);
+        always_assert(!cinfo->isSubMocked);
+      } else {
+        always_assert(cinfo->isSubMocked);
+      }
+
+      always_assert(
+        bool(cls->attrs & AttrNoExpandTrait) ==
+        cinfo->classGraph.usedTraits().empty()
+      );
+
+      for (auto const& [name, mte] : cinfo->methods) {
+        // Interface method tables should only contain its own methods.
+        if (cls->attrs & AttrInterface) {
+          always_assert(mte.meth().cls->tsame(cinfo->name));
+        }
+
+        // AttrNoOverride implies noOverrideRegular
+        always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular()));
+
+        if (!is_special_method_name(name)) {
+          // If the class isn't overridden, none of it's methods can be
+          // either.
+          always_assert(IMPLIES(cls->attrs & AttrNoOverride,
+                                mte.attrs & AttrNoOverride));
+        } else {
+          always_assert(!(mte.attrs & AttrNoOverride));
+          always_assert(!mte.noOverrideRegular());
+        }
+
+        if (cinfo->name->tsame(s_Closure.get()) || is_closure_name(cinfo->name)) {
+          always_assert(mte.attrs & AttrNoOverride);
+        }
+
+        // Don't store method families for special methods.
+        auto const famIt = cinfo->methodFamilies.find(name);
+        if (is_special_method_name(name)) {
+          always_assert(famIt == end(cinfo->methodFamilies));
+          continue;
+        }
+        if (famIt == end(cinfo->methodFamilies)) {
+          always_assert(is_closure_name(cinfo->name));
+          continue;
+        }
+        auto const& entry = famIt->second;
+
+        // No override methods should always have a single entry.
+        if (mte.attrs & AttrNoOverride) {
+          always_assert(
+            boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+            boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+          );
+          continue;
+        }
+
+        if (cinfo->isRegularClass) {
+          // "all" should only be a func family. It can't be empty,
+          // because we know there's at least one method in it (the one in
+          // cinfo->methods). It can't be a single func, because one of
+          // the methods must be the cinfo->methods method, and we know it
+          // isn't AttrNoOverride, so there *must* be another method. So,
+          // it must be a func family.
+          always_assert(
+            boost::get<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
+            boost::get<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
+          );
+          // This is a regular class, so we cannot have an incomplete
+          // entry (can only happen with interfaces).
+          always_assert(!entry.m_regularIncomplete);
+        }
+      }
+
+      // If the class is marked as having not having bad initial prop
+      // values, all of it's properties should have
+      // AttrInitialSatisfiesTC set. Likewise, if it is, at least one
+      // property should not have it set.
+      if (!cinfo->hasBadInitialPropValues) {
+        auto const all = std::all_of(
+          begin(cls->properties),
+          end(cls->properties),
+          [] (const php::Prop& p) {
+            return p.attrs & AttrInitialSatisfiesTC;
+          }
+        );
+        always_assert(all);
+      } else {
+        auto const someBad = std::any_of(
+          begin(cls->properties),
+          end(cls->properties),
+          [] (const php::Prop& p) {
+            return !(p.attrs & AttrInitialSatisfiesTC);
+          }
+        );
+        always_assert(someBad);
+      }
+
+      if (is_closure_name(cinfo->name)) {
+        assertx(cinfo->classGraph.hasCompleteChildren());
+        // Closures have no children.
+        auto const subclasses = cinfo->classGraph.children();
+        always_assert(subclasses.size() == 1);
+        always_assert(subclasses[0].name()->tsame(cinfo->name));
+      } else if (cinfo->classGraph.hasCompleteChildren()) {
+        // Otherwise the children list is non-empty, contains this
+        // class, and contains only unique elements.
+        auto const subclasses = cinfo->classGraph.children();
+        always_assert(
+          std::find_if(
+            begin(subclasses),
+            end(subclasses),
+            [&] (ClassGraph g) { return g.name()->tsame(cinfo->name); }
+          ) != end(subclasses)
+        );
+        auto cpy = subclasses;
+        std::sort(begin(cpy), end(cpy));
+        cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
+        always_assert(cpy.size() == subclasses.size());
+      }
+
+      // The base list is non-empty, and the last element is this class.
+      auto const bases = cinfo->classGraph.bases();
+      always_assert(!bases.empty());
+      always_assert(cinfo->classGraph == bases.back());
+      if (is_closure_base(cinfo->name)) {
+        always_assert(bases.size() == 1);
+      } else if (is_closure_name(cinfo->name)) {
+        always_assert(bases.size() == 2);
+        always_assert(bases[0].name()->tsame(s_Closure.get()));
+      }
+
+      always_assert(IMPLIES(is_closure(*cls), cls->closures.empty()));
+      always_assert(cls->closures.size() == cinfo->closures.size());
+    };
+
+    check(cinfo.get(), cls.get());
+    for (size_t i = 0, size = cls->closures.size(); i < size; ++i) {
+      always_assert(cls->closures[i]->name->tsame(cinfo->closures[i]->name));
+      always_assert(is_closure(*cls->closures[i]));
+      check(cinfo->closures[i].get(), cls->closures[i].get());
     }
 
     return true;
@@ -6629,6 +6694,8 @@ void check_invariants(const IndexData& index) {
 
 void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
   SCOPE_ASSERT_DETAIL("class") { return cinfo->cls->name->toCppString(); };
+
+  always_assert(check(*cinfo->cls));
 
   // AttrNoOverride is a superset of AttrNoOverrideRegular
   always_assert(
@@ -8177,10 +8244,10 @@ struct FlattenJob {
     // will require "fixups" in the php::Program data.
     struct NewClosure {
       SString unit;
-      SString context;
       SString name;
+      SString context;
       template <typename SerDe> void serde(SerDe& sd) {
-        sd(unit)(context)(name);
+        sd(unit)(name)(context);
       }
     };
     std::vector<NewClosure> newClosures;
@@ -8284,9 +8351,21 @@ struct FlattenJob {
         : deps.vals[i - classesSize];
       auto& bytecode = classBytecode.vals[i];
 
-      always_assert(bytecode->methodBCs.size() == cls->methods.size());
+      // We shouldn't have closures here. They're children of the
+      // declaring class.
+      assertx(!cls->closureContextCls);
+      auto const numMethods = cls->methods.size();
+      auto const numClosures = cls->closures.size();
+      always_assert(bytecode->methodBCs.size() == numMethods + numClosures);
+
       for (size_t j = 0, bcSize = bytecode->methodBCs.size(); j < bcSize; ++j) {
-        cls->methods[j]->rawBlocks = std::move(bytecode->methodBCs[j].bc);
+        if (j < numMethods) {
+          cls->methods[j]->rawBlocks = std::move(bytecode->methodBCs[j].bc);
+        } else {
+          assertx(cls->closures[j-numMethods]->methods.size() == 1);
+          cls->closures[j-numMethods]->methods[0]->rawBlocks =
+            std::move(bytecode->methodBCs[j].bc);
+        }
       }
     }
     classBytecode.vals.clear();
@@ -8302,9 +8381,15 @@ struct FlattenJob {
         out.reserve(classes.vals.size() + deps.vals.size());
         for (auto const& c : classes.vals) {
           always_assert(out.emplace(c->name, c.get()).second);
+          for (auto const& clo : c->closures) {
+            always_assert(out.emplace(clo->name, clo.get()).second);
+          }
         }
         for (auto const& c : deps.vals) {
           always_assert(out.emplace(c->name, c.get()).second);
+          for (auto const& clo : c->closures) {
+            always_assert(out.emplace(clo->name, clo.get()).second);
+          }
         }
         return out;
       }()
@@ -8312,10 +8397,12 @@ struct FlattenJob {
 
     for (auto const& cls : uninstantiable.vals) {
       always_assert(index.m_uninstantiable.emplace(cls->name).second);
+      for (auto const& clo : cls->closures) {
+        always_assert(index.m_uninstantiable.emplace(clo->name).second);
+      }
     }
 
-    std::vector<std::unique_ptr<php::Class>> newClosures;
-    newClosures.reserve(worklist.size());
+    std::vector<const php::Class*> newClosures;
 
     for (auto const cls : worklist) {
       Trace::Bump bumper{
@@ -8353,27 +8440,34 @@ struct FlattenJob {
         index.m_states.emplace(cls->name, std::move(state));
       always_assert(stateSuccess);
 
+      auto closureIdx = cls->closures.size();
       auto closures =
         flatten_traits(index, *cls, *cinfoIt->second, *stateIt->second);
 
-      assertx(IMPLIES(is_closure(*cls), cinfoIt->second->closures.empty()));
-      std::sort(
-        begin(cinfoIt->second->closures),
-        end(cinfoIt->second->closures),
-        string_data_lt_type{}
-      );
-
       // Trait flattening may produce new closures, so those need to
       // be added to the local index as well.
-      for (auto& [c, i] : closures) {
+      for (auto& i : closures) {
+        assertx(closureIdx < cls->closures.size());
+        auto& c = cls->closures[closureIdx++];
         ITRACE(5, "adding state for closure '{}' to local index\n", c->name);
+        assertx(!is_closure(*cls));
         assertx(c->name->tsame(i->name));
         assertx(is_closure(*c));
+        assertx(c->closureContextCls);
+        assertx(c->closures.empty());
         assertx(i->closures.empty());
         always_assert(index.m_classes.emplace(c->name, c.get()).second);
         always_assert(index.m_classInfos.emplace(c->name, std::move(i)).second);
-        newClosures.emplace_back(std::move(c));
+        newClosures.emplace_back(c.get());
       }
+
+      std::sort(
+        begin(cls->closures), end(cls->closures),
+        [] (const std::unique_ptr<php::Class>& c1,
+            const std::unique_ptr<php::Class>& c2) {
+          return string_data_lt_type{}(c1->name, c2->name);
+        }
+      );
     }
 
     // Format the output data and put it in a deterministic order.
@@ -8383,11 +8477,11 @@ struct FlattenJob {
     OutputMeta outMeta;
     TSStringSet outNames;
 
-    outClasses.vals.reserve(classes.vals.size() + newClosures.size());
-    outInfos.vals.reserve(classes.vals.size() + newClosures.size());
-    outMeta.newClosures.reserve(classes.vals.size());
+    outClasses.vals.reserve(classes.vals.size());
+    outInfos.vals.reserve(classes.vals.size());
     outNames.reserve(classes.vals.size());
-    outMeta.parents.reserve(classes.vals.size() + newClosures.size());
+    outMeta.parents.reserve(classes.vals.size());
+    outMeta.newClosures.reserve(newClosures.size());
 
     auto const makeMethodsWithoutCInfo = [&] (const php::Class& cls) {
       always_assert(outMeta.uninstantiable.emplace(cls.name).second);
@@ -8399,18 +8493,13 @@ struct FlattenJob {
       for (auto const& func : cls.methods) {
         methods->finfos.emplace_back(make_func_info(index, *func));
       }
-      outMethods.vals.emplace_back(std::move(methods));
-    };
-
-    // If a closure's context is uninstantiable, then so is the
-    // closure.
-    auto const isContextInstantiable = [&] (const php::Class& cls) {
-      if (!cls.closureContextCls) return true;
-      if (index.uninstantiable(cls.closureContextCls)) {
-        always_assert(!index.m_classInfos.count(cls.closureContextCls));
-        return false;
+      for (auto const& clo : cls.closures) {
+        assertx(clo->methods.size() == 1);
+        methods->closureInvokes.emplace_back(
+          make_func_info(index, *clo->methods[0])
+        );
       }
-      return true;
+      outMethods.vals.emplace_back(std::move(methods));
     };
 
     // Do the processing which relies on a fully accessible
@@ -8418,16 +8507,15 @@ struct FlattenJob {
 
     TSStringToOneT<InterfaceConflicts> ifaceConflicts;
     for (auto& cls : classes.vals) {
+      assertx(!cls->closureContextCls);
       auto const cinfoIt = index.m_classInfos.find(cls->name);
-      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
+      if (cinfoIt == end(index.m_classInfos)) {
         ITRACE(
           4, "{} discovered to be not instantiable, instead "
           "creating MethodsWithoutCInfo for it\n",
           cls->name
         );
-        always_assert(
-          IMPLIES(!cls->closureContextCls, index.uninstantiable(cls->name))
-        );
+        always_assert(index.uninstantiable(cls->name));
         makeMethodsWithoutCInfo(*cls);
         continue;
       }
@@ -8442,6 +8530,20 @@ struct FlattenJob {
       for (auto const& func : cls->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
       }
+
+      assertx(cinfo->closures.empty());
+      for (auto& clo : cls->closures) {
+        auto const it = index.m_classInfos.find(clo->name);
+        always_assert(it != end(index.m_classInfos));
+        auto& cloinfo = it->second;
+        update_type_constraints(index, *clo, &outMeta.classTypeUses.back());
+        optimize_properties(index, *clo, *cloinfo);
+        assertx(clo->methods.size() == 1);
+        cloinfo->funcInfos.emplace_back(
+          make_func_info(index, *clo->methods[0])
+        );
+      }
+
       outNames.emplace(cls->name);
 
       // Record interface conflicts
@@ -8453,6 +8555,14 @@ struct FlattenJob {
       }
 
       auto const interfaces = cinfo->classGraph.interfaces();
+
+      if (debug) {
+        always_assert(IMPLIES(is_closure(*cls), interfaces.empty()));
+        for (auto const& cloinfo : cinfo->closures) {
+          always_assert(cloinfo->classGraph.interfaces().empty());
+        }
+      }
+
       for (auto const i1 : interfaces) {
         auto& conflicts = ifaceConflicts[i1.name()];
         conflicts.name = i1.name();
@@ -8475,39 +8585,6 @@ struct FlattenJob {
         return string_data_lt_type{}(c1.name, c2.name);
       }
     );
-
-    std::sort(
-      begin(newClosures),
-      end(newClosures),
-      [] (const std::unique_ptr<php::Class>& a,
-          const std::unique_ptr<php::Class>& b) {
-        if (a->unit != b->unit) return string_data_lt{}(a->unit, b->unit);
-        return string_data_lt_type{}(a->name, b->name);
-      }
-    );
-
-    for (auto& clo : newClosures) {
-      assertx(is_closure(*clo));
-      assertx(clo->closureContextCls);
-      assertx(clo->unit);
-
-      // Only return the closures for classes we were actually
-      // requested to flatten.
-      if (!outNames.count(clo->closureContextCls)) continue;
-
-      auto& cinfo = index.m_classInfos.at(clo->name);
-
-      index.m_ctx = clo.get();
-      SCOPE_EXIT { index.m_ctx = nullptr; };
-
-      outMeta.classTypeUses.emplace_back();
-      update_type_constraints(index, *clo, &outMeta.classTypeUses.back());
-      optimize_properties(index, *clo, *cinfo);
-
-      for (auto const& func : clo->methods) {
-        cinfo->funcInfos.emplace_back(make_func_info(index, *func));
-      }
-    }
 
     // We don't process classes marked as uninstantiable beforehand,
     // except for creating method FuncInfos for them.
@@ -8533,10 +8610,13 @@ struct FlattenJob {
           begin(cls->methods), end(cls->methods),
           [] (auto const& m) { return is_86init_func(*m); }
         );
-      if (has86init) outMeta.with86init.emplace(name);
+      if (has86init) {
+        assertx(!is_closure(*cls));
+        outMeta.with86init.emplace(name);
+      }
 
       auto const cinfoIt = index.m_classInfos.find(name);
-      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
+      if (cinfoIt == end(index.m_classInfos)) {
         assertx(outMeta.uninstantiable.count(name));
         continue;
       }
@@ -8579,37 +8659,45 @@ struct FlattenJob {
         cinfo->classGraph.setComplete();
       }
 
+      assertx(cinfo->closures.empty());
+      for (auto& clo : cls->closures) {
+        auto const it = index.m_classInfos.find(clo->name);
+        always_assert(it != end(index.m_classInfos));
+        auto& cloinfo = it->second;
+
+        // Closures are always leafs.
+        cloinfo->classGraph.setComplete();
+        assertx(!cloinfo->classGraph.mightHaveRegularSubclass());
+        assertx(!cloinfo->classGraph.mightHaveNonRegularSubclass());
+
+        for (auto const& [methname, mte] : cloinfo->methods) {
+          if (is_special_method_name(methname)) continue;
+          auto entry =
+            make_initial_func_family_entry(*clo, index.meth(mte), mte);
+          always_assert(
+            cloinfo->methodFamilies.emplace(methname, std::move(entry)).second
+          );
+        }
+
+        cinfo->closures.emplace_back(std::move(cloinfo));
+      }
+
       outClasses.vals.emplace_back(std::move(cls));
       outInfos.vals.emplace_back(std::move(cinfo));
     }
 
-    for (auto& clo : newClosures) {
-      assertx(!is_closure_base(*clo));
+    std::sort(
+      begin(newClosures), end(newClosures),
+      [] (const php::Class* c1, const php::Class* c2) {
+        return string_data_lt_type{}(c1->name, c2->name);
+      }
+    );
+    for (auto clo : newClosures) {
       assertx(clo->closureContextCls);
-      // Only return the closures for classes we were actually
-      // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
-
-      index.m_ctx = clo.get();
-      SCOPE_EXIT { index.m_ctx = nullptr; };
-
       outMeta.newClosures.emplace_back(
-        OutputMeta::NewClosure{
-          clo->unit,
-          clo->closureContextCls,
-          clo->name
-        }
+        OutputMeta::NewClosure{clo->unit, clo->name, clo->closureContextCls}
       );
-
-      auto& cinfo = index.m_classInfos.at(clo->name);
-
-      // Closures are always leafs.
-      cinfo->classGraph.setComplete();
-      assertx(!cinfo->classGraph.mightHaveRegularSubclass());
-      assertx(!cinfo->classGraph.mightHaveNonRegularSubclass());
-
-      outClasses.vals.emplace_back(std::move(clo));
-      outInfos.vals.emplace_back(std::move(cinfo));
     }
 
     Variadic<std::unique_ptr<FuncInfo2>> funcInfos;
@@ -8628,6 +8716,14 @@ struct FlattenJob {
       bytecode->cls = cls->name;
       bytecode->methodBCs.reserve(cls->methods.size());
       for (auto& method : cls->methods) {
+        bytecode->methodBCs.emplace_back(
+          method->name,
+          std::move(method->rawBlocks)
+        );
+      }
+      for (auto& clo : cls->closures) {
+        assertx(clo->methods.size() == 1);
+        auto& method = clo->methods[0];
         bytecode->methodBCs.emplace_back(
           method->name,
           std::move(method->rawBlocks)
@@ -8697,11 +8793,6 @@ private:
     TSStringToOneT<std::unique_ptr<ClassInfo2>> m_classInfos;
     TSStringToOneT<std::unique_ptr<State>> m_states;
 
-    hphp_fast_map<
-      const php::Class*,
-      hphp_fast_set<const php::Class*>
-    > m_classClosures;
-
     TSStringSet m_uninstantiable;
 
     TSStringToOneT<TypeMapping> m_typeMappings;
@@ -8744,14 +8835,6 @@ private:
       );
       assertx(it->second.get());
       return *it->second;
-    }
-
-    const hphp_fast_set<const php::Class*>* classClosures(
-      const php::Class& cls
-    ) const {
-      auto const it = m_classClosures.find(&cls);
-      if (it == m_classClosures.end()) return nullptr;
-      return &it->second;
     }
 
     bool uninstantiable(SString name) const {
@@ -8807,25 +8890,13 @@ private:
       return *it->second;
     };
 
-    for (auto const [_, cls] : classes) {
-      if (!cls->closureContextCls) continue;
-      assertx(is_closure(*cls));
-      auto const it = classes.find(cls->closureContextCls);
-      // Closure's context may not necessarily be present.
-      if (it == classes.end()) continue;
-      auto& ctx = *it->second;
-      index.m_classClosures[&ctx].emplace(cls);
-    }
-
     auto const forEachDep = [&] (php::Class& c, auto const& f) {
       if (c.parentName) f(get(c.parentName));
       for (auto const i : c.interfaceNames)    f(get(i));
       for (auto const e : c.includedEnumNames) f(get(e));
       for (auto const t : c.usedTraitNames)    f(get(t));
-      if (auto const closures = index.classClosures(c)) {
-        for (auto const clo : *closures) {
-          f(const_cast<php::Class&>(*clo));
-        }
+      for (auto const& clo : c.closures) {
+        f(const_cast<php::Class&>(*clo));
       }
     };
 
@@ -8998,6 +9069,16 @@ private:
     // BuildSubclassList job.
     attribute_setter(cls.attrs, true, AttrNoMock);
 
+    for (auto const& clo : cls.closures) {
+      if (index.uninstantiable(clo->name)) {
+        ITRACE(2,
+               "Making class-info failed for `{}' because "
+               "its closure `{}' is uninstantiable\n",
+               cls.name, clo->name);
+        return nullptr;
+      }
+    }
+
     if (cls.parentName) {
       assertx(!is_closure_base(cls));
       assertx(is_closure(cls) == cls.parentName->tsame(s_Closure.get()));
@@ -9156,18 +9237,6 @@ private:
     if (!build_properties(index, cls, *cinfo, state)) return nullptr;
     if (!build_constants(index, cls, *cinfo, state))  return nullptr;
 
-    if (auto const closures = index.classClosures(cls)) {
-      for (auto const clo : *closures) {
-        assertx(is_closure(*clo));
-        assertx(
-          clo->closureContextCls && clo->closureContextCls->tsame(cls.name)
-        );
-        // Ensure closures have been processed already
-        if (debug) index.cls(clo->name);
-        cinfo->closures.emplace_back(clo->name);
-      }
-    }
-
     std::sort(
       begin(state.m_parents),
       end(state.m_parents),
@@ -9214,7 +9283,6 @@ private:
         always_assert(state.m_parents.empty());
         always_assert(cls.attrs & AttrNoReifiedInit);
       }
-      always_assert(cinfo->closures.empty());
       always_assert(cinfo->missingMethods.empty());
       always_assert(!cinfo->hasConstProp);
       always_assert(!cinfo->subHasConstProp);
@@ -9248,8 +9316,8 @@ private:
       for (auto const DEBUG_ONLY trait : cls.usedTraitNames) {
         ITRACE(3, "             uses: {}\n", trait);
       }
-      for (auto const DEBUG_ONLY closure : cinfo->closures) {
-        ITRACE(3, "          closure: {}\n", closure);
+      for (auto const& DEBUG_ONLY closure : cls.closures) {
+        ITRACE(3, "          closure: {}\n", closure->name);
       }
     }
 
@@ -9926,9 +9994,8 @@ private:
             name
           );
         }
-        for (auto const cloname : t.closures) {
-          auto const& clo = index.cls(cloname);
-          auto const invoke = find_method(&clo, s_invoke.get());
+        for (auto const& clo : tcls.closures) {
+          auto const invoke = find_method(clo.get(), s_invoke.get());
           assertx(invoke);
           cinfo.extraMethods.emplace(MethRef { *invoke });
         }
@@ -10247,15 +10314,11 @@ private:
     return merge_inits(index, cls, cinfo, s_86cinit.get(), clones);
   }
 
-  struct NewClosure {
-    std::unique_ptr<php::Class> cls;
-    std::unique_ptr<ClassInfo2> cinfo;
-  };
-
-  static std::vector<NewClosure> flatten_traits(const LocalIndex& index,
-                                                php::Class& cls,
-                                                ClassInfo2& cinfo,
-                                                State& state) {
+  static std::vector<std::unique_ptr<ClassInfo2>>
+  flatten_traits(const LocalIndex& index,
+                 php::Class& cls,
+                 ClassInfo2& cinfo,
+                 State& state) {
     if (cls.attrs & AttrNoExpandTrait) return {};
     if (cls.usedTraitNames.empty()) {
       cls.attrs |= AttrNoExpandTrait;
@@ -10416,7 +10479,7 @@ private:
       end(state.m_parents)
     );
 
-    std::vector<NewClosure> newClosures;
+    std::vector<std::unique_ptr<ClassInfo2>> newClosures;
     if (!clones.empty()) {
       auto const add = [&] (std::unique_ptr<php::Func> clone) {
         assertx(clone->cls == &cls);
@@ -10480,19 +10543,9 @@ private:
         assertx(cloState.m_parents.size() == 1);
         assertx(cloState.m_parents[0]->name->tsame(s_Closure.get()));
 
-        cinfo.closures.emplace_back(clo->name);
-        newClosures.emplace_back(
-          NewClosure { std::move(clo), std::move(cloinfo) }
-        );
+        cls.closures.emplace_back(std::move(clo));
+        newClosures.emplace_back(std::move(cloinfo));
       }
-
-      std::sort(
-        newClosures.begin(),
-        newClosures.end(),
-        [] (auto const& p1, auto const& p2) {
-          return string_data_lt_type{}(p1.cls->name, p2.cls->name);
-        }
-      );
     }
 
     // Flattening methods into traits can turn methods from not "first
@@ -10824,13 +10877,11 @@ Job<FlattenJob> s_flattenJob;
 struct IndexFlattenMetadata {
   struct ClassMeta {
     TSStringSet deps;
-    std::vector<SString> closures;
     // All types mentioned in type-constraints in this class.
     std::vector<SString> unresolvedTypes;
     size_t idx; // Index into allCls vector
     bool isClosure{false};
     bool uninstantiable{false};
-    SString closureContext{nullptr};
   };
   TSStringToOneT<ClassMeta> cls;
   // All classes to be flattened
@@ -11056,15 +11107,13 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
   parallel::for_each(
     meta.allCls,
     [&] (SString cls) {
-      auto const onDep = [&] (SString d) {
+      auto const& clsMeta = meta.cls.at(cls);
+      for (auto const d : clsMeta.deps) {
         auto const it = meta.cls.find(d);
-        if (it == meta.cls.end()) return;
+        if (it == meta.cls.end()) continue;
         assertx(it->second.idx < isNotLeaf.size());
         isNotLeaf[it->second.idx] = true;
-      };
-      auto const& clsMeta = meta.cls.at(cls);
-      for (auto const d : clsMeta.deps)       onDep(d);
-      for (auto const clo : clsMeta.closures) onDep(clo);
+      }
     }
   );
 
@@ -11096,7 +11145,6 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
     // The class exists, so look up it's dependency information.
     auto const idx = it->second.idx;
     auto const& deps = it->second.deps;
-    auto const& closures = it->second.closures;
 
     // Check for cycles. A class involved in cyclic inheritance is not
     // instantiable (and has no dependencies). This needs to be done
@@ -11120,13 +11168,14 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
         // dependencies and combine them.
         DepLookup out;
         out.instantiable = !it->second.uninstantiable;
-        auto const onDep = [&] (SString d) {
+
+        for (auto const d : deps) {
           auto const& lookup = self(d, visited, self);
           if (lookup.instantiable || meta.cls.count(d)) {
             out.deps.emplace(d);
           }
           out.deps.insert(begin(lookup.deps), end(lookup.deps));
-          if (lookup.instantiable) return;
+          if (lookup.instantiable) continue;
           // If the dependency is not instantiable, this isn't
           // either. Note, however, we still need to preserve the
           // already gathered dependencies, since they'll have to be
@@ -11140,43 +11189,12 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
             it->second.uninstantiable = true;
           }
           out.instantiable = false;
-        };
+        }
 
-        for (auto const d : deps)       onDep(d);
-        for (auto const clo : closures) onDep(clo);
         return out;
       }
     );
   };
-
-  // If a closure's context class is not uninstantiable, then the
-  // closure is likewise not instantiable. Calculate it here (we
-  // cannot do it in findAllDeps because it creates a circular
-  // dependency between the closure and the context class).
-  parallel::for_each(
-    meta.allCls,
-    [&] (SString cls) {
-      auto& clsMeta = meta.cls.at(cls);
-      if (!clsMeta.closureContext) return;
-      TSStringSet visited;
-      auto const& lookup =
-        findAllDeps(clsMeta.closureContext, visited, findAllDeps);
-      if (!lookup.instantiable) {
-        if (!clsMeta.uninstantiable) {
-          FTRACE(
-            4,
-            "{} is not instantiable because the "
-            "closure context {} is not instantiable\n",
-            cls, clsMeta.closureContext
-          );
-        }
-        clsMeta.uninstantiable = true;
-      }
-    }
-  );
-  // Reset the lookup results so that further lookups will correctly
-  // incorporate non-instantiable closures.
-  parallel::for_each(allDeps, [] (LockFreeLazy<DepLookup>& l) { l.reset(); });
 
   constexpr size_t kBucketSize = 2000;
   constexpr size_t kMaxBucketSize = 30000;
@@ -11317,7 +11335,6 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::ClassBytecode> bytecode;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
-    SString closureContext;
     TSStringSet typeUses;
     bool isInterface{false};
     bool has86init{false};
@@ -11329,11 +11346,17 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<FuncInfo2> finfo;
     TSStringSet typeUses;
   };
+  struct ClosureUpdate {
+    SString name;
+    SString context;
+    SString unit;
+  };
   struct MethodUpdate {
     SString name;
     UniquePtrRef<MethodsWithoutCInfo> methods;
   };
-  using Update = boost::variant<ClassUpdate, FuncUpdate, MethodUpdate>;
+  using Update =
+    boost::variant<ClassUpdate, FuncUpdate, ClosureUpdate, MethodUpdate>;
   using UpdateVec = std::vector<Update>;
 
   tbb::concurrent_hash_map<
@@ -11488,7 +11511,6 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           nullptr,
-          flattenMeta.closureContext,
           std::move(clsMeta.classTypeUses[outputIdx]),
           (bool)clsMeta.interfaces.count(name),
           (bool)clsMeta.with86init.count(name)
@@ -11509,25 +11531,12 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
       ++outputIdx;
     }
-
-    for (auto const& [unit, context, name] : clsMeta.newClosures) {
-      assertx(outputIdx < clsRefs.size());
-      assertx(outputIdx < clsMeta.classTypeUses.size());
-      updates.emplace_back(
-        ClassUpdate{
-          name,
-          std::move(clsRefs[outputIdx]),
-          std::move(bytecodeRefs[outputIdx]),
-          std::move(cinfoRefs[outputIdx]),
-          unit,
-          context,
-          std::move(clsMeta.classTypeUses[outputIdx])
-        }
-      );
-      ++outputIdx;
-    }
     assertx(outputIdx == clsRefs.size());
     assertx(outputIdx == clsMeta.classTypeUses.size());
+
+    for (auto const& [unit, name, context] : clsMeta.newClosures) {
+      updates.emplace_back(ClosureUpdate{ name, context, unit });
+    }
 
     for (auto const name : work.uninstantiable) {
       assertx(clsMeta.uninstantiable.count(name));
@@ -11654,12 +11663,15 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
-            if (!u || !u->unitToAddTo) continue;
-            initTypesMeta.fixups[u->unitToAddTo].addClass.emplace_back(u->name);
+            // Keep closure mappings up to date.
+            auto u = boost::get<ClosureUpdate>(&update);
+            if (!u) continue;
+            initTypesMeta.fixups[u->unit].addClass.emplace_back(u->name);
+            assertx(u->context);
             always_assert(
-              index.classToUnit.emplace(u->name, u->unitToAddTo).second
+              index.closureToClass.emplace(u->name, u->context).second
             );
+            index.classToClosures[u->context].emplace(u->name);
           }
         }
         for (auto& [unit, deletions] : meta.unitDeletions) {
@@ -11730,14 +11742,9 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
             if (auto const u = boost::get<ClassUpdate>(&update)) {
-              if (!u->closureContext) {
-                auto& meta = initTypesMeta.classes[u->name];
-                meta.deps.insert(begin(u->typeUses), end(u->typeUses));
-              } else {
-                auto& meta = initTypesMeta.classes[u->closureContext];
-                meta.deps.insert(begin(u->typeUses), end(u->typeUses));
-                index.classToClosures[u->closureContext].emplace(u->name);
-              }
+              auto& meta = initTypesMeta.classes[u->name];
+              assertx(meta.deps.empty());
+              meta.deps.insert(begin(u->typeUses), end(u->typeUses));
             } else if (auto const u = boost::get<FuncUpdate>(&update)) {
               auto& meta = initTypesMeta.funcs[u->name];
               assertx(meta.deps.empty());
@@ -12000,17 +12007,20 @@ struct BuildSubclassListJob {
     }
 
     for (auto& cinfo : classes.vals) {
+      assertx(!is_closure_name(cinfo->name));
       always_assert(
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
       index.top.emplace(cinfo->name);
     }
     for (auto& cinfo : deps.vals) {
+      assertx(!is_closure_name(cinfo->name));
       always_assert(
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
     }
     for (auto& cinfo : leafs.vals) {
+      assertx(!is_closure_name(cinfo->name));
       always_assert(
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
@@ -12028,6 +12038,7 @@ struct BuildSubclassListJob {
       );
     }
     for (auto& cls : phpClasses.vals) {
+      assertx(!is_closure(*cls));
       always_assert(
         index.classes.emplace(cls->name, cls.get()).second
       );
@@ -14408,6 +14419,9 @@ struct InitTypesJob {
 
     for (auto const& cls : classes.vals) {
       always_assert(index.classes.emplace(cls->name, cls.get()).second);
+      for (auto const& clo : cls->closures) {
+        always_assert(index.classes.emplace(clo->name, clo.get()).second);
+      }
     }
 
     // All of the classes which might be a regular only equivalent
@@ -14427,27 +14441,47 @@ struct InitTypesJob {
           [&] (auto const& e) { return !cinfo->methods.count(e.first); }
         );
       }
+
+      for (auto const& clo : cinfo->closures) {
+        always_assert(index.classInfos.emplace(clo->name, clo.get()).second);
+        clo->classGraph.setRegOnlyEquivs();
+      }
     }
     for (auto const& cinfo : cinfoDeps.vals) {
       always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
       cinfo->classGraph.setRegOnlyEquivs();
+      for (auto const& clo : cinfo->closures) {
+        always_assert(index.classInfos.emplace(clo->name, clo.get()).second);
+        clo->classGraph.setRegOnlyEquivs();
+      }
     }
+
+    auto const onCls = [&] (php::Class& cls, ClassInfo2& cinfo) {
+      assertx(cls.name->tsame(cinfo.name));
+      assertx(cinfo.funcInfos.size() == cls.methods.size());
+
+      unresolve_missing(index, cls);
+      set_bad_initial_prop_values(index, cls, cinfo);
+      for (size_t i = 0, size = cls.methods.size(); i < size; ++i) {
+        auto const& func = cls.methods[i];
+        auto& finfo = cinfo.funcInfos[i];
+        assertx(func->name == finfo->name);
+        assertx(finfo->returnTy.is(BInitCell));
+        finfo->returnTy = initial_return_type(index, *func);
+      }
+    };
 
     assertx(classes.vals.size() == cinfos.vals.size());
     for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
       auto& cls = classes.vals[i];
       auto& cinfo = cinfos.vals[i];
-      assertx(cls->name->tsame(cinfo->name));
-      assertx(cinfo->funcInfos.size() == cls->methods.size());
+      onCls(*cls, *cinfo);
 
-      unresolve_missing(index, *cls);
-      set_bad_initial_prop_values(index, *cls, *cinfo);
-      for (size_t j = 0, size = cls->methods.size(); j < size; ++j) {
-        auto const& func = cls->methods[j];
-        auto& finfo = cinfo->funcInfos[j];
-        assertx(func->name == finfo->name);
-        assertx(finfo->returnTy.is(BInitCell));
-        finfo->returnTy = initial_return_type(index, *func);
+      assertx(cls->closures.size() == cinfo->closures.size());
+      for (size_t j = 0, size2 = cls->closures.size(); j < size2; ++j) {
+        auto& clo = cls->closures[j];
+        auto& cloinfo = cinfo->closures[j];
+        onCls(*clo, *cloinfo);
       }
     }
 
@@ -14506,6 +14540,10 @@ private:
   }
 
   static Type initial_return_type(const LocalIndex& index, const php::Func& f) {
+    Trace::Bump _{
+      Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(f.unit)
+    };
+
     auto const ty = [&] {
       // Return type of native functions is calculated differently.
       if (f.isNative) return native_function_return_type(&f);
@@ -14603,6 +14641,10 @@ private:
   static void set_bad_initial_prop_values(const LocalIndex& index,
                                           php::Class& cls,
                                           ClassInfo2& cinfo) {
+    Trace::Bump _{
+      Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(cls.unit)
+    };
+
     assertx(cinfo.hasBadInitialPropValues);
 
     auto const isClosure = is_closure(cls);
@@ -14696,6 +14738,8 @@ struct UnitFixupJob {
 
   static std::unique_ptr<php::Unit> run(std::unique_ptr<php::Unit> unit,
                                         const InitTypesMetadata::Fixup& fixup) {
+    SCOPE_ASSERT_DETAIL("unit") { return unit->filename->toCppString(); };
+
     if (!fixup.removeFunc.empty()) {
       // If we want to remove a func, it should be in this unit.
       auto DEBUG_ONLY erased = false;
@@ -14720,10 +14764,23 @@ struct UnitFixupJob {
       assertx(erased);
     }
 
+    auto const before = unit->classes.size();
     unit->classes.insert(
       end(unit->classes),
       begin(fixup.addClass),
       end(fixup.addClass)
+    );
+    // Only sort the newly added classes. The order of the existing
+    // classes is visible to programs.
+    std::sort(
+      begin(unit->classes) + before,
+      end(unit->classes),
+      string_data_lt_type{}
+    );
+    always_assert(
+      std::adjacent_find(
+        begin(unit->classes), end(unit->classes),
+        string_data_tsame{}) == end(unit->classes)
     );
     return unit;
   }
@@ -14935,12 +14992,6 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       if (meta.classes.count(w)) {
         always_assert(roots.emplace(w).second);
         classNames.emplace_back(w);
-        if (auto const closures = folly::get_ptr(index.classToClosures, w)) {
-          for (auto const clo : *closures) {
-            always_assert(roots.emplace(clo).second);
-            classNames.emplace_back(clo);
-          }
-        }
       }
       if (meta.funcs.count(w)) funcNames.emplace_back(w);
     }
@@ -14964,12 +15015,6 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       if (auto const cls = folly::get_ptr(meta.classes, w)) {
         classes.emplace_back(index.classRefs.at(w));
         cinfos.emplace_back(index.classInfoRefs.at(w));
-        if (auto const closures = folly::get_ptr(index.classToClosures, w)) {
-          for (auto const clo : *closures) {
-            classes.emplace_back(index.classRefs.at(clo));
-            cinfos.emplace_back(index.classInfoRefs.at(clo));
-          }
-        }
         for (auto const d : cls->deps) addDep(d, true);
         for (auto const d : cls->candidateRegOnlyEquivs) addDep(d, false);
       }
@@ -15353,18 +15398,20 @@ IndexFlattenMetadata make_remote(IndexData& index,
     always_assert(index.classToUnit.emplace(cls.name, cls.unit).second);
 
     auto& meta = flattenMeta.cls[cls.name];
-    if (cls.closureContext) {
-      assertx(cls.isClosure);
-      if (!cls.closureDeclInFunc) {
-        flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
-        index.classToClosures[cls.closureContext].emplace(cls.name);
-        meta.closureContext = cls.closureContext;
-      } else {
-        index.funcToClosures[cls.closureContext].emplace(cls.name);
-        meta.closureContext = nullptr;
-      }
+    if (cls.closureFunc) {
+      assertx(cls.closures.empty());
+      index.funcToClosures[cls.closureFunc].emplace(cls.name);
+      index.closureToFunc.emplace(cls.name, cls.closureFunc);
+      meta.isClosure = true;
     }
-    meta.isClosure = cls.isClosure;
+    index.classToClosures[cls.name].insert(
+      begin(cls.closures),
+      end(cls.closures)
+    );
+    for (auto const clo : cls.closures) {
+      index.closureToClass.emplace(clo, cls.name);
+    }
+
     meta.deps.insert(begin(cls.dependencies), end(cls.dependencies));
     meta.unresolvedTypes = std::move(cls.unresolvedTypes);
     meta.idx = flattenMeta.allCls.size();
@@ -15669,28 +15716,40 @@ void make_class_infos_local(
   // First create a ClassInfo for each ClassInfo2. Since a ClassInfo
   // can refer to other ClassInfos, we can't do much more at this
   // stage.
-  index.allClassInfos = parallel::map(
+  auto newCInfos = parallel::map(
     remote,
-    [&] (const std::unique_ptr<ClassInfo2>& cinfo) {
-      auto out = std::make_unique<ClassInfo>();
+    [&] (const std::unique_ptr<ClassInfo2>& in) {
+      std::vector<std::unique_ptr<ClassInfo>> out;
 
-      auto const it = index.classes.find(cinfo->name);
-      always_assert_flog(
-        it != end(index.classes),
-        "Class-info for {} has no associated php::Class in index",
-        cinfo->name
-      );
-      out->cls = it->second;
+      auto const make = [&] (const ClassInfo2& cinfo) {
+        auto c = std::make_unique<ClassInfo>();
+        auto const it = index.classes.find(cinfo.name);
+        always_assert_flog(
+          it != end(index.classes),
+          "Class-info for {} has no associated php::Class in index",
+          cinfo.name
+        );
+        c->cls = it->second;
+        out.emplace_back(std::move(c));
+      };
+
+      make(*in);
+      for (auto const& clo : in->closures) make(*clo);
       return out;
     }
   );
 
   // Build table mapping name to ClassInfo.
-  for (auto& cinfo : index.allClassInfos) {
-    always_assert(
-      index.classInfo.emplace(cinfo->cls->name, cinfo.get()).second
-    );
+  for (auto& cinfos : newCInfos) {
+    for (auto& cinfo : cinfos) {
+      always_assert(
+        index.classInfo.emplace(cinfo->cls->name, cinfo.get()).second
+      );
+      index.allClassInfos.emplace_back(std::move(cinfo));
+    }
   }
+  newCInfos.clear();
+  newCInfos.shrink_to_fit();
   index.allClassInfos.shrink_to_fit();
 
   // Set AttrNoOverride to true for all methods. If we determine it's
@@ -15701,6 +15760,13 @@ void make_class_infos_local(
       for (auto& m : cls->methods) {
         assertx(!(m->attrs & AttrNoOverride));
         if (is_special_method_name(m->name)) continue;
+        attribute_setter(m->attrs, true, AttrNoOverride);
+      }
+      for (auto& clo : cls->closures) {
+        assertx(clo->methods.size() == 1);
+        auto& m = clo->methods[0];
+        assertx(!(m->attrs & AttrNoOverride));
+        assertx(!is_special_method_name(m->name));
         attribute_setter(m->attrs, true, AttrNoOverride);
       }
     }
@@ -15835,278 +15901,281 @@ void make_class_infos_local(
   // of the fields in each ClassInfo.
   parallel::for_each(
     remote,
-    [&] (std::unique_ptr<ClassInfo2>& rcinfo) {
-      auto const cinfo = get(rcinfo->name);
-      if (rcinfo->parent) cinfo->parent = get(rcinfo->parent);
+    [&] (std::unique_ptr<ClassInfo2>& rcinfos) {
+      auto const process = [&] (std::unique_ptr<ClassInfo2> rcinfo) {
+        auto const cinfo = get(rcinfo->name);
+        if (rcinfo->parent) cinfo->parent = get(rcinfo->parent);
 
-      if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
-        auto const traits = rcinfo->classGraph.usedTraits();
-        cinfo->usedTraits.reserve(traits.size());
-        for (auto const trait : traits) {
-          cinfo->usedTraits.emplace_back(get(trait.name()));
-        }
-        cinfo->usedTraits.shrink_to_fit();
-      }
-      cinfo->traitProps = std::move(rcinfo->traitProps);
-
-      cinfo->clsConstants.reserve(rcinfo->clsConstants.size());
-      for (auto const& [name, cns] : rcinfo->clsConstants) {
-        auto const it = index.classes.find(cns.cls);
-        always_assert_flog(
-          it != end(index.classes),
-          "php::Class for {} not found in index",
-          name
-        );
-        cinfo->clsConstants.emplace(
-          name,
-          ClassInfo::ConstIndex { it->second, cns.idx }
-        );
-      }
-
-      for (size_t i = 0, size = cinfo->cls->constants.size(); i < size; ++i) {
-        auto const& cns = cinfo->cls->constants[i];
-        if (cns.kind != ConstModifiers::Kind::Value) continue;
-        if (!cns.val.has_value())                    continue;
-        if (cns.val->m_type != KindOfUninit)         continue;
-        if (i >= cinfo->clsConstTypes.size()) {
-          cinfo->clsConstTypes.resize(i+1, ClsConstInfo { TInitCell, 0 });
-        }
-        cinfo->clsConstTypes[i] = folly::get_default(
-          rcinfo->clsConstantInfo,
-          cns.name,
-          ClsConstInfo { TInitCell, 0 }
-        );
-      }
-      cinfo->clsConstTypes.shrink_to_fit();
-
-      {
-        std::vector<std::pair<SString, MethTabEntry>> methods;
-        methods.reserve(cinfo->methods.size());
-        for (auto const& [name, mte] : rcinfo->methods) {
-          if (!(mte.attrs & AttrNoOverride)) {
-            attribute_setter(
-              func_from_meth_ref(index, mte.meth())->attrs,
-              false,
-              AttrNoOverride
-            );
+        if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
+          auto const traits = rcinfo->classGraph.usedTraits();
+          cinfo->usedTraits.reserve(traits.size());
+          for (auto const trait : traits) {
+            cinfo->usedTraits.emplace_back(get(trait.name()));
           }
-          methods.emplace_back(name, mte);
+          cinfo->usedTraits.shrink_to_fit();
         }
-        std::sort(
-          begin(methods), end(methods),
-          [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-        );
-        cinfo->methods.insert(
-          folly::sorted_unique, begin(methods), end(methods)
-        );
-        cinfo->methods.shrink_to_fit();
-      }
+        cinfo->traitProps = std::move(rcinfo->traitProps);
 
-      cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
-      cinfo->hasBadInitialPropValues = rcinfo->hasBadInitialPropValues;
-      cinfo->hasConstProp = rcinfo->hasConstProp;
-      cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
-      cinfo->subHasConstProp = rcinfo->subHasConstProp;
-      cinfo->isMocked = rcinfo->isMocked;
-      cinfo->isSubMocked = rcinfo->isSubMocked;
-
-      cinfo->classGraph = rcinfo->classGraph;
-      cinfo->classGraph.setCInfo(*cinfo);
-
-      auto const noOverride = [&] (SString name) {
-        if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
-          return bool(mte->attrs & AttrNoOverride);
-        }
-        return true;
-      };
-
-      auto const noOverrideRegular = [&] (SString name) {
-        if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
-          return mte->noOverrideRegular();
-        }
-        return true;
-      };
-
-      std::vector<std::pair<SString, FuncFamilyOrSingle>> entries;
-      std::vector<std::pair<SString, FuncFamilyOrSingle>> aux;
-      for (auto const& [name, entry] : rcinfo->methodFamilies) {
-        assertx(!is_special_method_name(name));
-
-        auto expanded = false;
-        if (!cinfo->methods.count(name)) {
-          if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
-          if (!cinfo->classGraph.mightHaveRegularSubclass()) continue;
-          if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
-          if (name == s_construct.get()) continue;
-          expanded = true;
-        } else if (noOverride(name)) {
-          continue;
+        cinfo->clsConstants.reserve(rcinfo->clsConstants.size());
+        for (auto const& [name, cns] : rcinfo->clsConstants) {
+          auto const it = index.classes.find(cns.cls);
+          always_assert_flog(
+            it != end(index.classes),
+            "php::Class for {} not found in index",
+            name
+          );
+          cinfo->clsConstants.emplace(
+            name,
+            ClassInfo::ConstIndex { it->second, cns.idx }
+          );
         }
 
-        match<void>(
-          entry.m_meths,
-          [&, name=name, &entry=entry] (const FuncFamilyEntry::BothFF& e) {
-            auto const it = ffState.find(e.m_ff);
-            assertx(it != end(ffState));
-            auto const& state = it->second;
+        for (size_t i = 0, size = cinfo->cls->constants.size(); i < size; ++i) {
+          auto const& cns = cinfo->cls->constants[i];
+          if (cns.kind != ConstModifiers::Kind::Value) continue;
+          if (!cns.val.has_value())                    continue;
+          if (cns.val->m_type != KindOfUninit)         continue;
+          if (i >= cinfo->clsConstTypes.size()) {
+            cinfo->clsConstTypes.resize(i+1, ClsConstInfo { TInitCell, 0 });
+          }
+          cinfo->clsConstTypes[i] = folly::get_default(
+            rcinfo->clsConstantInfo,
+            cns.name,
+            ClsConstInfo { TInitCell, 0 }
+          );
+        }
+        cinfo->clsConstTypes.shrink_to_fit();
 
-            if (expanded) {
-              if (state->m_ff->m_regular.empty()) return;
-              if (state->m_ff->m_regular.size() == 1) {
+        {
+          std::vector<std::pair<SString, MethTabEntry>> methods;
+          methods.reserve(cinfo->methods.size());
+          for (auto const& [name, mte] : rcinfo->methods) {
+            if (!(mte.attrs & AttrNoOverride)) {
+              attribute_setter(
+                func_from_meth_ref(index, mte.meth())->attrs,
+                false,
+                AttrNoOverride
+              );
+            }
+            methods.emplace_back(name, mte);
+          }
+          std::sort(
+            begin(methods), end(methods),
+            [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+          );
+          cinfo->methods.insert(
+            folly::sorted_unique, begin(methods), end(methods)
+          );
+          cinfo->methods.shrink_to_fit();
+        }
+
+        cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
+        cinfo->hasBadInitialPropValues = rcinfo->hasBadInitialPropValues;
+        cinfo->hasConstProp = rcinfo->hasConstProp;
+        cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
+        cinfo->subHasConstProp = rcinfo->subHasConstProp;
+        cinfo->isMocked = rcinfo->isMocked;
+        cinfo->isSubMocked = rcinfo->isSubMocked;
+
+        cinfo->classGraph = rcinfo->classGraph;
+        cinfo->classGraph.setCInfo(*cinfo);
+
+        auto const noOverride = [&] (SString name) {
+          if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
+            return bool(mte->attrs & AttrNoOverride);
+          }
+          return true;
+        };
+
+        auto const noOverrideRegular = [&] (SString name) {
+          if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
+            return mte->noOverrideRegular();
+          }
+          return true;
+        };
+
+        std::vector<std::pair<SString, FuncFamilyOrSingle>> entries;
+        std::vector<std::pair<SString, FuncFamilyOrSingle>> aux;
+        for (auto const& [name, entry] : rcinfo->methodFamilies) {
+          assertx(!is_special_method_name(name));
+
+          auto expanded = false;
+          if (!cinfo->methods.count(name)) {
+            if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
+            if (!cinfo->classGraph.mightHaveRegularSubclass()) continue;
+            if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
+            if (name == s_construct.get()) continue;
+            expanded = true;
+          } else if (noOverride(name)) {
+            continue;
+          }
+
+          match<void>(
+            entry.m_meths,
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::BothFF& e) {
+              auto const it = ffState.find(e.m_ff);
+              assertx(it != end(ffState));
+              auto const& state = it->second;
+
+              if (expanded) {
+                if (state->m_ff->m_regular.empty()) return;
+                if (state->m_ff->m_regular.size() == 1) {
+                  entries.emplace_back(
+                    name,
+                    FuncFamilyOrSingle{
+                      func_from_meth_ref(index, state->m_ff->m_regular[0]),
+                      false
+                    }
+                  );
+                  return;
+                }
                 entries.emplace_back(
                   name,
                   FuncFamilyOrSingle{
-                    func_from_meth_ref(index, state->m_ff->m_regular[0]),
+                    state->expanded(index),
                     false
                   }
                 );
                 return;
               }
+
               entries.emplace_back(
                 name,
                 FuncFamilyOrSingle{
-                  state->expanded(index),
-                  false
+                  state->notExpanded(index),
+                  entry.m_allIncomplete
                 }
               );
-              return;
-            }
-
-            entries.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                state->notExpanded(index),
-                entry.m_allIncomplete
+            },
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndSingle& e) {
+              if (expanded) {
+                if (e.m_nonRegularPrivate) return;
+                entries.emplace_back(
+                  name,
+                  FuncFamilyOrSingle{
+                    func_from_meth_ref(index, e.m_regular),
+                    false
+                  }
+                );
+                return;
               }
-            );
-          },
-          [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndSingle& e) {
-            if (expanded) {
-              if (e.m_nonRegularPrivate) return;
+
+              auto const it = ffState.find(e.m_ff);
+              assertx(it != end(ffState));
+
               entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  it->second->notExpanded(index),
+                  entry.m_allIncomplete
+                }
+              );
+              if (noOverrideRegular(name)) return;
+              aux.emplace_back(
                 name,
                 FuncFamilyOrSingle{
                   func_from_meth_ref(index, e.m_regular),
                   false
                 }
               );
-              return;
+            },
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndNone& e) {
+              if (expanded) return;
+              auto const it = ffState.find(e.m_ff);
+              assertx(it != end(ffState));
+
+              entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  it->second->notExpanded(index),
+                  entry.m_allIncomplete
+                }
+              );
+              if (!noOverrideRegular(name)) {
+                aux.emplace_back(name, FuncFamilyOrSingle{});
+              }
+            },
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::BothSingle& e) {
+              if (expanded && e.m_nonRegularPrivate) return;
+              entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  func_from_meth_ref(index, e.m_all),
+                  !expanded && entry.m_allIncomplete
+                }
+              );
+            },
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::SingleAndNone& e) {
+              if (expanded) return;
+              entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  func_from_meth_ref(index, e.m_all),
+                  entry.m_allIncomplete
+                }
+              );
+              if (!noOverrideRegular(name)) {
+                aux.emplace_back(name, FuncFamilyOrSingle{});
+              }
+            },
+            [&, &entry=entry] (const FuncFamilyEntry::None&) {
+              assertx(entry.m_allIncomplete);
             }
-
-            auto const it = ffState.find(e.m_ff);
-            assertx(it != end(ffState));
-
-            entries.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                it->second->notExpanded(index),
-                entry.m_allIncomplete
-              }
-            );
-            if (noOverrideRegular(name)) return;
-            aux.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                func_from_meth_ref(index, e.m_regular),
-                false
-              }
-            );
-          },
-          [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndNone& e) {
-            if (expanded) return;
-            auto const it = ffState.find(e.m_ff);
-            assertx(it != end(ffState));
-
-            entries.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                it->second->notExpanded(index),
-                entry.m_allIncomplete
-              }
-            );
-            if (!noOverrideRegular(name)) {
-              aux.emplace_back(name, FuncFamilyOrSingle{});
-            }
-          },
-          [&, name=name, &entry=entry] (const FuncFamilyEntry::BothSingle& e) {
-            if (expanded && e.m_nonRegularPrivate) return;
-            entries.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                func_from_meth_ref(index, e.m_all),
-                !expanded && entry.m_allIncomplete
-              }
-            );
-          },
-          [&, name=name, &entry=entry] (const FuncFamilyEntry::SingleAndNone& e) {
-            if (expanded) return;
-            entries.emplace_back(
-              name,
-              FuncFamilyOrSingle{
-                func_from_meth_ref(index, e.m_all),
-                entry.m_allIncomplete
-              }
-            );
-            if (!noOverrideRegular(name)) {
-              aux.emplace_back(name, FuncFamilyOrSingle{});
-            }
-          },
-          [&, entry=entry] (const FuncFamilyEntry::None&) {
-            assertx(entry.m_allIncomplete);
-          }
-        );
-      }
-
-      // Sort the lists of new entries, so we can insert them into the
-      // method family maps (which are sorted_vector_maps) in bulk.
-      std::sort(
-        begin(entries), end(entries),
-        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-      );
-      std::sort(
-        begin(aux), end(aux),
-        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-      );
-      if (!entries.empty()) {
-        cinfo->methodFamilies.insert(
-          folly::sorted_unique, begin(entries), end(entries)
-        );
-      }
-      if (!aux.empty()) {
-        cinfo->methodFamiliesAux.insert(
-          folly::sorted_unique, begin(aux), end(aux)
-        );
-      }
-      cinfo->methodFamilies.shrink_to_fit();
-      cinfo->methodFamiliesAux.shrink_to_fit();
-
-      if (!rcinfo->extraMethods.empty()) {
-        // This is rare. Only happens with unflattened traits, so
-        // taking a lock here is fine.
-        std::lock_guard<std::mutex> _{extraMethodLock};
-        auto& extra = index.classExtraMethodMap[cinfo->cls];
-        for (auto const& meth : rcinfo->extraMethods) {
-          extra.emplace(func_from_meth_ref(index, meth));
+          );
         }
-      }
 
-      // Build the FuncInfo for every method on this class. The
-      // FuncInfos already have default types, so update them with the
-      // type from the FuncInfo2. Any class types here will be
-      // unresolved (will be resolved later).
-      assertx(cinfo->cls->methods.size() == rcinfo->funcInfos.size());
-      for (size_t i = 0, size = cinfo->cls->methods.size(); i < size; ++i) {
-        auto& func = cinfo->cls->methods[i];
-        auto& rfi = rcinfo->funcInfos[i];
-        remote_func_info_to_local(index, *func, *rfi);
-      }
+        // Sort the lists of new entries, so we can insert them into the
+        // method family maps (which are sorted_vector_maps) in bulk.
+        std::sort(
+          begin(entries), end(entries),
+          [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+        );
+        std::sort(
+          begin(aux), end(aux),
+          [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+        );
+        if (!entries.empty()) {
+          cinfo->methodFamilies.insert(
+            folly::sorted_unique, begin(entries), end(entries)
+          );
+        }
+        if (!aux.empty()) {
+          cinfo->methodFamiliesAux.insert(
+            folly::sorted_unique, begin(aux), end(aux)
+          );
+        }
+        cinfo->methodFamilies.shrink_to_fit();
+        cinfo->methodFamiliesAux.shrink_to_fit();
 
-      // Free memory as we go.
-      rcinfo.reset();
+        if (!rcinfo->extraMethods.empty()) {
+          // This is rare. Only happens with unflattened traits, so
+          // taking a lock here is fine.
+          std::lock_guard<std::mutex> _{extraMethodLock};
+          auto& extra = index.classExtraMethodMap[cinfo->cls];
+          for (auto const& meth : rcinfo->extraMethods) {
+            extra.emplace(func_from_meth_ref(index, meth));
+          }
+        }
+
+        // Build the FuncInfo for every method on this class. The
+        // FuncInfos already have default types, so update them with the
+        // type from the FuncInfo2. Any class types here will be
+        // unresolved (will be resolved later).
+        assertx(cinfo->cls->methods.size() == rcinfo->funcInfos.size());
+        for (size_t i = 0, size = cinfo->cls->methods.size(); i < size; ++i) {
+          auto& func = cinfo->cls->methods[i];
+          auto& rfi = rcinfo->funcInfos[i];
+          remote_func_info_to_local(index, *func, *rfi);
+        }
+      };
+
+      for (auto& clo : rcinfos->closures) process(std::move(clo));
+      process(std::move(rcinfos));
     }
   );
 
   remote.clear();
+  remote.shrink_to_fit();
 
   for (auto const& [name, entry] : index.nameOnlyMethodFamilies) {
     match<void>(
@@ -16239,13 +16308,15 @@ void make_local(IndexData& index) {
   using namespace folly::gen;
 
   // These aren't needed below so we can free them immediately.
-  decltype(index.classToClosures){}.swap(index.classToClosures);
   decltype(index.funcToClosures){}.swap(index.funcToClosures);
+  decltype(index.classToClosures){}.swap(index.classToClosures);
   decltype(index.classesWith86Inits){}.swap(index.classesWith86Inits);
   decltype(index.classToUnit){}.swap(index.classToUnit);
   decltype(index.funcToUnit){}.swap(index.funcToUnit);
   decltype(index.constantToUnit){}.swap(index.constantToUnit);
   decltype(index.constantInitFuncs){}.swap(index.constantInitFuncs);
+  decltype(index.closureToFunc){}.swap(index.closureToFunc);
+  decltype(index.closureToClass){}.swap(index.closureToClass);
 
   // Unlike other cases, we want to bound each bucket to roughly the
   // same total byte size (since ultimately we're going to download
@@ -16533,13 +16604,26 @@ void make_local(IndexData& index) {
 
     always_assert(chunk.classBytecode.size() == chunk.classes.size());
     for (size_t i = 0, size = chunk.classes.size(); i < size; ++i) {
-      auto& bytecode = chunk.classBytecode[i];
+      auto& bc = chunk.classBytecode[i];
       auto& cls = chunk.classes[i];
-      always_assert(cls->methods.size() == bytecode->methodBCs.size());
-      for (size_t j = 0, methSize = cls->methods.size(); j < methSize; ++j) {
-        always_assert(!cls->methods[j]->rawBlocks);
-        cls->methods[j]->rawBlocks = std::move(bytecode->methodBCs[j].bc);
+
+      size_t bcIdx = 0;
+      for (auto& meth : cls->methods) {
+        assertx(bcIdx < bc->methodBCs.size());
+        auto& methBC = bc->methodBCs[bcIdx++];
+        always_assert(methBC.name == meth->name);
+        always_assert(!meth->rawBlocks);
+        meth->rawBlocks = std::move(methBC.bc);
       }
+      for (auto& clo : cls->closures) {
+        assertx(bcIdx < bc->methodBCs.size());
+        auto& methBC = bc->methodBCs[bcIdx++];
+        assertx(clo->methods.size() == 1);
+        always_assert(methBC.name == clo->methods[0]->name);
+        always_assert(!clo->methods[0]->rawBlocks);
+        clo->methods[0]->rawBlocks = std::move(methBC.bc);
+      }
+      assertx(bcIdx == bc->methodBCs.size());
     }
     chunk.classBytecode.clear();
 
@@ -16702,6 +16786,17 @@ void make_local(IndexData& index) {
       assertx(cls->methods.size() == meths->finfos.size());
       for (size_t i = 0, size = cls->methods.size(); i < size; ++i) {
         remote_func_info_to_local(index, *cls->methods[i], *meths->finfos[i]);
+      }
+
+      assertx(cls->closures.size() == meths->closureInvokes.size());
+      for (size_t i = 0, size = cls->closures.size(); i < size; ++i) {
+        auto const& clo = cls->closures[i];
+        assertx(clo->methods.size() == 1);
+        remote_func_info_to_local(
+          index,
+          *clo->methods[0],
+          *meths->closureInvokes[i]
+        );
       }
     }
   );
@@ -19308,6 +19403,7 @@ FuncOrCls AnalysisWorklist::next() {
 }
 
 void AnalysisWorklist::schedule(FuncOrCls fc) {
+  assertx(fc.left() || !is_closure(*fc.right()));
   if (!in.emplace(fc).second) return;
   ITRACE(2, "scheduling {} onto worklist\n", show(fc));
   list.emplace_back(fc);
@@ -19356,16 +19452,6 @@ AnalysisDeps::Type AnalysisDeps::merge(Type& o, Type n) {
   auto const added = n - o;
   o |= n;
   return added;
-}
-
-AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
-  for (auto const [name, type] : o.funcs) funcs[name] |= type;
-  for (auto const& [meth, type] : o.methods) methods[meth] |= type;
-  classes.insert(begin(o.classes), end(o.classes));
-  clsConstants.insert(begin(o.clsConstants), end(o.clsConstants));
-  constants.insert(begin(o.constants), end(o.constants));
-  typeAliases.insert(begin(o.typeAliases), end(o.typeAliases));
-  return *this;
 }
 
 std::string show(AnalysisDeps::Type t) {
@@ -19477,10 +19563,18 @@ AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) const {
 AnalysisScheduler::AnalysisScheduler(Index& index) : index{index} {}
 
 void AnalysisScheduler::registerClass(SString name) {
+  // Closures are only scheduled as part of the class or func they're
+  // declared in.
+  if (is_closure_name(name)) return;
   FTRACE(5, "AnalysisScheduler: registering class {}\n", name);
   always_assert(classState.try_emplace(name).second);
   classesToSchedule.emplace(name);
   classNames.emplace_back(name);
+  auto const& closures =
+    folly::get_default(index.m_data->classToClosures, name);
+  for (auto const clo : closures) {
+    always_assert(classState.try_emplace(clo).second);
+  }
 }
 
 void AnalysisScheduler::registerFunc(SString name) {
@@ -19488,6 +19582,12 @@ void AnalysisScheduler::registerFunc(SString name) {
   always_assert(funcState.try_emplace(name).second);
   funcsToSchedule.emplace(name);
   funcNames.emplace_back(name);
+
+  auto const& closures = folly::get_default(index.m_data->funcToClosures, name);
+  for (auto const clo : closures) {
+    always_assert(classState.try_emplace(clo).second);
+  }
+
   // If this func is a 86cinit, then register the associated constant
   // as well.
   if (auto const cns = Constant::nameFromFuncName(name)) {
@@ -19688,6 +19788,16 @@ void AnalysisScheduler::record(AnalysisOutput output) {
   group.classes.insert(begin(output.classNames), end(output.classNames));
   group.funcs.insert(begin(output.funcNames), end(output.funcNames));
   group.units.insert(begin(output.unitNames), end(output.unitNames));
+  for (auto const c : output.classNames) {
+    auto const& closures =
+      folly::get_default(index.m_data->classToClosures, c);
+    group.classes.insert(begin(closures), end(closures));
+  }
+  for (auto const f : output.funcNames) {
+    auto const& closures =
+      folly::get_default(index.m_data->funcToClosures, f);
+    group.classes.insert(begin(closures), end(closures));
+  }
 
   recordChanges(output.meta.changed, group);
   updateDepState(output, output.meta.removedFuncs, std::move(group));
@@ -19717,6 +19827,7 @@ void AnalysisScheduler::removeFuncs() {
     always_assert(index.m_data->funcToUnit.erase(name));
     always_assert(!funcsToSchedule.count(name));
     always_assert(funcState.erase(name));
+    index.m_data->funcToClosures.erase(name);
     if (auto const cns = Constant::nameFromFuncName(name)) {
       always_assert(index.m_data->constantInitFuncs.erase(name));
       always_assert(cnsChanged.erase(cns));
@@ -19980,6 +20091,7 @@ void AnalysisScheduler::findToSchedule() {
   auto const classBits = parallel::map(
     classNames,
     [&] (SString name) -> uint8_t {
+      assertx(!is_closure_name(name));
       return check(name, classState.at(name).depState);
     }
   );
@@ -20035,6 +20147,7 @@ void AnalysisScheduler::recordingDone() {
 
 void AnalysisScheduler::addClassToInput(SString name,
                                         AnalysisInput& input) const {
+  FTRACE(4, "AnalysisScheduler: adding class {} to input\n", name);
   input.classes.emplace(name, index.m_data->classRefs.at(name));
   input.classBC.emplace(name, index.m_data->classBytecodeRefs.at(name));
   if (auto const ref = folly::get_ptr(index.m_data->classInfoRefs, name)) {
@@ -20051,6 +20164,7 @@ void AnalysisScheduler::addClassToInput(SString name,
 
 void AnalysisScheduler::addFuncToInput(SString name,
                                        AnalysisInput& input) const {
+  FTRACE(4, "AnalysisScheduler: adding func {} to input\n", name);
   input.funcs.emplace(name, index.m_data->funcRefs.at(name));
   input.funcBC.emplace(name, index.m_data->funcBytecodeRefs.at(name));
   input.finfos.emplace(
@@ -20058,10 +20172,14 @@ void AnalysisScheduler::addFuncToInput(SString name,
     index.m_data->funcInfoRefs.at(name).cast<AnalysisIndexFInfo>()
   );
   if (!input.m_key) input.m_key = name;
+
+  auto const& closures = folly::get_default(index.m_data->funcToClosures, name);
+  for (auto const clo : closures) addClassToInput(clo, input);
 }
 
 void AnalysisScheduler::addUnitToInput(SString name,
                                        AnalysisInput& input) const {
+  FTRACE(4, "AnalysisScheduler: adding unit {} to input\n", name);
   input.units.emplace(name, index.m_data->unitRefs.at(name));
   if (!input.m_key) input.m_key = name;
 }
@@ -20069,7 +20187,8 @@ void AnalysisScheduler::addUnitToInput(SString name,
 void AnalysisScheduler::addDepClassToInput(SString cls,
                                            SString depSrc,
                                            bool addBytecode,
-                                           AnalysisInput& input) const {
+                                           AnalysisInput& input,
+                                           bool fromClosureCtx) const {
   if (input.classes.count(cls)) return;
 
   auto const badClass = [&] {
@@ -20080,7 +20199,15 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
   };
 
   auto const clsRef = folly::get_ptr(index.m_data->classRefs, cls);
-  if (!clsRef) return badClass();
+  if (!clsRef) {
+    if (!is_closure_name(cls)) return badClass();
+    assertx(!index.m_data->closureToFunc.count(cls));
+    auto const ctx = folly::get_default(index.m_data->closureToClass, cls);
+    if (!ctx) return badClass();
+    if (fromClosureCtx) return;
+    return addDepClassToInput(ctx, depSrc, addBytecode, input);
+  }
+  assertx(!index.m_data->closureToClass.count(cls));
 
   if (!input.depClasses.emplace(cls, *clsRef).second) {
     // If we already added the class and don't need to add the
@@ -20115,9 +20242,16 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
 
   addDepUnitToInput(index.m_data->classToUnit.at(cls), depSrc, input);
 
-  auto const& closures = folly::get_default(index.m_data->classToClosures, cls);
-  for (auto const clo : closures) {
-    addDepClassToInput(clo, depSrc, addBytecode, input);
+  if (is_closure_name(cls)) {
+    auto const f = folly::get_default(index.m_data->closureToFunc, cls);
+    always_assert(f);
+    if (fromClosureCtx) return;
+    return addDepFuncToInput(
+      f,
+      depSrc,
+      addBytecode ? Type::Bytecode : Type::Meta,
+      input
+    );
   }
 }
 
@@ -20167,7 +20301,7 @@ void AnalysisScheduler::addDepFuncToInput(SString func,
 
   auto const& closures = folly::get_default(index.m_data->funcToClosures, func);
   for (auto const clo : closures) {
-    addDepClassToInput(clo, depSrc, type & Type::Bytecode, input);
+    addDepClassToInput(clo, depSrc, type & Type::Bytecode, input, true);
   }
 }
 
@@ -20227,11 +20361,7 @@ void AnalysisScheduler::addDepTypeAliasToInput(SString typeAlias,
 void AnalysisScheduler::addDepsToInput(AnalysisInput& input) const {
   auto const add = [&] (SString n,
                         const DepState& depState,
-                        SString unit,
-                        const TSStringSet& closures) {
-    for (auto const clo : closures) {
-      addDepClassToInput(clo, n, true, input);
-    }
+                        SString unit) {
     addDepUnitToInput(unit, n, input);
     if (!depState.deps.has_value()) return;
     auto const& d = *depState.deps;
@@ -20262,19 +20392,19 @@ void AnalysisScheduler::addDepsToInput(AnalysisInput& input) const {
     }
   };
   for (auto const& [name, _] : input.classes) {
+    auto const& depState = classState.at(name).depState;
+    assertx(IMPLIES(is_closure_name(name), !depState.deps));
     add(
       name,
-      classState.at(name).depState,
-      index.m_data->classToUnit.at(name),
-      folly::get_default(index.m_data->classToClosures, name)
+      depState,
+      index.m_data->classToUnit.at(name)
     );
   }
   for (auto const& [name, _] : input.funcs) {
     add(
       name,
       funcState.at(name).depState,
-      index.m_data->funcToUnit.at(name),
-      folly::get_default(index.m_data->funcToClosures, name)
+      index.m_data->funcToUnit.at(name)
     );
   }
 }
@@ -20343,7 +20473,8 @@ namespace {
 // metadata to remove it.
 FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
   FSStringSet stripped;
-  for (auto const name : index.funcNames) {
+
+  for (auto const name : index.outFuncNames) {
     auto const cnsName = Constant::nameFromFuncName(name);
     if (!cnsName) continue;
     auto const it = index.constants.find(cnsName);
@@ -20360,12 +20491,12 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
     index.finfos.erase(name);
   }
 
-  index.funcNames.erase(
+  index.outFuncNames.erase(
     std::remove_if(
-      begin(index.funcNames), end(index.funcNames),
+      begin(index.outFuncNames), end(index.outFuncNames),
       [&] (SString f) { return stripped.count(f); }
     ),
-    end(index.funcNames)
+    end(index.outFuncNames)
   );
 
   for (auto& [_, unit] : index.units) {
@@ -20406,44 +20537,43 @@ AnalysisIndex::AnalysisIndex(
   m_data->badConstants = std::move(meta.badConstants);
   m_data->badTypeAliases = std::move(meta.badTypeAliases);
 
-  TSStringSet depClassNames;
-  depClassNames.reserve(depClasses.size());
-
-  m_data->classNames.reserve(classes.size());
-  m_data->classes.reserve(classes.size() + depClasses.size());
+  m_data->outClassNames.reserve(classes.size());
+  m_data->allClasses.reserve(classes.size() + depClasses.size());
   for (auto& cls : classes) {
+    for (auto& clo : cls->closures) {
+      always_assert(
+        m_data->classes.emplace(clo->name, clo.get()).second
+      );
+    }
     auto const name = cls->name;
-    always_assert(
-      m_data->classes.emplace(name, std::move(cls)).second
-    );
-    m_data->classNames.emplace_back(name);
+    always_assert(m_data->classes.emplace(name, cls.get()).second);
+    m_data->outClassNames.emplace_back(name);
+    m_data->allClasses.emplace(name, std::move(cls));
   }
   for (auto& cls : depClasses) {
+    for (auto& clo : cls->closures) {
+      always_assert(
+        m_data->classes.emplace(clo->name, clo.get()).second
+      );
+    }
     auto const name = cls->name;
-    always_assert(
-      m_data->classes.emplace(name, std::move(cls)).second
-    );
-    depClassNames.emplace(name);
+    always_assert(m_data->classes.emplace(name, cls.get()).second);
+    m_data->allClasses.emplace(name, std::move(cls));
   }
 
-  FSStringSet depFuncNames;
-  depFuncNames.reserve(depFuncs.size());
-
-  m_data->funcNames.reserve(funcs.size());
+  m_data->outFuncNames.reserve(funcs.size());
+  m_data->allFuncs.reserve(funcs.size() + depFuncs.size());
   m_data->funcs.reserve(funcs.size() + depFuncs.size());
   for (auto& func : funcs) {
     auto const name = func->name;
-    always_assert(
-      m_data->funcs.emplace(name, std::move(func)).second
-    );
-    m_data->funcNames.emplace_back(name);
+    always_assert(m_data->funcs.emplace(name, func.get()).second);
+    m_data->outFuncNames.emplace_back(name);
+    m_data->allFuncs.emplace(name, std::move(func));
   }
   for (auto& func : depFuncs) {
     auto const name = func->name;
-    always_assert(
-      m_data->funcs.emplace(name, std::move(func)).second
-    );
-    depFuncNames.emplace(name);
+    always_assert(m_data->funcs.emplace(name, func.get()).second);
+    m_data->allFuncs.emplace(name, std::move(func));
   }
 
   auto const assignFInfoIdx = [&] (php::Func& func, FuncInfo2& finfo) {
@@ -20454,65 +20584,99 @@ AnalysisIndex::AnalysisIndex(
     m_data->finfosByIdx.emplace_back(&finfo);
   };
 
-  m_data->cinfos.reserve(cinfos.size());
-  for (auto& wrapper : cinfos) {
-    auto cinfo = wrapper.ptr.release();
-    auto const name = cinfo->name;
-    auto& cls = m_data->classes.at(name);
+  auto const addCInfo = [&] (ClassInfo2* cinfo) {
+    auto cls = folly::get_default(m_data->classes, cinfo->name);
+    always_assert(cls);
     always_assert(!cls->cinfo);
     always_assert(!cinfo->cls);
     cls->cinfo = cinfo;
-    cinfo->cls = cls.get();
+    cinfo->cls = cls;
 
     auto const numMethods = cls->methods.size();
     always_assert(cinfo->funcInfos.size() == numMethods);
     for (size_t i = 0; i < numMethods; ++i) {
       assignFInfoIdx(*cls->methods[i], *cinfo->funcInfos[i]);
     }
+    always_assert(m_data->cinfos.emplace(cinfo->name, cinfo).second);
+  };
 
-    always_assert(m_data->cinfos.emplace(name, cinfo).second);
+  m_data->allCInfos.reserve(cinfos.size());
+  for (auto& wrapper : cinfos) {
+    for (auto& clo : wrapper.ptr->closures) addCInfo(clo.get());
+    addCInfo(wrapper.ptr.get());
+    auto const name = wrapper.ptr->name;
+    m_data->allCInfos.emplace(name, wrapper.ptr.release());
   }
 
   m_data->finfos.reserve(finfos.size());
+  m_data->allFInfos.reserve(finfos.size());
   for (auto& wrapper : finfos) {
-    auto finfo = wrapper.ptr.release();
-    auto const name = finfo->name;
-    auto& func = m_data->funcs.at(name);
-    assignFInfoIdx(*func, *finfo);
-    always_assert(m_data->finfos.emplace(name, finfo).second);
+    auto func = folly::get_default(m_data->funcs, wrapper.ptr->name);
+    always_assert(func);
+    assignFInfoIdx(*func, *wrapper.ptr);
+    auto const name = wrapper.ptr->name;
+    always_assert(m_data->finfos.emplace(name, wrapper.ptr.get()).second);
+    m_data->allFInfos.emplace(name, wrapper.ptr.release());
   }
 
   m_data->minfos.reserve(minfos.size());
+  m_data->allMInfos.reserve(minfos.size());
   for (auto& wrapper : minfos) {
-    auto minfo = wrapper.ptr.release();
-    auto const name = minfo->cls;
-    auto& cls = m_data->classes.at(name);
+    auto const minfo = wrapper.ptr.get();
+    auto cls = folly::get_default(m_data->classes, minfo->cls);
+    always_assert(cls);
     always_assert(!cls->cinfo);
+
     auto const numMethods = cls->methods.size();
     always_assert(minfo->finfos.size() == numMethods);
     for (size_t i = 0; i < numMethods; ++i) {
       assignFInfoIdx(*cls->methods[i], *minfo->finfos[i]);
     }
+    auto const numClosures = cls->closures.size();
+    always_assert(minfo->closureInvokes.size() == numClosures);
+    for (size_t i = 0; i < numClosures; ++i) {
+      auto& clo = cls->closures[i];
+      auto& finfo = minfo->closureInvokes[i];
+      assertx(clo->methods.size() == 1);
+      assignFInfoIdx(*clo->methods[0], *finfo);
+    }
+
+    auto const name = minfo->cls;
     always_assert(m_data->minfos.emplace(name, minfo).second);
+    m_data->allMInfos.emplace(name, wrapper.ptr.release());
   }
 
   for (auto& bc : clsBC) {
-    auto& cls = m_data->classes.at(bc->cls);
-    always_assert(bc->methodBCs.size() == cls->methods.size());
-    for (size_t i = 0, size = bc->methodBCs.size(); i < size; ++i) {
-      always_assert(bc->methodBCs[i].name == cls->methods[i]->name); // XXX split diff
-      cls->methods[i]->rawBlocks = std::move(bc->methodBCs[i].bc);
+    auto cls = folly::get_default(m_data->classes, bc->cls);
+    always_assert(cls);
+
+    size_t idx = 0;
+    for (auto& meth : cls->methods) {
+      assertx(idx < bc->methodBCs.size());
+      auto& methBC = bc->methodBCs[idx++];
+      always_assert(methBC.name == meth->name);
+      meth->rawBlocks = std::move(methBC.bc);
     }
+    for (auto& clo : cls->closures) {
+      assertx(idx < bc->methodBCs.size());
+      auto& methBC = bc->methodBCs[idx++];
+      assertx(clo->methods.size() == 1);
+      always_assert(methBC.name == clo->methods[0]->name);
+      clo->methods[0]->rawBlocks = std::move(methBC.bc);
+    }
+    assertx(idx == bc->methodBCs.size());
   }
   for (auto& bc : funcBC) {
-    auto& func = m_data->funcs.at(bc->name);
+    auto func = folly::get_default(m_data->funcs, bc->name);
+    always_assert(func);
     func->rawBlocks = std::move(bc->bc);
   }
 
-  m_data->unitNames.reserve(units.size());
+  m_data->outUnitNames.reserve(units.size());
   m_data->units.reserve(units.size() + depUnits.size());
+  m_data->allUnits.reserve(units.size() + depUnits.size());
 
-  auto const addUnit = [&] (std::unique_ptr<php::Unit> unit) {
+  auto const addUnit = [&] (php::Unit* unit) {
     auto const isNative = is_native_unit(*unit);
     for (auto& cns : unit->constants) {
       always_assert(m_data->constants.emplace(cns->name, cns.get()).second);
@@ -20527,20 +20691,25 @@ AnalysisIndex::AnalysisIndex(
       );
       assertx(!m_data->badTypeAliases.count(typeAlias->name));
     }
-    auto const name = unit->filename;
-    always_assert(m_data->units.emplace(name, std::move(unit)).second);
+    always_assert(m_data->units.emplace(unit->filename, unit).second);
   };
   for (auto& unit : units) {
-    m_data->unitNames.emplace_back(unit->filename);
-    addUnit(std::move(unit));
+    addUnit(unit.get());
+    auto const name = unit->filename;
+    m_data->outUnitNames.emplace_back(name);
+    m_data->allUnits.emplace(name, std::move(unit));
   }
-  for (auto& unit : depUnits) addUnit(std::move(unit));
+  for (auto& unit : depUnits) {
+    addUnit(unit.get());
+    auto const name = unit->filename;
+    m_data->allUnits.emplace(name, std::move(unit));
+  }
 
-  for (auto const& [_, cls] : m_data->classes) {
+  for (auto const& [_, cls] : m_data->allClasses) {
     if (!cls->cinfo) continue;
     always_assert(cls.get() == cls->cinfo->cls);
   }
-  for (auto& [_, cinfo]: m_data->cinfos) {
+  for (auto const& [_, cinfo]: m_data->allCInfos) {
     always_assert(cinfo->cls);
     always_assert(cinfo.get() == cinfo->cls->cinfo);
   }
@@ -20598,10 +20767,7 @@ const php::Unit& AnalysisIndex::lookup_class_unit(const php::Class& c) const {
 const php::Class*
 AnalysisIndex::lookup_const_class(const php::Const& cns) const {
   m_data->deps->add(AnalysisDeps::Class { cns.cls });
-  if (auto const c = folly::get_ptr(m_data->classes, cns.cls)) {
-    return c->get();
-  }
-  return nullptr;
+  return folly::get_default(m_data->classes, cns.cls);
 }
 
 const php::Class&
@@ -20617,8 +20783,8 @@ AnalysisIndex::lookup_closure_context(const php::Class& cls) const {
 res::Func AnalysisIndex::resolve_func(SString n) const {
   n = normalizeNS(n);
   m_data->deps->add(AnalysisDeps::Func { n });
-  if (auto const finfo = folly::get_ptr(m_data->finfos, n)) {
-    return res::Func { res::Func::Fun2 { finfo->get() } };
+  if (auto const finfo = folly::get_default(m_data->finfos, n)) {
+    return res::Func { res::Func::Fun2 { finfo } };
   }
   if (m_data->badFuncs.count(n)) {
     return res::Func { res::Func::MissingFunc { n } };
@@ -20635,10 +20801,15 @@ Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
     return std::nullopt;
   }
   m_data->deps->add(AnalysisDeps::Class { n });
-  if (auto const cinfo = folly::get_ptr(m_data->cinfos, n)) {
-    return res::Class::get(*cinfo->get());
+  if (auto const cinfo = folly::get_default(m_data->cinfos, n)) {
+    return res::Class::get(*cinfo);
   }
-  if (m_data->badClasses.count(n)) return std::nullopt;
+  // A php::Class should always be accompanied by it's ClassInfo,
+  // unless if it's uninstantiable. So, if we have a php::Class here,
+  // we know it's uninstantiable.
+  if (m_data->badClasses.count(n) || m_data->classes.count(n)) {
+    return std::nullopt;
+  }
   return res::Class::getOrCreate(n);
 }
 
@@ -20657,7 +20828,7 @@ res::Func AnalysisIndex::resolve_func_or_method(const php::Func& f) const {
 Type AnalysisIndex::lookup_constant(SString name) const {
   m_data->deps->add(AnalysisDeps::Constant { name });
 
-  if (auto const cns = folly::get_default(m_data->constants, name, nullptr)) {
+  if (auto const cns = folly::get_default(m_data->constants, name)) {
     if (type(cns->val) != KindOfUninit) return from_cell(cns->val);
     if (m_data->dynamicConstants.count(name)) return TInitCell;
     auto const fname = Constant::funcNameFromName(name);
@@ -21370,9 +21541,9 @@ AnalysisIndex::lookup_type_alias(SString name) const {
 Index::ClassOrTypeAlias
 AnalysisIndex::lookup_class_or_type_alias(SString n) const {
   n = normalizeNS(n);
-  if (auto const cls = folly::get_ptr(m_data->classes, n)) {
+  if (auto const cls = folly::get_default(m_data->classes, n)) {
     m_data->deps->add(AnalysisDeps::Class { n });
-    return Index::ClassOrTypeAlias{cls->get(), nullptr, true};
+    return Index::ClassOrTypeAlias{cls, nullptr, true};
   }
   if (auto const ta = folly::get_default(m_data->typeAliases, n)) {
     m_data->deps->add(AnalysisDeps::TypeAlias { n });
@@ -21756,14 +21927,20 @@ AnalysisIndex::Output AnalysisIndex::finish() {
   // Remove any 86cinits that are now unneeded.
   meta.removedFuncs = strip_unneeded_constant_inits(*m_data);
 
-  classes.vals.reserve(m_data->classNames.size());
-  clsBC.vals.reserve(m_data->classNames.size());
-  cinfos.vals.reserve(m_data->classNames.size());
-  meta.classDeps.reserve(m_data->classNames.size());
-  for (auto const name : m_data->classNames) {
-    auto& cls = m_data->classes.at(name);
+  classes.vals.reserve(m_data->outClassNames.size());
+  clsBC.vals.reserve(m_data->outClassNames.size());
+  cinfos.vals.reserve(m_data->outClassNames.size());
+  meta.classDeps.reserve(m_data->outClassNames.size());
+  for (auto const name : m_data->outClassNames) {
+    auto& cls = m_data->allClasses.at(name);
 
     meta.classDeps.emplace_back(m_data->deps->take(cls.get()));
+    if (debug) {
+      always_assert(IMPLIES(is_closure(*cls), meta.classDeps.back().empty()));
+      for (auto const& clo : cls->closures) {
+        always_assert(m_data->deps->take(clo.get()).empty());
+      }
+    }
 
     clsBC.vals.emplace_back(
       std::make_unique<php::ClassBytecode>(cls->name)
@@ -21772,12 +21949,17 @@ AnalysisIndex::Output AnalysisIndex::finish() {
     for (auto& meth : cls->methods) {
       bc.methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
     }
+    for (auto& clo : cls->closures) {
+      assertx(clo->methods.size() == 1);
+      auto& meth = clo->methods[0];
+      bc.methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
+    }
 
-    if (auto cinfo = folly::get_ptr(m_data->cinfos, name)) {
+    if (auto cinfo = folly::get_ptr(m_data->allCInfos, name)) {
       AnalysisIndexCInfo acinfo;
       acinfo.ptr = decltype(acinfo.ptr){cinfo->release()};
       cinfos.vals.emplace_back(std::move(acinfo));
-    } else if (auto minfo = folly::get_ptr(m_data->minfos, name)) {
+    } else if (auto minfo = folly::get_ptr(m_data->allMInfos, name)) {
       AnalysisIndexMInfo aminfo;
       aminfo.ptr = decltype(aminfo.ptr){minfo->release()};
       minfos.vals.emplace_back(std::move(aminfo));
@@ -21786,15 +21968,15 @@ AnalysisIndex::Output AnalysisIndex::finish() {
     classes.vals.emplace_back(std::move(cls));
   }
 
-  funcs.vals.reserve(m_data->funcNames.size());
-  funcBC.vals.reserve(m_data->funcNames.size());
-  finfos.vals.reserve(m_data->funcNames.size());
-  meta.funcDeps.reserve(m_data->funcNames.size());
-  for (auto const name : m_data->funcNames) {
+  funcs.vals.reserve(m_data->outFuncNames.size());
+  funcBC.vals.reserve(m_data->outFuncNames.size());
+  finfos.vals.reserve(m_data->outFuncNames.size());
+  meta.funcDeps.reserve(m_data->outFuncNames.size());
+  for (auto const name : m_data->outFuncNames) {
     assertx(!meta.removedFuncs.count(name));
 
-    auto& func = m_data->funcs.at(name);
-    auto& finfo = m_data->finfos.at(name);
+    auto& func = m_data->allFuncs.at(name);
+    auto& finfo = m_data->allFInfos.at(name);
 
     meta.funcDeps.emplace_back(m_data->deps->take(func.get()));
 
@@ -21808,9 +21990,9 @@ AnalysisIndex::Output AnalysisIndex::finish() {
     finfos.vals.emplace_back(std::move(afinfo));
   }
 
-  units.vals.reserve(m_data->unitNames.size());
-  for (auto const name : m_data->unitNames) {
-    auto& unit = m_data->units.at(name);
+  units.vals.reserve(m_data->outUnitNames.size());
+  for (auto const name : m_data->outUnitNames) {
+    auto& unit = m_data->allUnits.at(name);
     units.vals.emplace_back(std::move(unit));
   }
 

@@ -200,6 +200,9 @@ ClassBase::ClassBase(const ClassBase& other) {
       methods.emplace_back(std::make_unique<php::Func>(*m));
     }
   }
+  for (auto& c : other.closures) {
+    closures.emplace_back(std::make_unique<php::Class>(*c));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

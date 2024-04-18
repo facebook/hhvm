@@ -90,7 +90,7 @@ let rec get_error_if_unsat p =
   match p with
   | Disj (err, ps) ->
     if List.for_all ps ~f:is_unsat then
-      err
+      Some err
     else
       None
   | Conj ps -> List.find_map ps ~f:get_error_if_unsat

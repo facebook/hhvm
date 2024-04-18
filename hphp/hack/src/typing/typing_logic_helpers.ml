@@ -12,9 +12,12 @@ open Typing_env_types
 module TL = Typing_logic
 
 let with_error fail ((env, p) : env * TL.subtype_prop) : env * TL.subtype_prop =
-  match (TL.get_error_if_unsat p, fail) with
-  | (Some ty_err1, Some ty_err2) ->
-    (env, TL.Disj (Some (Typing_error.both ty_err1 ty_err2), []))
+  match TL.get_error_if_unsat p with
+  | Some ty_err_opt1 ->
+    let ty_err_opt =
+      Typing_error.multiple_opt @@ List.filter_opt [ty_err_opt1; fail]
+    in
+    (env, TL.Disj (ty_err_opt, []))
   | _ -> (env, TL.conj p (TL.invalid ~fail))
 
 let check_with b f r =
@@ -27,12 +30,16 @@ let valid env : env * TL.subtype_prop = (env, TL.valid)
 
 let ( &&& ) (env, p1) (f : env -> env * TL.subtype_prop) =
   match TL.get_error_if_unsat p1 with
-  | Some ty_err1 ->
+  | Some ty_err_opt1 ->
     let (env, p2) = f env in
     begin
       match TL.get_error_if_unsat p2 with
-      | Some ty_err2 ->
-        (env, TL.Disj (Some (Typing_error.both ty_err1 ty_err2), []))
+      | Some ty_err_opt2 ->
+        let ty_err_opt =
+          Typing_error.multiple_opt
+          @@ List.filter_opt [ty_err_opt1; ty_err_opt2]
+        in
+        (env, TL.Disj (ty_err_opt, []))
       | None -> (env, p1)
     end
   | None ->

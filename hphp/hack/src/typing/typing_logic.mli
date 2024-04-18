@@ -45,7 +45,7 @@ val is_valid : subtype_prop -> bool
 
 val is_unsat : subtype_prop -> bool
 
-val get_error_if_unsat : subtype_prop -> Typing_error.t option
+val get_error_if_unsat : subtype_prop -> Typing_error.t option option
 
 val conj : subtype_prop -> subtype_prop -> subtype_prop
 

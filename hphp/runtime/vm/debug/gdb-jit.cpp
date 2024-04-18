@@ -23,6 +23,7 @@
 #include <folly/portability/SysMman.h>
 
 using namespace HPHP;
+using namespace HPHP::Debug;
 
 struct jit_descriptor __jit_debug_descriptor = { 1, 0, 0, 0 };
 

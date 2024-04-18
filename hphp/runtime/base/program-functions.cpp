@@ -195,8 +195,57 @@ void pcre_reinit();
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
+enum class ExecutionMode {
+  RUN,
+  DEBUG,
+  EVAL,
+  TRANSLATE,
+  SERVER,
+  REPLAY,
+  DAEMON,
+  DUMPHHAS,
+  VERIFY,
+  VSDEBUG,
+  GETOPTION,
+  DUMPCOVERAGE
+};
+
+void validate(boost::any& v, const std::vector<std::string>& values, ExecutionMode*, int) {
+    // Make sure no previous assignment to 'v' was made.
+    validators::check_first_occurrence(v);
+    const std::string& s = validators::get_single_string(values);
+
+    if (s == "run") {
+        v = boost::any(ExecutionMode::RUN);
+    } else if (s == "debug" || s == "d") {
+        v = boost::any(ExecutionMode::DEBUG);
+    } else if (s == "eval") {
+        v = boost::any(ExecutionMode::EVAL);
+    } else if (s == "translate" || s == "t") {
+        v = boost::any(ExecutionMode::TRANSLATE);
+    } else if (s == "server" || s == "s") {
+        v = boost::any(ExecutionMode::SERVER);
+    } else if (s == "replay") {
+        v = boost::any(ExecutionMode::REPLAY);
+    } else if (s == "daemon") {
+        v = boost::any(ExecutionMode::DAEMON);
+    } else if (s == "dumphhas") {
+        v = boost::any(ExecutionMode::DUMPHHAS);
+    } else if (s == "verify") {
+        v = boost::any(ExecutionMode::VERIFY);
+    } else if (s == "vsdebug") {
+        v = boost::any(ExecutionMode::VSDEBUG);
+    } else if (s == "getoption") {
+        v = boost::any(ExecutionMode::GETOPTION);
+    } else if (s == "dumpcoverage") {
+        v = boost::any(ExecutionMode::DUMPCOVERAGE);
+    } else {
+        throw validation_error(validation_error::invalid_option_value);
+    }
+}
+
 struct ProgramOptions {
-  std::string mode;
+  ExecutionMode mode;
   std::vector<std::string> config;
   std::vector<std::string> confStrings;
   std::vector<std::string> iniStrings;
@@ -1011,23 +1060,30 @@ static void pagein_self(void) {
 }
 
 /* Sets RuntimeOption::ExecutionMode according to commandline options prior to
- * config load.  Returns false upon unrecognized mode.
+ * config load.
  */
-static bool set_execution_mode(folly::StringPiece mode) {
-  if (mode == "daemon" || mode == "server" || mode == "replay") {
-    Cfg::Server::Mode = true;
-    Logger::Escape = true;
-    return true;
-  } else if (mode == "run" || mode == "debug" || mode == "translate" ||
-             mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
-             mode == "getoption" || mode == "eval" || mode == "dumpcoverage") {
-    // We don't run PHP in "translate" mode, so just treat it like cli mode.
-    Cfg::Server::Mode = false;
-    Logger::Escape = false;
-    return true;
-  }
-  // Invalid mode.
-  return false;
+static void set_execution_mode(ExecutionMode mode) {
+    switch (mode) {
+        case ExecutionMode::DAEMON:
+        case ExecutionMode::SERVER:
+        case ExecutionMode::REPLAY:
+            Cfg::Server::Mode = true;
+            Logger::Escape = true;
+            return;
+        case ExecutionMode::RUN:
+        case ExecutionMode::DEBUG:
+        case ExecutionMode::TRANSLATE:
+        case ExecutionMode::DUMPHHAS:
+        case ExecutionMode::VERIFY:
+        case ExecutionMode::VSDEBUG:
+        case ExecutionMode::GETOPTION:
+        case ExecutionMode::EVAL:
+        case ExecutionMode::DUMPCOVERAGE:
+        // We don't run PHP in "translate" mode, so just treat it like cli mode.
+            Cfg::Server::Mode = false;
+            Logger::Escape = false;
+            return;
+    }
 }
 
 static void init_repo_file() {
@@ -1054,7 +1110,7 @@ static int start_server(const std::string &username) {
   pagein_self();
   BootStats::mark("pagein_self");
 
-  set_execution_mode("server");
+  set_execution_mode(ExecutionMode::SERVER);
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
@@ -1428,7 +1484,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("repo-option-hash", "print the repo-options hash for the specified file "
      "and exit")
-    ("mode,m", value<std::string>(&po.mode)->default_value("run"),
+    ("mode,m", value<ExecutionMode>(&po.mode)->default_value(ExecutionMode::RUN, "run"),
      "run | debug (d) | vsdebug | server (s) | daemon | replay | "
      "translate (t) | verify | getoption | eval")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
@@ -1548,18 +1604,12 @@ static int execute_program_impl(int argc, char** argv) {
       // Process the options
       store(opts, vm);
       notify(vm);
-      if (vm.count("interactive") /* or -a */) po.mode = "debug";
-      else if (po.mode.empty()) po.mode = "run";
-      else if (po.mode == "d") po.mode = "debug";
-      else if (po.mode == "s") po.mode = "server";
-      else if (po.mode == "t") po.mode = "translate";
-
-      if (!set_execution_mode(po.mode)) {
-        Logger::Error("Error in command line: invalid mode: %s",
-                      po.mode.c_str());
-        cout << desc << "\n";
-        return HPHP_EXIT_FAILURE;
+      if (vm.count("interactive") /* or -a */) {
+        po.mode = ExecutionMode::DEBUG;
       }
+
+      set_execution_mode(po.mode);
+
       if (po.config.empty() && !vm.count("no-config")
           && ::getenv("HHVM_NO_DEFAULT_CONFIGS") == nullptr) {
         auto file_callback = [&po] (const char *filename) {
@@ -1608,7 +1658,7 @@ static int execute_program_impl(int argc, char** argv) {
 #endif
 
   // reuse -h for help command if possible
-  if (vm.count("help") || (vm.count("debug-host") && po.mode != "debug")) {
+  if (vm.count("help") || (vm.count("debug-host") && po.mode != ExecutionMode::DEBUG)) {
     cout << desc << "\n";
     return 0;
   }
@@ -1659,8 +1709,10 @@ static int execute_program_impl(int argc, char** argv) {
   po.isTempFile = vm.count("temp-file");
 
   // forget the source for systemlib.php unless we are debugging
-  if (po.mode != "debug" && po.mode != "vsdebug") SystemLib::s_source = "";
-  if (po.mode == "vsdebug") {
+  if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::VSDEBUG) {
+    SystemLib::s_source = "";
+  }
+  if (po.mode == ExecutionMode::VSDEBUG) {
     Cfg::Debugger::EnableVSDebugger = true;
     Cfg::Debugger::VSDebuggerListenPort = po.vsDebugPort;
     Cfg::Debugger::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
@@ -1726,7 +1778,7 @@ static int execute_program_impl(int argc, char** argv) {
       messages.push_back(msg);
     }
 
-    if (po.mode == "getoption") {
+    if (po.mode == ExecutionMode::GETOPTION) {
       if (po.args.size() < 1) {
         fprintf(stderr, "Must specify an option to load\n");
         return HPHP_EXIT_FAILURE;
@@ -1770,8 +1822,9 @@ static int execute_program_impl(int argc, char** argv) {
   // Do this as early as possible to avoid creating temp files and spawning
   // light processes. Correct compilation still requires loading all of the
   // ini/hdf/cli options.
-  if (po.mode == "dumphhas" || po.mode == "verify" ||
-      po.mode == "dumpcoverage") {
+  if (po.mode == ExecutionMode::DUMPHHAS ||
+      po.mode == ExecutionMode::VERIFY ||
+      po.mode == ExecutionMode::DUMPCOVERAGE) {
     if (po.file.empty() && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a hack file to compile.\n";
       return HPHP_EXIT_FAILURE;
@@ -1808,8 +1861,11 @@ static int execute_program_impl(int argc, char** argv) {
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
 
-    if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
-    else if (po.mode != "dumpcoverage") RuntimeOption::EvalVerifyOnly = true;
+    if (po.mode == ExecutionMode::DUMPHHAS) {
+      RuntimeOption::EvalDumpHhas = true;
+    } else if (po.mode != ExecutionMode::DUMPCOVERAGE) {
+      RuntimeOption::EvalVerifyOnly = true;
+    }
 
     auto const& defaults = RepoOptions::defaults();
     LazyUnitContentsLoader loader{
@@ -1821,7 +1877,7 @@ static int execute_program_impl(int argc, char** argv) {
     auto compiled =
       compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr, nullptr);
 
-    if (po.mode == "verify") {
+    if (po.mode == ExecutionMode::VERIFY) {
       return 0;
     }
 
@@ -1831,7 +1887,7 @@ static int execute_program_impl(int argc, char** argv) {
       return HPHP_EXIT_FAILURE;
     }
 
-    if (po.mode == "dumpcoverage") {
+    if (po.mode ==  ExecutionMode::DUMPCOVERAGE) {
       std::cout << "[" << folly::join(", ", get_executable_lines(compiled))
                 << "]" << std::endl;
       return 0;
@@ -1864,7 +1920,7 @@ static int execute_program_impl(int argc, char** argv) {
   // From this point on there is no tl_heap until hphp_process_init is called.
 
   auto opened_logs = open_server_log_files();
-  if (po.mode == "daemon") {
+  if (po.mode == ExecutionMode::DAEMON) {
     if (!opened_logs) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
     }
@@ -2047,15 +2103,18 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
 
-  if (argc <= 1 || po.mode == "run" || po.mode == "debug" ||
-      po.mode == "vsdebug" || po.mode == "eval") {
+  if (argc <= 1 ||
+    po.mode == ExecutionMode::RUN ||
+    po.mode == ExecutionMode::DEBUG ||
+    po.mode == ExecutionMode::VSDEBUG ||
+    po.mode == ExecutionMode::EVAL) {
     set_stack_size();
 
     if (po.isTempFile) {
       tempFile = po.file;
     }
 
-    set_execution_mode("run");
+    set_execution_mode(ExecutionMode::RUN);
     /* recreate the hardware counters for the main thread now that we know
      * whether to include subprocess times */
     HardwareCounter::s_counter.destroy();
@@ -2067,20 +2126,20 @@ static int execute_program_impl(int argc, char** argv) {
 
     std::string const cliFile = !po.file.empty() ? po.file :
                                  new_argv[0] ? new_argv[0] : "";
-    if (po.mode != "debug" && po.mode != "eval" && cliFile.empty()) {
+    if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::EVAL && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
       return HPHP_EXIT_FAILURE;
     }
 
-    if (po.mode == "eval" && po.args.empty()) {
+    if (po.mode == ExecutionMode::EVAL && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a command to run with mode eval\n";
       return HPHP_EXIT_FAILURE;
     }
 
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
         !RuntimeOption::EvalUnixServerPath.empty() &&
-        (!po.file.empty() || !po.args.empty()) && po.mode != "eval") {
+        (!po.file.empty() || !po.args.empty()) && po.mode != ExecutionMode::EVAL) {
       // CLI server clients use a wacky delayed initialization scheme for
       // RDS, and therefore requires RDS_LOCALS be outside RDS.
       rds::local::init();
@@ -2111,7 +2170,7 @@ static int execute_program_impl(int argc, char** argv) {
       file = new_argv[0];
     }
 
-    if (po.mode == "debug") {
+    if (po.mode == ExecutionMode::DEBUG) {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       Cfg::Debugger::EnableHphpd = true;
       po.debugger_options.fileName = file;
@@ -2179,7 +2238,7 @@ static int execute_program_impl(int argc, char** argv) {
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv);
         ret = 1;
-        if (po.mode == "eval") {
+        if (po.mode == ExecutionMode::EVAL) {
           String code{"<?hh " + file};
           auto const r = g_context->evalPHPDebugger(code.get(), 0);
           if (!r.failed) ret = 0;
@@ -2210,30 +2269,32 @@ static int execute_program_impl(int argc, char** argv) {
     return ret;
   }
 
-  if (po.mode == "daemon" || po.mode == "server") {
+  if (po.mode == ExecutionMode::DAEMON || po.mode == ExecutionMode::SERVER) {
     if (!po.user.empty()) Cfg::Server::User = po.user;
     return start_server(Cfg::Server::User);
   }
 
-  if (po.mode == "replay" && !po.args.empty()) {
-    RuntimeOption::RecordInput = false;
-    set_execution_mode("server");
-    HttpServer server; // so we initialize runtime properly
-    HttpRequestHandler handler(0);
-    for (int i = 0; i < po.count; i++) {
-      for (unsigned int j = 0; j < po.args.size(); j++) {
-        ReplayTransport rt;
-        rt.replayInput(po.args[j].c_str());
-        handler.run(&rt);
-        printf("%s\n", rt.getResponse().c_str());
+  if (po.mode == ExecutionMode::REPLAY && !po.args.empty()) {
+      RuntimeOption::RecordInput = false;
+      set_execution_mode(ExecutionMode::SERVER);
+
+      HttpServer server; // so we initialize runtime properly
+      HttpRequestHandler handler(0);
+
+      for (int i = 0; i < po.count; i++) {
+          for (unsigned int j = 0; j < po.args.size(); j++) {
+              ReplayTransport rt;
+              rt.replayInput(po.args[j].c_str());
+              handler.run(&rt);
+              printf("%s\n", rt.getResponse().c_str());
+          }
       }
-    }
-    return 0;
+      return 0;
   }
 
-  if (po.mode == "translate" && !po.args.empty()) {
-    printf("%s", translate_stack(po.args[0].c_str()).c_str());
-    return 0;
+  if (po.mode == ExecutionMode::TRANSLATE && !po.args.empty()) {
+      printf("%s", translate_stack(po.args[0].c_str()).c_str());
+      return 0;
   }
 
   cout << desc << "\n";

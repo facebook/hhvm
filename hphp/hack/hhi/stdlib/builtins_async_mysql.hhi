@@ -240,7 +240,6 @@ namespace {
     }
     public function mysql_errno(): int {}
     public function mysql_error(): string {}
-    public function mysql_normalize_error(): string {}
     public function failureType(): string {}
   }
   class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {

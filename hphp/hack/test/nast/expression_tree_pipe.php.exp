@@ -163,8 +163,8 @@
                                      f_external = false; f_doc_comment = None },
                                    [((), ([4:22-36], $0splice0)); ((), ([4:34-36], $$))])));
                                targs = []; args = [(Pnormal, ((), [4:22-24], (Dollardollar ([4:22-24], $$))))]; 
-                               unpacked_arg = None }));
-                         et_dollardollar_pos = (Some [4:22-24]) }))
+                               unpacked_arg = None }))
+                         }))
                    )))))
             ]
           };

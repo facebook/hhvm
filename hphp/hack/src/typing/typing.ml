@@ -10146,10 +10146,7 @@ and Expression_tree : sig
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
   let expression_tree env p et =
-    let { et_class; et_function_pointers; et_runtime_expr; et_dollardollar_pos }
-        =
-      et
-    in
+    let { et_class; et_function_pointers; et_runtime_expr } = et in
 
     (* Next, typecheck the function pointer assignments *)
     let (env, _, t_function_pointers) =
@@ -10186,7 +10183,6 @@ end = struct
            et_class;
            et_function_pointers = t_function_pointers;
            et_runtime_expr = t_runtime_expr;
-           et_dollardollar_pos;
          })
       ty_runtime_expr
 end

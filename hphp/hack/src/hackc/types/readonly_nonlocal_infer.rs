@@ -523,7 +523,6 @@ impl<'d> Infer<'d> {
                     function_pointers,
                     virtualized_expr,
                     runtime_expr,
-                    dollardollar_pos: et.dollardollar_pos.clone(),
                 }));
                 (et, Tyx::Todo, ctx)
             }

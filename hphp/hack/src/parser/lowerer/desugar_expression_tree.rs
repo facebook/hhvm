@@ -263,7 +263,6 @@ pub fn desugar(
             class: Id(visitor_pos.clone(), visitor_name.clone()),
             function_pointers,
             runtime_expr,
-            dollardollar_pos,
         }),
     );
     DesugarResult { expr, errors }

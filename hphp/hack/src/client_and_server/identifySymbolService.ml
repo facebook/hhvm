@@ -402,14 +402,7 @@ let visitor =
       acc + super#on_expr env expr
 
     method! on_expression_tree
-        env
-        (Aast.
-           {
-             et_class;
-             et_function_pointers;
-             et_runtime_expr;
-             et_dollardollar_pos = _;
-           } as expr) =
+        env (Aast.{ et_class; et_function_pointers; et_runtime_expr } as expr) =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The
          visitor expression is unityped, so we can't do much.*)

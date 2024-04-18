@@ -178,7 +178,6 @@ and check_await_usage expr =
           et_class = _;
           et_function_pointers = _;
           et_runtime_expr = runtime_expr;
-          et_dollardollar_pos = _;
         } ->
       check_await_usage runtime_expr
     (* lvalues: shouldn't contain await or $$ *)

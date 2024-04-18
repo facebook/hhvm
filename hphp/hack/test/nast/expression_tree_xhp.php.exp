@@ -191,8 +191,8 @@
                                           f_external = false; f_doc_comment = None },
                                         []))))
                                    ];
-                                 unpacked_arg = None }));
-                           et_dollardollar_pos = None }))
+                                 unpacked_arg = None }))
+                           }))
                      }))))
             ]
           };

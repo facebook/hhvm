@@ -243,7 +243,6 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             class: _,
             function_pointers: _,
             runtime_expr,
-            dollardollar_pos: _,
         }) => check_await_usage(runtime_expr),
         // lvalues: shouldn't contain await or $$
         Expr_::List(_) => NoAwait,
@@ -624,7 +623,6 @@ impl LiftAwait {
                 class: _,
                 function_pointers: _,
                 runtime_expr,
-                dollardollar_pos: _,
             }) => self.extract_await(runtime_expr, con, seq, tmps),
 
             // lvalues: shouldn't contain await or $$

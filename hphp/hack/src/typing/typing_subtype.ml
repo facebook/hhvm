@@ -1350,6 +1350,7 @@ end = struct
       in
       env |> try_disjuncts lty_supers
 
+  (* == Function subtyping ================================================== *)
   and simplify_subtype_params_with_variadic
       ~(subtype_env : Subtype_env.t)
       (subl : locl_fun_param list)
@@ -1555,12 +1556,7 @@ end = struct
    * <<__CrossPackage>> attribute
    *)
   and simplify_subtype_funs_attributes
-      ~subtype_env
-      (r_sub : Reason.t)
-      (ft_sub : locl_fun_type)
-      (r_super : Reason.t)
-      (ft_super : locl_fun_type)
-      env =
+      ~subtype_env (r_sub, ft_sub) (r_super, ft_super) =
     let p_sub = Reason.to_pos r_sub in
     let p_super = Reason.to_pos r_super in
     let print_cross_pkg_reason (c : string option) (is_sub : bool) =
@@ -1574,180 +1570,224 @@ end = struct
         Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
       | None -> "This function is not cross package"
     in
-    (env, TL.valid)
-    |> check_with
-         (readonly_subtype
-            (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
-            (get_ft_readonly_this ft_super)
-            (get_ft_readonly_this ft_sub))
-         (Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Readonly_mismatch
-                       {
-                         pos = p_sub;
-                         kind = `fn;
-                         reason_sub =
-                           lazy
-                             [(p_sub, "This function is not marked readonly")];
-                         reason_super =
-                           lazy [(p_super, "This function is marked readonly")];
-                       }))
-    |> check_with
-         (readonly_subtype
-            (* Readonly return is covariant, so check ft_sub <: ft_super *)
-            (get_ft_returns_readonly ft_sub)
-            (get_ft_returns_readonly ft_super))
-         (Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Readonly_mismatch
-                       {
-                         pos = p_sub;
-                         kind = `fn_return;
-                         reason_sub =
-                           lazy
-                             [(p_sub, "This function returns a readonly value")];
-                         reason_super =
-                           lazy
-                             [
-                               ( p_super,
-                                 "This function does not return a readonly value"
-                               );
-                             ];
-                       }))
-    |> check_with
-         (cross_package_subtype
-            ft_sub.ft_cross_package
-            ft_super.ft_cross_package)
-         (Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Cross_package_mismatch
-                       {
-                         pos = p_sub;
-                         reason_sub =
-                           lazy
-                             [
-                               ( p_sub,
-                                 print_cross_pkg_reason
-                                   ft_sub.ft_cross_package
-                                   true );
-                             ];
-                         reason_super =
-                           lazy
-                             [
-                               ( p_super,
-                                 print_cross_pkg_reason
-                                   ft_super.ft_cross_package
-                                   false );
-                             ];
-                       }))
-    |> check_with
-         (Bool.equal
-            (get_ft_return_disposable ft_sub)
-            (get_ft_return_disposable ft_super))
-         (Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Return_disposable_mismatch
-                       {
-                         pos_super = p_super;
-                         pos_sub = p_sub;
-                         is_marked_return_disposable =
-                           get_ft_return_disposable ft_super;
-                       }))
-    |> check_with
-         (arity_min ft_sub <= arity_min ft_super)
-         (Option.map
-            subtype_env.Subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Fun_too_many_args
-                       {
-                         expected = arity_min ft_super;
-                         actual = arity_min ft_sub;
-                         pos = p_sub;
-                         decl_pos = p_super;
-                       }))
-    |> fun res ->
-    let ft_sub_variadic =
-      if get_ft_variadic ft_sub then
-        List.last ft_sub.ft_params
-      else
-        None
-    in
-    let ft_super_variadic =
-      if get_ft_variadic ft_super then
-        List.last ft_super.ft_params
-      else
-        None
-    in
-
-    match (ft_sub_variadic, ft_super_variadic) with
-    | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
-      (* The HHVM runtime ignores "..." entirely, but knows about
-       * "...$args"; for contexts for which the runtime enforces method
-       * compatibility (currently, inheritance from abstract/interface
-       * methods), letting "..." override "...$args" would result in method
-       * compatibility errors at runtime. *)
-      with_error
-        (Option.map
-           subtype_env.Subtype_env.on_error
-           ~f:
-             Typing_error.(
-               fun on_error ->
-                 apply_reasons ~on_error
-                 @@ Secondary.Fun_variadicity_hh_vs_php56
-                      { pos = p_sub; decl_pos = p_super }))
-        res
-    | (None, None) ->
-      let sub_max = List.length ft_sub.ft_params in
-      let super_max = List.length ft_super.ft_params in
-      if sub_max < super_max then
-        with_error
+    (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
+    let readonly_this_err =
+      if
+        not
+          (readonly_subtype
+             (get_ft_readonly_this ft_super)
+             (get_ft_readonly_this ft_sub))
+      then
+        Error
           (Option.map
              subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
                    apply_reasons ~on_error
-                   @@ Secondary.Fun_too_few_args
+                   @@ Secondary.Readonly_mismatch
                         {
                           pos = p_sub;
-                          decl_pos = p_super;
-                          expected = super_max;
-                          actual = sub_max;
+                          kind = `fn;
+                          reason_sub =
+                            lazy
+                              [(p_sub, "This function is not marked readonly")];
+                          reason_super =
+                            lazy [(p_super, "This function is marked readonly")];
                         }))
-          res
       else
-        res
-    | (None, Some _) ->
-      with_error
-        (Option.map
-           subtype_env.Subtype_env.on_error
-           ~f:
-             Typing_error.(
-               fun on_error ->
-                 apply_reasons ~on_error
-                 @@ Secondary.Fun_unexpected_nonvariadic
-                      { pos = p_sub; decl_pos = p_super }))
-        res
-    | (_, _) -> res
+        Ok ()
+      (* Readonly return is covariant, so check ft_sub <: ft_super *)
+    and readonly_ret_err =
+      if
+        not
+          (readonly_subtype
+             (get_ft_returns_readonly ft_sub)
+             (get_ft_returns_readonly ft_super))
+      then
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Readonly_mismatch
+                        {
+                          pos = p_sub;
+                          kind = `fn_return;
+                          reason_sub =
+                            lazy
+                              [
+                                (p_sub, "This function returns a readonly value");
+                              ];
+                          reason_super =
+                            lazy
+                              [
+                                ( p_super,
+                                  "This function does not return a readonly value"
+                                );
+                              ];
+                        }))
+      else
+        Ok ()
+    and package_err =
+      if
+        not
+          (cross_package_subtype
+             ft_sub.ft_cross_package
+             ft_super.ft_cross_package)
+      then
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Cross_package_mismatch
+                        {
+                          pos = p_sub;
+                          reason_sub =
+                            lazy
+                              [
+                                ( p_sub,
+                                  print_cross_pkg_reason
+                                    ft_sub.ft_cross_package
+                                    true );
+                              ];
+                          reason_super =
+                            lazy
+                              [
+                                ( p_super,
+                                  print_cross_pkg_reason
+                                    ft_super.ft_cross_package
+                                    false );
+                              ];
+                        }))
+      else
+        Ok ()
+    and return_disposable_err =
+      if
+        not
+          (Bool.equal
+             (get_ft_return_disposable ft_sub)
+             (get_ft_return_disposable ft_super))
+      then
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Return_disposable_mismatch
+                        {
+                          pos_super = p_super;
+                          pos_sub = p_sub;
+                          is_marked_return_disposable =
+                            get_ft_return_disposable ft_super;
+                        }))
+      else
+        Ok ()
+    and arity_min_err =
+      if not (arity_min ft_sub <= arity_min ft_super) then
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Fun_too_many_args
+                        {
+                          expected = arity_min ft_super;
+                          actual = arity_min ft_sub;
+                          pos = p_sub;
+                          decl_pos = p_super;
+                        }))
+      else
+        Ok ()
+    and variadic_err =
+      let ft_sub_variadic =
+        if get_ft_variadic ft_sub then
+          List.last ft_sub.ft_params
+        else
+          None
+      in
+      let ft_super_variadic =
+        if get_ft_variadic ft_super then
+          List.last ft_super.ft_params
+        else
+          None
+      in
+
+      match (ft_sub_variadic, ft_super_variadic) with
+      | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
+        (* The HHVM runtime ignores "..." entirely, but knows about
+         * "...$args"; for contexts for which the runtime enforces method
+         * compatibility (currently, inheritance from abstract/interface
+         * methods), letting "..." override "...$args" would result in method
+         * compatibility errors at runtime. *)
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Fun_variadicity_hh_vs_php56
+                        { pos = p_sub; decl_pos = p_super }))
+      | (None, None) ->
+        let sub_max = List.length ft_sub.ft_params in
+        let super_max = List.length ft_super.ft_params in
+        if sub_max < super_max then
+          Error
+            (Option.map
+               subtype_env.Subtype_env.on_error
+               ~f:
+                 Typing_error.(
+                   fun on_error ->
+                     apply_reasons ~on_error
+                     @@ Secondary.Fun_too_few_args
+                          {
+                            pos = p_sub;
+                            decl_pos = p_super;
+                            expected = super_max;
+                            actual = sub_max;
+                          }))
+        else
+          Ok ()
+      | (None, Some _) ->
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Fun_unexpected_nonvariadic
+                        { pos = p_sub; decl_pos = p_super }))
+      | (_, _) -> Ok ()
+    in
+    (* Collect attribute errors *)
+    let (_, errs) =
+      List.partition_result
+        [
+          readonly_this_err;
+          readonly_ret_err;
+          package_err;
+          return_disposable_err;
+          arity_min_err;
+          variadic_err;
+        ]
+    in
+    (* If we have no errors, return valid *)
+    if List.is_empty errs then
+      TL.valid
+    else
+      (* Otherwise, combine the errors and return invalid *)
+      TL.invalid ~fail:(Typing_error.multiple_opt @@ List.filter_opt errs)
 
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
@@ -1855,13 +1895,11 @@ end = struct
     let simplify_subtype_implicit_params_help =
       simplify_subtype_implicit_params ~subtype_env
     in
-    env
-    |> simplify_subtype_funs_attributes
-         ~subtype_env
-         r_sub
-         ft_sub
-         r_super
-         ft_super
+    ( env,
+      simplify_subtype_funs_attributes
+        ~subtype_env
+        (r_sub, ft_sub)
+        (r_super, ft_super) )
     &&& (* Now do contravariant subtyping on parameters *)
     begin
       simplify_subtype_params
@@ -1908,6 +1946,7 @@ end = struct
     else
       valid
 
+  (* == Class / newtype subtyping =========================================== *)
   and simplify_subtype_variance_for_injective_loop
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)

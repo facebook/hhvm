@@ -7,18 +7,6 @@
  *
 *)
 
-val with_error :
-  Typing_error.t option ->
-  Typing_env_types.env * Typing_logic.subtype_prop ->
-  Typing_env_types.env * Typing_logic.subtype_prop
-
-(** If `b` is false then fail with error function `f` *)
-val check_with :
-  bool ->
-  Typing_error.t option ->
-  Typing_env_types.env * Typing_logic.subtype_prop ->
-  Typing_env_types.env * Typing_logic.subtype_prop
-
 val valid :
   Typing_env_types.env -> Typing_env_types.env * Typing_logic.subtype_prop
 

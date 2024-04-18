@@ -11,21 +11,6 @@ open Hh_prelude
 open Typing_env_types
 module TL = Typing_logic
 
-let with_error fail ((env, p) : env * TL.subtype_prop) : env * TL.subtype_prop =
-  match TL.get_error_if_unsat p with
-  | Some ty_err_opt1 ->
-    let ty_err_opt =
-      Typing_error.multiple_opt @@ List.filter_opt [ty_err_opt1; fail]
-    in
-    (env, TL.Disj (ty_err_opt, []))
-  | _ -> (env, TL.conj p (TL.invalid ~fail))
-
-let check_with b f r =
-  if not b then
-    with_error f r
-  else
-    r
-
 let valid env : env * TL.subtype_prop = (env, TL.valid)
 
 let ( &&& ) (env, p1) (f : env -> env * TL.subtype_prop) =

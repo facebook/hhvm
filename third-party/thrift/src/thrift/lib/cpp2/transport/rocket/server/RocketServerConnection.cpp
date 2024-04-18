@@ -186,19 +186,25 @@ void RocketServerConnection::flushWritesWithFds(
     auto write = writesQ.split(fdsOffset - prevOffset);
     DCHECK_EQ(fdsOffset - prevOffset, write->computeChainDataLength());
 
-    // Our writeSuccess / writeError handlers require that every write to
-    // the socket be preceded by a matched queue entry.  To avoid complex
-    // unbatching of `WriteBatchContext`s in `WriteBatcher::enqueueWrite`,
-    // let's make the first N-1 queue entries empty dummies, and use the
-    // full batched context for the last write.
-    inflightWritesQueue_.push_back(
-        writesQ.empty() ? std::move(context) : WriteBatchContext{});
-    // KEEP THIS INVARIANT: For the receiver to correctly match FDs to a
-    // message, the FDs must be sent with the IOBuf ending with the FINAL
-    // fragment of that message.  Today, message fragments are not
-    // interleaved, so there is no explicit logic around this, but this
-    // invariant must be preserved going forward.
-    writeChainWithFds(socket_.get(), this, std::move(write), std::move(fds));
+    if (writesQ.empty()) {
+      // Our writeSuccess / writeError handlers require that every write to
+      // the socket be preceded by a matched queue entry.  To avoid complex
+      // unbatching of `WriteBatchContext`s in `WriteBatcher::enqueueWrite`,
+      // let's make the first N-1 queue entries empty dummies, and use the
+      // full batched context for the last write.
+      inflightWritesQueue_.push_back(std::move(context));
+      // KEEP THIS INVARIANT: For the receiver to correctly match FDs to a
+      // message, the FDs must be sent with the IOBuf ending with the FINAL
+      // fragment of that message.  Today, message fragments are not
+      // interleaved, so there is no explicit logic around this, but this
+      // invariant must be preserved going forward.
+      writeChainWithFds(socket_.get(), this, std::move(write), std::move(fds));
+      // Return here so clangtidy linter won't think the context is moved twice
+      return;
+    } else {
+      inflightWritesQueue_.push_back(WriteBatchContext{});
+      writeChainWithFds(socket_.get(), this, std::move(write), std::move(fds));
+    }
 
     prevOffset = fdsOffset;
   }

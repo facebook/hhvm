@@ -548,7 +548,8 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 
 ### Typedefs
 
-A typedef introduces a named alias of a type and has the following form:
+Thrift IDL types can be *aliased* in source thrift files by using the `typedef`
+keyword.
 
 ```grammar
 typedef ::=  [annotations] "typedef" type identifier [";"]
@@ -559,6 +560,62 @@ It can be used to provide a simpler way to access complex types, for example:
 ```thrift
 typedef map<string, string> StringMap
 ```
+
+Such aliases always (eventually) resolve to *exactly one
+[Thrift IDL type](./#types)*.
+
+We distinguish the following usages:
+
+1. **"Pure" non-annotated aliases** are simple name aliases. They are completely
+   equivalent to, and interchangeable with, their target types:
+
+   ```thrift
+   // A transparent alias: StringMap and map<string, string> are completely
+   // interchangeable.
+   typedef map<string, string> StringMap
+
+   // The types of the two fields below must be indistinguishable from each
+   // other throughout the Thrift ecosystem, i.e. in IDL, target or wire types.
+   struct MyStruct {
+      1: map<string, string> map1;
+
+      2: StringMap map2;
+    }
+   ```
+
+2. **Annotated aliases** are slightly more complex, as their annotations may
+   affect the corresponding target types.:
+
+   ```thrift
+   // An annotated (non-"pure") type alias: the new alias (ui64) results
+   // in a different target type in C++ generated code.
+   @cpp.Type{name = "uint64_t"}
+   typedef i64 ui64
+
+   // The C++ target types of the two fields below will differ:
+   //   * int1 will use the default type corresponding to i64: int64_t.
+   //   * int2 will use the custom implicitly supported type: uint64_t.
+   struct MyStruct {
+     1: i64 int1;
+
+     2: ui64 int2;
+   }
+   ```
+
+:::note
+While annotations may affect the native target type corresponding to an aliased
+type, they do not change the Thrift IDL type being aliased.
+
+For example, at the Thrift IDL level, the following typedefs both resolve to the
+same exact type (in this case, `i64`):
+
+```thrift
+typedef i64 LongInteger
+
+@cpp.Type{name = "uint64_t"}
+typedef i64 UnsignedLongInteger
+```
+:::
 
 ### Services
 
@@ -871,6 +928,25 @@ Although not enforced, it is strongly encouraged to only use set and map when ke
 :::
 
 The element, key, and value types can be any Thrift type, including nested containers.
+
+### Named Types
+
+Also known as "user-defined", these types are defined explicitly through the
+following [type definitions](./#definitions):
+
+1. Structured types
+    * [structs](./#structs),
+    * [unions](./#unions)
+    * [exceptions](./#exceptions).
+
+2. [Enums](./#enums)
+
+
+:::note
+Similarly, [typedefs](./#typedefs) are user-defined and named, but unlike the
+above, they do not introduce a new Thrift IDL type (instead merely aliasing an
+existing type).
+:::
 
 ## Default Values
 

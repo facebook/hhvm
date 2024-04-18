@@ -137,7 +137,10 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   static FILE* stacktraceFile = nullptr;
 
 #ifdef __x86_64__
+  static uintptr_t sig_rbp = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RBP];
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
+#else
+  static uintptr_t sig_rbp = 0;
 #endif
 
   switch (s_crash_report_stage) {
@@ -284,7 +287,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
         // find a VM frame, fake the vmpc, and attempt again.
         s_crash_report_stage = CrashReportStage::DumpTransDB;
 
-        if (auto const ar = jit::findVMFrameForDebug()) {
+        if (auto const ar = jit::findVMFrameForDebug(sig_rbp)) {
           auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;

@@ -49,9 +49,9 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
 
 namespace jit {
 
-ActRec* findVMFrameForDebug() {
+ActRec* findVMFrameForDebug(uintptr_t start) {
   DECLARE_FRAME_POINTER(framePtr);
-  auto rbp = (ActRec*) framePtr;
+  auto rbp = start != 0 ? (ActRec*)start : framePtr;
 
   while (!isVMFrame(rbp, true)) {
     auto const nextRbp = rbp->m_sfp;

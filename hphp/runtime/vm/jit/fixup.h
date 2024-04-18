@@ -32,7 +32,7 @@ namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
-ActRec* findVMFrameForDebug();
+ActRec* findVMFrameForDebug(uintptr_t start = 0);
 
 /*
  * The Fixup map allows us to reconstruct the state of the VM registers (fp,

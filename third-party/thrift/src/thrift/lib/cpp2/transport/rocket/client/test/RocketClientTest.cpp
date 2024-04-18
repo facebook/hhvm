@@ -197,6 +197,9 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
     FAIL() << "Expected exception.";
   } catch (const TTransportException& ex) {
     EXPECT_EQ(ex.getType(), TTransportException::END_OF_FILE);
+    EXPECT_EQ(
+        std::string(ex.what()),
+        "Connection was closed due to KeepAliveTimeout.");
   }
   // Connection was closed, so next call should fail with NOT_OPEN.
   try {

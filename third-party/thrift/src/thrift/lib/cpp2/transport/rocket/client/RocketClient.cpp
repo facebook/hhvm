@@ -1304,6 +1304,11 @@ void RocketClient::closeNowImpl() noexcept {
   DCHECK(clientState_.connState == ConnectionState::ERROR);
   if (keepAliveWatcher_) {
     keepAliveWatcher_->stop();
+    if (keepAliveWatcher_->closeConnection()) {
+      error_ = transport::TTransportException(
+          transport::TTransportException::TTransportExceptionType::END_OF_FILE,
+          "Connection was closed due to KeepAliveTimeout.");
+    }
   }
   // Notice that AsyncSocket::closeNow() is a no-op if the socket is already in
   // the ERROR state -- such as if we are currently handling a writeErr() event.
@@ -1320,7 +1325,6 @@ void RocketClient::closeNowImpl() noexcept {
   if (auto closeCallback = std::move(closeCallback_)) {
     closeCallback();
   }
-
   queue_.failAllSentWrites(error_);
 
   // Move streams_ into a local copy before iterating and erasing. Note that

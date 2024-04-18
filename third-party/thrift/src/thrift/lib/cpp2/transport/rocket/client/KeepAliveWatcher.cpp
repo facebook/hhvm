@@ -90,6 +90,7 @@ void KeepAliveWatcher::checkTimeoutToCloseOrSchedule() {
   evb_->dcheckIsInEventBaseThread();
   if ((std::chrono::steady_clock::now() - lastKeepAliveTs_) > timeout_) {
     FB_LOG_EVERY_MS(ERROR, 1000) << "Slow Connection Detected, closing socket.";
+    closeConnection_ = true;
     socket_->closeNow();
   } else {
     // Reschedule timeout for next round.

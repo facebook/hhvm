@@ -55,6 +55,8 @@ class KeepAliveWatcher : public folly::HHWheelTimer::Callback,
 
   void timeoutExpired() noexcept override;
 
+  bool closeConnection() const { return closeConnection_; }
+
   void writeSuccess() noexcept override {}
 
   void writeErr(size_t, const folly::AsyncSocketException&) noexcept override {
@@ -77,5 +79,6 @@ class KeepAliveWatcher : public folly::HHWheelTimer::Callback,
   std::chrono::milliseconds interval_;
   std::chrono::milliseconds timeout_;
   std::chrono::time_point<std::chrono::steady_clock> lastKeepAliveTs_;
+  bool closeConnection_{false};
 };
 } // namespace apache::thrift::rocket

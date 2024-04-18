@@ -50,8 +50,12 @@ cdef class ApplicationError(Error):
 
     def __init__(ApplicationError self, type, str message):
         assert message, "message is empty"
-        if not isinstance(type, (int, ApplicationErrorType)):
-            raise TypeError(f"{type} is not an ApplicationErrorType")
+        if not isinstance(type, ApplicationErrorType):
+            try:
+                type = ApplicationErrorType(int(type))
+            except ValueError as e:
+                raise TypeError(f"Invalid ApplicationErrorType {type}") from e
+        super().__init__(type, message)
 
     @property
     def type(self):
@@ -104,9 +108,12 @@ cdef class TransportError(LibraryError):
     """All Transport Level Errors (TTransportException)"""
 
     def __init__(TransportError self, type, str message, int errno, int options):
-        super().__init__(type, message, errno, options)
         if not isinstance(type, TransportErrorType):
-            raise TypeError(f"{type} is not a TransportErrorType")
+            try:
+                type = TransportErrorType(int(type))
+            except ValueError as e:
+                raise TypeError(f"Invalid TransportErrorType {type}") from e
+        super().__init__(type, message, errno, options)
 
     @property
     def type(self):

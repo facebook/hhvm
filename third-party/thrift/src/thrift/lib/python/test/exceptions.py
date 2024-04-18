@@ -47,6 +47,17 @@ class ExceptionTests(unittest.TestCase):
     def test_cython_enum_scope(self) -> None:
         self.assertEqual(ApplicationErrorType(6), ApplicationErrorType.INTERNAL_ERROR)
 
+    def test_invalid_error_type(self) -> None:
+        with self.assertRaises(TypeError):
+            ApplicationError("msg", "legit error message")  # pyre-ignore
+        with self.assertRaises(TypeError):
+            TransportError(
+                type="oops",  # pyre-ignore
+                message="transport error",
+                errno=5,
+                options=1,
+            )
+
     def test_exception_message_annotation(self) -> None:
         x = UnusedError(message="something broke")
         self.assertEqual(x.message, str(x))

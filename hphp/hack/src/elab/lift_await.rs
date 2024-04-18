@@ -241,7 +241,6 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
         Expr_::ExpressionTree(box nast::ExpressionTree {
             class: _,
-            function_pointers: _,
             runtime_expr,
         }) => check_await_usage(runtime_expr),
         // lvalues: shouldn't contain await or $$
@@ -621,7 +620,6 @@ impl LiftAwait {
 
             Expr_::ExpressionTree(box nast::ExpressionTree {
                 class: _,
-                function_pointers: _,
                 runtime_expr,
             }) => self.extract_await(runtime_expr, con, seq, tmps),
 

@@ -347,11 +347,6 @@ and ('ex, 'en) function_ptr_id =
 and ('ex, 'en) expression_tree = {
   et_class: class_name;
       (** The hint before the backtick, so Foo in this example. *)
-  et_function_pointers: ('ex, 'en) stmt list;
-      (** The list of global functions and static methods assigned to
-       * temporaries.
-       *
-       *     $0fp1 = foo<>; *)
   et_runtime_expr: ('ex, 'en) expr;
       (** The expression that's executed at runtime.
        *

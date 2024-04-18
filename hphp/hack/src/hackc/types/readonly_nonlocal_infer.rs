@@ -513,14 +513,10 @@ impl<'d> Infer<'d> {
                 let (runtime_expr, _runtime_ty, ctx) =
                     self.infer_expr(&et.runtime_expr, ctx, next_where);
                 let (splices, ctx) = self.infer_stmts_block(&et.splices, ctx, next_where);
-                let (function_pointers, ctx) =
-                    self.infer_stmts_block(&et.function_pointers, ctx, next_where);
                 let splices = splices.0; // we want Vec<Stmt> rather than Block
-                let function_pointers = function_pointers.0; // we want Vec<Stmt> rather than Block
                 let et = ExpressionTree(Box::new(ast::ExpressionTree {
                     hint: et.hint.clone(),
                     splices,
-                    function_pointers,
                     virtualized_expr,
                     runtime_expr,
                 }));

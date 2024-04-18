@@ -10146,26 +10146,8 @@ and Expression_tree : sig
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
   let expression_tree env p et =
-    let { et_class; et_function_pointers; et_runtime_expr } = et in
+    let { et_class; et_runtime_expr } = et in
 
-    (* Next, typecheck the function pointer assignments *)
-    let (env, _, t_function_pointers) =
-      Env.with_inside_expr_tree env et_class (fun env ->
-          let (env, t_function_pointers) =
-            Stmt.block env et_function_pointers
-          in
-          (env, (), t_function_pointers))
-    in
-
-    (* Given the runtime expression:
-
-        MyVisitor::makeTree(...)
-
-        add the inferred type as a type parameter:
-
-        MyVisitor::makeTree<MyVisitorInt>(...)
-
-       and then typecheck. *)
     let (env, t_runtime_expr, ty_runtime_expr) =
       Env.with_inside_expr_tree env et_class (fun env ->
           Expr.expr
@@ -10178,12 +10160,7 @@ end = struct
     make_result
       env
       p
-      (Aast.ExpressionTree
-         {
-           et_class;
-           et_function_pointers = t_function_pointers;
-           et_runtime_expr = t_runtime_expr;
-         })
+      (Aast.ExpressionTree { et_class; et_runtime_expr = t_runtime_expr })
       ty_runtime_expr
 end
 

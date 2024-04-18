@@ -401,8 +401,8 @@ let visitor =
       in
       acc + super#on_expr env expr
 
-    method! on_expression_tree
-        env (Aast.{ et_class; et_function_pointers; et_runtime_expr } as expr) =
+    method! on_expression_tree env (Aast.{ et_class; et_runtime_expr } as expr)
+        =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The
          visitor expression is unityped, so we can't do much.*)
@@ -416,7 +416,6 @@ let visitor =
       (* We're overriding super#on_expression_tree, so we need to
          update the environment. *)
       let env = Tast_env.inside_expr_tree env et_class in
-      let acc = self#plus acc (self#on_Block env None et_function_pointers) in
 
       let e =
         match Aast_utils.get_virtual_expr_from_et expr with

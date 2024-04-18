@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b5943eaff28d91d52750d45fc791de9>>
+// @generated SignedSource<<2ef58af4dfe1dc807c16c19f4e387902>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -823,12 +823,6 @@ pub struct ExpressionTree<'a, Ex, En> {
     /// The hint before the backtick, so Foo in this example.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub class: &'a ClassName<'a>,
-    /// The list of global functions and static methods assigned to
-    /// temporaries.
-    ///
-    ///     $0fp1 = foo<>;
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub function_pointers: &'a [&'a Stmt<'a, Ex, En>],
     /// The expression that's executed at runtime.
     ///
     ///     Foo::makeTree($v ==> $v->visitBinOp(...))

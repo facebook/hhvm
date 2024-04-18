@@ -15,9 +15,6 @@
                ((), [4:3-8:5],
                 (ExpressionTree
                    { et_class = ([4:3-13], "\\ExampleDsl");
-                     et_function_pointers =
-                     [([6:7-10],
-                       (Expr ((), [6:7-10], (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp0))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))) }))))];
                      et_runtime_expr =
                      ((), [4:14-8:4],
                       (Call
@@ -30,31 +27,35 @@
                                  f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
-                                   [([4:14-8:4],
-                                     (Return
-                                        (Some ((), [4:3-13],
-                                               (Call
-                                                  { func = ((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))); 
-                                                    targs = [];
-                                                    args =
-                                                    [(Pnormal,
-                                                      ((), [4:14-8:4],
-                                                       (Shape
-                                                          [((SFlit_str ([4:14-8:4], "path")), ((), [4:14-8:4], (Id ([4:14-8:4], "\\__FILE__"))));
-                                                            ((SFlit_str ([4:14-8:4], "start_line")), ((), [4:14-8:4], (Int "4"))); (
-                                                            (SFlit_str ([4:14-8:4], "end_line")), ((), [4:14-8:4], (Int "8")));
-                                                            ((SFlit_str ([4:14-8:4], "start_column")), ((), [4:14-8:4], (Int "13")));
-                                                            ((SFlit_str ([4:14-8:4], "end_column")), ((), [4:14-8:4], (Int "3")))])));
-                                                      (Pnormal,
-                                                       ((), [4:3-13],
+                                   [([6:7-10],
+                                     (Expr
+                                        ((), [6:7-10],
+                                         (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp0))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))) }))));
+                                     ([4:14-8:4],
+                                      (Return
+                                         (Some ((), [4:3-13],
+                                                (Call
+                                                   { func = ((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))); 
+                                                     targs = [];
+                                                     args =
+                                                     [(Pnormal,
+                                                       ((), [4:14-8:4],
                                                         (Shape
-                                                           [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
-                                                             ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [((), [6:7-10], (Lvar ([6:7-10], $0fp0)))]))));
-                                                             ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
-                                                             ((SFlit_str ([4:3-13], "type")),
-                                                              ((), [4:14-8:4],
-                                                               (Efun
-                                                                  { ef_fun =
+                                                           [((SFlit_str ([4:14-8:4], "path")), ((), [4:14-8:4], (Id ([4:14-8:4], "\\__FILE__"))));
+                                                             ((SFlit_str ([4:14-8:4], "start_line")), ((), [4:14-8:4], (Int "4")));
+                                                             ((SFlit_str ([4:14-8:4], "end_line")), ((), [4:14-8:4], (Int "8")));
+                                                             ((SFlit_str ([4:14-8:4], "start_column")), ((), [4:14-8:4], (Int "13")));
+                                                             ((SFlit_str ([4:14-8:4], "end_column")), ((), [4:14-8:4], (Int "3")))])));
+                                                       (Pnormal,
+                                                        ((), [4:3-13],
+                                                         (Shape
+                                                            [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
+                                                              ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [((), [6:7-10], (Lvar ([6:7-10], $0fp0)))]))));
+                                                              ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
+                                                              ((SFlit_str ([4:3-13], "type")),
+                                                               ((), [4:14-8:4],
+                                                                (Efun
+                                                                   { ef_fun =
                                                                     { f_span = [4:14-8:4]; 
                                                                     f_readonly_this = None; 
                                                                     f_annotation = (); 
@@ -186,33 +187,33 @@
                                                                     f_doc_comment = None }; 
                                                                     ef_use = [((), ([4:3-13], $0fp0))]; 
                                                                     ef_closure_class_name = None })))
-                                                             ])));
-                                                      (Pnormal,
-                                                       ((), [4:14-8:4],
-                                                        (Lfun (
-                                                           { f_span = [4:14-8:4]; 
-                                                             f_readonly_this = None; 
-                                                             f_annotation = (); 
-                                                             f_readonly_ret = None; 
-                                                             f_ret = ((), None);
-                                                             f_params =
-                                                             [{ param_annotation = (); 
-                                                                param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
-                                                                param_is_variadic = false; 
-                                                                param_pos = [4:3-13]; 
-                                                                param_name = "$0v"; 
-                                                                param_expr = None; 
-                                                                param_readonly = None; 
-                                                                param_callconv = Pnormal; 
-                                                                param_user_attributes = []; 
-                                                                param_visibility = None }
-                                                               ];
-                                                             f_ctxs = None; 
-                                                             f_unsafe_ctxs = None;
-                                                             f_body =
-                                                             { fb_ast =
-                                                               [([4:14-8:4],
-                                                                 (Return
+                                                              ])));
+                                                       (Pnormal,
+                                                        ((), [4:14-8:4],
+                                                         (Lfun (
+                                                            { f_span = [4:14-8:4]; 
+                                                              f_readonly_this = None; 
+                                                              f_annotation = (); 
+                                                              f_readonly_ret = None; 
+                                                              f_ret = ((), None);
+                                                              f_params =
+                                                              [{ param_annotation = (); 
+                                                                 param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
+                                                                 param_is_variadic = false; 
+                                                                 param_pos = [4:3-13]; 
+                                                                 param_name = "$0v"; 
+                                                                 param_expr = None; 
+                                                                 param_readonly = None; 
+                                                                 param_callconv = Pnormal; 
+                                                                 param_user_attributes = []; 
+                                                                 param_visibility = None }
+                                                                ];
+                                                              f_ctxs = None; 
+                                                              f_unsafe_ctxs = None;
+                                                              f_body =
+                                                              { fb_ast =
+                                                                [([4:14-8:4],
+                                                                  (Return
                                                                     (Some (
                                                                     (), [4:14-8:4],
                                                                     (
@@ -461,15 +462,15 @@
                                                                     unpacked_arg = None }))]))))]; 
                                                                     unpacked_arg = None }))]))))]; 
                                                                     unpacked_arg = None })))))
-                                                                 ]
-                                                               };
-                                                             f_fun_kind = FSync; 
-                                                             f_user_attributes = []; 
-                                                             f_external = false; 
-                                                             f_doc_comment = None },
-                                                           [((), ([6:7-10], $0fp0))]))))
-                                                      ];
-                                                    unpacked_arg = None })))))
+                                                                  ]
+                                                                };
+                                                              f_fun_kind = FSync; 
+                                                              f_user_attributes = []; 
+                                                              f_external = false; 
+                                                              f_doc_comment = None },
+                                                            [((), ([6:7-10], $0fp0))]))))
+                                                       ];
+                                                     unpacked_arg = None })))))
                                      ]
                                    };
                                  f_fun_kind = FSync; f_user_attributes = []; 

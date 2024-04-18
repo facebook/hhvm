@@ -24,7 +24,6 @@ use oxidized::ast::Stmt_;
 use oxidized::ast_defs;
 use oxidized::ast_defs::*;
 use oxidized::local_id;
-use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 
 use crate::lowerer::Env;
@@ -239,9 +238,7 @@ pub fn desugar(
     } else {
         let body = {
             let mut b = splice_assignments.clone();
-            if matches!(env.codegen, Mode::ForCodegen) {
-                b.extend(function_pointers.clone())
-            }
+            b.extend(function_pointers.clone());
             b.push(wrap_return(make_tree, &et_literal_pos));
             b
         };
@@ -261,7 +258,6 @@ pub fn desugar(
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
             class: Id(visitor_pos.clone(), visitor_name.clone()),
-            function_pointers,
             runtime_expr,
         }),
     );

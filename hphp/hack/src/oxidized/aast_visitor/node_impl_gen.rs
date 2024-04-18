@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b66469e4a89fbab18f83123f2bcb5210>>
+// @generated SignedSource<<b400b5942f6d3b594d31d5b89c2d92cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1096,7 +1096,6 @@ impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::En> {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.class.accept(c, v)?;
-        self.function_pointers.accept(c, v)?;
         self.runtime_expr.accept(c, v)
     }
 }

@@ -18,7 +18,7 @@
                      rhs =
                      ((), [4:8-59],
                       (ExpressionTree
-                         { et_class = ([4:8-18], "\\ExampleDsl"); et_function_pointers = [];
+                         { et_class = ([4:8-18], "\\ExampleDsl");
                            et_runtime_expr =
                            ((), [4:8-18],
                             (Call

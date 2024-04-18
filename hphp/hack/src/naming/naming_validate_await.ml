@@ -173,12 +173,7 @@ and check_await_usage expr =
       | NoAwait -> check_await_usage expr1)
     (* Can't have await in the branches (parse error) *)
     | Eif (cond, _, _) -> check_await_usage cond
-    | ExpressionTree
-        {
-          et_class = _;
-          et_function_pointers = _;
-          et_runtime_expr = runtime_expr;
-        } ->
+    | ExpressionTree { et_class = _; et_runtime_expr = runtime_expr } ->
       check_await_usage runtime_expr
     (* lvalues: shouldn't contain await or $$ *)
     | List _ -> NoAwait

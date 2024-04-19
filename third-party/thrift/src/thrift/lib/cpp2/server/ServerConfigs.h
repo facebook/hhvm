@@ -29,17 +29,11 @@
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/server/PreprocessResult.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache {
 namespace thrift {
-
-using PreprocessResult = std::variant<
-    std::monostate, // Allow request through
-    AppClientException,
-    AppServerException,
-    AppOverloadedException,
-    AppQuotaExceededException>;
 
 class Cpp2ConnContext;
 class Cpp2RequestContext;

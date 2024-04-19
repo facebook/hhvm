@@ -25,6 +25,7 @@ class Cpp2ConnContext;
 
 namespace server {
 
+// TODO(sazonovk): Should we move it to apache::thrift namespace?
 struct PreprocessParams {
   PreprocessParams(
       const transport::THeader::StringToStringMap& headersIn,

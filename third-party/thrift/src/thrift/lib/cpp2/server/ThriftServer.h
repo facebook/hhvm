@@ -69,7 +69,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/PolledServiceHealth.h>
-#include <thrift/lib/cpp2/server/PreprocessParams.h>
+#include <thrift/lib/cpp2/server/PreprocessFunctions.h>
 #include <thrift/lib/cpp2/server/RequestDebugLog.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
@@ -178,9 +178,6 @@ class ThriftServerStopController final {
 
 using IsOverloadedFunc = folly::Function<bool(
     const transport::THeader::StringToStringMap*, const std::string*) const>;
-
-using PreprocessFunc =
-    folly::Function<PreprocessResult(const server::PreprocessParams&) const>;
 
 typedef std::function<void(
     folly::EventBase*,
@@ -967,7 +964,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   IsOverloadedFunc isOverloaded_;
 
-  std::vector<std::pair<std::string, PreprocessFunc>> preprocess_;
+  PreprocessFunctionSet preprocessFunctions_;
 
   std::function<int64_t(const std::string&)> getLoad_;
 
@@ -2601,9 +2598,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.setPreprocess).log(*this);
 
-    preprocess_.clear();
-    preprocess_.push_back(std::make_pair(
-        "UnnamedUserDefinedPreprocessFunction", std::move(preprocess)));
+    preprocessFunctions_.deprecatedSet(std::move(preprocess));
 
     runtimeServerActions_.setPreprocess = true;
     LOG(INFO) << "setPreprocess() call";
@@ -2612,8 +2607,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void addPreprocessFunc(const std::string& name, PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.addPreprocess).log(*this);
 
-    preprocess_.push_back(std::make_pair(name, std::move(preprocess)));
+    preprocessFunctions_.add(name, std::move(preprocess));
 
+    // TODO(sazonovk): Should there be a separate boolean for addPreprocess?
     runtimeServerActions_.setPreprocess = true;
     LOG(INFO) << "addPreprocessFunc() call";
   }

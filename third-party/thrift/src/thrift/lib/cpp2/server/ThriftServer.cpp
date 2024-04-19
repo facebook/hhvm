@@ -1848,14 +1848,7 @@ PreprocessResult ThriftServer::preprocess(
     return {};
   }
 
-  for (auto& [_, preprocessFunc] : preprocess_) {
-    auto result = preprocessFunc(params);
-    if (!std::holds_alternative<std::monostate>(result)) {
-      return result;
-    }
-  }
-
-  return {};
+  return preprocessFunctions_.run(params);
 }
 
 folly::Optional<server::ServerConfigs::ErrorCodeAndMessage>

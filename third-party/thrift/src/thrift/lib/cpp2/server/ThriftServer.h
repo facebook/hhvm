@@ -64,7 +64,6 @@
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ControlServerInterface.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
@@ -228,8 +227,7 @@ ThriftServerConfig& getThriftServerConfig(ThriftServer&);
  *   Uses cpp2 style generated code.
  */
 
-class ThriftServer : public apache::thrift::BaseThriftServer,
-                     public apache::thrift::concurrency::Runnable,
+class ThriftServer : public apache::thrift::concurrency::Runnable,
                      public apache::thrift::server::ServerConfigs,
                      public wangle::ServerBootstrap<Pipeline> {
  public:

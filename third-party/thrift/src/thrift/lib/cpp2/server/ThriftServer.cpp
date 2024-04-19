@@ -250,8 +250,7 @@ TLSCredentialWatcher::TLSCredentialWatcher(ThriftServer* server)
 }
 
 ThriftServer::ThriftServer()
-    : BaseThriftServer(),
-      thriftConfig_(),
+    : thriftConfig_(),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver(),
@@ -269,8 +268,7 @@ ThriftServer::ThriftServer()
 }
 
 ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
-    : BaseThriftServer(),
-      thriftConfig_(initialConfig),
+    : thriftConfig_(initialConfig),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver(),

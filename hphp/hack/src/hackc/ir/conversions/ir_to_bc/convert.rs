@@ -25,15 +25,15 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
     hhbc::Unit {
         functions: unit.functions.into(),
         classes: unit.classes.into(),
-        file_attributes: ir_unit.file_attributes.into(),
-        typedefs: ir_unit.typedefs.into(),
-        constants: ir_unit.constants.into(),
-        modules: ir_unit.modules.into(),
-        module_use: ir_unit.module_use.into(),
+        file_attributes: ir_unit.file_attributes,
+        typedefs: ir_unit.typedefs,
+        constants: ir_unit.constants,
+        modules: ir_unit.modules,
+        module_use: ir_unit.module_use,
         symbol_refs: ir_unit.symbol_refs,
-        fatal: ir_unit.fatal.into(),
-        missing_symbols: Default::default(),
-        error_symbols: Default::default(),
+        fatal: ir_unit.fatal,
+        missing_symbols: ir_unit.missing_symbols,
+        error_symbols: ir_unit.error_symbols,
     }
 }
 

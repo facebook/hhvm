@@ -14,6 +14,7 @@ use ir_core::Fatal;
 use ir_core::Function;
 use ir_core::FunctionName;
 use ir_core::IncludePath;
+use ir_core::Maybe;
 use ir_core::Method;
 use ir_core::MethodName;
 use ir_core::Module;
@@ -146,7 +147,7 @@ impl UnitParser {
         let message = tokenizer.expect_any_string()?;
         let message = message.unescaped_string()?.into();
 
-        self.unit.fatal = Some(Fatal { op, message, loc });
+        self.unit.fatal = Maybe::Just(Fatal { op, message, loc });
         Ok(())
     }
 
@@ -243,7 +244,7 @@ impl UnitParser {
     fn parse_module_use(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let module_use =
             ModuleName::from_utf8(&tokenizer.expect_any_string()?.unescaped_string()?)?;
-        self.unit.module_use = Some(module_use);
+        self.unit.module_use = Maybe::Just(module_use);
         Ok(())
     }
 

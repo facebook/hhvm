@@ -14,14 +14,14 @@
 //! Units are composed of the information needed to represent the program:
 //! classes, constants, functions, typedefs.
 //!
-//! Each class (see `Class` in class.rs) has a class description and a list of
-//! methods.
+//! Each class has a class description and a list of methods.
 //!
-//! Methods (see `Method` in func.rs) and functions (see `Function` in func.rs)
-//! are backed by a common `Func` structure (see `Func` in func.rs) which is the
-//! basic representation of a Hack callable.
+//! Methods (see `MethodImpl` in hhbc/method.rs) and functions
+//! (see `FunctionImpl` in hhbc/function.rs) are backed by a common `BodyImpl`
+//! structure (see `BodyImpl` in hhbc/body.rs) which is the basic representation
+//! of a Hack callable.
 //!
-//! Funcs are composed of instructions (see `Instr` in instr.rs) and basic
+//! IrRepr consists of instructions (see `Instr` in instr.rs) and basic
 //! blocks (see `Block` in block.rs).
 
 pub mod block;
@@ -33,7 +33,6 @@ pub mod instr;
 pub mod newtype;
 pub mod type_struct;
 pub mod types;
-pub mod unit;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
@@ -107,6 +106,7 @@ pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;
 pub use hhbc::TypedValue;
 pub use hhbc::Typedef;
+pub use hhbc::UnitImpl;
 pub use hhbc::UpperBound;
 pub use hhbc::Visibility;
 pub use hhvm_types_ffi::ffi::Attr;
@@ -149,5 +149,6 @@ pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;
-pub use self::unit::Class;
-pub use self::unit::Unit;
+
+pub type Unit = UnitImpl<IrRepr>;
+pub type Class = ClassImpl<IrRepr>;

@@ -2147,7 +2147,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
         writeln!(w)?;
     }
 
-    if let Some(module_use) = unit.module_use.as_ref() {
+    if let Maybe::Just(module_use) = unit.module_use.as_ref() {
         writeln!(
             w,
             "module_use {}\n",
@@ -2180,7 +2180,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
         }
     }
 
-    print_fatal(w, unit.fatal.as_ref())?;
+    print_fatal(w, unit.fatal.as_ref().into())?;
 
     print_symbol_refs(w, &unit.symbol_refs)?;
 

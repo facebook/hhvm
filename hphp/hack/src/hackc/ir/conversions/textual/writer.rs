@@ -37,7 +37,7 @@ pub fn textual_writer(
     txf.set_attribute(textual::FileAttribute::SourceLanguage("hack".to_string()))?;
     txf.debug_separator()?;
 
-    check_fatal(path, unit.fatal.as_ref())?;
+    check_fatal(path, unit.fatal.as_ref().into())?;
 
     // Merge classes and functions so we can sort them and emit in source file
     // order.

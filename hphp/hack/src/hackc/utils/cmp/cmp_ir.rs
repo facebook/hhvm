@@ -1527,6 +1527,8 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         module_use: a_module_use,
         symbol_refs: a_symbol_refs,
         typedefs: a_typedefs,
+        error_symbols: _,
+        missing_symbols: _,
     } = a_unit;
     let Unit {
         classes: b_classes,
@@ -1538,15 +1540,22 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         module_use: b_module_use,
         symbol_refs: b_symbol_refs,
         typedefs: b_typedefs,
+        error_symbols: _,
+        missing_symbols: _,
     } = b_unit;
 
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_attributes(a_file_attributes, b_file_attributes).qualified("file_attributes")?;
     cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
-    cmp_option(a_fatal.as_ref(), b_fatal.as_ref(), cmp_fatal).qualified("fatal")?;
+    cmp_option(a_fatal.as_ref().into(), b_fatal.as_ref().into(), cmp_fatal).qualified("fatal")?;
     cmp_map_t(a_modules, b_modules, cmp_module).qualified("modules")?;
-    cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), cmp_eq).qualified("module_use")?;
+    cmp_option(
+        a_module_use.as_ref().into_option(),
+        b_module_use.as_ref().into_option(),
+        cmp_eq,
+    )
+    .qualified("module_use")?;
     cmp_symbol_refs(a_symbol_refs, b_symbol_refs).qualified("symbol_refs")?;
     cmp_map_t(a_typedefs, b_typedefs, cmp_typedef).qualified("typedefs")?;
 

@@ -15,15 +15,17 @@ pub fn bc_to_ir(unit: Unit) -> ir::Unit {
         classes: (unit.classes.into_iter())
             .map(crate::class::convert_class)
             .collect(),
-        constants: unit.constants.into(),
-        fatal: unit.fatal.into(),
-        file_attributes: unit.file_attributes.into(),
+        constants: unit.constants,
+        fatal: unit.fatal,
+        file_attributes: unit.file_attributes,
         functions: (unit.functions.into_iter())
             .map(crate::func::convert_function)
             .collect(),
-        module_use: unit.module_use.into(),
-        modules: unit.modules.into(),
+        module_use: unit.module_use,
+        modules: unit.modules,
         symbol_refs: unit.symbol_refs,
-        typedefs: unit.typedefs.into(),
+        typedefs: unit.typedefs,
+        error_symbols: unit.error_symbols,
+        missing_symbols: unit.missing_symbols,
     }
 }

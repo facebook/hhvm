@@ -57,6 +57,34 @@ impl<R> BodyImpl<R> {
     }
 }
 
+// TODO: Steps to unify BcRepr with IrRepr:
+//
+// 1. Locations. Add a LocId field to the hhbc::Instruct::Opcode variant
+// so every Opcode has a SrcLoc. LocId indexes into a new locs table,
+// similar to IrRepr::locs. Assign LocIds in InstrSeq::to_vec() so the results
+// does not contain any inline Pseudo::SrcLoc instructions. If this step is
+// not bytecode-preserving, dig into how SrcLocs differ and debug; maybe the
+// new way is more correct.
+//
+// 2. Blocks. repurpose make_cfg() in opt_body.rs to create a vector of basic
+// blocks of type Vec<InstrId> where instrId is the index into BcRepr::instrs.
+// Change BcRepr::instrs to IdVec<InstrId,Instruct> for type safety. Modify
+// hackc-translator, bc_to_ir, and bytecode_printer to traverse blocks and
+// instructions. The order of instructions in BcRepr::instrs no longer matters.
+// If this step isn't bytecode preserving, decide if the new block order is better.
+//
+// 3. ExFrames. Construct ex_frames during or after constructing blocks by
+// processing in-line TryBegin/TryMiddle/TryEnd pseudo instructions.
+// Now every block refers to an exception scope. passes that linearize bytecode
+// (bytecode_printer, hackc-translator, bc_to_ir) need to first honor exception
+// frames, then place linear blocks a local good order (probably RPO) in nested
+// try/catch scopes. If this step is not bytecode preserving, make sure blocks
+// or instructions haven't moved in/out of their correct try/catch scope.
+//
+// By this point, enum Pseudo should be totally unused in BcRepr. enum Instruct
+// (opcode or pseudo) is now only needed for InstrSeq; BcRepr instrs can be
+// reduced to just Vector<(Opcode, LocId)>.
+
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct BcRepr {

@@ -76,6 +76,7 @@ cdef extern from "<Python.h>":
 cdef class TypeInfoBase:
     cdef to_internal_data(self, object)
     cdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class TypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
@@ -84,6 +85,7 @@ cdef class TypeInfo(TypeInfoBase):
     cdef create(const cTypeInfo& cpp_obj, pytypes)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class IntegerTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
@@ -93,6 +95,7 @@ cdef class IntegerTypeInfo(TypeInfoBase):
     cdef create(const cTypeInfo& cpp_obj, min_value, max_value)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class StringTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
@@ -100,6 +103,7 @@ cdef class StringTypeInfo(TypeInfoBase):
     cdef create(const cTypeInfo& cpp_obj)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class IOBufTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
@@ -107,6 +111,7 @@ cdef class IOBufTypeInfo(TypeInfoBase):
     cdef create(const cTypeInfo& cpp_obj)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class StructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj
@@ -127,7 +132,7 @@ cdef class UnionInfo:
 cdef class ListTypeInfo(TypeInfoBase):
     cdef object val_info
     cdef unique_ptr[cListTypeInfo] cpp_obj
-    cdef const cTypeInfo* get(self)
+    cdef const cTypeInfo* get_cTypeInfo(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info)
@@ -136,7 +141,7 @@ cdef class ListTypeInfo(TypeInfoBase):
 cdef class SetTypeInfo(TypeInfoBase):
     cdef object val_info
     cdef unique_ptr[cSetTypeInfo] cpp_obj
-    cdef const cTypeInfo* get(self)
+    cdef const cTypeInfo* get_cTypeInfo(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info)
@@ -146,7 +151,7 @@ cdef class MapTypeInfo(TypeInfoBase):
     cdef object key_info
     cdef object val_info
     cdef unique_ptr[cMapTypeInfo] cpp_obj
-    cdef const cTypeInfo* get(self)
+    cdef const cTypeInfo* get_cTypeInfo(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object)
@@ -155,7 +160,7 @@ cdef class MapTypeInfo(TypeInfoBase):
 cdef class StructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj
     cdef object _class
-    cdef const cTypeInfo* get(self)
+    cdef const cTypeInfo* get_cTypeInfo(self)
     cdef bint is_union
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
@@ -164,6 +169,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
     cdef object _class
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class AdaptedTypeInfo(TypeInfoBase):
     cdef object _orig_type_info
@@ -171,6 +177,7 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
     cdef object _transitive_annotation
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class StructOrUnion:
     cdef tuple _fbthrift_data

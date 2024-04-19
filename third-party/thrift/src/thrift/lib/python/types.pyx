@@ -83,6 +83,9 @@ cdef class TypeInfoBase:
     cdef to_python_value(self, object value):
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        raise NotImplementedError("Not implemented on base TypeInfoBase class")
+
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, pytypes):
@@ -103,6 +106,9 @@ cdef class TypeInfo(TypeInfoBase):
 
     def to_container_value(self, object value):
         return self.to_internal_data(value)
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj
 
 
 cdef class IntegerTypeInfo(TypeInfoBase):
@@ -129,6 +135,9 @@ cdef class IntegerTypeInfo(TypeInfoBase):
 
     def to_container_value(self, object value not None):
         return self.to_internal_data(value)
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj
 
 
 cdef class StringTypeInfo(TypeInfoBase):
@@ -172,6 +181,9 @@ cdef class StringTypeInfo(TypeInfoBase):
             raise TypeError(f"value {value} is not a <class 'str'>, is actually of type {type(value)}")
         return value
 
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj
+
 
 cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
@@ -188,6 +200,9 @@ cdef class IOBufTypeInfo(TypeInfoBase):
 
     def to_container_value(self, IOBuf value):
         return value
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj
 
 
 typeinfo_bool = TypeInfo.create(boolTypeInfo, (pbool,))
@@ -348,27 +363,8 @@ cdef class UnionInfo:
             )
 
 
-cdef const cTypeInfo* getCTypeInfo(type_info):
-        if isinstance(type_info, TypeInfo):
-            return (<TypeInfo>type_info).cpp_obj
-        if isinstance(type_info, StringTypeInfo):
-            return (<StringTypeInfo>type_info).cpp_obj
-        if isinstance(type_info, IOBufTypeInfo):
-            return (<IOBufTypeInfo>type_info).cpp_obj
-        if isinstance(type_info, IntegerTypeInfo):
-            return (<IntegerTypeInfo>type_info).cpp_obj
-        if isinstance(type_info, StructTypeInfo):
-            return (<StructTypeInfo>type_info).get()
-        if isinstance(type_info, ListTypeInfo):
-            return (<ListTypeInfo>type_info).get()
-        if isinstance(type_info, SetTypeInfo):
-            return (<SetTypeInfo>type_info).get()
-        if isinstance(type_info, MapTypeInfo):
-            return (<MapTypeInfo>type_info).get()
-        if isinstance(type_info, EnumTypeInfo):
-            return &i32TypeInfo
-        if isinstance(type_info, AdaptedTypeInfo):
-            return getCTypeInfo((<AdaptedTypeInfo>type_info)._orig_type_info)
+cdef inline const cTypeInfo* getCTypeInfo(type_info):
+        return (<TypeInfoBase>type_info).get_cTypeInfo()
 
 
 cdef to_container_elements_no_convert(type_info):
@@ -380,7 +376,7 @@ cdef class ListTypeInfo(TypeInfoBase):
         self.val_info = val_info
         self.cpp_obj = make_unique[cListTypeInfo](getCTypeInfo(val_info))
 
-    cdef const cTypeInfo* get(self):
+    cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
@@ -425,7 +421,7 @@ cdef class SetTypeInfo(TypeInfoBase):
         self.val_info = val_info
         self.cpp_obj = make_unique[cSetTypeInfo](getCTypeInfo(val_info))
 
-    cdef const cTypeInfo* get(self):
+    cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
@@ -468,7 +464,7 @@ cdef class MapTypeInfo(TypeInfoBase):
             getCTypeInfo(val_info),
         )
 
-    cdef const cTypeInfo* get(self):
+    cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
@@ -528,7 +524,7 @@ cdef class StructTypeInfo(TypeInfoBase):
             deref(c_struct_info)
         )
 
-    cdef const cTypeInfo* get(self):
+    cdef const cTypeInfo* get_cTypeInfo(self):
         return &self.cpp_obj
 
     cpdef to_internal_data(self, object value):
@@ -618,6 +614,9 @@ cdef class EnumTypeInfo(TypeInfoBase):
             raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
         return value
 
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return &i32TypeInfo
+
 
 cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
@@ -646,6 +645,9 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
 
     def to_container_value(self, object value not None):
         return value
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return (<TypeInfoBase>self._orig_type_info).get_cTypeInfo()
 
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:

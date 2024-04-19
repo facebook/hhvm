@@ -15,19 +15,27 @@
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
 from thrift.python.types import (
-    AdaptedTypeInfo,
-    EnumTypeInfo,
-    ListTypeInfo,
     Map,
-    MapTypeInfo,
     Set,
-    SetTypeInfo,
-    StructTypeInfo,
-    TypeInfoBase,
     typeinfo_bool,
     typeinfo_i64,
     typeinfo_iobuf,
     typeinfo_string,
+)
+from thrift.python.types cimport (
+    AdaptedTypeInfo,
+    EnumTypeInfo,
+    IntegerTypeInfo,
+    IOBufTypeInfo,
+    ListTypeInfo,
+    MapTypeInfo,
+    SetTypeInfo,
+    StringTypeInfo,
+    StructTypeInfo,
+    TypeInfo,
+    TypeInfoBase,
+    getCTypeInfo,
+    i32TypeInfo,
 )
 from thrift.python.test.containers.thrift_types import Foo, Bar
 from thrift.python.test.adapters.atoi import AtoiAdapter
@@ -35,6 +43,9 @@ from thrift.python.test.adapters.atoi import AtoiAdapter
 cdef class TypeInfoTests():
     def __cinit__(self, unit_test):
         self.ut = unit_test
+
+    cdef assertEqual(self, const cTypeInfo *lhs, const cTypeInfo *rhs):
+        return self.ut.assertTrue(lhs == rhs)
 
     def test_ListTypeInfo(self) -> None:
         list_type_info = ListTypeInfo(typeinfo_i64)
@@ -45,6 +56,11 @@ cdef class TypeInfoTests():
 
         data = list_type_info.to_internal_data([1, 2, 3])
         self.ut.assertEqual(data, (1, 2, 3))
+
+        self.assertEqual(
+            (<ListTypeInfo>list_type_info).cpp_obj.get().get(),
+            getCTypeInfo(list_type_info),
+        )
 
     def test_ListTypeInfo_nested(self) -> None:
         element_type_info = ListTypeInfo(typeinfo_i64)
@@ -69,6 +85,11 @@ cdef class TypeInfoTests():
         data = set_type_info.to_internal_data([1, 2, 3, 1, 2])
         self.ut.assertEqual(data, frozenset([1, 2, 3]))
 
+        self.assertEqual(
+            (<SetTypeInfo>set_type_info).cpp_obj.get().get(),
+            getCTypeInfo(set_type_info),
+        )
+
     def test_SetTypeInfo_nested(self) -> None:
         element_type_info = SetTypeInfo(typeinfo_i64)
         set_type_info = SetTypeInfo(element_type_info)
@@ -92,6 +113,11 @@ cdef class TypeInfoTests():
         data = typeinfo_i64.to_internal_data(2**63 - 1)
         self.ut.assertEqual(data, 2**63 - 1)
 
+        self.assertEqual(
+            (<IntegerTypeInfo>typeinfo_i64).cpp_obj,
+            getCTypeInfo(typeinfo_i64),
+        )
+
     def test_StringTypeInfo(self) -> None:
         self.ut.assertTrue(isinstance(typeinfo_string, TypeInfoBase))
         with self.ut.assertRaises(TypeError):
@@ -103,6 +129,11 @@ cdef class TypeInfoTests():
         data = typeinfo_string.to_internal_data("AbC")
         self.ut.assertEqual(data, b"AbC")
 
+        self.assertEqual(
+            (<StringTypeInfo>typeinfo_string).cpp_obj,
+            getCTypeInfo(typeinfo_string),
+        )
+
     def test_TypeInfo(self) -> None:
         self.ut.assertTrue(isinstance(typeinfo_bool, TypeInfoBase))
         with self.ut.assertRaises(TypeError):
@@ -110,6 +141,11 @@ cdef class TypeInfoTests():
 
         data = typeinfo_bool.to_internal_data(True)
         self.ut.assertEqual(data, True)
+
+        self.assertEqual(
+            (<TypeInfo>typeinfo_bool).cpp_obj,
+            getCTypeInfo(typeinfo_bool),
+        )
 
     def test_StructTypeInfo(self) -> None:
         struct_type_info = StructTypeInfo(Foo)
@@ -123,6 +159,11 @@ cdef class TypeInfoTests():
                 struct_type_info.to_python_value(data),
                 Foo(value=11))
 
+        self.assertEqual(
+            &(<StructTypeInfo>struct_type_info).cpp_obj,
+            getCTypeInfo(struct_type_info),
+        )
+
     def test_EnumTypeInfo(self) -> None:
         enum_type_info = EnumTypeInfo(Bar)
         self.ut.assertTrue(isinstance(enum_type_info, TypeInfoBase))
@@ -135,6 +176,11 @@ cdef class TypeInfoTests():
 
         data = enum_type_info.to_internal_data(Bar.ONE)
         self.ut.assertEqual(enum_type_info.to_python_value(data), Bar.ONE)
+
+        self.assertEqual(
+            &i32TypeInfo,
+            getCTypeInfo(enum_type_info),
+        )
 
     def test_AdaptedTypeInfo(self) -> None:
         adapted_type_info = AdaptedTypeInfo(typeinfo_string, AtoiAdapter, lambda: None)
@@ -152,6 +198,11 @@ cdef class TypeInfoTests():
         internal_str_data = typeinfo_string.to_internal_data("21")
         self.ut.assertEqual(21, adapted_type_info.to_python_value(internal_str_data))
 
+        self.assertEqual(
+            (<StringTypeInfo>typeinfo_string).cpp_obj,
+            getCTypeInfo(adapted_type_info),
+        )
+
     def test_IOBufTypeInfo(self) -> None:
         self.ut.assertTrue(isinstance(typeinfo_iobuf, TypeInfoBase))
         
@@ -164,6 +215,11 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(None, typeinfo_iobuf.to_python_value(None))
         self.ut.assertEqual("abc", typeinfo_iobuf.to_python_value("abc"))
 
+        self.assertEqual(
+            (<IOBufTypeInfo>typeinfo_iobuf).cpp_obj,
+            getCTypeInfo(typeinfo_iobuf),
+        )
+
     def test_MapTypeInfo(self) -> None:
         map_type_info = MapTypeInfo(typeinfo_string, typeinfo_i64)
         self.ut.assertTrue(isinstance(map_type_info, TypeInfoBase))
@@ -175,6 +231,11 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(data, ((b"a", 1), (b"b", 2)))
         expected_python_val = Map(typeinfo_string, typeinfo_i64, {"a": 1, "b":2})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
+
+        self.assertEqual(
+            (<MapTypeInfo>map_type_info).cpp_obj.get().get(),
+            getCTypeInfo(map_type_info),
+        )
 
     def test_MapTypeInfo_nested(self) -> None:
         # Map[str, Map[int, List[int]]]

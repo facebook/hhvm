@@ -12,5 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
+    cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
+        pass
+
 cdef class TypeInfoTests:
     cdef object ut
+    cdef assertEqual(self, const cTypeInfo *lhs, const cTypeInfo *rhs)

@@ -1046,8 +1046,7 @@ bool RocketClient::sendRequestN(StreamId streamId, int32_t n) {
       RequestNFrame(streamId, n),
       [dg = DestructorGuard(this), this, g = std::move(g)](
           transport::TTransportException ex) {
-        FB_LOG_EVERY_MS(ERROR, 1000)
-            << "sendRequestN failed, closing now: " << ex.what();
+        VLOG(1) << "sendRequestN failed, closing now: " << ex.what();
         close(std::move(ex));
       });
 }
@@ -1059,8 +1058,7 @@ void RocketClient::cancelStream(StreamId streamId) {
       CancelFrame(streamId),
       [dg = DestructorGuard(this), this, g = std::move(g)](
           transport::TTransportException ex) {
-        FB_LOG_EVERY_MS(ERROR, 1000)
-            << "cancelStream failed, closing now: " << ex.what();
+        VLOG(1) << "cancelStream failed, closing now: " << ex.what();
         close(std::move(ex));
       });
 }
@@ -1074,8 +1072,7 @@ bool RocketClient::sendPayload(
        dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::INTERNAL)](
           transport::TTransportException ex) {
-        FB_LOG_EVERY_MS(ERROR, 1000)
-            << "sendPayload failed, closing now: " << ex.what();
+        VLOG(1) << "sendPayload failed, closing now: " << ex.what();
         close(std::move(ex));
       });
 }
@@ -1088,8 +1085,7 @@ void RocketClient::sendError(StreamId streamId, RocketException&& rex) {
        dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::INTERNAL)](
           transport::TTransportException ex) {
-        FB_LOG_EVERY_MS(ERROR, 1000)
-            << "sendError failed, closing now: " << ex.what();
+        VLOG(1) << "sendError failed, closing now: " << ex.what();
         close(std::move(ex));
       });
 }
@@ -1110,8 +1106,7 @@ bool RocketClient::sendHeadersPush(
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
   auto onError = [dg = DestructorGuard(this), this, g = std::move(g)](
                      transport::TTransportException ex) {
-    FB_LOG_EVERY_MS(ERROR, 1000)
-        << "sendHeadersPush failed, closing now: " << ex.what();
+    VLOG(1) << "sendHeadersPush failed, closing now: " << ex.what();
     close(std::move(ex));
   };
   ClientPushMetadata clientMeta;

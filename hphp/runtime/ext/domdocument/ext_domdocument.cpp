@@ -1150,15 +1150,9 @@ Variant php_dom_create_object(xmlNodePtr obj,
     raise_warning("Unsupported node type: %d", obj->type);
     return init_null();
   }
-  if (doc) {
-    // Need to lowercase because that is what registerNodeClass does
-    // when it adds things to this map.
-    auto lower_clsname = HHVM_FN(strtolower)(clsname);
-    if (doc->m_classmap.exists(lower_clsname)) {
-      // or const char * is not safe
-      assertx(doc->m_classmap[lower_clsname].isString());
-      clsname = doc->m_classmap[lower_clsname].toString();
-    }
+  if (doc && doc->m_classmap.exists(clsname)) {
+    assertx(doc->m_classmap[clsname].isString());
+    clsname = doc->m_classmap[clsname].toString();
   }
 
   auto node = libxml_register_node(obj);
@@ -3661,7 +3655,7 @@ bool HHVM_METHOD(DOMDocument, registerNodeClass,
     return false;
   }
   auto* data = Native::data<DOMNode>(this_);
-  data->doc()->m_classmap.set(HHVM_FN(strtolower)(baseclass), extendedclass);
+  data->doc()->m_classmap.set(baseclass, extendedclass);
   return true;
 }
 

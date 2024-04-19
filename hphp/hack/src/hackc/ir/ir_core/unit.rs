@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::class::ClassImpl;
 use crate::Attribute;
+use crate::ClassImpl;
 use crate::Constant;
 use crate::Fatal;
 use crate::FunctionImpl;
@@ -15,6 +15,7 @@ use crate::SymbolRefs;
 use crate::Typedef;
 
 pub type Unit = UnitImpl<IrRepr>;
+pub type Class = ClassImpl<IrRepr>;
 
 /// Unit represents a single parsed file.
 #[derive(Debug, Default)]

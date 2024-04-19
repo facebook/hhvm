@@ -33,7 +33,7 @@ bitflags! {
     }
 }
 
-impl Method {
+impl<R> MethodImpl<R> {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(MethodFlags::IS_CLOSURE_BODY)
     }

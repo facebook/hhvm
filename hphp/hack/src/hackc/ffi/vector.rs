@@ -59,6 +59,12 @@ impl<T> Vector<T> {
         v.push(x);
         *self = Self::from(v);
     }
+
+    pub fn insert(&mut self, index: usize, x: T) {
+        let mut v = Vec::from(std::mem::take(self));
+        v.insert(index, x);
+        *self = Self::from(v);
+    }
 }
 
 impl<T> std::ops::Drop for Vector<T> {

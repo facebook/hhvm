@@ -25,7 +25,6 @@
 //! blocks (see `Block` in block.rs).
 
 pub mod block;
-pub mod class;
 pub mod func;
 pub mod func_builder;
 pub mod func_builder_ex;
@@ -54,6 +53,7 @@ pub use hhbc::CcParam;
 pub use hhbc::CcReified;
 pub use hhbc::CcThis;
 pub use hhbc::ClassGetCMode;
+pub use hhbc::ClassImpl;
 pub use hhbc::ClassName;
 pub use hhbc::ClassishKind;
 pub use hhbc::Coeffects;
@@ -115,7 +115,6 @@ pub use hhvm_types_ffi::ffi::TypeStructureKind;
 pub use naming_special_names_rust::coeffects::Ctx;
 
 pub use self::block::Block;
-pub use self::class::Class;
 pub use self::func::DefaultValue;
 pub use self::func::ExFrameId;
 pub use self::func::Filename;
@@ -150,4 +149,5 @@ pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;
+pub use self::unit::Class;
 pub use self::unit::Unit;

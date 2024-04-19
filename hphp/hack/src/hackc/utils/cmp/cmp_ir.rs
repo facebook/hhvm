@@ -126,11 +126,21 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
     } = b;
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
-    cmp_option(a_base.as_ref(), b_base.as_ref(), cmp_eq).qualified("base")?;
+    cmp_option(
+        a_base.as_ref().into_option(),
+        b_base.as_ref().into_option(),
+        cmp_eq,
+    )
+    .qualified("base")?;
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_ctx_constant).qualified("ctx_constants")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
-    cmp_option(a_enum_type.as_ref(), b_enum_type.as_ref(), cmp_type_info).qualified("enum_type")?;
+    cmp_option(
+        a_enum_type.as_ref().into_option(),
+        b_enum_type.as_ref().into_option(),
+        cmp_type_info,
+    )
+    .qualified("enum_type")?;
     cmp_slice(a_enum_includes.iter(), b_enum_includes.iter(), cmp_eq).qualified("enum_includes")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_slice(a_implements.iter(), b_implements.iter(), cmp_eq).qualified("implements")?;

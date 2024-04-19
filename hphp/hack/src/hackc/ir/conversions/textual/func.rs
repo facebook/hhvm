@@ -28,6 +28,7 @@ use ir::InstrId;
 use ir::IrRepr;
 use ir::LocId;
 use ir::LocalId;
+use ir::Maybe;
 use ir::MethodFlags;
 use ir::MethodName;
 use ir::SpecialClsRef;
@@ -1176,7 +1177,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                     let base = ClassName::intern("__parent__");
                     mangle::FunctionName::method(base, is_static, method)
                 } else {
-                    let base = if let Some(base) = mi.class.base {
+                    let base = if let Maybe::Just(base) = mi.class.base {
                         base
                     } else {
                         // Uh oh. We're asking to call parent::foo() when we don't

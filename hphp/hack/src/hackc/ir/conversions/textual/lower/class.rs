@@ -127,7 +127,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         );
     }
 
-    for method in &mut class.methods {
+    for method in class.methods.iter_mut() {
         if method.name.is_86pinit() {
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
             method.body.attrs -= Attr::AttrStatic;
@@ -151,7 +151,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     // Turn class constants into properties.
     // TODO: Need to think about abstract constants. Maybe constants lookups
     // should really be function calls...
-    for constant in class.constants.drain(..) {
+    for constant in std::mem::take(&mut class.constants) {
         let Constant { name, value, attrs } = constant;
         // Mark the property as originally being a constant.
         let attributes = vec![Attribute {
@@ -176,7 +176,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     }
 
     let dict_constraint_name = Some(ir::intern(hhbc::BUILTIN_NAME_DICT));
-    for tc in class.type_constants.drain(..) {
+    for tc in std::mem::take(&mut class.type_constants) {
         let TypeConstant {
             name,
             initializer,

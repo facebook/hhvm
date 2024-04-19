@@ -335,7 +335,7 @@ fn compute_base(class: &ir::Class) -> Option<ir::ClassName> {
             .find(|r| r.kind == ir::TraitReqKind::MustExtend);
         req.map(|req| req.name)
     } else {
-        class.base
+        class.base.into()
     }
 }
 

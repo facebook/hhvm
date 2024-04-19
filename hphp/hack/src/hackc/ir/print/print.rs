@@ -305,11 +305,11 @@ fn print_class(w: &mut dyn Write, class: &Class) -> Result {
         FmtAttr(class.flags, AttrContext::Class)
     )?;
 
-    if let Some(doc_comment) = class.doc_comment.as_ref() {
+    if let Maybe::Just(doc_comment) = class.doc_comment.as_ref() {
         writeln!(w, "  doc_comment {}", FmtQuotedStr(doc_comment.as_ref()))?;
     }
 
-    if let Some(base) = class.base {
+    if let Maybe::Just(base) = class.base {
         writeln!(w, "  extends {}", FmtIdentifierId(base.as_bytes_id()))?;
     }
 
@@ -321,7 +321,7 @@ fn print_class(w: &mut dyn Write, class: &Class) -> Result {
         )?;
     }
 
-    if let Some(et) = class.enum_type.as_ref() {
+    if let Maybe::Just(et) = class.enum_type.as_ref() {
         writeln!(w, "  enum_type {}", FmtTypeInfo(et))?;
     }
 

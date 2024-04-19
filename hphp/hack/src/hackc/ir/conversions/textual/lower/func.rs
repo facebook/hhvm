@@ -130,7 +130,7 @@ fn add_self_trait_parameter(func: &mut Func) {
 }
 
 fn call_base_func(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>, loc: LocId) {
-    if method_info.class.base.is_some() {
+    if method_info.class.base.is_just() {
         let clsref = SpecialClsRef::ParentCls;
         let method = method_info.name;
         builder.emit(Instr::method_call_special(clsref, method, &[], loc));

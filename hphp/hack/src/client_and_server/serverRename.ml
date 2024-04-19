@@ -503,6 +503,68 @@ let go_for_localvar ctx action new_name =
     changes
   | _ -> Error action
 
+let new_name_for_symbol_definition
+    ~(symbol_definition : _ SymbolDefinition.t)
+    ~(filename : Relative_path.t)
+    ~(pos : Pos.t)
+    ~(new_name : string) : string =
+  let has_dollar s = String.is_prefix ~prefix:"$" s in
+  let ensure_dollar s =
+    if has_dollar s then
+      s
+    else
+      "$" ^ s
+  in
+  let strip_dollar s =
+    if has_dollar s then
+      String.sub s ~pos:1 ~len:(String.length s - 1)
+    else
+      s
+  in
+  let open SymbolDefinition in
+  match symbol_definition.kind with
+  | Property ->
+    (* For static properties: they always have a $-sign prefix.
+       For non-static properties:
+         - On the definition site they have a $-sign prefix.
+         - On usage sites they don't have a $-sign prefix.
+         => We'll use the [old_name] to determine whether we're renaming
+            the definition/usage site. *)
+    let old_name =
+      File_provider.get_contents filename
+      |> Option.bind ~f:(fun content ->
+             begin
+               try Some (Pos.get_text_from_pos ~content pos) with
+               | Invalid_argument _ -> None
+             end)
+    in
+    let is_static =
+      List.exists symbol_definition.modifiers ~f:(function
+          | Static -> true
+          | _ -> false)
+    in
+    if is_static then
+      ensure_dollar new_name
+    else if Option.value_map ~default:false ~f:has_dollar old_name then
+      ensure_dollar new_name
+    else
+      strip_dollar new_name
+  | Function
+  | Class
+  | Method
+  | ClassConst
+  | GlobalConst
+  | Enum
+  | Interface
+  | Trait
+  | LocalVar
+  | TypeVar
+  | Typeconst
+  | Param
+  | Typedef
+  | Module ->
+    new_name
+
 let go_for_single_file
     ctx ~find_refs_action ~new_name ~filename ~symbol_definition ~naming_table =
   let action =
@@ -528,7 +590,15 @@ let go_for_single_file
           begin
             fun acc x ->
               let replacement =
-                { pos = Pos.to_absolute (snd x); text = new_name }
+                {
+                  pos = Pos.to_absolute (snd x);
+                  text =
+                    new_name_for_symbol_definition
+                      ~symbol_definition
+                      ~filename
+                      ~pos:(snd x)
+                      ~new_name;
+                }
               in
               let patch = Replace replacement in
               patch :: acc

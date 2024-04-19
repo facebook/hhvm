@@ -1844,10 +1844,17 @@ void ThriftServer::watchTicketPathForChanges(const std::string& ticketPath) {
 
 PreprocessResult ThriftServer::preprocess(
     const PreprocessParams& params) const {
-  const auto& method = params.method;
-  if (preprocess_ && !getMethodsBypassMaxRequestsLimit().contains(method)) {
-    return preprocess_(params);
+  if (getMethodsBypassMaxRequestsLimit().contains(params.method)) {
+    return {};
   }
+
+  for (auto& preprocessFunc : preprocess_) {
+    auto result = preprocessFunc(params);
+    if (!std::holds_alternative<std::monostate>(result)) {
+      return result;
+    }
+  }
+
   return {};
 }
 

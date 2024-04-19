@@ -966,7 +966,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::optional<uint16_t> port_;
 
   IsOverloadedFunc isOverloaded_;
-  PreprocessFunc preprocess_;
+
+  std::vector<PreprocessFunc> preprocess_;
 
   std::function<int64_t(const std::string&)> getLoad_;
 
@@ -2596,11 +2597,24 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // Do not try to access ThreadManager in this function as
   // ThreadManagers are being deprecated from thrift server
   // e.g. don't call getThreadManager() inside this
-  void setPreprocess(PreprocessFunc preprocess) {
+  [[deprecated("Use addPreprocess instead")]] void setPreprocess(
+      PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.setPreprocess).log(*this);
-    preprocess_ = std::move(preprocess);
+
+    preprocess_.clear();
+    preprocess_.push_back(std::move(preprocess));
+
     runtimeServerActions_.setPreprocess = true;
-    LOG(INFO) << "thrift server: preprocess() set.";
+    LOG(INFO) << "setPreprocess() call";
+  }
+
+  void addPreprocessFunc(PreprocessFunc preprocessFunc) {
+    THRIFT_SERVER_EVENT(call.addPreprocess).log(*this);
+
+    preprocess_.push_back(std::move(preprocessFunc));
+
+    runtimeServerActions_.setPreprocess = true;
+    LOG(INFO) << "addPreprocessFunc() call";
   }
 
   /**

@@ -105,12 +105,41 @@ The output backtrace has the following format:
                     and rip.unsigned != native_frame.parent.pc):
                 native_frame = native_frame.parent
 
-        # If we can't even find the ActRec type, we'll be checking for this
-        # and printing a native frame instead, below
-        try:
-            ar_type = utils.Type("HPHP::ActRec", exe_ctx.target).GetPointerType()
-        except Exception:
-            ar_type = None
+        # We do all of this by hand here specifically for ActRec struct types
+        # because lldb's `FindTypes()` and `FindFirstType()` have bugs.
+        # `utils.Type()` which uses the same API, but tries to work around one
+        # of the bugs does so by assuming that there is only one `ActRec` type
+        # in all of HHVM, It turns out this is not true - LLDB finds two
+        # `ActRec` - `struct HPHP::ActRec` and `typedef ActRec`. In some cases
+        # (eg. coredumps), it will end up picking the wrong one, at which point
+        # none of the ActRec based HHVM frame inspection logic works. So we
+        # jump through extra hoops to fix this.
+        # TODO: Link to Task filed for lldb/SDE folks, who have
+        # confirmed this is a bug.
+        ar_type = None
+        ar_ptr_type = None
+        ar_type_name = "HPHP::ActRec"
+        type_list = exe_ctx.target.FindTypes(ar_type_name)
+        for i in range(type_list.GetSize()):
+            t = type_list.GetTypeAtIndex(i)
+            # The "correct" `ActRec` is a struct - an AggregateType
+            if not t.IsAggregateType():
+                continue
+            # Yes, this looks like a very stupid check, but
+            # `FindTypes("HPHP::ActRec")` actully returns a type whose name
+            # is *not* "HPHP::ActRec" believe it or not (the wrong type's
+            # name is `typedef ActRec`, no namespace), so yeah - this
+            # sanity check is required.
+            if t.GetName() == ar_type_name:
+                ar_type = t
+
+
+        if ar_type is None:
+            result.SetError('walkstk: Cannot find ActRec type')
+            return
+
+        utils.debug_print(f"Resolved ActRec type to {ar_type.GetDisplayTypeName()}")
+        ar_ptr_type = ar_type.GetPointerType()
 
         i = 0
 
@@ -138,7 +167,7 @@ The output backtrace has the following format:
             # executing in the TC.
             if frame.is_jitted(rip):
                 try:
-                    result.write(frame.stringify(frame.create_php(idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip)) + "\n")
+                    result.write(frame.stringify(frame.create_php(idx=i, ar=fp.Cast(ar_ptr_type), rip=rip)) + "\n")
                 except Exception:
                     utils.debug_print(f"#{i} Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})")
                     if utils._Debug:

@@ -299,7 +299,6 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
     assert ret is not None and ret.GetError().Success(), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
     return ret
 
-
 #------------------------------------------------------------------------------
 # Pointer helpers
 
@@ -454,7 +453,7 @@ def ptr_add(ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True) 
             f"({ptr.type.name}){ptr.unsigned + n}"
     )
     return val
-    
+
 
 #------------------------------------------------------------------------------
 # Name accessor
@@ -838,7 +837,7 @@ def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
     Arguments:
         array_data: an SBValue wrapping an ArrayData
         kinds: one or more ArrayKind members
-    
+
     Returns:
         True if the array data's kind is one of those specified in kinds
     """
@@ -939,7 +938,7 @@ def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
 
 def parse_argv(args: str, target: lldb.SBTarget, limit=None) -> typing.List[lldb.SBValue]:
     """ Explode a LLDB argument string, then evaluate all args up to `limit`.
-    
+
         It assumes that each arg is space-separated, meaning e.g. "bc+bclen" is one argument,
         but "bc + bclen" is three.
     """

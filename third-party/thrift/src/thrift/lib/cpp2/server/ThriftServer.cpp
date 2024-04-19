@@ -1848,7 +1848,7 @@ PreprocessResult ThriftServer::preprocess(
     return {};
   }
 
-  for (auto& preprocessFunc : preprocess_) {
+  for (auto& [_, preprocessFunc] : preprocess_) {
     auto result = preprocessFunc(params);
     if (!std::holds_alternative<std::monostate>(result)) {
       return result;

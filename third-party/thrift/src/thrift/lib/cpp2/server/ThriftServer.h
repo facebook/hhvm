@@ -967,7 +967,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   IsOverloadedFunc isOverloaded_;
 
-  std::vector<PreprocessFunc> preprocess_;
+  std::vector<std::pair<std::string, PreprocessFunc>> preprocess_;
 
   std::function<int64_t(const std::string&)> getLoad_;
 
@@ -2586,7 +2586,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         AttributeSource::OVERRIDE);
   }
 
-  [[deprecated("Use setPreprocess instead")]] void setIsOverloaded(
+  [[deprecated("Use addPreprocess instead")]] void setIsOverloaded(
       IsOverloadedFunc isOverloaded) {
     THRIFT_SERVER_EVENT(call.setIsOverloaded).log(*this);
     isOverloaded_ = std::move(isOverloaded);
@@ -2602,16 +2602,17 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     THRIFT_SERVER_EVENT(call.setPreprocess).log(*this);
 
     preprocess_.clear();
-    preprocess_.push_back(std::move(preprocess));
+    preprocess_.push_back(std::make_pair(
+        "UnnamedUserDefinedPreprocessFunction", std::move(preprocess)));
 
     runtimeServerActions_.setPreprocess = true;
     LOG(INFO) << "setPreprocess() call";
   }
 
-  void addPreprocessFunc(PreprocessFunc preprocessFunc) {
+  void addPreprocessFunc(const std::string& name, PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.addPreprocess).log(*this);
 
-    preprocess_.push_back(std::move(preprocessFunc));
+    preprocess_.push_back(std::make_pair(name, std::move(preprocess)));
 
     runtimeServerActions_.setPreprocess = true;
     LOG(INFO) << "addPreprocessFunc() call";

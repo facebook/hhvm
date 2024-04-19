@@ -1353,27 +1353,22 @@ end = struct
   (* == Function subtyping ================================================== *)
   and simplify_subtype_params_with_variadic
       ~(subtype_env : Subtype_env.t)
-      (subl : locl_fun_param list)
-      (variadic_ty : locl_ty)
+      (fn_param_supers : locl_fun_param list)
+      (ty_sub : locl_ty)
       env =
     let simplify_subtype_params_with_variadic_help =
       simplify_subtype_params_with_variadic ~subtype_env
     in
-    match subl with
+    match fn_param_supers with
     | [] -> valid env
-    | { fp_type = sub; _ } :: subl ->
+    | { fp_type = ty_super; _ } :: fn_param_supers ->
       simplify
         ~subtype_env
         ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub = sub }
-        ~rhs:
-          {
-            super_like = false;
-            super_supportdyn = false;
-            ty_super = variadic_ty;
-          }
+        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
         env
-      &&& simplify_subtype_params_with_variadic_help subl variadic_ty
+      &&& simplify_subtype_params_with_variadic_help fn_param_supers ty_sub
 
   and simplify_subtype_implicit_params
       ~subtype_env { capability = sub_cap } { capability = super_cap } env =
@@ -1424,28 +1419,25 @@ end = struct
       valid env
 
   and simplify_supertype_params_with_variadic
-      ~(subtype_env : Subtype_env.t)
-      (superl : locl_fun_param list)
-      (variadic_ty : locl_ty)
-      env =
+      ~(subtype_env : Subtype_env.t) fn_param_subs ty_super env =
     let simplify_supertype_params_with_variadic_help =
       simplify_supertype_params_with_variadic ~subtype_env
     in
-    match superl with
+    match fn_param_subs with
     | [] -> valid env
-    | { fp_type = super; _ } :: superl ->
+    | { fp_type = ty_sub; _ } :: fn_param_subs ->
       simplify
         ~subtype_env
         ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub = variadic_ty }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = super }
+        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
         env
-      &&& simplify_supertype_params_with_variadic_help superl variadic_ty
+      &&& simplify_supertype_params_with_variadic_help fn_param_subs ty_super
 
-  and simplify_param_modes ~subtype_env param1 param2 env =
-    let { fp_pos = pos1; _ } = param1 in
-    let { fp_pos = pos2; _ } = param2 in
-    match (get_fp_mode param1, get_fp_mode param2) with
+  and simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super env =
+    let { fp_pos = pos1; _ } = fn_param_super in
+    let { fp_pos = pos2; _ } = fn_param_sub in
+    match (get_fp_mode fn_param_super, get_fp_mode fn_param_sub) with
     | (FPnormal, FPnormal)
     | (FPinout, FPinout) ->
       valid env
@@ -1474,11 +1466,13 @@ end = struct
                         { pos = pos1; decl_pos = pos2 }))
         env
 
-  and simplify_param_accept_disposable ~subtype_env param1 param2 env =
-    let { fp_pos = pos1; _ } = param1 in
-    let { fp_pos = pos2; _ } = param2 in
+  and simplify_param_accept_disposable
+      ~subtype_env ~fn_param_sub ~fn_param_super env =
+    let { fp_pos = pos1; _ } = fn_param_super in
+    let { fp_pos = pos2; _ } = fn_param_sub in
     match
-      (get_fp_accept_disposable param1, get_fp_accept_disposable param2)
+      ( get_fp_accept_disposable fn_param_super,
+        get_fp_accept_disposable fn_param_sub )
     with
     | (true, false) ->
       invalid
@@ -1512,13 +1506,15 @@ end = struct
       false (* A readonly value is a supertype of a mutable one *)
     | _ -> true
 
-  and simplify_param_readonly ~subtype_env sub super env =
-    (* The sub param here (as with all simplify_param_* functions)
-       is actually the parameter on ft_super, since params are contravariant *)
-    (* Thus we check readonly subtyping covariantly *)
-    let { fp_pos = pos1; _ } = sub in
-    let { fp_pos = pos2; _ } = super in
-    if not (readonly_subtype (get_fp_readonly sub) (get_fp_readonly super)) then
+  and simplify_param_readonly ~subtype_env ~fn_param_sub ~fn_param_super env =
+    let { fp_pos = pos1; _ } = fn_param_super in
+    let { fp_pos = pos2; _ } = fn_param_sub in
+    if
+      not
+        (readonly_subtype
+           (get_fp_readonly fn_param_super)
+           (get_fp_readonly fn_param_sub))
+    then
       invalid
         ~fail:
           (Option.map
@@ -1792,8 +1788,8 @@ end = struct
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
       ~for_override
-      (subl : locl_fun_param list)
-      (superl : locl_fun_param list)
+      (fn_params_sub : locl_fun_param list)
+      (fn_params_super : locl_fun_param list)
       (variadic_sub_ty : bool)
       (variadic_super_ty : bool)
       env =
@@ -1806,7 +1802,7 @@ end = struct
     let simplify_supertype_params_with_variadic_help =
       simplify_supertype_params_with_variadic ~subtype_env
     in
-    match (subl, superl) with
+    match (fn_params_sub, fn_params_super) with
     (* When either list runs out, we still have to typecheck that
        the remaining portion sub/super types with the other's variadic.
        For example, if
@@ -1832,20 +1828,20 @@ end = struct
        }
        It should also check that string is a subtype of mixed.
     *)
-    | ([fp], _) when variadic_sub_ty ->
-      simplify_supertype_params_with_variadic_help superl fp.fp_type env
-    | (_, [fp]) when variadic_super_ty ->
-      simplify_subtype_params_with_variadic_help subl fp.fp_type env
+    | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
+      simplify_subtype_params_with_variadic_help fn_params_super ty_sub env
+    | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
+      simplify_supertype_params_with_variadic_help fn_params_sub ty_super env
     | ([], _) -> valid env
     | (_, []) -> valid env
-    | (sub :: subl, super :: superl) ->
-      let { fp_type = ty_sub; _ } = sub in
-      let { fp_type = ty_super; _ } = super in
+    | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
+      let { fp_type = ty_sub; _ } = fn_param_sub
+      and { fp_type = ty_super; _ } = fn_param_super in
       let subtype_env_for_param =
         (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
          * subtype of the dynamic type itself
          *)
-        match get_node ty_super with
+        match get_node ty_sub with
         | Tdynamic
           when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
                && for_override ->
@@ -1856,28 +1852,32 @@ end = struct
         simplify
           ~subtype_env:subtype_env_for_param
           ~this_ty:None
-          ~lhs:{ sub_supportdyn = None; ty_sub }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+          ~rhs:
+            { super_like = false; super_supportdyn = false; ty_super = ty_sub }
           env
       in
       (* Check that the calling conventions of the params are compatible. *)
       env
-      |> simplify_param_modes ~subtype_env sub super
-      &&& simplify_param_readonly ~subtype_env sub super
-      &&& simplify_param_accept_disposable ~subtype_env sub super
+      |> simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super
+      &&& simplify_param_readonly ~subtype_env ~fn_param_sub ~fn_param_super
+      &&& simplify_param_accept_disposable
+            ~subtype_env
+            ~fn_param_sub
+            ~fn_param_super
       &&& begin
             fun env ->
-              match (get_fp_mode sub, get_fp_mode super) with
+              match (get_fp_mode fn_param_sub, get_fp_mode fn_param_super) with
               | (FPinout, FPinout) ->
                 (* Inout parameters are invariant wrt subtyping for function types. *)
                 env
-                |> simplify_subtype_for_param ty_super ty_sub
-                &&& simplify_subtype_for_param ty_sub ty_super
+                |> simplify_subtype_for_param ty_sub ty_super
+                &&& simplify_subtype_for_param ty_super ty_sub
               | _ -> env |> simplify_subtype_for_param ty_sub ty_super
           end
       &&& simplify_subtype_params_help
-            subl
-            superl
+            fn_params_sub
+            fn_params_super
             variadic_sub_ty
             variadic_super_ty
 
@@ -1905,10 +1905,10 @@ end = struct
       simplify_subtype_params
         ~subtype_env
         ~for_override
-        ft_super.ft_params
         ft_sub.ft_params
-        (get_ft_variadic ft_super)
+        ft_super.ft_params
         (get_ft_variadic ft_sub)
+        (get_ft_variadic ft_super)
     end
     &&& simplify_subtype_implicit_params_help
           ft_super.ft_implicit_params

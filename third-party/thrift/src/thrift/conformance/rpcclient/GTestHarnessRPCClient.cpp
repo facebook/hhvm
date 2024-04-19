@@ -33,7 +33,6 @@
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 

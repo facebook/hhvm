@@ -22,33 +22,43 @@
 #include <chrono>
 #include <cstdlib>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include <folly/Memory.h>
+#include <folly/Portability.h>
+#include <folly/SharedMutex.h>
 #include <folly/Singleton.h>
 #include <folly/SocketAddress.h>
+#include <folly/Synchronized.h>
 #include <folly/TokenBucket.h>
+#include <folly/VirtualExecutor.h>
 #include <folly/dynamic.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/PrimaryPtr.h>
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/experimental/observer/Observer.h>
 #include <folly/io/ShutdownSocketSet.h>
+#include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncServerSocket.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/lang/Badge.h>
 #include <folly/synchronization/CallOnce.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
+#include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
@@ -56,7 +66,9 @@
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
+#include <thrift/lib/cpp2/server/ControlServerInterface.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/PolledServiceHealth.h>
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/RequestDebugLog.h>
@@ -64,13 +76,20 @@
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
+#include <thrift/lib/cpp2/server/SecurityServerInterface.h>
+#include <thrift/lib/cpp2/server/ServerAttribute.h>
+#include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>
+#include <thrift/lib/cpp2/server/StatusServerInterface.h>
 #include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
+#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <wangle/acceptor/ServerSocketConfig.h>
 #include <wangle/acceptor/SharedSSLContextManager.h>
@@ -86,6 +105,10 @@ THRIFT_FLAG_DECLARE_bool(dump_snapshot_on_long_shutdown);
 THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);
 THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
+
+namespace wangle {
+class ConnectionManager;
+}
 
 namespace apache {
 namespace thrift {

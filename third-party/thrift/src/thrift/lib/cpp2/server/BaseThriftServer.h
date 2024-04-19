@@ -16,43 +16,6 @@
 
 #pragma once
 
-#include <atomic>
-#include <chrono>
-#include <cstdlib>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <stdexcept>
-#include <vector>
-
-#include <folly/Memory.h>
-#include <folly/Portability.h>
-#include <folly/SharedMutex.h>
-#include <folly/Synchronized.h>
-#include <folly/VirtualExecutor.h>
-#include <folly/io/SocketOptionMap.h>
-#include <folly/io/async/AsyncTransport.h>
-#include <folly/io/async/EventBase.h>
-#include <thrift/lib/cpp/concurrency/Thread.h>
-#include <thrift/lib/cpp/server/TServerObserver.h>
-#include <thrift/lib/cpp/transport/THeader.h>
-#include <thrift/lib/cpp2/Flags.h>
-#include <thrift/lib/cpp2/Thrift.h>
-#include <thrift/lib/cpp2/async/AsyncProcessor.h>
-#include <thrift/lib/cpp2/server/ControlServerInterface.h>
-#include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
-#include <thrift/lib/cpp2/server/SecurityServerInterface.h>
-#include <thrift/lib/cpp2/server/ServerAttribute.h>
-#include <thrift/lib/cpp2/server/ServerConfigs.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
-#include <thrift/lib/cpp2/server/StatusServerInterface.h>
-#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
-#include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
-
-namespace wangle {
-class ConnectionManager;
-}
-
 namespace apache {
 namespace thrift {
 

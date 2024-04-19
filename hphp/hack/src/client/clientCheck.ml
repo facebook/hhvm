@@ -26,7 +26,7 @@ module SaveStateResultPrinter = ClientResultPrinter.Make (struct
       "Dependency table edges added: %d"
       t.SaveStateServiceTypes.dep_table_edges_added
 
-  let to_json t =
+  let to_json (t : SaveStateServiceTypes.save_state_result) =
     Hh_json.JSON_Object (ServerError.get_save_state_result_props_json t)
 end)
 

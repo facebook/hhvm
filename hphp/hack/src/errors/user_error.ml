@@ -7,7 +7,19 @@
  *)
 open Hh_prelude
 
+type severity =
+  | Err
+  | Warning
+[@@deriving eq, hash, ord, show]
+
+module Severity = struct
+  let to_capital_string = function
+    | Err -> "ERROR"
+    | Warning -> "WARN"
+end
+
 type ('prim_pos, 'pos) t = {
+  severity: severity;
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
@@ -19,6 +31,7 @@ type ('prim_pos, 'pos) t = {
 [@@deriving eq, hash, ord, show]
 
 let make
+    severity
     code
     ?(is_fixmed = false)
     ?(quickfixes = [])
@@ -26,7 +39,13 @@ let make
     ?(flags = User_error_flags.empty)
     claim
     reasons =
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+
+let make_err code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons =
+  make Err code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons
+
+let make_warning code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons =
+  make Warning code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons
 
 let get_code { code; _ } = code
 
@@ -39,31 +58,49 @@ let to_list { claim; reasons; _ } = claim :: reasons
 let to_list_ { claim = (pos, claim); reasons; _ } =
   (Pos_or_decl.of_raw_pos pos, claim) :: reasons
 
-let get_messages = to_list
+let get_messages { claim; reasons; _ } = claim :: reasons
 
 let to_absolute
-    { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags } =
+    {
+      severity;
+      code;
+      claim;
+      reasons;
+      quickfixes;
+      custom_msgs;
+      is_fixmed;
+      flags;
+    } =
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
 let to_relative
-    { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags } :
-    (Pos.t, Pos.t) t =
+    {
+      severity;
+      code;
+      claim;
+      reasons;
+      quickfixes;
+      custom_msgs;
+      is_fixmed;
+      flags;
+    } : (Pos.t, Pos.t) t =
   let claim = (fst claim, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) -> (p |> Pos_or_decl.unsafe_to_raw_pos, s))
   in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
-let make_absolute code = function
+let make_absolute severity code = function
   | [] -> failwith "an error must have at least one message"
   | claim :: reasons ->
     {
+      severity;
       code;
       claim;
       reasons;
@@ -75,6 +112,7 @@ let make_absolute code = function
 
 let to_absolute_for_test
     {
+      severity;
       code;
       claim = (claim_pos, claim_msg);
       reasons;
@@ -97,7 +135,7 @@ let to_absolute_for_test
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
 let error_kind error_code =
   match error_code / 1000 with
@@ -117,6 +155,8 @@ let error_code_to_string error_code =
 let to_string
     report_pos_from_reason
     {
+      (* TODO @catg T179093379 *)
+      severity = _;
       code;
       claim;
       reasons;
@@ -153,6 +193,7 @@ let to_string
   Buffer.contents buf
 
 let to_json ~filename_to_string error =
+  (* TODO @catg T179093379 add severity *)
   let (error_code, msgl) = (get_code error, to_list error) in
   let elts =
     List.map msgl ~f:(fun (p, w) ->

@@ -18,6 +18,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self(
             UserError {
+                severity: _, // TODO @catg T179093379
                 code,
                 claim: Message(pos, msg),
                 reasons,

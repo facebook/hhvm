@@ -175,8 +175,16 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
   | None -> result
   | Some
       User_error.
-        { code; claim; reasons; quickfixes; custom_msgs; flags; is_fixmed = _ }
-    ->
+        {
+          severity;
+          code;
+          claim;
+          reasons;
+          quickfixes;
+          custom_msgs;
+          flags;
+          is_fixmed = _;
+        } ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
      * error position. *)
     let (claim, reasons) =
@@ -190,7 +198,14 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
         (claim, reasons)
     in
     f2 result
-    @@ User_error.make code claim reasons ~quickfixes ~custom_msgs ~flags
+    @@ User_error.make
+         severity
+         code
+         claim
+         reasons
+         ~quickfixes
+         ~custom_msgs
+         ~flags
 
 let try_with_result_pure ~fail f g =
   let error_map_copy = !error_map in
@@ -290,6 +305,7 @@ let compare_internal
     ~compare_reason : int =
   let User_error.
         {
+          severity = x_severity;
           code = x_code;
           claim = x_claim;
           reasons = x_messages;
@@ -302,6 +318,7 @@ let compare_internal
   in
   let User_error.
         {
+          severity = y_severity;
           code = y_code;
           claim = y_claim;
           reasons = y_messages;
@@ -315,6 +332,13 @@ let compare_internal
   (* The primary sort order is by file *)
   let comparison =
     compare_claim_fn (fst x_claim |> Pos.filename) (fst y_claim |> Pos.filename)
+  in
+  (* Then sort by severity *)
+  let comparison =
+    if comparison = 0 then
+      User_error.compare_severity x_severity y_severity
+    else
+      comparison
   in
   (* Then within each file, sort by category *)
   let comparison =
@@ -645,6 +669,7 @@ let check_pos_msg :
 let add_error_with_fixme_error error explanation =
   let User_error.
         {
+          severity;
           code;
           claim;
           reasons = _;
@@ -659,29 +684,39 @@ let add_error_with_fixme_error error explanation =
   let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
   add_error_impl error;
   add_error_impl
-  @@ User_error.make code (pos, explanation) [] ~quickfixes ~custom_msgs ~flags
+  @@ User_error.make
+       severity
+       code
+       (pos, explanation)
+       []
+       ~quickfixes
+       ~custom_msgs
+       ~flags
 
 let add_applied_fixme error =
   let error = { error with User_error.is_fixmed = true } in
   add_error_impl error
 
-let rec add code pos msg = add_list code (pos, msg) []
-
-and fixme_present (pos : Pos.t) code =
+let fixme_present (pos : Pos.t) code =
   !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
 
-and add_list code ?quickfixes (claim : _ Message.t) reasons =
-  add_error @@ User_error.make code claim reasons ?quickfixes
-
-and add_error (error : error) =
+let add_error (error : error) =
   let User_error.
-        { code; claim; reasons; quickfixes; custom_msgs; flags; is_fixmed = _ }
-      =
+        {
+          severity;
+          code;
+          claim;
+          reasons;
+          quickfixes;
+          custom_msgs;
+          flags;
+          is_fixmed = _;
+        } =
     error
   in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
   let error =
-    User_error.make code claim reasons ~quickfixes ~custom_msgs ~flags
+    User_error.make severity code claim reasons ~quickfixes ~custom_msgs ~flags
   in
 
   let pos = fst claim in
@@ -723,7 +758,7 @@ and add_error (error : error) =
     in
     add_error_with_fixme_error error explanation
 
-and merge err' err =
+let merge err' err =
   let append _ x y =
     let x = Option.value x ~default:[] in
     let y = Option.value y ~default:[] in
@@ -731,7 +766,7 @@ and merge err' err =
   in
   files_t_merge ~f:append err' err
 
-and incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
+let incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
     : t =
   (* Helper to detect coding oversight *)
   let assert_path_is_real (path : Relative_path.t) : unit =
@@ -761,6 +796,11 @@ and incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
           Relative_path.Map.remove acc path)
   in
   res
+
+let add_list severity code ?quickfixes (claim : _ Message.t) reasons =
+  add_error @@ User_error.make severity code claim reasons ?quickfixes
+
+let add severity code pos msg = add_list severity code (pos, msg) []
 
 let count ?(drop_fixmed = true) err =
   files_t_fold
@@ -851,22 +891,29 @@ let error_count : t -> int =
 
 exception Done of ISet.t
 
+(** This ignores warnings. *)
 let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
   let codes =
     try
       Relative_path.Map.fold t ~init:ISet.empty ~f:(fun _path errors codes ->
-          List.fold errors ~init:codes ~f:(fun codes User_error.{ code; _ } ->
-              let codes = ISet.add code codes in
-              if ISet.cardinal codes >= n then
-                raise (Done codes)
-              else
-                codes))
+          List.fold
+            errors
+            ~init:codes
+            ~f:(fun codes User_error.{ severity; code; _ } ->
+              match severity with
+              | User_error.Err ->
+                let codes = ISet.add code codes in
+                if ISet.cardinal codes >= n then
+                  raise (Done codes)
+                else
+                  codes
+              | User_error.Warning -> codes))
     with
     | Done codes -> codes
   in
   ISet.elements codes
 
-(* Get the error code of the first error which hasn't been HH_FIXME'd. *)
+(** Get the error code of the first error which hasn't been HH_FIXME'd. *)
 let choose_code_opt (t : t) : int option =
   drop_fixmed_errors_in_files t |> first_n_distinct_error_codes ~n:1 |> List.hd
 
@@ -934,9 +981,13 @@ let as_telemetry
   (* Convert to Scuba loggable data *)
   let error_to_telemetry (err : L.error_to_process) : Telemetry.t =
     let rel_err = User_error.to_relative err.L.error in
+    let { User_error.severity; code; _ } = rel_err in
     let telemetry =
       Telemetry.create ()
-      |> Telemetry.int_ ~key:"error_code" ~value:(User_error.get_code rel_err)
+      |> Telemetry.string_
+           ~key:"error_severity"
+           ~value:(User_error.Severity.to_capital_string severity)
+      |> Telemetry.int_ ~key:"error_code" ~value:code
       |> Telemetry.json_
            ~key:"error_json"
            ~value:
@@ -971,10 +1022,11 @@ let as_telemetry
 (* Error code printing. *)
 (*****************************************************************************)
 
-let unimplemented_feature pos msg = add 0 pos ("Feature not implemented: " ^ msg)
+let unimplemented_feature pos msg =
+  add User_error.Err 0 pos ("Feature not implemented: " ^ msg)
 
 let experimental_feature pos msg =
-  add 0 pos ("Cannot use experimental feature: " ^ msg)
+  add User_error.Err 0 pos ("Cannot use experimental feature: " ^ msg)
 
 (*****************************************************************************)
 (* Typing errors *)
@@ -1028,7 +1080,7 @@ let invariant_violation pos telemetry desc ~report_to_user =
   log_invariant_violation ~desc pos telemetry;
   if report_to_user then
     add_error
-    @@ User_error.make
+    @@ User_error.make_err
          Error_codes.Typing.(to_enum InvariantViolated)
          (pos, internal_compiler_error_msg)
          []
@@ -1036,14 +1088,14 @@ let invariant_violation pos telemetry desc ~report_to_user =
 let exception_occurred pos exn =
   log_exception_occurred pos exn;
   add_error
-  @@ User_error.make
+  @@ User_error.make_err
        Error_codes.Typing.(to_enum ExceptionOccurred)
        (pos, internal_compiler_error_msg)
        []
 
 let internal_error pos msg =
   add_error
-  @@ User_error.make
+  @@ User_error.make_err
        Error_codes.Typing.(to_enum InternalError)
        (pos, "Internal error: " ^ msg)
        []
@@ -1057,7 +1109,10 @@ let typechecker_timeout pos fn_name seconds =
         fn_name )
   in
   add_error
-  @@ User_error.make Error_codes.Typing.(to_enum TypecheckerTimeout) claim []
+  @@ User_error.make_err
+       Error_codes.Typing.(to_enum TypecheckerTimeout)
+       claim
+       []
 
 (*****************************************************************************)
 (* Typing decl errors *)
@@ -1068,6 +1123,7 @@ let function_is_not_dynamically_callable function_name error =
   let function_name = Markdown_lite.md_codify (Render.strip_ns function_name) in
   let nested_error_reason = User_error.to_list_ error in
   add_list
+    User_error.Err
     (User_error.get_code error)
     ( User_error.get_pos error,
       "Function  " ^ function_name ^ " is not dynamically callable." )
@@ -1127,6 +1183,7 @@ let method_is_not_dynamically_callable
   in
 
   add_list
+    User_error.Err
     code
     ( pos,
       "Method  "
@@ -1138,7 +1195,7 @@ let method_is_not_dynamically_callable
 
 (* Raise different types of error for accessing global variables. *)
 let global_access_error error_code pos message =
-  add (GlobalAccessCheck.err_code error_code) pos message
+  add User_error.Err (GlobalAccessCheck.err_code error_code) pos message
 
 (*****************************************************************************)
 (* Printing *)
@@ -1151,6 +1208,7 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
     ~f:(fun err acc_out ->
       let User_error.
             {
+              severity = _;
               code = _;
               claim;
               reasons;

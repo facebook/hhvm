@@ -90,11 +90,17 @@ let to_contextual_string lint =
     | Lint_warning -> Tty.Yellow
     | Lint_advice -> Tty.Default
   in
-  User_error.make_absolute lint.code [(lint.pos, lint.message)]
+  User_error.make_absolute
+    User_error.Warning
+    lint.code
+    [(lint.pos, lint.message)]
   |> Contextual_error_formatter.to_string ~claim_color
 
 let to_highlighted_string (lint : string Pos.pos t) =
-  User_error.make_absolute lint.code [(lint.pos, lint.message)]
+  User_error.make_absolute
+    User_error.Warning
+    lint.code
+    [(lint.pos, lint.message)]
   |> Highlighted_error_formatter.to_string
 
 let to_json { pos; code; severity; message; bypass_changed_lines; autofix; _ } =

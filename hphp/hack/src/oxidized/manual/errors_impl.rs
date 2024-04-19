@@ -10,19 +10,13 @@ use crate::message::Message;
 use crate::pos::Pos;
 use crate::quickfix::Edits;
 use crate::quickfix::Quickfix;
+use crate::user_error::Severity;
 use crate::user_error::UserError;
 use crate::user_error_flags::UserErrorFlags;
 
-impl Default for UserErrorFlags {
-    fn default() -> Self {
-        Self {
-            stripped_existential: false,
-        }
-    }
-}
-
 impl<PP, P> UserError<PP, P> {
     pub fn new(
+        severity: Severity,
         code: ErrorCode,
         claim: Message<PP>,
         reasons: Vec<Message<P>>,
@@ -31,6 +25,7 @@ impl<PP, P> UserError<PP, P> {
         flags: UserErrorFlags,
     ) -> Self {
         Self {
+            severity,
             code,
             claim,
             reasons,
@@ -60,6 +55,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
     // Intended to match the implementation of `compare` in `Errors.sort` in OCaml.
     pub fn cmp_impl(&self, other: &Self, by_phase: bool) -> Ordering {
         let Self {
+            severity: self_severity,
             code: self_code,
             claim: Message(self_pos, self_msg),
             reasons: self_reasons,
@@ -69,6 +65,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             flags: _,
         } = self;
         let Self {
+            severity: other_severity,
             code: other_code,
             claim: Message(other_pos, other_msg),
             reasons: other_reasons,
@@ -87,6 +84,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
         // The primary sort order is by file of the claim (main message).
         self_pos
             .cmp_file(other_pos)
+            .then(self_severity.cmp(other_severity))
             // If the files are the same, sort by error code or phase, depending on parameter.
             .then(compare_code(*self_code, *other_code))
             // If the phases are the same, sort by position.
@@ -118,13 +116,14 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
 
 impl<PP: Ord + FileOrd, P: Ord + FileOrd> PartialOrd for UserError<PP, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp_impl(other, false))
+        Some(self.cmp(other))
     }
 }
 
 impl Naming {
     pub fn fd_name_already_bound(p: Pos) -> Error {
         UserError::new(
+            Severity::Err,
             Self::FdNameAlreadyBound as isize,
             Message(p, "Field name already bound".into()),
             vec![],
@@ -136,6 +135,7 @@ impl Naming {
 
     pub fn bad_builtin_type(p: Pos, name: &str, correct_name: &str) -> Error {
         UserError::new(
+            Severity::Err,
             Self::InvalidBuiltinType as isize,
             Message(
                 p.clone(),
@@ -160,6 +160,7 @@ impl Naming {
         let fix_pos = Pos::from_raw_span(file, p_span);
 
         UserError::new(
+            Severity::Err,
             Self::MethodNeedsVisibility as isize,
             Message(
                 name_p,
@@ -190,6 +191,7 @@ impl Naming {
 
     pub fn unsupported_trait_use_as(p: Pos) -> Error {
         UserError::new(
+            Severity::Err,
             Self::UnsupportedTraitUseAs as isize,
             Message(
                 p,
@@ -204,6 +206,7 @@ impl Naming {
 
     pub fn unsupported_instead_of(p: Pos) -> Error {
         UserError::new(
+            Severity::Err,
             Self::UnsupportedInsteadOf as isize,
             Message(
                 p,
@@ -220,6 +223,7 @@ impl Naming {
 impl NastCheck {
     pub fn not_abstract_without_typeconst(p: Pos) -> Error {
         UserError::new(
+            Severity::Err,
             Self::NotAbstractWithoutTypeconst as isize,
             Message(
                 p,
@@ -235,6 +239,7 @@ impl NastCheck {
 
     pub fn multiple_xhp_category(p: Pos) -> Error {
         UserError::new(
+            Severity::Err,
             Self::MultipleXhpCategory as isize,
             Message(
                 p,
@@ -249,6 +254,7 @@ impl NastCheck {
 
     pub fn partially_abstract_typeconst_definition(p: Pos, kind: &str) -> Error {
         UserError::new(
+            Severity::Err,
             Self::PartiallyAbstractTypeconstDefinition as isize,
             Message(
                 p,
@@ -301,6 +307,7 @@ impl std::fmt::Display for ParseFormatError {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for Format {
     fn default() -> Self {
         Format::Plain

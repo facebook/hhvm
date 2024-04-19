@@ -444,7 +444,8 @@ let quantile ~index ~count : Relative_path.Set.t -> Relative_path.Set.t =
   in
   pop_quantiles index files |> Relative_path.Set.of_list
 
-let type_check_core genv env start_time ~check_reason cgroup_steps =
+let type_check_core
+    (genv : genv) (env : env) start_time ~check_reason cgroup_steps =
   let t = Unix.gettimeofday () in
   (* `start_time` is when the recheck_loop started and includes preliminaries like
    * reading about file-change notifications and communicating with client.

@@ -124,6 +124,7 @@ let derive_default (ty : label) =
       "tast_collector::ByNames";
       "tast_hashes::ByNames";
       "tast_hashes::FileInfo";
+      "user_error_flags::UserErrorFlags";
     ]
     ty
     ~equal:String.equal

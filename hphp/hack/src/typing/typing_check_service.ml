@@ -178,11 +178,12 @@ let process_file
       | Ok (file_errors, tasts) ->
         if log_errors then
           List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
-              let { User_error.claim; code; _ } = error in
+              let { User_error.severity; claim; code; _ } = error in
               let (pos, msg) = claim in
               let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
               Hh_logger.log
-                "%s(%d:%d-%d:%d) [%d] %s"
+                "%s: %s(%d:%d-%d:%d) [%d] %s"
+                (User_error.Severity.to_capital_string severity)
                 (Relative_path.suffix fn)
                 l1
                 c1

@@ -109,6 +109,7 @@ typing_defs_core::TypePredicate
 typing_defs_core::ValKind
 typing_reason::ArgPosition
 typing_reason::BlameSource
+user_error::Level
 user_error::Severity
 xhp_attribute::Tag
 xhp_attribute::XhpAttribute

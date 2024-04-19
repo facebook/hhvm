@@ -5479,7 +5479,7 @@ end = struct
     aux ~k:Fn.id t
 
   let make_error (code, claim, reasons, quickfixes, flags) ~custom_msgs =
-    User_error.make
+    User_error.make_err
       (Error_code.to_enum code)
       (Lazy.force claim)
       (Lazy.force reasons)
@@ -6977,7 +6977,7 @@ end = struct
 
   let apply ?code ?claim ?reasons ?flags ?quickfixes t ~env ~current_span =
     let f (code, claim, reasons, quickfixes, flags) =
-      User_error.make
+      User_error.make_err
         (Error_code.to_enum code)
         (Lazy.force claim)
         (Lazy.force reasons)
@@ -7005,6 +7005,10 @@ let apply_callback_to_errors errors on_error ~env =
   let on_error
       User_error.
         {
+          severity =
+            (* Applying a callback will always result in severity `Err`.
+               We don't use this mechanism for warnings anyway. *)
+            _;
           code;
           claim;
           reasons;
@@ -7048,6 +7052,7 @@ let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
 let ambiguous_inheritance pos class_ origin error on_error ~env =
   let User_error.
         {
+          severity = _;
           code;
           claim;
           reasons;

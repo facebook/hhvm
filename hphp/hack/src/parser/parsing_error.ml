@@ -27,20 +27,27 @@ type t =
 
 let to_user_error = function
   | Fixme_format pos ->
-    User_error.make
+    User_error.make_err
       Error_code.(to_enum FixmeFormat)
       (pos, "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`")
       []
   | Hh_ignore_comment pos ->
-    User_error.make
+    User_error.make_err
       Error_code.(to_enum HhIgnoreComment)
       ( pos,
         "`HH_IGNORE_ERROR` comments are disabled by configuration and will soon be treated like normal comments, so you cannot use them to suppress errors"
       )
       []
   | Parsing_error { pos; msg; quickfixes } ->
-    User_error.make Error_code.(to_enum ParsingError) ~quickfixes (pos, msg) []
+    User_error.make_err
+      Error_code.(to_enum ParsingError)
+      ~quickfixes
+      (pos, msg)
+      []
   | Xhp_parsing_error { pos; msg } ->
-    User_error.make Error_code.(to_enum XhpParsingError) (pos, msg) []
+    User_error.make_err Error_code.(to_enum XhpParsingError) (pos, msg) []
   | Package_config_error { pos; msg; reasons } ->
-    User_error.make Error_code.(to_enum PackageConfigError) (pos, msg) reasons
+    User_error.make_err
+      Error_code.(to_enum PackageConfigError)
+      (pos, msg)
+      reasons

@@ -52,7 +52,7 @@ let make_errors (errors : (string * string) list) : Errors.t =
   let errors =
     List.map errors ~f:(fun (suffix, message) ->
         let path = Relative_path.from_root ~suffix in
-        let error = User_error.make 101 (Pos.make_from path, message) [] in
+        let error = User_error.make_err 101 (Pos.make_from path, message) [] in
         (path, error))
   in
   Errors.from_file_error_list errors

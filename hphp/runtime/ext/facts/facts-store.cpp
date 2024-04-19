@@ -457,6 +457,7 @@ Array makeVecOfDynamicDynamic(std::vector<FileAttrVal>& vector) {
 struct FactsStoreImpl final
     : public FactsStore,
       public std::enable_shared_from_this<FactsStoreImpl> {
+  // when the filesystem can change, set up with a watcher
   FactsStoreImpl(
       fs::path root,
       AutoloadDB::Opener dbOpener,
@@ -478,6 +479,7 @@ struct FactsStoreImpl final
         m_watcher{std::move(watcher)},
         m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
+  // when the filesystem is readonly and we have a trusted db
   FactsStoreImpl(
       fs::path root,
       AutoloadDB::Opener dbOpener,

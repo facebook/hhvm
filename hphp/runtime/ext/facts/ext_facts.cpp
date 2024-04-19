@@ -50,6 +50,7 @@
 #include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/facts/config.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
@@ -85,44 +86,6 @@ struct RepoOptionsParseExc : public std::runtime_error {
   explicit RepoOptionsParseExc(std::string msg)
       : std::runtime_error{std::move(msg)} {}
 };
-
-/**
- * Get the directory containing the given RepoOptions file. We define this to
- * be the root of the repository we're autoloading.
- */
-fs::path getRepoRoot(const RepoOptions& options) {
-  return options.dir();
-}
-
-::gid_t getGroup() {
-  // Resolve the group to a unix gid
-  if (Cfg::Autoload::DBGroup.empty()) {
-    return -1;
-  }
-  try {
-    GroupInfo grp{Cfg::Autoload::DBGroup.c_str()};
-    return grp.gr->gr_gid;
-  } catch (const Exception& e) {
-    XLOGF(
-        WARN,
-        "Can't resolve {} to a gid: {}",
-        Cfg::Autoload::DBGroup,
-        e.what());
-    return -1;
-  }
-}
-
-::mode_t getDBPerms() {
-  try {
-    ::mode_t res = std::stoi(Cfg::Autoload::DBPerms, 0, 8);
-    XLOGF(DBG0, "Converted {} to {:04o}", Cfg::Autoload::DBPerms, res);
-    return res;
-  } catch (const std::exception& e) {
-    XLOG(WARN) << "Error running std::stoi on \"Autoload.DB.Perms\": "
-               << e.what();
-    return 0644;
-  }
-}
 
 bool hasWatchedFileExtension(const std::filesystem::path& path) {
   auto ext = path.extension();
@@ -160,8 +123,9 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   always_assert(!dbPath.empty());
   // Create a DB with the given permissions if none exists
   if (Cfg::Autoload::DBCanCreate) {
-    ::gid_t gid = getGroup();
-    return SQLiteKey::readWriteCreate(dbPath, gid, getDBPerms());
+    auto gid = parseDBGroup();
+    auto mode = parseDBPerms();
+    return SQLiteKey::readWriteCreate(dbPath, gid, mode);
   }
   // Use an existing DB and throw if it doesn't exist
   return SQLiteKey::readWrite(dbPath);
@@ -172,7 +136,7 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
  */
 struct SqliteAutoloadMapKey {
   static SqliteAutoloadMapKey get(const RepoOptions& repoOptions) {
-    auto root = getRepoRoot(repoOptions);
+    auto root = repoOptions.dir();
 
     auto queryExpr = [&]() -> folly::dynamic {
       auto const cached = repoOptions.flags().autoloadQueryObj();
@@ -282,7 +246,11 @@ struct SqliteAutoloadMapFactory final : public FactsFactory {
   std::mutex m_mutex;
 
   /**
-   * Map from root to AutoloadMap
+   * A FactsStore implements Facts API queries
+   *  - autoload queries (symbol -> file lookups)
+   *  - decl queries (details about files, symbols, methods, attributes)
+   *  - symbols with a certain attribute
+   *  - derived classes of a certain base
    */
   hphp_hash_map<SqliteAutoloadMapKey, std::shared_ptr<FactsStore>> m_stores;
 
@@ -385,6 +353,7 @@ std::shared_ptr<Watcher> make_watcher(const SqliteAutoloadMapKey& mapKey) {
   }
 }
 
+// Factory entry point called by autoload getFactsForRequest().
 FactsStore* SqliteAutoloadMapFactory::getForOptions(
     const RepoOptions& options) {
   auto mapKey = [&]() -> Optional<SqliteAutoloadMapKey> {

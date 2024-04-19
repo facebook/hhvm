@@ -99,7 +99,7 @@ let is_private_visible_for_class env x self_id cid class_ =
       | _ -> Some "You cannot access this member"
     end)
   | CIexpr _ ->
-    if Cls.final class_ then
+    if Cls.final class_ && String.equal self_id (Cls.name class_) then
       None
     else
       Some

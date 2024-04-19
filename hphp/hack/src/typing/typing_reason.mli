@@ -59,7 +59,7 @@ type prj =
   | Prj_newtype of string * int * Ast_defs.variance
   | Prj_tuple of int
   | Prj_shape of string
-  | Prj_fn_arg of int * Ast_defs.variance
+  | Prj_fn_arg of int * int * Ast_defs.variance
   | Prj_fn_ret
   | Prj_access
 [@@deriving hash]
@@ -197,6 +197,8 @@ type _ t_ =
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]
+
+val to_json : 'a t_ -> Hh_json.json
 
 type decl_t = decl_phase t_
 

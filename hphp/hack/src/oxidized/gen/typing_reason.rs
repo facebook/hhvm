@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<882f68605ec9cbd3cec642c52155b3c1>>
+// @generated SignedSource<<e44b816852cc4fa651845e3d90d3df43>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -159,7 +159,7 @@ pub enum Prj {
     #[rust_to_ocaml(name = "Prj_shape")]
     PrjShape(String),
     #[rust_to_ocaml(name = "Prj_fn_arg")]
-    PrjFnArg(isize, ast_defs::Variance),
+    PrjFnArg(isize, isize, ast_defs::Variance),
     #[rust_to_ocaml(name = "Prj_fn_ret")]
     PrjFnRet,
     #[rust_to_ocaml(name = "Prj_access")]

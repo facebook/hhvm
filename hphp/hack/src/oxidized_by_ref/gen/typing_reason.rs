@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ac9eb46ab70c71827c41eaf892fd7bb>>
+// @generated SignedSource<<68c6e984d901ce3a549425b700dfd136>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -126,7 +126,7 @@ pub enum Prj<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_fn_arg")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjFnArg(&'a (isize, oxidized::ast_defs::Variance)),
+    PrjFnArg(&'a (isize, isize, oxidized::ast_defs::Variance)),
     #[rust_to_ocaml(name = "Prj_fn_ret")]
     PrjFnRet,
     #[rust_to_ocaml(name = "Prj_access")]

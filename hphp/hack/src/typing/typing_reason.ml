@@ -16,11 +16,21 @@ let strip_ns id =
 type pos_id = (Pos_or_decl.t[@hash.ignore]) * Ast_defs.id_
 [@@deriving eq, hash, ord, show]
 
+let pos_id_to_json (pos_or_decl, str) =
+  Hh_json.(
+    JSON_Object
+      [("Tuple2", JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str])])
+
 type arg_position =
   | Aonly
   | Afirst
   | Asecond
 [@@deriving eq, hash, show]
+
+let arg_position_to_json = function
+  | Aonly -> Hh_json.(JSON_Object [("Aonly", JSON_Array [])])
+  | Afirst -> Hh_json.(JSON_Object [("Afirst", JSON_Array [])])
+  | Asecond -> Hh_json.(JSON_Object [("Asecond", JSON_Array [])])
 
 type expr_dep_type_reason =
   | ERexpr of Expression_id.t
@@ -31,6 +41,20 @@ type expr_dep_type_reason =
   | ERpu of string
 [@@deriving eq, hash, show]
 
+let expr_dep_type_reason_to_json = function
+  | ERexpr id ->
+    Hh_json.(
+      JSON_Object
+        [("ERexpr", JSON_Array [JSON_String (Expression_id.debug id)])])
+  | ERstatic -> Hh_json.(JSON_Object [("ERstatic", JSON_Array [])])
+  | ERclass str ->
+    Hh_json.(JSON_Object [("ERclass", JSON_Array [JSON_String str])])
+  | ERparent str ->
+    Hh_json.(JSON_Object [("ERparent", JSON_Array [JSON_String str])])
+  | ERself str ->
+    Hh_json.(JSON_Object [("ERself", JSON_Array [JSON_String str])])
+  | ERpu str -> Hh_json.(JSON_Object [("ERpu", JSON_Array [JSON_String str])])
+
 type blame_source =
   | BScall
   | BSlambda
@@ -38,7 +62,20 @@ type blame_source =
   | BSout_of_scope
 [@@deriving eq, hash, show]
 
+let blame_source_to_json = function
+  | BScall -> Hh_json.(JSON_Object [("BScall", JSON_Array [])])
+  | BSlambda -> Hh_json.(JSON_Object [("BSlambda", JSON_Array [])])
+  | BSassignment -> Hh_json.(JSON_Object [("BSassignment", JSON_Array [])])
+  | BSout_of_scope -> Hh_json.(JSON_Object [("BSout_of_scope", JSON_Array [])])
+
 type blame = Blame of Pos.t * blame_source [@@deriving eq, hash, show]
+
+let pos_to_json pos = Pos.(json @@ to_absolute pos)
+
+let blame_to_json (Blame (pos, src)) =
+  Hh_json.(
+    JSON_Object
+      [("Blame", JSON_Array [pos_to_json pos; blame_source_to_json src])])
 
 (* create private types to represent the different type phases *)
 type decl_phase = private DeclPhase [@@deriving eq, hash, show]
@@ -56,10 +93,63 @@ type prj =
   | Prj_newtype of string * int * Ast_defs.variance
   | Prj_tuple of int
   | Prj_shape of string
-  | Prj_fn_arg of int * Ast_defs.variance
+  | Prj_fn_arg of int * int * Ast_defs.variance
   | Prj_fn_ret
   | Prj_access
 [@@deriving hash]
+
+let variance_to_json = function
+  | Ast_defs.Covariant -> Hh_json.(JSON_Object [("Covariant", JSON_Array [])])
+  | Ast_defs.Contravariant ->
+    Hh_json.(JSON_Object [("Contravariant", JSON_Array [])])
+  | Ast_defs.Invariant -> Hh_json.(JSON_Object [("Invariant", JSON_Array [])])
+
+let prj_to_json = function
+  | Prj_union -> Hh_json.JSON_String "Prj_union"
+  | Prj_inter -> Hh_json.JSON_String "Prj_inter"
+  | Prj_neg -> Hh_json.JSON_String "Prj_neg"
+  | Prj_class (class_nm, idx, variance) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Prj_class",
+            JSON_Array
+              [
+                JSON_String class_nm;
+                JSON_Number (string_of_int idx);
+                variance_to_json variance;
+              ] );
+        ])
+  | Prj_newtype (ty_nm, idx, variance) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Prj_newtype",
+            JSON_Array
+              [
+                JSON_String ty_nm;
+                JSON_Number (string_of_int idx);
+                variance_to_json variance;
+              ] );
+        ])
+  | Prj_tuple idx ->
+    Hh_json.(JSON_Object [(" Prj_tuple", JSON_Number (string_of_int idx))])
+  | Prj_shape fld_nm ->
+    Hh_json.(JSON_Object [(" Prj_shape", JSON_String fld_nm)])
+  | Prj_fn_arg (idx_sub, idx_sup, variance) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Prj_fn_arg",
+            JSON_Array
+              [
+                JSON_Number (string_of_int idx_sub);
+                JSON_Number (string_of_int idx_sup);
+                variance_to_json variance;
+              ] );
+        ])
+  | Prj_fn_ret -> Hh_json.JSON_String "Prj_fn_ret"
+  | Prj_access -> Hh_json.JSON_String "Prj_access"
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
@@ -655,6 +745,390 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
 
+let fun_kind_to_json = function
+  | Ast_defs.FSync -> Hh_json.JSON_String "FSync"
+  | Ast_defs.FAsync -> Hh_json.JSON_String "FAsync"
+  | Ast_defs.FGenerator -> Hh_json.JSON_String "FGenerator"
+  | Ast_defs.FAsyncGenerator -> Hh_json.JSON_String "FAsyncGenerator"
+
+let rec to_json : type a. a t_ -> Hh_json.json =
+ fun t ->
+  match t with
+  | Rnone -> Hh_json.(JSON_Object [("Rnone", JSON_Array [])])
+  | Rwitness pos ->
+    Hh_json.(JSON_Object [("Rwitness", JSON_Array [pos_to_json pos])])
+  | Rwitness_from_decl pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rwitness_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Ridx (pos, r) ->
+    Hh_json.(JSON_Object [("Ridx", JSON_Array [pos_to_json pos; to_json r])])
+  | Ridx_vector pos ->
+    Hh_json.(JSON_Object [("Ridx_vector", JSON_Array [pos_to_json pos])])
+  | Ridx_vector_from_decl pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Ridx_vector_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rforeach pos ->
+    Hh_json.(JSON_Object [("Rforeach", JSON_Array [pos_to_json pos])])
+  | Rasyncforeach pos ->
+    Hh_json.(JSON_Object [("Rasyncforeach", JSON_Array [pos_to_json pos])])
+  | Rarith pos ->
+    Hh_json.(JSON_Object [("Rarith", JSON_Array [pos_to_json pos])])
+  | Rarith_ret pos ->
+    Hh_json.(JSON_Object [("Rarith_ret", JSON_Array [pos_to_json pos])])
+  | Rarith_ret_float (pos, r, arg_pos) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rarith_ret_float",
+            JSON_Array
+              [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
+        ])
+  | Rarith_ret_num (pos, r, arg_pos) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rarith_ret_num",
+            JSON_Array
+              [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
+        ])
+  | Rarith_ret_int pos ->
+    Hh_json.(JSON_Object [("Rarith_ret_int", JSON_Array [pos_to_json pos])])
+  | Rarith_dynamic pos ->
+    Hh_json.(JSON_Object [("Rarith_dynamic", JSON_Array [pos_to_json pos])])
+  | Rbitwise_dynamic pos ->
+    Hh_json.(JSON_Object [("Rbitwise_dynamic", JSON_Array [pos_to_json pos])])
+  | Rincdec_dynamic pos ->
+    Hh_json.(JSON_Object [("Rincdec_dynamic", JSON_Array [pos_to_json pos])])
+  | Rcomp pos -> Hh_json.(JSON_Object [("Rcomp", JSON_Array [pos_to_json pos])])
+  | Rconcat_ret pos ->
+    Hh_json.(JSON_Object [("Rconcat_ret", JSON_Array [pos_to_json pos])])
+  | Rlogic_ret pos ->
+    Hh_json.(JSON_Object [("Rlogic_ret", JSON_Array [pos_to_json pos])])
+  | Rbitwise pos ->
+    Hh_json.(JSON_Object [("Rbitwise", JSON_Array [pos_to_json pos])])
+  | Rbitwise_ret pos ->
+    Hh_json.(JSON_Object [("Rbitwise_ret", JSON_Array [pos_to_json pos])])
+  | Rno_return pos ->
+    Hh_json.(JSON_Object [("Rno_return", JSON_Array [pos_to_json pos])])
+  | Rno_return_async pos ->
+    Hh_json.(JSON_Object [("Rno_return_async", JSON_Array [pos_to_json pos])])
+  | Rret_fun_kind (pos, fun_kind) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rret_fun_kind",
+            JSON_Array [pos_to_json pos; fun_kind_to_json fun_kind] );
+        ])
+  | Rret_fun_kind_from_decl (pos_or_decl, fun_kind) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rret_fun_kind_from_decl",
+            JSON_Array [Pos_or_decl.json pos_or_decl; fun_kind_to_json fun_kind]
+          );
+        ])
+  | Rhint pos_or_decl ->
+    Hh_json.(JSON_Object [("Rhint", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rthrow pos ->
+    Hh_json.(JSON_Object [("Rthrow", JSON_Array [pos_to_json pos])])
+  | Rplaceholder pos ->
+    Hh_json.(JSON_Object [("Rplaceholder", JSON_Array [pos_to_json pos])])
+  | Rret_div pos ->
+    Hh_json.(JSON_Object [("Rret_div", JSON_Array [pos_to_json pos])])
+  | Ryield_gen pos ->
+    Hh_json.(JSON_Object [("Ryield_gen", JSON_Array [pos_to_json pos])])
+  | Ryield_asyncgen pos ->
+    Hh_json.(JSON_Object [("Ryield_asyncgen", JSON_Array [pos_to_json pos])])
+  | Ryield_asyncnull pos ->
+    Hh_json.(JSON_Object [("Ryield_asyncnull", JSON_Array [pos_to_json pos])])
+  | Ryield_send pos ->
+    Hh_json.(JSON_Object [("Ryield_send", JSON_Array [pos_to_json pos])])
+  | Rlost_info (str, r, blame) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rlost_info",
+            JSON_Array [JSON_String str; to_json r; blame_to_json blame] );
+        ])
+  | Rformat (pos, str, r) ->
+    Hh_json.(
+      JSON_Object
+        [("Rformat", JSON_Array [pos_to_json pos; JSON_String str; to_json r])])
+  | Rclass_class (pos_or_decl, str) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rclass_class",
+            JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str] );
+        ])
+  | Runknown_class pos ->
+    Hh_json.(JSON_Object [("Runknown_class", JSON_Array [pos_to_json pos])])
+  | Rvar_param pos ->
+    Hh_json.(JSON_Object [("Rvar_param", JSON_Array [pos_to_json pos])])
+  | Rvar_param_from_decl pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rvar_param_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Runpack_param (pos, pos_or_decl, n) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Runpack_param",
+            JSON_Array
+              [
+                pos_to_json pos;
+                Pos_or_decl.json pos_or_decl;
+                JSON_Number (string_of_int n);
+              ] );
+        ])
+  | Rinout_param pos_or_decl ->
+    Hh_json.(
+      JSON_Object [("Rinout_param", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rinstantiate (r1, str, r2) ->
+    Hh_json.(
+      JSON_Object
+        [("Rinstantiate", JSON_Array [to_json r1; JSON_String str; to_json r2])])
+  | Rtypeconst (r1, (pos_or_decl, str), lazy_str, r2) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rtypeconst",
+            JSON_Array
+              [
+                to_json r1;
+                JSON_Object
+                  [
+                    ( "Tuple2",
+                      JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str]
+                    );
+                  ];
+                JSON_String (Lazy.force lazy_str);
+                to_json r2;
+              ] );
+        ])
+  | Rtype_access (r, xs) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rtype_access",
+            JSON_Array
+              [
+                to_json r;
+                JSON_Array
+                  (List.map xs ~f:(fun (r, lazy_str) ->
+                       JSON_Object
+                         [
+                           ( "Tuple2",
+                             JSON_Array
+                               [to_json r; JSON_String (Lazy.force lazy_str)] );
+                         ]));
+              ] );
+        ])
+  | Rexpr_dep_type (r, pos_or_decl, expr_dep_type_reason) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rexpr_dep_type",
+            JSON_Array
+              [
+                to_json r;
+                Pos_or_decl.json pos_or_decl;
+                expr_dep_type_reason_to_json expr_dep_type_reason;
+              ] );
+        ])
+  | Rnullsafe_op pos ->
+    Hh_json.(JSON_Object [("Rnullsafe_op", JSON_Array [pos_to_json pos])])
+  | Rtconst_no_cstr pos_id ->
+    Hh_json.(
+      JSON_Object [("Rtconst_no_cstr", JSON_Array [pos_id_to_json pos_id])])
+  | Rpredicated (pos, str) ->
+    Hh_json.(
+      JSON_Object
+        [("Rpredicated", JSON_Array [pos_to_json pos; JSON_String str])])
+  | Ris pos -> Hh_json.(JSON_Object [("Ris", JSON_Array [pos_to_json pos])])
+  | Ras pos -> Hh_json.(JSON_Object [("Ras", JSON_Array [pos_to_json pos])])
+  | Requal pos ->
+    Hh_json.(JSON_Object [("Requal", JSON_Array [pos_to_json pos])])
+  | Rvarray_or_darray_key pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rvarray_or_darray_key", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rvec_or_dict_key pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rvec_or_dict_key", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rusing pos ->
+    Hh_json.(JSON_Object [("Rusing", JSON_Array [pos_to_json pos])])
+  | Rdynamic_prop pos ->
+    Hh_json.(JSON_Object [("Rdynamic_prop", JSON_Array [pos_to_json pos])])
+  | Rdynamic_call pos ->
+    Hh_json.(JSON_Object [("Rdynamic_call", JSON_Array [pos_to_json pos])])
+  | Rdynamic_construct pos ->
+    Hh_json.(JSON_Object [("Rdynamic_construct", JSON_Array [pos_to_json pos])])
+  | Ridx_dict pos ->
+    Hh_json.(JSON_Object [("Ridx_dict", JSON_Array [pos_to_json pos])])
+  | Rset_element pos ->
+    Hh_json.(JSON_Object [("Rset_element", JSON_Array [pos_to_json pos])])
+  | Rmissing_optional_field (pos_or_decl, str) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rmissing_optional_field",
+            JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str] );
+        ])
+  | Runset_field (pos, str) ->
+    Hh_json.(
+      JSON_Object
+        [("Runset_field", JSON_Array [pos_to_json pos; JSON_String str])])
+  | Rcontravariant_generic (r, str) ->
+    Hh_json.(
+      JSON_Object
+        [("Rcontravariant_generic", JSON_Array [to_json r; JSON_String str])])
+  | Rinvariant_generic (r, str) ->
+    Hh_json.(
+      JSON_Object
+        [("Rinvariant_generic", JSON_Array [to_json r; JSON_String str])])
+  | Rregex pos ->
+    Hh_json.(JSON_Object [("Rregex", JSON_Array [pos_to_json pos])])
+  | Rimplicit_upper_bound (pos_or_decl, str) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rimplicit_upper_bound",
+            JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str] );
+        ])
+  | Rtype_variable pos ->
+    Hh_json.(JSON_Object [("Rtype_variable", JSON_Array [pos_to_json pos])])
+  | Rtype_variable_generics (pos, str1, str2) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rtype_variable_generics",
+            JSON_Array [pos_to_json pos; JSON_String str1; JSON_String str2] );
+        ])
+  | Rtype_variable_error pos ->
+    Hh_json.(
+      JSON_Object [("Rtype_variable_error", JSON_Array [pos_to_json pos])])
+  | Rglobal_type_variable_generics (pos_or_decl, str1, str2) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rglobal_type_variable_generics",
+            JSON_Array
+              [Pos_or_decl.json pos_or_decl; JSON_String str1; JSON_String str2]
+          );
+        ])
+  | Rsolve_fail pos_or_decl ->
+    Hh_json.(
+      JSON_Object [("Rsolve_fail", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rcstr_on_generics (pos_or_decl, pos_id) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rcstr_on_generics",
+            JSON_Array [Pos_or_decl.json pos_or_decl; pos_id_to_json pos_id] );
+        ])
+  | Rlambda_param (pos, r) ->
+    Hh_json.(
+      JSON_Object [("Rlambda_param", JSON_Array [pos_to_json pos; to_json r])])
+  | Rshape (pos, str) ->
+    Hh_json.(
+      JSON_Object [("Rshape", JSON_Array [pos_to_json pos; JSON_String str])])
+  | Rshape_literal pos ->
+    Hh_json.(JSON_Object [("Rshape_literal", JSON_Array [pos_to_json pos])])
+  | Renforceable pos_or_decl ->
+    Hh_json.(
+      JSON_Object [("Renforceable", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rdestructure pos ->
+    Hh_json.(JSON_Object [("Rdestructure", JSON_Array [pos_to_json pos])])
+  | Rkey_value_collection_key pos ->
+    Hh_json.(
+      JSON_Object [("Rkey_value_collection_key", JSON_Array [pos_to_json pos])])
+  | Rglobal_class_prop pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rglobal_class_prop", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rglobal_fun_param pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rglobal_fun_param", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rglobal_fun_ret pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rglobal_fun_ret", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rsplice pos ->
+    Hh_json.(JSON_Object [("Rsplice", JSON_Array [pos_to_json pos])])
+  | Ret_boolean pos ->
+    Hh_json.(JSON_Object [("Ret_boolean", JSON_Array [pos_to_json pos])])
+  | Rdefault_capability pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rdefault_capability", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rconcat_operand pos ->
+    Hh_json.(JSON_Object [("Rconcat_operand", JSON_Array [pos_to_json pos])])
+  | Rinterp_operand pos ->
+    Hh_json.(JSON_Object [("Rinterp_operand", JSON_Array [pos_to_json pos])])
+  | Rdynamic_coercion r ->
+    Hh_json.(JSON_Object [("Rdynamic_coercion", JSON_Array [to_json r])])
+  | Rsupport_dynamic_type pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rsupport_dynamic_type", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rdynamic_partial_enforcement (pos_or_decl, str, r) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rdynamic_partial_enforcement",
+            JSON_Array
+              [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
+        ])
+  | Rrigid_tvar_escape (pos, str1, str2, r) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Rrigid_tvar_escape",
+            JSON_Array
+              [pos_to_json pos; JSON_String str1; JSON_String str2; to_json r]
+          );
+        ])
+  | Ropaque_type_from_module (pos_or_decl, str, r) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Ropaque_type_from_module",
+            JSON_Array
+              [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
+        ])
+  | Rmissing_class pos ->
+    Hh_json.(JSON_Object [("Rmissing_class", JSON_Array [pos_to_json pos])])
+  | Rinvalid -> Hh_json.(JSON_Object [("Rinvalid", JSON_Array [])])
+  | Rcaptured_like pos ->
+    Hh_json.(JSON_Object [("Rcaptured_like", JSON_Array [pos_to_json pos])])
+  | Rpessimised_inout pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rpessimised_inout", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rpessimised_return pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rpessimised_return", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Rpessimised_prop pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rpessimised_prop", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Runsafe_cast pos ->
+    Hh_json.(JSON_Object [("Runsafe_cast", JSON_Array [pos_to_json pos])])
+  | Rpattern pos ->
+    Hh_json.(JSON_Object [("Rpattern", JSON_Array [pos_to_json pos])])
+  | Rflow (r_from, r_into) ->
+    Hh_json.(
+      JSON_Object [("Rflow", JSON_Array [to_json r_from; to_json r_into])])
+  | Rrev r -> Hh_json.(JSON_Object [("Rrev", JSON_Array [to_json r])])
+  | Rprj (prj, r) ->
+    Hh_json.(JSON_Object [("Rprj", JSON_Array [prj_to_json prj; to_json r])])
+
 type t = locl_phase t_
 
 let pp : type ph. _ -> ph t_ -> unit = (fun fmt r -> pp_t_ fmt r)
@@ -1183,7 +1657,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
   | Rflow (from, _into) -> to_string prefix from
-  | Rrev r -> to_string prefix @@ normalize r
+  | Rrev r -> to_string prefix @@ reverse r
   | Rprj (_prj, r) -> to_string prefix r
 
 type ureason =

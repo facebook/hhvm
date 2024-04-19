@@ -252,7 +252,6 @@ add_library(
   security/extensions/ThriftParametersContext.cpp
   security/extensions/Types.cpp
   server/AdaptiveConcurrency.cpp
-  server/BaseThriftServer.cpp
   server/ConcurrencyControllerInterface.cpp
   server/ConcurrencyControllerBase.cpp
   server/Cpp2ConnContext.cpp

@@ -414,8 +414,7 @@ class ThreadManager::Impl : public ThreadManager,
       list<WorkerBaseHook, boost::intrusive::constant_time_size<false>>
           liveWorkers_;
 
-  folly::ThreadLocal<bool> isThreadManagerThread_{
-      [] { return new bool(false); }};
+  folly::ThreadLocal<bool> isThreadManagerThread_;
   std::string namePrefix_;
   uint32_t namePrefixCounter_;
 

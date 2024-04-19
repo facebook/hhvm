@@ -383,7 +383,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   /**
    * If a view of the event handlers is needed that does not need to extend
-   * their lifetime beyond that of the BaseThriftServer, this method allows
+   * their lifetime beyond that of the ThriftServer, this method allows
    * obtaining the raw pointer rather than the more expensive shared_ptr. Since
    * unsynchronized setServerEventHandler / addServerEventHandler /
    * getEventHandler calls are not permitted, use cases that get the handler,
@@ -841,7 +841,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * server to allocate memory for the IOBufs when parsing incoming frames.
    *
    * @param customAllocator A unique pointer to the custom allocator. The
-   * BaseThriftServer will take over the ownership
+   * ThriftServer will take over the ownership
    */
   void setCustomAllocatorForParser(
       std::shared_ptr<rocket::ParserAllocatorType> customParserAllocator) {

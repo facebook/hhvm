@@ -34,7 +34,7 @@ namespace thrift {
  * precedence depending on who set it. The resolved value (`.get()`)
  * prioritizes the value in the following order, falling back to the next one
  * if the value is reset:
- *   1. explicit application override through legacy BaseThriftServer setters
+ *   1. explicit application override through legacy ThriftServer setters
  *   2. baseline from configuration mechanism
  *   3. default provided in constructor, or through ThriftServerInitialConfig
  */

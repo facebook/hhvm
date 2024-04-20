@@ -1755,6 +1755,7 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized_by_ref",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

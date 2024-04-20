@@ -40,11 +40,32 @@ impl Default for TypeKind {
     }
 }
 
+// TODO: all variants are represented as string for no good reason;
+// as of april 2024, attributes are encoded as json in sqlite FactsDB.
+// However, attribute values are hack values and only consumed in hack,
+// so hack/php serializing would be much better than json. This will
+// require carefully migrating the FactsDB schema.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum AttrValue {
     Classname(String),
     String(String),
     Int(String),
+}
+
+impl AttrValue {
+    pub fn into_json(self) -> serde_json::Value {
+        match self {
+            Self::Classname(s) | Self::String(s) | Self::Int(s) => serde_json::Value::String(s),
+        }
+    }
+
+    pub fn to_json(&self) -> serde_json::Value {
+        match self {
+            Self::Classname(s) | Self::String(s) | Self::Int(s) => {
+                serde_json::Value::String(s.clone())
+            }
+        }
+    }
 }
 
 pub type Attributes = BTreeMap<String, Vec<AttrValue>>;

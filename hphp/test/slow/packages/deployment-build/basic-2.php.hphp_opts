@@ -1,0 +1,3 @@
+-c __DIR__/build_config.hdf
+--inputs=__DIR__/MODULES.inc.php
+-vActiveDeployment="my-prod"

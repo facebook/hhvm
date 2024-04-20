@@ -184,6 +184,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ForceEnableSymbolRefs, ini, config,
                "ForceEnableSymbolRefs", false);
 
+  Config::Bind(RuntimeOption::EvalActiveDeployment, ini, config,
+               "ActiveDeployment", RuntimeOption::EvalActiveDeployment);
+
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",

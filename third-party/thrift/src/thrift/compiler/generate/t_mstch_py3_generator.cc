@@ -1345,13 +1345,10 @@ void t_mstch_py3_generator::generate_file(
 }
 
 void t_mstch_py3_generator::generate_types() {
-  std::vector<std::string> pythonFiles{
+  std::vector<std::string> autoMigrateFiles{
       "types.py",
-      "metadata.py",
-  };
-
-  std::vector<std::string> cythonCompatFiles{
-      "types.py",
+      // in no_auto_migrate, .pxd contains a cimport * from types_.pxd
+      // without auto_migrate, .pxd contains just bindings of cpp thrift types
       "types.pxd",
       "metadata.py",
   };
@@ -1390,45 +1387,27 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.cpp",
   };
 
-  // TODO this logic is a complete mess and I intend to clean it up later
-  // the gist is:
-  // - if auto_migrate is present, generate py3_types and either
-  // types.pxd or types.py depending on if no_auto_migrate is present
-  // - if auto_migrate isn't present, just generate all the normal files
+  for (const auto& file : cppFilesWithTypeContext) {
+    generate_file(file, IsTypesFile);
+  }
+  for (const auto& file : cythonFilesNoTypeContext) {
+    generate_file(file, NotTypesFile, generateRootPath_);
+  }
+  for (const auto& file : cppFilesWithNoTypeContext) {
+    generate_file(file, NotTypesFile);
+  }
+  // - if auto_migrate is present, generate py3_types, types.pxd, and types.py
+  // - else, just generate normal cython files
   if (has_option("auto_migrate")) {
     for (const auto& file : cythonMigrationFilesWithTypeContext) {
       generate_file(file, IsTypesFile, generateRootPath_);
     }
-    for (const auto& file : cppFilesWithTypeContext) {
-      generate_file(file, IsTypesFile);
-    }
-    for (const auto& file : cythonFilesNoTypeContext) {
-      generate_file(file, NotTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFilesWithNoTypeContext) {
-      generate_file(file, NotTypesFile);
-    }
-    if (has_option("no_auto_migrate")) {
-      for (const auto& file : cythonCompatFiles) {
-        generate_file(file, IsTypesFile, generateRootPath_);
-      }
-    } else {
-      for (const auto& file : pythonFiles) {
-        generate_file(file, IsTypesFile, generateRootPath_);
-      }
+    for (const auto& file : autoMigrateFiles) {
+      generate_file(file, IsTypesFile, generateRootPath_);
     }
   } else {
     for (const auto& file : cythonFilesWithTypeContext) {
       generate_file(file, IsTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFilesWithTypeContext) {
-      generate_file(file, IsTypesFile);
-    }
-    for (const auto& file : cythonFilesNoTypeContext) {
-      generate_file(file, NotTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFilesWithNoTypeContext) {
-      generate_file(file, NotTypesFile);
     }
   }
 }

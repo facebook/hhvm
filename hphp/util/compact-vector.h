@@ -88,6 +88,14 @@ struct CompactVector : private std::allocator_traits<Alloc>::template rebind_all
   void pop_back();
   void erase(iterator);
   void erase(iterator, iterator);
+
+  // Erase all occurances of the given value.
+  bool erase(const T& v) {
+    auto const it = std::remove(begin(), end(), v);
+    if (it == end()) return false;
+    erase(it, end());
+    return true;
+  }
   iterator insert(iterator p, const T& v) { return insert_impl(p, 1, v); }
   iterator insert(iterator p, T&& v) { return insert_impl(p, 1, std::move(v)); }
   iterator insert(iterator p, size_t num, const T& v) {

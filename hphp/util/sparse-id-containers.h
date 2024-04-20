@@ -257,13 +257,14 @@ struct sparse_id_set {
    *
    * Post: contains an element with the id of `lt'
    */
-  void insert(LookupT lt) {
+  bool insert(LookupT lt) {
     auto const t = Extract()(lt);
     assert(t < m_universe_size);
-    if (containsImpl(t)) return;
+    if (containsImpl(t)) return false;
     dense()[m_next] = t;
     sparse()[t] = m_next;
     ++m_next;
+    return true;
   }
 
   /*
@@ -284,6 +285,18 @@ struct sparse_id_set {
     --m_next;
     // No need to write to sparse()[t].  If it's read, next and dense are
     // rechecked to ensure it's actually relevant.
+  }
+
+  void resize(T new_size) {
+    if (new_size > m_universe_size) {
+      sparse_id_set tmp{new_size};
+      for (auto t : *this) {
+        tmp.dense()[tmp.m_next] = t;
+        tmp.sparse()[t] = tmp.m_next;
+        ++tmp.m_next;
+      }
+      swap(tmp);
+    }
   }
 
   /*

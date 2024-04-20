@@ -2210,7 +2210,8 @@ private:
   TSStringSet classesToSchedule;
 
   FSStringSet funcsToRemove;
-  std::mutex funcsToRemoveLock;
+  // Keep AnalysisScheduler moveable
+  std::unique_ptr<std::mutex> funcsToRemoveLock;
 };
 
 //////////////////////////////////////////////////////////////////////

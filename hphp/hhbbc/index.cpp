@@ -93,6 +93,8 @@ struct ClassInfo2;
 
 struct ClassGraphHasher;
 
+struct AuxClassGraphs;
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -448,7 +450,7 @@ struct FuncInfo2 {
    * between the types (since std::unique_ptr does not require a
    * complete type at declaration).
    */
-  std::unique_ptr<hphp_fast_set<ClassGraph, ClassGraphHasher>> auxClassGraphs;
+  std::unique_ptr<AuxClassGraphs> auxClassGraphs;
 
   template <typename SerDe> void serde(SerDe&);
 };
@@ -1250,6 +1252,7 @@ struct ClassGraph {
   void flattenTraitInto(ClassGraph);
   void setCInfo(ClassInfo&);
   void setRegOnlyEquivs() const;
+  void finalizeParents();
   void reset();
 
   // ClassGraphs are ordered by their name alphabetically.
@@ -1288,7 +1291,7 @@ struct ClassGraph {
   static void setAnalysisIndex(AnalysisIndex::IndexData&);
   static void clearAnalysisIndex();
 
-  template <typename SerDe, typename T> void serde(SerDe&, T);
+  template <typename SerDe, typename T> void serde(SerDe&, T, bool = false);
 
   // When serializing multiple ClassGraphs, this can be declared
   // before serializing any of them, to allow for the serialization to
@@ -1305,6 +1308,9 @@ private:
   using NodeSet = hphp_fast_set<Node*>;
   template <typename T> using NodeMap = hphp_fast_map<Node*, T>;
   using NodeVec = TinyVector<Node*, 4>;
+
+  struct NodeIdxSet;
+  struct TLNodeIdxSet;
 
   struct SmallBitset;
   struct LargeBitset;
@@ -1325,6 +1331,12 @@ private:
     FlagMissing      = (1 << 10)
   };
 
+  // These are only set at runtime, so shouldn't be serialized in a
+  // Node.
+  static constexpr Flags kSerializable =
+    (Flags)~(FlagCInfo2 | FlagRegSub | FlagNonRegSub |
+             FlagWait | FlagChildren | FlagConservative);
+
   // Iterating through parents or children can result in one of three
   // different outcomes:
   enum class Action {
@@ -1336,7 +1348,7 @@ private:
 
   std::vector<ClassGraph> directParents(Flags) const;
 
-  void storeAuxs(AnalysisIndex::IndexData&) const;
+  void storeAuxs(AnalysisIndex::IndexData&, bool) const;
 
   static Table& table();
 
@@ -1359,28 +1371,18 @@ private:
   static bool betterNode(const Node*, const Node*);
 
   template <typename F>
-  static Action forEachParent(Node& n, const F& f, NodeSet& v) {
-    return forEachParentImpl(n, f, v, true);
-  }
+  static Action forEachParent(Node&, const F&, NodeIdxSet&);
   template <typename F>
-  static Action forEachParent(Node& n, const F& f) {
-    NodeSet v;
-    return forEachParentImpl(n, f, v, true);
-  }
+  static Action forEachParent(Node&, const F&);
   template <typename F>
-  static Action forEachParentImpl(Node&, const F&, NodeSet&, bool);
+  static Action forEachParentImpl(Node&, const F&, NodeIdxSet&, bool);
 
   template <typename F>
-  static Action forEachChild(Node& n, const F& f, NodeSet& v) {
-    return forEachChildImpl(n, f, v, true);
-  }
+  static Action forEachChild(Node&, const F&, NodeIdxSet&);
   template <typename F>
-  static Action forEachChild(Node& n, const F& f) {
-    NodeSet v;
-    return forEachChildImpl(n, f, v, true);
-  }
+  static Action forEachChild(Node&, const F&);
   template <typename F>
-  static Action forEachChildImpl(Node&, const F&, NodeSet&, bool);
+  static Action forEachChildImpl(Node&, const F&, NodeIdxSet&, bool);
 
   template <typename F, typename F2, typename T>
   static T foldParents(Node& n, const F& f, const F2& f2, NodeMap<T>& m) {
@@ -1389,21 +1391,19 @@ private:
   template <typename F, typename F2, typename T>
   static T foldParentsImpl(Node&, const F&, const F2&, NodeMap<T>&, bool);
 
-  static bool findParent(Node&, Node&, NodeSet&);
-  static bool findParent(Node& n1, Node& n2) {
-    NodeSet visited;
-    return findParent(n1, n2, visited);
-  }
+  static bool findParent(Node&, Node&, NodeIdxSet&);
+  static bool findParent(Node&, Node&);
 
   static NodeSet allParents(Node&);
 
   struct LockedSerdeImpl;
   struct UnlockedSerdeImpl;
 
-  static std::vector<Node*> sort(const hphp_fast_set<Node*>&);
+  template <typename SerDe> static void encodeName(SerDe&, SString);
+  template <typename SerDe> static SString decodeName(SerDe&);
 
   template <typename SerDe, typename Impl, typename T>
-  void serdeImpl(SerDe&, const Impl&, T);
+  void serdeImpl(SerDe&, const Impl&, T, bool);
 
   template <typename SerDe, typename Impl>
   static void deserBlock(SerDe&, const Impl&);
@@ -1412,6 +1412,9 @@ private:
 
   template <typename Impl>
   static std::pair<Flags, Optional<size_t>> setCompleteImpl(const Impl&, Node&);
+
+  template <typename Impl>
+  static void setConservative(const Impl&, Node&, bool, bool);
 
   static std::unique_ptr<Table> g_table;
   static __thread SerdeState* tl_serde_state;
@@ -1442,8 +1445,8 @@ struct ClassGraph::Node {
   // during deserialization.
   std::atomic<CIAndFlags::Opaque> ci{CIAndFlags{}.getOpaque()};
   // Direct (not transitive) parents and children of this node.
-  NodeSet parents;
-  NodeSet children;
+  CompactVector<Node*> parents;
+  CompactVector<Node*> children;
 
   // This information is lazily cached (and is not serialized).
   struct NonRegularInfo {
@@ -1451,6 +1454,10 @@ struct ClassGraph::Node {
     Node* regOnlyEquiv{nullptr};
   };
   LockFreeLazyPtr<NonRegularInfo> nonRegInfo;
+
+  // Unique sequential id assigned to every node. Used for NodeIdxSet.
+  using Idx = uint32_t;
+  Idx idx{0};
 
   Flags flags() const { return CIAndFlags{ci.load()}.tag(); }
   ClassInfo* cinfo() const {
@@ -1502,11 +1509,70 @@ struct ClassGraph::Node {
     old.set((Flags)(old.tag() | FlagCInfo2), &c);
     ci.store(old.getOpaque());
   }
+
+  struct Compare {
+    bool operator()(const Node* a, const Node* b) const {
+      assertx(a->name);
+      assertx(b->name);
+      return string_data_lt_type{}(a->name, b->name);
+    }
+  };
 };
 
-struct ClassGraph::SerdeState {
-  NodeSet upward;
-  NodeSet downward;
+// Efficient set of ClassGraph::Nodes.
+struct ClassGraph::NodeIdxSet {
+  NodeIdxSet();
+
+  bool add(Node& n) {
+    if (n.idx >= set.universe_size()) {
+      set.resize(folly::nextPowTwo(n.idx+1));
+    }
+    return set.insert(&n);
+  }
+  void erase(Node& n) {
+    if (n.idx < set.universe_size()) {
+      set.erase(&n);
+    }
+  }
+  void clear() { set.clear(); }
+  bool empty() { return set.empty(); }
+private:
+  struct Extract {
+    Node::Idx operator()(const Node* n) const {
+      assertx(n->idx > 0);
+      return n->idx;
+    }
+  };
+  sparse_id_set<Node::Idx, const Node*, Extract> set;
+};
+
+// Thread-local NodeIdxSet which automatically clears itself
+// afterwards (thus avoids memory allocation).
+struct ClassGraph::TLNodeIdxSet {
+  TLNodeIdxSet() : set{get()} { assertx(set.empty()); }
+
+  ~TLNodeIdxSet() {
+    set.clear();
+    sets().emplace_back(std::move(set));
+  }
+
+  NodeIdxSet& operator*() { return set; }
+  NodeIdxSet* operator->() { return &set; }
+private:
+  NodeIdxSet set;
+
+  static NodeIdxSet get() {
+    auto& s = sets();
+    if (s.empty()) return {};
+    auto set = std::move(s.back());
+    s.pop_back();
+    return set;
+  }
+
+  static std::vector<NodeIdxSet>& sets() {
+    static thread_local std::vector<NodeIdxSet> s;
+    return s;
+  }
 };
 
 struct ClassGraph::Table {
@@ -1517,14 +1583,31 @@ struct ClassGraph::Table {
   // a subclass (which is common). Stored separately to save memory
   // since it's rare.
   hphp_fast_map<Node*, Node*> regOnlyEquivs;
+  hphp_fast_map<Node*, size_t> completeSizeCache;
   AnalysisIndex::IndexData* index{nullptr};
   struct Locking {
     mutable folly::SharedMutex table;
     std::array<std::mutex, 2048> nodes;
     mutable folly::SharedMutex equivs;
+    mutable folly::SharedMutex sizes;
   };
   // If present, we're doing concurrent deserialization.
   Optional<Locking> locking;
+};
+
+ClassGraph::NodeIdxSet::NodeIdxSet()
+  : set{folly::nextPowTwo((Node::Idx)(table().nodes.size() + 1))}
+{
+  assertx(!table().locking);
+}
+
+struct ClassGraph::SerdeState {
+  Optional<NodeIdxSet> upward;
+  Optional<NodeIdxSet> downward;
+
+  std::vector<SString> strings;
+  std::vector<SString> newStrings;
+  SStringToOneT<size_t> strToIdx;
 };
 
 struct ClassGraph::ScopedSerdeState {
@@ -1752,12 +1835,16 @@ private:
 // without any locking.
 struct ClassGraph::UnlockedSerdeImpl {
   std::pair<Node*, bool> create(SString name) const {
-    auto& n = table().nodes[name];
+    auto& t = table();
+    auto& n = t.nodes[name];
     if (n.name) {
       assertx(n.name->tsame(name));
       return std::make_pair(&n, false);
     }
     n.name = name;
+    assertx(t.nodes.size() < std::numeric_limits<Node::Idx>::max());
+    n.idx = t.nodes.size();
+    assertx(n.idx > 0);
     return std::make_pair(&n, true);
   }
   Node& get(SString name) const {
@@ -1774,7 +1861,20 @@ struct ClassGraph::UnlockedSerdeImpl {
     auto const [it, s] = table().regOnlyEquivs.emplace(&n, &e);
     always_assert(s || it->second == &e);
   }
+  size_t getCompleteSize(Node& n) const {
+    auto const size = folly::get_default(table().completeSizeCache, &n);
+    always_assert(size > 1);
+    return size;
+  }
+  void setCompleteSize(Node& n, size_t size) const {
+    assertx(size > 1);
+    auto const [it, s] = table().completeSizeCache.emplace(&n, size);
+    always_assert(s || it->second == size);
+  }
   template <typename F> void lock(Node&, const F& f) const { f(); }
+  template <typename F> void forEachChild(Node& n, const F& f) const {
+    for (auto const c : n.children) f(*c);
+  }
   void signal(Node& n, Flags f) const {
     assertx(n.flags() == FlagNone);
     assertx(!(f & FlagWait));
@@ -1841,6 +1941,9 @@ struct ClassGraph::LockedSerdeImpl {
     assertx(!n.name);
     assertx(!(n.flags() & FlagWait));
     n.name = name;
+    assertx(t.nodes.size() < std::numeric_limits<Node::Idx>::max());
+    n.idx = t.nodes.size();
+    assertx(n.idx > 0);
     // Set FlagWait, this will ensure that any other thread who
     // retrieves this node (after we drop the write lock) will block
     // until we're done deserializing it and it's children.
@@ -1875,6 +1978,20 @@ struct ClassGraph::LockedSerdeImpl {
     auto const [it, s] = t.regOnlyEquivs.emplace(&n, &e);
     always_assert(s || it->second == &e);
   }
+  size_t getCompleteSize(Node& n) const {
+    auto& t = table();
+    std::shared_lock _{t.locking->sizes};
+    auto const size = folly::get_default(t.completeSizeCache, &n);
+    always_assert(size > 1);
+    return size;
+  }
+  void setCompleteSize(Node& n, size_t size) const {
+    assertx(size > 1);
+    auto& t = table();
+    std::unique_lock _{t.locking->sizes};
+    auto const [it, s] = t.completeSizeCache.emplace(&n, size);
+    always_assert(s || it->second == size);
+  }
   // Lock a node by using the lock it hashes to and execute f() while
   // holding the lock.
   template <typename F> void lock(Node& n, const F& f) const {
@@ -1885,6 +2002,11 @@ struct ClassGraph::LockedSerdeImpl {
     lock.lock();
     SCOPE_EXIT { lock.unlock(); };
     f();
+  }
+  template <typename F> void forEachChild(Node& n, const F& f) const {
+    CompactVector<Node*> children;
+    lock(n, [&] { children = n.children; });
+    for (auto const c : children) f(*c);
   }
   // Signal that a node (and all of it's dependents) is done being
   // deserialized. This clears FlagWait and wakes up any threads
@@ -2042,8 +2164,10 @@ void ClassGraph::setBase(ClassGraph b) {
   assertx(!isMissing());
   assertx(!b.isMissing());
   assertx(b.this_->isBase());
-  this_->parents.emplace(b.this_);
-  if (!b.this_->isConservative()) b.this_->children.emplace(this_);
+  this_->parents.emplace_back(b.this_);
+  if (!b.this_->isConservative()) {
+    b.this_->children.emplace_back(this_);
+  }
 }
 
 void ClassGraph::addParent(ClassGraph p) {
@@ -2053,8 +2177,10 @@ void ClassGraph::addParent(ClassGraph p) {
   assertx(!isMissing());
   assertx(!p.isMissing());
   assertx(!p.this_->isBase());
-  this_->parents.emplace(p.this_);
-  if (!p.this_->isConservative()) p.this_->children.emplace(this_);
+  this_->parents.emplace_back(p.this_);
+  if (!p.this_->isConservative()) {
+    p.this_->children.emplace_back(this_);
+  }
 }
 
 void ClassGraph::flattenTraitInto(ClassGraph t) {
@@ -2072,9 +2198,20 @@ void ClassGraph::flattenTraitInto(ClassGraph t) {
   always_assert(this_->parents.erase(t.this_));
   always_assert(t.this_->children.erase(this_));
   for (auto const p : t.this_->parents) {
-    this_->parents.emplace(p);
-    p->children.emplace(this_);
+    this_->parents.emplace_back(p);
+    p->children.emplace_back(this_);
   }
+}
+
+// Indicates that all possible parents has been added to this
+// node. Puts the parents list in canonical order.
+void ClassGraph::finalizeParents() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(!this_->isConservative());
+  assertx(!this_->hasCompleteChildren());
+  std::sort(begin(this_->parents), end(this_->parents), Node::Compare{});
 }
 
 void ClassGraph::reset() {
@@ -2211,14 +2348,14 @@ std::vector<ClassGraph> ClassGraph::children() const {
   std::vector<ClassGraph> out;
   // If this_ is a trait, then forEachChild won't walk the list. Use
   // forEachChildImpl with the right params to prevent this.
-  NodeSet visited;
+  TLNodeIdxSet visited;
   forEachChildImpl(
     *this_,
     [&] (Node& c) {
       out.emplace_back(ClassGraph{ &c });
       return Action::Continue;
     },
-    visited,
+    *visited,
     false
   );
   std::sort(begin(out), end(out));
@@ -2238,7 +2375,6 @@ std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
     if (!(p->flags() & flags)) continue;
     out.emplace_back(ClassGraph { p });
   }
-  std::sort(begin(out), end(out));
   return out;
 }
 
@@ -2252,7 +2388,6 @@ std::vector<ClassGraph> ClassGraph::directParents() const {
   std::vector<ClassGraph> out;
   out.reserve(this_->parents.size());
   for (auto const p : this_->parents) out.emplace_back(ClassGraph { p });
-  std::sort(begin(out), end(out));
   return out;
 }
 
@@ -2285,21 +2420,23 @@ std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
 
   // Remove any nodes which are reachable from another node. Such
   // nodes are redundant.
-  NodeSet visited;
-  for (auto const n : nonParents) {
-    if (!heads.count(n)) continue;
-    forEachParent(
-      *n,
-      [&] (Node& p) {
-        if (&p == n) return Action::Continue;
-        if (!nonParents.count(&p)) return Action::Continue;
-        if (!heads.count(&p)) return Action::Skip;
-        heads.erase(&p);
-        return Action::Continue;
-      },
-      visited
-    );
-    visited.erase(n);
+  {
+    TLNodeIdxSet visited;
+    for (auto const n : nonParents) {
+      if (!heads.count(n)) continue;
+      forEachParent(
+        *n,
+        [&] (Node& p) {
+          if (&p == n) return Action::Continue;
+          if (!nonParents.count(&p)) return Action::Continue;
+          if (!heads.count(&p)) return Action::Skip;
+          heads.erase(&p);
+          return Action::Continue;
+        },
+        *visited
+      );
+      visited->erase(*n);
+    }
   }
 
   // Remove any nodes which have a (regular) child which does not have
@@ -2537,12 +2674,12 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   ClassGraph{left}.ensureWithChildren();
   if (!left->hasCompleteChildren()) return true;
 
-  NodeSet visited;
+  TLNodeIdxSet visited;
   auto const action = forEachChild(
     *left,
     [&] (Node& c) {
       if (regOnly && !c.isRegular()) return Action::Continue;
-      return findParent(c, *right, visited)
+      return findParent(c, *right, *visited)
         ? Action::Stop : Action::Continue;
     }
   );
@@ -2662,21 +2799,23 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
 
   // Remove any nodes which are reachable from another node. Such
   // nodes are redundant.
-  NodeSet visited;
-  for (auto const n : subclassOf) {
-    if (!heads.count(n)) continue;
-    forEachParent(
-      *n,
-      [&] (Node& p) {
-        if (&p == n) return Action::Continue;
-        if (!subclassOf.count(&p)) return Action::Continue;
-        if (!heads.count(&p)) return Action::Skip;
-        heads.erase(&p);
-        return Action::Continue;
-      },
-      visited
-    );
-    visited.erase(n);
+  {
+    TLNodeIdxSet visited;
+    for (auto const n : subclassOf) {
+      if (!heads.count(n)) continue;
+      forEachParent(
+        *n,
+        [&] (Node& p) {
+          if (&p == n) return Action::Continue;
+          if (!subclassOf.count(&p)) return Action::Continue;
+          if (!heads.count(&p)) return Action::Skip;
+          heads.erase(&p);
+          return Action::Continue;
+        },
+        *visited
+      );
+      visited->erase(*n);
+    }
   }
   if (heads.size() == 1) return *heads.begin();
 
@@ -3084,23 +3223,25 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
   // via another node. In that case, this node is implied by the other
   // and can be removed.
   auto heads = nodes;
-  NodeSet visited;
-  for (auto const n : nodes) {
-    ClassGraph{n}.ensure();
-    if (!heads.count(n)) continue;
-    if (n->isMissing()) continue;
-    forEachParent(
-      *n,
-      [&] (Node& p) {
-        if (&p == n) return Action::Continue;
-        if (!nodes.count(&p)) return Action::Continue;
-        if (!heads.count(&p)) return Action::Skip;
-        heads.erase(&p);
-        return Action::Continue;
-      },
-      visited
-    );
-    visited.erase(n);
+  {
+    TLNodeIdxSet visited;
+    for (auto const n : nodes) {
+      ClassGraph{n}.ensure();
+      if (!heads.count(n)) continue;
+      if (n->isMissing()) continue;
+      forEachParent(
+        *n,
+        [&] (Node& p) {
+          if (&p == n) return Action::Continue;
+          if (!nodes.count(&p)) return Action::Continue;
+          if (!heads.count(&p)) return Action::Skip;
+          heads.erase(&p);
+          return Action::Continue;
+        },
+        *visited
+      );
+      visited->erase(*n);
+    }
   }
 
   // A node can be redundant with another even they aren't reachable
@@ -3136,12 +3277,23 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
 }
 
 template <typename F>
+ClassGraph::Action ClassGraph::forEachParent(Node& n, const F& f, NodeIdxSet& v) {
+  return forEachParentImpl(n, f, v, true);
+}
+
+template <typename F>
+ClassGraph::Action ClassGraph::forEachParent(Node& n, const F& f) {
+  TLNodeIdxSet v;
+  return forEachParentImpl(n, f, *v, true);
+}
+
+template <typename F>
 ClassGraph::Action ClassGraph::forEachParentImpl(Node& n,
                                                  const F& f,
-                                                 NodeSet& v,
+                                                 NodeIdxSet& v,
                                                  bool start) {
   assertx(!n.isMissing());
-  if (!v.emplace(&n).second) return Action::Skip;
+  if (!v.add(n)) return Action::Skip;
   if (start || !n.isTrait()) {
     auto const action = f(n);
     if (action != Action::Continue) return action;
@@ -3171,12 +3323,28 @@ T ClassGraph::foldParentsImpl(Node& n,
   return t;
 }
 
-bool ClassGraph::findParent(Node& start, Node& target, NodeSet& visited) {
+bool ClassGraph::findParent(Node& n1, Node& n2) {
+  TLNodeIdxSet visited;
+  return findParent(n1, n2, *visited);
+}
+
+bool ClassGraph::findParent(Node& start, Node& target, NodeIdxSet& visited) {
   assertx(!start.isMissing());
+
+  static thread_local hphp_fast_map<std::pair<Node*, Node*>, bool> cache;
+  if (auto const r = folly::get_ptr(cache, std::make_pair(&start, &target))) {
+    return *r;
+  }
+
   auto const action = forEachParent(
     start,
     [&] (Node& p) { return (&p == &target) ? Action::Stop : Action::Continue; },
     visited
+  );
+
+  cache.try_emplace(
+    std::make_pair(&start, &target),
+    action == Action::Stop
   );
   return action == Action::Stop;
 }
@@ -3195,10 +3363,21 @@ ClassGraph::NodeSet ClassGraph::allParents(Node& n) {
 }
 
 template <typename F>
+ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f, NodeIdxSet& v) {
+  return forEachChildImpl(n, f, v, true);
+}
+
+template <typename F>
+ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f) {
+  TLNodeIdxSet v;
+  return forEachChildImpl(n, f, *v, true);
+}
+
+template <typename F>
 ClassGraph::Action
-ClassGraph::forEachChildImpl(Node& n, const F& f, NodeSet& v, bool start) {
+ClassGraph::forEachChildImpl(Node& n, const F& f, NodeIdxSet& v, bool start) {
   assertx(!n.isMissing());
-  if (!v.emplace(&n).second) return Action::Skip;
+  if (!v.add(n)) return Action::Skip;
   auto const action = f(n);
   if (action != Action::Continue) return action;
   if (start && n.isTrait()) return action;
@@ -3224,6 +3403,7 @@ ClassGraph ClassGraph::create(const php::Class& cls) {
   assertx(!n->second.cinfo());
   assertx(!n->second.cinfo2());
   n->second.name = cls.name;
+  n->second.idx = table().nodes.size();
 
   auto f = FlagNone;
   if (cls.attrs & AttrInterface)              f = Flags(f | FlagInterface);
@@ -3257,6 +3437,7 @@ ClassGraph ClassGraph::getOrCreate(SString name) {
     assertx(!n->second.cinfo());
     assertx(!n->second.cinfo2());
     n->second.name = name;
+    n->second.idx = table().nodes.size();
     n->second.setFlags(FlagMissing);
   } else {
     assertx(n->second.name->tsame(name));
@@ -3274,6 +3455,7 @@ ClassGraph ClassGraph::getMissing(SString name) {
     assertx(!n->second.cinfo());
     assertx(!n->second.cinfo2());
     n->second.name = name;
+    n->second.idx = table().nodes.size();
     n->second.setFlags(FlagMissing);
   } else {
     assertx(n->second.name->tsame(name));
@@ -3336,14 +3518,35 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
   // Conservative nodes don't have children. However, they're
   // guaranteed to have their FlagRegSub and FlagNonRegSub flags set
   // properly, so we don't need to.
-  if (n.isConservative()) {
-    assertx(n.children.empty());
+  if (n.hasCompleteChildren() || n.isConservative()) {
     auto f = FlagNone;
     if (n.isRegular() || n.hasRegularSubclass()) {
       f = (Flags)(f | FlagRegSub);
     }
     if (!n.isRegular() || n.hasNonRegularSubclass()) {
       f = (Flags)(f | FlagNonRegSub);
+    }
+    if (n.hasCompleteChildren()) {
+      // If we know all the children, the list should be in canonical
+      // order.
+      if (debug) {
+        impl.lock(
+          n,
+          [&] {
+            always_assert(
+              std::is_sorted(
+                begin(n.children),
+                end(n.children),
+                Node::Compare{}
+              )
+            );
+          }
+        );
+      }
+      return std::make_pair(
+        f,
+        n.children.empty() ? 1 : impl.getCompleteSize(n)
+      );
     }
     return std::make_pair(f, std::nullopt);
   }
@@ -3353,36 +3556,35 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
   Optional<size_t> count;
   count.emplace(1);
 
-  // Copy the children list for concurrency safety.
-  NodeSet children;
-  impl.lock(n, [&] { children = n.children; });
-  for (auto const child : children) {
-    auto const [f, c] = setCompleteImpl(impl, *child);
-    flags = (Flags)(flags | f);
-    if (count) {
-      if (c) {
-        *count += *c;
-      } else {
-        count.reset();
+  if (!n.children.empty()) {
+    impl.forEachChild(
+      n,
+      [&] (Node& child) {
+        auto const [f, c] = setCompleteImpl(impl, child);
+        flags = (Flags)(flags | f);
+        if (count) {
+          if (c) {
+            *count += *c;
+          } else {
+            count.reset();
+          }
+        }
       }
-    }
+    );
   }
 
   if (!count || *count > options.preciseSubclassLimit) {
     // The child is conservative, or we've exceeded the subclass list
     // limit. Mark this node as being conservative.
-    assertx(!n.hasCompleteChildren());
-    impl.updateFlags(n, (Flags)(flags | FlagConservative));
-    impl.lock(n, [&] { n.children.clear(); });
+    setConservative(impl, n, flags & FlagRegSub, flags & FlagNonRegSub);
     count.reset();
-  } else if (n.hasCompleteChildren()) {
-    // Otherwise if this node is already marked as having complete
-    // children, verify we inferred the same thing already stored
-    // here.
-    assertx(n.hasRegularSubclass() == bool(flags & FlagRegSub));
-    assertx(n.hasNonRegularSubclass() == bool(flags & FlagNonRegSub));
   } else {
     // Didn't have complete children, but now does. Update the flags.
+    if (!n.children.empty()) impl.setCompleteSize(n, *count);
+    impl.lock(
+      n,
+      [&] { std::sort(begin(n.children), end(n.children), Node::Compare{}); }
+    );
     impl.updateFlags(n, (Flags)(flags | FlagChildren));
   }
 
@@ -3391,205 +3593,302 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
   return std::make_pair(flags, count);
 }
 
+// Make a node conservative (does not have any child information).
+template <typename Impl>
+void ClassGraph::setConservative(const Impl& impl,
+                                 Node& n,
+                                 bool regSub,
+                                 bool nonRegSub) {
+  assertx(!n.isMissing());
+  assertx(!n.hasCompleteChildren());
+
+  if (n.isConservative()) {
+    assertx(n.hasRegularSubclass() == regSub);
+    assertx(n.hasNonRegularSubclass() == nonRegSub);
+    return;
+  }
+
+  assertx(!n.hasRegularSubclass());
+  assertx(!n.hasNonRegularSubclass());
+
+  auto f = FlagConservative;
+  if (regSub)    f = (Flags)(f | FlagRegSub);
+  if (nonRegSub) f = (Flags)(f | FlagNonRegSub);
+
+  impl.updateFlags(n, f);
+  impl.lock(n, [&] { n.children.clear(); });
+}
+
 template <typename SerDe, typename T>
-void ClassGraph::serde(SerDe& sd, T cinfo) {
+void ClassGraph::serde(SerDe& sd, T cinfo, bool ignoreChildren) {
   // Serialization/deserialization entry point. If we're operating
   // concurrently, use one Impl, otherwise, use the other.
   if (SerDe::deserializing && table().locking) {
-    serdeImpl(sd, LockedSerdeImpl{}, cinfo);
+    serdeImpl(sd, LockedSerdeImpl{}, cinfo, ignoreChildren);
   } else {
-    serdeImpl(sd, UnlockedSerdeImpl{}, cinfo);
+    serdeImpl(sd, UnlockedSerdeImpl{}, cinfo, ignoreChildren);
   }
 }
 
 template <typename SerDe, typename Impl, typename T>
 void ClassGraph::serdeImpl(SerDe& sd,
                            const Impl& impl,
-                           T cinfo) {
+                           T cinfo,
+                           bool ignoreChildren) {
   // Allocate SerdeState if someone else hasn't already.
   ScopedSerdeState _;
 
-  if constexpr (SerDe::deserializing) {
-    // Deserializing:
+  sd.alternate(
+    [&] {
+      if constexpr (SerDe::deserializing) {
+        // Deserializing:
 
-    // First ensure that all nodes reachable by this node are
-    // deserialized.
-    sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+        // First ensure that all nodes reachable by this node are
+        // deserialized.
+        sd.readWithLazyCount([&] { deserBlock(sd, impl); });
 
-    // Then obtain a pointer to the node that ClassGraph points
-    // to.
-    if (auto const name = sd.template make<const StringData*>()) {
-      this_ = &impl.get(name);
+        // Then obtain a pointer to the node that ClassGraph points
+        // to.
+        if (auto const name = decodeName(sd)) {
+          this_ = &impl.get(name);
 
-      // If this node was marked as having complete children (and
-      // we're not ignoring that), mark this node and all of it's
-      // transitive children as also having complete children.
-      bool complete;
-      sd(complete);
-      if (complete && !this_->hasCompleteChildren()) {
-        assertx(!this_->isConservative());
-        setCompleteImpl(impl, *this_);
-        assertx(this_->hasCompleteChildren());
-      }
+          // If this node was marked as having complete children (and
+          // we're not ignoring that), mark this node and all of it's
+          // transitive children as also having complete children.
+          Flags flags;
+          sd(flags);
+          if (flags & FlagChildren) {
+            assertx(flags == FlagChildren);
+            assertx(!this_->isConservative());
+            if (!this_->hasCompleteChildren()) {
+              setCompleteImpl(impl, *this_);
+              assertx(this_->hasCompleteChildren());
+            }
+          } else if (flags & FlagConservative) {
+            assertx(flags == (flags & (FlagConservative |
+                                       FlagRegSub | FlagNonRegSub)));
+            setConservative(
+              impl,
+              *this_,
+              flags & FlagRegSub,
+              flags & FlagNonRegSub
+            );
+          } else {
+            assertx(flags == FlagNone);
+          }
 
-      // If this node isn't regular, and we've recorded an equivalent
-      // node for it, make sure that the equivalent is
-      // hasCompleteChildren(), as that's an invariant.
-      if (auto const equiv = sd.template make<const StringData*>()) {
-        auto const equivNode = &impl.get(equiv);
-        assertx(!equivNode->isRegular());
-        if (!equivNode->hasCompleteChildren()) {
-          assertx(!equivNode->isConservative());
-          setCompleteImpl(impl, *equivNode);
-          assertx(equivNode->hasCompleteChildren());
-        }
-        impl.setEquiv(*this_, *equivNode);
-      }
+          // If this node isn't regular, and we've recorded an equivalent
+          // node for it, make sure that the equivalent is
+          // hasCompleteChildren(), as that's an invariant.
+          if (auto const equiv = decodeName(sd)) {
+            auto const equivNode = &impl.get(equiv);
+            assertx(!equivNode->isRegular());
+            if (!equivNode->hasCompleteChildren()) {
+              assertx(!equivNode->isConservative());
+              setCompleteImpl(impl, *equivNode);
+              assertx(equivNode->hasCompleteChildren());
+            }
+            impl.setEquiv(*this_, *equivNode);
+          }
 
-      if constexpr (!std::is_null_pointer_v<T>) {
-        if (cinfo) {
-          assertx(!this_->isMissing());
-          impl.setCInfo(*this_, *cinfo);
-        }
-      }
-    } else {
-      this_ = nullptr;
-    }
-  } else {
-    // Serializing:
-
-    // Serialize all of the nodes reachable by this node (parents,
-    // children, and parents of children) and encode how many.
-    sd.lazyCount(
-      [&] () -> size_t {
-        if (!this_) return 0;
-        auto count = serDownward(sd, *this_);
-        if (auto const e = folly::get_default(table().regOnlyEquivs, this_)) {
-          assertx(!this_->isRegular());
-          assertx(e->hasCompleteChildren());
-          count += serDownward(sd, *e);
-        }
-        return count;
-      }
-    );
-    // Encode the "entry-point" into the graph represented by this
-    // ClassGraph.
-    if (this_) {
-      sd(this_->name);
-      // Record whether this node has complete children, so we can
-      // reconstruct that when deserializing.
-      assertx(IMPLIES(hasCompleteChildren(), !isConservative()));
-      assertx(IMPLIES(isConservative(), this_->children.empty()));
-      sd(this_->hasCompleteChildren());
-
-      // If this Node isn't regular and has an equivalent node, record
-      // that here.
-      if (!this_->isMissing() && !this_->isRegular()) {
-        if (auto const e = folly::get_default(table().regOnlyEquivs, this_)) {
-          assertx(e->hasCompleteChildren());
-          sd(e->name);
+          if constexpr (!std::is_null_pointer_v<T>) {
+            if (cinfo) {
+              assertx(!this_->isMissing());
+              impl.setCInfo(*this_, *cinfo);
+            }
+          }
         } else {
-          sd((const StringData*)nullptr);
+          this_ = nullptr;
         }
       } else {
-        sd((const StringData*)nullptr);
-      }
-    } else {
-      sd((const StringData*)nullptr);
-    }
-  }
-}
+        // Serializing:
 
-// Sort a hphp_fast_set of nodes to a vector. Used to ensure
-// deterministic serialization of graph edges.
-std::vector<ClassGraph::Node*> ClassGraph::sort(const hphp_fast_set<Node*>& v) {
-  std::vector<Node*> sorted{begin(v), end(v)};
-  std::sort(
-    begin(sorted), end(sorted),
-    [] (const Node* a, const Node* b) {
-      assertx(a->name);
-      assertx(b->name);
-      return string_data_lt_type{}(a->name, b->name);
+        if (!tl_serde_state->upward) tl_serde_state->upward.emplace();
+        if (!tl_serde_state->downward) tl_serde_state->downward.emplace();
+
+        // Serialize all of the nodes reachable by this node (parents,
+        // children, and parents of children) and encode how many.
+        sd.lazyCount(
+          [&] () -> size_t {
+            if (!this_) return 0;
+            // Only encode children if requested.
+            auto count = ignoreChildren
+              ? serUpward(sd, *this_)
+              : serDownward(sd, *this_);
+            if (ignoreChildren) return count;
+            if (auto const e =
+                folly::get_default(table().regOnlyEquivs, this_)) {
+              assertx(!this_->isRegular());
+              assertx(e->hasCompleteChildren());
+              count += serDownward(sd, *e);
+            }
+            return count;
+          }
+        );
+        // Encode the "entry-point" into the graph represented by this
+        // ClassGraph.
+        if (this_) {
+          encodeName(sd, this_->name);
+          // Record whether this node has complete children, so we can
+          // reconstruct that when deserializing.
+          assertx(IMPLIES(hasCompleteChildren(), !isConservative()));
+          assertx(IMPLIES(isConservative(), this_->children.empty()));
+          assertx(IMPLIES(!hasCompleteChildren() && !isConservative(),
+                          !this_->hasRegularSubclass() &&
+                          !this_->hasNonRegularSubclass()));
+
+          auto mask = (Flags)(FlagChildren | FlagConservative);
+          if (this_->isConservative()) {
+            mask = (Flags)(mask | FlagRegSub | FlagNonRegSub);
+          }
+          if (ignoreChildren) mask = (Flags)(mask & ~FlagChildren);
+          sd((Flags)(this_->flags() & mask));
+
+          // If this Node isn't regular and has an equivalent node, record
+          // that here.
+          if (!ignoreChildren && !this_->isMissing() && !this_->isRegular()) {
+            if (auto const e =
+                folly::get_default(table().regOnlyEquivs, this_)) {
+              assertx(e->hasCompleteChildren());
+              encodeName(sd, e->name);
+            } else {
+              encodeName(sd, nullptr);
+            }
+          } else {
+            encodeName(sd, nullptr);
+          }
+        } else {
+          encodeName(sd, nullptr);
+        }
+      }
+    },
+    [&] {
+      // When serializing, we write this out last. When deserializing,
+      // we read it first.
+      assertx(tl_serde_state);
+      sd(tl_serde_state->newStrings);
+      tl_serde_state->strings.insert(
+        end(tl_serde_state->strings),
+        begin(tl_serde_state->newStrings),
+        end(tl_serde_state->newStrings)
+      );
+      tl_serde_state->newStrings.clear();
     }
   );
-  return sorted;
+}
+
+// Serialize a string using the string table.
+template <typename SerDe>
+void ClassGraph::encodeName(SerDe& sd, SString s) {
+  assertx(tl_serde_state);
+  if (auto const idx = folly::get_ptr(tl_serde_state->strToIdx, s)) {
+    sd(*idx);
+    return;
+  }
+  auto const idx =
+    tl_serde_state->strings.size() + tl_serde_state->newStrings.size();
+  tl_serde_state->newStrings.emplace_back(s);
+  tl_serde_state->strToIdx.emplace(s, idx);
+  sd(idx);
+}
+
+// Deserialize a string using the string table.
+template <typename SerDe>
+SString ClassGraph::decodeName(SerDe& sd) {
+  assertx(tl_serde_state);
+  size_t idx;
+  sd(idx);
+  always_assert(idx < tl_serde_state->strings.size());
+  return tl_serde_state->strings[idx];
 }
 
 // Deserialize a node, along with any other nodes it depends on.
 template <typename SerDe, typename Impl>
 void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
   // First get the name for this node.
-  auto const name = sd.template make<const StringData*>();
+  auto const name = decodeName(sd);
   assertx(name);
-
-  // Try to create it:
-  auto const [node, created] = impl.create(name);
-
-  // Either it already existed and we got an existing Node, or we
-  // created it. Even if it already existed, we still need to process
-  // it below as if it was new, because this might have additional
-  // flags to add to the Node.
-
-  // Deserialize dependent nodes.
-  sd.readWithLazyCount([&] { deserBlock(sd, impl); });
-
-  // At this point all dependent nodes are guaranteed to exist.
-
-  // Read the parent links. The children links are not encoded as
-  // they can be inferred from the parent links.
-  std::vector<SString> parents;
-  {
-    size_t size;
-    sd(size);
-    parents.reserve(size);
-    for (size_t i = 0; i < size; ++i) {
-      parents.emplace_back(sd.template make<const StringData*>());
-    }
-  }
-
-  // For each parent, register this node as a child. Lock the
-  // appropriate node if we're concurrent deserializing.
-  for (auto const parent : parents) {
-    // This should always succeed because all dependents should
-    // exist.
-    auto& parentNode = impl.get(parent);
-    impl.lock(
-      *node,
-      [&, node=node] { node->parents.emplace(&parentNode); }
-    );
-    impl.lock(
-      parentNode,
-      [&, node=node] {
-        if (!parentNode.isConservative()) parentNode.children.emplace(node);
-      }
-    );
-  }
 
   Flags flags;
   sd(flags);
   // These flags are never encoded and only exist at runtime.
-  assertx(
-    !(flags & (FlagWait | FlagChildren | FlagCInfo2))
-  );
-  // If this is a "missing" node, it shouldn't have any links
-  // (because we shouldn't know anything about it).
-  assertx(IMPLIES(flags & FlagMissing, parents.empty()));
+  assertx((flags & kSerializable) == flags);
   assertx(IMPLIES(flags & FlagMissing, flags == FlagMissing));
 
-  if (created) {
-    // If we created this node, we need to clear FlagWait and
-    // simultaneously set the node's flags to what we decoded.
-    impl.signal(*node, flags);
-  } else if (node->isMissing()) {
-    if (!(flags & FlagMissing)) impl.updateFlags(*node, flags, FlagMissing);
-  } else if (node->isConservative()) {
-    assertx(!(flags & FlagConservative) ||
-            ((node->flags() & ~(FlagChildren | FlagCInfo2))) == flags);
-  } else if (!node->hasCompleteChildren()) {
-    impl.updateFlags(*node, flags, FlagMissing);
-    if (node->isConservative()) {
-      impl.lock(*node, [node=node] { node->children.clear(); });
+  // Try to create it:
+  auto const [node, created] = impl.create(name);
+  if (created || node->isMissing()) {
+    // If this is the first time we've seen this node, deserialize any
+    // dependent nodes.
+    sd.withSize(
+      [&, node=node] {
+        assertx(!node->hasCompleteChildren());
+        assertx(!node->isConservative());
+
+        // Either it already existed and we got an existing Node, or we
+        // created it. Even if it already existed, we still need to process
+        // it below as if it was new, because this might have additional
+        // flags to add to the Node.
+
+        // Deserialize dependent nodes.
+        sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+
+        // At this point all dependent nodes are guaranteed to exist.
+
+        // Read the parent links. The children links are not encoded as
+        // they can be inferred from the parent links.
+        CompactVector<Node*> parents;
+        {
+          size_t size;
+          sd(size);
+          parents.reserve(size);
+          for (size_t i = 0; i < size; ++i) {
+            // This should always succeed because all dependents
+            // should exist.
+            parents.emplace_back(&impl.get(decodeName(sd)));
+          }
+          parents.shrink_to_fit();
+        }
+
+        // If this is a "missing" node, it shouldn't have any links
+        // (because we shouldn't know anything about it).
+        assertx(IMPLIES(flags & FlagMissing, parents.empty()));
+        assertx(std::is_sorted(begin(parents), end(parents), Node::Compare{}));
+
+        // For each parent, register this node as a child. Lock the
+        // appropriate node if we're concurrent deserializing.
+        for (auto const parent : parents) {
+          impl.lock(
+            *parent,
+            [&, node=node] {
+              if (parent->hasCompleteChildren() ||
+                  parent->isConservative()) {
+                return;
+              }
+              parent->children.emplace_back(node);
+            }
+          );
+        }
+
+        impl.lock(
+          *node,
+          [&, node=node] { node->parents = std::move(parents); }
+        );
+      }
+    );
+
+    if (created) {
+      // If we created this node, we need to clear FlagWait and
+      // simultaneously set the node's flags to what we decoded.
+      impl.signal(*node, flags);
+    } else if (!(flags & FlagMissing)) {
+      impl.updateFlags(*node, flags, FlagMissing);
     }
+  } else {
+    // Otherwise skip over the dependent nodes.
+    always_assert(flags == FlagMissing ||
+                  flags == (node->flags() & kSerializable));
+    sd.skipWithSize();
   }
 }
 
@@ -3601,12 +3900,16 @@ template <typename SerDe>
 size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
   assertx(!table().locking);
   assertx(tl_serde_state);
-  if (!tl_serde_state->downward.emplace(&n).second) return 0;
+  if (!tl_serde_state->downward->add(n)) return 0;
 
-  if (n.children.empty()) return serUpward(sd, n);
+  if (n.children.empty() || !n.hasCompleteChildren()) {
+    return serUpward(sd, n);
+  }
+  assertx(!n.isConservative());
+  assertx(std::is_sorted(begin(n.children), end(n.children), Node::Compare{}));
 
   size_t count = 0;
-  for (auto const child : sort(n.children)) {
+  for (auto const child : n.children) {
     count += serDownward(sd, *child);
   }
   return count;
@@ -3620,46 +3923,72 @@ bool ClassGraph::serUpward(SerDe& sd, Node& n) {
   assertx(tl_serde_state);
   // If we've already serialized this node, no need to serialize it
   // again.
-  if (!tl_serde_state->upward.emplace(&n).second) return false;
+  if (!tl_serde_state->upward->add(n)) return false;
 
   assertx(n.name);
   assertx(IMPLIES(n.isMissing(), n.parents.empty()));
   assertx(IMPLIES(n.isMissing(), n.children.empty()));
   assertx(IMPLIES(n.isMissing(), n.flags() == FlagMissing));
   assertx(IMPLIES(n.isConservative(), n.children.empty()));
+  assertx(IMPLIES(!n.hasCompleteChildren() && !n.isConservative(),
+                  !n.hasRegularSubclass()));
+  assertx(IMPLIES(!n.hasCompleteChildren() && !n.isConservative(),
+                  !n.hasNonRegularSubclass()));
+  assertx(std::is_sorted(begin(n.parents), end(n.parents), Node::Compare{}));
 
-  sd(n.name);
+  encodeName(sd, n.name);
+  // Shouldn't have any FlagWait when serializing.
+  assertx(!(n.flags() & FlagWait));
+  sd((Flags)(n.flags() & kSerializable));
 
-  // Sort the parents into a deterministic order.
-  auto const sorted = sort(n.parents);
-
-  // Recursively serialize all parents of this node. This ensures
-  // that when deserializing, the parents will be available before
-  // deserializing this node.
-  sd.lazyCount(
+  sd.withSize(
     [&] {
-      size_t count = 0;
-      for (auto const parent : sorted) {
-        count += serUpward(sd, *parent);
+      // Recursively serialize all parents of this node. This ensures
+      // that when deserializing, the parents will be available before
+      // deserializing this node.
+      sd.lazyCount(
+        [&] {
+          size_t count = 0;
+          for (auto const parent : n.parents) {
+            count += serUpward(sd, *parent);
+          }
+          return count;
+        }
+      );
+
+      // Record the names of the parents, to restore the links when
+      // deserializing.
+      sd(n.parents.size());
+      for (auto const p : n.parents) {
+        assertx(p->name);
+        encodeName(sd, p->name);
       }
-      return count;
     }
   );
 
-  // Record the names of the parents, to restore the links when
-  // deserializing.
-  sd(sorted.size());
-  for (auto const p : sorted) {
-    assertx(p->name);
-    sd(p->name);
-  }
-  // Shouldn't have any FlagWait when serializing.
-  assertx(!(n.flags() & FlagWait));
-  // These are only set at runtime, so shouldn't be serialized.
-  sd((Flags)(n.flags() & ~(FlagChildren | FlagCInfo2)));
-
   return true;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+// Storage for the auxiliary ClassGraphs a class or func may need.
+struct AuxClassGraphs {
+  // Nodes for which we don't need children.
+  hphp_fast_set<ClassGraph, ClassGraphHasher> noChildren;
+  // Nodes for which we have and need children.
+  hphp_fast_set<ClassGraph, ClassGraphHasher> withChildren;
+
+  void clear() {
+    noChildren.clear();
+    withChildren.clear();
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(noChildren, std::less<>{}, nullptr, true)
+      (withChildren, std::less<>{}, nullptr, false)
+      ;
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3677,14 +4006,14 @@ template <typename SerDe> void FuncInfo2::serde(SerDe& sd) {
   if constexpr (SerDe::deserializing) {
     bool present;
     sd(present);
-    using T = decltype(auxClassGraphs)::element_type;
     if (present) {
-      auxClassGraphs =
-        std::make_unique<T>(sd.template make<T>(std::less<>{}, nullptr));
+      auxClassGraphs = std::make_unique<AuxClassGraphs>(
+        sd.template make<AuxClassGraphs>()
+      );
     }
   } else {
     sd((bool)auxClassGraphs);
-    if (auxClassGraphs) sd(*auxClassGraphs, std::less<>{}, nullptr);
+    if (auxClassGraphs) sd(*auxClassGraphs);
   }
 }
 
@@ -3975,7 +4304,7 @@ struct ClassInfo2 {
    * here. This ensures that that ClassGraph will always be available
    * again.
    */
-  hphp_fast_set<ClassGraph, ClassGraphHasher> auxClassGraphs;
+  AuxClassGraphs auxClassGraphs;
 
   /*
    * Track if this class has a property which might redeclare a property in a
@@ -4054,7 +4383,7 @@ struct ClassInfo2 {
       (closures)
       (methodFamilies, string_data_lt{})
       (funcInfos)
-      (auxClassGraphs, std::less<>{}, nullptr)
+      (auxClassGraphs)
       (hasBadRedeclareProp)
       (hasBadInitialPropValues)
       (hasConstProp)
@@ -5928,22 +6257,41 @@ const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
 
 // Defined here so that AnalysisIndex::IndexData is a complete type.
 
-void ClassGraph::storeAuxs(AnalysisIndex::IndexData& i) const {
+void ClassGraph::storeAuxs(AnalysisIndex::IndexData& i, bool children) const {
   // Get the current context and store this ClassGraph on it's aux
   // list.
   auto const fc = fc_from_context(context_for_deps(i));
   if (auto const c = fc.right()) {
     if (!c->cinfo || c->cinfo == cinfo2()) return;
-    if (!c->cinfo->auxClassGraphs.emplace(*this).second) return;
-    FTRACE(2, "{} now stores {} as an auxiliary ClassGraph\n", c->name, name());
+    if (children) {
+      if (!c->cinfo->auxClassGraphs.withChildren.emplace(*this).second) return;
+      c->cinfo->auxClassGraphs.noChildren.erase(*this);
+    } else {
+      if (c->cinfo->auxClassGraphs.withChildren.count(*this)) return;
+      if (!c->cinfo->auxClassGraphs.noChildren.emplace(*this).second) return;
+    }
+    FTRACE(
+      2, "{} now stores {} as an auxiliary ClassGraph{}\n",
+      c->name, name(),
+      children ? " (with children)" : ""
+    );
   } else if (auto const f = fc.left()) {
     auto& fi = func_info(i, *f);
     if (!fi.auxClassGraphs) {
-      using T = decltype(fi.auxClassGraphs)::element_type;
-      fi.auxClassGraphs = std::make_unique<T>();
+      fi.auxClassGraphs = std::make_unique<AuxClassGraphs>();
     }
-    if (!fi.auxClassGraphs->emplace(*this).second) return;
-    FTRACE(2, "{} now stores {} as an auxiliary ClassGraph\n", f->name, name());
+    if (children) {
+      if (fi.auxClassGraphs->withChildren.emplace(*this).second) return;
+      fi.auxClassGraphs->noChildren.erase(*this);
+    } else {
+      if (fi.auxClassGraphs->withChildren.count(*this)) return;
+      if (!fi.auxClassGraphs->noChildren.emplace(*this).second) return;
+    }
+    FTRACE(
+      2, "{} now stores {} as an auxiliary ClassGraph{}\n",
+      f->name, name(),
+      children ? " (with children)" : ""
+    );
   }
 }
 
@@ -5955,7 +6303,7 @@ void ClassGraph::ensure() const {
   if (this_->isMissing()) {
     i->deps->add(AnalysisDeps::Class { name() });
   }
-  storeAuxs(*i);
+  storeAuxs(*i, false);
 }
 
 // Ensure ClassGraph is not missing and has complete child
@@ -5968,7 +6316,7 @@ void ClassGraph::ensureWithChildren() const {
       (!this_->hasCompleteChildren() && !this_->isConservative())) {
     i->deps->add(AnalysisDeps::Class { name() });
   }
-  storeAuxs(*i);
+  storeAuxs(*i, true);
 }
 
 // Ensure ClassGraph is not missing and has an associated ClassInfo2
@@ -8418,12 +8766,13 @@ struct FlattenJob {
       auto state = std::make_unique<State>();
       // Attempt to make the ClassInfo2 for this class. If we can't,
       // it means the class is not instantiable.
-      auto cinfo = make_info(index, *cls, *state);
-      if (!cinfo) {
+      auto newInfo = make_info(index, *cls, *state);
+      if (!newInfo) {
         ITRACE(4, "{} is not instantiable\n", cls->name);
         always_assert(index.m_uninstantiable.emplace(cls->name).second);
         continue;
       }
+      auto const cinfo = newInfo.get();
 
       ITRACE(5, "adding state for class '{}' to local index\n", cls->name);
       assertx(cinfo->name->tsame(cls->name));
@@ -8431,18 +8780,16 @@ struct FlattenJob {
       // We might look up this class when flattening itself, so add it
       // to the local index before we start.
       always_assert(index.m_classes.emplace(cls->name, cls).second);
-
-      auto const [cinfoIt, cinfoSuccess] =
-        index.m_classInfos.emplace(cls->name, std::move(cinfo));
-      always_assert(cinfoSuccess);
+      always_assert(
+        index.m_classInfos.emplace(cls->name, std::move(newInfo)).second
+      );
 
       auto const [stateIt, stateSuccess] =
         index.m_states.emplace(cls->name, std::move(state));
       always_assert(stateSuccess);
 
       auto closureIdx = cls->closures.size();
-      auto closures =
-        flatten_traits(index, *cls, *cinfoIt->second, *stateIt->second);
+      auto closures = flatten_traits(index, *cls, *cinfo, *stateIt->second);
 
       // Trait flattening may produce new closures, so those need to
       // be added to the local index as well.
@@ -8468,6 +8815,10 @@ struct FlattenJob {
           return string_data_lt_type{}(c1->name, c2->name);
         }
       );
+
+      // We're done with this class. All of it's parents are now
+      // added.
+      cinfo->classGraph.finalizeParents();
     }
 
     // Format the output data and put it in a deterministic order.
@@ -11904,19 +12255,17 @@ struct BuildSubclassListJob {
 
     SString name;
     SString cls;
-    // ClassGraph for the class this split contributes to. NB: Since
-    // this split only represents a subset of the class' children, it
-    // should *not* hasCompleteChildren().
-    ClassGraph classGraph;
     CompactVector<SString> children;
+    CompactVector<ClassGraph> classGraphs;
     Data data;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
+      ClassGraph::ScopedSerdeState _2;
       sd(name)
         (cls)
-        (classGraph, nullptr)
         (children)
+        (classGraphs, nullptr)
         (data)
         ;
     }
@@ -11999,10 +12348,25 @@ struct BuildSubclassListJob {
       }
       for (auto const& cinfo : leafs.vals) {
         always_assert(!cinfo->classGraph.isMissing());
+        always_assert(!cinfo->classGraph.hasCompleteChildren());
         always_assert(!cinfo->classGraph.isConservative());
       }
       for (auto const& cinfo : deps.vals) {
         always_assert(!cinfo->classGraph.isMissing());
+      }
+      for (auto const& split : splits.vals) {
+        for (auto const child : split->classGraphs) {
+          always_assert(!child.isMissing());
+          always_assert(!child.hasCompleteChildren());
+          always_assert(!child.isConservative());
+        }
+      }
+      for (auto const& split : splitDeps.vals) {
+        for (auto const child : split->classGraphs) {
+          always_assert(!child.isMissing());
+          always_assert(child.hasCompleteChildren() ||
+                        child.isConservative());
+        }
       }
     }
 
@@ -12069,6 +12433,22 @@ struct BuildSubclassListJob {
         continue;
       }
       cinfo->classGraph.setComplete();
+    }
+    for (auto& cinfo : deps.vals) {
+      if (cinfo->classGraph.hasCompleteChildren() ||
+          cinfo->classGraph.isConservative()) {
+        continue;
+      }
+      cinfo->classGraph.setComplete();
+    }
+    for (auto& split : splits.vals) {
+      for (auto child : split->classGraphs) {
+        if (child.hasCompleteChildren() ||
+            child.isConservative()) {
+          continue;
+        }
+        child.setComplete();
+      }
     }
 
     // Store the regular-only equivalent classes in the output
@@ -12488,7 +12868,7 @@ protected:
     // matches the semantics of the subclass list and simplifies the
     // processing).
     for (auto const name : index.top) {
-      if (auto const split = folly::get_default(index.splits, name, nullptr)) {
+      if (auto const split = folly::get_default(index.splits, name)) {
         // Copy the children list out of the split and add it to the
         // map.
         auto& c = children[name];
@@ -12497,7 +12877,6 @@ protected:
                   index.splits.count(child));
           c.emplace(child);
         }
-        split->children.clear();
       }
     }
 
@@ -12907,7 +13286,8 @@ protected:
 
     Data data;
     auto first = true;
-    // Set of children calculated for current top to ensure we don't duplicate work.
+    // Set of children calculated for current top to ensure we don't
+    // duplicate work.
     TSStringSet calculatedForTop;
 
     // For each child of the class/split (for classes this includes
@@ -13453,9 +13833,27 @@ protected:
     // the fields should be their default settings.
     for (auto& split : splits) {
       assertx(index.top.count(split->name));
-      assertx(split->children.empty());
       split->data = aggregate_data(index, split->name);
-      split->classGraph = ClassGraph::get(split->cls);
+      // This split inherits all of the splits of their children.
+      for (auto const child : split->children) {
+        if (auto const c = folly::get_default(index.classInfos, child)) {
+          split->classGraphs.emplace_back(c->classGraph);
+          continue;
+        }
+        auto const s = folly::get_default(index.splits, child);
+        always_assert(s);
+        split->classGraphs.insert(
+          end(split->classGraphs),
+          begin(s->classGraphs),
+          end(s->classGraphs)
+        );
+      }
+      std::sort(begin(split->classGraphs), end(split->classGraphs));
+      split->classGraphs.erase(
+        std::unique(begin(split->classGraphs), end(split->classGraphs)),
+        end(split->classGraphs)
+      );
+      split->children.clear();
     }
   }
 };
@@ -13846,14 +14244,15 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           std::vector<Split::Data> splits;
           splits.reserve(numSplits);
           for (size_t i = 0; i < numSplits; ++i) {
-            // The names of a split node are arbitrary, but most be
+            // The names of a split node are arbitrary, but must be
             // unique and not collide with any actual classes.
             auto const name = makeStaticString(
               folly::sformat("{}_{}_split;{}", round, i, cls)
             );
 
             auto deps = std::make_unique<DepData>();
-            auto split = std::make_unique<BuildSubclassListJob::Split>(name, cls);
+            auto split =
+              std::make_unique<BuildSubclassListJob::Split>(name, cls);
             std::vector<SString> children;
 
             for (auto const child : buckets[i]) {
@@ -13872,7 +14271,12 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             );
 
             splits.emplace_back(
-              Split::Data{name, std::move(deps), std::move(split), std::move(children)}
+              Split::Data{
+                name,
+                std::move(deps),
+                std::move(split),
+                std::move(children)
+              }
             );
           }
           return splits;
@@ -19560,7 +19964,9 @@ AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) const {
 
 //////////////////////////////////////////////////////////////////////
 
-AnalysisScheduler::AnalysisScheduler(Index& index) : index{index} {}
+AnalysisScheduler::AnalysisScheduler(Index& index)
+  : index{index}
+  , funcsToRemoveLock{std::make_unique<std::mutex>()} {}
 
 void AnalysisScheduler::registerClass(SString name) {
   // Closures are only scheduled as part of the class or func they're
@@ -19573,6 +19979,10 @@ void AnalysisScheduler::registerClass(SString name) {
   auto const& closures =
     folly::get_default(index.m_data->classToClosures, name);
   for (auto const clo : closures) {
+    FTRACE(
+      5, "AnalysisScheduler: registering closure {} associated with class {}\n",
+      clo, name
+    );
     always_assert(classState.try_emplace(clo).second);
   }
 }
@@ -19585,6 +19995,10 @@ void AnalysisScheduler::registerFunc(SString name) {
 
   auto const& closures = folly::get_default(index.m_data->funcToClosures, name);
   for (auto const clo : closures) {
+    FTRACE(
+      5, "AnalysisScheduler: registering closure {} associated with func {}\n",
+      clo, name
+    );
     always_assert(classState.try_emplace(clo).second);
   }
 
@@ -19704,7 +20118,14 @@ void AnalysisScheduler::updateDepState(AnalysisOutput& output,
       "Trying to set deps for un-tracked class {}",
       name
     );
-    update(it->second.depState, std::move(output.meta.classDeps[i]));
+    auto& state = it->second.depState;
+    if (is_closure_name(name)) {
+      assertx(output.meta.classDeps[i].empty());
+      assertx(!state.group);
+      assertx(!state.newDeps);
+      continue;
+    }
+    update(state, std::move(output.meta.classDeps[i]));
   }
   for (size_t i = 0, size = output.funcNames.size(); i < size; ++i) {
     auto const name = output.funcNames[i];
@@ -19733,8 +20154,8 @@ void AnalysisScheduler::updateDepState(AnalysisOutput& output,
   }
 }
 
-// Record the output of an analys job. This means updating the various
-// Refs to their new versions, recording new dependencies, and
+// Record the output of an analysis job. This means updating the
+// various Refs to their new versions, recording new dependencies, and
 // recording what has changed (to schedule the next round).
 void AnalysisScheduler::record(AnalysisOutput output) {
   auto const numClasses = output.classNames.size();
@@ -19806,7 +20227,7 @@ void AnalysisScheduler::record(AnalysisOutput output) {
   // that here so they can be later removed from our tables.
   if (!output.meta.removedFuncs.empty()) {
     // This is relatively rare, so a lock is fine.
-    std::lock_guard<std::mutex> _{funcsToRemoveLock};
+    std::lock_guard<std::mutex> _{*funcsToRemoveLock};
     funcsToRemove.insert(
       begin(output.meta.removedFuncs),
       end(output.meta.removedFuncs)
@@ -19876,6 +20297,12 @@ void AnalysisScheduler::findToSchedule() {
 
     auto const& old = d.deps.has_value() ? *d.deps : empty;
     auto const& nue = d.newDeps.has_value() ? *d.newDeps : old;
+
+    if (is_closure_name(name)) {
+      assertx(old.empty());
+      assertx(nue.empty());
+      return false;
+    }
 
     for (auto const [meth, newT] : nue.methods) {
       auto const state = folly::get_ptr(classState, meth.cls);
@@ -20114,22 +20541,32 @@ void AnalysisScheduler::findToSchedule() {
 // Reset any recorded changes from analysis jobs, in preparation for
 // another round.
 void AnalysisScheduler::resetChanges() {
+  auto const resetClass = [&] (SString name) {
+    auto& state = classState.at(name);
+    std::fill(
+      begin(state.methodChanges),
+      end(state.methodChanges),
+      Type::None
+    );
+    state.cnsChanges.reset();
+  };
+
   parallel::for_each(
     classNames,
     [&] (SString name) {
-      auto& state = classState.at(name);
-      std::fill(
-        begin(state.methodChanges),
-        end(state.methodChanges),
-        Type::None
-      );
-      state.cnsChanges.reset();
+      resetClass(name);
+      auto const& closures =
+        folly::get_default(index.m_data->classToClosures, name);
+      for (auto const c : closures) resetClass(c);
     }
   );
   parallel::for_each(
     funcNames,
     [&] (SString name) {
       funcState.at(name).changed = Type::None;
+      auto const& closures =
+        folly::get_default(index.m_data->funcToClosures, name);
+      for (auto const c : closures) resetClass(c);
       if (auto const cns = Constant::nameFromFuncName(name)) {
         cnsChanged.at(cns).store(false, std::memory_order_release);
       }
@@ -20209,15 +20646,13 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
   }
   assertx(!index.m_data->closureToClass.count(cls));
 
-  if (!input.depClasses.emplace(cls, *clsRef).second) {
-    // If we already added the class and don't need to add the
-    // bytecode, nothing more to do.
-    if (!addBytecode) return;
-  } else {
+  if (input.depClasses.emplace(cls, *clsRef).second) {
     FTRACE(
       4, "AnalysisScheduler: adding class {} to {} dep inputs\n",
       cls, depSrc
     );
+  } else if (!addBytecode || input.classBC.count(cls)) {
+    return;
   }
 
   if (auto const r = folly::get_ptr(index.m_data->classInfoRefs, cls)) {
@@ -20271,15 +20706,13 @@ void AnalysisScheduler::addDepFuncToInput(SString func,
     return;
   }
 
-  if (!input.depFuncs.emplace(func, *funcRef).second) {
-    // If we already added the func and don't need to add the
-    // bytecode, nothing more to do.
-    if (!(type & Type::Bytecode)) return;
-  } else {
+  if (input.depFuncs.emplace(func, *funcRef).second) {
     FTRACE(
       4, "AnalysisScheduler: adding func {} to {} dep inputs\n",
       func, depSrc
     );
+  } else if (!(type & Type::Bytecode) || input.funcBC.count(func)) {
+    return;
   }
 
   input.finfos.emplace(

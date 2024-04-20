@@ -156,6 +156,11 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
   not_reached();
 }
 
+size_t EntryInfo::totalSize() const {
+  return size + key.size() + 1 /* null terminator in string */ +
+    ConcurrentTableSharedStore::NodeSize + sizeof(StoreValue);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1130,7 +1135,7 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
     auto const key = iter.first;
     StoreValue& value = iter.second;
     if (value.expired()) continue;
-    int size = sizeof(StoreValue) + strlen(key) + 1 + value.dataSize;
+    int size = NodeSize + sizeof(StoreValue) + strlen(key) + 1 + value.dataSize;
 
     if (size > next) {
       uint32_t left = size - next;

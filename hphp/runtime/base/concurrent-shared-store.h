@@ -162,6 +162,7 @@ struct EntryInfo {
     , inHotCache(inHotCache)
   {}
 
+  size_t totalSize() const;
   static Type getAPCType(const APCHandle* handle);
 
   std::string key;
@@ -398,6 +399,9 @@ private:
       return p1.second > p2.second;
     }
   };
+
+public:
+  static constexpr size_t NodeSize = sizeof(Map::node);
 
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);

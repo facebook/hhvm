@@ -811,6 +811,9 @@ void apc_sample_by_size() {
     sample.setInt("in_mem", 1);
     sample.setInt("ttl", entry.ttl);
     sample.setInt("size", entry.size);
+    sample.setInt("key_size", entry.key.size());
+    sample.setInt("value_size", entry.size);
+    sample.setInt("total_size", entry.totalSize());
     sample.setInt("weight", weight);
     StructuredLog::log("apc_samples", sample);
   }

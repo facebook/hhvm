@@ -301,7 +301,13 @@ struct FactsExtension final : Extension {
 
   void moduleShutdown() override {
     // Destroy all resources at a deterministic time to avoid SDOF
-    FactsFactory::setInstance(nullptr);
+    if (FactsFactory::getInstance() == m_data->m_factory.get()) {
+      // FactsFactory is still the one installed by this extension.
+      // Deregister it now.
+      FactsFactory::setInstance(nullptr);
+    } else {
+      // Some other extension initialized FactsFactory - leave it alone.
+    }
     m_data = {};
   }
 

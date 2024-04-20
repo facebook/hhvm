@@ -74,6 +74,7 @@ Optional<fs::path> resolvePathRelativeToRoot(
     const fs::path& root) {
   if (path.is_relative())
     return path;
+  // TODO: for snapshot semantics, this should not access the filesystem.
   if (!fs::exists(path))
     return std::nullopt;
   return fs::relative(path, root);

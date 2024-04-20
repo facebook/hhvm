@@ -23,10 +23,12 @@ use oxidized_by_ref::typing_defs::UserAttributeParam;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum TypeKind {
     Class,
     Interface,
+
+    /// Used for legacy enum and enum class
     Enum,
     Trait,
     TypeAlias,
@@ -37,6 +39,19 @@ pub enum TypeKind {
 impl Default for TypeKind {
     fn default() -> Self {
         Self::Unknown
+    }
+}
+
+impl TypeKind {
+    pub fn is_classish(&self) -> bool {
+        matches!(
+            self,
+            Self::Class | Self::Interface | Self::Trait | Self::Enum
+        )
+    }
+
+    pub fn is_typedef(&self) -> bool {
+        *self == Self::TypeAlias
     }
 }
 

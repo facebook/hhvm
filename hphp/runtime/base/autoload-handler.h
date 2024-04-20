@@ -127,6 +127,7 @@ struct FactsFactory {
    * yet, create it.
    */
   virtual FactsStore* getForOptions(const RepoOptions& options) = 0;
+  virtual bool canFork() const { return true; }
 };
 
 }

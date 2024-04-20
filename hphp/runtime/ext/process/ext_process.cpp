@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -100,6 +101,13 @@ namespace {
 static SimpleMutex s_lock;
 
 bool cantPrefork() {
+  if (auto ff = FactsFactory::getInstance()) {
+    // Allow Facts implementation to block forking.
+    // TODO: If forking is essential even after facts is initialized, then
+    // we should have FactsFactory prefork/postfork hooks so it can properly
+    // manage singletons, threadpools, connection pools, etc.
+    if (!ff->canFork()) return true;
+  }
   if (num_1g_pages() > 0 || RuntimeOption::EvalFileBackedColdArena) {
     // We put data on shared pages, which won't work with fork().
     return true;

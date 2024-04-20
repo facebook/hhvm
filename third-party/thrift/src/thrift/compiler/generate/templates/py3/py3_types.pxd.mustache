@@ -25,6 +25,22 @@ implemented in the Struct.pyx file.
 {{> common/auto_generated_py}}
 
 {{> types/cimport_extern }}
+cimport thrift.py3.exceptions
+cimport thrift.py3.types
+from thrift.py3.common cimport (
+    RpcOptions as __RpcOptions,
+    MetadataBox as __MetadataBox,
+)
+from folly.optional cimport cOptional as __cOptional
+{{#program:has_stream?}}
+from folly cimport cFollyTry
+from cpython.ref cimport PyObject
+from thrift.py3.stream cimport (
+    ClientBufferedStream, cClientBufferedStream, cClientBufferedStreamWrapper,
+    ResponseAndClientBufferedStream, cResponseAndClientBufferedStream,
+    ServerStream, cServerStream, ResponseAndServerStream
+)
+{{/program:has_stream?}}
 
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_fields as _fbthrift_types_fields
 

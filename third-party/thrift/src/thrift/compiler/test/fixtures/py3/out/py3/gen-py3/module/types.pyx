@@ -11,6 +11,7 @@ from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.iterator cimport inserter as cinserter
+from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
@@ -47,6 +48,7 @@ from thrift.py3.types cimport (
 )
 from thrift.py3.types import _is_python_enum, _is_python_struct
 cimport thrift.py3.serializer as serializer
+from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
 from folly.optional cimport cOptional
 from folly.memory cimport to_shared_ptr as __to_shared_ptr

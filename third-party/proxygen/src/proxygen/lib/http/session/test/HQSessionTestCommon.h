@@ -169,7 +169,7 @@ class HQSessionTest
       auto dirModifier =
           (direction_ == proxygen::TransportDirection::DOWNSTREAM) ? 0 : 1;
       EXPECT_CALL(infoCb_, onWrite(testing::_, testing::_))
-          .Times(testing::AtLeast(numCtrlStreams_));
+          .Times(testing::AtLeast(1));
       for (auto i = 0; i < numCtrlStreams_; i++) {
         folly::Optional<proxygen::HTTPCodec::StreamID> expectedStreamID =
             i * 4 + 2 + dirModifier;

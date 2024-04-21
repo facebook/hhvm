@@ -2236,6 +2236,7 @@ void HTTPSession::runLoopCallback() noexcept {
             });
   }
 
+  uint64_t bytesWritten = 0;
   for (uint32_t i = 0; i < kMaxWritesPerLoop; ++i) {
     bodyBytesPerWriteBuf_ = 0;
     bool cork = true;
@@ -2281,8 +2282,13 @@ void HTTPSession::runLoopCallback() noexcept {
       // updateWriteBufSize called in scope guard
       break;
     }
+    bytesWritten += len;
     // writeChain can result in a writeError and trigger the shutdown code path
   }
+  if (infoCallback_ && bytesWritten > 0) {
+    infoCallback_->onWrite(*this, bytesWritten);
+  }
+
   if (numActiveWrites_ == 0 && !writesShutdown() && hasMoreWrites() &&
       (!connFlowControl_ || connFlowControl_->getAvailableSend())) {
     scheduleWrite();
@@ -2800,7 +2806,7 @@ void HTTPSession::writeSuccess() noexcept {
   writeTimeout_.cancelTimeout();
   pendingWrite_.reset();
 
-  if (infoCallback_) {
+  if (infoCallback_ && !inLoopCallback_) {
     infoCallback_->onWrite(*this, bytesWritten);
   }
 

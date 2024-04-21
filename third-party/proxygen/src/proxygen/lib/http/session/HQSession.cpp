@@ -1066,11 +1066,18 @@ void HQSession::runLoopCallback() noexcept {
 
   // Then handle the writes
   // Write all the control streams first
+  auto maxToSendOrig = maxToSend_;
   maxToSend_ -= writeControlStreams(maxToSend_);
   // Then write the request streams
   if (!txnEgressQueue_.empty() && maxToSend_ > 0) {
     // TODO: we could send FIN only?
     maxToSend_ = writeRequestStreams(maxToSend_);
+  }
+  auto sent = maxToSendOrig - maxToSend_;
+  if (sent > 0) {
+    if (infoCallback_) {
+      infoCallback_->onWrite(*this, sent);
+    }
   }
   // Zero out maxToSend_ here.  We won't egress anything else until the next
   // onWriteReady call
@@ -1769,10 +1776,6 @@ uint64_t HQSession::controlStreamWriteImpl(HQControlStream* ctrlStream,
       << __func__ << " after write sess=" << *this
       << ": streamID=" << ctrlStream->getEgressStreamId() << " sent=" << sendLen
       << " buflen=" << static_cast<int>(ctrlStream->writeBuf_.chainLength());
-  if (infoCallback_) {
-    infoCallback_->onWrite(*this, sendLen);
-  }
-
   return sendLen;
 }
 
@@ -2035,9 +2038,6 @@ uint64_t HQSession::requestStreamWriteImpl(HQStreamTransportBase* hqStream,
           << " buflen=" << hqStream->writeBufferSize()
           << " hasPendingBody=" << hqStream->txn_.hasPendingBody()
           << " EOM=" << hqStream->pendingEOM_;
-  if (infoCallback_) {
-    infoCallback_->onWrite(*this, sent);
-  }
   CHECK_GE(maxEgress, sent);
 
   bool flowControlBlocked = (sent == streamSendWindow && !sendEof);

@@ -108,6 +108,7 @@ const StaticString s_Closure("Closure");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
 const StaticString s_Awaitable("HH\\Awaitable");
+const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -5491,6 +5492,37 @@ TriBool Func::lookupReadonlyThis() const {
       }
       return readOnly;
     }
+  );
+}
+
+Optional<SString> Func::triviallyWrappedFunc() const {
+  auto const check = [](const php::Func* func) -> Optional<SString> {
+    auto const it = func->userAttributes.find(s_TrivialHHVMBuiltinWrapper.get());
+    if (it == func->userAttributes.end()) return std::nullopt;
+    assertx(tvIsVec(it->second));
+    auto const args = it->second.m_data.parr;
+    if (args->size() != 1) return std::nullopt;
+    auto const wrappedFunc = args->at(int64_t{0});
+    if (!tvIsString(wrappedFunc)) return std::nullopt;
+    assertx(wrappedFunc.m_data.pstr->isStatic());
+    return wrappedFunc.m_data.pstr;
+  };
+  return match<Optional<SString>>(
+    val,
+    [] (Func::FuncName)          { return std::nullopt; },
+    [] (Func::MethodName)        { return std::nullopt; },
+    [&] (Func::Fun f)            { return check(f.finfo->func); },
+    [&] (Func::Fun2 f)           { return check(f.finfo->func); },
+    [] (Func::Method)            { return std::nullopt; },
+    [] (Func::Method2)           { return std::nullopt; },
+    [] (Func::MethodFamily)      { return std::nullopt; },
+    [] (Func::MethodFamily2)     { return std::nullopt; },
+    [] (Func::MethodOrMissing)   { return std::nullopt; },
+    [] (Func::MethodOrMissing2)  { return std::nullopt; },
+    [] (Func::MissingFunc)       { return std::nullopt; },
+    [] (Func::MissingMethod)     { return std::nullopt; },
+    [] (const Func::Isect&)      { return std::nullopt; },
+    [] (const Func::Isect2&)     { return std::nullopt; }
   );
 }
 

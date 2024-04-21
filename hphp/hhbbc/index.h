@@ -790,6 +790,11 @@ struct Func {
   TriBool lookupReadonlyThis() const;
 
   /*
+   * Returns the wrapped HHVM builtin iff this is a trivial HHVM builtin wrapper
+   */
+  Optional<SString> triviallyWrappedFunc() const;
+
+  /*
    * Coeffects
    */
   const RuntimeCoeffects* requiredCoeffects() const;

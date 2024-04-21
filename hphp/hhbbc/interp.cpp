@@ -3965,6 +3965,10 @@ void fcallUnknownImpl(ISS& env,
 void in(ISS& env, const bc::FCallFuncD& op) {
   auto const rfunc = env.index.resolve_func(op.str2);
 
+  if (auto const wrapped = rfunc.triviallyWrappedFunc()) {
+    return reduce(env, bc::FCallFuncD { op.fca, *wrapped });
+  }
+
   if (op.fca.hasGenerics()) {
     auto const tsList = topC(env);
     if (!tsList.couldBe(BVec)) {

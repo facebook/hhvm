@@ -22,11 +22,11 @@ struct Message {
   std::unique_ptr<folly::IOBuf> message;
 };
 folly::SemiFuture<Message> expectSendMessage(MockWebTransport& wt) {
-  auto contract = folly::makePromiseContract<Message>();
+  auto [promise, future] = folly::makePromiseContract<Message>();
 
   EXPECT_CALL(wt, writeStreamData(_, _, _))
       .WillOnce(
-          [&wt, promise = folly::MoveWrapper(std::move(contract.first))](
+          [&wt, promise = folly::MoveWrapper(std::move(promise))](
               uint64_t id, std::unique_ptr<folly::IOBuf> data, bool eof) mutable
           -> folly::Expected<folly::Unit, proxygen::WebTransport::ErrorCode> {
             Message m;
@@ -39,7 +39,7 @@ folly::SemiFuture<Message> expectSendMessage(MockWebTransport& wt) {
           })
       .RetiresOnSaturation();
 
-  return std::move(contract.second);
+  return std::move(future);
 }
 
 class DeviousBatonTest : public testing::TestWithParam<uint8_t> {};

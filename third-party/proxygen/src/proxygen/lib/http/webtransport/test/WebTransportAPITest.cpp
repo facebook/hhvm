@@ -49,20 +49,22 @@ TEST(WebTransportTest, AwaitNextReadTimeout) {
   folly::SingletonVault::singleton()->registrationComplete();
   folly::EventBase evb;
   MockStreamReadHandle readHandle(0);
-  auto contract = folly::makePromiseContract<WebTransport::StreamData>();
-  EXPECT_CALL(readHandle, readStreamData()).WillOnce(testing::Invoke([&] {
-    return std::move(contract.second);
-  }));
+  auto [promise, future] =
+      folly::makePromiseContract<WebTransport::StreamData>();
+  EXPECT_CALL(readHandle, readStreamData())
+      .WillOnce(testing::Invoke([&, &future = future] { //
+        return std::move(future);
+      }));
 
   readHandle.awaitNextRead(
       &evb,
-      [&](WebTransport::StreamReadHandle* handle,
-          folly::Try<WebTransport::StreamData> streamData) {
+      [&, &promise = promise](WebTransport::StreamReadHandle* handle,
+                              folly::Try<WebTransport::StreamData> streamData) {
         EXPECT_EQ(handle, &readHandle);
         EXPECT_NE(streamData.tryGetExceptionObject<folly::FutureException>(),
                   nullptr);
         // The promise core holds a keep alive to the event base, kill it here
-        auto deadPromise = std::move(contract.first);
+        auto deadPromise = std::move(promise);
       },
       std::chrono::milliseconds(100));
   evb.loop();

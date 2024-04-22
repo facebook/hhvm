@@ -2060,9 +2060,9 @@ HTTPTransaction::TxnStreamWriteHandle::writeStreamData(
   if (*fcState == Transport::FCState::UNBLOCKED) {
     return folly::makeSemiFuture(folly::unit);
   } else {
-    auto contract = folly::makePromiseContract<folly::Unit>();
-    writePromise_.emplace(std::move(contract.first));
-    return std::move(contract.second);
+    auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+    writePromise_.emplace(std::move(promise));
+    return std::move(future);
   }
 }
 
@@ -2161,9 +2161,10 @@ HTTPTransaction::TxnStreamReadHandle::readStreamData() {
     txn_.wtIngressStreams_.erase(getID());
     return folly::makeSemiFuture<WebTransport::StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {
-    auto contract = folly::makePromiseContract<WebTransport::StreamData>();
-    readPromise_.emplace(std::move(contract.first));
-    return std::move(contract.second);
+    auto [promise, future] =
+        folly::makePromiseContract<WebTransport::StreamData>();
+    readPromise_.emplace(std::move(promise));
+    return std::move(future);
   } else {
     auto bufLen = buf_.chainLength();
     WebTransport::StreamData streamData({buf_.move(), eof_});

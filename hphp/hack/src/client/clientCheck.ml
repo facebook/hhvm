@@ -230,10 +230,15 @@ let parse_positions positions =
         raise Exit_status.(Exit_with Input_error))
 
 (* Filters and prints errors when a path is not a realpath *)
-let filter_real_paths paths =
+let filter_real_paths ~allow_directories paths =
   List.filter_map paths ~f:(fun fn ->
       match Sys_utils.realpath fn with
-      | Some path -> Some path
+      | Some path ->
+        if (not allow_directories) && Disk.is_directory fn then begin
+          prerr_endlinef "Path is a directory, only files are allowed: '%s'" fn;
+          None
+        end else
+          Some path
       | None ->
         prerr_endlinef "Could not find file '%s'" fn;
         None)
@@ -771,7 +776,7 @@ let main_internal
       Lwt.return (Exit_status.No_error, telemetry)
     end
   | MODE_LINT ->
-    let fnl = filter_real_paths args.paths in
+    let fnl = filter_real_paths ~allow_directories:false args.paths in
     begin
       match args.paths with
       | [] ->
@@ -925,7 +930,7 @@ let main_internal
         raise Exit_status.(Exit_with Input_error)
     end
   | MODE_FILE_LEVEL_DEPENDENCIES ->
-    let paths = filter_real_paths args.paths in
+    let paths = filter_real_paths ~allow_directories:true args.paths in
     let%lwt (responses, telemetry) =
       rpc args @@ ServerCommandTypes.FILE_DEPENDENTS paths
     in

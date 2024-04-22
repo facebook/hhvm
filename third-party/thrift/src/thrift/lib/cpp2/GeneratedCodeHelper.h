@@ -1585,7 +1585,7 @@ using CallbackBasePtr = CallbackBase::Ptr;
 template <typename T>
 using Callback = HandlerCallback<T>;
 template <typename T>
-using CallbackPtr = std::unique_ptr<Callback<T>>;
+using CallbackPtr = HandlerCallbackPtr<T>;
 
 class AsyncTmPrep {
   ServerInterface* si_;

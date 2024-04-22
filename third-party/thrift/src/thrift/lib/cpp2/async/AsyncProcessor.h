@@ -1168,9 +1168,6 @@ class ServerInterface : public virtual AsyncProcessorFactory,
 template <class T>
 class HandlerCallback;
 
-template <class T>
-using HandlerCallbackPtr = std::unique_ptr<HandlerCallback<T>>;
-
 /**
  * HandlerCallback class for async callbacks.
  *
@@ -1207,6 +1204,9 @@ class HandlerCallbackBase {
     }
   }
 
+  util::BasicIntrusiveSharedPtrControlBlock intrusivePtrControlBlock_;
+
+ public:
   struct IntrusiveSharedPtrAccess {
     static void acquireRef(HandlerCallbackBase& callback) noexcept {
       callback.intrusivePtrControlBlock_.acquireRef();
@@ -1216,7 +1216,6 @@ class HandlerCallbackBase {
       return callback.intrusivePtrControlBlock_.releaseRef();
     }
   };
-  util::BasicIntrusiveSharedPtrControlBlock intrusivePtrControlBlock_;
 
  public:
   using Ptr =
@@ -1379,6 +1378,11 @@ class HandlerCallbackBase {
   ServerRequestData requestData_;
 };
 
+template <class T>
+using HandlerCallbackPtr = util::IntrusiveSharedPtr<
+    HandlerCallback<T>,
+    HandlerCallbackBase::IntrusiveSharedPtrAccess>;
+
 template <typename T>
 class HandlerCallback : public HandlerCallbackBase {
   using Helper = apache::thrift::detail::HandlerCallbackHelper<T>;
@@ -1387,7 +1391,7 @@ class HandlerCallback : public HandlerCallbackBase {
   using cob_ptr = typename Helper::CobPtr;
 
  public:
-  using Ptr = std::unique_ptr<HandlerCallback<T>>;
+  using Ptr = HandlerCallbackPtr<T>;
   using ResultType = std::decay_t<typename Helper::InputType>;
 
  public:
@@ -1435,7 +1439,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   using cob_ptr = SerializedResponse (*)(ContextStack*);
 
  public:
-  using Ptr = std::unique_ptr<HandlerCallback<void>>;
+  using Ptr = HandlerCallbackPtr<void>;
   using ResultType = void;
 
   HandlerCallback() : cp_(nullptr) {}
@@ -1489,7 +1493,7 @@ template <typename InteractionIf, typename Response>
 class HandlerCallback<TileAndResponse<InteractionIf, Response>> final
     : public HandlerCallback<Response> {
  public:
-  using Ptr = std::unique_ptr<HandlerCallback>;
+  using Ptr = HandlerCallbackPtr<TileAndResponse<InteractionIf, Response>>;
 
   void result(TileAndResponse<InteractionIf, Response>&& r) {
     if (this->fulfillTilePromise(std::move(r.tile))) {

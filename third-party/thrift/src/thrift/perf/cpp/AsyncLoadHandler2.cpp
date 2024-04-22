@@ -44,11 +44,12 @@ void AsyncLoadHandler2::async_eb_asyncNoop(HandlerCallbackPtr<void> callback) {
 void AsyncLoadHandler2::async_eb_sleep(
     HandlerCallbackPtr<void> callback, int64_t microseconds) {
   // May leak if task never finishes
-  HandlerCallback<void>* callbackp = callback.release();
+  HandlerCallback<void>* callbackp = callback.unsafeRelease();
   callbackp->getEventBase()->runInEventBaseThread([=]() {
     callbackp->getEventBase()->tryRunAfterDelay(
         [=]() {
-          HandlerCallbackPtr<void> cb(callbackp);
+          HandlerCallbackPtr<void> cb(
+              HandlerCallbackPtr<void>::UnsafelyFromRawPointer(), callbackp);
           cb->done();
         },
         microseconds / Util::US_PER_MS);

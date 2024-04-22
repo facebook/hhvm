@@ -1101,12 +1101,12 @@ TEST(StructPatchTest, IncludePatch) {
   MyData data;
   data.data2() = 42;
 
-  test::patch::IncludePatchStruct patch1;
+  IncludePatchStruct patch1;
   patch1.patch()->patch<ident::data2>() -= 10;
   patch1.patch()->apply(data);
   EXPECT_EQ(data.data2(), 32);
 
-  test::patch::IncludePatchUnion patch2;
+  IncludePatchUnion patch2;
   patch2.patch_ref().emplace().patch<ident::data2>() += 10;
   patch2.patch_ref()->apply(data);
   EXPECT_EQ(data.data2(), 42);
@@ -1130,21 +1130,21 @@ TEST(PatchTest, IsPatch) {
   static_assert(!is_patch_v<std::string>);
   static_assert(is_patch_v<op::StringPatch>);
 
-  static_assert(!is_patch_v<test::patch::MyStruct>);
-  static_assert(is_patch_v<test::patch::MyStructPatch>);
-  static_assert(!is_patch_v<test::patch::MyStructPatchStruct>);
-  static_assert(is_patch_v<test::patch::MyStructFieldPatch>);
-  static_assert(!is_patch_v<test::patch::MyStructEnsureStruct>);
+  static_assert(!is_patch_v<MyStruct>);
+  static_assert(is_patch_v<MyStructPatch>);
+  static_assert(!is_patch_v<MyStructPatchStruct>);
+  static_assert(is_patch_v<MyStructFieldPatch>);
+  static_assert(!is_patch_v<MyStructEnsureStruct>);
 
   static_assert(is_patch_v<ListPatch>);
   static_assert(is_patch_v<SetPatch>);
   static_assert(is_patch_v<MapPatch>);
 
   // Assign only patch
-  static_assert(is_patch_v<test::patch::BarPatch>);
-  static_assert(op::is_assign_only_patch_v<test::patch::BarPatch>);
+  static_assert(is_patch_v<BarPatch>);
+  static_assert(op::is_assign_only_patch_v<BarPatch>);
   static_assert(!op::is_assign_only_patch_v<op::BoolPatch>);
-  static_assert(!op::is_assign_only_patch_v<test::patch::MyStructPatch>);
+  static_assert(!op::is_assign_only_patch_v<MyStructPatch>);
 
   using YourData = MyDataPatch;
   static_assert(is_patch_v<YourData>);
@@ -1200,7 +1200,6 @@ TEST(PatchTest, StructRemove) {
 }
 
 TEST(PatchTest, StructRemoveSerialization) {
-  using test::patch::IncludePatchStruct;
   IncludePatchStruct s;
   s.patch()->patch<ident::data3>().clear();
 

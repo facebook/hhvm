@@ -1581,7 +1581,7 @@ folly::Future<T> future(
 }
 
 using CallbackBase = HandlerCallbackBase;
-using CallbackBasePtr = std::unique_ptr<CallbackBase>;
+using CallbackBasePtr = CallbackBase::Ptr;
 template <typename T>
 using Callback = HandlerCallback<T>;
 template <typename T>

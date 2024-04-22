@@ -57,6 +57,7 @@
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 #include <thrift/lib/cpp2/server/ResourcePoolHandle.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
+#include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
 #include <thrift/lib/cpp2/util/TypeErasedStorage.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
@@ -1206,8 +1207,20 @@ class HandlerCallbackBase {
     }
   }
 
+  struct IntrusiveSharedPtrAccess {
+    static void acquireRef(HandlerCallbackBase& callback) noexcept {
+      callback.intrusivePtrControlBlock_.acquireRef();
+    }
+    static util::BasicIntrusiveSharedPtrControlBlock::RefCount releaseRef(
+        HandlerCallbackBase& callback) noexcept {
+      return callback.intrusivePtrControlBlock_.releaseRef();
+    }
+  };
+  util::BasicIntrusiveSharedPtrControlBlock intrusivePtrControlBlock_;
+
  public:
-  using Ptr = std::unique_ptr<HandlerCallbackBase>;
+  using Ptr =
+      util::IntrusiveSharedPtr<HandlerCallbackBase, IntrusiveSharedPtrAccess>;
 
   HandlerCallbackBase() : eb_(nullptr), reqCtx_(nullptr), protoSeqId_(0) {}
 

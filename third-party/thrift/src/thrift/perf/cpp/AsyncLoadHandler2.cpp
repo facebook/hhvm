@@ -57,7 +57,7 @@ void AsyncLoadHandler2::async_eb_sleep(
 
 void AsyncLoadHandler2::async_eb_onewaySleep(
     HandlerCallbackBase::Ptr callback, int64_t microseconds) {
-  auto callbackp = callback.release();
+  auto callbackp = callback.unsafeRelease();
   // May leak if task never finishes
   auto eb = callbackp->getEventBase();
   eb->runInEventBaseThread([=]() {

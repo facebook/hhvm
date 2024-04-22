@@ -875,7 +875,20 @@ map<string, list<i32>> AMap = {
 type ::=  primitive_type | container_type | maybe_qualified_id
 ```
 
-Thrift supports primitive, container and named types. The name can be an identifier that denotes a type defined in the same Thrift file, or a qualified name of the form `filename.typename` where `filename` and `typename` are identifiers, and `typename` denotes a type defined in the Thrift file denoted by `filename`.
+:::note
+The concept of data *types* is central to the mission of Thrift as a data
+definition and interoperability framework, and to the underlying programming
+languages. As such, depending on the context, different [kinds of
+"types"](/glossary/kinds-of-types.md) may be relevant when interacting with
+Thrift. Unless explicitly stated otherwise, this section refers to [**Thrift IDL
+types**](/glossary/kinds-of-types.md#thrift-idl-types).
+:::
+
+Thrift supports primitive, container and named types. The name can be an
+identifier that denotes a type defined in the same Thrift file, or a qualified
+name of the form `filename.typename` where `filename` and `typename` are
+identifiers, and `typename` denotes a type defined in the Thrift file denoted by
+`filename`.
 
 ### Primitive Types
 

@@ -582,7 +582,16 @@ module.exports = {
         },
       ],
     },
-
-    'glossary',
+    {
+      type: 'category',
+      label: 'Glossary',
+      link: {
+        type: 'doc',
+        id: 'glossary/index',
+      },
+      items: [
+        'glossary/kinds-of-types',
+      ],
+    },
   ],
 };

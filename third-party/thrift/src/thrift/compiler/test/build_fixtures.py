@@ -221,5 +221,9 @@ async def main() -> int:
     return int(has_errors)
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     sys.exit(asyncio.run(main()))
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

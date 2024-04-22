@@ -110,19 +110,19 @@ class BasePatch
       std::forward<U>(next).customVisit(derived());
     }
   }
-  [[deprecated("Use customVisit(...) method to read the patch.")]] auto&&
+  [[deprecated("ERROR: Use customVisit(...) method to read the patch.")]] auto&&
   toThrift() & {
     return Base::toThrift();
   }
-  [[deprecated("Use customVisit(...) method to read the patch.")]] auto&&
+  [[deprecated("ERROR: Use customVisit(...) method to read the patch.")]] auto&&
   toThrift() && {
     return Base::toThrift();
   }
-  [[deprecated("Use customVisit(...) method to read the patch.")]] auto&&
+  [[deprecated("ERROR: Use customVisit(...) method to read the patch.")]] auto&&
   toThrift() const& {
     return Base::toThrift();
   }
-  [[deprecated("Use customVisit(...) method to read the patch.")]] auto&&
+  [[deprecated("ERROR: Use customVisit(...) method to read the patch.")]] auto&&
   toThrift() const&& {
     return Base::toThrift();
   }

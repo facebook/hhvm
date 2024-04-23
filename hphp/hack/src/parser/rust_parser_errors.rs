@@ -3485,9 +3485,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
 
                     ValidClass(_) => {}
-                    ValidClassEt(_) => {
-                        self.check_can_use_feature(node, &UnstableFeatures::ExpressionTreeMap)
-                    }
+                    ValidClassEt(_) => {}
                     InvalidBraceKind => self.errors.push(make_error_from_node(
                         node,
                         errors::invalid_brace_kind_in_collection_initializer,

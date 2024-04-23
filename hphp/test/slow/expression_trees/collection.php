@@ -1,7 +1,6 @@
 <?hh
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
-<<file:__EnableUnstableFeatures('expression_tree_map')>>
 
 function foo(
   ExampleContext $_,

@@ -1,6 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('expression_tree_map')>>
 <<file: __EnableUnstableFeatures('expression_trees')>>
 
 function test_function(): void {

@@ -27,6 +27,7 @@
 }}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
 }}, unused_imports, clippy::all)]
 
+#[path = "mock_impl.rs"]
 pub mod mock;
 
 #[doc(inline)]

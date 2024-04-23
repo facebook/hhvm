@@ -182,22 +182,6 @@ struct CustomProtocolAdapter {
   }
 };
 
-// TODO(afuller): Move this to a shared location.
-template <typename AdaptedT>
-struct IndirectionAdapter {
-  template <typename ThriftT>
-  FOLLY_ERASE static constexpr AdaptedT fromThrift(ThriftT&& value) {
-    AdaptedT adapted;
-    toThrift(adapted) = std::forward<ThriftT>(value);
-    return adapted;
-  }
-  FOLLY_ERASE static constexpr decltype(auto)
-  toThrift(AdaptedT& adapted) noexcept(
-      noexcept(::apache::thrift::apply_indirection(adapted))) {
-    return ::apache::thrift::apply_indirection(adapted);
-  }
-};
-
 template <typename T, typename Struct, int16_t FieldId>
 struct AdaptedWithContext {
   T value = {};

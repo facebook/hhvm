@@ -459,6 +459,10 @@ template <class Struct, class Id>
 struct is_cpp_ref_field_optional : std::false_type {
   static_assert(sizeof(Struct), "Struct must be a complete type.");
 };
+template <class Struct, class Id>
+struct is_cpp_ref_field_terse : std::false_type {
+  static_assert(sizeof(Struct), "Struct must be a complete type.");
+};
 } // namespace qualifier
 
 } // namespace detail

@@ -428,6 +428,14 @@ struct is_cpp_ref_field_optional<::cpp2::StructWithBox,::apache::thrift::type::f
 template<>
 struct is_cpp_ref_field_optional<::cpp2::StructWithBox,::apache::thrift::type::field_id<3>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::cpp2::StructWithTerseInternBox,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::cpp2::StructWithTerseInternBox,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::cpp2::AdaptedStructWithTerseInternBox,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::cpp2::AdaptedStructWithTerseInternBox,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeUnique,::apache::thrift::type::field_id<2>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeShared,::apache::thrift::type::field_id<2>> : std::true_type{};

@@ -795,9 +795,27 @@ struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MapStruct,::apac
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyStructPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<5>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<6>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<7>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyStructFieldPatchStruct,::apache::thrift::type::field_id<8>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyStructEnsureStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyDataItemPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::python_capi::MyDataItemFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to

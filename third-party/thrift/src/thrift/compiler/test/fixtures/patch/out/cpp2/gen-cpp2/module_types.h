@@ -1473,6 +1473,14 @@ namespace apache::thrift::detail::annotation {
 
 namespace apache::thrift::detail::qualifier {
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::Bar,::apache::thrift::type::field_id<-1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFields,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFields,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFields,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::RefFields,::apache::thrift::type::field_id<4>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::RefFields,::apache::thrift::type::field_id<5>> : std::true_type{};
@@ -1483,13 +1491,99 @@ struct is_cpp_ref_field_optional<::test::fixtures::patch::RefFields,::apache::th
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::MyDataPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyDataFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyDataFieldPatchStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::InnerUnionPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::InnerUnionPatchStruct,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::InnerUnionFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::MyUnionPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyUnionPatchStruct,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyUnionFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyUnionFieldPatchStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyUnionFieldPatchStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-32>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-31>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-30>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-29>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-28>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-27>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-26>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-25>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-24>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-23>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-22>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-21>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-20>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-19>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-18>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-17>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-16>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-15>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-14>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-13>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-12>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-11>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-10>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-9>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-8>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-7>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-6>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-5>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<-1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::MyStructFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-32>> : std::true_type{};
 template<>
@@ -1509,13 +1603,23 @@ struct is_cpp_ref_field_optional<::test::fixtures::patch::LateDefStructPatchStru
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::RecursivePatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RecursiveFieldPatchStruct,::apache::thrift::type::field_id<-1>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::BarPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::BarFieldPatchStruct,::apache::thrift::type::field_id<-1>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::BarEnsureStruct,::apache::thrift::type::field_id<-1>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::LoopPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::test::fixtures::patch::RefFieldsPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFieldsFieldPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFieldsFieldPatchStruct,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_terse<::test::fixtures::patch::RefFieldsFieldPatchStruct,::apache::thrift::type::field_id<7>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to

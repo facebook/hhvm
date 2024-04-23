@@ -46,6 +46,14 @@ using if_not_optional_or_union_field_ref = std::enable_if_t<
         folly::remove_cvref_t<U>>,
     R>;
 
+template <typename T, typename Id>
+inline constexpr bool is_terse_field_v =
+    ::apache::thrift::detail::is_terse_field_ref_v<op::get_field_ref<T, Id>> ||
+    ::apache::thrift::detail::is_terse_intern_boxed_field_ref_v<
+        op::get_field_ref<T, Id>> ||
+    ::apache::thrift::detail::qualifier::
+        is_cpp_ref_field_terse<T, op::get_field_id<T, Id>>::value;
+
 } // namespace type
 } // namespace thrift
 } // namespace apache

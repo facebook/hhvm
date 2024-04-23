@@ -174,6 +174,8 @@ static_assert( //
 static_assert( //
     !type::
         is_optional_or_union_field_v<terse_write::MyStruct, type::field_id<1>>);
+static_assert( //
+    type::is_terse_field_v<terse_write::MyStruct, type::field_id<1>>);
 // Intern Box.
 static_assert( //
     !type::is_optional_or_union_field_v<
@@ -184,6 +186,15 @@ static_assert( //
     !type::is_optional_or_union_field_v<
         terse_write::CppRefTerseStruct,
         type::field_id<4>>);
+static_assert( //
+    type::is_terse_field_v<terse_write::CppRefTerseStruct, type::field_id<4>>);
+// Terse cpp.ref
+static_assert( //
+    type::is_terse_field_v<terse_write::CppRefTerseStruct, type::field_id<1>>);
+static_assert( //
+    type::is_terse_field_v<terse_write::CppRefTerseStruct, type::field_id<2>>);
+static_assert( //
+    type::is_terse_field_v<terse_write::CppRefTerseStruct, type::field_id<3>>);
 // non-optional cpp.ref
 static_assert( //
     !type::is_optional_or_union_field_v<

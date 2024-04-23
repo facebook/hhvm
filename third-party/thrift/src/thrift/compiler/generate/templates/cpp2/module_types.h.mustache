@@ -74,6 +74,10 @@ namespace apache::thrift::detail::qualifier {
 template<>
 struct is_cpp_ref_field_optional<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:key}}>> : std::true_type{};
 {{/field:opt_cpp_ref?}}
+{{#field:terse_cpp_ref?}}
+template<>
+struct is_cpp_ref_field_terse<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:key}}>> : std::true_type{};
+{{/field:terse_cpp_ref?}}
 {{/struct:fields}}
 {{/program:structs}}
 } // namespace apache::thrift::detail::qualifier

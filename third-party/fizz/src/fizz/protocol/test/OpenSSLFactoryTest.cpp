@@ -46,6 +46,7 @@ INSTANTIATE_TEST_SUITE_P(
         NamedGroup::kyber512,
         NamedGroup::x25519_kyber768_draft00,
         NamedGroup::x25519_kyber768_experimental,
+        NamedGroup::x25519_kyber512_experimental,
         NamedGroup::secp256r1_kyber768_draft00,
         NamedGroup::secp384r1_kyber768
 #endif

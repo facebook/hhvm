@@ -355,10 +355,11 @@ enum class NamedGroup : uint16_t {
 
   // experimental
   /**
-   * Internal equivalent of x25519_kyber768 to get clean data for external
-   * traffic experiments
+   * Internal equivalent of x25519_kyber768 and x25519_kyber512 to get clean
+   * data for external traffic experiments
    */
   x25519_kyber768_experimental = 65024,
+  x25519_kyber512_experimental = 65025,
 
   /**
    * Hybrid of secp521r1 and x25519. TLS Supported Group 510 is reserved for

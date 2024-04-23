@@ -30,6 +30,7 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
       return std::make_unique<X25519KeyExchange>();
 #if FIZZ_HAVE_OQS
     case NamedGroup::x25519_kyber512:
+    case NamedGroup::x25519_kyber512_experimental:
       return std::make_unique<HybridKeyExchange>(
           std::make_unique<X25519KeyExchange>(),
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));

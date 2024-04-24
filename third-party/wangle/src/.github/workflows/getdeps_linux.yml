@@ -10,11 +10,14 @@ on:
     branches:
     - main
 
+permissions:
+  contents: read  #  to fetch code (actions/checkout)
+
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Fetch ninja
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests ninja
     - name: Fetch cmake

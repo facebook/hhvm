@@ -17,23 +17,23 @@ jobs:
   build:
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Fetch boost
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests boost
+    - uses: actions/checkout@v4
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@stable
+    - name: Fetch boost
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests boost
     - name: Fetch ninja
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests ninja
     - name: Fetch cmake
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests cmake
     - name: Fetch cpptoml
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests cpptoml
+    - name: Fetch fmt
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fmt
     - name: Fetch gflags
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests gflags
     - name: Fetch glog
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests glog
-    - name: Fetch fmt
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fmt
     - name: Fetch googletest
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests googletest
     - name: Fetch python-six
@@ -50,6 +50,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests snappy
     - name: Fetch pcre2
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests pcre2
+    - name: Fetch python-setuptools
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests python-setuptools
     - name: Fetch libevent
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libevent
     - name: Fetch zlib
@@ -68,14 +70,16 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests folly
     - name: Fetch fizz
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fizz
+    - name: Fetch mvfst
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests mvfst
     - name: Fetch wangle
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests wangle
     - name: Fetch fbthrift
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fbthrift
-    - name: Fetch edencommon
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests edencommon
     - name: Fetch fb303
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fb303
+    - name: Fetch edencommon
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests edencommon
     - name: Build boost
       run: python3 build/fbcode_builder/getdeps.py build --no-tests boost
     - name: Build ninja
@@ -84,12 +88,12 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests cmake
     - name: Build cpptoml
       run: python3 build/fbcode_builder/getdeps.py build --no-tests cpptoml
+    - name: Build fmt
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests fmt
     - name: Build gflags
       run: python3 build/fbcode_builder/getdeps.py build --no-tests gflags
     - name: Build glog
       run: python3 build/fbcode_builder/getdeps.py build --no-tests glog
-    - name: Build fmt
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests fmt
     - name: Build googletest
       run: python3 build/fbcode_builder/getdeps.py build --no-tests googletest
     - name: Build python-six
@@ -106,6 +110,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests snappy
     - name: Build pcre2
       run: python3 build/fbcode_builder/getdeps.py build --no-tests pcre2
+    - name: Build python-setuptools
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests python-setuptools
     - name: Build libevent
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libevent
     - name: Build zlib
@@ -124,14 +130,16 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests folly
     - name: Build fizz
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fizz
+    - name: Build mvfst
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests mvfst
     - name: Build wangle
       run: python3 build/fbcode_builder/getdeps.py build --no-tests wangle
     - name: Build fbthrift
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fbthrift
-    - name: Build edencommon
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests edencommon
     - name: Build fb303
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fb303
+    - name: Build edencommon
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests edencommon
     - name: Build watchman
       run: python3 build/fbcode_builder/getdeps.py build --src-dir=. watchman  --project-install-prefix watchman:/usr/local
     - name: Copy artifacts

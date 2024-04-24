@@ -68,47 +68,47 @@ jobs:
     - name: Fetch wangle
       run: python build/fbcode_builder/getdeps.py fetch --no-tests wangle
     - name: Build libsodium
-      run: python build/fbcode_builder/getdeps.py build --no-tests libsodium
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests libsodium
     - name: Build ninja
-      run: python build/fbcode_builder/getdeps.py build --no-tests ninja
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests ninja
     - name: Build cmake
-      run: python build/fbcode_builder/getdeps.py build --no-tests cmake
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests cmake
     - name: Build zlib
-      run: python build/fbcode_builder/getdeps.py build --no-tests zlib
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests zlib
     - name: Build zstd
-      run: python build/fbcode_builder/getdeps.py build --no-tests zstd
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests zstd
     - name: Build fmt
-      run: python build/fbcode_builder/getdeps.py build --no-tests fmt
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests fmt
     - name: Build boost
-      run: python build/fbcode_builder/getdeps.py build --no-tests boost
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests boost
     - name: Build double-conversion
-      run: python build/fbcode_builder/getdeps.py build --no-tests double-conversion
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests double-conversion
     - name: Build gflags
-      run: python build/fbcode_builder/getdeps.py build --no-tests gflags
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests gflags
     - name: Build glog
-      run: python build/fbcode_builder/getdeps.py build --no-tests glog
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests glog
     - name: Build googletest
-      run: python build/fbcode_builder/getdeps.py build --no-tests googletest
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests googletest
     - name: Build lz4
-      run: python build/fbcode_builder/getdeps.py build --no-tests lz4
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests lz4
     - name: Build snappy
-      run: python build/fbcode_builder/getdeps.py build --no-tests snappy
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests snappy
     - name: Build python-six
-      run: python build/fbcode_builder/getdeps.py build --no-tests python-six
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests python-six
     - name: Build perl
-      run: python build/fbcode_builder/getdeps.py build --no-tests perl
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests perl
     - name: Build openssl
-      run: python build/fbcode_builder/getdeps.py build --no-tests openssl
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests openssl
     - name: Build libevent
-      run: python build/fbcode_builder/getdeps.py build --no-tests libevent
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests libevent
     - name: Build folly
-      run: python build/fbcode_builder/getdeps.py build --no-tests folly
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests folly
     - name: Build fizz
-      run: python build/fbcode_builder/getdeps.py build --no-tests fizz
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests fizz
     - name: Build mvfst
-      run: python build/fbcode_builder/getdeps.py build --no-tests mvfst
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests mvfst
     - name: Build wangle
-      run: python build/fbcode_builder/getdeps.py build --no-tests wangle
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests wangle
     - name: Build fbthrift
       run: python build/fbcode_builder/getdeps.py build --src-dir=. fbthrift 
     - name: Copy artifacts

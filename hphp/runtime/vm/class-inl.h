@@ -793,12 +793,6 @@ inline Class* Class::load(const StringData* name) {
     String normStr;
     auto ne = NamedType::getNoCreate(name, &normStr);
 
-    // Try to fetch from cache
-    if (ne) {
-      Class* class_ = ne->getCachedClass();
-      if (LIKELY(class_ != nullptr)) return class_;
-    }
-
     // Normalize the namespace
     if (normStr) name = normStr.get();
 

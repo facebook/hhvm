@@ -69,10 +69,6 @@ pub fn enum_from_str(
     }
 }
 
-pub fn type_name_of_val<T>(_: &T) -> &'static str {
-    std::any::type_name::<T>()
-}
-
 pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
     let length: usize = b.remaining();
     let length: u32 = length.try_into().with_context(|| {

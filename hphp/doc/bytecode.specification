@@ -2714,7 +2714,7 @@ IterBase    [C]  ->  [C:Arr|Obj]
 
 IterInit  <IterArgs> <rel offset>    [C:Arr|Obj]  ->  []
 
-  Initialize an iterator. This instruction takes a "base" in $1, which might be
+  Initialize an iterator. This instruction takes a "base" in $1, which must be
   an array-like or an object implementing the Iterator interface. It creates
   an iterator with ID given in %1 pointing to the beginning of $1 and, if $1 is
   an Iterator object, rewinds $1. It then checks if the base is empty. If so,

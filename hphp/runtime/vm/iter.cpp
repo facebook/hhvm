@@ -629,51 +629,21 @@ struct FreeObj {
 };
 
 /**
- * new_iter_object_any creates an iterator for the specified object if the
- * object is iterable and it is non-empty (has properties). If
- * new_iter_object_any creates an iterator, it does not increment the refcount
- * of the specified object. If new_iter_object does not create an iterator,
- * it decRefs the object.
+ * new_iter_object creates an iterator for the specified Iterator object
  *
- * If exceptions are thrown, new_iter_object_any takes care of decRefing the
+ * If exceptions are thrown, new_iter_object takes care of decRefing the
  * object.
  */
-static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
-                                   TypedValue* valOut, TypedValue* keyOut) {
-  auto const iter = unwrap(dest);
-  auto object_base = true;
-  {
-    FreeObj fo;
-    if (obj->isIterator()) {
-      TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
-            __func__, dest, obj, ctx);
-      new (iter) IterImpl(Object::attach(obj));
-    } else {
-      bool isIteratorAggregate;
-      /*
-       * We are not going to transfer ownership of obj to the iterator,
-       * so arrange to decRef it later. The actual decRef has to happen
-       * after the call to arr().end() below, because both can have visible side
-       * effects (calls to valid()). Similarly it has to happen before the
-       * iter_*_cell_local_impl calls below, because they call current() and
-       * key() (hence the explicit scope around FreeObj fo;)
-       */
-      fo = obj;
+int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+                        TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, obj %p, ctx %p, Iterator\n",
+        __func__, dest, obj, ctx);
+  assertx(obj->isIterator());
 
-      Object itObj = obj->iterableObject(isIteratorAggregate, false);
-      if (isIteratorAggregate) {
-        TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
-              __func__, dest, obj, ctx);
-        new (iter) IterImpl(std::move(itObj));
-      } else {
-        TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
-              __func__, dest, obj, ctx);
-        Array iterArray(itObj->o_toIterArray(ctx));
-        ArrayData* ad = iterArray.get();
-        new (iter) IterImpl(ad);
-        object_base = false;
-      }
-    }
+  auto const iter = unwrap(dest);
+  {
+    new (iter) IterImpl(Object::attach(obj));
+
     try {
       if (dest->end()) {
         // Iterator was empty; call the destructor on the iterator we just
@@ -687,41 +657,11 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
     }
   }
 
-  if (object_base) {
-    iter_value_cell_local_impl<false>(dest, valOut);
-    if (keyOut) {
-      iter_key_cell_local_impl<false>(dest, keyOut);
-    }
-  } else {
-    iter_value_cell_local_impl<true>(dest, valOut);
-    if (keyOut) {
-      iter_key_cell_local_impl<true>(dest, keyOut);
-    }
+  iter_value_cell_local_impl<false>(dest, valOut);
+  if (keyOut) {
+    iter_key_cell_local_impl<false>(dest, keyOut);
   }
   return 1LL;
-}
-
-int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
-                        TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator or Object\n",
-        __func__, dest, obj, ctx);
-  if (UNLIKELY(!obj->isCollection())) {
-    return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
-  }
-  auto constexpr Type = IterTypeOp::NonLocal;
-
-  if (auto ad = collections::asArray(obj)) {
-    ad->incRefCount();
-    decRefObj(obj);
-    return keyOut ? new_iter_array_key<Type>(dest, ad, valOut, keyOut)
-                  : new_iter_array<Type>(dest, ad, valOut);
-  }
-
-  assertx(obj->collectionType() == CollectionType::Pair);
-  auto arr = collections::toArray(obj);
-  decRefObj(obj);
-  return keyOut ? new_iter_array_key<Type>(dest, arr.detach(), valOut, keyOut)
-                : new_iter_array<Type>(dest, arr.detach(), valOut);
 }
 
 // Generic next implementation for non-local iterators. This method is used for

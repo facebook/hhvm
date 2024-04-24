@@ -721,11 +721,12 @@ let rec array_get
         let (env, (ty, err_opt_arr, err_opt_idx)) =
           nullable_container_get env ty
         in
+        (* Construct the hole on the outer type  *)
         let err_res_arr =
           Option.value_map
             err_opt_arr
             ~default:dflt_arr_res
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+            ~f:(fun (_ty_have, ty_expect) -> Error (ty1, ty_expect))
         in
         let err_res_idx =
           Option.value_map

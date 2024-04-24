@@ -10,5 +10,5 @@ Invalid return type (Typing[4110])
   Expected `ExampleFloat`
   File "pipe4.php", line 5, characters 62-71:
   But got `ExampleInt`
-  File "expr_tree.hhi", line 227, characters 44-49:
+  File "expr_tree.hhi", line 229, characters 44-49:
     via this generic `TInfer`

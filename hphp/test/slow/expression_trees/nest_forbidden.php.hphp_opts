@@ -1,0 +1,2 @@
+-vRuntime.Hack.Lang.AllowUnstableFeatures=1
+--inputs=__DIR__/expression_tree.inc

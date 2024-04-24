@@ -219,6 +219,8 @@ class ExampleDsl {
   }
 }
 
+class ExampleDsl2 extends ExampleDsl {}
+
 interface Spliceable<TVisitor, TResult, +TInfer> {
   public function visit(TVisitor $v): TResult;
 }

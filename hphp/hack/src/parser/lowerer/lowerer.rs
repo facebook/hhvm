@@ -35,6 +35,7 @@ use ocaml_helper::parse_int;
 use ocaml_helper::ParseIntError;
 use oxidized::aast;
 use oxidized::aast::Binop;
+use oxidized::aast_defs::ClassName;
 use oxidized::aast_defs::ClassReq;
 use oxidized::aast_defs::DocComment;
 use oxidized::aast_visitor::AstParams;
@@ -190,6 +191,8 @@ pub struct Env<'a> {
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
 
+    expression_tree_class: Option<ClassName>,
+
     state: Rc<RefCell<State>>,
 }
 
@@ -218,6 +221,7 @@ impl<'a> Env<'a> {
             empty_ns_env: namespace_env,
             token_factory,
             arena,
+            expression_tree_class: None,
 
             state: Rc::new(RefCell::new(State {
                 cls_generics: HashMap::default(),
@@ -2142,6 +2146,19 @@ fn p_prefixed_code_expr<'a>(
     c: &'a PrefixedCodeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
+    let mut clear_et_class_at_end = false;
+    match &env.expression_tree_class {
+        None => match pos_name(&c.prefix, env) {
+            Ok(id) => {
+                clear_et_class_at_end = true;
+                env.expression_tree_class = Some(id.clone());
+                Ok(())
+            }
+            Err(err) => Err(err),
+        },
+        Some(_) => Ok(()),
+    }?;
+
     let src_expr = if !c.body.is_compound_statement() {
         p_expr(&c.body, env)?
     } else {
@@ -2175,12 +2192,14 @@ fn p_prefixed_code_expr<'a>(
         });
         ast::Expr::new((), pos, expr)
     };
+    let cls = env.expression_tree_class.as_ref().unwrap();
 
-    let cls = pos_name(&c.prefix, env)?;
-
-    let desugar_result = desugar(&cls, src_expr, env);
+    let desugar_result = desugar(cls, src_expr, env);
     for (pos, msg) in desugar_result.errors {
         raise_parsing_error_pos(&pos, env, &msg);
+    }
+    if clear_et_class_at_end {
+        env.expression_tree_class = None;
     }
 
     Ok(desugar_result.expr.2)

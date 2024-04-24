@@ -114,6 +114,7 @@ pub enum UnstableFeatures {
     FunctionReferences,
     FunctionTypeOptionalParams,
     ExpressionTreeMap,
+    ExpressionTreeNest,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -149,6 +150,7 @@ impl UnstableFeatures {
             UnstableFeatures::FunctionReferences => Unstable,
             UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
             UnstableFeatures::ExpressionTreeMap => OngoingRelease,
+            UnstableFeatures::ExpressionTreeNest => Unstable,
         }
     }
 }
@@ -261,7 +263,6 @@ struct Context<'a> {
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
     pub active_unstable_features: HashSet<UnstableFeatures>,
-    pub active_expression_tree: bool,
 }
 
 struct Env<'a, State> {
@@ -319,13 +320,20 @@ fn make_first_use_or_def(
         global: !is_method && namespace_name == GLOBAL_NAMESPACE_NAME,
     }
 }
+
+#[derive(Default, Debug, Clone)]
+struct ParserErrorsContext {
+    is_in_concurrent_block: bool,
+    active_expression_tree: bool,
+    expression_tree_depth: i32,
+}
+
 struct ParserErrors<'a, State> {
     env: Env<'a, State>,
     errors: Vec<SyntaxError>,
     parents: Vec<S<'a>>,
 
     trait_require_clauses: Strmap<TokenKind>,
-    is_in_concurrent_block: bool,
     names: UsedNames,
     // Named (not anonymous) namespaces that the current expression is enclosed within.
     nested_namespaces: Vec<S<'a>>,
@@ -333,6 +341,7 @@ struct ParserErrors<'a, State> {
     namespace_name: String,
     uses_readonly: bool,
     in_module: bool,
+    context: ParserErrorsContext,
 }
 
 fn strip_ns(name: &str) -> &str {
@@ -1198,10 +1207,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             trait_require_clauses: empty_trait_require_clauses(),
             namespace_name: GLOBAL_NAMESPACE_NAME.to_string(),
             namespace_type: Unspecified,
-            is_in_concurrent_block: false,
             nested_namespaces: vec![],
             uses_readonly: false,
             in_module: false,
+            context: ParserErrorsContext {
+                is_in_concurrent_block: false,
+                active_expression_tree: false,
+                expression_tree_depth: 0,
+            },
         }
     }
 
@@ -3170,7 +3183,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             ETSpliceExpression(_) => {
-                if !self.env.context.active_expression_tree {
+                if !self.context.active_expression_tree {
                     self.errors
                         .push(make_error_from_node(node, errors::splice_outside_et))
                 }
@@ -3388,7 +3401,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         match self.text(n).to_ascii_lowercase().as_ref() {
                             "dict" | "vec" | "keyset" => InvalidBraceKind,
                             n => {
-                                if self.env.context.active_expression_tree {
+                                if self.context.active_expression_tree {
                                     ValidClassEt(n.to_string())
                                 } else if is_standard_collection(n) {
                                     ValidClass(n.to_string())
@@ -3462,7 +3475,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
                     ValidClass(name)
                         if (use_key_value_initializers(name)
-                            || self.env.context.active_expression_tree)
+                            || self.context.active_expression_tree)
                             && initializer_list().any(|i| !is_key_value(i)) =>
                     {
                         self.errors.push(make_error_from_node(
@@ -5253,7 +5266,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn concurrent_statement_errors(&mut self, node: S<'a>) {
         if let ConcurrentStatement(x) = &node.children {
             // issue error if concurrent blocks are nested
-            if self.is_in_concurrent_block {
+            if self.context.is_in_concurrent_block {
                 self.errors
                     .push(make_error_from_node(node, errors::nested_concurrent_blocks))
             };
@@ -5524,7 +5537,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             NamespaceBody(x) => self.namespace_body(node, &x.left_brace, &x.right_brace),
             NamespaceEmptyBody(x) => self.namespace_empty_body(node, &x.semicolon),
             ClassishDeclaration(_) | AnonymousClass(_) => self.classes(node),
-            PrefixedCodeExpression(_) => self.prefixed_code_expr(node, &mut prev_context),
+            PrefixedCodeExpression(x) => {
+                self.prefixed_code_expr(node, &x.prefix, &mut prev_context)
+            }
             ETSpliceExpression(_) => self.et_splice_expr(node),
             _ => self.fold_child_nodes(node),
         }
@@ -5609,25 +5624,32 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env.context.active_callable_attr_spec = Some(s);
     }
 
+    fn reset_parser_error_context_for_lambda(&mut self) -> ParserErrorsContext {
+        if self.context.active_expression_tree {
+            self.context.clone()
+        } else {
+            std::mem::take(&mut self.context)
+        }
+    }
+
     fn lambda(&mut self, node: S<'a>) {
-        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-        // reset is_in_concurrent_block for functions
-        self.is_in_concurrent_block = false;
+        // reset the context to default for functions, and restore it at the end
+        let prev_context = self.reset_parser_error_context_for_lambda();
         // analyze the body of lambda block
         self.fold_child_nodes(node);
         // adjust is_in_concurrent_block in final result
-        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+        self.context = prev_context;
     }
 
     fn concurrent_stmt(&mut self, node: S<'a>) {
         self.concurrent_statement_errors(node);
         // adjust is_in_concurrent_block in accumulator to dive into the
-        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-        self.is_in_concurrent_block = true;
+        let prev_is_in_concurrent_block = self.context.is_in_concurrent_block;
+        self.context.is_in_concurrent_block = true;
         // analyze the body of concurrent block
         self.fold_child_nodes(node);
         // adjust is_in_concurrent_block in final result
-        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+        self.context.is_in_concurrent_block = prev_is_in_concurrent_block;
     }
 
     fn namespace_body(&mut self, node: S<'a>, left_brace: S<'a>, right_brace: S<'a>) {
@@ -5678,17 +5700,49 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.names.constants = constants;
     }
 
-    fn prefixed_code_expr(&mut self, node: S<'a>, prev_context: &mut Option<Context<'a>>) {
+    fn prefixed_code_expr(
+        &mut self,
+        node: S<'a>,
+        prefix: S<'a>,
+        prev_context: &mut Option<Context<'a>>,
+    ) {
+        if self.context.expression_tree_depth == 0 && prefix.is_missing() {
+            self.errors.push(make_error_from_node(
+                node,
+                errors::top_level_expression_tree_name,
+            ))
+        } else if self.context.expression_tree_depth != 0
+            && !prefix.is_missing()
+            && !self.context.active_expression_tree
+        {
+            self.errors.push(make_error_from_node(
+                prefix,
+                errors::nested_expression_tree_name,
+            ))
+        }
+        if self.context.expression_tree_depth > 0 && !self.context.active_expression_tree {
+            self.check_can_use_feature(node, &UnstableFeatures::ExpressionTreeNest)
+        }
+
         *prev_context = Some(self.env.context.clone());
-        self.env.context.active_expression_tree = true;
-        self.fold_child_nodes(node)
+        self.context.active_expression_tree = true;
+        self.context.expression_tree_depth += 1;
+        self.fold_child_nodes(node);
+        self.context.active_expression_tree = false;
+        self.context.expression_tree_depth -= 1;
     }
 
     fn et_splice_expr(&mut self, node: S<'a>) {
-        let previous_state = self.env.context.active_expression_tree;
-        self.env.context.active_expression_tree = false;
+        if self.context.expression_tree_depth > 0 && !self.context.active_expression_tree {
+            self.errors.push(make_error_from_node(
+                node,
+                "Splice syntax `${...}` cannot be nested.".into(),
+            ))
+        }
+        let previous_state = self.context.active_expression_tree;
+        self.context.active_expression_tree = false;
         self.fold_child_nodes(node);
-        self.env.context.active_expression_tree = previous_state;
+        self.context.active_expression_tree = previous_state;
     }
 
     fn old_attr_spec(&mut self, node: S<'a>, attributes: S<'a>) {
@@ -5748,7 +5802,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable_attr_spec: None,
                 active_const: None,
                 active_unstable_features: default_unstable_features,
-                active_expression_tree: false,
             },
             hhvm_compat_mode,
             hhi_mode,

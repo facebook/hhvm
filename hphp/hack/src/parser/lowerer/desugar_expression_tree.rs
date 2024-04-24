@@ -383,55 +383,6 @@ fn only_void_return(lfun_body: &[ast::Stmt]) -> bool {
     checker.only_void_return
 }
 
-struct NestedSpliceCheck {
-    has_nested_splice: Option<Pos>,
-    has_nested_expression_tree: Option<Pos>,
-}
-
-impl<'ast> Visitor<'ast> for NestedSpliceCheck {
-    type Params = AstParams<(), ()>;
-
-    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
-        self
-    }
-
-    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), ()>) -> Result<(), ()> {
-        use aast::Expr_::*;
-
-        match &e.2 {
-            ETSplice(_) => {
-                self.has_nested_splice = Some(e.1.clone());
-            }
-            ExpressionTree(_) => {
-                self.has_nested_expression_tree = Some(e.1.clone());
-            }
-            _ if self.has_nested_splice.is_none() && self.has_nested_expression_tree.is_none() => {
-                e.recurse(env, self)?
-            }
-            _ => {}
-        }
-        Ok(())
-    }
-}
-
-/// Assumes that the Expr is the expression within a splice.
-/// If the expression has an Expression Tree contained within or a splice, then
-/// we have nested expression trees or splices and this should raise an error.
-fn check_nested_splice(e: &ast::Expr) -> Result<(), (Pos, String)> {
-    let mut checker = NestedSpliceCheck {
-        has_nested_splice: None,
-        has_nested_expression_tree: None,
-    };
-    visit(&mut checker, &mut (), e).unwrap();
-    if let Some(p) = checker.has_nested_splice {
-        return Err((p, "Splice syntax `${...}` cannot be nested.".into()));
-    }
-    if let Some(p) = checker.has_nested_expression_tree {
-        return Err((p, "Expression trees may not be nested. Consider assigning to a local variable and splicing the local variable in.".into()));
-    }
-    Ok(())
-}
-
 fn null_literal(pos: Pos) -> Expr {
     Expr::new((), pos, Expr_::Null)
 }
@@ -1338,10 +1289,6 @@ fn rewrite_expr(
             spliced_expr,
             extract_client_type,
         }) => {
-            if let Err(err) = check_nested_splice(&spliced_expr) {
-                errors.push(err);
-            };
-
             let len = temps.splices.len();
             let expr_pos = spliced_expr.1.clone();
             temps.splices.push(Expr(
@@ -1567,7 +1514,8 @@ fn rewrite_expr(
         ExpressionTree(_) => {
             errors.push((
                 pos,
-                "Expression trees may not be nested. Consider splicing Expression trees together using `${}`.".into()
+                "Expression trees may not be used directly inside of other expression trees."
+                    .into(),
             ));
             unchanged_result
         }

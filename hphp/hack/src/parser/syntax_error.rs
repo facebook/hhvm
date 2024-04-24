@@ -1255,3 +1255,11 @@ pub const varray_darray_banned: Error =
 
 pub const optional_precedes_non_optional: Error =
     Cow::Borrowed("An optional parameter cannot precede a non-optional parameter.");
+
+pub const nested_expression_tree_name: Error = Cow::Borrowed(
+    "Nested expression trees must not provide the DSL name (it is inherited from the enclosing tree).",
+);
+
+pub const top_level_expression_tree_name: Error = Cow::Borrowed(
+    "Top-level expression trees must provide the DSL name (including at the top-level of a nested lambda).",
+);

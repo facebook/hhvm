@@ -118,7 +118,7 @@ let schema : schema_node list =
       aggregates = [Expression; ConstructorExpression; LambdaBody];
       fields =
         [
-          ("prefix", Token);
+          ("prefix", ZeroOrOne Token);
           ("left_backtick", Token);
           ("body", Aggregate LambdaBody);
           ("right_backtick", Token);

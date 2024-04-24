@@ -29,13 +29,11 @@ use crate::protocol::ProtocolReader;
 use crate::Result;
 
 // Read trait. Every type that needs to be deserialized will implement this trait.
-pub trait Deserialize<P>
+pub trait Deserialize<P>: Sized
 where
     P: ProtocolReader,
 {
-    fn read(p: &mut P) -> Result<Self>
-    where
-        Self: Sized;
+    fn read(p: &mut P) -> Result<Self>;
 }
 
 impl<P, T> Deserialize<P> for Box<T>

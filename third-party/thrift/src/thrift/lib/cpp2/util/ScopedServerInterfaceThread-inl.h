@@ -247,10 +247,11 @@ template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> makeTestClient(
     std::shared_ptr<AsyncProcessorFactory> apf,
     ScopedServerInterfaceThread::FaultInjectionFunc injectFault,
-    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault) {
+    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault,
+    protocol::PROTOCOL_TYPES prot) {
   auto client = std::make_unique<AsyncClientT>(
       ScopedServerInterfaceThread::makeTestClientChannel(
-          apf, std::move(injectFault), std::move(streamInjectFault)));
+          apf, std::move(injectFault), std::move(streamInjectFault), prot));
   apache::thrift::detail::validateServiceName(*apf, client->getServiceName());
   return client;
 }
@@ -259,11 +260,13 @@ template <class ServiceHandler, class ServiceTag>
 std::unique_ptr<Client<ServiceTag>> makeTestClient(
     std::shared_ptr<ServiceHandler> handler,
     ScopedServerInterfaceThread::FaultInjectionFunc injectFault,
-    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault) {
+    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault,
+    protocol::PROTOCOL_TYPES prot) {
   return makeTestClient<Client<ServiceTag>>(
       std::static_pointer_cast<AsyncProcessorFactory>(std::move(handler)),
       std::move(injectFault),
-      std::move(streamInjectFault));
+      std::move(streamInjectFault),
+      prot);
 }
 
 } // namespace thrift

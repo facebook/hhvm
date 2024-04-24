@@ -654,7 +654,7 @@ class py3_mstch_type : public mstch_type {
 
   const std::string& get_flat_name() const { return cached_props_.flatName; }
 
-  void set_flat_name(std::string extra) {
+  void set_flat_name(const std::string& extra) {
     std::string custom_prefix;
     if (!is_default_template()) {
       custom_prefix = to_cython_template() + "__";
@@ -1353,6 +1353,11 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.py",
   };
 
+  std::vector<std::string> converterFiles{
+      "converter.pxd",
+      "converter.pyx",
+  };
+
   std::vector<std::string> cythonFilesWithTypeContext{
       "types.pyx",
       "types.pxd",
@@ -1395,6 +1400,9 @@ void t_mstch_py3_generator::generate_types() {
   }
   for (const auto& file : cppFilesWithNoTypeContext) {
     generate_file(file, NotTypesFile);
+  }
+  for (const auto& file : converterFiles) {
+    generate_file(file, IsTypesFile, generateRootPath_);
   }
   // - if auto_migrate is present, generate py3_types, types.pxd, and types.py
   // - else, just generate normal cython files

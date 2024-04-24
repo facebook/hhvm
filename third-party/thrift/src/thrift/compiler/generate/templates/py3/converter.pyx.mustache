@@ -1,0 +1,34 @@
+
+{{> common/auto_generated_py}}
+
+{{#program:auto_migrate?}}
+from libcpp.memory cimport make_shared
+from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
+from cython.operator cimport dereference as deref
+{{/program:auto_migrate?}}
+
+{{#program:auto_migrate?}}{{! include Constructor and Extractor specializations }}
+cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
+    pass
+{{/program:auto_migrate?}}
+
+{{#program:filtered_structs}}
+{{! direct replacement for ._cpp_obj }}
+cdef shared_ptr[_fbthrift_ctypes.c{{struct:name}}] {{struct:name}}_convert_to_cpp(object inst):
+{{#program:auto_migrate?}}
+    return make_shared[_fbthrift_ctypes.c{{struct:name}}](python_to_cpp[_fbthrift_ctypes.c{{struct:name}}](inst))
+{{/program:auto_migrate?}}
+{{^program:auto_migrate?}}
+    return (<_fbthrift_ctypes.{{struct:name}}?>inst)._cpp_obj
+{{/program:auto_migrate?}}
+
+
+{{! direct replacement for ._fbthrift_create }}
+cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_ctypes.c{{struct:name}}]& c_struct):
+{{#program:auto_migrate?}}
+    return cpp_to_python[_fbthrift_ctypes.c{{struct:name}}](deref(c_struct))
+{{/program:auto_migrate?}}
+{{^program:auto_migrate?}}
+    return _fbthrift_ctypes.{{struct:name}}._fbthrift_create(c_struct)
+{{/program:auto_migrate?}}
+{{/program:filtered_structs}}

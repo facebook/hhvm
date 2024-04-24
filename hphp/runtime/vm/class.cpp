@@ -5043,15 +5043,6 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
   return newClass.get();
 }
 
-Class* Class::load(const NamedType* ne, const StringData* name) {
-  Class* cls;
-  if (LIKELY(ne != nullptr)) {
-    if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
-      return cls;
-    }
-  }
-  return loadMissing(ne, name);
-}
 
 namespace {
 void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
@@ -5092,14 +5083,14 @@ Class* Class::loadMissing(const NamedType* ne, const StringData* name) {
   return ne ? ne->getCachedClass() : nullptr;
 }
 
+Class* Class::load(const NamedType* ne, const StringData* name) {
+  return Class::get(ne, name, true);
+}
+
 Class* Class::get(const NamedType* ne, const StringData *name, bool tryAutoload) {
   Class *cls = ne ? ne->getCachedClass() : nullptr;
-  if (UNLIKELY(!cls)) {
-    if (tryAutoload) {
-      return loadMissing(ne, name);
-    }
-  }
-  return cls;
+  if (LIKELY(cls != nullptr)) return cls;
+  return tryAutoload ? loadMissing(ne, name) : nullptr;
 }
 
 bool Class::exists(const StringData* name, bool autoload, ClassKind kind) {

@@ -1502,12 +1502,6 @@ public:
   static Class* defClosure(const PreClass* preClass, bool cache);
 
   /*
-   * Look up the Class in this request with name `name'
-   * Return nullptr if the class is not yet defined in this request.
-   */
-  static Class* lookup(const StringData* name);
-
-  /*
    * Finds a class which is guaranteed to be unique in the specified
    * context. The class has not necessarily been loaded in the
    * current request.
@@ -1520,15 +1514,6 @@ public:
   static const Class* lookupUniqueInContext(const StringData* name,
                                             const Class* ctx,
                                             const Unit* unit);
-
-  /*
-   * Look up, or autoload and define, the Class in this request with name
-   * `name', or with the name mapped to the NamedType `ne'.
-   *
-   * @requires: NamedType::get(name) == ne
-   */
-  static Class* load(const NamedType* ne, const StringData* name);
-  static Class* load(const StringData* name);
 
   /*
    * Same as Class::load but also checks for module boundary violations
@@ -1545,8 +1530,22 @@ public:
   static Class* loadMissing(const NamedType* ne, const StringData* name);
 
   /*
-   * Same as lookupClass(), but if `tryAutoload' is set, call and return
-   * loadMissingClass().
+   * Look up, or autoload and define, the Class in this request with name
+   * `name', or with the name mapped to the NamedType `ne'.
+   *
+   * @requires: NamedType::get(name) == ne
+   */
+  static Class* load(const NamedType* ne, const StringData* name);
+  static Class* load(const StringData* name);
+
+  /*
+   * Look up the Class in this request with name `name'
+   * Return nullptr if the class is not yet defined in this request.
+   */
+  static Class* lookup(const StringData* name);
+
+  /*
+   * Behaves like load() or lookup() depending on tryAutoload.
    */
   static Class* get(const NamedType* ne, const StringData* name,
                     bool tryAutoload);

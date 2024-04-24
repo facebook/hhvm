@@ -754,16 +754,7 @@ inline const StringData* classToStringHelper(const Class* cls,
 // Lookup.
 
 inline Class* Class::lookup(const StringData* name) {
-  if (name->isSymbol()) {
-    if (auto const result = name->getCachedClass()) return result;
-  }
-  auto const nt = NamedType::getNoCreate(name);
-  if (!nt) return nullptr;
-  auto const result = nt->getCachedClass();
-  if (name->isSymbol() && result && classHasPersistentRDS(result)) {
-    const_cast<StringData*>(name)->setCachedClass(result);
-  }
-  return result;
+  return get(name, false);
 }
 
 inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
@@ -784,26 +775,7 @@ inline const Class* Class::lookupUniqueInContext(const StringData* name,
 }
 
 inline Class* Class::load(const StringData* name) {
-  if (name->isSymbol()) {
-    if (auto const result = name->getCachedClass()) return result;
-  }
-  auto const orig = name;
-
-  auto const result = [&]() -> Class* {
-    String normStr;
-    auto ne = NamedType::getNoCreate(name, &normStr);
-
-    // Normalize the namespace
-    if (normStr) name = normStr.get();
-
-    // Autoload the class
-    return load(ne, name);
-  }();
-
-  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
-    const_cast<StringData*>(orig)->setCachedClass(result);
-  }
-  return result;
+  return get(name, true);
 }
 
 inline Class* Class::get(const StringData* name, bool tryAutoload) {
@@ -813,12 +785,10 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
   auto const orig = name;
   String normStr;
   auto ne = NamedType::getNoCreate(name, &normStr);
-  if (!ne && !tryAutoload) {
-    return nullptr;
-  }
-  if (normStr) {
-    name = normStr.get();
-  }
+
+  if (!ne && !tryAutoload) return nullptr;
+  if (normStr) name = normStr.get();
+
   auto const result = get(ne, name, tryAutoload);
   if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(orig)->setCachedClass(result);

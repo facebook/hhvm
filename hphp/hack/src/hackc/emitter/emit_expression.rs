@@ -858,44 +858,145 @@ pub fn emit_await<'a, 'd>(
             args,
             unpacked_arg: None,
             ..
-        }) if (args.len() == 1
-            && string_utils::strip_global_ns(&id.1) == emitter_special_functions::GENA) =>
-        {
-            inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
-        }
-        _ => {
-            let after_await = emitter.label_gen_mut().next_regular();
-            let instrs = match e {
-                ast::Expr_::Call(c) => {
-                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, c)?
-                }
-                _ => emit_expr(emitter, env, expr)?,
-            };
-            Ok(InstrSeq::gather(vec![
-                instrs,
-                emit_pos(pos),
-                instr::dup(),
-                instr::is_type_c(IsTypeOp::Null),
-                instr::jmp_nz(after_await.clone()),
-                instr::await_(),
-                instr::label(after_await),
-            ]))
-        }
+        }) if (args.len() == 2) => match id.1.as_str() {
+            emitter_special_functions::VEC_MAP_ASYNC
+            | emitter_special_functions::VEC_MAP_ASYNC_FB => inline_map_async_call(
+                emitter,
+                env,
+                error::expect_normal_paramkind(&args[0])?,
+                error::expect_normal_paramkind(&args[1])?,
+                false,
+                false,
+            ),
+            emitter_special_functions::DICT_MAP_ASYNC
+            | emitter_special_functions::DICT_MAP_ASYNC_FB => inline_map_async_call(
+                emitter,
+                env,
+                error::expect_normal_paramkind(&args[0])?,
+                error::expect_normal_paramkind(&args[1])?,
+                true,
+                false,
+            ),
+            emitter_special_functions::DICT_MAP_WITH_KEY_ASYNC
+            | emitter_special_functions::DICT_MAP_WITH_KEY_ASYNC_FB => inline_map_async_call(
+                emitter,
+                env,
+                error::expect_normal_paramkind(&args[0])?,
+                error::expect_normal_paramkind(&args[1])?,
+                true,
+                true,
+            ),
+            _ => emit_await_impl(emitter, env, pos, expr),
+        },
+        _ => emit_await_impl(emitter, env, pos, expr),
     }
 }
 
-fn inline_gena_call<'a, 'd>(
+fn emit_await_impl<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: &Env<'a>,
-    arg: &ast::Expr,
+    pos: &Pos,
+    expr: &ast::Expr,
 ) -> Result<InstrSeq> {
-    let load_arr = emit_expr(emitter, env, arg)?;
-    let async_eager_label = emitter.label_gen_mut().next_regular();
+    let ast::Expr(_, _, e) = expr;
+    let after_await = emitter.label_gen_mut().next_regular();
+    let instrs = match e {
+        ast::Expr_::Call(c) => {
+            emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, c)?
+        }
+        _ => emit_expr(emitter, env, expr)?,
+    };
+    Ok(InstrSeq::gather(vec![
+        instrs,
+        emit_pos(pos),
+        instr::dup(),
+        instr::is_type_c(IsTypeOp::Null),
+        instr::jmp_nz(after_await.clone()),
+        instr::await_(),
+        instr::label(after_await),
+    ]))
+}
 
+fn inline_map_async_call<'a, 'd>(
+    emitter: &mut Emitter<'d>,
+    env: &Env<'a>,
+    traversable: &ast::Expr,
+    func: &ast::Expr,
+    is_dict: bool,
+    with_key: bool,
+) -> Result<InstrSeq> {
     scope::with_unnamed_local(emitter, |e, arr_local| {
-        let before = InstrSeq::gather(vec![load_arr, instr::cast_dict(), instr::pop_l(arr_local)]);
+        let correct_type_label = e.label_gen_mut().next_regular();
+        let done_type_label = e.label_gen_mut().next_regular();
+        let before = InstrSeq::gather(vec![
+            emit_expr(e, env, traversable)?,
+            instr::dup(),
+            if is_dict {
+                instr::is_type_c(IsTypeOp::Dict)
+            } else {
+                instr::is_type_c(IsTypeOp::Vec)
+            },
+            instr::jmp_nz(correct_type_label),
+            if is_dict {
+                instr::cast_dict()
+            } else {
+                instr::cast_vec()
+            },
+            instr::jmp(done_type_label),
+            instr::label(correct_type_label),
+            instr::false_(),
+            instr::instr(Instruct::Opcode(Opcode::ArrayUnmarkLegacy)),
+            instr::label(done_type_label),
+            instr::pop_l(arr_local),
+        ]);
 
+        let async_eager_label = e.label_gen_mut().next_regular();
+        let empty_label = e.label_gen_mut().next_regular();
+        let done_label = e.label_gen_mut().next_regular();
         let inner = InstrSeq::gather(vec![
+            // $func = ...
+            // foreach ($arr as $k => $v) {
+            //   $arr[$k] = $func(?$k, $v);
+            // }
+            scope::with_unnamed_local(e, |e, func_local| {
+                let before = InstrSeq::gather(vec![
+                    emit_expr(e, env, func)?,
+                    instr::c_get_l(arr_local),
+                    instr::jmp_z(empty_label),
+                    instr::pop_l(func_local),
+                ]);
+
+                let inner = emit_liter(e, &arr_local, |val_local, key_local| {
+                    InstrSeq::gather(vec![
+                        instr::null_uninit(),
+                        instr::null_uninit(),
+                        if with_key {
+                            instr::c_get_l(key_local)
+                        } else {
+                            instr::empty()
+                        },
+                        instr::push_l(val_local),
+                        instr::c_get_l(func_local),
+                        instr::f_call_func(FCallArgs::new(
+                            FCallArgsFlags::default(),
+                            1,
+                            if with_key { 2 } else { 1 },
+                            vec![],
+                            vec![],
+                            None,
+                            None,
+                        )),
+                        instr::base_l(arr_local, MOpMode::Define, ReadonlyOp::Any),
+                        instr::set_m(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
+                        instr::pop_c(),
+                    ])
+                })?;
+
+                let after = instr::unset_l(func_local);
+
+                Ok((before, inner, after))
+            })?,
+            // await HH\AwaitAllWaitHandle::from{Vec,Dict}($arr);
             instr::null_uninit(),
             instr::null_uninit(),
             instr::c_get_l(arr_local),
@@ -909,15 +1010,22 @@ fn inline_gena_call<'a, 'd>(
                     Some(async_eager_label),
                     None,
                 ),
-                MethodName::new(string_id!("fromDict")),
+                if is_dict {
+                    MethodName::new(string_id!("fromDict"))
+                } else {
+                    MethodName::new(string_id!("fromVec"))
+                },
                 ClassName::new(string_id!("HH\\AwaitAllWaitHandle")),
             ),
             instr::await_(),
             instr::label(async_eager_label),
             instr::pop_c(),
+            // foreach ($arr as $k => $v) {
+            //   $arr[$k] = HH\Asio\result($v);
+            // }
             emit_liter(e, &arr_local, |val_local, key_local| {
                 InstrSeq::gather(vec![
-                    instr::c_get_l(val_local),
+                    instr::push_l(val_local),
                     instr::wh_result(),
                     instr::base_l(
                         arr_local,
@@ -928,6 +1036,10 @@ fn inline_gena_call<'a, 'd>(
                     instr::pop_c(),
                 ])
             })?,
+            instr::jmp(done_label),
+            instr::label(empty_label),
+            instr::pop_c(),
+            instr::label(done_label),
         ]);
 
         let after = instr::push_l(arr_local);
@@ -941,13 +1053,8 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
     collection: &Local,
     f: F,
 ) -> Result<InstrSeq> {
-    let use_liter = e.options().hhbc.optimize_local_iterators;
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = if use_liter {
-            e.iterator_mut().gen_liter(*collection)
-        } else {
-            e.iterator_mut().gen_iter()
-        };
+        let iter_id = e.iterator_mut().gen_liter(*collection);
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
         let loop_end = e.label_gen_mut().next_regular();
@@ -957,26 +1064,15 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
             key_id,
             val_id,
         };
-        let iter_init = if use_liter {
-            InstrSeq::gather(vec![instr::l_iter_init(
-                iter_args.clone(),
-                *collection,
-                loop_end,
-            )])
-        } else {
-            InstrSeq::gather(vec![
-                instr::c_get_l(*collection),
-                instr::iter_init(iter_args.clone(), loop_end),
-            ])
-        };
+        let iter_init = InstrSeq::gather(vec![instr::l_iter_init(
+            iter_args.clone(),
+            *collection,
+            loop_end,
+        )]);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_next),
             f(val_id, key_id),
-            if use_liter {
-                instr::l_iter_next(iter_args, *collection, loop_next)
-            } else {
-                instr::iter_next(iter_args, loop_next)
-            },
+            instr::l_iter_next(iter_args, *collection, loop_next),
         ]);
         let iter_done = InstrSeq::gather(vec![
             instr::unset_l(val_id),

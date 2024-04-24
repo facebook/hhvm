@@ -1133,7 +1133,12 @@ pub mod emitter_special_functions {
     pub const SET_PRODUCT_ATTRIBUTION_ID_DEFERRED: &str =
         "\\HH\\set_product_attribution_id_deferred";
     pub const SYSTEMLIB_REIFIED_GENERICS: &str = "\\__systemlib_reified_generics";
-    pub const GENA: &str = "gena";
+    pub const VEC_MAP_ASYNC: &str = "\\HH\\Lib\\Vec\\map_async";
+    pub const VEC_MAP_ASYNC_FB: &str = "\\FlibSL\\Vec\\map_async";
+    pub const DICT_MAP_ASYNC: &str = "\\HH\\Lib\\Dict\\map_async";
+    pub const DICT_MAP_ASYNC_FB: &str = "\\FlibSL\\Dict\\map_async";
+    pub const DICT_MAP_WITH_KEY_ASYNC: &str = "\\HH\\Lib\\Dict\\map_with_key_async";
+    pub const DICT_MAP_WITH_KEY_ASYNC_FB: &str = "\\FlibSL\\Dict\\map_with_key_async";
 }
 
 pub mod math {

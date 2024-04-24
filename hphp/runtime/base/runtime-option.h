@@ -1105,6 +1105,13 @@ public:
   static bool ThreadTuneSkipWarmup;
   static double ThreadTuneAdjustmentPct;
   static double ThreadTuneStepPct;
+  // CPU high threshold is used for determining when to adjust threads. If the
+  // host CPU is > this threshold no adjustments will be made.
+  static double ThreadTuneCPUThreshold;
+  // Thread utilization threshold is used for determining when to adjust threads,
+  // threads will be increased if other criteria match and the current thread
+  // utilization is above this threshold.
+  static double ThreadTuneThreadUtilizationThreshold;
 #endif
 
   // Xenon options

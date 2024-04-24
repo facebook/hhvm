@@ -934,6 +934,8 @@ bool RuntimeOption::ThreadTuneDebug = false;
 bool RuntimeOption::ThreadTuneSkipWarmup = false;
 double RuntimeOption::ThreadTuneAdjustmentPct = 0;
 double RuntimeOption::ThreadTuneStepPct = 5;
+double RuntimeOption::ThreadTuneCPUThreshold = 95.0;
+double RuntimeOption::ThreadTuneThreadUtilizationThreshold = 90.0;
 #endif
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
@@ -1992,10 +1994,18 @@ void RuntimeOption::Load(
                  "Fb303Server.EnforceAclChecks", Fb303ServerEnforceAclChecks);
     Config::Bind(Fb303ServerIdentity, ini, config, "Fb303Server.Identity");
 
-    Config::Bind(ThreadTuneDebug, ini, config, "ThreadTuneDebug", ThreadTuneDebug);
-    Config::Bind(ThreadTuneSkipWarmup, ini, config, "ThreadTuneSkipWarmup", ThreadTuneSkipWarmup);
-    Config::Bind(ThreadTuneAdjustmentPct, ini, config, "ThreadTuneAdjustmentPct", ThreadTuneAdjustmentPct);
-    Config::Bind(ThreadTuneStepPct, ini, config, "ThreadTuneStepPct", ThreadTuneStepPct);
+    Config::Bind(ThreadTuneDebug, ini, config,
+                 "ThreadTuneDebug", ThreadTuneDebug);
+    Config::Bind(ThreadTuneSkipWarmup, ini, config,
+                 "ThreadTuneSkipWarmup", ThreadTuneSkipWarmup);
+    Config::Bind(ThreadTuneAdjustmentPct, ini, config,
+                 "ThreadTuneAdjustmentPct", ThreadTuneAdjustmentPct);
+    Config::Bind(ThreadTuneStepPct, ini, config,
+                 "ThreadTuneStepPct", ThreadTuneStepPct);
+    Config::Bind(ThreadTuneCPUThreshold, ini, config,
+                 "ThreadTuneCPUThreshold", ThreadTuneCPUThreshold);
+    Config::Bind(ThreadTuneThreadUtilizationThreshold, ini, config,
+                 "ThreadTuneThreadUtilizationThreshold", ThreadTuneThreadUtilizationThreshold);
   }
 #endif
 

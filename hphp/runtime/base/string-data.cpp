@@ -74,6 +74,7 @@ SymbolPrefix* getSymbolPrefix(StringData* sd) {
   assertx(sd->isSymbol());
   return reinterpret_cast<SymbolPrefix*>(sd) - 1;
 }
+
 const SymbolPrefix* getSymbolPrefix(const StringData* sd) {
   assertx(sd->isSymbol());
   return getSymbolPrefix(const_cast<StringData*>(sd));
@@ -166,6 +167,7 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
   }
   sd->m_len = sl.size(); // m_hash is computed soon.
 
+  // set null byte
   data[sl.size()] = 0;
   auto const mcret = memcpy(data, sl.data(), sl.size());
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
@@ -179,22 +181,24 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
   return ret;
 }
 
-StringData* StringData::MakeStaticAt(folly::StringPiece sl, MemBlock range) {
-  return MakeSharedAt<true>(sl, range);
+template <bool trueStatic> ALWAYS_INLINE
+StringData* StringData::MakeShared(folly::StringPiece sl) {
+  assertx(IMPLIES(trueStatic, StaticString::s_globalInit));
+  auto range = AllocateShared<trueStatic>(sl);
+  return MakeSharedAt<trueStatic>(sl, range);
 }
 
 StringData* StringData::MakeStatic(folly::StringPiece sl) {
-  assertx(StaticString::s_globalInit);
-  return MakeStaticAt(sl, AllocateShared<true>(sl));
+  return MakeShared<true>(sl);
 }
 
 StringData* StringData::MakeUncounted(folly::StringPiece sl) {
-  return MakeSharedAt<false>(sl, AllocateShared<false>(sl));
+  return MakeShared<false>(sl);
 }
 
 StringData* StringData::MakeEmpty() {
-  return MakeStaticAt(folly::StringPiece{""},
-                      MemBlock{&s_theEmptyString, sizeof(s_theEmptyString)});
+  return MakeSharedAt<true>(folly::StringPiece{""},
+                            MemBlock{&s_theEmptyString, sizeof(s_theEmptyString)});
 }
 
 void StringData::destructStatic() {

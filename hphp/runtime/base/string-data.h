@@ -496,6 +496,8 @@ private:
   template<bool trueStatic>
   static MemBlock AllocateShared(folly::StringPiece sl);
   template<bool trueStatic>
+  static StringData* MakeShared(folly::StringPiece sl);
+  template<bool trueStatic>
   static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
 
   /*

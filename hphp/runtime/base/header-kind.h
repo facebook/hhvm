@@ -113,14 +113,16 @@ enum class GCBits : uint8_t {};
  * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
  * padding with ONE_BIT_REFCOUNT.
  *
- * 0       32     40      48            56
+ * 0       32     40      48             56
  * [ cnt | kind | marks | arrBits      | sizeClass ] (vanilla) Vec
  * [ cnt | kind | marks | arrBits      | keyTypes  ] (vanilla) Dict
  * [ cnt | kind | marks |                          ] (vanilla) Keyset
  * [ cnt | kind | marks | arrBits      | extraData ] any BespokeArray
- * [ cnt | kind | marks | sizeClass    | isSymbol  ] String
+ * [ cnt | kind | marks | sizeClass:16             ] String (ref-counted)
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
+ * 0       32     40      48             63
+ * [ cnt | kind | marks | color:1      | isSymbol  ] String (cnt = StaticValue | UncountedValue)
  *
  * Note: arrBits includes several flags, mostly from the Hack array migration:
  *  - 1 bit for hasAPCTypedValue

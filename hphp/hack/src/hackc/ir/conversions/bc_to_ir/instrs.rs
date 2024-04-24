@@ -679,7 +679,14 @@ fn convert_local_range(ctx: &mut Context<'_>, range: &hhbc::LocalRange) -> Box<[
 
 fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
     match *opcode {
-        Opcode::IterInit(ref args, label) => {
+        Opcode::LIterInit(_, local, _) => {
+            let lid = convert_local(ctx, &local);
+            ctx.emit_push(Instr::Hhbc(instr::Hhbc::CGetL(lid, ctx.loc)));
+        }
+        _ => {}
+    };
+    match *opcode {
+        Opcode::IterInit(ref args, label) | Opcode::LIterInit(ref args, _, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
@@ -698,7 +705,7 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
             ctx.builder.start_block(next_bid);
             ctx.unspill_stack(stack_size);
         }
-        Opcode::IterNext(ref args, label) => {
+        Opcode::IterNext(ref args, label) | Opcode::LIterNext(ref args, _, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
@@ -852,7 +859,10 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
 
-        Opcode::IterInit(_, _) | Opcode::IterNext(_, _) => {
+        Opcode::IterInit(_, _)
+        | Opcode::IterNext(_, _)
+        | Opcode::LIterInit(_, _, _)
+        | Opcode::LIterNext(_, _, _) => {
             convert_iterator(ctx, opcode);
             Action::None
         }
@@ -1019,9 +1029,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IssetS => simple!(Hhbc::IssetS),
         Opcode::IterBase => simple!(Hhbc::IterBase),
         Opcode::IterFree => simple!(Hhbc::IterFree),
-        Opcode::LIterFree => todo!(),
-        Opcode::LIterInit => todo!(),
-        Opcode::LIterNext => todo!(),
+        Opcode::LIterFree => simple!(Hhbc::LIterFree),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
         Opcode::LazyClass => simple!(Immediate::LazyClass),
         Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),

@@ -499,6 +499,8 @@ pub enum Hhbc {
     IterBase(ValueId, LocId),
     #[has_operands(none)]
     IterFree(IterId, LocId),
+    #[has_operands(none)]
+    LIterFree(IterId, LocalId, LocId),
     LateBoundCls(LocId),
     LazyClassFromClass(ValueId, LocId),
     LockObj(ValueId, LocId),

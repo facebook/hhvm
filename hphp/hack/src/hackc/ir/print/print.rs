@@ -973,6 +973,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::IterFree(iter_id, _loc) => {
             write!(w, "iterator ^{} free", iter_id)?;
         }
+        Hhbc::LIterFree(iter_id, lid, _loc) => {
+            write!(w, "iterator ^{} lfree {}", iter_id, FmtLid(lid))?;
+        }
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
         }

@@ -388,20 +388,23 @@ impl<'a> State<'a> {
                 self.locals.remove(&local);
             }
 
-            Instruct::Opcode(Opcode::LIterFree(..)) => todo!(),
-            Instruct::Opcode(Opcode::LIterInit(..)) => todo!(),
-            Instruct::Opcode(Opcode::LIterNext(..)) => todo!(),
-
             Instruct::Opcode(Opcode::MemoGetEager(targets, _, range)) => {
                 self.step_memo_get_eager(builder, targets, range)?;
             }
 
             Instruct::Opcode(Opcode::IterInit(ref iter_args, target)) => {
-                self.step_iter_init(builder, iter_args, target);
+                self.step_iter_init(builder, iter_args, None, target)
             }
-            Instruct::Opcode(Opcode::IterFree(iter_id)) => self.step_iter_free(iter_id),
+            Instruct::Opcode(Opcode::LIterInit(ref iter_args, local, target)) => {
+                self.step_iter_init(builder, iter_args, Some(local), target)
+            }
+            Instruct::Opcode(Opcode::IterFree(iter_id))
+            | Instruct::Opcode(Opcode::LIterFree(iter_id, _)) => self.step_iter_free(iter_id),
             Instruct::Opcode(Opcode::IterNext(ref iter_args, target)) => {
-                self.step_iter_next(builder, iter_args, target)
+                self.step_iter_next(builder, iter_args, None, target)
+            }
+            Instruct::Opcode(Opcode::LIterNext(ref iter_args, local, target)) => {
+                self.step_iter_next(builder, iter_args, Some(local), target)
             }
 
             Instruct::Opcode(Opcode::Switch(bounded, base, ref targets)) => {
@@ -932,10 +935,14 @@ impl<'a> State<'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
+        base_local: Option<Local>,
         target: Label,
     ) {
         // IterArgs { iter_id: IterId, key_id: Local, val_id: Local }
-        let base = self.stack_pop();
+        let base = match base_local {
+            None => self.stack_pop(),
+            Some(local) => self.local_get(&local),
+        };
         let inputs = vec![self.reffy(base)];
 
         self.fork_and_adjust(builder, &[target], |_, _, _| {
@@ -965,10 +972,15 @@ impl<'a> State<'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
+        base_local: Option<Local>,
         target: Label,
     ) {
         if let Some(iterator) = self.iterators.get(&iter_args.iter_id) {
-            let inputs = vec![self.reffy(iterator.base)];
+            let base = match base_local {
+                None => iterator.base,
+                Some(local) => self.local_get(&local),
+            };
+            let inputs = vec![self.reffy(base)];
 
             let instr = NodeInstr::Opcode(Opcode::IterNext(IterArgs::default(), Label::INVALID));
 

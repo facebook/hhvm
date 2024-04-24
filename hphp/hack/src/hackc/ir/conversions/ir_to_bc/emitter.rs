@@ -512,6 +512,10 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::IssetS(_, _) => Opcode::IssetS,
             Hhbc::IterBase(..) => Opcode::IterBase,
             Hhbc::IterFree(iter_id, _) => Opcode::IterFree(iter_id),
+            Hhbc::LIterFree(iter_id, lid, _) => {
+                let local = self.lookup_local(lid);
+                Opcode::LIterFree(iter_id, local)
+            }
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
             Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,

@@ -1217,7 +1217,6 @@ class HandlerCallbackBase {
     }
   };
 
- public:
   using Ptr =
       util::IntrusiveSharedPtr<HandlerCallbackBase, IntrusiveSharedPtrAccess>;
 

@@ -31,19 +31,19 @@ std::shared_ptr<PeerCert> makeCredential(
 
   switch (CertUtils::getKeyType(pubKey)) {
     case KeyType::RSA:
-      return std::make_shared<PeerDelegatedCredential<KeyType::RSA>>(
+      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::RSA>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P256:
-      return std::make_shared<PeerDelegatedCredential<KeyType::P256>>(
+      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P384:
-      return std::make_shared<PeerDelegatedCredential<KeyType::P384>>(
+      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P384>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P521:
-      return std::make_shared<PeerDelegatedCredential<KeyType::P521>>(
+      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P521>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::ED25519:
-      return std::make_shared<PeerDelegatedCredential<KeyType::ED25519>>(
+      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::ED25519>>(
           std::move(cert), std::move(pubKey), std::move(credential));
   }
 

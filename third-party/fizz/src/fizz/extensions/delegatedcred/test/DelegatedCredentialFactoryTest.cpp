@@ -84,7 +84,8 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsing) {
   auto entry = generateEntry();
   auto cert = factory_.makePeerCert(std::move(entry), true);
   EXPECT_TRUE(cert);
-  EXPECT_TRUE(typeid(*cert) == typeid(PeerDelegatedCredential<KeyType::P256>));
+  EXPECT_TRUE(
+      typeid(*cert) == typeid(PeerDelegatedCredentialImpl<KeyType::P256>));
 }
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {

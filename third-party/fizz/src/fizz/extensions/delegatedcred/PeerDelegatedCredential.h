@@ -15,21 +15,36 @@
 namespace fizz {
 namespace extensions {
 
-template <KeyType T>
-class PeerDelegatedCredential : public OpenSSLPeerCertImpl<T> {
+// This is a base class purely to differentiate between the common
+// peer cert impl, in case a cast is needed at some higher layer.
+class PeerDelegatedCredential : public PeerCert {
  public:
-  explicit PeerDelegatedCredential(
+  virtual ~PeerDelegatedCredential() = default;
+};
+
+template <KeyType T>
+class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
+ public:
+  PeerDelegatedCredentialImpl(
       folly::ssl::X509UniquePtr cert,
       folly::ssl::EvpPkeyUniquePtr pubKey,
       DelegatedCredential credential);
 
-  ~PeerDelegatedCredential() override = default;
+  ~PeerDelegatedCredentialImpl() override = default;
 
   void verify(
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,
       folly::ByteRange signature) const override;
+
+  folly::ssl::X509UniquePtr getX509() const override {
+    return peerCertImpl_.getX509();
+  }
+
+  std::string getIdentity() const override {
+    return peerCertImpl_.getIdentity();
+  }
 
   SignatureScheme getExpectedScheme() const;
 
@@ -39,6 +54,18 @@ class PeerDelegatedCredential : public OpenSSLPeerCertImpl<T> {
   }
 
  private:
+  class InternalPeerCert : public OpenSSLPeerCertImpl<T> {
+   public:
+    ~InternalPeerCert() override = default;
+
+    explicit InternalPeerCert(
+        folly::ssl::X509UniquePtr cert,
+        folly::ssl::EvpPkeyUniquePtr pubKey);
+
+    using OpenSSLPeerCertImpl<T>::cert_;
+    using OpenSSLPeerCertImpl<T>::signature_;
+  };
+  InternalPeerCert peerCertImpl_;
   DelegatedCredential credential_;
   std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();
 };

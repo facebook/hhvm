@@ -13,17 +13,26 @@ namespace fizz {
 namespace extensions {
 
 template <KeyType T>
-PeerDelegatedCredential<T>::PeerDelegatedCredential(
+PeerDelegatedCredentialImpl<T>::InternalPeerCert::InternalPeerCert(
     folly::ssl::X509UniquePtr cert,
-    folly::ssl::EvpPkeyUniquePtr pubKey,
-    DelegatedCredential credential)
-    : OpenSSLPeerCertImpl<T>(std::move(cert)),
-      credential_(std::move(credential)) {
-  this->signature_.setKey(std::move(pubKey));
+    folly::ssl::EvpPkeyUniquePtr pubKey)
+    : OpenSSLPeerCertImpl<T>(std::move(cert)) {
+  if (CertUtils::getKeyType(pubKey) != T) {
+    throw std::runtime_error("Key and credential type don't match");
+  }
+  signature_.setKey(std::move(pubKey));
 }
 
 template <KeyType T>
-void PeerDelegatedCredential<T>::verify(
+PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
+    folly::ssl::X509UniquePtr cert,
+    folly::ssl::EvpPkeyUniquePtr pubKey,
+    DelegatedCredential credential)
+    : peerCertImpl_(std::move(cert), std::move(pubKey)),
+      credential_(std::move(credential)) {}
+
+template <KeyType T>
+void PeerDelegatedCredentialImpl<T>::verify(
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
@@ -34,7 +43,7 @@ void PeerDelegatedCredential<T>::verify(
         "certificate verify didn't use credential's algorithm",
         AlertDescription::illegal_parameter);
   }
-  auto x509 = OpenSSLPeerCertImpl<T>::getX509();
+  auto x509 = peerCertImpl_.getX509();
   // Check extensions on cert
   DelegatedCredentialUtils::checkExtensions(x509);
   DelegatedCredentialUtils::checkCredentialTimeValidity(
@@ -59,12 +68,12 @@ void PeerDelegatedCredential<T>::verify(
   }
 
   // Call the parent verify method
-  OpenSSLPeerCertImpl<T>::verify(
+  peerCertImpl_.verify(
       scheme, context, std::move(toBeSigned), std::move(signature));
 }
 
 template <KeyType T>
-SignatureScheme PeerDelegatedCredential<T>::getExpectedScheme() const {
+SignatureScheme PeerDelegatedCredentialImpl<T>::getExpectedScheme() const {
   return credential_.expected_verify_scheme;
 }
 } // namespace extensions

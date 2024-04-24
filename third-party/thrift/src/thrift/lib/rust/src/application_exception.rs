@@ -49,6 +49,7 @@ pub enum ApplicationExceptionErrorCode {
     InjectedFailure = 13,
     ChecksumMismatch = 14,
     Interruption = 15,
+    TenantQuotaExceeded = 16,
 }
 
 const TAPPLICATION_EXCEPTION_ERROR_CODE: &str = "ApplicationExceptionErrorCode";
@@ -152,6 +153,7 @@ impl ExceptionInfo for ApplicationException {
             ApplicationExceptionErrorCode::InjectedFailure => "ApplicationExceptionErrorCode::InjectedFailure",
             ApplicationExceptionErrorCode::ChecksumMismatch => "ApplicationExceptionErrorCode::ChecksumMismatch",
             ApplicationExceptionErrorCode::Interruption => "ApplicationExceptionErrorCode::Interruption",
+            ApplicationExceptionErrorCode::TenantQuotaExceeded => "ApplicationExceptionErrorCode::TenantQuotaExceeded",
         }
     }
 
@@ -210,6 +212,7 @@ where
                         13 => ApplicationExceptionErrorCode::InjectedFailure,
                         14 => ApplicationExceptionErrorCode::ChecksumMismatch,
                         15 => ApplicationExceptionErrorCode::Interruption,
+                        16 => ApplicationExceptionErrorCode::TenantQuotaExceeded,
 
                         _ => ApplicationExceptionErrorCode::Unknown,
                     }

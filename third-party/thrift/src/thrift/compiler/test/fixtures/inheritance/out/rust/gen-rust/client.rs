@@ -6,9 +6,6 @@
 #![recursion_limit = "100000000"]
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_imports, clippy::all)]
 
-#[path = "mock_impl.rs"]
-pub mod mock;
-
 #[doc(inline)]
 pub use :: as types;
 
@@ -329,7 +326,7 @@ impl ::fbthrift::ClientFactory for make_MyRoot {
 
 /// Client definitions for `MyNode`.
 pub struct MyNodeImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::MyRootImpl<P, T, S>,
+    parent: crate::client::MyRootImpl<P, T, S>,
 }
 
 impl<P, T, S> MyNodeImpl<P, T, S>
@@ -344,7 +341,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::MyRootImpl::<P, T, S>::new(transport);
+        let parent = crate::client::MyRootImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -432,13 +429,13 @@ where
     }
 }
 
-pub trait MyNode: crate::MyRoot + ::std::marker::Send {
+pub trait MyNode: crate::client::MyRoot + ::std::marker::Send {
     fn do_mid(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>>;
 }
 
-pub trait MyNodeExt<T>: MyNode + crate::MyRootExt<T>
+pub trait MyNodeExt<T>: MyNode + crate::client::MyRootExt<T>
 where
     T: ::fbthrift::Transport,
 {
@@ -646,7 +643,7 @@ impl ::fbthrift::ClientFactory for make_MyNode {
 
 /// Client definitions for `MyLeaf`.
 pub struct MyLeafImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::MyNodeImpl<P, T, S>,
+    parent: crate::client::MyNodeImpl<P, T, S>,
 }
 
 impl<P, T, S> MyLeafImpl<P, T, S>
@@ -661,7 +658,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::MyNodeImpl::<P, T, S>::new(transport);
+        let parent = crate::client::MyNodeImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -781,13 +778,13 @@ where
     }
 }
 
-pub trait MyLeaf: crate::MyNode + ::std::marker::Send {
+pub trait MyLeaf: crate::client::MyNode + ::std::marker::Send {
     fn do_leaf(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>>;
 }
 
-pub trait MyLeafExt<T>: MyLeaf + crate::MyNodeExt<T>
+pub trait MyLeafExt<T>: MyLeaf + crate::client::MyNodeExt<T>
 where
     T: ::fbthrift::Transport,
 {

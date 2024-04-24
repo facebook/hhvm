@@ -151,20 +151,6 @@ bool rust_serde_enabled(
   }
 }
 
-std::string get_lib_import_name(
-    const t_program* program, const rust_codegen_options& options) {
-  if (program == options.current_program) {
-    return options.current_crate;
-  }
-
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate != options.cratemap.end()) {
-    return crate->second.import_name();
-  }
-  return program_name;
-}
-
 std::string get_types_import_name(
     const t_program* program, const rust_codegen_options& options) {
   if (program == options.current_program) {
@@ -185,7 +171,7 @@ std::string get_types_import_name(
 std::string get_client_import_name(
     const t_program* program, const rust_codegen_options& options) {
   if (program == options.current_program) {
-    return options.current_crate;
+    return options.current_crate + "::client";
   }
 
   auto program_name = program->name();
@@ -193,7 +179,7 @@ std::string get_client_import_name(
   if (crate == options.cratemap.end()) {
     return program_name + "__clients";
   } else if (crate->second.name == "crate") {
-    return crate->second.import_name();
+    return crate->second.import_name() + "::client";
   }
 
   std::string absolute_crate_name = "::" + crate->second.name + "_clients";
@@ -223,6 +209,48 @@ std::string get_server_import_name(
     return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
   } else {
     return absolute_crate_name;
+  }
+}
+
+std::string get_mock_import_name(
+    const t_program* program, const rust_codegen_options& options) {
+  if (program == options.current_program) {
+    return options.current_crate;
+  }
+
+  auto program_name = program->name();
+  auto crate = options.cratemap.find(program_name);
+  if (crate == options.cratemap.end()) {
+    return program_name + "__mocks";
+  } else if (crate->second.name == "crate") {
+    return crate->second.import_name();
+  }
+
+  std::string absolute_crate_name = "::" + crate->second.name + "_mocks";
+  if (crate->second.multifile_module) {
+    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  } else {
+    return absolute_crate_name;
+  }
+}
+
+// Path to the crate root of the given service's mocks crate. Unlike
+// `get_mock_import_name`, for multifile Thrift libraries the module name is not
+// included here.
+std::string get_mock_crate(
+    const t_program* program, const rust_codegen_options& options) {
+  if (program == options.current_program) {
+    return "crate";
+  }
+
+  auto program_name = program->name();
+  auto crate = options.cratemap.find(program_name);
+  if (crate == options.cratemap.end()) {
+    return program_name + "__mocks";
+  } else if (crate->second.name == "crate") {
+    return "crate";
+  } else {
+    return "::" + crate->second.name + "_mocks";
   }
 }
 
@@ -603,7 +631,6 @@ class rust_mstch_program : public mstch_program {
             {"program:server?", &rust_mstch_program::rust_server},
             {"program:multifile?", &rust_mstch_program::rust_multifile},
             {"program:crate", &rust_mstch_program::rust_crate},
-            {"program:package", &rust_mstch_program::rust_package},
             {"program:client_package",
              &rust_mstch_program::rust_client_package},
             {"program:includes", &rust_mstch_program::rust_includes},
@@ -709,7 +736,6 @@ class rust_mstch_program : public mstch_program {
     }
     return std::string("crate");
   }
-  mstch::node rust_package() { return get_lib_import_name(program_, options_); }
   mstch::node rust_client_package() {
     return get_client_import_name(program_, options_);
   }
@@ -974,6 +1000,8 @@ class rust_mstch_service : public mstch_service {
          {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
          {"service:client_package", &rust_mstch_service::rust_client_package},
          {"service:server_package", &rust_mstch_service::rust_server_package},
+         {"service:mock_package", &rust_mstch_service::rust_mock_package},
+         {"service:mock_crate", &rust_mstch_service::rust_mock_crate},
          {"service:snake", &rust_mstch_service::rust_snake},
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
@@ -994,6 +1022,12 @@ class rust_mstch_service : public mstch_service {
   }
   mstch::node rust_server_package() {
     return get_server_import_name(service_->program(), options_);
+  }
+  mstch::node rust_mock_package() {
+    return get_mock_import_name(service_->program(), options_);
+  }
+  mstch::node rust_mock_crate() {
+    return get_mock_crate(service_->program(), options_);
   }
   mstch::node rust_snake() {
     if (service_->has_annotation("rust.mod")) {
@@ -2407,7 +2441,6 @@ void t_mstch_rust_generator::generate_program() {
   render_to_file(prog, "client.rs", "client.rs");
   render_to_file(prog, "server.rs", "server.rs");
   render_to_file(prog, "mock.rs", "mock.rs");
-  render_to_file(prog, "mock_impl.rs", "mock_impl.rs");
   write_output("namespace", namespace_rust + '\n');
   write_output("service-names", service_names);
 }

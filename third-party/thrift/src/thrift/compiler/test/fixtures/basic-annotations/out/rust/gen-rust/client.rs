@@ -6,9 +6,6 @@
 #![recursion_limit = "100000000"]
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_imports, clippy::all)]
 
-#[path = "mock_impl.rs"]
-pub mod mock;
-
 #[doc(inline)]
 pub use :: as types;
 
@@ -1413,7 +1410,7 @@ impl ::fbthrift::ClientFactory for make_MyServicePrioParent {
 
 /// Client definitions for `MyServicePrioChild`.
 pub struct MyServicePrioChildImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::MyServicePrioParentImpl<P, T, S>,
+    parent: crate::client::MyServicePrioParentImpl<P, T, S>,
 }
 
 impl<P, T, S> MyServicePrioChildImpl<P, T, S>
@@ -1428,7 +1425,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::MyServicePrioParentImpl::<P, T, S>::new(transport);
+        let parent = crate::client::MyServicePrioParentImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -1516,13 +1513,13 @@ where
     }
 }
 
-pub trait MyServicePrioChild: crate::MyServicePrioParent + ::std::marker::Send {
+pub trait MyServicePrioChild: crate::client::MyServicePrioParent + ::std::marker::Send {
     fn pang(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_child::PangError>>;
 }
 
-pub trait MyServicePrioChildExt<T>: MyServicePrioChild + crate::MyServicePrioParentExt<T>
+pub trait MyServicePrioChildExt<T>: MyServicePrioChild + crate::client::MyServicePrioParentExt<T>
 where
     T: ::fbthrift::Transport,
 {

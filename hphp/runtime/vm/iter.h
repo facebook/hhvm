@@ -131,21 +131,11 @@ std::string show(IterSpecialization::BaseType type);
  * type of mutating operations. Apparently, this pattern is somewhat common...
  */
 struct IterImpl {
-  enum NoInc { noInc = 0 };
-  enum Local { local = 0 };
-
   /*
    * Constructors.  Note that sometimes IterImpl objects are created
    * without running their C++ constructor.  (See new_iter_array.)
    */
   IterImpl() = delete;
-  explicit IterImpl(const ArrayData* data);
-  IterImpl(const ArrayData* data, NoInc) {
-    setArrayData<false>(data);
-  }
-  IterImpl(const ArrayData* data, Local) {
-    setArrayData<true>(data);
-  }
   explicit IterImpl(Object&& obj);
 
   // Destructor
@@ -312,30 +302,6 @@ private:
   template<bool HasKey, bool Local>
   friend int64_t iter_next_mixed_pointer(
     Iter*, TypedValue*, TypedValue*, ArrayData*);
-
-  template <bool incRef = true>
-  void arrInit(const ArrayData* arr);
-
-  // Set all IterImpl fields for iteration over an array:
-  //  - m_data is either the array, or null (for local iterators).
-  //  - The type fields union is set based on the array type.
-  //  - m_pos and m_end are set based on its virtual iter helpers.
-  template <bool Local = false>
-  void setArrayData(const ArrayData* ad) {
-    assertx((intptr_t(ad) & objectBaseTag()) == 0);
-    assertx(!Local || ad);
-    m_data = Local ? nullptr : ad;
-    setArrayNext(IterNextIndex::Array);
-    if (ad != nullptr) {
-      if (ad->isVanillaVec()) {
-        setArrayNext(IterNextIndex::VanillaVec);
-      } else if (ad->isVanillaDict()) {
-        setArrayNext(IterNextIndex::ArrayMixed);
-      }
-      m_pos = ad->iter_begin();
-      m_end = ad->iter_end();
-    }
-  }
 
   // Set all IterImpl fields for iteration over an object:
   //  - m_data is is always the object, with the lowest bit set as a flag.

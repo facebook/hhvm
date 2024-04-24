@@ -96,10 +96,6 @@ std::string show(IterSpecialization::BaseType type) {
 
 //////////////////////////////////////////////////////////////////////
 
-IterImpl::IterImpl(const ArrayData* data) {
-  arrInit(data);
-}
-
 IterImpl::IterImpl(Object&& obj) {
   auto const o = obj.detach();
   assertx(o->isIterator());
@@ -172,12 +168,6 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(m_end == arr->iter_end());
   }
   return true;
-}
-
-template <bool incRef /* = true */>
-void IterImpl::arrInit(const ArrayData* arr) {
-  setArrayData(arr);
-  if (arr && incRef) arr->incRefCount();
 }
 
 void IterImpl::kill() {
@@ -338,55 +328,47 @@ namespace {
 
 template <bool typeArray>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
-  auto const oldVal = *out;
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   auto& arrIter = *unwrap(iter);
   assertx(typeArray == arrIter.hasArrayData());
   if (typeArray) {
-    tvDup(arrIter.nvSecond(), *out);
+    tvSet(arrIter.nvSecond(), *out);
   } else {
     Variant val = arrIter.second();
-    tvDup(*val.asTypedValue(), *out);
+    tvSet(*val.asTypedValue(), *out);
   }
-  tvDecRefGen(oldVal);
 }
 
 template <bool typeArray>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
-  auto const oldVal = *out;
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   auto& arrIter = *unwrap(iter);
   assertx(typeArray == arrIter.hasArrayData());
   if (typeArray) {
-    tvDup(arrIter.nvFirst(), *out);
+    tvSet(arrIter.nvFirst(), *out);
   } else {
     Variant key = arrIter.first();
-    tvDup(*key.asTypedValue(), *out);
+    tvSet(*key.asTypedValue(), *out);
   }
-  tvDecRefGen(oldVal);
 }
 
 inline void liter_value_cell_local_impl(Iter* iter,
                                         TypedValue* out,
                                         const ArrayData* ad) {
-  auto const oldVal = *out;
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.hasArrayData());
   assertx(!arrIter.getArrayData());
-  tvDup(arrIter.nvSecondLocal(ad), *out);
-  tvDecRefGen(oldVal);
+  tvSet(arrIter.nvSecondLocal(ad), *out);
 }
 
 inline void liter_key_cell_local_impl(Iter* iter,
                                       TypedValue* out,
                                       const ArrayData* ad) {
-  auto const oldVal = *out;
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.hasArrayData());
   assertx(!arrIter.getArrayData());
-  tvDup(arrIter.nvFirstLocal(ad), *out);
-  tvDecRefGen(oldVal);
+  tvSet(arrIter.nvFirstLocal(ad), *out);
 }
 
 NEVER_INLINE void clearOutputLocal(TypedValue* local) {
@@ -419,42 +401,6 @@ NEVER_INLINE int64_t iter_next_free_struct_dict(Iter* iter, StructDict* sad) {
   return 0;
 }
 
-}
-
-/*
- * new_iter_array creates an iterator for the specified array iff the
- * array is not empty.  If new_iter_array creates an iterator, it does
- * not increment the refcount of the specified array.  If
- * new_iter_array does not create an iterator, it decRefs the array.
- */
-template <bool Local>
-NEVER_INLINE
-int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
-                            TypedValue* keyOut) {
-  TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
-  if (!arr->empty()) {
-    // We are transferring ownership of the array to the iterator, therefore
-    // we do not need to adjust the refcount.
-    auto const iter = unwrap(dest);
-    if (Local) {
-      new (iter) IterImpl(arr, IterImpl::local);
-      liter_value_cell_local_impl(dest, valOut, arr);
-      if (keyOut) {
-        liter_key_cell_local_impl(dest, keyOut, arr);
-      }
-    } else {
-      new (iter) IterImpl(arr, IterImpl::noInc);
-      iter_value_cell_local_impl<true>(dest, valOut);
-      if (keyOut) {
-        iter_key_cell_local_impl<true>(dest, keyOut);
-      }
-    }
-    return 1LL;
-  }
-  // We did not transfer ownership of the array to an iterator, so we need
-  // to decRef the array.
-  if (!Local) decRefArr(arr);
-  return 0LL;
 }
 
 template <IterTypeOp Type>
@@ -524,7 +470,11 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 1;
   }
 
-  return new_iter_array_cold<Local>(dest, ad, valOut, nullptr);
+  aiter.m_pos = ad->iter_begin();
+  aiter.m_end = ad->iter_end();
+  aiter.setArrayNext(IterNextIndex::Array);
+  tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
+  return 1;
 }
 
 IterInitArr new_iter_array_helper(IterTypeOp type) {
@@ -605,7 +555,12 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  return new_iter_array_cold<Local>(dest, ad, valOut, keyOut);
+  aiter.m_pos = ad->iter_begin();
+  aiter.m_end = ad->iter_end();
+  aiter.setArrayNext(IterNextIndex::Array);
+  tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
+  tvDup(ad->nvGetKey(aiter.m_pos), *keyOut);
+  return 1;
 }
 
 IterInitArrKey new_iter_array_key_helper(IterTypeOp type) {

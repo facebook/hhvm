@@ -28,7 +28,7 @@ How mutations for Thrift values are represented, manipulated, and applied. It ca
 
 Use `thrift_patch_library` buck build rule to enable Patch. Internally, it will
 create a `thrift_library` build rule that contains the patch structs in Thrift
-file `[thrift_file_name]_patch.thrift`. It takes the following arguments
+file `gen_patch_[thrift_file_name].thrift`. It takes the following arguments
 
 | Argument            | Description                                             | Example                            |
 | ------------------- | ------------------------------------------------------- | ---------------------------------- |
@@ -82,7 +82,7 @@ Internally, this will generate
 thrift_library(
   name = "foo_patch",
   srcs = {"foo_patch.thrift": []},
-  deps = [":foo", "//path/to/bar_patch"],
+  deps = [":foo", "//path/to:gen_patch_bar"],
   languages = ['cpp2'],
   thrift_cpp2_options = ['any'],
 )
@@ -92,7 +92,7 @@ So that this can be used later in C++, and dependencies can be included automati
 
 ```cpp
 // MyService.cpp
-#include "path/to/gen-cpp2/foo_patch_types.h"
+#include "path/to/gen-cpp2/gen_patch_foo_types.h"
 
 auto createPatch() {
   using apache::thrift;
@@ -111,7 +111,7 @@ And, to send over the wire, you must use Thrift SafePatch to avoid silent data c
 
 ```cpp
 // MyService.cpp
-#include "path/to/gen-cpp2/foo_patch_types.h"
+#include "path/to/gen-cpp2/gen_patch_foo_types.h"
 
 auto createSafePatch() {
   using apache::thrift;
@@ -140,7 +140,7 @@ the generated Thrift header.
   - Pros: More user-friendly APIs (e.g., ability to modify patch based on field
     name, user can’t generate invalid patch).
   - Cons: Requires Thrift file to be available (e.g.,
-    `<thrift_file>_patch_types.h` must be included in C++).
+    `gen_patch_<thrift_file>_types.h` must be included in C++).
     You need to recursively enable for all Thrift file dependencies.
 - Dynamic Patch, or Schema-less Patch, is a schema-less representation of static
   patch that is consumed with dynamic type `protocol::Object`.

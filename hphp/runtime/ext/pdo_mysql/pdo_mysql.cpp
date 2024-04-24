@@ -217,7 +217,7 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   #endif
 
-  parseDataSource(data_source.data(), data_source.size(), vars, 5);
+  parseDataSource(m_data_source.data(), m_data_source.size(), vars, 5);
 
   dbname = vars[1].optval;
 

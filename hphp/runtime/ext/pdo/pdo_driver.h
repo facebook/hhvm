@@ -401,7 +401,7 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
   };
 
   // Data source string used to open this handle.
-  std::string data_source;
+  std::string m_data_source;
 
   // The global error code.
   PDOErrorType error_code{0};

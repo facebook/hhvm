@@ -94,12 +94,12 @@ PDOSqliteConnection::~PDOSqliteConnection() {
 }
 
 bool PDOSqliteConnection::create(const Array& options) {
-  String filename = data_source.substr(0,1) == ":" ? String(data_source) :
-                    File::TranslatePath(data_source);
+  String filename = m_data_source.substr(0,1) == ":" ? String(m_data_source) :
+                    File::TranslatePath(m_data_source);
   if (filename.empty()) {
     throw_pdo_exception(Array(),
                         "safe_mode/open_basedir prohibits opening %s",
-                        data_source.c_str());
+                        m_data_source.c_str());
     return false;
   }
 

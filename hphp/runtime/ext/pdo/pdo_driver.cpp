@@ -55,7 +55,7 @@ req::ptr<PDOResource> PDODriver::createResource(const String& datasource,
   auto const rsrc = createResourceImpl();
   auto const& conn = rsrc->conn();
 
-  conn->data_source = datasource.toCppString();
+  conn->m_data_source = datasource.toCppString();
   conn->username = username.toCppString();
   conn->password = password.toCppString();
 

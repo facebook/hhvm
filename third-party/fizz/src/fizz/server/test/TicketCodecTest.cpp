@@ -127,9 +127,10 @@ TEST(TicketCodecTest, TestFactoryCert) {
   }));
   auto factory = std::make_unique<MockFactory>();
   auto certManager = std::make_unique<MockCertManager>();
-  auto factoryCert = std::make_shared<MockPeerCert>();
-  EXPECT_CALL(*factory, _makePeerCert(_, _)).WillOnce(Return(factoryCert));
+  auto factoryCert = std::make_unique<MockPeerCert>();
   EXPECT_CALL(*factoryCert, getIdentity()).WillOnce(Return("factory clientid"));
+  EXPECT_CALL(*factory, _makePeerCert(_, _))
+      .WillOnce(Return(std::move(factoryCert)));
   EXPECT_CALL(*certManager, getCert(_)).WillOnce(Return(nullptr));
   auto encoded = TicketCodec<CertificateStorage::X509>::encode(std::move(rs));
   auto drs = TicketCodec<CertificateStorage::X509>::decode(

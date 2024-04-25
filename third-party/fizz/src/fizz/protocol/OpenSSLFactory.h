@@ -38,7 +38,7 @@ class OpenSSLFactory : public DefaultFactory {
   std::unique_ptr<HandshakeContext> makeHandshakeContext(
       CipherSuite cipher) const override;
 
-  [[nodiscard]] std::shared_ptr<PeerCert> makePeerCert(
+  [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const override;
 };

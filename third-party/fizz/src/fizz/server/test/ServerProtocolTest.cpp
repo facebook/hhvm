@@ -6193,12 +6193,14 @@ TEST_F(ServerProtocolTest, TestCertificate) {
   setUpExpectingCertificate();
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("certencoding")));
-  clientLeafCert_ = std::make_shared<MockPeerCert>();
-  clientIntCert_ = std::make_shared<MockPeerCert>();
+  auto clientLeafCert = std::make_unique<MockPeerCert>();
+  auto clientIntCert = std::make_unique<MockPeerCert>();
+  auto clientLeafPtr = clientLeafCert.get();
+  auto clientIntPtr = clientIntCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(clientLeafCert_));
+      .WillOnce(Return(std::move(clientLeafCert)));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(clientIntCert_));
+      .WillOnce(Return(std::move(clientIntCert)));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;
@@ -6213,8 +6215,8 @@ TEST_F(ServerProtocolTest, TestCertificate) {
   expectActions<MutateState>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.unverifiedCertChain()->size(), 2);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(0), clientLeafCert_);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(1), clientIntCert_);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(0).get(), clientLeafPtr);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(1).get(), clientIntPtr);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificateVerify);
 }
 
@@ -6290,12 +6292,14 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsNotSupported) {
 
 TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   setUpExpectingCertificate();
-  clientLeafCert_ = std::make_shared<MockPeerCert>();
-  clientIntCert_ = std::make_shared<MockPeerCert>();
+  auto clientLeafCert = std::make_unique<MockPeerCert>();
+  auto clientLeafPtr = clientLeafCert.get();
+  auto clientIntCert = std::make_unique<MockPeerCert>();
+  auto clientIntPtr = clientIntCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(clientLeafCert_));
+      .WillOnce(Return(std::move(clientLeafCert)));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(clientIntCert_));
+      .WillOnce(Return(std::move(clientIntCert)));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;
@@ -6314,8 +6318,8 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   expectActions<MutateState>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.unverifiedCertChain()->size(), 2);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(0), clientLeafCert_);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(1), clientIntCert_);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(0).get(), clientLeafPtr);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(1).get(), clientIntPtr);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificateVerify);
 }
 

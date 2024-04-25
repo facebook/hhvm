@@ -14,7 +14,7 @@ namespace fizz {
 namespace extensions {
 
 namespace {
-std::shared_ptr<PeerCert> makeCredential(
+std::unique_ptr<PeerCert> makeCredential(
     DelegatedCredential&& credential,
     folly::ssl::X509UniquePtr cert) {
   VLOG(4) << "Making delegated credential";
@@ -31,19 +31,19 @@ std::shared_ptr<PeerCert> makeCredential(
 
   switch (CertUtils::getKeyType(pubKey)) {
     case KeyType::RSA:
-      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::RSA>>(
+      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::RSA>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P256:
-      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
+      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P256>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P384:
-      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P384>>(
+      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P384>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::P521:
-      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::P521>>(
+      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P521>>(
           std::move(cert), std::move(pubKey), std::move(credential));
     case KeyType::ED25519:
-      return std::make_shared<PeerDelegatedCredentialImpl<KeyType::ED25519>>(
+      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::ED25519>>(
           std::move(cert), std::move(pubKey), std::move(credential));
   }
 
@@ -53,7 +53,7 @@ std::shared_ptr<PeerCert> makeCredential(
 }
 } // namespace
 
-std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
+std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
     CertificateEntry entry,
     bool leaf) {
   if (!leaf || entry.extensions.empty()) {
@@ -65,14 +65,14 @@ std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
 
   // No credential, just leave as is
   if (!credential) {
-    return std::move(parentCert);
+    return parentCert;
   }
 
   // Create credential
   return makeCredential(std::move(credential.value()), std::move(parentX509));
 }
 
-std::shared_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
+std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
     CertificateEntry entry,
     bool leaf) const {
   return makePeerCertStatic(std::move(entry), leaf);

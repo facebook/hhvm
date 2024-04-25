@@ -257,11 +257,11 @@ class MockFactory : public OpenSSLFactory {
   MOCK_METHOD(uint32_t, makeTicketAgeAdd, (), (const));
 
   MOCK_METHOD(
-      std::shared_ptr<PeerCert>,
+      std::unique_ptr<PeerCert>,
       _makePeerCert,
       (CertificateEntry & entry, bool leaf),
       (const));
-  std::shared_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
+  std::unique_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
       const override {
     return _makePeerCert(entry, leaf);
   }

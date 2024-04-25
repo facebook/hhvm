@@ -71,7 +71,7 @@ class Factory {
   [[nodiscard]] virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(
       size_t count) const = 0;
 
-  virtual std::shared_ptr<PeerCert> makePeerCert(
+  virtual std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const = 0;
 

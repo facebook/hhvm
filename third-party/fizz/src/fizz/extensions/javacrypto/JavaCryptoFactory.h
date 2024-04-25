@@ -20,7 +20,7 @@ class JavaCryptoFactory : public OpenSSLFactory {
  public:
   ~JavaCryptoFactory() override = default;
 
-  std::shared_ptr<PeerCert> makePeerCert(
+  std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const override {
     if (certEntry.cert_data->empty()) {

@@ -113,7 +113,7 @@ std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
   }
 }
 
-std::shared_ptr<PeerCert> OpenSSLFactory::makePeerCert(
+std::unique_ptr<PeerCert> OpenSSLFactory::makePeerCert(
     CertificateEntry certEntry,
     bool /*leaf*/) const {
   return CertUtils::makePeerCert(std::move(certEntry.cert_data));

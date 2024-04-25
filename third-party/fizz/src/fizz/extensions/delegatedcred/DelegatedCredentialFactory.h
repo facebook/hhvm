@@ -21,10 +21,10 @@ class DelegatedCredentialFactory : public OpenSSLFactory {
  public:
   ~DelegatedCredentialFactory() override = default;
 
-  std::shared_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
+  std::unique_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
       const override;
 
-  static std::shared_ptr<PeerCert> makePeerCertStatic(
+  static std::unique_ptr<PeerCert> makePeerCertStatic(
       CertificateEntry entry,
       bool leaf);
 };

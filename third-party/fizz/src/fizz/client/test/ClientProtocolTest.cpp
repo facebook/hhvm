@@ -50,8 +50,8 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
     pskCache_ = std::make_shared<MockPskCache>();
     context_->setPskCache(pskCache_);
     context_->setSendEarlyData(true);
-    mockLeaf_ = std::make_shared<MockPeerCert>();
-    mockClientCert_ = std::make_shared<MockSelfCert>();
+    mockLeaf_ = std::make_unique<MockPeerCert>();
+    mockClientCert_ = std::make_unique<MockSelfCert>();
     mockClock_ = std::make_shared<MockClock>();
     context_->setClock(mockClock_);
     ON_CALL(*mockClock_, getCurrentTime())
@@ -3738,12 +3738,14 @@ TEST_F(ClientProtocolTest, TestCertificateFlow) {
   setupExpectingCertificate();
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("certencoding")));
-  mockLeaf_ = std::make_shared<MockPeerCert>();
-  mockIntermediate_ = std::make_shared<MockPeerCert>();
+  auto mockLeafCert = std::make_unique<MockPeerCert>();
+  auto mockIntermediateCert = std::make_unique<MockPeerCert>();
+  auto mockLeafPtr = mockLeafCert.get();
+  auto mockIntermediatePtr = mockIntermediateCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(mockLeaf_));
+      .WillOnce(Return(std::move(mockLeafCert)));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(mockIntermediate_));
+      .WillOnce(Return(std::move(mockIntermediateCert)));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;
@@ -3757,8 +3759,8 @@ TEST_F(ClientProtocolTest, TestCertificateFlow) {
   expectActions<MutateState>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.unverifiedCertChain()->size(), 2);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(0), mockLeaf_);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(1), mockIntermediate_);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(0).get(), mockLeafPtr);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(1).get(), mockIntermediatePtr);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificateVerify);
 }
 
@@ -3878,12 +3880,15 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateFlow) {
   EXPECT_CALL(
       *mockHandshakeContext_,
       appendToTranscript(BufMatches("compcertencoding")));
-  mockLeaf_ = std::make_shared<MockPeerCert>();
-  mockIntermediate_ = std::make_shared<MockPeerCert>();
+
+  auto mockLeafCert = std::make_unique<MockPeerCert>();
+  auto mockIntermediateCert = std::make_unique<MockPeerCert>();
+  auto mockLeafPtr = mockLeafCert.get();
+  auto mockIntermediatePtr = mockIntermediateCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(mockLeaf_));
+      .WillOnce(Return(std::move(mockLeafCert)));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(mockIntermediate_));
+      .WillOnce(Return(std::move(mockIntermediateCert)));
 
   auto decompressor = std::make_shared<MockCertificateDecompressor>();
   decompressor->setDefaults();
@@ -3914,8 +3919,8 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateFlow) {
   expectActions<MutateState>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.unverifiedCertChain()->size(), 2);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(0), mockLeaf_);
-  EXPECT_EQ(state_.unverifiedCertChain()->at(1), mockIntermediate_);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(0).get(), mockLeafPtr);
+  EXPECT_EQ(state_.unverifiedCertChain()->at(1).get(), mockIntermediatePtr);
   EXPECT_EQ(state_.serverCertCompAlgo(), CertificateCompressionAlgorithm::zlib);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificateVerify);
 }

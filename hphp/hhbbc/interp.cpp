@@ -100,6 +100,25 @@ bool poppable(Op op) {
   }
 }
 
+bool pushes_immediate(Op op) {
+  switch (op) {
+    case Op::Null:
+    case Op::False:
+    case Op::True:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Vec:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::LazyClass:
+    case Op::EnumClassLabel:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void interpStep(ISS& env, const Bytecode& bc);
 
 void record(ISS& env, const Bytecode& bc) {
@@ -1810,64 +1829,6 @@ bool isTypeHelper(ISS& env,
 
   refineLocation(env, location, taken, jmp.target1, fallthrough);
   return true;
-}
-
-// If the current function is a memoize wrapper, return the inferred return type
-// of the function being wrapped along with if the wrapped function is effect
-// free.
-Index::ReturnType memoizeImplRetType(ISS& env) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
-
-  // Lookup the wrapped function. This should always resolve to a precise
-  // function but we don't rely on it.
-  auto const memo_impl_func = [&] {
-    if (env.ctx.func->cls) {
-      return env.index.resolve_method(
-        env.ctx,
-        selfExact(env),
-        memoize_impl_name(env.ctx.func)
-      );
-    }
-    return env.index.resolve_func(memoize_impl_name(env.ctx.func));
-  }();
-
-  // Infer the return type of the wrapped function, taking into account the
-  // types of the parameters for context sensitive types.
-  auto const numArgs = env.ctx.func->params.size();
-  CompactVector<Type> args{numArgs};
-  for (auto i = LocalId{0}; i < numArgs; ++i) {
-    args[i] = locAsCell(env, i);
-  }
-
-  // Determine the context the wrapped function will be called on.
-  auto const ctxType = [&]() -> Type {
-    if (env.ctx.func->cls) {
-      if (env.ctx.func->attrs & AttrStatic) {
-        // The class context for static methods is the method's class,
-        // if LSB is not specified.
-        auto const clsTy =
-          env.ctx.func->isMemoizeWrapperLSB ?
-          selfCls(env) :
-          selfClsExact(env);
-        return clsTy ? *clsTy : TCls;
-      } else {
-        return thisTypeNonNull(env);
-      }
-    }
-    return TBottom;
-  }();
-
-  auto [retTy, effectFree] = env.index.lookup_return_type(
-    env.ctx,
-    &env.collect.methods,
-    args,
-    ctxType,
-    memo_impl_func
-  );
-  // Regardless of anything we know the return type will be an InitCell (this is
-  // a requirement of memoize functions).
-  if (!retTy.subtypeOf(BInitCell)) return { TInitCell, effectFree };
-  return { std::move(retTy), effectFree };
 }
 
 template<class JmpOp>
@@ -5845,7 +5806,7 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
     }
   }
 
-  auto [retTy, effectFree] = memoizeImplRetType(env);
+  auto [retTy, effectFree] = memoGet(env);
 
   // MemoGet can raise if we give a non arr-key local, or if we're in a method
   // and $this isn't available.
@@ -5866,7 +5827,7 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
       // deal with constprop manually; otherwise we will propagate the
       // taken edge and *then* replace the MemoGet with a constant.
       if (effectFree) {
-        if (auto v = tv(retTy)) {
+        if (auto const v = tv(retTy)) {
           reduce(env, gen_constant(*v));
           return true;
         }
@@ -5905,18 +5866,19 @@ void in(ISS& env, const bc::MemoGetEager& op) {
   );
   if (reduced) return;
 
-  env.propagate(op.target2, &env.state);
   auto const t = popC(env);
-  push(
-    env,
-    is_specialized_wait_handle(t) ? wait_handle_inner(t) : TInitCell
-  );
+
+  push(env, wait_handle(t));
+  env.propagate(op.target2, &env.state);
+
+  popC(env);
+  push(env, t);
 }
 
 namespace {
 
 template <typename Op>
-void memoSetImpl(ISS& env, const Op& op) {
+void memoSetImpl(ISS& env, const Op& op, bool eager) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.count
                 <= env.ctx.func->locals.size());
@@ -5930,6 +5892,14 @@ void memoSetImpl(ISS& env, const Op& op) {
     );
   }
 
+  // If the call to the memoize implementation was optimized away to
+  // an immediate instruction, record that fact so that we can
+  // optimize away the corresponding MemoGet.
+  auto effectFree = [&] {
+    auto const last = last_op(env);
+    return last && pushes_immediate(last->op);
+  }();
+
   // MemoSet can raise if we give a non arr-key local, or if we're in a method
   // and $this isn't available.
   auto allArrKey = true;
@@ -5941,19 +5911,33 @@ void memoSetImpl(ISS& env, const Op& op) {
        (env.ctx.func->attrs & AttrStatic) ||
        thisAvailable(env))) {
     nothrow(env);
+  } else {
+    effectFree = false;
   }
-  push(env, popC(env));
+
+  auto t = popC(env);
+  memoSet(
+    env,
+    [&] {
+      if (!env.ctx.func->isAsync || eager) return t;
+      return is_specialized_wait_handle(t)
+        ? wait_handle_inner(t)
+        : TInitCell;
+    }(),
+    effectFree
+  );
+  push(env, std::move(t));
 }
 
 }
 
 void in(ISS& env, const bc::MemoSet& op) {
-  memoSetImpl(env, op);
+  memoSetImpl(env, op, false);
 }
 
 void in(ISS& env, const bc::MemoSetEager& op) {
   always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
-  memoSetImpl(env, op);
+  memoSetImpl(env, op, true);
 }
 
 }

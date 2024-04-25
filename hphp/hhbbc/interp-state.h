@@ -645,6 +645,17 @@ struct CollectedInfo {
     }
   };
   MInstrState mInstrState;
+
+  /*
+   * All blocks encountered (so far) which contain a MemoGet
+   * instruction.
+   */
+  folly::sorted_vector_set<BlockId> allMemoGets;
+  /*
+   * The union of all types used as inputs to a MemoSet instruction,
+   * and whether those types come from an effect-free function.
+   */
+  Index::ReturnType allMemoSets{TBottom, true};
 };
 
 //////////////////////////////////////////////////////////////////////

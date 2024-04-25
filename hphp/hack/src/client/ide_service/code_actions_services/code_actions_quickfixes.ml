@@ -41,7 +41,12 @@ let convert_quickfix
   in
 
   Code_action_types.
-    { title = Quickfix.get_title quickfix; edits; kind = `Quickfix }
+    {
+      title = Quickfix.get_title quickfix;
+      edits;
+      kind = `Quickfix;
+      selection = None;
+    }
 
 let quickfix_positions_for_error
     (classish_positions : Pos.t Classish_positions.t) (error : Errors.error) :

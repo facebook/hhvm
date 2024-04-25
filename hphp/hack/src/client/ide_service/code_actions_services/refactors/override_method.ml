@@ -110,7 +110,8 @@ let refactor_action
       (Relative_path.Map.singleton path (to_edits classish_positions quickfix))
   in
 
-  Code_action_types.{ title = quickfix.title; edits; kind = `Refactor }
+  Code_action_types.
+    { title = quickfix.title; edits; kind = `Refactor; selection = None }
 
 let find ~entry pos ctx =
   let (cursor_line, cursor_col) = Pos.line_column pos in

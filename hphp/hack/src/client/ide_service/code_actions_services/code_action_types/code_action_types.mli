@@ -16,15 +16,20 @@ type edits = edit list Relative_path.Map.t
 (** Internal representation for code actions in our language server,
  * distinct from Lsp.CodeAction and from quickfixex in Quickfixes.ml
  *)
-type 'kind t = {
-  title: string;
-  edits: edits Lazy.t;
+type +'kind t = {
+  title: string;  (** Title of the code action, as displayed by VSCode *)
+  edits: edits Lazy.t;  (** Series of edits that will be applied *)
+  selection: Pos.t option;
+      (** Text that will be selected after the edits are applied. If [None]
+          the cursor is not updated after applying the edits. *)
   kind: [< `Refactor | `Quickfix ] as 'kind;
 }
 
 type refactor = [ `Refactor ] t
 
 type quickfix = [ `Quickfix ] t
+
+type any = [ `Refactor | `Quickfix ] t
 
 type find_refactor =
   entry:Provider_context.entry -> Pos.t -> Provider_context.t -> refactor list

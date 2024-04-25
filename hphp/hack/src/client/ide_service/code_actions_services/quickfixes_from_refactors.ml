@@ -49,6 +49,6 @@ let find ctx entry (e : Errors.error) =
            refactors
            ~f:
              Code_action_types.(
-               fun { title; edits; kind = `Refactor } ->
-                 { title; edits; kind = `Quickfix }))
+               fun { title; edits; kind = `Refactor; selection } ->
+                 { title; edits; kind = `Quickfix; selection }))
   |> Option.value ~default:[]

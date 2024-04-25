@@ -374,7 +374,8 @@ let refactor_of_candidate ctx entry candidate =
          entry.Provider_context.path
          (edits_of_candidate ctx entry candidate))
   in
-  Code_action_types.{ title = "await expression"; edits; kind = `Refactor }
+  Code_action_types.
+    { title = "await expression"; edits; kind = `Refactor; selection = None }
 
 let find ~entry selection ctx =
   if Pos.length selection <> 0 then

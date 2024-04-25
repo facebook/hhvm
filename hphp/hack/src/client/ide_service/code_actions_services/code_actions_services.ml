@@ -18,8 +18,6 @@ open Hh_prelude
 
   TODO(T168350458): remove all uses of types from `Lsp` from this library and instead use internal types
 *)
-type resolvable_command_or_action =
-  Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_
 
 let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
   let lsp_pos_of_ide_pos ide_pos =
@@ -72,8 +70,23 @@ let workspace_edit_of_code_action_edits
   in
   Lsp.WorkspaceEdit.{ changes }
 
-let to_action Code_action_types.{ title; edits; kind } =
+let to_action Code_action_types.{ title; edits; kind; selection } =
   let workspace_edit = Lazy.map edits ~f:workspace_edit_of_code_action_edits in
+  let action =
+    match selection with
+    | None -> lazy (Lsp.CodeAction.EditOnly (Lazy.force workspace_edit))
+    | Some selection ->
+      lazy
+        begin
+          let range =
+            Lsp_helpers.hack_pos_to_lsp_range
+              ~equal:Relative_path.equal
+              selection
+          in
+          let command = Lsp_extra_commands.set_selection range in
+          Lsp.CodeAction.BothEditThenCommand (Lazy.force workspace_edit, command)
+        end
+  in
   let lsp_kind =
     match kind with
     | `Refactor -> Lsp.CodeActionKind.refactor
@@ -84,13 +97,13 @@ let to_action Code_action_types.{ title; edits; kind } =
       Lsp.CodeAction.title;
       kind = lsp_kind;
       diagnostics = [];
-      action = Lsp.CodeAction.UnresolvedEdit workspace_edit;
+      action = Lsp.CodeAction.UnresolvedEdit action;
     }
 
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(range : Lsp.range) : resolvable_command_or_action list =
+    ~(range : Lsp.range) : [ `Refactor | `Quickfix ] Code_action_types.t list =
   let pos =
     let source_text = Ast_provider.compute_source_text ~entry in
     let line_to_offset line =
@@ -100,18 +113,28 @@ let find
     Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
   in
   let quickfixes = Code_actions_quickfixes.find ~entry pos ctx in
-  let lsp_quickfixes = List.map quickfixes ~f:to_action in
   let quickfix_titles =
     SSet.of_list @@ List.map quickfixes ~f:(fun q -> q.Code_action_types.title)
   in
-  let lsp_refactors =
+  let refactors =
     Code_actions_refactors.find ~entry pos ctx
     (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
     |> List.filter ~f:(fun Code_action_types.{ title; _ } ->
            not (SSet.mem title quickfix_titles))
-    |> List.map ~f:to_action
   in
-  lsp_quickfixes @ lsp_refactors
+  let quickfixes :> Code_action_types.any list = quickfixes in
+  let refactors :> Code_action_types.any list = refactors in
+  quickfixes @ refactors
+
+let map_edit_and_or_command ~f :
+    Lsp.CodeAction.resolved_marker Lsp.CodeAction.edit_and_or_command ->
+    Lsp.CodeAction.resolved_marker Lsp.CodeAction.edit_and_or_command =
+  Lsp.CodeAction.(
+    function
+    | EditOnly e -> EditOnly (f e)
+    | CommandOnly c -> CommandOnly c
+    | BothEditThenCommand (e, c) -> BothEditThenCommand (f e, c)
+    | UnresolvedEdit _ -> .)
 
 let update_edit ~f =
   Lsp.CodeAction.(
@@ -133,7 +156,9 @@ let go
     ~(entry : Provider_context.entry)
     ~(range : Ide_api_types.range) =
   let strip = update_edit ~f:(fun _ -> Lsp.CodeAction.UnresolvedEdit ()) in
-  find ~ctx ~entry ~range:(lsp_range_of_ide_range range) |> List.map ~f:strip
+  find ~ctx ~entry ~range:(lsp_range_of_ide_range range)
+  |> List.map ~f:to_action
+  |> List.map ~f:strip
 
 let content_modified =
   Lsp.Error.
@@ -156,23 +181,20 @@ let resolve
     ~(resolve_title : string)
     ~(use_snippet_edits : bool) : Lsp.CodeActionResolve.result =
   let transform_command_or_action :
-      Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_ ->
+      Lsp.CodeAction.resolved_marker Lsp.CodeAction.edit_and_or_command Lazy.t
+      Lsp.CodeAction.command_or_action_ ->
       Lsp.CodeAction.resolved_command_or_action =
-    update_edit ~f:(fun lazy_edit ->
-        let edit = Lazy.force lazy_edit in
-        let edit =
-          if use_snippet_edits then
-            edit
-          else
-            remove_snippets edit
-        in
-        Lsp.CodeAction.EditOnly edit)
+    update_edit ~f:(fun edit_and_or_command ->
+        map_edit_and_or_command (Lazy.force edit_and_or_command) ~f:(fun edit ->
+            if use_snippet_edits then
+              edit
+            else
+              remove_snippets edit))
   in
   find ~ctx ~entry ~range:(lsp_range_of_ide_range range)
-  |> List.find ~f:(fun command_or_action ->
-         let title = Lsp_helpers.title_of_command_or_action command_or_action in
-         String.equal title resolve_title)
+  |> List.find ~f:(fun code_action ->
+         String.equal code_action.Code_action_types.title resolve_title)
   (* When we can't find a matching code action, ContentModified is the right error
      per https://github.com/microsoft/language-server-protocol/issues/1738 *)
   |> Result.of_option ~error:content_modified
-  |> Result.map ~f:transform_command_or_action
+  |> Result.map ~f:(fun ca -> transform_command_or_action (to_action ca))

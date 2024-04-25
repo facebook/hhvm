@@ -64,18 +64,6 @@ void logNonTLSEvent(const ConnectionLoggingContext& context) {
   }
 }
 
-void logIfPeekingTransport(
-    const ConnectionLoggingContext& context,
-    const folly::AsyncTransport* transport) {
-  if (auto decorator =
-          dynamic_cast<const PreReceivedDataAsyncTransportWrapper*>(
-              transport)) {
-    // Transport was wrapped by TransportPeekingManager, presumably because no
-    // ALPN was provided. The ConnectionEventLogEntry should captures all the
-    // ALPN details we need.
-    THRIFT_CONNECTION_EVENT(peeking_manager.tls).log(context);
-  }
-}
 } // namespace
 
 void logSetupConnectionEventsOnce(
@@ -107,7 +95,6 @@ void logSetupConnectionEventsOnce(
           } else {
             maybeLogTlsPeerCertEvent(context, transport->getPeerCertificate());
           }
-          logIfPeekingTransport(context, transport);
         } else {
           logNonTLSEvent(context);
         }

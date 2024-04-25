@@ -2638,6 +2638,7 @@ void setupServerSSL(ThriftServer& server) {
       find_resource(folly::test::kTestCert).string(),
       find_resource(folly::test::kTestKey).string(),
       "");
+  sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());
   sslConfig->clientCAFiles =
       std::vector<std::string>{find_resource(folly::test::kTestCA).string()};
   sslConfig->sessionContext = "ThriftServerTest";
@@ -3295,34 +3296,9 @@ TEST(ThriftServer, RocketOverSSLNoALPN) {
   folly::SocketAddress loopback("::1", port);
 
   auto ctx = makeClientSslContext();
+  ctx->setAdvertisedNextProtocols({"rs"});
+
   ctx->disableTLS13();
-  folly::AsyncSSLSocket::UniquePtr sslSock(
-      new folly::AsyncSSLSocket(ctx, &base));
-  sslSock->connect(nullptr /* connect callback */, loopback);
-
-  TestServiceAsyncClient client(
-      RocketClientChannel::newChannel(std::move(sslSock)));
-
-  std::string response;
-  client.sync_sendResponse(response, 64);
-  EXPECT_EQ(response, "test64");
-}
-
-// Tests that the TransportPeekingManager's logic succeeds when using TLS 1.3
-// and not providing an ALPN. The RocketOverSSLNoALPN test above currently uses
-// TLS 1.2.
-TEST(ThriftServer, RocketOverSSLNoALPNWithTLS13) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
-  server->setSSLPolicy(SSLPolicy::REQUIRED);
-  setupServerSSL(*server);
-  ScopedServerThread sst(std::move(server));
-
-  folly::EventBase base;
-  auto port = sst.getAddress()->getPort();
-  folly::SocketAddress loopback("::1", port);
-
-  // Should use TLS 1.3 by default
-  auto ctx = makeClientSslContext();
   folly::AsyncSSLSocket::UniquePtr sslSock(
       new folly::AsyncSSLSocket(ctx, &base));
   sslSock->connect(nullptr /* connect callback */, loopback);
@@ -3389,6 +3365,7 @@ TEST(ThriftServer, PooledRocketSyncChannel) {
       [port](folly::EventBase& evb) mutable {
         folly::SocketAddress loopback("::1", port);
         auto ctx = makeClientSslContext();
+        ctx->setAdvertisedNextProtocols({"rs"});
         folly::AsyncSSLSocket::UniquePtr sslSock(
             new folly::AsyncSSLSocket(ctx, &evb));
         sslSock->connect(nullptr /* connect callback */, loopback);

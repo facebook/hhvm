@@ -150,8 +150,19 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
         sock = folly::AsyncIoUringSocketFactory::create<
             folly::AsyncTransport::UniquePtr>(std::move(sock));
       }
+      // Need an AsyncSocketTransport so we can reset the bytes the
+      // TransportPeekingManager might peek at
+      folly::AsyncSocketTransport::UniquePtr plaintextSocket{
+          sock->getUnderlyingTransport<folly::AsyncSocketTransport>()};
+      DCHECK(plaintextSocket);
+      sock.release();
+
       new TransportPeekingManager(
-          shared_from_this(), *addr, tinfo, server_, std::move(sock));
+          shared_from_this(),
+          *addr,
+          tinfo,
+          server_,
+          std::move(plaintextSocket));
       break;
     }
     case wangle::SecureTransportType::TLS:
@@ -175,8 +186,10 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
           }
         }
       }
-      new TransportPeekingManager(
-          shared_from_this(), *addr, tinfo, server_, std::move(sock));
+      VLOG(4) << "Failed to find a TransportRoutingHandler based on the ALPN "
+              << "value. Handling as Header transport with a possible upgrade "
+              << "to Rocket.";
+      handleHeader(std::move(sock), addr, tinfo);
       break;
     default:
       LOG(ERROR) << "Unsupported Secure Transport Type";

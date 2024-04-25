@@ -11313,6 +11313,8 @@ void flatten_type_mappings(IndexData& index,
                                       | TypeConstraintFlags::DisplayNullable
                                       | TypeConstraintFlags::UpperBound);
       auto firstEnum = typeMapping->firstEnum;
+      auto const isUnion = typeMapping->value.isUnion();
+      bool anyUnresolved = false;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
 
@@ -11322,6 +11324,7 @@ void flatten_type_mappings(IndexData& index,
         const auto type = tc.type();
         const auto value = tc.typeName();
         auto name = value;
+        LSString curEnum;
 
         if (type != AnnotType::Unresolved) {
           // If the type-mapping is already resolved, we mainly take it
@@ -11343,6 +11346,7 @@ void flatten_type_mappings(IndexData& index,
             continue;
           }
           tvu.emplace_back(type, tc.flags() | flags, value);
+          anyUnresolved = true;
           continue;
         }
 
@@ -11361,10 +11365,12 @@ void flatten_type_mappings(IndexData& index,
                                             | TypeConstraintFlags::TypeConstant
                                             | TypeConstraintFlags::DisplayNullable
                                             | TypeConstraintFlags::UpperBound);
-            if (!firstEnum) firstEnum = next->firstEnum;
+            auto const nextEnum = next->firstEnum;
+            if (!curEnum) curEnum = nextEnum;
+            if (!firstEnum && !isUnion) firstEnum = curEnum;
 
-            if (enumMeta && next->firstEnum) {
-              enumMeta->deps.emplace(next->firstEnum);
+            if (enumMeta && nextEnum) {
+              enumMeta->deps.emplace(nextEnum);
             }
 
             for (auto const& next_tc : eachTypeConstraintInUnion(next->value)) {
@@ -11375,36 +11381,38 @@ void flatten_type_mappings(IndexData& index,
                 continue;
               }
               assertx(next_type != AnnotType::SubObject);
-              if (firstEnum && !enumSupportsAnnot(next_type)) {
+              if (curEnum && !enumSupportsAnnot(next_type)) {
                 FTRACE(
                   2, "Type-mapping '{}' is invalid because it resolves to "
                   "invalid enum type {}{}\n",
                   typeMapping->name,
                   annotName(next_type),
-                  firstEnum->tsame(typeMapping->name)
-                    ? "" : folly::sformat(" (via {})", firstEnum)
+                  curEnum->tsame(typeMapping->name)
+                    ? "" : folly::sformat(" (via {})", curEnum)
                 );
                 tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
+                anyUnresolved = true;
                 continue;
               }
               tvu.emplace_back(next_type, tc.flags() | flags, next_value);
             }
           } else if (index.classRefs.count(name)) {
-            if (firstEnum) {
+            if (curEnum) {
               FTRACE(
                 2, "Type-mapping '{}' is invalid because it resolves to "
                 "invalid object '{}' for enum type (via {})\n",
                 typeMapping->name,
                 name,
-                firstEnum
+                curEnum
               );
             }
 
             tvu.emplace_back(
-              firstEnum ? AnnotType::Unresolved : AnnotType::SubObject,
+              curEnum ? AnnotType::Unresolved : AnnotType::SubObject,
               tc.flags() | flags,
               name
             );
+            if (curEnum) anyUnresolved = true;
             break;
           } else {
             FTRACE(
@@ -11412,10 +11420,11 @@ void flatten_type_mappings(IndexData& index,
               "non-existent type '{}'{}\n",
               typeMapping->name,
               name,
-              (firstEnum && !firstEnum->tsame(typeMapping->name))
-                ? folly::sformat(" (via {})", firstEnum) : ""
+              (curEnum && !curEnum->tsame(typeMapping->name))
+                ? folly::sformat(" (via {})", curEnum) : ""
             );
             tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
+            anyUnresolved = true;
             break;
           }
 
@@ -11441,6 +11450,12 @@ void flatten_type_mappings(IndexData& index,
             }
           }
         }
+      }
+      if (isUnion && anyUnresolved) {
+        // Unions cannot contain a mix of resolved an unresolved class names so
+        // if one of the names failed to resolve we must mark all of them as
+        // unresolved.
+        for (auto& tc : tvu) if (tc.isSubObject()) tc.unresolve();
       }
       assertx(!tvu.empty());
       // If any of the subtypes end up unresolved then the final union will also

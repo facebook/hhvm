@@ -48,8 +48,6 @@ pub enum SerializedStreamElement<Payload> {
     DeclaredException(Payload),
     /// Contains the application exception.
     ApplicationException(ApplicationException),
-    /// The serialization failed. Contains the error.
-    SerializationError(Error),
 }
 
 pub trait ReplyState<F>

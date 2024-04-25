@@ -1,4 +1,4 @@
-Typing[4110] await can only operate on an Awaitable [1]
+error: Typing[4110] await can only operate on an Awaitable [1]
 -> Expected Awaitable<nothing> [1]
 -> But got int [2]
 

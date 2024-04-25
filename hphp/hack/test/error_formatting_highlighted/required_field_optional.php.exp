@@ -1,4 +1,4 @@
-Typing[4163] Invalid return type [1]
+error: Typing[4163] Invalid return type [1]
 -> The field y is optional [2]
 -> The field y is defined as required [3]
 -> y is defined here [4]

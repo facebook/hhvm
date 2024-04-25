@@ -1,4 +1,4 @@
-Typing[4118] This expression is always false [1]
+error: Typing[4118] This expression is always false [1]
 -> This is a string [2]
 -> This is an int [3]
 

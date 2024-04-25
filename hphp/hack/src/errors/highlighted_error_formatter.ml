@@ -486,11 +486,15 @@ let single_marker_highlighted marker =
   lbracket ^ npretty ^ rbracket
 
 let format_claim_highlighted
+    (severity : User_error.severity)
     (error_code : error_code)
     (marker : error_code * Tty.raw_color)
     (msg : string) : string =
   let suffix = single_marker_highlighted marker in
   let (_, color) = marker in
+  let pretty_severity =
+    Tty.apply_color (Tty.Bold color) (User_error.Severity.to_string severity)
+  in
   let pretty_error_code =
     Tty.apply_color
       (Tty.Bold color)
@@ -507,7 +511,12 @@ let format_claim_highlighted
     | _ -> color
   in
   let pretty_msg = Markdown_lite.render ~add_bold:true ~color msg in
-  Printf.sprintf "%s %s %s" pretty_error_code pretty_msg suffix
+  Printf.sprintf
+    "%s: %s %s %s"
+    pretty_severity
+    pretty_error_code
+    pretty_msg
+    suffix
 
 let format_reason_highlighted marked_msg : string =
   let suffix = single_marker_highlighted marked_msg.marker in
@@ -519,26 +528,11 @@ let format_reason_highlighted marked_msg : string =
   in
   Printf.sprintf "%s %s %s" pretty_arrow pretty_msg suffix
 
-let make_marker n error_code : marker =
-  (* Explicitly list out the various codes, rather than a catch-all
-     for non 5 or 6 codes, to make the correspondence clear and to
-     make updating this in the future more straightforward *)
-  let claim_color =
-    match error_code / 1000 with
-    | 1 -> Tty.Red (* Parsing *)
-    | 2 -> Tty.Red (* Naming *)
-    | 3 -> Tty.Red (* NastCheck *)
-    | 4 -> Tty.Red (* Typing *)
-    | 5 -> Tty.Yellow (* Lint *)
-    | 6 -> Tty.Yellow (* Zoncolan (AI) *)
-    | 8 -> Tty.Red (* Init *)
-    | _ -> Tty.Red
-    (* Other *)
-  in
+let make_marker n severity : marker =
   let color_wheel = [Tty.Cyan; Tty.Green; Tty.Magenta; Tty.Blue] in
   let color =
     if n <= 1 then
-      claim_color
+      User_error.Severity.tty_color severity
     else
       let ix = (n - 2) mod List.length color_wheel in
       List.nth_exn color_wheel ix
@@ -549,8 +543,8 @@ let make_marker n error_code : marker =
    by assigning each their original index in the list and a marker.
    Any messages that have the same position (meaning exact location
    and size) share the same marker. *)
-let mark_messages (error_code : error_code) (msgl : Pos.absolute Message.t list)
-    : marked_message list =
+let mark_messages severity (msgl : Pos.absolute Message.t list) :
+    marked_message list =
   List.folding_mapi
     msgl
     ~init:(1, [])
@@ -562,20 +556,31 @@ let mark_messages (error_code : error_code) (msgl : Pos.absolute Message.t list)
               Pos.equal_absolute curr_msg_pos pos)
         with
         | None ->
-          let marker = make_marker next_marker_n error_code in
+          let marker = make_marker next_marker_n severity in
           (next_marker_n + 1, (marker, curr_msg_pos) :: existing_markers, marker)
         | Some (marker, _) -> (next_marker_n, existing_markers, marker)
       in
       ((next_marker_n, existing_markers), { original_index; marker; message }))
 
 let to_string (error : Errors.finalized_error) : string =
-  let error_code = User_error.get_code error in
+  let {
+    User_error.severity;
+    code;
+    claim;
+    reasons;
+    custom_msgs;
+    quickfixes = _;
+    flags = _;
+    is_fixmed = _;
+  } =
+    error
+  in
   (* Assign messages markers according to order of original error list
      and then sort these marked messages such that messages in the same
      file are together. Does not reorder the files or messages within a file. *)
   let marked_messages =
-    User_error.get_messages error
-    |> mark_messages error_code
+    claim :: reasons
+    |> mark_messages severity
     |> Errors.combining_sort ~f:(fun mm ->
            Message.get_message_pos mm.message |> Pos.filename)
   in
@@ -595,7 +600,8 @@ let to_string (error : Errors.finalized_error) : string =
     | mm :: msgs ->
       (* This very vitally assumes that the first message in the error is the main one *)
       ( format_claim_highlighted
-          error_code
+          severity
+          code
           mm.marker
           (Message.get_message_str mm.message),
         List.map msgs ~f:format_reason_highlighted )
@@ -611,7 +617,6 @@ let to_string (error : Errors.finalized_error) : string =
           5 | }
   *)
   let all_contexts = format_all_contexts_highlighted marked_messages in
-  let custom_msgs = error.User_error.custom_msgs in
   let buf = Buffer.create 50 in
   Buffer.add_string buf (claim ^ "\n");
   if not (List.is_empty reasons) then
@@ -619,7 +624,5 @@ let to_string (error : Errors.finalized_error) : string =
   Buffer.add_string buf "\n";
   Buffer.add_string buf all_contexts;
   if not @@ List.is_empty custom_msgs then
-    Buffer.add_string
-      buf
-      (String.concat ~sep:"\n" error.User_error.custom_msgs ^ "\n");
+    Buffer.add_string buf (String.concat ~sep:"\n" custom_msgs ^ "\n");
   Buffer.contents buf

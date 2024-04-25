@@ -1,4 +1,4 @@
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But the default module belongs to package default [3]
 -> And package default does not include package pkg1 [4]
@@ -16,7 +16,7 @@ cross_package_access_bad5.php--a.php:4:14
 [2]  4 | public class A {}
      5 | 
 
-/tmp/5QBNX6XEfV/modules.hhi:5:12
+/tmp/y02Tu9Kaxn/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}

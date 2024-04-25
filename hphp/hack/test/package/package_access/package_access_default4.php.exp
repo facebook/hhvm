@@ -1,4 +1,4 @@
-Naming[2049] Unbound name: b.undefined (a module) [1]
+error: Naming[2049] Unbound name: b.undefined (a module) [1]
 
 package_access_default4.php--a.php:3:8
     1 | <?hh
@@ -7,7 +7,7 @@ package_access_default4.php--a.php:3:8
     4 | 
     5 | type YInt = XInt; // error
 
-Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
 -> This is from module b.b1, which belongs to package pkg2 [2]
 -> But module b.undefined is undefined, though it would belong to package pkg1 [3]
 -> And package pkg1 does not include package pkg2 [4]
@@ -35,7 +35,7 @@ PACKAGES.toml:3:11
     4 | uses = ["a", "b.*"]
     5 | includes=["default"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
 -> This is from module b.b1, which belongs to package pkg2 [2]
 -> But module b.undefined is undefined, though it would belong to package pkg1 [3]
 -> And package pkg1 does not include package pkg2 [4]

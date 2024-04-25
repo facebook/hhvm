@@ -1,4 +1,4 @@
-Typing[4444] Cannot access an internal element from module a in module b.b2 [1]
+error: Typing[4444] Cannot access an internal element from module a in module b.b2 [1]
 -> This is from module a [2]
 
 same_package_access_bad.php--b.php:3:22

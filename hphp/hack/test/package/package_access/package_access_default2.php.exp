@@ -1,4 +1,4 @@
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module x belongs to package default [3]
 -> And package default does not include package pkg1 [4]
@@ -26,7 +26,7 @@ PACKAGES.toml:20:11
 [4] 20 | [packages.default]
     21 | uses=["*"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module x belongs to package default [3]
 -> And package default does not include package pkg1 [4]

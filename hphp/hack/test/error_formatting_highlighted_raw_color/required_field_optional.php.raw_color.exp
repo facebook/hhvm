@@ -1,4 +1,4 @@
-[31;1mTyping[4163][0m [0;1mInvalid return type[0m [0;2m[[0m[31m1[0m[0;2m][0m
+[31;1merror[0m: [31;1mTyping[4163][0m [0;1mInvalid return type[0m [0;2m[[0m[31m1[0m[0;2m][0m
 [0;2m->[0m The field [0;4my[0m is [0;1moptional[0m [0;2m[[0m[36m2[0m[0;2m][0m
 [0;2m->[0m The field [0;4my[0m is defined as [0;1mrequired[0m [0;2m[[0m[32m3[0m[0;2m][0m
 [0;2m->[0m [0;4my[0m is defined here [0;2m[[0m[35m4[0m[0;2m][0m

@@ -1,4 +1,4 @@
-Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:15:9
     13 |       f1(); // error; function calls don't register package info
@@ -7,7 +7,7 @@ cross_package_access_with_package_syntax_invalid_conds.php--c.php:15:9
     16 |       f1(); // error; assignments aren't allowed in conditionals
     17 | 
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
@@ -35,7 +35,7 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
@@ -63,7 +63,7 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
@@ -91,7 +91,7 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
@@ -119,7 +119,7 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]

@@ -64,16 +64,6 @@ struct SQLite {
    */
   void analyze();
 
-
- /** 
-  * Run "PRAGMA quick_check" as a quick integrity check.
-  * quick_check doesn't check for UNIQUE or index consistency.
-  *
-  * This allows the check to be faster than a full integrity_check
-  * and reduce runtime to O(N) from O(NlogN). This still takes a few seconds.
-  */
-  bool passesQuickCheck();
-
   enum class OpenMode {
     ReadOnly = 1,
     ReadWrite = 2,

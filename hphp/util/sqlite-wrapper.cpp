@@ -94,11 +94,6 @@ void SQLite::analyze() {
   }
 }
 
-bool SQLite::passesQuickCheck() {
-  int rc = sqlite3_exec(m_dbc, "PRAGMA quick_check;", nullptr, nullptr, nullptr);
-  return rc == SQLITE_OK;
-}
-
 SQLite SQLite::connect(const std::string& path, OpenMode mode) {
   return connect(path.c_str(), mode);
 }

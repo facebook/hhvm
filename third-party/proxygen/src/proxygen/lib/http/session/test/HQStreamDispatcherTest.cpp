@@ -132,7 +132,7 @@ class MockDispatcher
 template <typename T>
 class HQStreamDispatcherTest : public Test {
  public:
-  using PeekIterator = quic::CircularDeque<StreamBuffer>::const_iterator;
+  using PeekIterator = std::deque<StreamBuffer>::const_iterator;
   using PeekData = MockDispatcher::PeekData;
   using ReadError = MockDispatcher::ReadError;
 
@@ -186,7 +186,7 @@ class HQStreamDispatcherTest : public Test {
 
  protected:
   folly::EventBase evb_;
-  quic::CircularDeque<StreamBuffer> incomingData_;
+  std::deque<StreamBuffer> incomingData_;
   MockDispatcher dispatcherCallback_{&evb_};
   T dispatcher_{dispatcherCallback_, proxygen::TransportDirection::UPSTREAM};
 };

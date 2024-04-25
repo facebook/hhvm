@@ -240,7 +240,7 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   }
   // By reset data bits and toggle the continuation bits, the tailing zeros
   // should be intBytes*8-1
-#if defined(__cpp_lib_bitops) && __cpp_lib_bitsops >= 201907L
+#if defined(__cpp_lib_bitops) && __cpp_lib_bitops >= 201907L
   // __builtin_ctzll(0) is defined as UB, even though TZCNT does what we want in
   // that case. std::countr_zero is the same thing without the UB.
   size_t maskShift =

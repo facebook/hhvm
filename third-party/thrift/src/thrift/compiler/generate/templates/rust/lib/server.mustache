@@ -360,13 +360,8 @@ where
                         match item {
                             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                                 let item = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(res);
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="{{service:name}}.{{function:name}}", "Failed to serialize success response");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    },
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                                ::fbthrift::SerializedStreamElement::Success(payload)
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(_))) => {
                                 panic!("{} attempted to return success via error", "{{function:rust_name}}");
@@ -378,13 +373,8 @@ where
                             {{#function:stream_exceptions?}}
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="{{service:name}}.{{function:name}}", "Streaming declared exception");
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(exn) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::DeclaredException(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="{{service:name}}.{{function:name}}", "Failed to serialize declared exception return");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    }
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(exn);
+                                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
                             }
                             {{/function:stream_exceptions?}}
                             ::std::result::Result::Err(exn) => {

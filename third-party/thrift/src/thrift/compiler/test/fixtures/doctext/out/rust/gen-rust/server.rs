@@ -395,13 +395,8 @@ where
                         match item {
                             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                                 let item = crate::services::c::NumbersStreamExn::Success(res);
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="C.numbers", "Failed to serialize success response");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    },
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                                ::fbthrift::SerializedStreamElement::Success(payload)
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::Success(_))) => {
                                 panic!("{} attempted to return success via error", "numbers");

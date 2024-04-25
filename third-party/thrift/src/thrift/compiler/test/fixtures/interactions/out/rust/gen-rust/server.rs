@@ -456,13 +456,8 @@ where
                         match item {
                             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                                 let item = crate::services::my_interaction::TruthifyStreamExn::Success(res);
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="MyInteraction.truthify", "Failed to serialize success response");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    },
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                                ::fbthrift::SerializedStreamElement::Success(payload)
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::Success(_))) => {
                                 panic!("{} attempted to return success via error", "truthify");
@@ -1084,13 +1079,8 @@ where
                         match item {
                             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                                 let item = crate::services::my_interaction_fast::TruthifyStreamExn::Success(res);
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="MyInteractionFast.truthify", "Failed to serialize success response");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    },
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                                ::fbthrift::SerializedStreamElement::Success(payload)
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::Success(_))) => {
                                 panic!("{} attempted to return success via error", "truthify");
@@ -2251,13 +2241,8 @@ where
                         match item {
                             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                                 let item = crate::services::my_service::SerializeStreamExn::Success(res);
-                                match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
-                                    Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                    Err(err) => {
-                                        tracing::error!(?err, method="MyService.serialize", "Failed to serialize success response");
-                                        ::fbthrift::SerializedStreamElement::SerializationError(err)
-                                    },
-                                }
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                                ::fbthrift::SerializedStreamElement::Success(payload)
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::SerializeStreamExn::Success(_))) => {
                                 panic!("{} attempted to return success via error", "serialize");

@@ -119,14 +119,12 @@ where
     Ok(envelope)
 }
 
-pub fn serialize_stream_item<P, RES>(res: RES) -> anyhow::Result<ProtocolEncodedFinal<P>>
+pub fn serialize_stream_item<P, RES>(res: RES) -> ProtocolEncodedFinal<P>
 where
     P: Protocol,
-    RES: ResultInfo + Serialize<P::Sizer> + Serialize<P::Serializer>,
+    RES: Serialize<P::Sizer> + Serialize<P::Serializer>,
 {
-    Ok(serialize!(P, |p| {
-        res.write(p);
-    }))
+    serialize!(P, |p| res.write(p))
 }
 
 /// Serialize a request with envelope.

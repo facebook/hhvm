@@ -119,15 +119,14 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   always_assert(src->type() <= TObj);
   always_assert(!isLInit);
 
-  args.immPtr(inst->marker().func()->cls())
-      .addr(fp, valOff);
+  args.addr(fp, valOff);
   if (isInitK) {
     args.addr(fp, localOffset(extra->keyId));
   } else {
     args.imm(0);
   }
 
-  auto const target = CallSpec::direct(new_iter_object);
+  auto const target = CallSpec::direct(new_iter_object_jit);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 

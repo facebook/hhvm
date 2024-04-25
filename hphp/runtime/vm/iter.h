@@ -136,7 +136,6 @@ struct IterImpl {
    * without running their C++ constructor.  (See new_iter_array.)
    */
   IterImpl() = delete;
-  explicit IterImpl(Object&& obj);
 
   // Destructor
   ~IterImpl();
@@ -296,6 +295,8 @@ private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
+  friend int64_t new_iter_object(Iter*, ObjectData* obj,
+                                 TypedValue* val, TypedValue* key);
   template<bool HasKey, bool Local>
   friend int64_t iter_next_packed_pointer(
     Iter*, TypedValue*, TypedValue*, ArrayData*);
@@ -395,10 +396,6 @@ struct alignas(16) Iter {
   // Assumes the base is not an array.
   static TypedValue extractBase(TypedValue base, const Class* ctx);
 
-  // Returns true if the base is non-empty. Only used for non-local iterators.
-  // For local iterators, use new_iter_array / new_iter_array_key below.
-  bool initObj(Object&& base);
-
   // Returns true if there are more elems. Only used for non-local iterators.
   // For local iterators, use liter_next_ind / liter_next_key_ind below.
   bool next();
@@ -449,8 +446,10 @@ using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 IterInitArr    new_iter_array_helper(IterTypeOp type);
 IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
 
-int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+int64_t new_iter_object(Iter* dest, ObjectData* obj,
                         TypedValue* val, TypedValue* key);
+int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
+                            TypedValue* val, TypedValue* key);
 
 
 // Native helpers for the interpreter + JIT used to implement *IterInit* ops.

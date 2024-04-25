@@ -96,25 +96,6 @@ std::string show(IterSpecialization::BaseType type) {
 
 //////////////////////////////////////////////////////////////////////
 
-IterImpl::IterImpl(Object&& obj) {
-  auto const o = obj.detach();
-  assertx(o->isIterator());
-  setObject(o);
-  try {
-    o->o_invoke_few_args(s_rewind, RuntimeCoeffects::fixme(), 0);
-  } catch (...) {
-    // At this point, this IterImpl "owns" a reference to the object and is
-    // responsible for dec-ref-ing it when the iterator is destroyed.
-    //
-    // Normally, the destructor takes care of this case, but we'll never invoke
-    // it if the exception is thrown before the constructor finishes, so we
-    // must manually dec-ref the object here.
-    decRefObj(o);
-    kill();
-    throw;
-  }
-}
-
 bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   TRACE(3, "IterImpl::checkInvariants: %lx %lx %lx %lx (ad = %lx)\n",
         uintptr_t(m_data), size_t(m_typeFields), m_pos, m_end, uintptr_t(ad));
@@ -263,23 +244,6 @@ TypedValue Iter::extractBase(TypedValue base, const Class* ctx) {
 
   Array iterArray(obj->o_toIterArray(ctx));
   return make_tv<KindOfDict>(iterArray.detach());
-}
-
-bool Iter::initObj(Object&& base) {
-  assertx(base->isIterator());
-  new (&m_iter) IterImpl(std::move(base));
-
-  // If the object was empty, or if end throws, dec-ref it and branch to done.
-  try {
-    if (m_iter.end()) {
-      m_iter.~IterImpl();
-      return false;
-    }
-  } catch (...) {
-    m_iter.~IterImpl();
-    throw;
-  }
-  return true;
 }
 
 bool Iter::next() {
@@ -575,48 +539,47 @@ IterInitArrKey new_iter_array_key_helper(IterTypeOp type) {
   always_assert(false);
 }
 
-struct FreeObj {
-  FreeObj() : m_obj(0) {}
-  void operator=(ObjectData* obj) { m_obj = obj; }
-  ~FreeObj() { if (UNLIKELY(m_obj != nullptr)) decRefObj(m_obj); }
- private:
-  ObjectData* m_obj;
-};
-
 /**
- * new_iter_object creates an iterator for the specified Iterator object
- *
- * If exceptions are thrown, new_iter_object takes care of decRefing the
- * object.
+ * new_iter_object creates an iterator for the specified Iterator object, with
+ * borrow refcount semantics.
  */
-int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+int64_t new_iter_object(Iter* dest, ObjectData* obj,
                         TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "%s: I %p, obj %p, ctx %p, Iterator\n",
-        __func__, dest, obj, ctx);
+  TRACE(2, "%s: I %p, obj %p, Iterator\n",
+        __func__, dest, obj);
   assertx(obj->isIterator());
 
-  auto const iter = unwrap(dest);
-  {
-    new (iter) IterImpl(Object::attach(obj));
+  obj->o_invoke_few_args(s_rewind, RuntimeCoeffects::fixme(), 0);
 
-    try {
-      if (dest->end()) {
-        // Iterator was empty; call the destructor on the iterator we just
-        // constructed.
-        dest->free();
-        return 0LL;
-      }
-    } catch (...) {
-      dest->free();
-      throw;
-    }
-  }
+  auto const end =
+    !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
+  if (end) return 0LL;
 
-  iter_value_cell_local_impl<false>(dest, valOut);
+  tvMove(
+    obj->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0).detach(),
+    *valOut
+  );
+
   if (keyOut) {
-    iter_key_cell_local_impl<false>(dest, keyOut);
+    tvMove(
+      obj->o_invoke_few_args(s_key, RuntimeCoeffects::fixme(), 0).detach(),
+      *keyOut
+    );
   }
+
+  unwrap(dest)->setObject(obj);
+  obj->incRefCount();
   return 1LL;
+}
+
+/**
+ * Version of new_iter_object() used by JIT, which expects us to consume
+ * the object reference.
+ */
+int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
+                            TypedValue* valOut, TypedValue* keyOut) {
+  SCOPE_EXIT { decRefObj(obj); };
+  return new_iter_object(dest, obj, valOut, keyOut);
 }
 
 // Generic next implementation for non-local iterators. This method is used for

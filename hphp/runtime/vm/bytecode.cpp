@@ -4417,10 +4417,7 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
 
   // The base is extracted and we already handled ArrayLike.
   assertx(isObjectType(type(base)));
-  if (it->initObj(Object(val(base).pobj))) {
-    tvAsVariant(value) = it->value();
-    if (key) tvAsVariant(key) = it->key();
-  } else {
+  if (!new_iter_object(it, val(base).pobj, value, key)) {
     pc = targetpc;
   }
 

@@ -89,6 +89,7 @@ pub trait NodeImpl {
         })
     }
 
+    #[allow(dead_code)]
     fn try_simple_ty_param(ctx: &Context<'_>, ty: &syn::Type) -> Option<String> {
         try_simple_type(ty).filter(|t| ctx.is_root_ty_param(t))
     }

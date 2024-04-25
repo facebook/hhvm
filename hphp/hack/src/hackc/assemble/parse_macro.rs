@@ -743,6 +743,7 @@ trait MyTokenIter {
     fn expect_peek(&mut self) -> Result<&TokenTree>;
     fn expect_tt(&mut self) -> Result<TokenTree>;
     fn expect_ident(&mut self) -> Result<TokenTree>;
+    #[allow(dead_code)]
     fn expect_token<F: FnOnce(&TokenTree) -> bool>(
         &mut self,
         what: &str,

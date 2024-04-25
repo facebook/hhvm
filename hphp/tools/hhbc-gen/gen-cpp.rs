@@ -121,6 +121,7 @@ fn fmt_count(n: usize, none: &str, f: impl Fn(usize) -> String) -> String {
     }
 }
 
+#[allow(dead_code)]
 struct FmtCount<'a, T, F>(&'a [T], &'a str, F)
 where
     F: Fn(&mut dyn fmt::Write, &T) -> fmt::Result;

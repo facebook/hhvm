@@ -419,8 +419,10 @@ impl Display for FmtDocComment<'_> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) struct FmtIncDecOp(pub IncDecOp);
 
+#[allow(dead_code)]
 impl FmtIncDecOp {
     pub(crate) fn as_str(&self) -> &'static str {
         match self.0 {

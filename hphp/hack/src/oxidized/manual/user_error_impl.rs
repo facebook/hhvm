@@ -8,7 +8,7 @@ use ansi_term::Color;
 use crate::user_error::Severity;
 
 impl Severity {
-    pub fn to_capital_string(&self) -> &'static str {
+    pub fn to_all_caps_string(&self) -> &'static str {
         match self {
             Severity::Err => "ERROR",
             Severity::Warning => "WARN",

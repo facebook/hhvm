@@ -13,7 +13,11 @@ type severity =
 [@@deriving eq, hash, ord, show]
 
 module Severity = struct
-  let to_capital_string = function
+  let to_string = function
+    | Err -> "error"
+    | Warning -> "warning"
+
+  let to_all_caps_string = function
     | Err -> "ERROR"
     | Warning -> "WARN"
 
@@ -192,7 +196,7 @@ let to_string
       in
       Printf.sprintf
         "%s: %s\n%s (%s)%s\n"
-        (Severity.to_capital_string severity)
+        (Severity.to_all_caps_string severity)
         (Pos.string pos1)
         msg1
         error_code

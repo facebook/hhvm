@@ -986,7 +986,7 @@ let as_telemetry
       Telemetry.create ()
       |> Telemetry.string_
            ~key:"error_severity"
-           ~value:(User_error.Severity.to_capital_string severity)
+           ~value:(User_error.Severity.to_all_caps_string severity)
       |> Telemetry.int_ ~key:"error_code" ~value:code
       |> Telemetry.json_
            ~key:"error_json"

@@ -58,6 +58,7 @@ let format_filename (pos : Pos.absolute) : string =
 let format_substring_underline
     (pos : Pos.absolute)
     (msg : string)
+    (severity_color : Tty.raw_color)
     (first_context_line : string option)
     is_first
     col_width : string =
@@ -81,7 +82,7 @@ let format_substring_underline
   in
   let color =
     if is_first then
-      Tty.Bold Tty.Red
+      Tty.Bold severity_color
     else
       Tty.Dim Tty.Default
   in
@@ -97,8 +98,12 @@ let format_substring_underline
          underline ^ " " ^ msg))
 
 (* Format the line of code associated with this message, and the message itself. *)
-let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
-    string * string =
+let format_message
+    (msg : string)
+    (pos : Pos.absolute)
+    (severity_color : Tty.raw_color)
+    ~is_first
+    ~col_width : string * string =
   let col_width =
     Option.value col_width ~default:(column_width (Pos.line pos))
   in
@@ -108,6 +113,7 @@ let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
     format_substring_underline
       pos
       msg
+      severity_color
       (List.hd context_lines)
       is_first
       col_width
@@ -133,6 +139,7 @@ let col_widths (msgs : Pos.absolute Message.t list) : int Core.String.Map.t =
     The list may not be ordered, and multiple messages may occur on one line.
  *)
 let format_error (error : Errors.finalized_error) : string =
+  let { User_error.severity; _ } = error in
   (* Sort messages such that messages in the same file are together.
      Does not reorder the files or messages within a file. *)
   let msgs =
@@ -172,7 +179,12 @@ let format_error (error : Errors.finalized_error) : string =
       let line = Pos.line pos in
       let col_width = Map.find col_widths filename in
       let (pretty_ctx, pretty_msg) =
-        format_message (Message.get_message_str msg) pos ~is_first ~col_width
+        format_message
+          (Message.get_message_str msg)
+          pos
+          (User_error.Severity.tty_color severity)
+          ~is_first
+          ~col_width
       in
       let formatted : string list =
         match prev with
@@ -193,22 +205,31 @@ let format_error (error : Errors.finalized_error) : string =
 let to_string
     ?(claim_color : Tty.raw_color option) (error : Errors.finalized_error) :
     string =
-  let error_code = User_error.get_code error in
-  let custom_msgs = error.User_error.custom_msgs in
-  let msgl = User_error.to_list error in
+  let {
+    User_error.severity;
+    code;
+    claim = (_, claim_msg);
+    reasons = _;
+    custom_msgs;
+    quickfixes = _;
+    flags = _;
+    is_fixmed = _;
+  } =
+    error
+  in
   let buf = Buffer.create 50 in
-  let color = Option.value claim_color ~default:Tty.Red in
-  (match msgl with
-  | [] -> failwith "Impossible: an error always has non-empty list of messages"
-  | (_, msg) :: _ ->
-    Buffer.add_string
-      buf
-      (Printf.sprintf
-         "%s %s\n"
-         (Tty.apply_color
-            (Tty.Bold color)
-            (User_error.error_code_to_string error_code))
-         (Tty.apply_color (Tty.Bold Tty.Default) msg)));
+  let color =
+    Option.value claim_color ~default:(User_error.Severity.tty_color severity)
+  in
+  Buffer.add_string
+    buf
+    (Printf.sprintf
+       "%s: %s %s\n"
+       (Tty.apply_color
+          (Tty.Bold color)
+          (User_error.Severity.to_string severity))
+       (Tty.apply_color (Tty.Bold color) (User_error.error_code_to_string code))
+       (Tty.apply_color (Tty.Bold Tty.Default) claim_msg));
   (try Buffer.add_string buf (format_error error) with
   | _ ->
     Buffer.add_string

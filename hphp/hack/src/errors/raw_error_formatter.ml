@@ -43,7 +43,7 @@ let format_error_code code =
 let format_severity (severity : User_error.severity) =
   [
     ( Tty.Bold (User_error.Severity.tty_color severity),
-      Printf.sprintf "%s: " (User_error.Severity.to_capital_string severity) );
+      Printf.sprintf "%s: " (User_error.Severity.to_all_caps_string severity) );
   ]
 
 let to_string (error : Errors.finalized_error) : string =

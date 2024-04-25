@@ -45,7 +45,7 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
             "{}: {}:{}:{},{}: {} ({})",
             Styled(
                 severity.color().bold(),
-                severity.to_capital_string(),
+                severity.to_all_caps_string(),
                 *is_term
             ),
             Styled(Color::Red.bold(), filename.display(), *is_term),

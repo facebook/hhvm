@@ -33,7 +33,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
         write!(
             f,
             "{}: {}\n{} ({})",
-            severity.to_capital_string(),
+            severity.to_all_caps_string(),
             pos.absolute(ctx),
             msg,
             code

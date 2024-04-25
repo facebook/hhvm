@@ -183,7 +183,7 @@ let process_file
               let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
               Hh_logger.log
                 "%s: %s(%d:%d-%d:%d) [%d] %s"
-                (User_error.Severity.to_capital_string severity)
+                (User_error.Severity.to_all_caps_string severity)
                 (Relative_path.suffix fn)
                 l1
                 c1

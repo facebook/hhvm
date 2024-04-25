@@ -12,7 +12,9 @@ type severity =
 [@@deriving ord]
 
 module Severity : sig
-  val to_capital_string : severity -> string
+  val to_string : severity -> string
+
+  val to_all_caps_string : severity -> string
 
   val tty_color : severity -> Tty.raw_color
 end

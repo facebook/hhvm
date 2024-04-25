@@ -306,6 +306,7 @@ type t = {
       (** Stack size to use for parallel workers inside the parser. *)
   tco_extended_reasons: bool;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
+  hack_warnings: bool;  (** turn on hack warnings *)
 }
 [@@deriving eq, show]
 
@@ -437,6 +438,7 @@ val set :
   ?po_nameof_precedence:bool ->
   ?po_stack_size:int ->
   ?tco_extended_reasons:bool ->
+  ?hack_warnings:bool ->
   t ->
   t
 

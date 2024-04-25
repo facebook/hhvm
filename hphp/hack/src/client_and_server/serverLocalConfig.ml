@@ -254,6 +254,7 @@ type t = {
       (** POC: @ljw - controls how quarantine invalidates folded decls *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
+  hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)
 }
 
 let default =
@@ -342,6 +343,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
     autocomplete_sort_text = false;
+    hack_warnings = false;
   }
 
 let system_config_path =
@@ -1038,6 +1040,9 @@ let load_
       ~default:default.autocomplete_sort_text
       config
   in
+  let hack_warnings =
+    bool_ "hack_warnings" ~default:default.hack_warnings config
+  in
   let zstd_decompress_by_file =
     bool_
       "zstd_decompress_by_file"
@@ -1152,6 +1157,7 @@ let load_
     lsp_sticky_quarantine;
     lsp_invalidation;
     autocomplete_sort_text;
+    hack_warnings;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

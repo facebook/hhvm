@@ -379,6 +379,7 @@ impl HhConfig {
             po_nameof_precedence: hhconfig.get_bool_or("nameof_precedence", default.po_nameof_precedence)?,
             po_stack_size: default.po_stack_size,
             tco_extended_reasons:  default.tco_extended_reasons,
+            hack_warnings: hhconfig.get_bool_or("hack_warnings", default.hack_warnings)?,
         };
         let mut c = Self {
             local_config,

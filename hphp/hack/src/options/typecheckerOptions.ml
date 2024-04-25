@@ -312,3 +312,5 @@ let tco_sticky_quarantine t = t.GlobalOptions.tco_sticky_quarantine
 let tco_lsp_invalidation t = t.GlobalOptions.tco_lsp_invalidation
 
 let tco_extended_reasons t = t.GlobalOptions.tco_extended_reasons
+
+let hack_warnings t = t.GlobalOptions.hack_warnings

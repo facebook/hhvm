@@ -139,6 +139,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     dump_tast_hashes: false,
     dump_tasts: vec![],
     po_disallow_direct_superglobals_refs: false,
+    hack_warnings: false,
 };
 
 impl GlobalOptions<'static> {

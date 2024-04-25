@@ -398,6 +398,7 @@ let load_config config options =
     ?po_disallow_direct_superglobals_refs:
       (bool_opt "disallow_direct_superglobals_refs" config)
     ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
+    ?hack_warnings:(bool_opt "hack_warnings" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =
@@ -505,6 +506,7 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_sticky_quarantine:local_config.lsp_sticky_quarantine
         ~tco_lsp_invalidation:local_config.lsp_invalidation
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
+        ~hack_warnings:local_config.hack_warnings
         GlobalOptions.default
     in
     load_config config local_config_opts

@@ -5,7 +5,6 @@
 mod local_config;
 
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -210,189 +209,248 @@ impl HhConfig {
             .unwrap_or(Ok(false))?;
 
         let version = hhconfig.get_str("version");
+
+        let local_config = LocalConfig::from_config(
+            version,
+            current_rolled_out_flag_idx,
+            deactivate_saved_state_rollout,
+            &hh_conf,
+        )?;
+
+        let default = GlobalOptions::default();
+        let opts = GlobalOptions {
+            tco_saved_state: local_config.saved_state.clone(),
+            tco_experimental_features: hhconfig
+                .get_string_set_or("enable_experimental_tc_features", default.tco_experimental_features),
+            tco_migration_flags: default.tco_migration_flags,
+            tco_num_local_workers: default.tco_num_local_workers,
+            tco_defer_class_declaration_threshold: default.tco_defer_class_declaration_threshold,
+            tco_locl_cache_capacity: hhconfig.get_int_or("locl_cache_capacity", default.tco_locl_cache_capacity)?,
+            tco_locl_cache_node_threshold: hhconfig.get_int_or("locl_cache_node_threshold", default.tco_locl_cache_node_threshold)?,
+            so_naming_sqlite_path: default.so_naming_sqlite_path,
+            po_auto_namespace_map: match hhconfig.get_str("auto_namespace_map") {
+                None => default.po_auto_namespace_map,
+                Some(s) => parse_json::<BTreeMap<String, String>>(s)?.into_iter().collect()},
+            po_codegen: hhconfig.get_bool_or("codegen", default.po_codegen)?,
+            po_deregister_php_stdlib: hhconfig.get_bool_or("deregister_php_stdlib", default.po_deregister_php_stdlib)?,
+            po_disallow_toplevel_requires: hhconfig.get_bool_or("disallow_toplevel_requires", default.po_disallow_toplevel_requires)?,
+            po_allow_unstable_features: local_config.allow_unstable_features,
+            tco_log_large_fanouts_threshold: default.tco_log_large_fanouts_threshold,
+            tco_log_inference_constraints: default.tco_log_inference_constraints,
+            tco_language_feature_logging: default.tco_language_feature_logging,
+            tco_timeout: hhconfig.get_int_or("timeout", default.tco_timeout)?,
+            tco_disallow_invalid_arraykey: hhconfig.get_bool_or("disallow_invalid_arraykey", default.tco_disallow_invalid_arraykey)?,
+            tco_disallow_byref_dynamic_calls: default.tco_disallow_byref_dynamic_calls,
+            tco_disallow_byref_calls: default.tco_disallow_byref_calls,
+            code_agnostic_fixme: hhconfig.get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
+            allowed_fixme_codes_strict: hhconfig.get_int_set_or("allowed_fixme_codes_strict", default.allowed_fixme_codes_strict)?,
+            log_levels: hhconfig.get_str("log_levels").map_or(Ok(default.log_levels), parse_json)?,
+            class_pointer_levels: hhconfig.get_str("class_pointer_levels").map_or(Ok(default.class_pointer_levels), parse_json)?,
+            po_disable_lval_as_an_expression: default.po_disable_lval_as_an_expression,
+            tco_remote_old_decls_no_limit: default.tco_remote_old_decls_no_limit,
+            tco_use_old_decls_from_cas: default.tco_use_old_decls_from_cas,
+            tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
+            tco_populate_member_heaps: default.tco_populate_member_heaps,
+            tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,
+            tco_skip_tast_checks: default.tco_skip_tast_checks,
+            tco_like_type_hints: hhconfig.get_bool_or("like_type_hints", default.tco_like_type_hints)?,
+            tco_union_intersection_type_hints: hhconfig.get_bool_or("union_intersection_type_hints", default.tco_union_intersection_type_hints)?,
+            tco_coeffects: default.tco_coeffects,
+            tco_coeffects_local: default.tco_coeffects_local,
+            tco_strict_contexts: default.tco_strict_contexts,
+            tco_like_casts: hhconfig.get_bool_or("like_casts", default.tco_like_casts)?,
+            tco_check_xhp_attribute: hhconfig.get_bool_or("check_xhp_attribute", default.tco_check_xhp_attribute)?,
+            tco_check_redundant_generics: hhconfig.get_bool_or("check_redundant_generics", default.tco_check_redundant_generics)?,
+            tco_disallow_unresolved_type_variables: default
+                .tco_disallow_unresolved_type_variables,
+            tco_custom_error_config: custom_error_config,
+            po_enable_class_level_where_clauses: default.po_enable_class_level_where_clauses,
+            po_disable_legacy_soft_typehints: default.po_disable_legacy_soft_typehints,
+            po_allowed_decl_fixme_codes: hhconfig.get_int_set_or("allowed_decl_fixme_codes", default.po_allowed_decl_fixme_codes)?,
+            tco_const_static_props: default.tco_const_static_props,
+            po_disable_legacy_attribute_syntax: default.po_disable_legacy_attribute_syntax,
+            tco_const_attribute: default.tco_const_attribute,
+            po_const_default_func_args: hhconfig.get_bool_or("const_default_func_args", default.po_const_default_func_args)?,
+            po_const_default_lambda_args: hhconfig.get_bool_or("const_default_lambda_args", default.po_const_default_lambda_args)?,
+            po_disallow_silence: hhconfig.get_bool_or("disallow_silence", default.po_disallow_silence)?,
+            po_abstract_static_props: default.po_abstract_static_props,
+            po_parser_errors_only: default.po_parser_errors_only,
+            tco_check_attribute_locations: default.tco_check_attribute_locations,
+            glean_reponame: default.glean_reponame,
+            symbol_write_index_inherited_members: default.symbol_write_index_inherited_members,
+            symbol_write_ownership: default.symbol_write_ownership,
+            symbol_write_root_path: default.symbol_write_root_path,
+            symbol_write_hhi_path: default.symbol_write_hhi_path,
+            symbol_write_ignore_paths: default.symbol_write_ignore_paths,
+            symbol_write_index_paths: default.symbol_write_index_paths,
+            symbol_write_index_paths_file: default.symbol_write_index_paths_file,
+            symbol_write_index_paths_file_output: default.symbol_write_index_paths_file_output,
+            symbol_write_include_hhi: default.symbol_write_include_hhi,
+            symbol_write_sym_hash_in: default.symbol_write_sym_hash_in,
+            symbol_write_exclude_out: default.symbol_write_exclude_out,
+            symbol_write_referenced_out: default.symbol_write_referenced_out,
+            symbol_write_reindexed_out: default.symbol_write_reindexed_out,
+            symbol_write_sym_hash_out: default.symbol_write_sym_hash_out,
+            po_disallow_func_ptrs_in_constants: hhconfig.get_bool_or("disallow_func_ptrs_in_constants", default.po_disallow_func_ptrs_in_constants)?,
+            tco_error_php_lambdas: default.tco_error_php_lambdas,
+            tco_disallow_discarded_nullable_awaitables: default
+                .tco_disallow_discarded_nullable_awaitables,
+            po_enable_xhp_class_modifier: hhconfig.get_bool_or("enable_xhp_class_modifier", default.po_enable_xhp_class_modifier)?,
+            po_disable_xhp_element_mangling: hhconfig.get_bool_or("disable_xhp_element_mangling", default.po_disable_xhp_element_mangling)?,
+            po_disable_xhp_children_declarations: hhconfig.get_bool_or("disable_xhp_children_declarations", default.po_disable_xhp_children_declarations)?,
+            po_disable_hh_ignore_error: hhconfig.get_int_or("disable_hh_ignore_error", default.po_disable_hh_ignore_error)?,
+            po_keep_user_attributes: default.po_keep_user_attributes,
+            tco_is_systemlib: default.tco_is_systemlib,
+            tco_higher_kinded_types: default.tco_higher_kinded_types,
+            tco_report_pos_from_reason: default.tco_report_pos_from_reason,
+            tco_typecheck_sample_rate: hhconfig.get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
+            tco_enable_sound_dynamic: hhconfig.get_bool_or("enable_sound_dynamic_type", default.tco_enable_sound_dynamic)?,
+            tco_pessimise_builtins: hhconfig.get_bool_or("pessimise_builtins", default.tco_pessimise_builtins)?,
+            tco_enable_no_auto_dynamic: hhconfig.get_bool_or("enable_no_auto_dynamic", default.tco_enable_no_auto_dynamic)?,
+            tco_skip_check_under_dynamic: hhconfig.get_bool_or("skip_check_under_dynamic", default.tco_skip_check_under_dynamic)?,
+            tco_global_access_check_enabled: hhconfig.get_bool_or("tco_global_access_check_enabled", default.tco_global_access_check_enabled)?,
+            po_interpret_soft_types_as_like_types: hhconfig.get_bool_or("interpret_soft_types_as_like_types", default.po_interpret_soft_types_as_like_types)?,
+            tco_enable_strict_string_concat_interp: hhconfig.get_bool_or("enable_strict_string_concat_interp", default
+                .tco_enable_strict_string_concat_interp)?,
+            tco_ignore_unsafe_cast: default.tco_ignore_unsafe_cast,
+            tco_no_parser_readonly_check: default.tco_no_parser_readonly_check,
+            tco_enable_expression_trees: default.tco_enable_expression_trees,
+            tco_enable_function_references: hhconfig.get_bool_or("enable_function_references", default.tco_enable_function_references)?,
+            tco_allowed_expression_tree_visitors:
+                hhconfig
+                    .get_str("allowed_expression_tree_visitors")
+                    .map_or(default.tco_allowed_expression_tree_visitors, |s| {
+                        let mut allowed_expression_tree_visitors = parse_svec(s);
+                        // Fix up type names so they will match with elaborated names.
+                        // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
+                        for ty in &mut allowed_expression_tree_visitors {
+                            if !ty.starts_with('\\') {
+                                *ty = format!("\\{}", ty)
+                            }
+                        };
+                        allowed_expression_tree_visitors
+                    }),
+            tco_typeconst_concrete_concrete_error: default.tco_typeconst_concrete_concrete_error,
+            tco_enable_strict_const_semantics: hhconfig.get_int_or("enable_strict_const_semantics", default.tco_enable_strict_const_semantics)?,
+            tco_strict_wellformedness: hhconfig.get_int_or("strict_wellformedness", default.tco_strict_wellformedness)?,
+            tco_meth_caller_only_public_visibility: default
+                .tco_meth_caller_only_public_visibility,
+            tco_require_extends_implements_ancestors: default
+                .tco_require_extends_implements_ancestors,
+            tco_strict_value_equality: default.tco_strict_value_equality,
+            tco_enforce_sealed_subclasses: default.tco_enforce_sealed_subclasses,
+            tco_everything_sdt: hhconfig.get_bool_or("everything_sdt", default.tco_everything_sdt)?,
+            tco_implicit_inherit_sdt: default.tco_implicit_inherit_sdt,
+            tco_explicit_consistent_constructors: hhconfig.get_int_or("explicit_consistent_constructors", default.tco_explicit_consistent_constructors)?,
+            tco_require_types_class_consts: hhconfig.get_int_or("require_types_tco_require_types_class_consts", default.tco_require_types_class_consts)?,
+            tco_type_printer_fuel: hhconfig.get_int_or("type_printer_fuel", default.tco_type_printer_fuel)?,
+            tco_specify_manifold_api_key: default.tco_specify_manifold_api_key,
+            tco_profile_top_level_definitions: hhconfig.get_bool_or("profile_top_level_definitions", default.tco_profile_top_level_definitions)?,
+            tco_allow_all_files_for_module_declarations: default
+                .tco_allow_all_files_for_module_declarations,
+            tco_allowed_files_for_module_declarations: hhconfig.get_str("allowed_files_for_module_declarations").map_or(default.tco_allowed_files_for_module_declarations, parse_svec),
+            tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
+            tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
+            tco_use_type_alias_heap: default.tco_use_type_alias_heap,
+            tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
+            po_disallow_static_constants_in_default_func_args: default
+                .po_disallow_static_constants_in_default_func_args,
+            tco_rust_elab: local_config.rust_elab,
+            dump_tast_hashes: hh_conf.get_bool_or("dump_tast_hashes", default.dump_tast_hashes)?,
+            dump_tasts: match hh_conf.get_str("dump_tasts") {
+                None => default.dump_tasts,
+                Some(path) => {
+                    let path = PathBuf::from(path);
+                    let file =
+                        File::open(&path).with_context(|| path.to_string_lossy().to_string())?;
+                    BufReader::new(file)
+                        .lines()
+                        .collect::<std::io::Result<_>>()?
+                }
+            },
+            tco_autocomplete_mode: default.tco_autocomplete_mode,
+            tco_package_info:
+                // If there are errors, ignore them for the tcopt, the parser errors will be caught and
+                // sent separately.
+                package_info.try_into().unwrap_or_default(),
+            po_unwrap_concurrent: default.po_unwrap_concurrent,
+            tco_log_exhaustivity_check: hhconfig.get_bool_or("log_exhaustivity_check", default.tco_log_exhaustivity_check)?,
+            po_disallow_direct_superglobals_refs: hhconfig.get_bool_or("disallow_direct_superglobals_refs", default.po_disallow_direct_superglobals_refs)?,
+            tco_sticky_quarantine: default.tco_sticky_quarantine,
+            tco_lsp_invalidation: default.tco_lsp_invalidation,
+            tco_autocomplete_sort_text: default.tco_autocomplete_sort_text,
+            po_nameof_precedence: hhconfig.get_bool_or("nameof_precedence", default.po_nameof_precedence)?,
+            po_stack_size: default.po_stack_size,
+            tco_extended_reasons:  default.tco_extended_reasons,
+        };
         let mut c = Self {
-            local_config: LocalConfig::from_config(
-                version,
-                current_rolled_out_flag_idx,
-                deactivate_saved_state_rollout,
-                &hh_conf,
-            )?,
+            local_config,
+            opts,
             ..Self::default()
         };
-
-        // Some GlobalOptions fields are copied from LocalConfig
-        let go = &mut c.opts;
-        go.tco_saved_state = c.local_config.saved_state.clone();
-        go.po_allow_unstable_features = c.local_config.allow_unstable_features;
-        go.tco_rust_elab = c.local_config.rust_elab;
-        go.tco_custom_error_config = custom_error_config;
-        go.dump_tast_hashes = match hh_conf.get_str("dump_tast_hashes") {
-            Some("true") => true,
-            Some(_) | None => false,
-        };
-        go.dump_tasts = match hh_conf.get_str("dump_tasts") {
-            None => vec![],
-            Some(path) => {
-                let path = PathBuf::from(path);
-                let file = File::open(&path).with_context(|| path.to_string_lossy().to_string())?;
-                BufReader::new(file)
-                    .lines()
-                    .collect::<std::io::Result<_>>()?
-            }
-        };
-        // If there are errors, ignore them for the tcopt, the parser errors will be caught and
-        // sent separately.
-        go.tco_package_info = package_info.try_into().unwrap_or_default();
 
         for (key, mut value) in hhconfig {
             match key.as_str() {
                 "current_saved_state_rollout_flag_index"
                 | "deactivate_saved_state_rollout"
                 | "override_hhconfig_hash"
-                | "ss_force" => {
+                | "ss_force"
+                | "disable_full_init_fallback" => {
                     // These were already queried for LocalConfig above.
                     // Ignore them so they aren't added to c.unknown.
                 }
-                "auto_namespace_map" => {
-                    let map: BTreeMap<String, String> = parse_json(&value)?;
-                    go.po_auto_namespace_map = map.into_iter().collect();
-                }
-                "disable_xhp_element_mangling" => {
-                    go.po_disable_xhp_element_mangling = parse_json(&value)?;
-                }
-                "disable_xhp_children_declarations" => {
-                    go.po_disable_xhp_children_declarations = parse_json(&value)?;
-                }
-                "interpret_soft_types_as_like_types" => {
-                    go.po_interpret_soft_types_as_like_types = parse_json(&value)?;
-                }
-                "everything_sdt" => {
-                    go.tco_everything_sdt = parse_json(&value)?;
-                }
-                "deregister_php_stdlib" => {
-                    go.po_deregister_php_stdlib = parse_json(&value)?;
-                }
+                "auto_namespace_map"
+                | "disable_xhp_element_mangling"
+                | "disable_xhp_children_declarations"
+                | "interpret_soft_types_as_like_types"
+                | "everything_sdt"
+                | "deregister_php_stdlib"
+                | "enable_experimental_tc_features"
+                | "enable_xhp_class_modifier"
+                | "disallow_invalid_arraykey"
+                | "check_xhp_attribute"
+                | "disallow_silence"
+                | "check_redundant_generics"
+                | "disallow_func_ptrs_in_constants"
+                | "enable_strict_string_concat_interp"
+                | "allowed_expression_tree_visitors"
+                | "locl_cache_capacity"
+                | "locl_cache_node_threshold"
+                | "explicit_consistent_constructors"
+                | "enable_strict_const_semantics"
+                | "require_types_tco_require_types_class_consts"
+                | "strict_wellformedness"
+                | "disable_hh_ignore_error"
+                | "allowed_fixme_codes_strict"
+                | "allowed_decl_fixme_codes"
+                | "code_agnostic_fixme"
+                | "allowed_files_for_module_declarations"
+                | "tco_global_access_check_enabled"
+                | "log_levels"
+                | "class_pointer_levels"
+                | "const_default_func_args"
+                | "const_default_lambda_args"
+                | "like_casts"
+                | "timeout"
+                | "enable_sound_dynamic_type"
+                | "pessimise_builtins"
+                | "enable_no_auto_dynamic"
+                | "like_type_hints"
+                | "union_intersection_type_hints"
+                | "typecheck_sample_rate"
+                | "type_printer_fuel"
+                | "profile_top_level_definitions"
+                | "skip_check_under_dynamic"
+                | "log_exhaustivity_check"
+                | "dump_tast_hashes"
+                | "disallow_direct_superglobals_refs"
+                | "nameof_precedence"
+                | "enable_function_references" => {}
                 "version" => {
                     c.version = Some(value);
                 }
                 "ignored_paths" => {
                     c.ignored_paths = parse_json(&value)?;
-                }
-                "enable_experimental_tc_features" => {
-                    go.tco_experimental_features = parse_sset(&value);
-                }
-                "enable_xhp_class_modifier" => {
-                    go.po_enable_xhp_class_modifier = parse_json(&value)?;
-                }
-                "disallow_invalid_arraykey" => {
-                    go.tco_disallow_invalid_arraykey = parse_json(&value)?;
-                }
-                "check_xhp_attribute" => {
-                    go.tco_check_xhp_attribute = parse_json(&value)?;
-                }
-                "disallow_silence" => {
-                    go.po_disallow_silence = parse_json(&value)?;
-                }
-                "check_redundant_generics" => {
-                    go.tco_check_redundant_generics = parse_json(&value)?;
-                }
-                "disallow_func_ptrs_in_constants" => {
-                    go.po_disallow_func_ptrs_in_constants = parse_json(&value)?;
-                }
-                "enable_strict_string_concat_interp" => {
-                    go.tco_enable_strict_string_concat_interp = parse_json(&value)?;
-                }
-                "allowed_expression_tree_visitors" => {
-                    let mut allowed_expression_tree_visitors = parse_svec(&value);
-                    // Fix up type names so they will match with elaborated names.
-                    // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
-                    for ty in &mut allowed_expression_tree_visitors {
-                        if !ty.starts_with('\\') {
-                            *ty = format!("\\{}", ty)
-                        }
-                    }
-                    go.tco_allowed_expression_tree_visitors = allowed_expression_tree_visitors;
-                }
-                "locl_cache_capacity" => {
-                    go.tco_locl_cache_capacity = parse_json(&value)?;
-                }
-                "locl_cache_node_threshold" => {
-                    go.tco_locl_cache_node_threshold = parse_json(&value)?;
-                }
-                "explicit_consistent_constructors" => {
-                    go.tco_explicit_consistent_constructors = parse_json(&value)?;
-                }
-                "enable_strict_const_semantics" => {
-                    go.tco_enable_strict_const_semantics = parse_json(&value)?;
-                }
-                "require_types_tco_require_types_class_consts" => {
-                    go.tco_require_types_class_consts = parse_json(&value)?;
-                }
-                "strict_wellformedness" => {
-                    go.tco_strict_wellformedness = parse_json(&value)?;
-                }
-                "disable_hh_ignore_error" => {
-                    go.po_disable_hh_ignore_error = parse_json(&value)?;
-                }
-                "allowed_fixme_codes_strict" => {
-                    go.allowed_fixme_codes_strict = parse_iset(&value)?;
-                }
-                "allowed_decl_fixme_codes" => {
-                    go.po_allowed_decl_fixme_codes = parse_iset(&value)?;
-                }
-                "code_agnostic_fixme" => {
-                    go.code_agnostic_fixme = parse_json(&value)?;
-                }
-                "allowed_files_for_module_declarations" => {
-                    go.tco_allowed_files_for_module_declarations = parse_svec(&value);
-                }
-                "tco_global_access_check_enabled" => {
-                    go.tco_global_access_check_enabled = parse_json(&value)?;
-                }
-                "log_levels" => {
-                    go.log_levels = parse_json(&value)?;
-                }
-                "class_pointer_levels" => {
-                    go.class_pointer_levels = parse_json(&value)?;
-                }
-                "const_default_func_args" => {
-                    go.po_const_default_func_args = parse_json(&value)?;
-                }
-                "const_default_lambda_args" => {
-                    go.po_const_default_lambda_args = parse_json(&value)?;
-                }
-                "like_casts" => {
-                    go.tco_like_casts = parse_json(&value)?;
-                }
-                "timeout" => {
-                    go.tco_timeout = parse_json(&value)?;
-                }
-                "enable_sound_dynamic_type" => {
-                    go.tco_enable_sound_dynamic = parse_json(&value)?;
-                }
-                "pessimise_builtins" => {
-                    go.tco_pessimise_builtins = parse_json(&value)?;
-                }
-                "enable_no_auto_dynamic" => {
-                    go.tco_enable_no_auto_dynamic = parse_json(&value)?;
-                }
-                "like_type_hints" => {
-                    go.tco_like_type_hints = parse_json(&value)?;
-                }
-                "union_intersection_type_hints" => {
-                    go.tco_union_intersection_type_hints = parse_json(&value)?;
-                }
-                "typecheck_sample_rate" => {
-                    go.tco_typecheck_sample_rate = parse_json(&value)?;
-                }
-                "type_printer_fuel" => {
-                    go.tco_type_printer_fuel = parse_json(&value)?;
-                }
-                "profile_top_level_definitions" => {
-                    go.tco_profile_top_level_definitions = parse_json(&value)?;
-                }
-                "skip_check_under_dynamic" => {
-                    go.tco_skip_check_under_dynamic = parse_json(&value)?;
                 }
                 "gc_minor_heap_size" => {
                     value.retain(|c| c != '_');
@@ -430,23 +488,8 @@ impl HhConfig {
                 "naming_table_compression_level" => {
                     c.naming_table_compression_level = parse_json(&value)?;
                 }
-                "log_exhaustivity_check" => {
-                    go.tco_log_exhaustivity_check = parse_json(&value)?;
-                }
-                "dump_tast_hashes" => {
-                    go.dump_tast_hashes = parse_json(&value)?;
-                }
-                "disallow_direct_superglobals_refs" => {
-                    go.po_disallow_direct_superglobals_refs = parse_json(&value)?;
-                }
                 "eden_fetch_parallelism" => {
                     c.eden_fetch_parallelism = parse_json(&value)?;
-                }
-                "nameof_precedence" => {
-                    go.po_nameof_precedence = parse_json(&value)?;
-                }
-                "enable_function_references" => {
-                    go.tco_enable_function_references = parse_json(&value)?;
                 }
                 _ => c.unknown.push((key, value)),
             }
@@ -463,25 +506,11 @@ fn parse_json<'de, T: serde::de::Deserialize<'de>>(value: &'de str) -> Result<T>
     Ok(serde_json::from_slice(value.as_bytes())?)
 }
 
-fn parse_sset(value: &str) -> BTreeSet<String> {
-    value
-        .split_terminator(',')
-        .map(|s| s.trim().to_owned())
-        .collect()
-}
-
 fn parse_svec(value: &str) -> Vec<String> {
     value
         .split_terminator(',')
         .map(|s| s.trim().to_owned())
         .collect()
-}
-
-fn parse_iset(value: &str) -> Result<BTreeSet<isize>> {
-    value
-        .split_terminator(',')
-        .map(|s| Ok(s.trim().parse()?))
-        .collect::<Result<_>>()
 }
 
 /// Return the local config file path, allowing HH_LOCALCONF_PATH to override it.

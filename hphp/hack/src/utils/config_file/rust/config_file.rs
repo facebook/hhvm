@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::path::Path;
 
 use bstr::ByteSlice;
@@ -100,12 +101,36 @@ impl ConfigFile {
         self.map.get(key).map(|s| parse_int(s))
     }
 
+    pub fn get_int_or(&self, key: &str, default: isize) -> Result<isize, std::num::ParseIntError> {
+        self.map.get(key).map_or(Ok(default), |s| parse_int(s))
+    }
+
+    pub fn get_int_set_or(
+        &self,
+        key: &str,
+        default: BTreeSet<isize>,
+    ) -> Result<BTreeSet<isize>, std::num::ParseIntError> {
+        self.map.get(key).map_or(Ok(default), |s| {
+            s.split_terminator(',')
+                .map(|s| s.trim().parse())
+                .collect::<Result<_, _>>()
+        })
+    }
+
     pub fn get_float(&self, key: &str) -> Option<Result<f64, std::num::ParseFloatError>> {
         self.map.get(key).map(|s| s.parse())
     }
 
+    pub fn get_float_or(&self, key: &str, default: f64) -> Result<f64, std::num::ParseFloatError> {
+        self.map.get(key).map_or(Ok(default), |s| s.parse())
+    }
+
     pub fn get_bool(&self, key: &str) -> Option<Result<bool, std::str::ParseBoolError>> {
         self.map.get(key).map(|s| s.parse())
+    }
+
+    pub fn get_bool_or(&self, key: &str, default: bool) -> Result<bool, std::str::ParseBoolError> {
+        self.map.get(key).map_or(Ok(default), |s| s.parse())
     }
 
     pub fn bool_if_min_version(
@@ -127,6 +152,14 @@ impl ConfigFile {
             static ref RE: regex::Regex = regex::Regex::new(",[ \n\r\x0c\t]*").unwrap();
         }
         self.map.get(key).map(|s| RE.split(s.as_str()))
+    }
+
+    pub fn get_string_set_or(&self, key: &str, default: BTreeSet<String>) -> BTreeSet<String> {
+        self.map.get(key).map_or(default, |s| {
+            s.split_terminator(',')
+                .map(|s| s.trim().to_owned())
+                .collect()
+        })
     }
 }
 

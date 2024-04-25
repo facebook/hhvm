@@ -40,35 +40,49 @@ let format_error_code code =
     (Tty.Normal Tty.Default, ")");
   ]
 
+let format_severity (severity : User_error.severity) =
+  [
+    ( Tty.Bold (User_error.Severity.tty_color severity),
+      Printf.sprintf "%s: " (User_error.Severity.to_capital_string severity) );
+  ]
+
 let to_string (error : Errors.finalized_error) : string =
-  let (error_code, msgl) = User_error.(get_code error, to_list error) in
-  match msgl with
-  | [] ->
-    failwith "Impossible: an error always has a non-empty list of messages"
-  | msg :: msgl ->
-    let newline = (Tty.Normal Tty.Default, "\n") in
-    let claim =
-      format_msg (Tty.Bold Tty.Red) (Tty.Bold Tty.Red) msg
-      @ format_error_code error_code
-      @ [newline]
-    in
-    let reasons =
-      let indent = (Tty.Normal Tty.Default, "  ") in
-      List.concat_map
-        ~f:(fun msg ->
-          (indent :: format_msg (Tty.Normal Tty.Red) (Tty.Normal Tty.Green) msg)
-          @ [newline])
-        msgl
-    in
-    let custom_msgs =
-      match error.User_error.custom_msgs with
-      | [] -> []
-      | msgs ->
-        (Tty.Normal Tty.Default, "\n")
-        :: List.map ~f:(fun msg -> (Tty.Normal Tty.Yellow, msg)) msgs
-    in
-    let to_print = claim @ reasons @ custom_msgs in
-    if Unix.isatty Unix.stdout then
-      List.map to_print ~f:(fun (c, s) -> Tty.apply_color c s) |> String.concat
-    else
-      List.map to_print ~f:(fun (_, x) -> x) |> String.concat
+  let {
+    User_error.severity;
+    code;
+    claim;
+    reasons;
+    quickfixes = _;
+    custom_msgs = _;
+    is_fixmed = _;
+    flags = _;
+  } =
+    error
+  in
+  let newline = (Tty.Normal Tty.Default, "\n") in
+  let severity = format_severity severity in
+  let claim =
+    format_msg (Tty.Bold Tty.Red) (Tty.Bold Tty.Red) claim
+    @ format_error_code code
+    @ [newline]
+  in
+  let reasons =
+    let indent = (Tty.Normal Tty.Default, "  ") in
+    List.concat_map
+      ~f:(fun msg ->
+        (indent :: format_msg (Tty.Normal Tty.Red) (Tty.Normal Tty.Green) msg)
+        @ [newline])
+      reasons
+  in
+  let custom_msgs =
+    match error.User_error.custom_msgs with
+    | [] -> []
+    | msgs ->
+      (Tty.Normal Tty.Default, "\n")
+      :: List.map ~f:(fun msg -> (Tty.Normal Tty.Yellow, msg)) msgs
+  in
+  let to_print = severity @ claim @ reasons @ custom_msgs in
+  if Unix.isatty Unix.stdout then
+    List.map to_print ~f:(fun (c, s) -> Tty.apply_color c s) |> String.concat
+  else
+    List.map to_print ~f:(fun (_, x) -> x) |> String.concat

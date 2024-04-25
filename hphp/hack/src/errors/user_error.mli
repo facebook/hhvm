@@ -13,6 +13,8 @@ type severity =
 
 module Severity : sig
   val to_capital_string : severity -> string
+
+  val tty_color : severity -> Tty.raw_color
 end
 
 type ('prim_pos, 'pos) t = {

@@ -16,6 +16,10 @@ module Severity = struct
   let to_capital_string = function
     | Err -> "ERROR"
     | Warning -> "WARN"
+
+  let tty_color = function
+    | Err -> Tty.Red
+    | Warning -> Tty.Yellow
 end
 
 type ('prim_pos, 'pos) t = {

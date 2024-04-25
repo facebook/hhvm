@@ -11,6 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
+ansi_term = "0.12"
 anyhow = "1.0.75"
 arena_deserializer = { version = "0.0.0", path = "../utils/arena_deserializer" }
 arena_trait = { version = "0.0.0", path = "../arena_trait" }

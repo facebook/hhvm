@@ -1,4 +1,4 @@
-File "hierarchy_property.php", line 7, characters 12-13:
+ERROR: File "hierarchy_property.php", line 7, characters 12-13:
 Typing error (Typing[4256])
   File "hierarchy_property.php", line 7, characters 16-18:
   This object access to `val` is ambiguous

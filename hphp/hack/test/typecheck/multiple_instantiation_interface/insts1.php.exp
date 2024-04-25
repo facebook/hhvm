@@ -1,8 +1,8 @@
-File "insts1.php", line 12, characters 21-26:
+ERROR: File "insts1.php", line 12, characters 21-26:
 Interface `J` is used more than once in this declaration. (Typing[4377])
   File "insts1.php", line 12, characters 29-29:
   Here is another occurrence
-File "insts1.php", line 12, characters 29-34:
+ERROR: File "insts1.php", line 12, characters 29-34:
 L extends J<int> but it already extends J at another instantiation (Typing[4480])
   File "insts1.php", line 12, characters 21-26:
   It already extends J<num>

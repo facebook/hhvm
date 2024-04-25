@@ -1,4 +1,4 @@
-File "super_constraint_5.php", line 9, characters 10-13:
+ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 8, characters 4-5:
   Expected `Tx`

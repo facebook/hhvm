@@ -85,6 +85,15 @@ val error_kind : int -> string
 
 val error_code_to_string : int -> string
 
+(** The string looks like:
+
+    ERROR/WARN: path/to/file.php pos...
+    error/warning: You have a problem here (Typing4110)
+      path/to/other/file.php pos...
+      Because this is wrong
+      path/to/other/file.php pos...
+      And this too
+  *)
 val to_string : bool -> (Pos.absolute, Pos.absolute) t -> string
 
 val to_json :

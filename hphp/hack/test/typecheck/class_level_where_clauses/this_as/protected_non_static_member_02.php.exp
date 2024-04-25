@@ -1,4 +1,4 @@
-File "protected_non_static_member_02.php", line 29, characters 12-13:
+ERROR: File "protected_non_static_member_02.php", line 29, characters 12-13:
 No instance method `me` in `Tw` (Typing[4053])
   File "protected_non_static_member_02.php", line 27, characters 19-21:
   Did you mean `foo` instead?
@@ -6,7 +6,7 @@ No instance method `me` in `Tw` (Typing[4053])
   This is why I think it is an object of type Tw
   File "protected_non_static_member_02.php", line 26, characters 7-8:
   Declaration of `Tw` is here
-File "protected_non_static_member_02.php", line 38, characters 12-13:
+ERROR: File "protected_non_static_member_02.php", line 38, characters 12-13:
 No instance method `me` in `Tw2` (Typing[4053])
   File "protected_non_static_member_02.php", line 36, characters 19-21:
   Did you mean `foo` instead?

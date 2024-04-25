@@ -1,4 +1,4 @@
-File "wildcard_funcall.php", line 11, characters 16-27:
+ERROR: File "wildcard_funcall.php", line 11, characters 16-27:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 11, characters 7-12:
   Expected `string`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   This type argument to `A` must match exactly (it is invariant)
   File "wildcard_funcall.php", line 11, characters 22-24:
   But got `int`
-File "wildcard_funcall.php", line 11, characters 16-27:
+ERROR: File "wildcard_funcall.php", line 11, characters 16-27:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 11, characters 22-24:
   Expected `int`
@@ -14,7 +14,7 @@ Invalid argument (Typing[4110])
   But got `string`
   File "wildcard_funcall.php", line 11, characters 7-12:
   This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 16, characters 19-33:
+ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 9-14:
   Expected `string`
@@ -22,7 +22,7 @@ Invalid argument (Typing[4110])
   This type argument to `A` must match exactly (it is invariant)
   File "wildcard_funcall.php", line 16, characters 27-29:
   But got `int`
-File "wildcard_funcall.php", line 16, characters 19-33:
+ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 9-14:
   Expected `string`
@@ -30,7 +30,7 @@ Invalid argument (Typing[4110])
   But got `int`
   File "wildcard_funcall.php", line 16, characters 27-29:
   This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 16, characters 19-33:
+ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 27-29:
   Expected `int`
@@ -38,7 +38,7 @@ Invalid argument (Typing[4110])
   But got `string`
   File "wildcard_funcall.php", line 16, characters 9-14:
   This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 16, characters 19-33:
+ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 27-29:
   Expected `int`
@@ -46,25 +46,25 @@ Invalid argument (Typing[4110])
   This type argument to `A` must match exactly (it is invariant)
   File "wildcard_funcall.php", line 16, characters 9-14:
   But got `string`
-File "wildcard_funcall.php", line 10, characters 7-7:
+ERROR: File "wildcard_funcall.php", line 10, characters 7-7:
 Invalid reified hint (Typing[4305])
   File "wildcard_funcall.php", line 10, characters 7-7:
   This is a wildcard, it cannot be used as a reified type argument
   File "wildcard_funcall.php", line 4, characters 15-15:
   `T` is reified
-File "wildcard_funcall.php", line 14, characters 7-7:
+ERROR: File "wildcard_funcall.php", line 14, characters 7-7:
 Invalid reified hint (Typing[4305])
   File "wildcard_funcall.php", line 14, characters 7-7:
   This is a wildcard, it cannot be used as a reified type argument
   File "wildcard_funcall.php", line 4, characters 15-15:
   `T` is reified
-File "wildcard_funcall.php", line 15, characters 7-10:
+ERROR: File "wildcard_funcall.php", line 15, characters 7-10:
 Invalid reified hint (Typing[4305])
   File "wildcard_funcall.php", line 15, characters 9-9:
   This is a wildcard, it cannot be used as a reified type argument
   File "wildcard_funcall.php", line 4, characters 15-15:
   `T` is reified
-File "wildcard_funcall.php", line 15, characters 9-9:
+ERROR: File "wildcard_funcall.php", line 15, characters 9-9:
 Invalid reified hint (Typing[4305])
   File "wildcard_funcall.php", line 15, characters 9-9:
   This is a wildcard, it cannot be used as a reified type argument

@@ -1,4 +1,4 @@
-File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
+ERROR: File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
 Invalid argument (Typing[4110])
   File "this_as_argument_public_inst_meth.php", line 11, characters 31-31:
   Expected exactly the type `C`

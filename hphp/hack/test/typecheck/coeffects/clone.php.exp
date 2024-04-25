@@ -1,4 +1,4 @@
-File "clone.php", line 10, characters 3-10:
+ERROR: File "clone.php", line 10, characters 3-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "clone.php", line 9, characters 27-32:
   From this declaration, the context of this function body provides the capability string

@@ -44,7 +44,7 @@ class Fo
 let foo_diagnostics =
   "
 /foo.php:
-File \"/foo.php\", line 3, characters 9-9:
+ERROR: File \"/foo.php\", line 3, characters 9-9:
 A left brace `{` is expected here. (Parsing[1002])
 "
 

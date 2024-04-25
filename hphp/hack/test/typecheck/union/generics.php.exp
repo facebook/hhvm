@@ -64,7 +64,7 @@ File "generics.php--file2.php", line 28, characters 5-15:
   int
 File "generics.php--file2.php", line 31, characters 5-15:
   ?int
-File "generics.php--file2.php", line 102, characters 32-33:
+ERROR: File "generics.php--file2.php", line 102, characters 32-33:
 Invalid argument (Typing[4110])
   File "generics.php--file2.php", line 100, characters 20-22:
   Expected `int`
@@ -72,13 +72,13 @@ Invalid argument (Typing[4110])
     via this generic `T`
   File "generics.php--file2.php", line 102, characters 32-33:
   But got `string`
-File "generics.php--file2.php", line 20, characters 43-50:
+ERROR: File "generics.php--file2.php", line 20, characters 43-50:
 Invalid type hint (Typing[4352])
   File "generics.php--file2.php", line 20, characters 47-50:
   An abstract type constant is not allowed in this position.
   File "generics.php--file2.php", line 4, characters 23-26:
   `Tabs` is abstract here.
-File "generics.php--file2.php", line 20, characters 58-66:
+ERROR: File "generics.php--file2.php", line 20, characters 58-66:
 Invalid type hint (Typing[4352])
   File "generics.php--file2.php", line 20, characters 62-66:
   An abstract type constant is not allowed in this position.

@@ -1,4 +1,4 @@
-File "projected_type_const_error3.php", line 21, characters 10-18:
+ERROR: File "projected_type_const_error3.php", line 21, characters 10-18:
 Some type arguments violate their constraints (Typing[4323])
   File "projected_type_const_error3.php", line 13, characters 20-23:
   `TBox` is a constrained type parameter
@@ -20,7 +20,7 @@ Some type arguments violate their constraints (Typing[4323])
     via this generic `TVal`
   File "projected_type_const_error3.php", line 9, characters 23-25:
   But got `int`
-File "projected_type_const_error3.php", line 21, characters 10-18:
+ERROR: File "projected_type_const_error3.php", line 21, characters 10-18:
 Some type arguments violate their constraints (Typing[4323])
   File "projected_type_const_error3.php", line 13, characters 20-23:
   `TBox` is a constrained type parameter

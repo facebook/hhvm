@@ -1,4 +1,4 @@
-File "call_missing_label.php", line 10, characters 15-16:
+ERROR: File "call_missing_label.php", line 10, characters 15-16:
 Enum class `E` does not contain a label named `B`. (Typing[4394])
   File "call_missing_label.php", line 3, characters 12-12:
   `E` is defined here

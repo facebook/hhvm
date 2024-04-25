@@ -1,4 +1,4 @@
-File "disallow_access_on_nullable.php", line 6, characters 18-24:
+ERROR: File "disallow_access_on_nullable.php", line 6, characters 18-24:
 Invalid type hint (Typing[4062])
   File "disallow_access_on_nullable.php", line 6, characters 24-24:
   You are trying to access the type constant `B` but this is a nullable type

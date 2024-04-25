@@ -1,4 +1,4 @@
-File "bidirectional.bad.php", line 8, characters 17-18:
+ERROR: File "bidirectional.bad.php", line 8, characters 17-18:
 Function  `;anonymous` is not dynamically callable. (Typing[4110])
   File "bidirectional.bad.php", line 8, characters 17-18:
   Invalid argument

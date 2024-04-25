@@ -1,4 +1,4 @@
-File "nullable.bad.php", line 18, characters 10-11:
+ERROR: File "nullable.bad.php", line 18, characters 10-11:
 Invalid argument (Typing[4110])
   File "nullable.bad.php", line 5, characters 3-8:
   Expected `string`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   But got `int`
   File "nullable.bad.php", line 8, characters 35-37:
   This type argument to `HH\EnumClass\Label` must match exactly (it is invariant)
-File "nullable.bad.php", line 18, characters 10-11:
+ERROR: File "nullable.bad.php", line 18, characters 10-11:
 Invalid argument (Typing[4110])
   File "nullable.bad.php", line 8, characters 35-37:
   Expected `int`
@@ -14,7 +14,7 @@ Invalid argument (Typing[4110])
   This type argument to `HH\EnumClass\Label` must match exactly (it is invariant)
   File "nullable.bad.php", line 5, characters 3-8:
   But got `string`
-File "nullable.bad.php", line 22, characters 10-11:
+ERROR: File "nullable.bad.php", line 22, characters 10-11:
 Enum class `E` does not contain a label named `Z`. (Typing[4394])
   File "nullable.bad.php", line 3, characters 12-12:
   `E` is defined here

@@ -1,4 +1,4 @@
-File "array_get_newtype.php--file1.php", line 3, characters 20-39:
+ERROR: File "array_get_newtype.php--file1.php", line 3, characters 20-39:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
@@ -8,7 +8,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "array_get_newtype.php--file1.php", line 3, characters 27-31:
   But got `mixed`
-File "array_get_newtype.php--file2.php", line 4, characters 10-11:
+ERROR: File "array_get_newtype.php--file2.php", line 4, characters 10-11:
 Invalid return type (Typing[4110])
   File "array_get_newtype.php--file2.php", line 2, characters 25-31:
   Expected `MyArray`

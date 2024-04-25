@@ -1,4 +1,4 @@
-File "const_map3.php", line 13, characters 3-14:
+ERROR: File "const_map3.php", line 13, characters 3-14:
 an object of type ConstMap<string, string> does not allow array append (Typing[4006])
-File "const_map3.php", line 12, characters 14-37:
-Definition is here
+  File "const_map3.php", line 12, characters 14-37:
+  Definition is here

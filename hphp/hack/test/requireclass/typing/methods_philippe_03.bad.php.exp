@@ -1,4 +1,4 @@
-File "methods_philippe_03.bad.php", line 23, characters 19-21:
+ERROR: File "methods_philippe_03.bad.php", line 23, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "methods_philippe_03.bad.php", line 23, characters 19-21:
   Method `foo` has type `(function(int $a): void)` in `TPajoux`

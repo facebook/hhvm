@@ -1,4 +1,4 @@
-File "typeconst_expected_union.php", line 23, characters 12-42:
+ERROR: File "typeconst_expected_union.php", line 23, characters 12-42:
 Invalid argument (Typing[4326])
   File "typeconst_expected_union.php", line 8, characters 23-25:
   Expected `int`
@@ -11,7 +11,7 @@ Invalid argument (Typing[4326])
   by accessing the type constant `Tconst`
   File "typeconst_expected_union.php", line 20, characters 33-41:
   on an object of type SomeClass
-File "typeconst_expected_union.php", line 23, characters 12-42:
+ERROR: File "typeconst_expected_union.php", line 23, characters 12-42:
 Invalid argument (Typing[4326])
   File "typeconst_expected_union.php", line 15, characters 75-80:
   Expected `SomeClass::Tconst`

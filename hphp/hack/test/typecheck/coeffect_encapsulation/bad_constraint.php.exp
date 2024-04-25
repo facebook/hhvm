@@ -1,4 +1,4 @@
-File "bad_constraint.php", line 6, characters 8-8:
+ERROR: File "bad_constraint.php", line 6, characters 8-8:
 Invalid constraint on `newtype` (Typing[4332])
   File "coeffect/contexts.hhi", line 206, characters 5-40:
   Expected `HH\Capabilities\ImplicitPolicyOf<int>`

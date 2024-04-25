@@ -1,4 +1,4 @@
-File "test_function.php", line 4, characters 3-6:
+ERROR: File "test_function.php", line 4, characters 3-6:
 Unbound name: `trim` (a global function) (Naming[2049])
-File "test_function.php", line 4, characters 3-6:
+ERROR: File "test_function.php", line 4, characters 3-6:
 Unbound name (typing): `trim` (Typing[4107])

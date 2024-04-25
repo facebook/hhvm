@@ -39,7 +39,7 @@ let test () =
     Test.fail "Expected the server to process disk updates";
 
   let expected_error =
-    "File \"/foo.php\", line 3, characters 20-22:\n"
+    "ERROR: File \"/foo.php\", line 3, characters 20-22:\n"
     ^ "Invalid return type (Typing[4110])\n"
     ^ "  File \"/foo.php\", line 2, characters 23-25:\n"
     ^ "  Expected `int`\n"

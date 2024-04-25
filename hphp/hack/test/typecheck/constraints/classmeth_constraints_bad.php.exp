@@ -1,4 +1,4 @@
-File "classmeth_constraints_bad.php", line 11, characters 6-6:
+ERROR: File "classmeth_constraints_bad.php", line 11, characters 6-6:
 Invalid argument (Typing[4323])
   File "classmeth_constraints_bad.php", line 6, characters 34-34:
   `T` is a constrained type parameter

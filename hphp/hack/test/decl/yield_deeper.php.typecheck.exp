@@ -1,4 +1,4 @@
-File "yield_deeper.php", line 20, characters 3-45:
+ERROR: File "yield_deeper.php", line 20, characters 3-45:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "yield_deeper.php", line 20, characters 3-45:
   Expected `Awaitable<nothing>`

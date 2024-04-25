@@ -43,7 +43,7 @@ let rec create_bars acc = function
 let bar_107_foo_line_3_diagnostics =
   {|
 /bar107.php:
-File "/bar107.php", line 4, characters 10-14:
+ERROR: File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar107.php", line 3, characters 21-23:
   Expected `int`
@@ -54,7 +54,7 @@ Invalid return type (Typing[4110])
 let bar_107_foo_line_5_diagnostics =
   {|
 /bar107.php:
-File "/bar107.php", line 4, characters 10-14:
+ERROR: File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar107.php", line 3, characters 21-23:
   Expected `int`
@@ -73,7 +73,7 @@ let bar107_cleared = {|
 let bar_108_foo_line_5_diagnostics =
   {|
 /bar108.php:
-File "/bar108.php", line 4, characters 10-14:
+ERROR: File "/bar108.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar108.php", line 3, characters 21-23:
   Expected `int`
@@ -84,7 +84,7 @@ Invalid return type (Typing[4110])
 let bar_109_foo_line_3_diagnostics =
   {|
 /bar109.php:
-File "/bar109.php", line 4, characters 10-14:
+ERROR: File "/bar109.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar109.php", line 3, characters 21-23:
   Expected `int`

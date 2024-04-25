@@ -1,4 +1,4 @@
-File "splice_err3.php", line 13, characters 23-27:
+ERROR: File "splice_err3.php", line 13, characters 23-27:
 Invalid argument (Typing[4110])
   File "expr_tree.hhi", line 258, characters 26-35:
   Expected `ExampleInt`

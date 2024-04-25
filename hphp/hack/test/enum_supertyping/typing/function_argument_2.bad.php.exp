@@ -1,4 +1,4 @@
-File "function_argument_2.bad.php", line 17, characters 12-15:
+ERROR: File "function_argument_2.bad.php", line 17, characters 12-15:
 Invalid argument (Typing[4110])
   File "function_argument_2.bad.php", line 13, characters 14-14:
   Expected `G`

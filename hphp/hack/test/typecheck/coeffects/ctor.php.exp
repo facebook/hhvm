@@ -1,4 +1,4 @@
-File "ctor.php", line 24, characters 14-27:
+ERROR: File "ctor.php", line 24, characters 14-27:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "ctor.php", line 23, characters 32-33:
   From this declaration, the context of this function body provides the capability set {}

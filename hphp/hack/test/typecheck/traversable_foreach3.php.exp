@@ -1,4 +1,4 @@
-File "traversable_foreach3.php", line 13, characters 12-13:
+ERROR: File "traversable_foreach3.php", line 13, characters 12-13:
 Invalid `foreach` (Typing[4110])
   File "traversable_foreach3.php", line 13, characters 12-13:
   Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement

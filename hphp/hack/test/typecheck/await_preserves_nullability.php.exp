@@ -1,4 +1,4 @@
-File "await_preserves_nullability.php", line 17, characters 17-18:
+ERROR: File "await_preserves_nullability.php", line 17, characters 17-18:
 Invalid argument (Typing[4110])
   File "await_preserves_nullability.php", line 12, characters 11-11:
   Expected `T`

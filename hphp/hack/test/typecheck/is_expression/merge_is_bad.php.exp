@@ -1,4 +1,4 @@
-File "merge_is_bad.php", line 27, characters 11-12:
+ERROR: File "merge_is_bad.php", line 27, characters 11-12:
 Invalid argument (Typing[4110])
   File "merge_is_bad.php", line 19, characters 18-18:
   Expected `J`

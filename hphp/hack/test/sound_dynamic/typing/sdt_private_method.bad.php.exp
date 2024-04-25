@@ -1,4 +1,4 @@
-File "sdt_private_method.bad.php", line 13, characters 12-15:
+ERROR: File "sdt_private_method.bad.php", line 13, characters 12-15:
 Method  `set` in class `C` is not dynamically callable. (Typing[4426])
   File "sdt_private_method.bad.php", line 13, characters 12-15:
   Cannot write to property `prop` through dynamic type because private property in `C` does not have an enforceable type

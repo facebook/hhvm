@@ -1,4 +1,4 @@
-File "4341-bad_method_override.php", line 9, characters 19-21:
+ERROR: File "4341-bad_method_override.php", line 9, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "4341-bad_method_override.php", line 9, characters 19-21:
   Method `foo` has type `(function(string $x): void)` in `B`

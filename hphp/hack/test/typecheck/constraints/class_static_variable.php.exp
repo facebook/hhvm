@@ -1,4 +1,4 @@
-File "class_static_variable.php", line 6, characters 24-41:
+ERROR: File "class_static_variable.php", line 6, characters 24-41:
 Some type arguments violate their constraints (Typing[4323])
   File "class_static_variable.php", line 3, characters 22-22:
   `T` is a constrained type parameter

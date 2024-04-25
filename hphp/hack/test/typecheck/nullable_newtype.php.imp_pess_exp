@@ -1,4 +1,4 @@
-File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+ERROR: File "nullable_newtype.php--file2.php", line 10, characters 16-17:
 Invalid argument (Typing[4110])
   File "nullable_newtype.php--file2.php", line 7, characters 14-16:
   Expected `int`

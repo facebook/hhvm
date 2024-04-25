@@ -1,2 +1,2 @@
-File "typing_fail_abstract_method2.php", line 14, characters 28-28:
+ERROR: File "typing_fail_abstract_method2.php", line 14, characters 28-28:
 A method must have a body or be marked `abstract`. (Parsing[1002])

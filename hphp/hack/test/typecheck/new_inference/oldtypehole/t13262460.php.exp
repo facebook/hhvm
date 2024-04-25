@@ -1,4 +1,4 @@
-File "t13262460.php", line 18, characters 19-21:
+ERROR: File "t13262460.php", line 18, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "t13262460.php", line 18, characters 19-21:
   Method `foo` has type `(function<T as C>(): Action<T>)` in `C`

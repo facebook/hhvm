@@ -1,4 +1,4 @@
-File "refine_interface_no_sub.php", line 16, characters 3-5:
+ERROR: File "refine_interface_no_sub.php", line 16, characters 3-5:
 Some type arguments violate their constraints (Typing[4323])
   File "refine_interface_no_sub.php", line 7, characters 14-14:
   `T` is a constrained type parameter

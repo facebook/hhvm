@@ -1,4 +1,4 @@
-File "generic_capture_bad.php", line 13, characters 19-22:
+ERROR: File "generic_capture_bad.php", line 13, characters 19-22:
 The method `cast` is not compatible with the overridden method (Typing[4341])
   File "generic_capture_bad.php", line 13, characters 19-22:
   Method `cast` has type `(function<TF as mixed>(TF $x): ~TF)` in `Bad2`

@@ -1,4 +1,4 @@
-File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-22:
+ERROR: File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-22:
 Nested expression trees must not provide the DSL name (it is inherited from the enclosing tree). (Parsing[1002])
-File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-25:
+ERROR: File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-25:
 Cannot use unstable feature: `expression_tree_nest` (Parsing[1002])

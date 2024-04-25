@@ -1,4 +1,4 @@
-File "this_member.php", line 16, characters 5-20:
+ERROR: File "this_member.php", line 16, characters 5-20:
 Invalid assignment (Typing[4110])
   File "this_member.php", line 15, characters 24-24:
   Expected `X`

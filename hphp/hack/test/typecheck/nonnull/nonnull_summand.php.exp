@@ -1,4 +1,4 @@
-File "nonnull_summand.php", line 4, characters 8-9:
+ERROR: File "nonnull_summand.php", line 4, characters 8-9:
 Typing error (Typing[4429])
   File "nonnull_summand.php", line 4, characters 8-13:
   Expected `num` because this is used in an arithmetic operation

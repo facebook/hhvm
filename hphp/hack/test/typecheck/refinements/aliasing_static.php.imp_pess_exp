@@ -1,4 +1,4 @@
-File "aliasing_static.php", line 19, characters 10-18:
+ERROR: File "aliasing_static.php", line 19, characters 10-18:
 Invalid return type (Typing[4110])
   File "aliasing_static.php", line 11, characters 44-46:
   Expected `~int` because the type of this return is implicitly a like-type

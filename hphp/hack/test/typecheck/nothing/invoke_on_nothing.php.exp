@@ -1,4 +1,4 @@
-File "invoke_on_nothing.php", line 15, characters 37-42:
+ERROR: File "invoke_on_nothing.php", line 15, characters 37-42:
 Invalid return type (Typing[4110])
   File "invoke_on_nothing.php", line 14, characters 32-50:
   Expected `Awaitable<vec<int>>`

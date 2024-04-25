@@ -1,4 +1,4 @@
-File "vec_literal_error.php", line 6, characters 15-19:
+ERROR: File "vec_literal_error.php", line 6, characters 15-19:
 Invalid argument (Typing[4110])
   File "vec_literal_error.php", line 9, characters 22-27:
   Expected `string`

@@ -1,4 +1,4 @@
-File "lambda_inherits_coeffect.php--g.php", line 9, characters 7-10:
+ERROR: File "lambda_inherits_coeffect.php--g.php", line 9, characters 7-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "lambda_inherits_coeffect.php--g.php", line 6, characters 17-19:
   From this declaration, the context of this function body provides the capability Foo

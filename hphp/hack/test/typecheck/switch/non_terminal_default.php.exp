@@ -1,2 +1,2 @@
-File "non_terminal_default.php", line 6, characters 5-12:
+ERROR: File "non_terminal_default.php", line 6, characters 5-12:
 Default case in `switch` must be terminal (Parsing[1002])

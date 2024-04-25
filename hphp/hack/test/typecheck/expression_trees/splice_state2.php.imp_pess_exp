@@ -1,4 +1,4 @@
-File "splice_state2.php", line 23, characters 14-18:
+ERROR: File "splice_state2.php", line 23, characters 14-18:
 Typing error (Typing[4429])
   File "splice_state2.php", line 23, characters 14-22:
   Expected `num` because this is used in an arithmetic operation
@@ -7,7 +7,7 @@ Typing error (Typing[4429])
   File "splice_state2.php", line 21, characters 14-24:
   All the local information about `$x->x` has been invalidated during this call.
 This is a limitation of the type-checker; use a local if that's the problem.
-File "splice_state2.php", line 23, characters 14-18:
+ERROR: File "splice_state2.php", line 23, characters 14-18:
 Typing error (Typing[4429])
   File "splice_state2.php", line 23, characters 14-22:
   Expected `num` because this is used in an arithmetic operation

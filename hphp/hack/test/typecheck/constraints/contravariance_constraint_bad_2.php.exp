@@ -1,4 +1,4 @@
-File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
+ERROR: File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
 Invalid return type (Typing[4110])
   File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
   Expected `NAC\AAA`

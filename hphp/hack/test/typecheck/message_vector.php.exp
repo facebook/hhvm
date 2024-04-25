@@ -1,4 +1,4 @@
-File "message_vector.php", line 21, characters 3-16:
+ERROR: File "message_vector.php", line 21, characters 3-16:
 Invalid assignment (Typing[4110])
   File "message_vector.php", line 15, characters 25-25:
   Expected `B`

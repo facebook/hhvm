@@ -1,4 +1,4 @@
-File "refine-error.php", line 7, characters 5-11:
+ERROR: File "refine-error.php", line 7, characters 5-11:
 Typing error (Typing[4110])
   File "refine-error.php", line 5, characters 11-13:
   Expected `int`

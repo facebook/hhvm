@@ -1,4 +1,4 @@
-File "return_with_and_without_expr6.php", line 4, characters 11-104:
+ERROR: File "return_with_and_without_expr6.php", line 4, characters 11-104:
 This function can exit with and without returning a value (Typing[4421])
   File "return_with_and_without_expr6.php", line 6, characters 9-17:
   Returning a value here.

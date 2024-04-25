@@ -1,4 +1,4 @@
-File "constraint_override_bad.php", line 10, characters 19-21:
+ERROR: File "constraint_override_bad.php", line 10, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "constraint_override_bad.php", line 10, characters 19-21:
   Method `foo` has type `(function<T as mixed super B>(): ~T)` in `C`

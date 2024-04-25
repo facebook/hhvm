@@ -36,7 +36,7 @@ function test(mixed $x): void {
 let disk_diagnostics =
   {|
 /bar.php:
-File "/bar.php", line 4, characters 7-8:
+ERROR: File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
   File "/foo.php", line 3, characters 14-16:
   Expected `int`
@@ -47,7 +47,7 @@ Invalid argument (Typing[4110])
 let ide_diagnostics =
   {|
 /bar.php:
-File "/bar.php", line 4, characters 7-8:
+ERROR: File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
   File "/foo.php", line 3, characters 14-19:
   Expected `string`

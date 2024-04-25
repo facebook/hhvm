@@ -32,7 +32,7 @@ let test () =
     Test.fail "Expected the server to process disk updates";
   let expected_errors =
     [
-      "File \"/foo.php\", line 4, characters 11-11:\n"
+      "ERROR: File \"/foo.php\", line 4, characters 11-11:\n"
       ^ "A semicolon `;` is expected here. (Parsing[1002])";
     ]
   in

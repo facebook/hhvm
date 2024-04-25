@@ -1,4 +1,4 @@
-File "haccess.php", line 6, characters 19-37:
+ERROR: File "haccess.php", line 6, characters 19-37:
 Invalid type hint (Typing[4090])
   File "haccess.php", line 6, characters 27-36:
   No type constant `TUndefined` in `I`

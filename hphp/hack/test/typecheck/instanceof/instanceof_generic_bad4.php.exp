@@ -1,4 +1,4 @@
-File "instanceof_generic_bad4.php", line 9, characters 20-21:
+ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
 Invalid argument (Typing[4110])
   File "instanceof_generic_bad4.php", line 6, characters 29-32:
   Expected `Base`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   This type argument to `Inv` must match exactly (it is invariant)
   File "instanceof_generic_bad4.php", line 8, characters 13-18:
   But got `Tinv#1` from this `is` expression test
-File "instanceof_generic_bad4.php", line 9, characters 20-21:
+ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
 Invalid argument (Typing[4110])
   File "instanceof_generic_bad4.php", line 8, characters 13-18:
   Expected `Tinv#1` from this `is` expression test

@@ -1,4 +1,4 @@
-File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 11-22:
+ERROR: File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 11-22:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 11-22:
   Expected `Awaitable<nothing>`

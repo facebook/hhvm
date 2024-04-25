@@ -1,4 +1,4 @@
-File "trait_priv_extends1.php", line 17, characters 20-20:
+ERROR: File "trait_priv_extends1.php", line 17, characters 20-20:
 The method `f` is not compatible with the overridden method (Typing[4341])
   File "trait_priv_extends1.php", line 17, characters 20-20:
   Method `f` has type `(function(): string)` in `C`

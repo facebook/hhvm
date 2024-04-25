@@ -1,4 +1,4 @@
-File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
 Invalid argument (Typing[4110])
   File "prop_access_lambda_nullsafe2.php", line 13, characters 23-28:
   Expected `string`

@@ -1,6 +1,6 @@
-File "loader_example.php", line 6, characters 19-21:
+ERROR: File "loader_example.php", line 6, characters 19-21:
 Was expecting a return type hint (Typing[4030])
-File "loader_example.php", line 43, characters 11-12:
+ERROR: File "loader_example.php", line 43, characters 11-12:
 Invalid argument (Typing[4110])
   File "loader_example.php", line 17, characters 27-30:
   Expected exactly the type `ALoader`

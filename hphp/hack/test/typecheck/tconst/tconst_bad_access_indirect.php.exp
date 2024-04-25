@@ -1,4 +1,4 @@
-File "tconst_bad_access_indirect.php", line 7, characters 18-22:
+ERROR: File "tconst_bad_access_indirect.php", line 7, characters 18-22:
 Invalid type hint (Typing[4090])
   File "tconst_bad_access_indirect.php", line 7, characters 21-22:
   No type constant `T3` in `E`

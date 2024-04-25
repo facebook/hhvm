@@ -1,4 +1,4 @@
-File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
+ERROR: File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
 Invalid argument (Typing[4323])
   File "generics_sub_nullable_tvar.php", line 4, characters 12-13:
   `T1` is a constrained type parameter
@@ -8,7 +8,7 @@ Invalid argument (Typing[4323])
   Expected `string`
   File "generics_sub_nullable_tvar.php", line 10, characters 23-25:
   But got `int`
-File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
+ERROR: File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
 Invalid argument (Typing[4323])
   File "generics_sub_nullable_tvar.php", line 4, characters 12-13:
   `T1` is a constrained type parameter

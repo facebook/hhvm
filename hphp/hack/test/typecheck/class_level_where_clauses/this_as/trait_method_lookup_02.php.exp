@@ -1,4 +1,4 @@
-File "trait_method_lookup_02.php", line 29, characters 26-26:
+ERROR: File "trait_method_lookup_02.php", line 29, characters 26-26:
 Some members in class `D` are incompatible with those declared in type `C` (Typing[4341])
   File "trait_method_lookup_02.php", line 18, characters 26-28:
   The method `foo` is not compatible with the overridden method

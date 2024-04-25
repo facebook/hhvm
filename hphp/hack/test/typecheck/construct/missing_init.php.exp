@@ -1,6 +1,6 @@
-File "missing_init.php", line 7, characters 19-29:
+ERROR: File "missing_init.php", line 7, characters 19-29:
 Class `C` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-File "missing_init.php", line 4, characters 15-16:
-`$this->x` is not initialized.
-File "missing_init.php", line 5, characters 18-19:
-`$this->y` is not initialized.
+  File "missing_init.php", line 4, characters 15-16:
+  `$this->x` is not initialized.
+  File "missing_init.php", line 5, characters 18-19:
+  `$this->y` is not initialized.

@@ -1,4 +1,4 @@
-File "missing_label.php", line 9, characters 8-32:
+ERROR: File "missing_label.php", line 9, characters 8-32:
 Enum class `VeryLongClassName` does not contain a label named `foobarr`. (Typing[4394])
   File "missing_label.php", line 3, characters 12-28:
   `VeryLongClassName` is defined here

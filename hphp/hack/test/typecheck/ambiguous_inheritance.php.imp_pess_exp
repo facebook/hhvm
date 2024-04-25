@@ -1,4 +1,4 @@
-File "ambiguous_inheritance.php", line 11, characters 33-34:
+ERROR: File "ambiguous_inheritance.php", line 11, characters 33-34:
 Some members in class `C` are incompatible with those declared in type `I2` (Typing[4341])
   File "ambiguous_inheritance.php", line 4, characters 19-21:
   The method `foo` is not compatible with the overridden method

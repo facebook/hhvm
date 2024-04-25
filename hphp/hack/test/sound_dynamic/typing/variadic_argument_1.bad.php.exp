@@ -1,4 +1,4 @@
-File "variadic_argument_1.bad.php", line 9, characters 13-17:
+ERROR: File "variadic_argument_1.bad.php", line 9, characters 13-17:
 Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
   File "variadic_argument_1.bad.php", line 9, characters 13-17:
   Invalid argument

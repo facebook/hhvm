@@ -1,4 +1,4 @@
-File "anon9.php", line 16, characters 10-11:
+ERROR: File "anon9.php", line 16, characters 10-11:
 Invalid return type (Typing[4040])
   File "anon9.php", line 13, characters 8-38:
   Too few arguments (required 1 but got 0)

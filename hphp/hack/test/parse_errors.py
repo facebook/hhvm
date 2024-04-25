@@ -3,6 +3,7 @@
 
 import re
 from dataclasses import dataclass
+from enum import Enum
 from typing import IO, List, Tuple
 
 
@@ -26,8 +27,14 @@ class PositionedMessage:
     message: str
 
 
+class Severity(str, Enum):
+    ERROR = "ERROR"
+    WARNING = "WARN"
+
+
 @dataclass
 class Error:
+    severity: Severity
     code: ErrorCode
     message: PositionedMessage
     reason: List[PositionedMessage]
@@ -38,12 +45,13 @@ class ParseException(Exception):
 
 
 def make_error(
+    severity: Severity,
     errorCode: ErrorCode,
     position: Position,
     message: str,
     reasons: List[PositionedMessage],
 ) -> Error:
-    return Error(errorCode, PositionedMessage(position, message), reasons)
+    return Error(severity, errorCode, PositionedMessage(position, message), reasons)
 
 
 def end_of_file(line: str) -> bool:
@@ -76,6 +84,8 @@ def parse_error(output_file: IO[str], multiple_error_file: bool) -> List[Error]:
     while not end_of_file(line):
         if line == "No errors\n":
             return []
+        severity_string, position_string = line.split(": ", 1)
+        severity = Severity(severity_string)
         position = parse_position(line)
         line = output_file.readline()
         if starts_with_space(line):
@@ -92,7 +102,7 @@ def parse_error(output_file: IO[str], multiple_error_file: bool) -> List[Error]:
             (line, reasonMessage) = parse_message(output_file, line)
             reason = PositionedMessage(reasonPos, reasonMessage)
             reasons.append(reason)
-        errors.append(make_error(errorCode, position, message, reasons))
+        errors.append(make_error(severity, errorCode, position, message, reasons))
     return errors
 
 

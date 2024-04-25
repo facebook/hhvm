@@ -1,4 +1,4 @@
-File "T91162999.php", line 12, characters 8-103:
+ERROR: File "T91162999.php", line 12, characters 8-103:
 Rigid type variable escapes its lambda (Typing[4442])
   File "T91162999.php", line 13, characters 25-25:
   Could not remove rigid type variable `T#2`

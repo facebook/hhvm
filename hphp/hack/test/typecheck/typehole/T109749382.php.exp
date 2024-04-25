@@ -1,4 +1,4 @@
-File "T109749382.php", line 9, characters 30-31:
+ERROR: File "T109749382.php", line 9, characters 30-31:
 This makes I2 extends I<string> but it already extends I at another instantiation (Typing[4480])
   File "T109749382.php", line 9, characters 22-27:
   It already extends I<int>
@@ -12,7 +12,7 @@ This makes I2 extends I<string> but it already extends I at another instantiatio
   This type argument to `I` must match exactly (it is invariant)
   File "T109749382.php", line 9, characters 24-26:
   But got `int`
-File "T109749382.php", line 9, characters 30-31:
+ERROR: File "T109749382.php", line 9, characters 30-31:
 This makes I2 extends I<string> but it already extends I at another instantiation (Typing[4480])
   File "T109749382.php", line 9, characters 22-27:
   It already extends I<int>

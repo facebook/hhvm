@@ -1,2 +1,2 @@
-File "fake_nullable.php", line 17, characters 10-13:
+ERROR: File "fake_nullable.php", line 17, characters 10-13:
 Was expecting a return type hint (Typing[4030])

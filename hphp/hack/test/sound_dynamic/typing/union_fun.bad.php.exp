@@ -1,4 +1,4 @@
-File "union_fun.bad.php", line 6, characters 16-17:
+ERROR: File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 6, characters 11-13:
   Expected `int`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
     via this generic `Tu`
   File "union_fun.bad.php", line 5, characters 39-41:
   But got `Awaitable<int>` (result of an `async` function)
-File "union_fun.bad.php", line 6, characters 16-17:
+ERROR: File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 6, characters 11-13:
   Expected `int`
@@ -14,7 +14,7 @@ Invalid argument (Typing[4110])
     via this generic `Tu`
   File "union_fun.bad.php", line 5, characters 39-41:
   But got `Awaitable<int>` (result of an `async` function)
-File "union_fun.bad.php", line 7, characters 16-66:
+ERROR: File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 7, characters 11-13:
   Expected `int`
@@ -22,7 +22,7 @@ Invalid argument (Typing[4110])
     via this generic `Tu`
   File "union_fun.bad.php", line 7, characters 48-50:
   But got `Awaitable<int>` (result of an `async` function)
-File "union_fun.bad.php", line 7, characters 16-66:
+ERROR: File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 7, characters 11-13:
   Expected `int`

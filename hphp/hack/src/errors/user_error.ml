@@ -152,11 +152,19 @@ let error_code_to_string error_code =
   let error_number = Printf.sprintf "%04d" error_code in
   error_kind ^ "[" ^ error_number ^ "]"
 
+(** The string looks like:
+
+    ERROR/WARN: path/to/file.php line ...
+    You have a problem here (Typing4110)
+      path/to/other/file.php ...
+      Because this is wrong
+      path/to/other/file.php ...
+      And this too
+  *)
 let to_string
     report_pos_from_reason
     {
-      (* TODO @catg T179093379 *)
-      severity = _;
+      severity;
       code;
       claim;
       reasons;
@@ -178,7 +186,8 @@ let to_string
           ""
       in
       Printf.sprintf
-        "%s\n%s (%s)%s\n"
+        "%s: %s\n%s (%s)%s\n"
+        (Severity.to_capital_string severity)
         (Pos.string pos1)
         msg1
         error_code

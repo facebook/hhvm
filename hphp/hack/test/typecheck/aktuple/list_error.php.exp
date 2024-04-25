@@ -1,4 +1,4 @@
-File "list_error.php", line 9, characters 15-18:
+ERROR: File "list_error.php", line 9, characters 15-18:
 Invalid argument (Typing[4110])
   File "list_error.php", line 12, characters 22-27:
   Expected `string`

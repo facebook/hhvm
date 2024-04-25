@@ -19,7 +19,7 @@ let foo_contents = "<?hh
 let foo_diagnostics =
   "
 /foo.php:
-File \"/foo.php\", line 2, characters 2-2:
+ERROR: File \"/foo.php\", line 2, characters 2-2:
 A right brace `}` is expected here. (Parsing[1002])"
 
 let foo_clear_diagnostics = "
@@ -35,7 +35,7 @@ function test() {} // missing return type
 let bar_diagnostics =
   "
 /bar.php:
-File \"/bar.php\", line 2, characters 10-13:
+ERROR: File \"/bar.php\", line 2, characters 10-13:
 Was expecting a return type hint (Typing[4030])"
 
 let test () =

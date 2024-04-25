@@ -1,4 +1,4 @@
-File "shape24.php", line 21, characters 10-11:
+ERROR: File "shape24.php", line 21, characters 10-11:
 Invalid return type (Typing[4110])
   File "shape24.php", line 14, characters 12-15:
   Expected `bool`

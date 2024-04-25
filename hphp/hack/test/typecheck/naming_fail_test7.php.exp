@@ -1,4 +1,4 @@
-File "naming_fail_test7.php", line 18, characters 3-4:
+ERROR: File "naming_fail_test7.php", line 18, characters 3-4:
 Variable `$k` is undefined, or not always defined. (Naming[2050])
-File "naming_fail_test7.php", line 14, characters 27-28:
-Did you mean `$x` instead?
+  File "naming_fail_test7.php", line 14, characters 27-28:
+  Did you mean `$x` instead?

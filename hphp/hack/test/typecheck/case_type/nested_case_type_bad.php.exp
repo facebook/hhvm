@@ -1,4 +1,4 @@
-File "nested_case_type_bad.php", line 6, characters 11-13:
+ERROR: File "nested_case_type_bad.php", line 6, characters 11-13:
 Invalid case type declaration. More than one variant of `Bad` could contain values with the same runtime tag (Typing[4475])
   File "nested_case_type_bad.php", line 6, characters 17-23:
   This is the type `Scalars`, which includes **ints**

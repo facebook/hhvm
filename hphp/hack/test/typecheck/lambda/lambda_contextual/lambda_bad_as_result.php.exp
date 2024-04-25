@@ -1,4 +1,4 @@
-File "lambda_bad_as_result.php", line 29, characters 13-26:
+ERROR: File "lambda_bad_as_result.php", line 29, characters 13-26:
 No instance method `missing_method` in `MyClass` (Typing[4053])
   File "lambda_bad_as_result.php", line 5, characters 19-23:
   Did you mean `hello` instead?

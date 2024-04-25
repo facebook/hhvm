@@ -1,4 +1,4 @@
-File "typing_fail_private_access2.php", line 18, characters 19-19:
+ERROR: File "typing_fail_private_access2.php", line 18, characters 19-19:
 No instance method `f` in `Bar` (Typing[4053])
   File "typing_fail_private_access2.php", line 17, characters 19-19:
   Did you mean `x` instead?

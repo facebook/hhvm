@@ -1,6 +1,6 @@
-File "spliceable_interface.php", line 6, characters 25-28:
+ERROR: File "spliceable_interface.php", line 6, characters 25-28:
 Unbound name: `Code` (Naming[2049])
-File "spliceable_interface.php", line 6, characters 19-23:
+ERROR: File "spliceable_interface.php", line 6, characters 19-23:
 The method `visit` is not compatible with the overridden method (Typing[4341])
   File "spliceable_interface.php", line 6, characters 19-23:
   Method `visit` has type `(function(Code $v): ~ExampleDsl::TAst)` in `MySpliceableClass`

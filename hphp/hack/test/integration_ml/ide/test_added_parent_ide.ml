@@ -47,7 +47,7 @@ function test(FooChild $foo_child) : void {
 let bar_initial_diagnostics =
   "
 /bar.php:
-File \"/bar.php\", line 6, characters 24-24:
+ERROR: File \"/bar.php\", line 6, characters 24-24:
 No instance method `f` in `FooChild` (Typing[4053])
   File \"/bar.php\", line 5, characters 15-22:
   This is why I think it is an object of type FooChild
@@ -58,7 +58,7 @@ No instance method `f` in `FooChild` (Typing[4053])
 let bar_diagnostics =
   "
 /bar.php:
-File \"/bar.php\", line 6, characters 12-26:
+ERROR: File \"/bar.php\", line 6, characters 12-26:
 Invalid argument (Typing[4110])
   File \"/bar.php\", line 3, characters 19-21:
   Expected `int`

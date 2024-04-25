@@ -1,4 +1,4 @@
-File "default_consistent_construct.php", line 7, characters 19-29:
+ERROR: File "default_consistent_construct.php", line 7, characters 19-29:
 The method `__construct` is not compatible with the overridden method (Typing[4341])
   File "default_consistent_construct.php", line 7, characters 19-29:
   Method `__construct` has type `(function()[HH\Contexts\write_props]: void)` in `C`

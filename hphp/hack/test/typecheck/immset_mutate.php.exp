@@ -1,4 +1,4 @@
-File "immset_mutate.php", line 13, characters 3-10:
+ERROR: File "immset_mutate.php", line 13, characters 3-10:
 an object of type ImmSet<int> does not allow array append (Typing[4006])
-File "immset_mutate.php", line 12, characters 17-27:
-Definition is here
+  File "immset_mutate.php", line 12, characters 17-27:
+  Definition is here

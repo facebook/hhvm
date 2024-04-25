@@ -28,7 +28,7 @@ class Bar {
 
 let expected_errors =
   {|
-File "/foo.php", line 7, characters 9-9:
+ERROR: File "/foo.php", line 7, characters 9-9:
 Please add a type hint (Naming[2035])
 |}
 

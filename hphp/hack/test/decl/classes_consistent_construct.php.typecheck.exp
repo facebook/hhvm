@@ -1,4 +1,4 @@
-File "classes_consistent_construct.php", line 8, characters 19-29:
+ERROR: File "classes_consistent_construct.php", line 8, characters 19-29:
 The method `__construct` is not compatible with the overridden method (Typing[4341])
   File "classes_consistent_construct.php", line 8, characters 19-29:
   Method `__construct` has type `(function(A $a): void)` in `C2`

@@ -1,4 +1,4 @@
-File "concurrent_non_awaitable.php", line 8, characters 10-20:
+ERROR: File "concurrent_non_awaitable.php", line 8, characters 10-20:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "concurrent_non_awaitable.php", line 8, characters 10-20:
   Expected `Awaitable<nothing>`

@@ -18,7 +18,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self(
             UserError {
-                severity: _, // TODO @catg T179093379
+                severity,
                 code,
                 claim: Message(pos, msg),
                 reasons,
@@ -30,7 +30,14 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
             ctx,
         ) = self;
         let code = FmtErrorCode(*code);
-        write!(f, "{}\n{} ({})", pos.absolute(ctx), msg, code)?;
+        write!(
+            f,
+            "{}: {}\n{} ({})",
+            severity.to_capital_string(),
+            pos.absolute(ctx),
+            msg,
+            code
+        )?;
         for Message(pos, msg) in reasons {
             write!(f, "\n  {}\n  {}", pos.absolute(ctx), msg)?;
         }

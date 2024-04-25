@@ -1,4 +1,4 @@
-File "readonly_closure_advanced.php", line 27, characters 18-19:
+ERROR: File "readonly_closure_advanced.php", line 27, characters 18-19:
 Invalid argument (Typing[4411])
   File "readonly_closure_advanced.php", line 23, characters 8-51:
   Function readonly mismatch

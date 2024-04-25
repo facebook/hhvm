@@ -1,4 +1,4 @@
-File "abstract_constructor3.php", line 7, characters 7-7:
+ERROR: File "abstract_constructor3.php", line 7, characters 7-7:
 This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` (Typing[4047])
   File "abstract_constructor3.php", line 7, characters 17-17:
   `D` uses `C`

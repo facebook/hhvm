@@ -26,7 +26,7 @@ function test() : void {
 let foo_disk_diagnostics =
   "
 /foo.php:
-File \"/foo.php\", line 6, characters 7-7:
+ERROR: File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
   File \"/foo.php\", line 3, characters 14-19:
   Expected `string`
@@ -42,7 +42,7 @@ let foo_ide_contents = "<?hh
 let foo_ide_diagnostics =
   "
 /foo.php:
-File \"/foo.php\", line 3, characters 2-2:
+ERROR: File \"/foo.php\", line 3, characters 2-2:
 A right brace `}` is expected here. (Parsing[1002])
 "
 

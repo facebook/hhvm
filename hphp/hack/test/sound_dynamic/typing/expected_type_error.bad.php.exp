@@ -1,4 +1,4 @@
-File "expected_type_error.bad.php", line 26, characters 16-22:
+ERROR: File "expected_type_error.bad.php", line 26, characters 16-22:
 Invalid argument (Typing[4110])
   File "expected_type_error.bad.php", line 7, characters 22-24:
   Expected `int`

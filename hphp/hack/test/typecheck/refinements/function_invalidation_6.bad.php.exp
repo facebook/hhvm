@@ -1,4 +1,4 @@
-File "function_invalidation_6.bad.php", line 12, characters 15-19:
+ERROR: File "function_invalidation_6.bad.php", line 12, characters 15-19:
 Invalid argument (Typing[4110])
   File "function_invalidation_6.bad.php", line 6, characters 20-22:
   Expected `int`

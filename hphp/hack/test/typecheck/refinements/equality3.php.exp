@@ -1,4 +1,4 @@
-File "equality3.php", line 11, characters 18-19:
+ERROR: File "equality3.php", line 11, characters 18-19:
 Invalid argument (Typing[4110])
   File "equality3.php", line 6, characters 23-28:
   Expected `string`

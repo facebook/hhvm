@@ -26,7 +26,7 @@ File "nonnull.php--file2.php", line 54, characters 3-13:
   ?nonnull
 File "nonnull.php--file2.php", line 57, characters 3-13:
   nonnull
-File "nonnull.php--file2.php", line 51, characters 18-19:
+ERROR: File "nonnull.php--file2.php", line 51, characters 18-19:
 Invalid argument (Typing[4110])
   File "nonnull.php--file2.php", line 60, characters 25-31:
   Expected `nonnull`

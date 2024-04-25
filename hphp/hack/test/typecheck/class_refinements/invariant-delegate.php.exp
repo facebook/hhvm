@@ -1,4 +1,4 @@
-File "invariant-delegate.php", line 31, characters 29-40:
+ERROR: File "invariant-delegate.php", line 31, characters 29-40:
 Invalid argument (Typing[4110])
   File "invariant-delegate.php", line 27, characters 37-42:
   Expected `IntBox`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   But got `Box with { type T = int }`
   File "invariant-delegate.php", line 36, characters 13-37:
   This type argument to `Invariant` must match exactly (it is invariant)
-File "invariant-delegate.php", line 40, characters 34-41:
+ERROR: File "invariant-delegate.php", line 40, characters 34-41:
 Invalid argument (Typing[4323])
   File "invariant-delegate.php", line 17, characters 3-6:
   `TBox` is a constrained type parameter

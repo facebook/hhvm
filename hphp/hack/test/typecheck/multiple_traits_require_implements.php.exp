@@ -1,4 +1,4 @@
-File "multiple_traits_require_implements.php", line 20, characters 7-8:
+ERROR: File "multiple_traits_require_implements.php", line 20, characters 7-8:
 Some members in class `T` are incompatible with those declared in type `T1` (Typing[4341])
   File "multiple_traits_require_implements.php", line 8, characters 19-21:
   The method `foo` is not compatible with the overridden method
@@ -12,7 +12,7 @@ Some members in class `T` are incompatible with those declared in type `T1` (Typ
   Expected `string`
   File "multiple_traits_require_implements.php", line 4, characters 23-25:
   But got `int`
-File "multiple_traits_require_implements.php", line 31, characters 19-21:
+ERROR: File "multiple_traits_require_implements.php", line 31, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "multiple_traits_require_implements.php", line 31, characters 19-21:
   Method `foo` has type `(function(int $_): void)` in `A`

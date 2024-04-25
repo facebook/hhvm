@@ -1,4 +1,4 @@
-File "class_missing_label_case.php", line 11, characters 15-21:
+ERROR: File "class_missing_label_case.php", line 11, characters 15-21:
 Enum class `E` does not contain a label named `carrot`. (Typing[4394])
   File "class_missing_label_case.php", line 3, characters 12-12:
   `E` is defined here

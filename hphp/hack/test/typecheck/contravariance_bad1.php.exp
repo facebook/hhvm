@@ -1,4 +1,4 @@
-File "contravariance_bad1.php", line 39, characters 10-11:
+ERROR: File "contravariance_bad1.php", line 39, characters 10-11:
 Invalid return type (Typing[4110])
   File "contravariance_bad1.php", line 33, characters 16-16:
   Expected `A`

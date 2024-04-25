@@ -1,4 +1,4 @@
-File "variadic_args10.php", line 8, characters 19-22:
+ERROR: File "variadic_args10.php", line 8, characters 19-22:
 The method `meth` is not compatible with the overridden method (Typing[4341])
   File "variadic_args10.php", line 8, characters 19-22:
   Method `meth` has type `(function(optional int $x, string $args...): void)` in `C2`

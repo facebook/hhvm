@@ -1,4 +1,4 @@
-File "override_generic_parameter_bad.php", line 9, characters 25-27:
+ERROR: File "override_generic_parameter_bad.php", line 9, characters 25-27:
 The method `get` is not compatible with the overridden method (Typing[4341])
   File "override_generic_parameter_bad.php", line 9, characters 25-27:
   Method `get` has type `(function(string $in): void)` in `C1`

@@ -1,4 +1,4 @@
-File "this_param.php", line 23, characters 16-19:
+ERROR: File "this_param.php", line 23, characters 16-19:
 Invalid argument (Typing[4110])
   File "this_param.php", line 23, characters 5-9:
   Expected `this`

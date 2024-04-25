@@ -1,4 +1,4 @@
-File "static_method_call_classname_with_generics.php", line 16, characters 9-10:
+ERROR: File "static_method_call_classname_with_generics.php", line 16, characters 9-10:
 Invalid argument (Typing[4323])
   File "static_method_call_classname_with_generics.php", line 8, characters 15-15:
   `T` is a constrained type parameter

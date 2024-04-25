@@ -1,16 +1,16 @@
-File "simple.php", line 9, characters 20-72:
+ERROR: File "simple.php", line 9, characters 20-72:
 Invalid argument (Typing[4110])
   File "simple.php", line 9, characters 8-18:
   Expected `ExampleDsl2`
   File "expr_tree.hhi", line 25, characters 15-24:
   But got `ExampleDsl`
-File "simple.php", line 9, characters 43-43:
+ERROR: File "simple.php", line 9, characters 43-43:
 Invalid argument (Typing[4110])
   File "simple.php", line 9, characters 8-18:
   Expected `ExampleDsl2`
   File "expr_tree.hhi", line 25, characters 15-24:
   But got `ExampleDsl`
-File "simple.php", line 9, characters 65-65:
+ERROR: File "simple.php", line 9, characters 65-65:
 Invalid argument (Typing[4110])
   File "simple.php", line 9, characters 8-18:
   Expected `ExampleDsl2`

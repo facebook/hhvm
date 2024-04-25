@@ -22,7 +22,7 @@ class Foo {}
 
 let errors =
   {|
-File "/B.php", line 2, characters 12-14:
+ERROR: File "/B.php", line 2, characters 12-14:
 Name already bound: `foo` (Naming[2012])
   File "/A.php", line 2, characters 14-16:
   Previous definition is here

@@ -1,4 +1,4 @@
-File "list_generic_assign.php", line 5, characters 3-19:
+ERROR: File "list_generic_assign.php", line 5, characters 3-19:
 Invalid assignment (Typing[4110])
   File "list_generic_assign.php", line 5, characters 3-14:
   Expected `list(nothing, nothing)` resulting from a list destructuring assignment or a splat

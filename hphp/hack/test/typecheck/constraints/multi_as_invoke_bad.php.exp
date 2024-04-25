@@ -1,4 +1,4 @@
-File "multi_as_invoke_bad.php", line 24, characters 9-12:
+ERROR: File "multi_as_invoke_bad.php", line 24, characters 9-12:
 No instance method `Bong` in `I` (Typing[4053])
   File "multi_as_invoke_bad.php", line 5, characters 19-21:
   Did you mean `Foo` instead?
@@ -6,7 +6,7 @@ No instance method `Bong` in `I` (Typing[4053])
   This is why I think it is an object of type I
   File "multi_as_invoke_bad.php", line 4, characters 11-11:
   Declaration of `I` is here
-File "multi_as_invoke_bad.php", line 24, characters 9-12:
+ERROR: File "multi_as_invoke_bad.php", line 24, characters 9-12:
 No instance method `Bong` in `J` (Typing[4053])
   File "multi_as_invoke_bad.php", line 8, characters 19-21:
   Did you mean `Bar` instead?

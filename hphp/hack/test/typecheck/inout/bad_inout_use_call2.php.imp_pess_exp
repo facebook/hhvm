@@ -1,4 +1,4 @@
-File "bad_inout_use_call2.php", line 10, characters 10-11:
+ERROR: File "bad_inout_use_call2.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "bad_inout_use_call2.php", line 7, characters 18-20:
   Expected `int`

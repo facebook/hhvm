@@ -26,7 +26,7 @@ class B extends A {}
 
 let errors =
   {|
-File "/B.php", line 3, characters 7-7:
+ERROR: File "/B.php", line 3, characters 7-7:
 Class `B` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
   File "/A.php", line 4, characters 17-18:
   `$this->x` is not initialized.

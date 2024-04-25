@@ -1,4 +1,4 @@
-File "method_swap_error.php", line 17, characters 14-23:
+ERROR: File "method_swap_error.php", line 17, characters 14-23:
 Invalid argument (Typing[4110])
   File "method_swap_error.php", line 12, characters 24-30:
   Expected `<expr#21>::T`

@@ -1,4 +1,4 @@
-File "bad_contra_constraint.php", line 22, characters 21-25:
+ERROR: File "bad_contra_constraint.php", line 22, characters 21-25:
 Invalid argument (Typing[4110])
   File "bad_contra_constraint.php", line 13, characters 17-23:
   Expected `nothing` from this `is` expression test

@@ -30,7 +30,8 @@ let error_in file =
            { pos = Pos.make_from (create_path file); msg = ""; quickfixes = [] })
 
 let expect_error_in =
-  Printf.sprintf "File \"/%s\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+  Printf.sprintf
+    "ERROR: File \"/%s\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
 
 let test_do () =
   let (errors, ()) =
@@ -51,25 +52,25 @@ let test_do () =
   true
 
 let expected_unsorted =
-  {|File "/FileWithErrors.php", line 1, characters 4-7:
+  {|ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C2_Type` (NastCheck[3083])
   File "/C2", line 0, characters 0-0:
   Previous field is here
 
-File "/FileWithErrors.php", line 1, characters 4-7:
+ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C1_Type` (NastCheck[3083])
   File "/C1", line 0, characters 0-0:
   Previous field is here
 
-File "/FileWithErrors.php", line 0, characters 0-0:
+ERROR: File "/FileWithErrors.php", line 0, characters 0-0:
  (Parsing[1002])
 
-File "/FileWithErrors.php", line 1, characters 4-7:
+ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C2_Type` (NastCheck[3083])
   File "/C2", line 0, characters 0-0:
   Previous field is here
 
-File "/FileWithErrors.php", line 1, characters 4-7:
+ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C1_Type` (NastCheck[3083])
   File "/C1", line 0, characters 0-0:
   Previous field is here
@@ -77,15 +78,15 @@ Duplicate record field `C1_Type` (NastCheck[3083])
 |}
 
 let expected_sorted =
-  {|File "/FileWithErrors.php", line 0, characters 0-0:
+  {|ERROR: File "/FileWithErrors.php", line 0, characters 0-0:
  (Parsing[1002])
 
-File "/FileWithErrors.php", line 1, characters 4-7:
+ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C1_Type` (NastCheck[3083])
   File "/C1", line 0, characters 0-0:
   Previous field is here
 
-File "/FileWithErrors.php", line 1, characters 4-7:
+ERROR: File "/FileWithErrors.php", line 1, characters 4-7:
 Duplicate record field `C2_Type` (NastCheck[3083])
   File "/C2", line 0, characters 0-0:
   Previous field is here
@@ -262,8 +263,8 @@ let test_phases () =
         ())
   in
   let expected =
-    "File \"/A\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
-    ^ "File \"/A\", line 0, characters 0-0:
+    "ERROR: File \"/A\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    ^ "ERROR: File \"/A\", line 0, characters 0-0:
 `__EntryPoint` functions cannot take arguments. (NastCheck[3085])\n\n"
   in
   Asserter.String_asserter.assert_equals
@@ -300,8 +301,8 @@ let test_incremental_update () =
       ~rechecked:(Relative_path.Set.singleton a_path)
   in
   let expected =
-    "File \"/bar2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
-    ^ "File \"/bar1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    "ERROR: File \"/bar2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    ^ "ERROR: File \"/bar1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
   in
   Asserter.String_asserter.assert_equals
     expected
@@ -315,10 +316,10 @@ let test_incremental_update () =
       ~rechecked:(Relative_path.Set.singleton b_path)
   in
   let expected =
-    "File \"/foo1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
-    ^ "File \"/foo2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
-    ^ "File \"/baz2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
-    ^ "File \"/baz1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    "ERROR: File \"/foo1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    ^ "ERROR: File \"/foo2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    ^ "ERROR: File \"/baz2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    ^ "ERROR: File \"/baz1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
   in
   Asserter.String_asserter.assert_equals
     expected

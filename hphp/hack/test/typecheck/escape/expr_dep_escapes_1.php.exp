@@ -1,4 +1,4 @@
-File "expr_dep_escapes_1.php", line 13, characters 8-67:
+ERROR: File "expr_dep_escapes_1.php", line 13, characters 8-67:
 Rigid type variable escapes its lambda (Typing[4442])
   File "expr_dep_escapes_1.php", line 6, characters 38-38:
   Could not remove rigid type variable `<expr#13>::T`

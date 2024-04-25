@@ -1,4 +1,4 @@
-File "contravariance_constraint_bad.php", line 30, characters 12-29:
+ERROR: File "contravariance_constraint_bad.php", line 30, characters 12-29:
 Invalid return type (Typing[4323])
   File "contravariance_constraint_bad.php", line 22, characters 26-26:
   `T` is a constrained type parameter

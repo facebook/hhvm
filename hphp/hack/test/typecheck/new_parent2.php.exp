@@ -1,4 +1,4 @@
-File "new_parent2.php", line 20, characters 9-11:
+ERROR: File "new_parent2.php", line 20, characters 9-11:
 No instance method `foo` in `B` (Typing[4053])
   File "new_parent2.php", line 19, characters 14-19:
   This is why I think it is an object of type B

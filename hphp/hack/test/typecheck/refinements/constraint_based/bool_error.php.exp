@@ -1,4 +1,4 @@
-File "bool_error.php", line 11, characters 12-13:
+ERROR: File "bool_error.php", line 11, characters 12-13:
 Invalid return type (Typing[4110])
   File "bool_error.php", line 6, characters 28-30:
   Expected `int`

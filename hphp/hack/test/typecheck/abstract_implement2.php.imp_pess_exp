@@ -1,4 +1,4 @@
-File "abstract_implement2.php", line 21, characters 19-21:
+ERROR: File "abstract_implement2.php", line 21, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "abstract_implement2.php", line 21, characters 19-21:
   Method `foo` has type `(function(): int)` in `BClass`

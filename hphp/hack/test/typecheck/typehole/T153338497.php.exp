@@ -1,2 +1,2 @@
-File "T153338497.php", line 15, characters 91-94:
+ERROR: File "T153338497.php", line 15, characters 91-94:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])

@@ -10,7 +10,7 @@ File "lvar_expr_dependent.php", line 34, characters 5-28:
   <expr#16>::T where <expr#16>::T as C::T, <expr#16>::T as I::T
 File "lvar_expr_dependent.php", line 41, characters 5-22:
   <expr#20>::T as C::T
-File "lvar_expr_dependent.php", line 27, characters 13-27:
+ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
   Expected `<expr#13>::T`
@@ -20,7 +20,7 @@ Invalid argument (Typing[4110])
   But got `<expr#16>::T as C::T`
   File "lvar_expr_dependent.php", line 27, characters 13-20:
     where `<expr#16>` is a reference to this expression
-File "lvar_expr_dependent.php", line 28, characters 19-27:
+ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
   Expected `<expr#16>::T`
@@ -30,7 +30,7 @@ Invalid argument (Typing[4110])
   But got `<expr#13>::T as C::T`
   File "lvar_expr_dependent.php", line 28, characters 19-20:
     where `<expr#13>` is a reference to this expression
-File "lvar_expr_dependent.php", line 42, characters 13-18:
+ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
   Expected `<expr#20>::T`

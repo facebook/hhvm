@@ -47,7 +47,7 @@ function test(FooChild $foo_child) : void {
 "
 
 let bar_errors =
-  "File \"/bar.php\", line 7, characters 12-26:
+  "ERROR: File \"/bar.php\", line 7, characters 12-26:
 Invalid argument (Typing[4110])
   File \"/bar.php\", line 3, characters 19-21:
   Expected `int`

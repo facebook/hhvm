@@ -1,4 +1,4 @@
-File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
+ERROR: File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
 Invalid argument (Typing[4110])
   File "new_bad_error_pos.php--file2.php", line 8, characters 36-43:
   Expected `<expr#2>::Ta`

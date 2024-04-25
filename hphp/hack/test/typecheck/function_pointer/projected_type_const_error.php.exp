@@ -1,4 +1,4 @@
-File "projected_type_const_error.php", line 22, characters 22-28:
+ERROR: File "projected_type_const_error.php", line 22, characters 22-28:
 Invalid argument (Typing[4110])
   File "projected_type_const_error.php", line 9, characters 23-25:
   Expected `int`

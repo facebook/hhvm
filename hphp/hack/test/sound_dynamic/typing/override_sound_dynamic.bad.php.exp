@@ -1,4 +1,4 @@
-File "override_sound_dynamic.bad.php", line 9, characters 19-21:
+ERROR: File "override_sound_dynamic.bad.php", line 9, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "override_sound_dynamic.bad.php", line 9, characters 19-21:
   Method foo must be declared <<__SupportDynamicType>> because it overrides method in class C which does.

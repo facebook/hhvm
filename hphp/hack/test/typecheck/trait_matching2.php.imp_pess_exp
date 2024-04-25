@@ -1,4 +1,4 @@
-File "trait_matching2.php", line 23, characters 22-24:
+ERROR: File "trait_matching2.php", line 23, characters 22-24:
 The method `lol` is not compatible with the overridden method (Typing[4341])
   File "trait_matching2.php", line 23, characters 22-24:
   Method `lol` has type `(function(): string)` in `C`

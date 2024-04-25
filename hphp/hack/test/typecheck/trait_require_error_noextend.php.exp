@@ -1,4 +1,4 @@
-File "trait_require_error_noextend.php", line 22, characters 16-17:
+ERROR: File "trait_require_error_noextend.php", line 22, characters 16-17:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "trait_require_error_noextend.php", line 23, characters 7-12:
   This requires to extend or implement Super

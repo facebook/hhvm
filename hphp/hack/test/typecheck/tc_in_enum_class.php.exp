@@ -2,7 +2,7 @@ File "tc_in_enum_class.php", line 98, characters 5-15:
   arraykey
 File "tc_in_enum_class.php", line 105, characters 5-15:
   nothing
-File "tc_in_enum_class.php", line 103, characters 20-23:
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`

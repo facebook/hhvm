@@ -44,7 +44,7 @@ function test(FooChild $foo_child) : void {
 "
 
 let bar_errors =
-  "File \"/bar.php\", line 4, characters 15-15:
+  "ERROR: File \"/bar.php\", line 4, characters 15-15:
 No instance method `f` in `FooChild` (Typing[4053])
   File \"/bar.php\", line 3, characters 15-22:
   This is why I think it is an object of type FooChild

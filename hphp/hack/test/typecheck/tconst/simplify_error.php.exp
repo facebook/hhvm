@@ -1,4 +1,4 @@
-File "simplify_error.php", line 13, characters 31-33:
+ERROR: File "simplify_error.php", line 13, characters 31-33:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "simplify_error.php", line 13, characters 31-33:
   Method `foo` has type `(function(): T)` in `C`

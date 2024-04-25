@@ -35,10 +35,10 @@ class Foo extends FooParent {
 let foo_parent_missing_diagnostics =
   {|
 /foo.php:
-File "/foo.php", line 3, characters 19-27:
+ERROR: File "/foo.php", line 3, characters 19-27:
 Unbound name: `FooParent` (an object type) (Naming[2049])
 
-File "/foo.php", line 5, characters 12-14:
+ERROR: File "/foo.php", line 5, characters 12-14:
 No instance method `lol` in `Foo` (Typing[4053])
   File "/foo.php", line 4, characters 19-22:
   Did you mean `test` instead?

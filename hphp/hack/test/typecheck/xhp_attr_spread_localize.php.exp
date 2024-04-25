@@ -1,4 +1,4 @@
-File "xhp_attr_spread_localize.php", line 23, characters 12-13:
+ERROR: File "xhp_attr_spread_localize.php", line 23, characters 12-13:
 Invalid xhp value for attribute `:my-foo` in `:baz` (Typing[4343])
   File "xhp_attr_spread_localize.php", line 23, characters 4-6:
   Expected `:baz`

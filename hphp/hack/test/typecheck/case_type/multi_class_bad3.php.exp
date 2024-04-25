@@ -1,4 +1,4 @@
-File "multi_class_bad3.php", line 4, characters 11-20:
+ERROR: File "multi_class_bad3.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad3.php", line 4, characters 29-29:
   This is the type `I`, which includes **instances of the class B**

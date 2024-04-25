@@ -1,4 +1,4 @@
-File "meth_caller11.php", line 31, characters 17-23:
+ERROR: File "meth_caller11.php", line 31, characters 17-23:
 Invalid argument (Typing[4110])
   File "meth_caller11.php", line 24, characters 49-49:
   Expected `C`

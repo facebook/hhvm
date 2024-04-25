@@ -1,4 +1,4 @@
-File "typedef_bad_error_message.php", line 6, characters 10-24:
+ERROR: File "typedef_bad_error_message.php", line 6, characters 10-24:
 Some elements in this collection are incompatible (Typing[4110])
   File "typedef_bad_error_message.php", line 5, characters 20-22:
   Expected `int`

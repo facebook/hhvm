@@ -1,4 +1,4 @@
-File "require_extends_primitive.php", line 8, characters 19-21:
+ERROR: File "require_extends_primitive.php", line 8, characters 19-21:
 Primitive type annotations are always available and may no longer be referred to in the toplevel namespace. (Naming[2039])
-File "require_extends_primitive.php", line 8, characters 19-21:
+ERROR: File "require_extends_primitive.php", line 8, characters 19-21:
 Unbound name: `int` (an object type) (Naming[2049])

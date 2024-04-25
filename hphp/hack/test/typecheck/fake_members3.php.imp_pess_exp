@@ -1,4 +1,4 @@
-File "fake_members3.php", line 22, characters 12-16:
+ERROR: File "fake_members3.php", line 22, characters 12-16:
 Invalid return type (Typing[4110])
   File "fake_members3.php", line 17, characters 27-29:
   Expected `~int` because the type of this return is implicitly a like-type

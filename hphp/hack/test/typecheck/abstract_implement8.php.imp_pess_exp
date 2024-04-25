@@ -1,4 +1,4 @@
-File "abstract_implement8.php", line 16, characters 19-27:
+ERROR: File "abstract_implement8.php", line 16, characters 19-27:
 The method `getMyName` is not compatible with the overridden method (Typing[4341])
   File "abstract_implement8.php", line 16, characters 19-27:
   Method `getMyName` has type `(function(): int)` in `A`

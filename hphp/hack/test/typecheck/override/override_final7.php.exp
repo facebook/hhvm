@@ -1,4 +1,4 @@
-File "override_final7.php", line 26, characters 24-25:
+ERROR: File "override_final7.php", line 26, characters 24-25:
 Some members in class `C1` are incompatible with those declared in type `P2` (Typing[4070])
   File "override_final7.php", line 21, characters 25-37:
   You cannot override this method

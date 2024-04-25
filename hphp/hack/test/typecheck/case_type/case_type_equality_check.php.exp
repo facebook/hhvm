@@ -1,4 +1,4 @@
-File "case_type_equality_check.php", line 9, characters 12-20:
+ERROR: File "case_type_equality_check.php", line 9, characters 12-20:
 This expression is always `false` (Typing[4118])
   File "case_type_equality_check.php", line 8, characters 12-16:
   This is a value of type MyInt

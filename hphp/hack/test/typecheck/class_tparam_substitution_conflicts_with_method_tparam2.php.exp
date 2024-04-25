@@ -1,4 +1,4 @@
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
+ERROR: File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
 Invalid return type (Typing[4110])
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
   Expected `B`
@@ -12,7 +12,7 @@ Invalid return type (Typing[4110])
   But got `C`
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
   This type argument to `BaseIterable` must match exactly (it is invariant)
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-41:
+ERROR: File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-41:
 Invalid argument (Typing[4110])
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
   Expected `B`

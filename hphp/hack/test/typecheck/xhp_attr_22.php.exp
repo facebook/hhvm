@@ -1,4 +1,4 @@
-File "xhp_attr_22.php", line 14, characters 25-40:
+ERROR: File "xhp_attr_22.php", line 14, characters 25-40:
 Invalid xhp value for attribute `:mysubclass` in `:foo` (Typing[4343])
   File "xhp_attr_22.php", line 9, characters 5-12:
   Expected `Subclass`

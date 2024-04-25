@@ -1,4 +1,4 @@
-File "collection_type_argument.php", line 17, characters 3-16:
+ERROR: File "collection_type_argument.php", line 17, characters 3-16:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 43, characters 50-50:
   `T` is a constrained type parameter
@@ -8,7 +8,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "collection_type_argument.php", line 17, characters 10-13:
   But got `bool`
-File "collection_type_argument.php", line 21, characters 3-19:
+ERROR: File "collection_type_argument.php", line 21, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
@@ -18,7 +18,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "collection_type_argument.php", line 21, characters 8-11:
   But got `bool`
-File "collection_type_argument.php", line 25, characters 3-19:
+ERROR: File "collection_type_argument.php", line 25, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
@@ -28,7 +28,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "collection_type_argument.php", line 25, characters 8-11:
   But got `bool`
-File "collection_type_argument.php", line 29, characters 3-19:
+ERROR: File "collection_type_argument.php", line 29, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
   File "collections/Map.hhi", line 57, characters 19-20:
   `Tk` is a constrained type parameter

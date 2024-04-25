@@ -1,4 +1,4 @@
-File "reifiable.php", line 11, characters 21-30:
+ERROR: File "reifiable.php", line 11, characters 21-30:
 Invalid reified hint (Typing[4305])
   File "reifiable.php", line 8, characters 23-26:
   This is an abstract type constant without the __Reifiable attribute, it cannot be used as a reified type argument

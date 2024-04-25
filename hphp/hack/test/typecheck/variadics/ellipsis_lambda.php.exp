@@ -1,12 +1,12 @@
-File "ellipsis_lambda.php", line 4, characters 12-12:
+ERROR: File "ellipsis_lambda.php", line 4, characters 12-12:
 An expression is expected here. (Parsing[1002])
-File "ellipsis_lambda.php", line 4, characters 9-11:
+ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
 Unbound name: `...` (a global constant) (Naming[2049])
-File "ellipsis_lambda.php", line 4, characters 14-16:
+ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
 Unbound name: `==>` (a global constant) (Naming[2049])
-File "ellipsis_lambda.php", line 4, characters 14-16:
+ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
 Cannot use `[]` for reading (NastCheck[3047])
-File "ellipsis_lambda.php", line 4, characters 9-11:
+ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
 Unbound global constant (Typing) (Typing[4106])
-File "ellipsis_lambda.php", line 4, characters 14-16:
+ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
 Unbound global constant (Typing) (Typing[4106])

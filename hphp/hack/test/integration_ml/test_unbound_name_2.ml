@@ -23,7 +23,7 @@ class B {
 
 let errors =
   {|
-File "/A.php", line 5, characters 5-5:
+ERROR: File "/A.php", line 5, characters 5-5:
 Unbound name: `B` (an object type) (Naming[2049])
 |}
 

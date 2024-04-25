@@ -1,4 +1,4 @@
-File "constraint_on_extends_bad.php", line 14, characters 7-13:
+ERROR: File "constraint_on_extends_bad.php", line 14, characters 7-13:
 A `where` type constraint is violated here (Typing[4323])
   File "constraint_on_extends_bad.php", line 14, characters 28-35:
   This is the class with `where` type constraints

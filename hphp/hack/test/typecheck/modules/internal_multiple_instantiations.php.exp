@@ -1,4 +1,4 @@
-File "internal_multiple_instantiations.php--B.php", line 3, characters 17-17:
+ERROR: File "internal_multiple_instantiations.php--B.php", line 3, characters 17-17:
 This makes D implements F<arraykey> but it already implements F at another instantiation (Typing[4480])
   File "internal_multiple_instantiations.php--B.php", line 3, characters 30-30:
   It already implements F<float> via G

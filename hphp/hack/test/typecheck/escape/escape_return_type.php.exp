@@ -1,4 +1,4 @@
-File "escape_return_type.php", line 11, characters 8-84:
+ERROR: File "escape_return_type.php", line 11, characters 8-84:
 Rigid type variable escapes its lambda (Typing[4442])
   File "escape_return_type.php", line 12, characters 25-25:
   Rigid type variable `T#2` is escaping

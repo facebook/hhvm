@@ -1,10 +1,10 @@
-File "insts2.php", line 16, characters 14-15:
+ERROR: File "insts2.php", line 16, characters 14-15:
 Invalid argument (Typing[4110])
   File "insts2.php", line 14, characters 23-25:
   Expected `int`
   File "insts2.php", line 6, characters 24-26:
   But got `num`
-File "insts2.php", line 12, characters 25-26:
+ERROR: File "insts2.php", line 12, characters 25-26:
 This makes L extends J<int> but it already extends J at another instantiation (Typing[4480])
   File "insts2.php", line 12, characters 21-22:
   It already extends J<num> via I2

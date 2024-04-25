@@ -1,12 +1,12 @@
-File "read_static_prop_lambda_error.php", line 12, characters 6-14:
+ERROR: File "read_static_prop_lambda_error.php", line 12, characters 6-14:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_lambda_error.php", line 16, characters 6-14:
+ERROR: File "read_static_prop_lambda_error.php", line 16, characters 6-14:
 Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
-File "read_static_prop_lambda_error.php", line 21, characters 4-11:
+ERROR: File "read_static_prop_lambda_error.php", line 21, characters 4-11:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_lambda_error.php", line 25, characters 4-11:
+ERROR: File "read_static_prop_lambda_error.php", line 25, characters 4-11:
 Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
-File "read_static_prop_lambda_error.php", line 29, characters 4-12:
+ERROR: File "read_static_prop_lambda_error.php", line 29, characters 4-12:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_lambda_error.php", line 33, characters 4-12:
+ERROR: File "read_static_prop_lambda_error.php", line 33, characters 4-12:
 Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])

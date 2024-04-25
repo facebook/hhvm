@@ -1,4 +1,4 @@
-File "intersection_dynamic.bad.php", line 12, characters 10-19:
+ERROR: File "intersection_dynamic.bad.php", line 12, characters 10-19:
 Invalid return type (Typing[4110])
   File "intersection_dynamic.bad.php", line 10, characters 23-28:
   Expected `string`

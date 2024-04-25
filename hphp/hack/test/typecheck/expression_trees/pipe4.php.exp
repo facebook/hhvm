@@ -1,10 +1,10 @@
-File "pipe4.php", line 12, characters 47-48:
+ERROR: File "pipe4.php", line 12, characters 47-48:
 Invalid argument (Typing[4110])
   File "pipe4.php", line 5, characters 14-16:
   Expected `int`
   File "pipe4.php", line 5, characters 23-72:
   But got `ExprTree<ExampleDsl, mixed, ExampleInt>`
-File "pipe4.php", line 14, characters 10-12:
+ERROR: File "pipe4.php", line 14, characters 10-12:
 Invalid return type (Typing[4110])
   File "pipe4.php", line 9, characters 57-68:
   Expected `ExampleFloat`

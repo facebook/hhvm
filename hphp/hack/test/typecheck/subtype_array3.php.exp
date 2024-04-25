@@ -1,4 +1,4 @@
-File "subtype_array3.php", line 19, characters 18-37:
+ERROR: File "subtype_array3.php", line 19, characters 18-37:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter

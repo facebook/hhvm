@@ -1,6 +1,6 @@
-File "using_bad_undefined.php", line 26, characters 3-4:
+ERROR: File "using_bad_undefined.php", line 26, characters 3-4:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "using_bad_undefined.php", line 39, characters 3-4:
+ERROR: File "using_bad_undefined.php", line 39, characters 3-4:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "using_bad_undefined.php", line 29, characters 23-24:
-Did you mean `$b` instead?
+  File "using_bad_undefined.php", line 29, characters 23-24:
+  Did you mean `$b` instead?

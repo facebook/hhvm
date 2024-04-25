@@ -1,4 +1,4 @@
-File "generic_subtyping2.php", line 25, characters 7-8:
+ERROR: File "generic_subtyping2.php", line 25, characters 7-8:
 Invalid argument (Typing[4323])
   File "generic_subtyping2.php", line 17, characters 14-14:
   `T` is a constrained type parameter

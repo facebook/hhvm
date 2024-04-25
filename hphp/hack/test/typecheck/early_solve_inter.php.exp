@@ -1,4 +1,4 @@
-File "early_solve_inter.php", line 10, characters 9-18:
+ERROR: File "early_solve_inter.php", line 10, characters 9-18:
 Was expecting an object but type is unknown (Typing[4297])
   File "early_solve_inter.php", line 4, characters 8-13:
   It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`

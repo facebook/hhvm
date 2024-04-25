@@ -1,4 +1,4 @@
-File "T53770929.php", line 17, characters 28-36:
+ERROR: File "T53770929.php", line 17, characters 28-36:
 This makes C implements A<string> but it already implements A at another instantiation (Typing[4480])
   File "T53770929.php", line 17, characters 20-25:
   It already implements A<int>
@@ -14,7 +14,7 @@ This makes C implements A<string> but it already implements A at another instant
     via this generic `T`
   File "T53770929.php", line 5, characters 26-26:
   This type argument to `A` must match exactly (it is invariant)
-File "T53770929.php", line 17, characters 28-36:
+ERROR: File "T53770929.php", line 17, characters 28-36:
 This makes C implements A<string> but it already implements A at another instantiation (Typing[4480])
   File "T53770929.php", line 17, characters 20-25:
   It already implements A<int>

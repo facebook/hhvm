@@ -1,4 +1,4 @@
-File "sound_dynamic_callable_3.bad.php", line 8, characters 5-22:
+ERROR: File "sound_dynamic_callable_3.bad.php", line 8, characters 5-22:
 Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
   File "sound_dynamic_callable_3.bad.php", line 8, characters 5-22:
   Typing error

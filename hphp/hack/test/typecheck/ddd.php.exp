@@ -1,6 +1,6 @@
-File "ddd.php", line 16, characters 26-27:
+ERROR: File "ddd.php", line 16, characters 26-27:
 Was expecting a type hint on this variadic parameter (Typing[4033])
-File "ddd.php", line 14, characters 16-20:
+ERROR: File "ddd.php", line 14, characters 16-20:
 Typing error (Typing[4053])
   File "ddd.php", line 14, characters 23-25:
   No property `WtF` in `X`

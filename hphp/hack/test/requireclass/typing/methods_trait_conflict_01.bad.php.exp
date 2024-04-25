@@ -1,4 +1,4 @@
-File "methods_trait_conflict_01.bad.php", line 24, characters 7-17:
+ERROR: File "methods_trait_conflict_01.bad.php", line 24, characters 7-17:
 Some members in class `TParentDemo` are incompatible with those declared in type `TChild1Demo` (Typing[4341])
   File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
   The method `asEnt` is not compatible with the overridden method

@@ -1,4 +1,4 @@
-File "escape_reason.php", line 15, characters 10-11:
+ERROR: File "escape_reason.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
   File "escape_reason.php", line 12, characters 16-18:
   Expected `int`

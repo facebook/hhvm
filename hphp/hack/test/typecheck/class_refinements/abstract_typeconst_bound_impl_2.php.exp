@@ -1,4 +1,4 @@
-File "abstract_typeconst_bound_impl_2.php", line 22, characters 14-15:
+ERROR: File "abstract_typeconst_bound_impl_2.php", line 22, characters 14-15:
 Unable to satisfy constraint on this type constant (Typing[4110])
   File "abstract_typeconst_bound_impl_2.php", line 8, characters 29-78:
   Expected a class with `{type TUserData = UserDataA}`

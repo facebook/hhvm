@@ -1,4 +1,4 @@
-File "trait_matching1.php", line 25, characters 13-18:
+ERROR: File "trait_matching1.php", line 25, characters 13-18:
 The property `x` has the wrong type (Typing[4341])
   File "trait_matching1.php", line 25, characters 13-18:
   Typing error
@@ -6,7 +6,7 @@ The property `x` has the wrong type (Typing[4341])
   Expected `int`
   File "trait_matching1.php", line 25, characters 13-18:
   But got `string`
-File "trait_matching1.php", line 25, characters 13-18:
+ERROR: File "trait_matching1.php", line 25, characters 13-18:
 The property `x` has the wrong type (Typing[4341])
   File "trait_matching1.php", line 25, characters 13-18:
   Typing error

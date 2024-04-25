@@ -1,4 +1,4 @@
-File "assign.php", line 18, characters 34-35:
+ERROR: File "assign.php", line 18, characters 34-35:
 Invalid argument (Typing[4110])
   File "assign.php", line 18, characters 24-31:
   Expected `arraykey`

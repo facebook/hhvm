@@ -1,4 +1,4 @@
-File "bad_inout_hint_parent5.php", line 11, characters 19-21:
+ERROR: File "bad_inout_hint_parent5.php", line 11, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "bad_inout_hint_parent5.php", line 11, characters 19-21:
   Method `foo` has type `(function(): ~(function(int): ~void))` in `C2`

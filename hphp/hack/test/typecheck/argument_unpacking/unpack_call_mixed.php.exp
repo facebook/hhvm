@@ -1,4 +1,4 @@
-File "unpack_call_mixed.php", line 5, characters 9-13:
+ERROR: File "unpack_call_mixed.php", line 5, characters 9-13:
 Typing error (Typing[4110])
   File "unpack_call_mixed.php", line 5, characters 9-13:
   Expected `Traversable<_>` (it is unpacked with `...`)

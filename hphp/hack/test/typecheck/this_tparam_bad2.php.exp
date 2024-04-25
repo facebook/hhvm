@@ -1,4 +1,4 @@
-File "this_tparam_bad2.php", line 26, characters 12-15:
+ERROR: File "this_tparam_bad2.php", line 26, characters 12-15:
 Invalid argument (Typing[4110])
   File "this_tparam_bad2.php", line 20, characters 15-17:
   Expected exactly the type `Foo`

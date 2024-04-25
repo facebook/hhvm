@@ -1,10 +1,10 @@
-File "read_static_prop_error.php", line 8, characters 10-17:
+ERROR: File "read_static_prop_error.php", line 8, characters 10-17:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_error.php", line 14, characters 8-14:
+ERROR: File "read_static_prop_error.php", line 14, characters 8-14:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_error.php", line 18, characters 8-14:
+ERROR: File "read_static_prop_error.php", line 18, characters 8-14:
 Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
-File "read_static_prop_error.php", line 23, characters 8-15:
+ERROR: File "read_static_prop_error.php", line 23, characters 8-15:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-File "read_static_prop_error.php", line 28, characters 8-15:
+ERROR: File "read_static_prop_error.php", line 28, characters 8-15:
 Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])

@@ -1,4 +1,4 @@
-File "parent_implements_bad.php", line 14, characters 7-7:
+ERROR: File "parent_implements_bad.php", line 14, characters 7-7:
 A `where` type constraint is violated here (Typing[4323])
   File "parent_implements_bad.php", line 14, characters 20-20:
   This is the class with `where` type constraints

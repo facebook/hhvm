@@ -1,4 +1,4 @@
-File "enforceable_targ_funcall.php", line 11, characters 5-15:
+ERROR: File "enforceable_targ_funcall.php", line 11, characters 5-15:
 Invalid type (Typing[4302])
   File "enforceable_targ_funcall.php", line 8, characters 30-31:
   Type parameter `Tf` was declared `__Enforceable` here

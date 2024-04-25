@@ -1,4 +1,4 @@
-File "key_exists_refines_union_bad.php", line 12, characters 16-22:
+ERROR: File "key_exists_refines_union_bad.php", line 12, characters 16-22:
 Invalid argument (Typing[4110])
   File "key_exists_refines_union_bad.php", line 3, characters 21-23:
   Expected `int`

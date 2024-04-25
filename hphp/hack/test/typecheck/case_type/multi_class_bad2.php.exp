@@ -1,4 +1,4 @@
-File "multi_class_bad2.php", line 4, characters 11-20:
+ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad2.php", line 4, characters 24-24:
   This is the type `C`, which includes **instances of the class C**
@@ -6,7 +6,7 @@ Invalid case type declaration. More than one variant of `MultiClass` could conta
   It may overlap with `I1`, which includes **instances of the interface I1**
   File "multi_class_bad2.php", line 4, characters 11-20:
   Because it is possible for values to be both **instances of the class C** and **instances of the interface I1**, `C` and `I1` cannot be in the same case type
-File "multi_class_bad2.php", line 4, characters 11-20:
+ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad2.php", line 4, characters 24-24:
   This is the type `C`, which includes **instances of the class C**
@@ -14,7 +14,7 @@ Invalid case type declaration. More than one variant of `MultiClass` could conta
   It may overlap with `I2`, which includes **instances of the interface I2**
   File "multi_class_bad2.php", line 4, characters 11-20:
   Because it is possible for values to be both **instances of the class C** and **instances of the interface I2**, `C` and `I2` cannot be in the same case type
-File "multi_class_bad2.php", line 4, characters 11-20:
+ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad2.php", line 4, characters 28-29:
   This is the type `I1`, which includes **instances of the interface I1**

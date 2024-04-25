@@ -1,4 +1,4 @@
-File "super_constraint_11.php", line 22, characters 19-33:
+ERROR: File "super_constraint_11.php", line 22, characters 19-33:
 Invalid argument (Typing[4323])
   File "super_constraint_11.php", line 14, characters 23-23:
   `T` is a constrained type parameter

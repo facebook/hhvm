@@ -1,4 +1,4 @@
-File "accessing_type_constant_of_nonnull.php", line 5, characters 12-15:
+ERROR: File "accessing_type_constant_of_nonnull.php", line 5, characters 12-15:
 Invalid type hint (Typing[4062])
   File "accessing_type_constant_of_nonnull.php", line 5, characters 15-15:
   You are trying to access the type constant `C` but this is a nonnull value

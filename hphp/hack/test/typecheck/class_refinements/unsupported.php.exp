@@ -1,8 +1,8 @@
-File "unsupported.php", line 15, characters 41-60:
+ERROR: File "unsupported.php", line 15, characters 41-60:
 Invalid type hint (Typing[4469])
   File "unsupported.php", line 15, characters 41-60:
   Unsupported refinement, only class types can be refined
-File "unsupported.php", line 24, characters 24-48:
+ERROR: File "unsupported.php", line 24, characters 24-48:
 Unsupported refinement, only class types can be refined (Typing[4469])
-File "unsupported.php", line 30, characters 23-47:
+ERROR: File "unsupported.php", line 30, characters 23-47:
 Unsupported refinement, only class types can be refined (Typing[4469])

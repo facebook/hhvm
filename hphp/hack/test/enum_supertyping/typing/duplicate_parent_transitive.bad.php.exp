@@ -1,4 +1,4 @@
-File "duplicate_parent_transitive.bad.php", line 14, characters 3-3:
+ERROR: File "duplicate_parent_transitive.bad.php", line 14, characters 3-3:
 G cannot re-declare constant A (Typing[4389])
   File "duplicate_parent_transitive.bad.php", line 12, characters 6-6:
   because it already inherited it via F

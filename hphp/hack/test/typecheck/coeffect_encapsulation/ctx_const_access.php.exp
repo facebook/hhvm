@@ -1,4 +1,4 @@
-File "ctx_const_access.php", line 8, characters 3-6:
+ERROR: File "ctx_const_access.php", line 8, characters 3-6:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "ctx_const_access.php", line 4, characters 20-30:
   From this declaration, the context of this function body provides the capability WriteProperty

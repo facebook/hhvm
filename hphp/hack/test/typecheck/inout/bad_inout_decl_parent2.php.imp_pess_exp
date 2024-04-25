@@ -1,4 +1,4 @@
-File "bad_inout_decl_parent2.php", line 8, characters 19-21:
+ERROR: File "bad_inout_decl_parent2.php", line 8, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "bad_inout_decl_parent2.php", line 8, characters 19-21:
   Method `foo` has type `(function(string $x, inout ~int $y): void)` in `C2`

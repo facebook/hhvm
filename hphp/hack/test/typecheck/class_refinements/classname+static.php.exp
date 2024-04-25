@@ -1,4 +1,4 @@
-File "classname+static.php", line 9, characters 7-17:
+ERROR: File "classname+static.php", line 9, characters 7-17:
 Invalid argument (Typing[4323])
   File "classname+static.php", line 13, characters 12-15:
   `TBox` is a constrained type parameter

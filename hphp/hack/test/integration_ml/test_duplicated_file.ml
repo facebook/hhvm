@@ -38,7 +38,7 @@ let test () =
     Test.fail "Expected the server to process disk updates";
 
   let expected_result =
-    "File \"/foo.php\", line 2, characters 11-13:\n"
+    "ERROR: File \"/foo.php\", line 2, characters 11-13:\n"
     ^ "Name already bound: `Foo` (Naming[2012])\n"
     ^ "  File \"/bar.php\", line 2, characters 11-13:\n"
     ^ "  Previous definition is here\n"

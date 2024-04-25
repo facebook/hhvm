@@ -1,4 +1,4 @@
-File "open_shape_optional_required_reason2.php", line 10, characters 26-29:
+ERROR: File "open_shape_optional_required_reason2.php", line 10, characters 26-29:
 Some type arguments violate their constraints (Typing[4323])
   File "open_shape_optional_required_reason2.php", line 8, characters 22-31:
   The field `field` is **optional**

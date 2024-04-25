@@ -1,10 +1,10 @@
-File "array_sub.php", line 21, characters 12-13:
+ERROR: File "array_sub.php", line 21, characters 12-13:
 Invalid argument (Typing[4110])
   File "array_sub.php", line 12, characters 27-40:
   Expected `dict<_, _>`
   File "array_sub.php", line 20, characters 15-25:
   But got `vec<int>`
-File "array_sub.php", line 12, characters 27-40:
+ERROR: File "array_sub.php", line 12, characters 27-40:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter

@@ -1,4 +1,4 @@
-File "interface_mismatch.php", line 16, characters 22-25:
+ERROR: File "interface_mismatch.php", line 16, characters 22-25:
 This interface is not properly implemented (Typing[4054])
   File "interface_mismatch.php", line 13, characters 19-26:
   Method `whatever` does not have an implementation

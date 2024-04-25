@@ -1,4 +1,4 @@
-File "sort_by.php", line 20, characters 70-76:
+ERROR: File "sort_by.php", line 20, characters 70-76:
 Invalid return type (Typing[4110])
   File "sort_by.php", line 13, characters 23-25:
   Expected `int`

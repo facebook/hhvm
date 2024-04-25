@@ -1,2 +1,2 @@
-File "nullsafe-prop-3.php", line 8, characters 3-8:
+ERROR: File "nullsafe-prop-3.php", line 8, characters 3-8:
 `?->` operator is not allowed in write context (Parsing[1002])

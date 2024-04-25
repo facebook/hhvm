@@ -1,4 +1,4 @@
-File "projected_type_const_error2.php", line 21, characters 10-20:
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 9, characters 23-25:
   Expected `int`

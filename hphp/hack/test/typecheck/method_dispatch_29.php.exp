@@ -1,6 +1,6 @@
-File "method_dispatch_29.php", line 25, characters 8-9:
+ERROR: File "method_dispatch_29.php", line 25, characters 8-9:
 No static method `f3` in `C` (Typing[4090])
-File "method_dispatch_29.php", line 31, characters 19-20:
-Did you mean instance method `f3` instead?
-File "method_dispatch_29.php", line 30, characters 7-7:
-Declaration of `C` is here
+  File "method_dispatch_29.php", line 31, characters 19-20:
+  Did you mean instance method `f3` instead?
+  File "method_dispatch_29.php", line 30, characters 7-7:
+  Declaration of `C` is here

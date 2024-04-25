@@ -1,4 +1,4 @@
-File "call_missing_label_like_class.php", line 11, characters 15-21:
+ERROR: File "call_missing_label_like_class.php", line 11, characters 15-21:
 Enum class `E` does not contain a label named `classy`. (Typing[4394])
   File "call_missing_label_like_class.php", line 3, characters 12-12:
   `E` is defined here

@@ -1,4 +1,4 @@
-File "test_foreach.php", line 14, characters 12-13:
+ERROR: File "test_foreach.php", line 14, characters 12-13:
 Invalid return type (Typing[4110])
   File "test_foreach.php", line 12, characters 37-42:
   Expected `string`

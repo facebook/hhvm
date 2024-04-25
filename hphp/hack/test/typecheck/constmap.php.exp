@@ -1,4 +1,4 @@
-File "constmap.php", line 14, characters 14-15:
+ERROR: File "constmap.php", line 14, characters 14-15:
 Invalid argument (Typing[4110])
   File "constmap.php", line 13, characters 20-25:
   Expected `string`
@@ -10,7 +10,7 @@ Invalid argument (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 12, characters 30-37:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 15, characters 10-11:
+ERROR: File "constmap.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
   File "constmap.php", line 13, characters 20-25:
   Expected `string`
@@ -22,7 +22,7 @@ Invalid return type (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 13, characters 47-54:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 18, characters 14-15:
+ERROR: File "constmap.php", line 18, characters 14-15:
 Invalid argument (Typing[4110])
   File "constmap.php", line 17, characters 23-28:
   Expected `string`
@@ -32,7 +32,7 @@ Invalid argument (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 12, characters 30-37:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 19, characters 10-11:
+ERROR: File "constmap.php", line 19, characters 10-11:
 Invalid return type (Typing[4110])
   File "constmap.php", line 17, characters 23-28:
   Expected `string`
@@ -42,7 +42,7 @@ Invalid return type (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 17, characters 50-57:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 25, characters 23-24:
+ERROR: File "constmap.php", line 25, characters 23-24:
 Invalid argument (Typing[4110])
   File "constmap.php", line 24, characters 39-44:
   Expected `string`
@@ -54,7 +54,7 @@ Invalid argument (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 23, characters 39-46:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 26, characters 12-13:
+ERROR: File "constmap.php", line 26, characters 12-13:
 Invalid return type (Typing[4110])
   File "constmap.php", line 24, characters 39-44:
   Expected `string`
@@ -66,7 +66,7 @@ Invalid return type (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 24, characters 65-72:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 31, characters 23-24:
+ERROR: File "constmap.php", line 31, characters 23-24:
 Invalid argument (Typing[4110])
   File "constmap.php", line 29, characters 12-17:
   Expected `string`
@@ -76,7 +76,7 @@ Invalid argument (Typing[4110])
   But got `arraykey`
   File "constmap.php", line 23, characters 39-46:
   This type argument to `ConstMap` must match exactly (it is invariant)
-File "constmap.php", line 32, characters 12-13:
+ERROR: File "constmap.php", line 32, characters 12-13:
 Invalid return type (Typing[4110])
   File "constmap.php", line 29, characters 12-17:
   Expected `string`

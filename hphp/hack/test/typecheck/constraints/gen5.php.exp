@@ -1,4 +1,4 @@
-File "gen5.php", line 22, characters 17-20:
+ERROR: File "gen5.php", line 22, characters 17-20:
 Some type arguments violate their constraints (Typing[4323])
   File "gen5.php", line 12, characters 9-9:
   `T` is a constrained type parameter

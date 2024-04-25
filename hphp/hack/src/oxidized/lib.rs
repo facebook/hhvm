@@ -54,6 +54,7 @@ pub use manual::typing_env;
 pub use manual::typing_logic;
 pub use manual::typing_reason_impl;
 pub use manual::typing_set;
+pub use manual::user_error_impl;
 
 mod stubs;
 

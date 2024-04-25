@@ -1,4 +1,4 @@
-File "covariant-dep-1.php", line 52, characters 12-36:
+ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 51, characters 6-7:
   Expected `T0`

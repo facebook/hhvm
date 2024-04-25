@@ -1,4 +1,4 @@
-File "tconst_bad_union.php", line 35, characters 17-18:
+ERROR: File "tconst_bad_union.php", line 35, characters 17-18:
 Invalid argument (Typing[4110])
   File "tconst_bad_union.php", line 19, characters 18-19:
   Expected `A1`
@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
     resulting from expanding the type constant `C1::T`
   File "tconst_bad_union.php", line 28, characters 13-14:
   But got `A2`
-File "tconst_bad_union.php", line 35, characters 17-18:
+ERROR: File "tconst_bad_union.php", line 35, characters 17-18:
 Invalid argument (Typing[4110])
   File "tconst_bad_union.php", line 23, characters 18-19:
   Expected `A2`

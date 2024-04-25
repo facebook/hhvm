@@ -1,4 +1,4 @@
-File "override_with_generic_3.php", line 18, characters 19-20:
+ERROR: File "override_with_generic_3.php", line 18, characters 19-20:
 The method `do` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_3.php", line 18, characters 19-20:
   Method `do` has type `(function<T>(): T where TEnt as IMyEnt with { type TC = T })` in `MyReified`

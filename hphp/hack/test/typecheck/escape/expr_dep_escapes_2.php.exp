@@ -1,4 +1,4 @@
-File "expr_dep_escapes_2.php", line 19, characters 10-13:
+ERROR: File "expr_dep_escapes_2.php", line 19, characters 10-13:
 Invalid return type (Typing[4110])
   File "expr_dep_escapes_2.php", line 14, characters 18-20:
   Expected `int`

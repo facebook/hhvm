@@ -36,7 +36,7 @@ let test () =
 
   (* TODO: get rid of repeating errors in error list *)
   let expected_error =
-    "File \"/foo2.php\", line 2, characters 9-11:\n"
+    "ERROR: File \"/foo2.php\", line 2, characters 9-11:\n"
     ^ "Name already bound: `FOO` (Naming[2012])\n"
     ^ "  File \"/foo1.php\", line 2, characters 9-11:\n"
     ^ "  Previous definition is here\n"

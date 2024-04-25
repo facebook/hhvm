@@ -1,4 +1,4 @@
-File "plus_tyvar_int.php", line 9, characters 14-22:
+ERROR: File "plus_tyvar_int.php", line 9, characters 14-22:
 Invalid argument (Typing[4110])
   File "plus_tyvar_int.php", line 3, characters 21-23:
   Expected `int`

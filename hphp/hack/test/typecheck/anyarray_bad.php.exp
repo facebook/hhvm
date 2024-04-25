@@ -1,28 +1,28 @@
 File "anyarray_bad.php", line 34, characters 5-17:
   AnyArray<arraykey, mixed>
-File "anyarray_bad.php", line 17, characters 3-13:
+ERROR: File "anyarray_bad.php", line 17, characters 3-13:
 You cannot mutate this (Typing[4011])
   File "anyarray_bad.php", line 4, characters 25-42:
   This is an object of type AnyArray<int, int>
-File "anyarray_bad.php", line 10, characters 15-20:
+ERROR: File "anyarray_bad.php", line 10, characters 15-20:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 3, characters 22-39:
   Expected `AnyArray<int, int>`
   File "anyarray_bad.php", line 10, characters 15-20:
   But got `Map<(arraykey & _), _>`
-File "anyarray_bad.php", line 11, characters 15-20:
+ERROR: File "anyarray_bad.php", line 11, characters 15-20:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 3, characters 22-39:
   Expected `AnyArray<int, int>`
   File "anyarray_bad.php", line 11, characters 15-20:
   But got `Set<(arraykey & _)>`
-File "anyarray_bad.php", line 12, characters 15-26:
+ERROR: File "anyarray_bad.php", line 12, characters 15-26:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 3, characters 22-39:
   Expected `AnyArray<int, int>`
   File "anyarray_bad.php", line 12, characters 15-26:
   But got `ImmVector<nothing>`
-File "anyarray_bad.php", line 13, characters 38-50:
+ERROR: File "anyarray_bad.php", line 13, characters 38-50:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 13, characters 30-35:
   Expected `string`
@@ -30,7 +30,7 @@ Invalid argument (Typing[4110])
     via this generic `Tv`
   File "anyarray_bad.php", line 4, characters 39-41:
   But got `int`
-File "anyarray_bad.php", line 35, characters 18-21:
+ERROR: File "anyarray_bad.php", line 35, characters 18-21:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 29, characters 10-15:
   Expected `arraykey` because type parameter `Tk` of `HH\Set` could not be determined. Please add explicit type parameters to the invocation of `HH\Set`
@@ -42,7 +42,7 @@ Invalid argument (Typing[4110])
     via this generic `Tv`
   File "interfaces.hhi", line 92, characters 66-67:
     via this generic `Tv`
-File "anyarray_bad.php", line 25, characters 19-21:
+ERROR: File "anyarray_bad.php", line 25, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "anyarray_bad.php", line 25, characters 19-21:
   Method `foo` has type `(function(AnyArray<int, int> $f): void)` in `Child`

@@ -1,4 +1,4 @@
-File "function_subtype.php", line 30, characters 19-21:
+ERROR: File "function_subtype.php", line 30, characters 19-21:
 The method `get` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 30, characters 19-21:
   Method `get` has type `(function(): readonly ParentClass)` in `Child`
@@ -12,7 +12,7 @@ The method `get` is not compatible with the overridden method (Typing[4341])
   This function is not marked readonly
   File "function_subtype.php", line 9, characters 28-30:
   This function is marked readonly
-File "function_subtype.php", line 35, characters 19-27:
+ERROR: File "function_subtype.php", line 35, characters 19-27:
 The method `return_ro` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 35, characters 19-27:
   Method `return_ro` has type `(function(): readonly ParentClass)` in `Child`
@@ -26,7 +26,7 @@ The method `return_ro` is not compatible with the overridden method (Typing[4341
   This function returns a readonly value
   File "function_subtype.php", line 13, characters 19-27:
   This function does not return a readonly value
-File "function_subtype.php", line 39, characters 19-27:
+ERROR: File "function_subtype.php", line 39, characters 19-27:
 The method `setParams` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 39, characters 19-27:
   Method `setParams` has type `(function(ParentClass $x, readonly ParentClass $y): void)` in `Child`
@@ -40,7 +40,7 @@ The method `setParams` is not compatible with the overridden method (Typing[4341
   This parameter is mutable
   File "function_subtype.php", line 22, characters 50-51:
   But this parameter is readonly
-File "function_subtype.php", line 45, characters 19-29:
+ERROR: File "function_subtype.php", line 45, characters 19-29:
 The method `readonlyFun` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 45, characters 19-29:
   Method `readonlyFun` has type `(function((readonly function(Child): ~Child) $f): void)` in `Child`
@@ -54,7 +54,7 @@ The method `readonlyFun` is not compatible with the overridden method (Typing[43
   This function is not marked readonly
   File "function_subtype.php", line 46, characters 5-39:
   This function is marked readonly
-File "function_subtype.php", line 62, characters 11-12:
+ERROR: File "function_subtype.php", line 62, characters 11-12:
 Invalid argument (Typing[4411])
   File "function_subtype.php", line 54, characters 22-26:
   Mismatched parameter readonlyness
@@ -62,7 +62,7 @@ Invalid argument (Typing[4411])
   This parameter is mutable
   File "function_subtype.php", line 54, characters 22-26:
   But this parameter is readonly
-File "function_subtype.php", line 64, characters 11-13:
+ERROR: File "function_subtype.php", line 64, characters 11-13:
 Invalid argument (Typing[4411])
   File "function_subtype.php", line 55, characters 3-46:
   Function readonly return mismatch
@@ -70,7 +70,7 @@ Invalid argument (Typing[4411])
   This function returns a readonly value
   File "function_subtype.php", line 54, characters 3-36:
   This function does not return a readonly value
-File "function_subtype.php", line 86, characters 15-16:
+ERROR: File "function_subtype.php", line 86, characters 15-16:
 Invalid argument (Typing[4411])
   File "function_subtype.php", line 83, characters 8-26:
   Function readonly mismatch

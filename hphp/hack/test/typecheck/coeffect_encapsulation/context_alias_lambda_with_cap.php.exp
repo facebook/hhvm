@@ -1,4 +1,4 @@
-File "context_alias_lambda_with_cap.php--g.php", line 9, characters 7-10:
+ERROR: File "context_alias_lambda_with_cap.php--g.php", line 9, characters 7-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "context_alias_lambda_with_cap.php--g.php", line 8, characters 8-14:
   From this declaration, the context of this function body provides the capability Codegen

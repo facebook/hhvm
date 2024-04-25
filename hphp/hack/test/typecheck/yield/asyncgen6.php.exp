@@ -1,4 +1,4 @@
-File "asyncgen6.php", line 13, characters 3-11:
+ERROR: File "asyncgen6.php", line 13, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "asyncgen6.php", line 13, characters 3-11:
   Expected `Awaitable<nothing>`

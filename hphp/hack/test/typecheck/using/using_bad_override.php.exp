@@ -1,4 +1,4 @@
-File "using_bad_override.php", line 14, characters 19-21:
+ERROR: File "using_bad_override.php", line 14, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 14, characters 19-21:
   Method `foo` has type `(function(mixed $h): void)` in `BadDerived1`
@@ -10,7 +10,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   This parameter is marked `<<__AcceptDisposable>>`
   File "using_bad_override.php", line 14, characters 29-30:
   This parameter is not marked `<<__AcceptDisposable>>`
-File "using_bad_override.php", line 19, characters 19-21:
+ERROR: File "using_bad_override.php", line 19, characters 19-21:
 The method `bar` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 19, characters 19-21:
   Method `bar` has type `(function(<<__AcceptDisposable>> mixed $h): void)` in `BadDerived2`
@@ -22,7 +22,7 @@ The method `bar` is not compatible with the overridden method (Typing[4341])
   This parameter is marked `<<__AcceptDisposable>>`
   File "using_bad_override.php", line 11, characters 29-30:
   This parameter is not marked `<<__AcceptDisposable>>`
-File "using_bad_override.php", line 31, characters 19-21:
+ERROR: File "using_bad_override.php", line 31, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 31, characters 19-21:
   Method `foo` has type `(function(): void)` in `RBadDerived1`
@@ -34,7 +34,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   This is marked `<<__ReturnDisposable>>`.
   File "using_bad_override.php", line 31, characters 19-21:
   This is not marked `<<__ReturnDisposable>>`.
-File "using_bad_override.php", line 38, characters 19-21:
+ERROR: File "using_bad_override.php", line 38, characters 19-21:
 The method `bar` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 38, characters 19-21:
   Method `bar` has type `<<__ReturnDisposable>> (function(): void)` in `RBadDerived2`

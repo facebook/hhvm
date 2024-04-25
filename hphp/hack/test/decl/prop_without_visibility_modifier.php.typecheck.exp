@@ -1,2 +1,2 @@
-File "prop_without_visibility_modifier.php", line 4, characters 3-18:
+ERROR: File "prop_without_visibility_modifier.php", line 4, characters 3-18:
 Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])

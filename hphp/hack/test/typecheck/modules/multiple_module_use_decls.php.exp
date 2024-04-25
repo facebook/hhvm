@@ -1,2 +1,2 @@
-File "multiple_module_use_decls.php--A1.php", line 4, characters 8-8:
+ERROR: File "multiple_module_use_decls.php--A1.php", line 4, characters 8-8:
 `module B;` must be unique, and precede any other declarations in a file. (Parsing[1002])

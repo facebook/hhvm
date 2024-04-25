@@ -28,10 +28,10 @@ let test () =
     diagnostics
     {|
 /bar_expects_int.php:
-File "/bar_expects_int.php", line 2, characters 34-36:
+ERROR: File "/bar_expects_int.php", line 2, characters 34-36:
 Unbound name: `foo` (a global function) (Naming[2049])
 
-File "/bar_expects_int.php", line 2, characters 34-36:
+ERROR: File "/bar_expects_int.php", line 2, characters 34-36:
 Unbound name (typing): `foo` (Typing[4107])
 |};
   let (env, diagnostics) = Test.Client.open_file env "bar_expects_string.php" in
@@ -39,10 +39,10 @@ Unbound name (typing): `foo` (Typing[4107])
     diagnostics
     {|
 /bar_expects_string.php:
-File "/bar_expects_string.php", line 2, characters 40-42:
+ERROR: File "/bar_expects_string.php", line 2, characters 40-42:
 Unbound name: `foo` (a global function) (Naming[2049])
 
-File "/bar_expects_string.php", line 2, characters 40-42:
+ERROR: File "/bar_expects_string.php", line 2, characters 40-42:
 Unbound name (typing): `foo` (Typing[4107])
 |};
 
@@ -59,7 +59,7 @@ Unbound name (typing): `foo` (Typing[4107])
   let bar_expects_int_but_got_string =
     {|
 /bar_expects_int.php:
-File "/bar_expects_int.php", line 2, characters 34-38:
+ERROR: File "/bar_expects_int.php", line 2, characters 34-38:
 Invalid return type (Typing[4110])
   File "/bar_expects_int.php", line 2, characters 21-23:
   Expected `int`
@@ -104,7 +104,7 @@ Invalid return type (Typing[4110])
     diagnostics
     {|
 /bar_expects_string.php:
-File "/bar_expects_string.php", line 2, characters 40-44:
+ERROR: File "/bar_expects_string.php", line 2, characters 40-44:
 Invalid return type (Typing[4110])
   File "/bar_expects_string.php", line 2, characters 24-29:
   Expected `string`

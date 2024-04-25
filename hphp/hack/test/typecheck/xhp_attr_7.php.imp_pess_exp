@@ -1,4 +1,4 @@
-File "xhp_attr_7.php", line 8, characters 10-17:
+ERROR: File "xhp_attr_7.php", line 8, characters 10-17:
 Invalid return type (Typing[4110])
   File "xhp_attr_7.php", line 6, characters 28-30:
   Expected `~int` because the type of this return is implicitly a like-type

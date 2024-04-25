@@ -1,4 +1,4 @@
-File "override_with_generic_5.php", line 38, characters 19-31:
+ERROR: File "override_with_generic_5.php", line 38, characters 19-31:
 The method `numInCovar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 38, characters 19-31:
   Method `numInCovar_Eq` has type `(function<TTi>(Contra<TTi> $_): void where T as I with { type Ti = TTi })` in `B`
@@ -10,7 +10,7 @@ The method `numInCovar_Eq` is not compatible with the overridden method (Typing[
   Expected a class with `{type Ti = _}`
   File "override_with_generic_5.php", line 40, characters 5-5:
   But got `T as I`
-File "override_with_generic_5.php", line 62, characters 19-36:
+ERROR: File "override_with_generic_5.php", line 62, characters 19-36:
 The method `numInContravar_Sub` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 62, characters 19-36:
   Method `numInContravar_Sub` has type `(function<TTi>(TTi $_): void where T as I with { type Ti super TTi })` in `B`
@@ -22,7 +22,7 @@ The method `numInContravar_Sub` is not compatible with the overridden method (Ty
   Expected `nothing` because the type constant Ti lacks a constraint
   File "override_with_generic_5.php", line 17, characters 38-40:
   But got `num`
-File "override_with_generic_5.php", line 69, characters 19-35:
+ERROR: File "override_with_generic_5.php", line 69, characters 19-35:
 The method `numInContravar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 69, characters 19-35:
   Method `numInContravar_Eq` has type `(function<TTi>(TTi $_): void where T as I with { type Ti = TTi })` in `B`
@@ -34,7 +34,7 @@ The method `numInContravar_Eq` is not compatible with the overridden method (Typ
   Expected a class with `{type Ti = _}`
   File "override_with_generic_5.php", line 71, characters 5-5:
   But got `T as I`
-File "override_with_generic_5.php", line 76, characters 19-34:
+ERROR: File "override_with_generic_5.php", line 76, characters 19-34:
 The method `numInInvar_Super` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 76, characters 19-34:
   Method `numInInvar_Super` has type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti super TTi })` in `B`
@@ -46,7 +46,7 @@ The method `numInInvar_Super` is not compatible with the overridden method (Typi
   Expected `nothing` because the type constant Ti lacks a constraint
   File "override_with_generic_5.php", line 20, characters 39-41:
   But got `num`
-File "override_with_generic_5.php", line 91, characters 19-31:
+ERROR: File "override_with_generic_5.php", line 91, characters 19-31:
 The method `numInInvar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 91, characters 19-31:
   Method `numInInvar_Eq` has type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti = TTi })` in `B`

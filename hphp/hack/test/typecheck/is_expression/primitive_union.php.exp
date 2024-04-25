@@ -1,10 +1,10 @@
-File "primitive_union.php", line 9, characters 19-20:
+ERROR: File "primitive_union.php", line 9, characters 19-20:
 Invalid argument (Typing[4110])
   File "primitive_union.php", line 13, characters 26-33:
   Expected `arraykey`
   File "primitive_union.php", line 4, characters 13-20:
   But got `mixed`
-File "primitive_union.php", line 10, characters 14-15:
+ERROR: File "primitive_union.php", line 10, characters 14-15:
 Invalid argument (Typing[4110])
   File "primitive_union.php", line 14, characters 21-23:
   Expected `num`

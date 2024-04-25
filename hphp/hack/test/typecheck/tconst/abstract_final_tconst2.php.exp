@@ -1,4 +1,4 @@
-File "abstract_final_tconst2.php", line 10, characters 22-22:
+ERROR: File "abstract_final_tconst2.php", line 10, characters 22-22:
 This class was declared as `final`. It must provide an implementation for the abstract type constant `T` (Typing[4047])
   File "abstract_final_tconst2.php", line 10, characters 35-35:
   `C` uses `I`

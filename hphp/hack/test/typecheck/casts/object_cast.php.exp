@@ -1,6 +1,6 @@
-File "object_cast.php", line 4, characters 16-17:
+ERROR: File "object_cast.php", line 4, characters 16-17:
 Encountered unexpected token `$i`. (Parsing[1002])
-File "object_cast.php", line 4, characters 9-14:
+ERROR: File "object_cast.php", line 4, characters 9-14:
 Unbound name: `object` (a global constant) (Naming[2049])
-File "object_cast.php", line 4, characters 9-14:
+ERROR: File "object_cast.php", line 4, characters 9-14:
 Unbound global constant (Typing) (Typing[4106])

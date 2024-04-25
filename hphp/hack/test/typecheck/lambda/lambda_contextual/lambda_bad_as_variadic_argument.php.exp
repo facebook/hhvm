@@ -1,4 +1,4 @@
-File "lambda_bad_as_variadic_argument.php", line 31, characters 15-28:
+ERROR: File "lambda_bad_as_variadic_argument.php", line 31, characters 15-28:
 No instance method `missing_method` in `MyClass` (Typing[4053])
   File "lambda_bad_as_variadic_argument.php", line 5, characters 19-23:
   Did you mean `hello` instead?

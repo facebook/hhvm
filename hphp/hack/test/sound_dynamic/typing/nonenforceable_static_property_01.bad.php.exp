@@ -1,4 +1,4 @@
-File "nonenforceable_static_property_01.bad.php", line 11, characters 5-33:
+ERROR: File "nonenforceable_static_property_01.bad.php", line 11, characters 5-33:
 Invalid assignment (Typing[4110])
   File "nonenforceable_static_property_01.bad.php", line 8, characters 19-26:
   Expected `vec<int>`

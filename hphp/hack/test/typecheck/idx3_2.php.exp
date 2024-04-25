@@ -1,4 +1,4 @@
-File "idx3_2.php", line 10, characters 10-11:
+ERROR: File "idx3_2.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "idx3_2.php", line 7, characters 15-20:
   Expected `string`

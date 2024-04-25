@@ -1,6 +1,6 @@
-File "runtime_generic_bad.php", line 4, characters 3-3:
+ERROR: File "runtime_generic_bad.php", line 4, characters 3-3:
 Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
-File "runtime_generic_bad.php", line 4, characters 6-8:
+ERROR: File "runtime_generic_bad.php", line 4, characters 6-8:
 You are trying to access the static property `foo` but this is a value of generic type T (Typing[4252])
   File "runtime_generic_bad.php", line 4, characters 3-3:
   Definition is here

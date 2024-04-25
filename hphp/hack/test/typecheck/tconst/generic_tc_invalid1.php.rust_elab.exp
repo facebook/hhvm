@@ -1,4 +1,4 @@
-File "generic_tc_invalid1.php", line 25, characters 10-11:
+ERROR: File "generic_tc_invalid1.php", line 25, characters 10-11:
 Invalid return type (Typing[4110])
   File "generic_tc_invalid1.php", line 22, characters 19-24:
   Expected `string`

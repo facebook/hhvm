@@ -1,4 +1,4 @@
-File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 8, characters 14-15:
+ERROR: File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 8, characters 14-15:
 Invalid argument (Typing[4163])
   File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 5, characters 31-48:
   The field `x` is **optional**

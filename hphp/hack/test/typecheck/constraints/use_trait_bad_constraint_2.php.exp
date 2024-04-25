@@ -1,4 +1,4 @@
-File "use_trait_bad_constraint_2.php", line 10, characters 7-16:
+ERROR: File "use_trait_bad_constraint_2.php", line 10, characters 7-16:
 Some type arguments violate their constraints (Typing[4323])
   File "use_trait_bad_constraint_2.php", line 4, characters 14-15:
   `Tb` is a constrained type parameter

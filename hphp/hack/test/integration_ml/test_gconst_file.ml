@@ -59,7 +59,7 @@ let test () =
     Test.fail "Expected the server to process disk updates";
 
   let expected_error =
-    "File \"/bar.php\", line 2, characters 9-11:\n"
+    "ERROR: File \"/bar.php\", line 2, characters 9-11:\n"
     ^ "Wrong type hint (Typing[4110])\n"
     ^ "  File \"/bar.php\", line 2, characters 9-11:\n"
     ^ "  Expected `int`\n"

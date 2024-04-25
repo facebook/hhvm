@@ -617,17 +617,37 @@ void Class::releaseSProps() {
   if (!m_sPropCache) return;
 
   auto init = &m_sPropCacheInit;
-  if (init->bound() && rds::isNormalHandle(init->handle())) {
-    auto const symbol = rds::LinkName{"SPropCacheInit", name()};
-    unbindLink(init, symbol);
+
+  if (!init->bound()) {
+    if constexpr (debug) {
+      for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+        always_assert(!m_sPropCache[i].bound());
+      }
+    }
+    return;
   }
 
-  for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
-    auto const& sProp = m_staticProperties[i];
-    if (m_sPropCache[i].bound() && m_sPropCache[i].isPersistent()) continue;
-    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
-      unbindLink(&m_sPropCache[i], rds::SPropCache{this, i});
+  if (rds::isNormalHandle(init->handle())) {
+    auto const symbol = rds::LinkName{"SPropCacheInit", name()};
+    unbindLink(init, symbol);
+    for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+      auto const& sProp = m_staticProperties[i];
+      assertx(m_sPropCache[i].bound());
+      if (m_sPropCache[i].isPersistent()) continue;
+      if (declaredOnThisClass(sProp)) {
+        unbindLink(&m_sPropCache[i], rds::SPropCache{this, i});
+      }
     }
+  } else {
+    // init handle in rds::Persistent implies that all properties are persistent
+    assertx(rds::isPersistentHandle(init->handle()));
+    if constexpr (debug) {
+      for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+        always_assert(m_sPropCache[i].bound());
+        always_assert(m_sPropCache[i].isPersistent());
+      }
+    }
+    return;
   }
 }
 
@@ -929,7 +949,7 @@ void Class::initSProps() const {
     // coerce class_meth types.
     auto val = sProp.val;
 
-    if (sProp.cls == this || sProp.attrs & AttrLSB) {
+    if (declaredOnThisClass(sProp)) {
       sProp.typeConstraint.validForPropResolved(sProp.cls, sProp.name);
       if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
@@ -1148,7 +1168,7 @@ void Class::initSPropHandles() const {
     auto& propHandle = m_sPropCache[slot];
     auto const& sProp = m_staticProperties[slot];
 
-    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
+    if (declaredOnThisClass(sProp)) {
       if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
         static_assert(sizeof(StaticPropData) == sizeof(sProp.val),
                       "StaticPropData must be a simple wrapper "
@@ -2980,8 +3000,7 @@ void Class::setProperties() {
     slotIndex.insert(slotIndex.end(),
                      parentSlotIndex.begin(), parentSlotIndex.end());
     for (auto const& parentProp : m_parent->staticProperties()) {
-      if ((parentProp.attrs & AttrPrivate) &&
-          !(parentProp.attrs & AttrLSB)) continue;
+      if (!inherited(parentProp)) continue;
 
       // Alias parent's static property.
       SProp sProp;
@@ -3267,7 +3286,7 @@ void Class::setProperties() {
       Slot parentSlot = m_parent->staticProperties()[i].serializationIdx;
       auto const& prop = m_parent->staticProperties()[parentSlot];
 
-      if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrLSB)) continue;
+      if (!inherited(prop)) continue;
 
       auto it = curSPropMap.find(prop.name);
       assertx(it != curSPropMap.end());

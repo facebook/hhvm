@@ -247,7 +247,7 @@ struct Class : AtomicCountable {
     Attr attrs;
     Slot serializationIdx;
 
-    /* Used if (cls == this). */
+    /* Used if (cls == this) or if LSB. */
     TypedValue val;
 
     bool isInternal() const {
@@ -1031,6 +1031,9 @@ public:
    * Map the physical index of a property within the object to its logical slot.
    */
   Slot propIndexToSlot(uint16_t index) const;
+
+  bool declaredOnThisClass(const SProp& sProp) const;
+  bool inherited(const SProp& parentProp) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property lookup and accessibility.                                 [const]

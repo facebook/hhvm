@@ -533,6 +533,15 @@ Class::sPropLink(Slot index) const {
   return m_sPropCache[index];
 }
 
+inline bool Class::declaredOnThisClass(const SProp& sProp) const {
+  return sProp.cls == this || (sProp.attrs & AttrLSB);
+}
+
+inline bool Class::inherited(const SProp& parentProp) const {
+  return !(parentProp.attrs & AttrPrivate) ||
+    (parentProp.attrs & AttrLSB);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 

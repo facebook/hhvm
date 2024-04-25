@@ -1,0 +1,6 @@
+WARN: File "sketchy_equality1.php", line 4, characters 3-11:
+This expression is likely always `false` (Warn[12001])
+  File "sketchy_equality1.php", line 3, characters 18-23:
+  This is a string
+  File "sketchy_equality1.php", line 3, characters 30-32:
+  This is an int

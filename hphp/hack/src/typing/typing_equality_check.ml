@@ -23,27 +23,28 @@ let trivial_result_str bop =
   | Ast_defs.Diff2 -> true
   | _ -> assert false
 
-let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
-  let result = trivial_result_str bop
-  and tys1 = lazy (Typing_print.error env ty1)
-  and tys2 = lazy (Typing_print.error env ty2) in
-  Typing_error_utils.add_typing_error
-    ~env
-    Typing_error.(
-      primary
-      @@ Primary.Trivial_strict_eq
-           {
-             pos = p;
-             result;
-             left =
-               Lazy.map tys1 ~f:(fun tys1 ->
-                   Reason.to_string ("This is " ^ tys1) (get_reason ty1));
-             right =
-               Lazy.map tys2 ~f:(fun tys2 ->
-                   Reason.to_string ("This is " ^ tys2) (get_reason ty2));
-             left_trail = trail1;
-             right_trail = trail2;
-           })
+let trivial_comparison_error
+    env pos bop ty1 ty2 left_trail right_trail ~as_warning =
+  let result = trivial_result_str bop in
+  let describe_type ty =
+    let ty_string = lazy (Typing_print.error env ty) in
+    Lazy.map ty_string ~f:(fun ty_string ->
+        Reason.to_string ("This is " ^ ty_string) (get_reason ty))
+  in
+  let left = describe_type ty1 in
+  let right = describe_type ty2 in
+  if as_warning then
+    Typing_warning_utils.add
+      env
+      (Typing_warning.Sketchy_equality
+         { pos; result; left; right; left_trail; right_trail })
+  else
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Trivial_strict_eq
+             { pos; result; left; right; left_trail; right_trail })
 
 let eq_incompatible_types env p ty1 ty2 =
   let tys1 = lazy (Typing_print.error env ty1)
@@ -81,7 +82,7 @@ let bad_compare_prim_to_enum ty enum_bound =
     | _ -> false)
   | _ -> false
 
-let rec assert_nontrivial p bop env ty1 ty2 =
+let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
   let ety_env = empty_expand_env in
   let (_, ty1) = Env.expand_type env ty1 in
   let (_, ety1, trail1) = TDef.force_expand_typedef ~ety_env env ty1 in
@@ -136,14 +137,18 @@ let rec assert_nontrivial p bop env ty1 ty2 =
                { pos = p; reason = lazy (Reason.to_string "This is `void`" r) })
     | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
       when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
-      trivial_comparison_error env p bop ty1 bound trail1 trail2
+      trivial_comparison_error env p bop ty1 bound trail1 trail2 ~as_warning
     | ((_, Tnewtype (e, _, bound)), (_, Tprim a))
       when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
-      trivial_comparison_error env p bop bound ty2 trail1 trail2
+      trivial_comparison_error env p bop bound ty2 trail1 trail2 ~as_warning
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
-      trivial_comparison_error env p bop ty1 ty2 trail1 trail2
-    | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
-    | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
+      trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
+    | ((_, Toption ty1), (_, Tprim _)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Tprim _), (_, Toption ty2)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Toption ty1), (_, Toption ty2)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning:true
     | ( ( _,
           ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _ | Tdynamic
           | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
@@ -151,3 +156,5 @@ let rec assert_nontrivial p bop env ty1 ty2 =
           | Tunapplied_alias _ | Tneg _ ) ),
         _ ) ->
       ())
+
+let assert_nontrivial = assert_nontrivial ~as_warning:false

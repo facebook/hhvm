@@ -145,6 +145,7 @@ let error_kind error_code =
   | 4 -> "Typing"
   | 5 -> "Lint"
   | 8 -> "Init"
+  | 12 -> "Warn"
   | _ -> "Other"
 
 let error_code_to_string error_code =

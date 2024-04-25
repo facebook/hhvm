@@ -116,6 +116,7 @@ let handler =
 
     method! at_expr env =
       function
+      (* Function call *)
       | (_, p, Call { func = (_, _, Id (_, name)); targs = _ :: _ as tal; _ })
         -> begin
         match Decl_provider.get_fun (Tast_env.get_ctx env) name with
@@ -129,6 +130,7 @@ let handler =
             fe_type
         | _ -> ()
       end
+      (* Method call *)
       | ( _,
           p,
           Call
@@ -151,6 +153,7 @@ let handler =
           receiver_type
           method_name
           tal
+      (* Static method call *)
       | ( _,
           p,
           Call

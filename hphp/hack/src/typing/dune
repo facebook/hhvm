@@ -44,7 +44,9 @@
 (library
   (name typing_error)
   (wrapped false)
-  (modules typing_error)
+  (modules
+    typing_error
+    typing_warning)
   (libraries
     ast
     pos
@@ -58,7 +60,9 @@
 (library
   (name typing_error_utils)
   (wrapped false)
-  (modules typing_error_utils)
+  (modules
+    typing_error_utils
+    typing_warning_utils)
   (libraries
     core_kernel
     custom_error_eval

@@ -776,13 +776,17 @@ module Typing = struct
   let err_code = to_enum
 end
 
+module Warning = struct
+  type t = SketchyEquality [@value 12001]
+  [@@deriving enum, show { with_path = false }]
+end
+
 (* 5xxx: reserved for FB lint *)
 (* 6xxx: reserved for FB ai *)
 (* 7xxx: reserved for FB ai *)
 (* 8xxx: had been used for forward/back-compat; no longer *)
 (* 9xxx: reserved for FB ai *)
 (* 10xxx: reserved for FB ai *)
-
 (* 11xxx: reserved for global access check (fbcode/hphp/hack/src/typing/tast_check/global_access_check.ml),
  * which is used to detect potential data leaks caused by global variable access.
  * 11001 represents the error when a global variable is definitely written.
@@ -790,6 +794,8 @@ end
  * 11003 represents the warning when a global variable is possibly written via function calls.
  * 11004 represents the error when a global variable is definitely read.
  *)
+(* 12xxx: reserved for warnings, see module Warning above *)
+
 module GlobalAccessCheck = struct
   type t =
     | DefiniteGlobalWrite [@value 11001]

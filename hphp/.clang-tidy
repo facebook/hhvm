@@ -17,5 +17,6 @@ Checks: '
 -facebook-hte-ParameterUncheckedArrayBounds,
 -facebook-hte-BadImplicitCast,
 -facebook-reserve,
+-readability-braces-around-statements,
 '
 ...

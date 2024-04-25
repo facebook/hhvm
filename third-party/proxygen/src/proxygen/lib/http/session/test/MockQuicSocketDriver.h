@@ -18,7 +18,7 @@
 
 namespace quic {
 
-using PeekIterator = std::deque<StreamBuffer>::const_iterator;
+using PeekIterator = CircularDeque<StreamBuffer>::const_iterator;
 
 // The driver stores connection state in a Stream State structure
 // so use an id outside the on the wire id space
@@ -1542,7 +1542,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                   stream.readState = ERROR;
                 }
               } else if (stream.readState != PAUSED && stream.readBuf.front()) {
-                std::deque<StreamBuffer> fakeReadBuffer;
+                CircularDeque<StreamBuffer> fakeReadBuffer;
                 stream.readBuf.gather(stream.readBuf.chainLength());
                 auto copyBuf = stream.readBuf.front()->clone();
                 fakeReadBuffer.emplace_back(std::move(copyBuf),
@@ -1706,7 +1706,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
       if (streamID != kConnectionStreamId && hasCB &&
           streamState.readState == OPEN && hasDataOrEOF) {
         if (streamState.peekCB) {
-          std::deque<StreamBuffer> fakeReadBuffer;
+          CircularDeque<StreamBuffer> fakeReadBuffer;
           std::unique_ptr<folly::IOBuf> copyBuf;
           std::size_t copyBufLen = 0;
           if (streamState.readBuf.chainLength() > 0) {

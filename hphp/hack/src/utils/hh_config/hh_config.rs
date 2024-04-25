@@ -43,9 +43,6 @@ pub struct HhConfig {
     pub opts: GlobalOptions,
     pub local_config: LocalConfig,
 
-    /// Config settings that did not match any setting known to this parser.
-    pub unknown: Vec<(String, String)>,
-
     pub gc_minor_heap_size: usize,
     pub gc_space_overhead: usize,
     pub hackfmt_version: usize,
@@ -391,61 +388,6 @@ impl HhConfig {
 
         for (key, mut value) in hhconfig {
             match key.as_str() {
-                "current_saved_state_rollout_flag_index"
-                | "deactivate_saved_state_rollout"
-                | "override_hhconfig_hash"
-                | "ss_force"
-                | "disable_full_init_fallback" => {
-                    // These were already queried for LocalConfig above.
-                    // Ignore them so they aren't added to c.unknown.
-                }
-                "auto_namespace_map"
-                | "disable_xhp_element_mangling"
-                | "disable_xhp_children_declarations"
-                | "interpret_soft_types_as_like_types"
-                | "everything_sdt"
-                | "deregister_php_stdlib"
-                | "enable_experimental_tc_features"
-                | "enable_xhp_class_modifier"
-                | "disallow_invalid_arraykey"
-                | "check_xhp_attribute"
-                | "disallow_silence"
-                | "check_redundant_generics"
-                | "disallow_func_ptrs_in_constants"
-                | "enable_strict_string_concat_interp"
-                | "allowed_expression_tree_visitors"
-                | "locl_cache_capacity"
-                | "locl_cache_node_threshold"
-                | "explicit_consistent_constructors"
-                | "enable_strict_const_semantics"
-                | "require_types_tco_require_types_class_consts"
-                | "strict_wellformedness"
-                | "disable_hh_ignore_error"
-                | "allowed_fixme_codes_strict"
-                | "allowed_decl_fixme_codes"
-                | "code_agnostic_fixme"
-                | "allowed_files_for_module_declarations"
-                | "tco_global_access_check_enabled"
-                | "log_levels"
-                | "class_pointer_levels"
-                | "const_default_func_args"
-                | "const_default_lambda_args"
-                | "like_casts"
-                | "timeout"
-                | "enable_sound_dynamic_type"
-                | "pessimise_builtins"
-                | "enable_no_auto_dynamic"
-                | "like_type_hints"
-                | "union_intersection_type_hints"
-                | "typecheck_sample_rate"
-                | "type_printer_fuel"
-                | "profile_top_level_definitions"
-                | "skip_check_under_dynamic"
-                | "log_exhaustivity_check"
-                | "dump_tast_hashes"
-                | "disallow_direct_superglobals_refs"
-                | "nameof_precedence"
-                | "enable_function_references" => {}
                 "version" => {
                     c.version = Some(value);
                 }
@@ -491,7 +433,7 @@ impl HhConfig {
                 "eden_fetch_parallelism" => {
                     c.eden_fetch_parallelism = parse_json(&value)?;
                 }
-                _ => c.unknown.push((key, value)),
+                _ => {}
             }
         }
         Ok(c)

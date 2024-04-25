@@ -173,6 +173,7 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
     state_.version() = TestProtocolVersion;
     state_.cipher() = CipherSuite::TLS_AES_128_GCM_SHA256;
     state_.state() = StateEnum::ExpectingEncryptedExtensions;
+    state_.pskType() = PskType::NotAttempted;
     state_.requestedExtensions() = std::vector<ExtensionType>(
         {ExtensionType::supported_versions,
          ExtensionType::key_share,
@@ -5478,6 +5479,31 @@ TEST_F(ClientProtocolTest, TestWaitForDataSizeHint) {
   auto wfd = expectAction<WaitForData>(actions);
   EXPECT_EQ(wfd.recordSizeHint, 17);
 }
+
+TEST_F(ClientProtocolTest, TestPskWithoutCerts) {
+  // Because CachedPsks can be serialized, and because certificates may fail
+  // to serialize for whatever reason, there may be an instance where a client
+  // uses a deserialized cached psk that does not contain either a client or
+  // a server certificate, but the PSK itself is valid (and the server accepted
+  // the offered PSK).
+  setupExpectingServerHello();
+
+  CachedPsk psk = getCachedPsk();
+  psk.clientCert = nullptr;
+  psk.serverCert = nullptr;
+
+  state_.attemptedPsk() = psk;
+
+  auto actions = detail::processEvent(state_, TestMessages::serverHelloPsk());
+  processStateMutations(actions);
+
+  ASSERT_TRUE(state_.pskType().has_value());
+  EXPECT_EQ(state_.pskType().value(), PskType::Resumption);
+
+  ASSERT_TRUE(state_.clientAuthRequested().has_value());
+  EXPECT_EQ(state_.clientAuthRequested().value(), ClientAuthType::NotRequested);
+}
+
 } // namespace test
 } // namespace client
 } // namespace fizz

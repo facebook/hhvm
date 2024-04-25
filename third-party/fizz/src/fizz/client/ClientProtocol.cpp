@@ -1297,9 +1297,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingServerHello, Event::ServerHello>::
   }
 
   // Servers cannot accept GREASE PSK
-  if (echStatus == ECHStatus::Rejected &&
-      (negotiatedPsk.type == PskType::External ||
-       negotiatedPsk.type == PskType::Resumption)) {
+  if (echStatus == ECHStatus::Rejected && isPskAccepted(negotiatedPsk.type)) {
     throw FizzException(
         "ech rejected but server accepted psk",
         AlertDescription::illegal_parameter);
@@ -1346,10 +1344,12 @@ EventHandler<ClientTypes, StateEnum::ExpectingServerHello, Event::ServerHello>::
       folly::IOBuf::copyBuffer(handshakeReadSecret.secret);
 
   folly::Optional<ClientAuthType> authType;
-  if (negotiatedPsk.clientCert) {
-    authType = ClientAuthType::Stored;
-  } else if (negotiatedPsk.serverCert) {
-    authType = ClientAuthType::NotRequested;
+  if (isPskAccepted(negotiatedPsk.type)) {
+    if (negotiatedPsk.clientCert) {
+      authType = ClientAuthType::Stored;
+    } else {
+      authType = ClientAuthType::NotRequested;
+    }
   }
 
   std::chrono::system_clock::time_point handshakeTime;
@@ -1803,8 +1803,7 @@ Actions EventHandler<
         }
       });
 
-  if (state.pskType() == PskType::Resumption ||
-      state.pskType() == PskType::External) {
+  if (isPskAccepted(*state.pskType())) {
     return actions(
         std::move(mutateState),
         MutateState(&Transition<StateEnum::ExpectingFinished>));

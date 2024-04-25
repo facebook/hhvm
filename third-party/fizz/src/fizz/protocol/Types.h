@@ -24,6 +24,22 @@ enum class PskType {
 };
 
 /**
+ * `isPskAccepted` returning true implies that the handshake negotiated a PSK to
+ * be used.
+ */
+inline bool isPskAccepted(PskType t) {
+  switch (t) {
+    case PskType::NotSupported:
+    case PskType::NotAttempted:
+    case PskType::Rejected:
+      return false;
+    case PskType::External:
+    case PskType::Resumption:
+      return true;
+  }
+}
+
+/**
  * Encryption level for the TLS layer.
  */
 enum class EncryptionLevel { Plaintext, Handshake, EarlyData, AppTraffic };

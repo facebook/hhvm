@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 
+#include <fmt/format.h>
 #include <folly/Likely.h>
 #include <folly/Portability.h>
 #include <folly/Utility.h>
@@ -67,14 +68,16 @@ class PluggableFunction<Ret(Args...)> {
  public:
   using signature = Ret(Args...);
 
-  constexpr explicit PluggableFunction(signature& init) noexcept
-      : init_{init} {}
+  constexpr explicit PluggableFunction(
+      signature& init, const char* name) noexcept
+      : init_{init}, name_{name} {}
 
   const PluggableFunction& operator=(signature& next) const noexcept {
     if (auto prev = impl_.exchange(&next)) {
-      auto msg = prev == &init_
-          ? "pluggable function: override after invocation"
-          : "pluggable function: override after override";
+      auto reason = prev == &init_
+          ? " pluggable function: override after invocation"
+          : " pluggable function: override after override";
+      std::string msg = fmt::format("[{}] {}", name_, reason);
       folly::terminate_with<std::logic_error>(msg);
     }
     return *this;
@@ -105,6 +108,7 @@ class PluggableFunction<Ret(Args...)> {
   //  impl_ should be first to avoid extra arithmetic in the fast path
   mutable folly::relaxed_atomic<signature*> impl_{nullptr};
   signature& init_;
+  const char* name_;
 };
 
 } // namespace detail
@@ -119,7 +123,7 @@ class PluggableFunction<Ret(Args...)> {
 #define THRIFT_PLUGGABLE_FUNC_REGISTER(_ret, _name, ...)                     \
   FOLLY_STORAGE_CONSTEXPR const ::apache::thrift::detail::PluggableFunction< \
       _ret(__VA_ARGS__)>                                                     \
-      _name{THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name};                         \
+      _name{THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name, #_name};                 \
   _ret THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name(__VA_ARGS__)
 
 #define THRIFT_PLUGGABLE_FUNC_SET(_ret, _name, ...)      \

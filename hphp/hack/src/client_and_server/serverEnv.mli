@@ -145,7 +145,8 @@ module RecheckLoopStats : sig
 
   val empty : recheck_id:string -> t
 
-  (** The format of this json is user-facing, returned from 'hh check --json' *)
+  (** The format of this json is user-facing, returned from 'hh check --json'
+      in field `last_recheck`. *)
   val to_user_telemetry : t -> Telemetry.t
 
   (** Update field [time_first_result] if given timestamp is the

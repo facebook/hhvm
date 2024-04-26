@@ -211,27 +211,39 @@ let to_string
   Buffer.contents buf
 
 let to_json ~filename_to_string error =
-  (* TODO @catg T179093379 add severity *)
-  let (error_code, msgl) = (get_code error, to_list error) in
+  let {
+    severity;
+    code;
+    claim;
+    reasons;
+    custom_msgs;
+    quickfixes = _;
+    is_fixmed = _;
+    flags;
+  } =
+    error
+  in
+  let msgl = claim :: reasons in
   let elts =
-    List.map msgl ~f:(fun (p, w) ->
+    List.map msgl ~f:(fun (p, msg) ->
         let (line, scol, ecol) = Pos.info_pos p in
         Hh_json.JSON_Object
           [
-            ("descr", Hh_json.JSON_String w);
+            ("descr", Hh_json.JSON_String msg);
             ("path", Hh_json.JSON_String (Pos.filename p |> filename_to_string));
             ("line", Hh_json.int_ line);
             ("start", Hh_json.int_ scol);
             ("end", Hh_json.int_ ecol);
-            ("code", Hh_json.int_ error_code);
+            ("code", Hh_json.int_ code);
           ])
   in
   let custom_msgs =
-    List.map ~f:(fun msg -> Hh_json.JSON_String msg) error.custom_msgs
+    List.map ~f:(fun msg -> Hh_json.JSON_String msg) custom_msgs
   in
-  let flags = User_error_flags.to_json error.flags in
+  let flags = User_error_flags.to_json flags in
   Hh_json.JSON_Object
     [
+      ("severity", Hh_json.JSON_String (Severity.to_string severity));
       ("message", Hh_json.JSON_Array elts);
       ("custom_messages", Hh_json.JSON_Array custom_msgs);
       ("flags", flags);

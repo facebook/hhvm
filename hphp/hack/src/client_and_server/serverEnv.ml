@@ -46,7 +46,8 @@ module RecheckLoopStats = struct
       any_full_checks = false;
     }
 
-  (** The format of this json is user-facing, returned from 'hh check --json' *)
+  (** The format of this json is user-facing, returned from 'hh check --json'
+      in field `last_recheck`. *)
   let to_user_telemetry (stats : t) : Telemetry.t =
     let {
       updates_stale;

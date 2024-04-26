@@ -330,10 +330,8 @@ void parse_include_srcs(
   auto paths = *include_srcs;
   std::string::size_type pos = 0;
   while (pos != std::string::npos && pos < paths.size()) {
-    mstch::map node;
     std::string::size_type next_pos = paths.find(':', pos);
-    node["program:include_src"] = paths.substr(pos, next_pos - pos);
-    elements.push_back(std::move(node));
+    elements.push_back(paths.substr(pos, next_pos - pos));
     pos = ((next_pos == std::string::npos) ? next_pos : next_pos + 1);
   }
 }

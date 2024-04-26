@@ -16,8 +16,8 @@
 
 #include <thrift/compiler/ast/t_function.h>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_interaction.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 
 namespace apache {
 namespace thrift {
@@ -38,7 +38,7 @@ t_function::t_function(
     return_type_ = return_type;
     has_return_type_ = true;
   } else {
-    return_type_ = t_type_ref::from_ptr(&t_base_type::t_void());
+    return_type_ = t_type_ref::from_ptr(&t_primitive_type::t_void());
   }
   if (!params_) {
     params_ = std::make_unique<t_paramlist>(program);

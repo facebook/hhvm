@@ -27,7 +27,6 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/node_list.h>
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_exception.h>
@@ -37,6 +36,7 @@
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_package.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_set.h>

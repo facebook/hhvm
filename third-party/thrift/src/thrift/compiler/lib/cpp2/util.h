@@ -25,10 +25,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_function.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_struct.h>

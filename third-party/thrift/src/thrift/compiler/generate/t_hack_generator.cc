@@ -207,7 +207,7 @@ class t_hack_generator : public t_concat_generator {
     THRIFT_VOID_TYPE = 10,
   };
 
-  ThriftPrimitiveType base_to_t_primitive(const t_base_type* base_type);
+  ThriftPrimitiveType base_to_t_primitive(const t_primitive_type* base_type);
 
   std::unique_ptr<t_const_value> type_to_tmeta(const t_type* type);
   std::unique_ptr<t_const_value> field_to_tmeta(const t_field* field);
@@ -1256,34 +1256,35 @@ void t_hack_generator::generate_json_field(
     generate_json_container(out, namer, tconatiner, name, prefix_json);
   } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
     generate_json_enum(out, namer, tenum, name, prefix_json);
-  } else if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+  } else if (
+      const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     std::string typeConversionString = "";
     std::string number_limit = "";
     switch (tbase_type->get_base()) {
-      case t_base_type::TYPE_VOID:
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
-      case t_base_type::TYPE_BOOL:
-      case t_base_type::TYPE_I64:
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_VOID:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_I64:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         break;
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         number_limit = "0x7f";
         typeConversionString = "(int)";
         break;
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         number_limit = "0x7fff";
         typeConversionString = "(int)";
         break;
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         number_limit = "0x7fffffff";
         typeConversionString = "(int)";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no PHP reader for base type " +
-            t_base_type::t_base_name(tbase_type->get_base()) + name);
+            t_primitive_type::t_base_name(tbase_type->get_base()) + name);
     }
 
     if (number_limit.empty()) {
@@ -1405,11 +1406,11 @@ void t_hack_generator::generate_json_map_element(
   if (!keytype->is_enum() && !keytype->is_base_type()) {
     throw error_msg;
   }
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(keytype)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(keytype)) {
     switch (tbase_type->get_base()) {
-      case t_base_type::TYPE_VOID:
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_VOID:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         throw error_msg;
       default:
         break;
@@ -1931,23 +1932,23 @@ std::string t_hack_generator::render_const_value_helper(
     return val;
   }
 
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     switch (tbase_type->get_base()) {
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         out << render_string(value->get_string());
         break;
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         out << (value->get_integer() > 0 ? "true" : "false");
         break;
-      case t_base_type::TYPE_BYTE:
-      case t_base_type::TYPE_I16:
-      case t_base_type::TYPE_I32:
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::TYPE_I64:
         out << value->get_integer();
         break;
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         if (value->kind() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
         } else {
@@ -1961,7 +1962,7 @@ std::string t_hack_generator::render_const_value_helper(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_base_type::t_base_name(tbase_type->get_base()));
+            t_primitive_type::t_base_name(tbase_type->get_base()));
     }
   } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
     const t_enum_value* val = tenum->find_value(value->get_integer());
@@ -2049,7 +2050,7 @@ std::string t_hack_generator::render_const_value_helper(
         }
         if (v != nullptr) {
           indent(out) << render_const_value_helper(
-                             &t_base_type::t_string(),
+                             &t_primitive_type::t_string(),
                              k,
                              temp_var_initializations_out,
                              namer,
@@ -2205,30 +2206,30 @@ std::string t_hack_generator::render_const_value_helper(
 std::string t_hack_generator::render_default_value(const t_type* type) {
   std::string dval;
   type = type->get_true_type();
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
-    t_base_type::t_base tbase = tbase_type->get_base();
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
+    t_primitive_type::t_base tbase = tbase_type->get_base();
     switch (tbase) {
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         dval = "''";
         break;
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         dval = "false";
         break;
-      case t_base_type::TYPE_BYTE:
-      case t_base_type::TYPE_I16:
-      case t_base_type::TYPE_I32:
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::TYPE_I64:
         dval = "0";
         break;
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         dval = "0.0";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_base_type::t_base_name(tbase));
+            t_primitive_type::t_base_name(tbase));
     }
   } else if (type->is_enum()) {
     dval = "null";
@@ -2263,32 +2264,32 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
 }
 
 t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
-    const t_base_type* tbase) {
+    const t_primitive_type* tbase) {
   switch (tbase->get_base()) {
-    case t_base_type::TYPE_BOOL:
+    case t_primitive_type::TYPE_BOOL:
       return ThriftPrimitiveType::THRIFT_BOOL_TYPE;
-    case t_base_type::TYPE_BYTE:
+    case t_primitive_type::TYPE_BYTE:
       return ThriftPrimitiveType::THRIFT_BYTE_TYPE;
-    case t_base_type::TYPE_I16:
+    case t_primitive_type::TYPE_I16:
       return ThriftPrimitiveType::THRIFT_I16_TYPE;
-    case t_base_type::TYPE_I32:
+    case t_primitive_type::TYPE_I32:
       return ThriftPrimitiveType::THRIFT_I32_TYPE;
-    case t_base_type::TYPE_I64:
+    case t_primitive_type::TYPE_I64:
       return ThriftPrimitiveType::THRIFT_I64_TYPE;
-    case t_base_type::TYPE_FLOAT:
+    case t_primitive_type::TYPE_FLOAT:
       return ThriftPrimitiveType::THRIFT_FLOAT_TYPE;
-    case t_base_type::TYPE_DOUBLE:
+    case t_primitive_type::TYPE_DOUBLE:
       return ThriftPrimitiveType::THRIFT_DOUBLE_TYPE;
-    case t_base_type::TYPE_BINARY:
+    case t_primitive_type::TYPE_BINARY:
       return ThriftPrimitiveType::THRIFT_BINARY_TYPE;
-    case t_base_type::TYPE_STRING:
+    case t_primitive_type::TYPE_STRING:
       return ThriftPrimitiveType::THRIFT_STRING_TYPE;
-    case t_base_type::TYPE_VOID:
+    case t_primitive_type::TYPE_VOID:
       return ThriftPrimitiveType::THRIFT_VOID_TYPE;
     default:
       throw std::invalid_argument(
           "compiler error: no ThriftPrimitiveType mapped to base type " +
-          t_base_type::t_base_name(tbase->get_base()));
+          t_primitive_type::t_base_name(tbase->get_base()));
   }
 }
 
@@ -2296,7 +2297,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
     const t_type* type) {
   auto tmeta_ThriftType = t_const_value::make_map();
 
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_primitive"),
         std::make_unique<t_const_value>(base_to_t_primitive(tbase_type)));
@@ -2658,13 +2659,14 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
   set_type.append(std::make_unique<t_field>(&type, "valueType"));
   map_type.append(std::make_unique<t_field>(&type, "keyType"));
   map_type.append(std::make_unique<t_field>(&type, "valueType"));
-  enum_type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  enum_type.append(
+      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   struct_type.append(
-      std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   union_type.append(
-      std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   typedef_type.append(
-      std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+      std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   typedef_type.append(std::make_unique<t_field>(&type, "underlyingType"));
   stream_type.append(std::make_unique<t_field>(&type, "elemType"));
   stream_type.append(std::make_unique<t_field>(&type, "initialResponseType"));
@@ -2692,10 +2694,11 @@ const t_type* t_hack_generator::tmeta_ThriftField_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_i64(), "id"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_i64(), "id"));
   type.append(std::make_unique<t_field>(tmeta_ThriftType_type(), "type"));
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(&t_base_type::t_bool(), "is_optional"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
+  type.append(
+      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_optional"));
   return &type;
 }
 
@@ -2707,12 +2710,13 @@ const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   type.append(
       std::make_unique<t_field>(tmeta_ThriftType_type(), "return_type"));
   type.append(std::make_unique<t_field>(&tlist, "arguments"));
   type.append(std::make_unique<t_field>(&tlist, "exceptions"));
-  type.append(std::make_unique<t_field>(&t_base_type::t_bool(), "is_oneway"));
+  type.append(
+      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_oneway"));
   return &type;
 }
 
@@ -2724,21 +2728,22 @@ const t_type* t_hack_generator::tmeta_ThriftService_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   type.append(std::make_unique<t_field>(&tlist, "functions"));
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "parent"));
+  type.append(
+      std::make_unique<t_field>(&t_primitive_type::t_string(), "parent"));
   return &type;
 }
 
 const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
   static t_program empty_program("");
   static t_struct type(&empty_program, "tmeta_ThriftEnum");
-  static t_map tmap(&t_base_type::t_i32(), &t_base_type::t_string());
+  static t_map tmap(&t_primitive_type::t_i32(), &t_primitive_type::t_string());
   if (type.has_fields()) {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   type.append(std::make_unique<t_field>(&tmap, "elements"));
   return &type;
 }
@@ -2751,9 +2756,10 @@ const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   type.append(std::make_unique<t_field>(&tlist, "fields"));
-  type.append(std::make_unique<t_field>(&t_base_type::t_bool(), "is_union"));
+  type.append(
+      std::make_unique<t_field>(&t_primitive_type::t_bool(), "is_union"));
   return &type;
 }
 
@@ -2765,7 +2771,7 @@ const t_type* t_hack_generator::tmeta_ThriftException_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(&t_base_type::t_string(), "name"));
+  type.append(std::make_unique<t_field>(&t_primitive_type::t_string(), "name"));
   type.append(std::make_unique<t_field>(&tlist, "fields"));
   return &type;
 }
@@ -2773,13 +2779,14 @@ const t_type* t_hack_generator::tmeta_ThriftException_type() {
 const t_type* t_hack_generator::tmeta_ThriftMetadata_type() {
   static t_program empty_program("");
   static t_struct type(&empty_program, "tmeta_ThriftMetadata");
-  static t_map tmap_enums(&t_base_type::t_string(), tmeta_ThriftEnum_type());
+  static t_map tmap_enums(
+      &t_primitive_type::t_string(), tmeta_ThriftEnum_type());
   static t_map tmap_structs(
-      &t_base_type::t_string(), tmeta_ThriftStruct_type());
+      &t_primitive_type::t_string(), tmeta_ThriftStruct_type());
   static t_map tmap_exceptions(
-      &t_base_type::t_string(), tmeta_ThriftException_type());
+      &t_primitive_type::t_string(), tmeta_ThriftException_type());
   static t_map tmap_services(
-      &t_base_type::t_string(), tmeta_ThriftService_type());
+      &t_primitive_type::t_string(), tmeta_ThriftService_type());
 
   if (type.has_fields()) {
     return &type;
@@ -2913,8 +2920,8 @@ void t_hack_generator::generate_php_type_spec(
   }
   t = t->get_true_type();
   indent(out) << "'type' => " << type_to_enum(t) << ",\n";
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(t)) {
-    if (tbase_type->get_base() == t_base_type::TYPE_BINARY) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(t)) {
+    if (tbase_type->get_base() == t_primitive_type::TYPE_BINARY) {
       indent(out) << "'is_binary' => true,\n";
     }
   }
@@ -6506,21 +6513,21 @@ std::string t_hack_generator::type_to_typehint(
 
   ttype = ttype->get_true_type();
   if (ttype->is_base_type()) {
-    switch ((dynamic_cast<const t_base_type*>(ttype))->get_base()) {
-      case t_base_type::TYPE_VOID:
+    switch ((dynamic_cast<const t_primitive_type*>(ttype))->get_base()) {
+      case t_primitive_type::TYPE_VOID:
         return "void";
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         return "string";
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         return "bool";
-      case t_base_type::TYPE_BYTE:
-      case t_base_type::TYPE_I16:
-      case t_base_type::TYPE_I32:
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::TYPE_I64:
         return "int";
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         return "float";
       default:
         return "mixed";
@@ -7306,31 +7313,31 @@ std::string t_hack_generator::declare_field(
   std::string result = "$" + tfield->name();
   if (init) {
     const t_type* type = tfield->get_type()->get_true_type();
-    if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+    if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
       switch (tbase_type->get_base()) {
-        case t_base_type::TYPE_VOID:
+        case t_primitive_type::TYPE_VOID:
           break;
-        case t_base_type::TYPE_STRING:
-        case t_base_type::TYPE_BINARY:
+        case t_primitive_type::TYPE_STRING:
+        case t_primitive_type::TYPE_BINARY:
           result += " = ''";
           break;
-        case t_base_type::TYPE_BOOL:
+        case t_primitive_type::TYPE_BOOL:
           result += " = false";
           break;
-        case t_base_type::TYPE_BYTE:
-        case t_base_type::TYPE_I16:
-        case t_base_type::TYPE_I32:
-        case t_base_type::TYPE_I64:
+        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::TYPE_I64:
           result += " = 0";
           break;
-        case t_base_type::TYPE_DOUBLE:
-        case t_base_type::TYPE_FLOAT:
+        case t_primitive_type::TYPE_DOUBLE:
+        case t_primitive_type::TYPE_FLOAT:
           result += " = 0.0";
           break;
         default:
           throw std::runtime_error(
               "compiler error: no Hack initializer for base type " +
-              t_base_type::t_base_name(tbase_type->get_base()));
+              t_primitive_type::t_base_name(tbase_type->get_base()));
       }
     } else if (type->is_enum()) {
       result += " = null";
@@ -7465,20 +7472,20 @@ std::string t_hack_generator::generate_function_helper_name(
  * Gets a typecast string for a particular type.
  */
 std::string t_hack_generator::type_to_cast(const t_type* type) {
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     switch (tbase_type->get_base()) {
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         return "(bool)";
-      case t_base_type::TYPE_BYTE:
-      case t_base_type::TYPE_I16:
-      case t_base_type::TYPE_I32:
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_I16:
+      case t_primitive_type::TYPE_I32:
+      case t_primitive_type::TYPE_I64:
         return "(int)";
-      case t_base_type::TYPE_DOUBLE:
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_FLOAT:
         return "(float)";
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         return "(string)";
       default:
         return "";
@@ -7495,26 +7502,26 @@ std::string t_hack_generator::type_to_cast(const t_type* type) {
 std::string t_hack_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     switch (tbase_type->get_base()) {
-      case t_base_type::TYPE_VOID:
+      case t_primitive_type::TYPE_VOID:
         throw std::runtime_error("NO T_VOID CONSTRUCT");
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         return "\\TType::STRING";
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         return "\\TType::BOOL";
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         return "\\TType::BYTE";
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         return "\\TType::I16";
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         return "\\TType::I32";
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         return "\\TType::I64";
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         return "\\TType::DOUBLE";
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         return "\\TType::FLOAT";
     }
   } else if (type->is_enum()) {

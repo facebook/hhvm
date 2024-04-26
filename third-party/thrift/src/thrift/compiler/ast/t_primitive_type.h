@@ -30,7 +30,7 @@ namespace compiler {
  * this definition.
  *
  */
-class t_base_type : public t_type {
+class t_primitive_type : public t_type {
  public:
   /**
    * The subset of t_type::type that are base types.
@@ -49,16 +49,16 @@ class t_base_type : public t_type {
   };
 
   // A singleton per type.
-  static const t_base_type& t_void();
-  static const t_base_type& t_string();
-  static const t_base_type& t_binary();
-  static const t_base_type& t_bool();
-  static const t_base_type& t_byte();
-  static const t_base_type& t_i16();
-  static const t_base_type& t_i32();
-  static const t_base_type& t_i64();
-  static const t_base_type& t_double();
-  static const t_base_type& t_float();
+  static const t_primitive_type& t_void();
+  static const t_primitive_type& t_string();
+  static const t_primitive_type& t_binary();
+  static const t_primitive_type& t_bool();
+  static const t_primitive_type& t_byte();
+  static const t_primitive_type& t_i16();
+  static const t_primitive_type& t_i32();
+  static const t_primitive_type& t_i64();
+  static const t_primitive_type& t_double();
+  static const t_primitive_type& t_float();
 
   // Returns the name for the given type.
   using t_type::type_name;
@@ -70,14 +70,14 @@ class t_base_type : public t_type {
 
   // TODO(afuller): Disable copy constructor, and use
   // 'anonymous' typdefs instead.
-  // t_base_type(const t_base_type&) = delete;
+  // t_primitive_type(const t_primitive_type&) = delete;
 
   std::string get_full_name() const override { return type_name(base_type_); }
 
  private:
   type base_type_;
 
-  t_base_type(std::string name, type base_type)
+  t_primitive_type(std::string name, type base_type)
       : t_type(std::move(name)), base_type_(base_type) {}
 
   // TODO(afuller): Remove everything below here. It is provided only for

@@ -20,11 +20,11 @@
 #include <unordered_map>
 #include <utility>
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_paramlist.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_struct.h>
 

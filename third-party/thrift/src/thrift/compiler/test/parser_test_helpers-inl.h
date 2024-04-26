@@ -36,13 +36,13 @@ class func_signature_helper {
   template <typename>
   struct dummy {};
   static std::unique_ptr<t_type> get_type(dummy<void>) {
-    return std::make_unique<t_base_type>(t_base_type::t_void());
+    return std::make_unique<t_primitive_type>(t_primitive_type::t_void());
   }
   static std::unique_ptr<t_type> get_type(dummy<int>) {
-    return std::make_unique<t_base_type>(t_base_type::t_i32());
+    return std::make_unique<t_primitive_type>(t_primitive_type::t_i32());
   }
   static std::unique_ptr<t_type> get_type(dummy<double>) {
-    return std::make_unique<t_base_type>(t_base_type::t_double());
+    return std::make_unique<t_primitive_type>(t_primitive_type::t_double());
   }
 };
 

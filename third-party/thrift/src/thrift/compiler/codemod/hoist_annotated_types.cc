@@ -265,7 +265,7 @@ class hoist_annotated_types {
     if (dynamic_cast<const t_container*>(ptr)) {
       return true;
     }
-    if (dynamic_cast<const t_base_type*>(ptr)) {
+    if (dynamic_cast<const t_primitive_type*>(ptr)) {
       return true;
     }
     if (auto t = dynamic_cast<const t_typedef*>(ptr)) {

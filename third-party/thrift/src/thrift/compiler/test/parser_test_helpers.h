@@ -21,9 +21,9 @@
 
 #include <fmt/format.h>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_function.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
 

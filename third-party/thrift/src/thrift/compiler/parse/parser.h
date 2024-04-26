@@ -32,7 +32,7 @@ namespace compiler {
 class diagnostics_engine;
 class lexer;
 
-class t_base_type;
+class t_primitive_type;
 class t_sink;
 class t_stream;
 class t_throws;
@@ -189,7 +189,7 @@ class parser_actions {
 
   virtual t_type_ref on_type(
       source_range range,
-      const t_base_type& type,
+      const t_primitive_type& type,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual t_type_ref on_type(

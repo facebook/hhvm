@@ -25,10 +25,10 @@
 
 #include <fmt/core.h>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_named.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
@@ -186,7 +186,7 @@ class type_resolver {
   static const std::string* get_string_from_annotation_or_null(
       const t_named& node, const char* uri, const char* key);
 
-  static const std::string& default_type(t_base_type::type btype);
+  static const std::string& default_type(t_primitive_type::type btype);
   static const std::string& default_template(t_container::type ctype);
 
   const std::string& get_namespace(const t_program& program);

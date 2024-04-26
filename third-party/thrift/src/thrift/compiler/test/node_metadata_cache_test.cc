@@ -24,21 +24,21 @@ namespace {
 
 TEST(NodeMetadataCacheTest, Cache) {
   node_metadata_cache cache;
-  EXPECT_EQ(cache.get<int>(t_base_type::t_bool()), 0);
+  EXPECT_EQ(cache.get<int>(t_primitive_type::t_bool()), 0);
   EXPECT_EQ(
-      &cache.get<int>(t_base_type::t_bool()),
-      &cache.get<int>(t_base_type::t_bool()));
+      &cache.get<int>(t_primitive_type::t_bool()),
+      &cache.get<int>(t_primitive_type::t_bool()));
   EXPECT_EQ(
       cache.get(
-          t_base_type::t_i32(), []() { return std::make_unique<int>(1); }),
+          t_primitive_type::t_i32(), []() { return std::make_unique<int>(1); }),
       1);
   EXPECT_NE(
-      &cache.get<int>(t_base_type::t_bool()),
-      &cache.get<int>(t_base_type::t_i32()));
-  cache.get<int>(t_base_type::t_bool()) = 2;
-  EXPECT_EQ(cache.get<int>(t_base_type::t_bool()), 2);
-  EXPECT_EQ(cache.get<int>(t_base_type::t_i32()), 1);
-  EXPECT_EQ(cache.get<float>(t_base_type::t_i32()), 0.0);
+      &cache.get<int>(t_primitive_type::t_bool()),
+      &cache.get<int>(t_primitive_type::t_i32()));
+  cache.get<int>(t_primitive_type::t_bool()) = 2;
+  EXPECT_EQ(cache.get<int>(t_primitive_type::t_bool()), 2);
+  EXPECT_EQ(cache.get<int>(t_primitive_type::t_i32()), 1);
+  EXPECT_EQ(cache.get<float>(t_primitive_type::t_i32()), 0.0);
 }
 
 } // namespace

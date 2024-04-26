@@ -388,9 +388,9 @@ class ast_builder : public parser_actions {
     }
 
     // Make a copy of the node to hold the annotations.
-    if (const auto* tbase_type = dynamic_cast<const t_base_type*>(&type)) {
+    if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&type)) {
       // Base types can be copy constructed.
-      auto node = std::make_unique<t_base_type>(*tbase_type);
+      auto node = std::make_unique<t_primitive_type>(*tbase_type);
       set_annotations(node.get(), std::move(annotations));
       t_type_ref result(*node, range);
       program_.add_unnamed_type(std::move(node));
@@ -823,7 +823,7 @@ class ast_builder : public parser_actions {
 
   t_type_ref on_type(
       source_range range,
-      const t_base_type& type,
+      const t_primitive_type& type,
       std::unique_ptr<deprecated_annotations> annotations) override {
     return new_type_ref(type, std::move(annotations), range);
   }

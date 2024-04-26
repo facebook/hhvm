@@ -23,7 +23,7 @@ namespace thrift {
 namespace compiler {
 
 class diagnostic_context;
-class t_base_type;
+class t_primitive_type;
 class t_named;
 class t_type;
 

@@ -291,42 +291,42 @@ const std::string& type_resolver::default_template(t_container::type ctype) {
       "unknown container type: " + std::to_string(static_cast<int>(ctype)));
 }
 
-const std::string& type_resolver::default_type(t_base_type::type btype) {
+const std::string& type_resolver::default_type(t_primitive_type::type btype) {
   switch (btype) {
-    case t_base_type::type::t_void: {
+    case t_primitive_type::type::t_void: {
       static const auto& kValue = *new std::string("void");
       return kValue;
     }
-    case t_base_type::type::t_bool: {
+    case t_primitive_type::type::t_bool: {
       static const auto& kValue = *new std::string("bool");
       return kValue;
     }
-    case t_base_type::type::t_byte: {
+    case t_primitive_type::type::t_byte: {
       static const auto& kValue = *new std::string("::std::int8_t");
       return kValue;
     }
-    case t_base_type::type::t_i16: {
+    case t_primitive_type::type::t_i16: {
       static const auto& kValue = *new std::string("::std::int16_t");
       return kValue;
     }
-    case t_base_type::type::t_i32: {
+    case t_primitive_type::type::t_i32: {
       static const auto& kValue = *new std::string("::std::int32_t");
       return kValue;
     }
-    case t_base_type::type::t_i64: {
+    case t_primitive_type::type::t_i64: {
       static const auto& kValue = *new std::string("::std::int64_t");
       return kValue;
     }
-    case t_base_type::type::t_float: {
+    case t_primitive_type::type::t_float: {
       static const auto& kValue = *new std::string("float");
       return kValue;
     }
-    case t_base_type::type::t_double: {
+    case t_primitive_type::type::t_double: {
       static const auto& kValue = *new std::string("double");
       return kValue;
     }
-    case t_base_type::type::t_string:
-    case t_base_type::type::t_binary: {
+    case t_primitive_type::type::t_string:
+    case t_primitive_type::type::t_binary: {
       static const auto& kValue = *new std::string("::std::string");
       return kValue;
     }
@@ -402,7 +402,7 @@ std::string type_resolver::gen_storage_type(
 std::string type_resolver::gen_standard_type(
     const t_type& node, type_resolve_fn resolve_fn) {
   // Base types have fixed type mappings.
-  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(&node)) {
+  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&node)) {
     return default_type(tbase_type->base_type());
   }
 

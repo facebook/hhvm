@@ -81,7 +81,7 @@ TEST_F(StandardMutatorTest, Empty) {
 TEST_F(StandardMutatorTest, TerseWriteField) {
   t_program* program = root_program();
   auto terse_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "terse_field", 1);
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);
   auto strct = std::make_unique<t_struct>(program, "struct");
 
   // Store pointer for testing purpose.
@@ -102,11 +102,11 @@ TEST_F(StandardMutatorTest, TerseWriteField) {
 TEST_F(StandardMutatorTest, TerseWriteStruct) {
   t_program* program = root_program();
   auto terse_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "terse_field", 1);
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);
   auto optional_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "optional_field", 2);
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "optional_field", 2);
   auto required_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "required_field", 3);
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "required_field", 3);
   auto strct = std::make_unique<t_struct>(program, "struct");
 
   optional_field->set_qualifier(t_field_qualifier::optional);
@@ -138,7 +138,7 @@ TEST_F(StandardMutatorTest, TerseWriteStruct) {
 TEST_F(StandardMutatorTest, Transitive) {
   t_program* program = root_program();
   auto terse_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "terse_field", 1);
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);
   auto strct = std::make_unique<t_struct>(program, "struct");
 
   // Store pointer for testing purpose.

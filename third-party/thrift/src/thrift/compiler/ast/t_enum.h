@@ -23,9 +23,9 @@
 #include <vector>
 
 #include <thrift/compiler/ast/node_list.h>
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum_value.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
 
 namespace apache {

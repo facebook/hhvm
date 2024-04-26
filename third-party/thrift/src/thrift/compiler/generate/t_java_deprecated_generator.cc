@@ -416,10 +416,10 @@ string t_java_deprecated_generator::render_const_value(
   type = type->get_true_type();
   std::ostringstream render;
   if (type->is_base_type()) {
-    t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
+    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
     switch (tbase) {
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         render << '"';
         for (unsigned char c : value->get_string()) {
           switch (c) {
@@ -442,33 +442,33 @@ string t_java_deprecated_generator::render_const_value(
           }
         }
         render << '"';
-        if (tbase == t_base_type::TYPE_BINARY) {
+        if (tbase == t_primitive_type::TYPE_BINARY) {
           render << ".getBytes()";
         }
         break;
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         render << ((value->get_integer() > 0) ? "true" : "false");
         break;
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         render << "(byte)" << value->get_integer();
         break;
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         render << "(short)" << value->get_integer();
         break;
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         render << value->get_integer();
         break;
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         render << value->get_integer() << "L";
         break;
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         if (value->kind() == t_const_value::CV_INTEGER) {
           render << "(double)" << value->get_integer();
         } else {
           render << value->get_double();
         }
         break;
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         if (value->kind() == t_const_value::CV_INTEGER) {
           render << "(float)" << value->get_integer();
         } else {
@@ -478,7 +478,7 @@ string t_java_deprecated_generator::render_const_value(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_base_type::t_base_name(tbase));
+            t_primitive_type::t_base_name(tbase));
     }
   } else if (type->is_enum()) {
     std::string namespace_prefix =
@@ -1862,7 +1862,7 @@ void t_java_deprecated_generator::generate_reflection_getters(
   indent_up();
 
   if (type->is_base_type() && !type->is_string_or_binary()) {
-    t_base_type* base_type = (t_base_type*)type;
+    t_primitive_type* base_type = (t_primitive_type*)type;
 
     indent(out) << "return new " << type_name(type, true, false) << "("
                 << (base_type->is_bool() ? "is" : "get") << cap_name << "());"
@@ -1968,7 +1968,7 @@ std::string t_java_deprecated_generator::get_simple_getter_name(
   const t_type* type = field->get_type()->get_true_type();
 
   if (type->is_base_type() &&
-      ((t_base_type*)type)->get_base() == t_base_type::TYPE_BOOL) {
+      ((t_primitive_type*)type)->get_base() == t_primitive_type::TYPE_BOOL) {
     return "is" + cap_name;
   } else {
     return "get" + cap_name;
@@ -2278,25 +2278,25 @@ std::string t_java_deprecated_generator::get_java_type_string(
   } else if (type->is_typedef()) {
     return get_java_type_string(((t_typedef*)type)->get_type());
   } else if (type->is_base_type()) {
-    switch (((t_base_type*)type)->get_base()) {
-      case t_base_type::TYPE_VOID:
+    switch (((t_primitive_type*)type)->get_base()) {
+      case t_primitive_type::TYPE_VOID:
         return "TType.VOID";
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         return "TType.STRING";
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         return "TType.BOOL";
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         return "TType.BYTE";
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         return "TType.I16";
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         return "TType.I32";
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         return "TType.I64";
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         return "TType.DOUBLE";
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         return "TType.FLOAT";
       default:
         throw std::runtime_error(
@@ -2574,7 +2574,7 @@ void t_java_deprecated_generator::generate_service_client(
 
     t_function send_function(
         nullptr,
-        t_type_ref::from_req_ptr(&t_base_type::t_void()),
+        t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
         string("send_") + (*f_iter)->get_name(),
         t_struct::clone_DO_NOT_USE(&(*f_iter)->params()));
 
@@ -3250,42 +3250,42 @@ void t_java_deprecated_generator::generate_deserialize_field(
                 << ".findByValue(iprot.readI32());" << endl;
   } else if (type->is_base_type()) {
     indent(out) << name << " = iprot.";
-    t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
+    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
     switch (tbase) {
-      case t_base_type::TYPE_VOID:
+      case t_primitive_type::TYPE_VOID:
         throw std::runtime_error(
             "compiler error: cannot serialize void field in a struct: " + name);
-      case t_base_type::TYPE_STRING:
+      case t_primitive_type::TYPE_STRING:
         out << "readString();";
         break;
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_BINARY:
         out << "readBinary();";
         break;
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         out << "readBool();";
         break;
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         out << "readByte();";
         break;
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         out << "readI16();";
         break;
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         out << "readI32();";
         break;
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         out << "readI64();";
         break;
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         out << "readDouble();";
         break;
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         out << "readFloat();";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no Java name for base type " +
-            t_base_type::t_base_name(tbase));
+            t_primitive_type::t_base_name(tbase));
     }
     out << endl;
   } else {
@@ -3470,42 +3470,42 @@ void t_java_deprecated_generator::generate_serialize_field(
     string name = prefix + tfield->get_name();
     indent(out) << "oprot.";
 
-    t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
+    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
     switch (tbase) {
-      case t_base_type::TYPE_VOID:
+      case t_primitive_type::TYPE_VOID:
         throw std::runtime_error(
             "compiler error: cannot serialize void field in a struct: " + name);
-      case t_base_type::TYPE_STRING:
+      case t_primitive_type::TYPE_STRING:
         out << "writeString(" << name << ");";
         break;
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_BINARY:
         out << "writeBinary(" << name << ");";
         break;
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         out << "writeBool(" << name << ");";
         break;
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         out << "writeByte(" << name << ");";
         break;
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         out << "writeI16(" << name << ");";
         break;
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         out << "writeI32(" << name << ");";
         break;
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         out << "writeI64(" << name << ");";
         break;
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         out << "writeDouble(" << name << ");";
         break;
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         out << "writeFloat(" << name << ");";
         break;
       default:
         throw std::runtime_error(
             "compiler error: no Java name for base type " +
-            t_base_type::t_base_name(tbase));
+            t_primitive_type::t_base_name(tbase));
     }
     out << endl;
   } else {
@@ -3635,7 +3635,7 @@ string t_java_deprecated_generator::type_name(
   string prefix;
 
   if (ttype->is_base_type()) {
-    return base_type_name((t_base_type*)ttype, in_container);
+    return base_type_name((t_primitive_type*)ttype, in_container);
   } else if (ttype->is_map()) {
     const t_map* tmap = (t_map*)ttype;
     if (in_init) {
@@ -3688,35 +3688,35 @@ string t_java_deprecated_generator::type_name(
  * @param container Is it going in a Java container?
  */
 string t_java_deprecated_generator::base_type_name(
-    t_base_type* type, bool in_container) {
-  t_base_type::t_base tbase = type->get_base();
+    t_primitive_type* type, bool in_container) {
+  t_primitive_type::t_base tbase = type->get_base();
   bool boxedPrimitive = in_container || generate_boxed_primitive;
 
   switch (tbase) {
-    case t_base_type::TYPE_VOID:
+    case t_primitive_type::TYPE_VOID:
       return "void";
-    case t_base_type::TYPE_STRING:
+    case t_primitive_type::TYPE_STRING:
       return "String";
-    case t_base_type::TYPE_BINARY:
+    case t_primitive_type::TYPE_BINARY:
       return "byte[]";
-    case t_base_type::TYPE_BOOL:
+    case t_primitive_type::TYPE_BOOL:
       return (boxedPrimitive ? "Boolean" : "boolean");
-    case t_base_type::TYPE_BYTE:
+    case t_primitive_type::TYPE_BYTE:
       return (boxedPrimitive ? "Byte" : "byte");
-    case t_base_type::TYPE_I16:
+    case t_primitive_type::TYPE_I16:
       return (boxedPrimitive ? "Short" : "short");
-    case t_base_type::TYPE_I32:
+    case t_primitive_type::TYPE_I32:
       return (boxedPrimitive ? "Integer" : "int");
-    case t_base_type::TYPE_I64:
+    case t_primitive_type::TYPE_I64:
       return (boxedPrimitive ? "Long" : "long");
-    case t_base_type::TYPE_DOUBLE:
+    case t_primitive_type::TYPE_DOUBLE:
       return (boxedPrimitive ? "Double" : "double");
-    case t_base_type::TYPE_FLOAT:
+    case t_primitive_type::TYPE_FLOAT:
       return (boxedPrimitive ? "Float" : "float");
     default:
       throw std::runtime_error(
           "compiler error: no C++ name for base type " +
-          t_base_type::t_base_name(tbase));
+          t_primitive_type::t_base_name(tbase));
   }
 }
 
@@ -3737,27 +3737,27 @@ string t_java_deprecated_generator::declare_field(
           render_const_value(
                     dummy, tfield->get_name(), ttype, tfield->get_value());
     } else if (ttype->is_base_type()) {
-      t_base_type::t_base tbase = ((t_base_type*)ttype)->get_base();
+      t_primitive_type::t_base tbase = ((t_primitive_type*)ttype)->get_base();
       switch (tbase) {
-        case t_base_type::TYPE_VOID:
+        case t_primitive_type::TYPE_VOID:
           throw std::runtime_error("NO T_VOID CONSTRUCT");
-        case t_base_type::TYPE_STRING:
-        case t_base_type::TYPE_BINARY:
+        case t_primitive_type::TYPE_STRING:
+        case t_primitive_type::TYPE_BINARY:
           result += " = null";
           break;
-        case t_base_type::TYPE_BOOL:
+        case t_primitive_type::TYPE_BOOL:
           result += " = false";
           break;
-        case t_base_type::TYPE_BYTE:
-        case t_base_type::TYPE_I16:
-        case t_base_type::TYPE_I32:
-        case t_base_type::TYPE_I64:
+        case t_primitive_type::TYPE_BYTE:
+        case t_primitive_type::TYPE_I16:
+        case t_primitive_type::TYPE_I32:
+        case t_primitive_type::TYPE_I64:
           result += " = 0";
           break;
-        case t_base_type::TYPE_DOUBLE:
+        case t_primitive_type::TYPE_DOUBLE:
           result += " = (double)0";
           break;
-        case t_base_type::TYPE_FLOAT:
+        case t_primitive_type::TYPE_FLOAT:
           result += " = (float)0";
           break;
       }
@@ -3888,26 +3888,26 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
   if (type->is_base_type()) {
-    t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
+    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
     switch (tbase) {
-      case t_base_type::TYPE_VOID:
+      case t_primitive_type::TYPE_VOID:
         throw std::runtime_error("NO T_VOID CONSTRUCT");
-      case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_primitive_type::TYPE_STRING:
+      case t_primitive_type::TYPE_BINARY:
         return "TType.STRING";
-      case t_base_type::TYPE_BOOL:
+      case t_primitive_type::TYPE_BOOL:
         return "TType.BOOL";
-      case t_base_type::TYPE_BYTE:
+      case t_primitive_type::TYPE_BYTE:
         return "TType.BYTE";
-      case t_base_type::TYPE_I16:
+      case t_primitive_type::TYPE_I16:
         return "TType.I16";
-      case t_base_type::TYPE_I32:
+      case t_primitive_type::TYPE_I32:
         return "TType.I32";
-      case t_base_type::TYPE_I64:
+      case t_primitive_type::TYPE_I64:
         return "TType.I64";
-      case t_base_type::TYPE_DOUBLE:
+      case t_primitive_type::TYPE_DOUBLE:
         return "TType.DOUBLE";
-      case t_base_type::TYPE_FLOAT:
+      case t_primitive_type::TYPE_FLOAT:
         return "TType.FLOAT";
     }
   } else if (type->is_enum()) {

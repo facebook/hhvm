@@ -483,7 +483,7 @@ class parser {
     switch (token_.kind) {
       case tok::kw_void:
         is_void = true;
-        ret.type = &t_base_type::t_void();
+        ret.type = &t_primitive_type::t_void();
         consume_token();
         break;
       case tok::kw_sink:
@@ -740,7 +740,7 @@ class parser {
   // the token as return_clause.
   t_type_ref parse_type() {
     auto range = track_range();
-    if (const t_base_type* type = try_parse_base_type()) {
+    if (const t_primitive_type* type = try_parse_base_type()) {
       return actions_.on_type(range, *type, try_parse_deprecated_annotations());
     }
     switch (token_.kind) {
@@ -785,27 +785,27 @@ class parser {
 
   // base_type: "bool" | "byte" | "i16" | "i32" | "i64" | "float" | "double" |
   //            "string" | "binary"
-  const t_base_type* try_parse_base_type() {
-    auto get_base_type = [this]() -> const t_base_type* {
+  const t_primitive_type* try_parse_base_type() {
+    auto get_base_type = [this]() -> const t_primitive_type* {
       switch (token_.kind) {
         case tok::kw_bool:
-          return &t_base_type::t_bool();
+          return &t_primitive_type::t_bool();
         case tok::kw_byte:
-          return &t_base_type::t_byte();
+          return &t_primitive_type::t_byte();
         case tok::kw_i16:
-          return &t_base_type::t_i16();
+          return &t_primitive_type::t_i16();
         case tok::kw_i32:
-          return &t_base_type::t_i32();
+          return &t_primitive_type::t_i32();
         case tok::kw_i64:
-          return &t_base_type::t_i64();
+          return &t_primitive_type::t_i64();
         case tok::kw_float:
-          return &t_base_type::t_float();
+          return &t_primitive_type::t_float();
         case tok::kw_double:
-          return &t_base_type::t_double();
+          return &t_primitive_type::t_double();
         case tok::kw_string:
-          return &t_base_type::t_string();
+          return &t_primitive_type::t_string();
         case tok::kw_binary:
-          return &t_base_type::t_binary();
+          return &t_primitive_type::t_binary();
         default:
           return nullptr;
       }

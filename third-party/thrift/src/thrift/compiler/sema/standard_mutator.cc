@@ -429,8 +429,8 @@ void lower_type_annotations(
   } else if (node_type->is_base_type()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
     auto& program = mCtx.program();
-    auto unnamed = std::make_unique<t_base_type>(
-        *static_cast<const t_base_type*>(node_type));
+    auto unnamed = std::make_unique<t_primitive_type>(
+        *static_cast<const t_primitive_type*>(node_type));
     for (auto& pair : unstructured) {
       unnamed->set_annotation(pair.first, pair.second);
     }

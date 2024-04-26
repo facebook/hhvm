@@ -243,7 +243,8 @@ class t_java_deprecated_generator : public t_concat_generator {
       bool in_container = false,
       bool in_init = false,
       bool skip_generic = false);
-  std::string base_type_name(t_base_type* tbase, bool in_container = false);
+  std::string base_type_name(
+      t_primitive_type* tbase, bool in_container = false);
   std::string declare_field(const t_field* tfield, bool init = false);
   std::string function_signature(
       const t_function* tfunction, std::string prefix = "");

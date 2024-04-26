@@ -27,11 +27,11 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_paramlist.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_type.h>
@@ -47,7 +47,7 @@ namespace {
 class UtilTest : public ::testing::Test {};
 
 TEST_F(UtilTest, is_orderable_set_template) {
-  t_set t(&t_base_type::t_double());
+  t_set t(&t_primitive_type::t_double());
   t.set_annotation("cpp2.template", "blah");
   t_program p("path/to/program.thrift");
   t_struct s(&p, "struct_name");
@@ -59,15 +59,15 @@ TEST_F(UtilTest, is_orderable_set_template) {
 TEST_F(UtilTest, is_orderable_struct) {
   t_program p("path/to/program.thrift");
   t_struct s(&p, "struct_name");
-  s.append(
-      std::make_unique<t_field>(&t_base_type::t_string(), "field_name", 1));
+  s.append(std::make_unique<t_field>(
+      &t_primitive_type::t_string(), "field_name", 1));
   EXPECT_TRUE(cpp2::is_orderable(s));
 }
 
 TEST_F(UtilTest, is_orderable_struct_self_reference) {
   t_program p("path/to/program.thrift");
 
-  t_set t(&t_base_type::t_double());
+  t_set t(&t_primitive_type::t_double());
   t.set_annotation("cpp2.template", "blah");
 
   t_struct c(&p, "C");
@@ -94,12 +94,12 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   auto is_eligible_for_constexpr = [](const t_type* t) {
     return cpp2::is_eligible_for_constexpr()(t);
   };
-  auto i32 = t_base_type::t_i32();
+  auto i32 = t_primitive_type::t_i32();
   EXPECT_TRUE(is_eligible_for_constexpr(&i32));
-  EXPECT_TRUE(is_eligible_for_constexpr(&t_base_type::t_double()));
-  EXPECT_TRUE(is_eligible_for_constexpr(&t_base_type::t_bool()));
-  EXPECT_FALSE(is_eligible_for_constexpr(&t_base_type::t_string()));
-  EXPECT_FALSE(is_eligible_for_constexpr(&t_base_type::t_binary()));
+  EXPECT_TRUE(is_eligible_for_constexpr(&t_primitive_type::t_double()));
+  EXPECT_TRUE(is_eligible_for_constexpr(&t_primitive_type::t_bool()));
+  EXPECT_FALSE(is_eligible_for_constexpr(&t_primitive_type::t_string()));
+  EXPECT_FALSE(is_eligible_for_constexpr(&t_primitive_type::t_binary()));
 
   auto list = t_list(&i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&list));
@@ -107,11 +107,11 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   auto set = t_set(&i32);
   EXPECT_FALSE(is_eligible_for_constexpr(&set));
 
-  auto map = t_map(&i32, &t_base_type::t_double());
+  auto map = t_map(&i32, &t_primitive_type::t_double());
   EXPECT_FALSE(is_eligible_for_constexpr(&map));
 
   for (auto a : {"cpp.indirection"}) {
-    auto ref = t_base_type::t_i32();
+    auto ref = t_primitive_type::t_i32();
     ref.set_annotation(a, "true");
     EXPECT_FALSE(is_eligible_for_constexpr(&ref));
   }
@@ -178,7 +178,7 @@ TEST_F(UtilTest, for_each_transitive_field) {
   //        d   e
   //             \
   //              f
-  auto i32 = t_base_type::t_i32();
+  auto i32 = t_primitive_type::t_i32();
   auto a = t_struct(&program, "a");
   auto b = t_struct(&program, "b");
   auto e = t_struct(&program, "e");
@@ -221,7 +221,7 @@ TEST_F(UtilTest, for_each_transitive_field) {
 }
 
 TEST_F(UtilTest, field_transitively_refers_to_unique) {
-  auto i = t_base_type::t_i32();
+  auto i = t_primitive_type::t_i32();
   auto li = t_list(&i);
   auto lli = t_list(t_list(&i));
   auto si = t_set(&i);
@@ -235,7 +235,7 @@ TEST_F(UtilTest, field_transitively_refers_to_unique) {
   }
 
   // typedef binary (cpp.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr;
-  auto p = t_base_type::t_binary();
+  auto p = t_primitive_type::t_binary();
   p.set_annotation("cpp.type", "std::unique_ptr<folly::IOBuf>");
 
   auto lp = t_list(&p);
@@ -273,14 +273,14 @@ TEST_F(UtilTest, get_gen_type_class) {
   // a single example as demo
   EXPECT_EQ(
       "::apache::thrift::type_class::string",
-      cpp2::get_gen_type_class(t_base_type::t_string()));
+      cpp2::get_gen_type_class(t_primitive_type::t_string()));
 }
 
 TEST_F(UtilTest, is_custom_type) {
   t_program p("path/to/program.thrift");
 
   {
-    auto cppType = t_base_type::t_string();
+    auto cppType = t_primitive_type::t_string();
     auto typeDef = t_typedef(&p, "Type", cppType);
     EXPECT_FALSE(cpp2::is_custom_type(cppType));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
@@ -290,7 +290,7 @@ TEST_F(UtilTest, is_custom_type) {
   }
 
   {
-    auto cpp2Type = t_base_type::t_string();
+    auto cpp2Type = t_primitive_type::t_string();
     auto typeDef = t_typedef(&p, "Type", cpp2Type);
     EXPECT_FALSE(cpp2::is_custom_type(cpp2Type));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
@@ -299,7 +299,7 @@ TEST_F(UtilTest, is_custom_type) {
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
 
-  const auto i32 = t_base_type::t_i32();
+  const auto i32 = t_primitive_type::t_i32();
   {
     auto cppTemplate = t_list(&i32);
     auto typeDef = t_typedef(&p, "Type", cppTemplate);

@@ -38,9 +38,9 @@ namespace {
 
 std::vector<t_function*> lifecycleFunctions() {
   static t_function onStartServing_{
-      nullptr, t_base_type::t_void(), "onStartServing"};
+      nullptr, t_primitive_type::t_void(), "onStartServing"};
   static t_function onStopRequested_{
-      nullptr, t_base_type::t_void(), "onStopRequested"};
+      nullptr, t_primitive_type::t_void(), "onStopRequested"};
 
   return {&onStartServing_, &onStopRequested_};
 }

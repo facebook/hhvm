@@ -23,13 +23,13 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_interaction.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -105,7 +105,7 @@ class StandardValidatorTest : public ::testing::Test {
 };
 
 TEST_F(StandardValidatorTest, InterfaceNamesUniqueNoError) {
-  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto return_type = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
 
   // Create interfaces with non-overlapping functions.
   auto service = std::make_unique<t_service>(&program_, "Service");
@@ -127,7 +127,7 @@ TEST_F(StandardValidatorTest, InterfaceNamesUniqueNoError) {
 }
 
 TEST_F(StandardValidatorTest, BadPriority) {
-  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto return_type = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
 
   {
     auto service = std::make_unique<t_service>(&program_, "Service");
@@ -170,7 +170,7 @@ TEST_F(StandardValidatorTest, BadPriority) {
 }
 
 TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
-  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto return_type = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
 
   // Create interfaces with overlapping functions.
   {
@@ -209,7 +209,7 @@ TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
 }
 
 TEST_F(StandardValidatorTest, RepeatedNameInExtendedService) {
-  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto return_type = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
 
   // Create first service with non repeated functions.
   auto base = std::make_unique<t_service>(&program_, "Base");
@@ -316,19 +316,21 @@ TEST_F(StandardValidatorTest, UnionFieldAttributes) {
   auto tunion = std::make_unique<t_union>(&program_, "Union");
   tunion->set_src_range({loc, loc});
   {
-    auto field = std::make_unique<t_field>(&t_base_type::t_i64(), "req", 1);
+    auto field =
+        std::make_unique<t_field>(&t_primitive_type::t_i64(), "req", 1);
     field->set_src_range({loc + 1, loc + 1});
     field->set_qualifier(t_field_qualifier::required);
     tunion->append(std::move(field));
   }
   {
-    auto field = std::make_unique<t_field>(&t_base_type::t_i64(), "op", 2);
+    auto field = std::make_unique<t_field>(&t_primitive_type::t_i64(), "op", 2);
     field->set_src_range({loc + 2, loc + 2});
     field->set_qualifier(t_field_qualifier::optional);
     tunion->append(std::move(field));
   }
   {
-    auto field = std::make_unique<t_field>(&t_base_type::t_i64(), "non", 3);
+    auto field =
+        std::make_unique<t_field>(&t_primitive_type::t_i64(), "non", 3);
     field->set_src_range({loc + 3, loc + 3});
     tunion->append(std::move(field));
   }
@@ -364,12 +366,12 @@ TEST_F(StandardValidatorTest, UnionFieldAttributes) {
 TEST_F(StandardValidatorTest, FieldId) {
   auto tstruct = std::make_unique<t_struct>(&program_, "Struct");
   tstruct->append(
-      std::make_unique<t_field>(t_base_type::t_i64(), "explicit_id", 1));
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "explicit_id", 1));
   tstruct->append(
-      std::make_unique<t_field>(t_base_type::t_i64(), "zero_id", 0));
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "zero_id", 0));
   tstruct->append(
-      std::make_unique<t_field>(t_base_type::t_i64(), "neg_id", -1));
-  auto f = std::make_unique<t_field>(t_base_type::t_i64(), "implicit_id");
+      std::make_unique<t_field>(t_primitive_type::t_i64(), "neg_id", -1));
+  auto f = std::make_unique<t_field>(t_primitive_type::t_i64(), "implicit_id");
   f->set_implicit_id(-2);
   f->set_src_range({loc, loc});
   tstruct->append(std::move(f));
@@ -410,7 +412,7 @@ TEST_F(StandardValidatorTest, MixinFieldType) {
   }
   {
     auto field =
-        std::make_unique<t_field>(&t_base_type::t_i32(), "other_field", 4);
+        std::make_unique<t_field>(&t_primitive_type::t_i32(), "other_field", 4);
     field->set_annotation("cpp.mixin");
     foo->append(std::move(field));
   }
@@ -440,7 +442,7 @@ TEST_F(StandardValidatorTest, RepeatedStructuredAnnotation) {
 
   t_scope scope;
   auto bar = std::make_unique<t_typedef>(
-      &program_, &t_base_type::t_i32(), "Bar", &scope);
+      &program_, &t_primitive_type::t_i32(), "Bar", &scope);
   bar->add_structured_annotation(inst(other_foo.get(), 1));
   bar->add_structured_annotation(inst(foo.get(), 2));
   auto annot = inst(foo.get(), 3);
@@ -473,22 +475,28 @@ TEST_F(StandardValidatorTest, CustomDefaultValue) {
       std::make_unique<t_const_value>(std::numeric_limits<int32_t>::max());
 
   auto const_byte = std::make_unique<t_const>(
-      &program_, &t_base_type::t_byte(), "const_byte", std::move(custom_byte));
+      &program_,
+      &t_primitive_type::t_byte(),
+      "const_byte",
+      std::move(custom_byte));
   auto const_short = std::make_unique<t_const>(
-      &program_, &t_base_type::t_i16(), "const_short", std::move(custom_short));
+      &program_,
+      &t_primitive_type::t_i16(),
+      "const_short",
+      std::move(custom_short));
   auto const_integer = std::make_unique<t_const>(
       &program_,
-      &t_base_type::t_i32(),
+      &t_primitive_type::t_i32(),
       "const_integer",
       std::move(custom_integer));
   auto const_float = std::make_unique<t_const>(
       &program_,
-      &t_base_type::t_float(),
+      &t_primitive_type::t_float(),
       "const_float",
       std::move(custom_float));
   auto const_float_precision_loss = std::make_unique<t_const>(
       &program_,
-      &t_base_type::t_float(),
+      &t_primitive_type::t_float(),
       "const_float_precision_loss",
       std::move(custom_float_precision_loss));
 
@@ -694,11 +702,12 @@ TEST_F(ScopeValidatorTest, Exception) {
 }
 
 TEST_F(ScopeValidatorTest, Field) {
-  runTest(t_field{t_base_type::t_i32(), "my_field"}, "Field");
+  runTest(t_field{t_primitive_type::t_i32(), "my_field"}, "Field");
 }
 
 TEST_F(ScopeValidatorTest, Typedef) {
-  runTest(t_typedef{&program, "MyTypedef", t_base_type::t_void()}, "Typedef");
+  runTest(
+      t_typedef{&program, "MyTypedef", t_primitive_type::t_void()}, "Typedef");
 }
 
 TEST_F(ScopeValidatorTest, Service) {
@@ -712,7 +721,9 @@ TEST_F(ScopeValidatorTest, Interaction) {
 TEST_F(ScopeValidatorTest, Function) {
   runTest(
       t_function(
-          &program, t_type_ref::from_req_ptr(&t_base_type::t_i32()), "my_func"),
+          &program,
+          t_type_ref::from_req_ptr(&t_primitive_type::t_i32()),
+          "my_func"),
       "Function");
 }
 
@@ -725,7 +736,9 @@ TEST_F(ScopeValidatorTest, EnumValue) {
 }
 
 TEST_F(ScopeValidatorTest, Const) {
-  runTest(t_const{&program, t_base_type::t_i32(), "MyConst", nullptr}, "Const");
+  runTest(
+      t_const{&program, t_primitive_type::t_i32(), "MyConst", nullptr},
+      "Const");
 }
 
 TEST_F(ScopeValidatorTest, StructWithTransitiveStructuredScope) {
@@ -737,7 +750,7 @@ TEST_F(ScopeValidatorTest, StructWithTransitiveStructuredScope) {
 }
 
 TEST_F(ScopeValidatorTest, FieldWithTransitiveStructuredScope) {
-  t_field field{&t_base_type::t_i32(), "MyField"};
+  t_field field{&t_primitive_type::t_i32(), "MyField"};
   field.add_structured_annotation(inst(&annotMyStructured));
   field.add_structured_annotation(inst(&annotMyNestedStructured));
   auto result = validate(field);
@@ -767,7 +780,7 @@ TEST_F(ScopeValidatorTest, StructWithNonTransitiveStructuredScope) {
 }
 
 TEST_F(ScopeValidatorTest, FieldWithNonTransitiveStructuredScope) {
-  t_field field{&t_base_type::t_i32(), "MyField"};
+  t_field field{&t_primitive_type::t_i32(), "MyField"};
   field.add_structured_annotation(inst(&annotMyNonTransitiveStructured));
   auto result = validate(field);
   std::vector<diagnostic> expected{

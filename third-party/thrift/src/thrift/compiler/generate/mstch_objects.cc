@@ -468,7 +468,7 @@ mstch::node mstch_function::return_type() {
   } else if (const t_stream* stream = function_->stream()) {
     type = stream;
   } else if (function_->sink()) {
-    type = &t_base_type::t_void();
+    type = &t_primitive_type::t_void();
   }
   return context_.type_factory->make_mstch_object(type, context_, pos_);
 }

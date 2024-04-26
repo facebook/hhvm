@@ -22,8 +22,8 @@
 #include <utility>
 #include <vector>
 
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_named.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
@@ -34,7 +34,7 @@ namespace compiler {
 namespace {
 
 bool is_valid_custom_default_integer(
-    const t_base_type* type, const t_const_value* value) {
+    const t_primitive_type* type, const t_const_value* value) {
   int64_t min = 0, max = 0;
   if (type->is_byte()) {
     min = std::numeric_limits<int8_t>::min();
@@ -98,7 +98,7 @@ class const_checker {
   void check(const t_type* type, const t_const_value* value) {
     type = type->get_true_type();
 
-    if (const auto base_type = dynamic_cast<const t_base_type*>(type)) {
+    if (const auto base_type = dynamic_cast<const t_primitive_type*>(type)) {
       check_base_type(base_type, value);
       check_base_value(base_type, value);
     } else if (const auto enum_type = dynamic_cast<const t_enum*>(type)) {
@@ -164,23 +164,24 @@ class const_checker {
   // to check double. However, we need to check a floating point stored
   // with CV_INTEGER that might lead to a precision loss when converting int64_t
   // to a floating point.
-  void check_base_value(const t_base_type* type, const t_const_value* value) {
+  void check_base_value(
+      const t_primitive_type* type, const t_const_value* value) {
     switch (type->base_type()) {
-      case t_base_type::type::t_void:
-      case t_base_type::type::t_string:
-      case t_base_type::type::t_binary:
-      case t_base_type::type::t_bool:
-      case t_base_type::type::t_i64:
+      case t_primitive_type::type::t_void:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
+      case t_primitive_type::type::t_bool:
+      case t_primitive_type::type::t_i64:
         break;
-      case t_base_type::type::t_byte:
-      case t_base_type::type::t_i16:
-      case t_base_type::type::t_i32:
+      case t_primitive_type::type::t_byte:
+      case t_primitive_type::type::t_i16:
+      case t_primitive_type::type::t_i32:
         if (value->kind() == t_const_value::CV_INTEGER &&
             !is_valid_custom_default_integer(type, value)) {
           report_value_mistmatch();
         }
         break;
-      case t_base_type::type::t_float:
+      case t_primitive_type::type::t_float:
         if (value->kind() == t_const_value::CV_DOUBLE &&
             !is_valid_custom_default_float(value)) {
           report_value_mistmatch();
@@ -190,7 +191,7 @@ class const_checker {
           report_value_precision();
         }
         break;
-      case t_base_type::type::t_double:
+      case t_primitive_type::type::t_double:
         if (value->kind() == t_const_value::CV_INTEGER &&
             !is_valid_custom_default_float_with_integer_value<double>(value)) {
           report_value_precision();
@@ -201,45 +202,46 @@ class const_checker {
     }
   }
 
-  void check_base_type(const t_base_type* type, const t_const_value* value) {
+  void check_base_type(
+      const t_primitive_type* type, const t_const_value* value) {
     switch (type->base_type()) {
-      case t_base_type::type::t_void:
+      case t_primitive_type::type::t_void:
         error("type error: cannot declare a void const: {}", name_);
         break;
-      case t_base_type::type::t_string:
-      case t_base_type::type::t_binary:
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
         if (value->kind() != t_const_value::CV_STRING) {
           report_type_mismatch("string");
         }
         break;
-      case t_base_type::type::t_bool:
+      case t_primitive_type::type::t_bool:
         if (value->kind() != t_const_value::CV_BOOL &&
             value->kind() != t_const_value::CV_INTEGER) {
           report_type_mismatch("bool");
         }
         break;
-      case t_base_type::type::t_byte:
+      case t_primitive_type::type::t_byte:
         if (value->kind() != t_const_value::CV_INTEGER) {
           report_type_mismatch("byte");
         }
         break;
-      case t_base_type::type::t_i16:
+      case t_primitive_type::type::t_i16:
         if (value->kind() != t_const_value::CV_INTEGER) {
           report_type_mismatch("i16");
         }
         break;
-      case t_base_type::type::t_i32:
+      case t_primitive_type::type::t_i32:
         if (value->kind() != t_const_value::CV_INTEGER) {
           report_type_mismatch("i32");
         }
         break;
-      case t_base_type::type::t_i64:
+      case t_primitive_type::type::t_i64:
         if (value->kind() != t_const_value::CV_INTEGER) {
           report_type_mismatch("i64");
         }
         break;
-      case t_base_type::type::t_double:
-      case t_base_type::type::t_float:
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float:
         if (value->kind() != t_const_value::CV_INTEGER &&
             value->kind() != t_const_value::CV_DOUBLE) {
           report_type_mismatch("double");

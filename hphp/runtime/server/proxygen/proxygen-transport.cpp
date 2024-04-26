@@ -966,7 +966,6 @@ void ProxygenTransport::abort() {
   if (m_clientTxn) {
     m_clientTxn->sendAbort();
   }
-  s_requestErrorCount->addValue(1);
 }
 
 void ProxygenTransport::trySetMaxThreadCount(int max) {

@@ -6,8 +6,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
-#include <fizz/crypto/signature/Signature.h>
+#include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <openssl/crypto.h>
 
 #include <folly/Conv.h>
@@ -17,6 +17,7 @@
 using namespace folly;
 
 namespace fizz {
+namespace openssl {
 namespace detail {
 
 static const EVP_MD* getHash(int hashNid) {
@@ -220,4 +221,5 @@ void rsaPssVerify(
   }
 }
 } // namespace detail
+} // namespace openssl
 } // namespace fizz

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/hpke/Hkdf.h>
 
 #include <fizz/crypto/hpke/Types.h>

@@ -53,7 +53,7 @@ class BatchSignaturePeerCert : public PeerCert {
 
  private:
   // TODO: the current implementation only support BatchSignature with Hash
-  // function Sha256.
+  // function openssl::Sha256.
   /**
    * Verify a batch signature.
    *

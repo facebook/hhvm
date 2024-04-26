@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/Sha256.h>
 #include <fizz/record/Types.h>
@@ -54,7 +55,7 @@ struct MerkleTreePath {
  *    preimage attacks.
  *    @param msg, the original message.
  */
-template <typename Derived, typename Hash = Sha256>
+template <typename Derived, typename Hash = openssl::Sha256>
 class MerkleTree {
  public:
   // key of Hash Map: (height, offset)
@@ -270,7 +271,7 @@ class MerkleTree {
  * Refer to https://datatracker.ietf.org/doc/draft-ietf-tls-batch-signing for a
  * detailed description.
  */
-template <class Hash = Sha256>
+template <class Hash = openssl::Sha256>
 class BatchSignatureMerkleTree
     : public MerkleTree<BatchSignatureMerkleTree<Hash>, Hash> {
  public:

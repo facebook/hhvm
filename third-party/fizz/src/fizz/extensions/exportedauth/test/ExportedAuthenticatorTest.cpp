@@ -9,9 +9,9 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/protocol/test/TestMessages.h>
 #include <fizz/record/Extensions.h>
@@ -72,7 +72,7 @@ class AuthenticatorTest : public ::testing::Test {
     auto authRequest = encode<CertificateRequest>(std::move(cr));
     authrequest_ = std::move(authRequest);
     CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    deriver_ = OpenSSLFactory().makeKeyDeriver(cipher);
+    deriver_ = openssl::OpenSSLFactory().makeKeyDeriver(cipher);
     handshakeContext_ =
         folly::IOBuf::copyBuffer("12345678901234567890123456789012");
     finishedKey_ = folly::IOBuf::copyBuffer("12345678901234567890123456789012");
@@ -146,7 +146,7 @@ class ValidateAuthenticatorTest : public ::testing::Test {
  public:
   void SetUp() override {
     CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    deriver_ = OpenSSLFactory().makeKeyDeriver(cipher);
+    deriver_ = openssl::OpenSSLFactory().makeKeyDeriver(cipher);
     schemes_.push_back(SignatureScheme::ecdsa_secp256r1_sha256);
     authrequest_ = {
         "14303132333435363738396162636465666768696a0008000d000400020403"};
@@ -167,7 +167,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
       std::move(key), std::move(certs));
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   auto handshakeContext =
@@ -204,7 +204,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
       std::move(key), std::move(certs));
   schemes_.clear();
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));

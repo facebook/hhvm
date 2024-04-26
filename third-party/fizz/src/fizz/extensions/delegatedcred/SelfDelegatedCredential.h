@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/OpenSSLSelfCertImpl.h>
 
@@ -25,12 +26,12 @@ class SelfDelegatedCredential : public SelfCert {
 //
 // The inheritance is a bit funny cause we want to derive from SelfCert directly
 // to inherit the pure virtual base (for tests) but we also want the
-// implementation to inherit from OpenSSLSelfCertImpl (to share logic). To
-// achieve that without diamond inheritance, the implementation class derives
+// implementation to inherit from openssl::OpenSSLSelfCertImpl (to share logic).
+// To achieve that without diamond inheritance, the implementation class derives
 // from the interface, and it has an internal private class that derives from
-// the corresponding OpenSSLSelfCertImpl class to provide the implementation
-// logic.
-template <KeyType T>
+// the corresponding openssl::OpenSSLSelfCertImpl class to provide the
+// implementation logic.
+template <openssl::KeyType T>
 class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
  public:
   ~SelfDelegatedCredentialImpl() override = default;
@@ -64,15 +65,15 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
   const DelegatedCredential& getDelegatedCredential() const override;
 
  private:
-  class InternalSelfCert : public OpenSSLSelfCertImpl<T> {
+  class InternalSelfCert : public openssl::OpenSSLSelfCertImpl<T> {
    public:
     ~InternalSelfCert() override = default;
 
     InternalSelfCert(
         std::vector<folly::ssl::X509UniquePtr> certs,
         folly::ssl::EvpPkeyUniquePtr privateKey);
-    using OpenSSLSelfCertImpl<T>::certs_;
-    using OpenSSLSelfCertImpl<T>::signature_;
+    using openssl::OpenSSLSelfCertImpl<T>::certs_;
+    using openssl::OpenSSLSelfCertImpl<T>::signature_;
   };
   InternalSelfCert selfCertImpl_;
   DelegatedCredential credential_;

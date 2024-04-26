@@ -6,10 +6,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/Certificate.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <openssl/bio.h>
 
@@ -24,6 +24,7 @@ int getCurveName(EVP_PKEY* key) {
 } // namespace
 
 namespace fizz {
+namespace openssl {
 
 namespace detail {
 
@@ -297,4 +298,5 @@ CompressedCertificate CertUtils::cloneCompressedCert(
   return ret;
 }
 
+} // namespace openssl
 } // namespace fizz

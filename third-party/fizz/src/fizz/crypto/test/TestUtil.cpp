@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/fizz-config.h>
 
@@ -13,11 +14,6 @@
 #include <fizz/crypto/aead/AEGISCipher.h>
 #endif
 
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESGCM256.h>
-#include <fizz/crypto/aead/AESOCB128.h>
-#include <fizz/crypto/aead/ChaCha20Poly1305.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <folly/String.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <sodium/randombytes.h>
@@ -84,16 +80,17 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
   std::unique_ptr<Aead> cipher;
   switch (suite) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      cipher = OpenSSLEVPCipher::makeCipher<AESGCM128>();
+      cipher = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
       break;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      cipher = OpenSSLEVPCipher::makeCipher<AESGCM256>();
+      cipher = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM256>();
       break;
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      cipher = OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
+      cipher =
+          openssl::OpenSSLEVPCipher::makeCipher<openssl::ChaCha20Poly1305>();
       break;
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      cipher = OpenSSLEVPCipher::makeCipher<AESOCB128>();
+      cipher = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESOCB128>();
       break;
 #if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_128L_SHA256:

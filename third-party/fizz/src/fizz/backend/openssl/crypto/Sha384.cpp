@@ -6,8 +6,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/Sha384.h>
+#include <fizz/backend/openssl/crypto/Sha384.h>
 
 #if __cplusplus < 201703L
-constexpr folly::StringPiece fizz::Sha384::BlankHash;
+constexpr folly::StringPiece fizz::openssl::Sha384::BlankHash;
 #endif

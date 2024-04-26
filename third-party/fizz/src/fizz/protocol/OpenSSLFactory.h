@@ -21,25 +21,10 @@
 #include <fizz/crypto/exchange/X25519.h>
 #include <fizz/protocol/DefaultFactory.h>
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
+
 namespace fizz {
 
-class OpenSSLFactory : public DefaultFactory {
- public:
-  [[nodiscard]] std::unique_ptr<KeyExchange> makeKeyExchange(
-      NamedGroup group,
-      KeyExchangeMode mode) const override;
+using OpenSSLFactory = openssl::OpenSSLFactory;
 
-  [[nodiscard]] std::unique_ptr<Aead> makeAead(
-      CipherSuite cipher) const override;
-
-  std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const override;
-
-  std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const override;
-
-  [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(
-      CertificateEntry certEntry,
-      bool /*leaf*/) const override;
-};
 } // namespace fizz

@@ -23,8 +23,7 @@
 
 #include <sys/socket.h>
 
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESGCM256.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 
 namespace fizz {
 
@@ -63,14 +62,14 @@ static folly::Optional<KTLSParameterLayout> getKTLSLayout(CipherSuite suite) {
   // TODO: Newer kernels support chacha20
   switch (suite) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      ret.keyLength = AESGCM128::kKeyLength;
-      ret.ivLength = AESGCM128::kIVLength;
+      ret.keyLength = openssl::AESGCM128::kKeyLength;
+      ret.ivLength = openssl::AESGCM128::kIVLength;
       ret.ktlsAllocationSize = CRYPTO_INFO_SIZE(TLS_CIPHER_AES_GCM_128);
       ret.ktlsCipherType = TLS_CIPHER_AES_GCM_128;
       break;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      ret.keyLength = AESGCM256::kKeyLength;
-      ret.ivLength = AESGCM256::kIVLength;
+      ret.keyLength = openssl::AESGCM256::kKeyLength;
+      ret.ivLength = openssl::AESGCM256::kIVLength;
       ret.ktlsAllocationSize = CRYPTO_INFO_SIZE(TLS_CIPHER_AES_GCM_256);
       ret.ktlsCipherType = TLS_CIPHER_AES_GCM_256;
       break;

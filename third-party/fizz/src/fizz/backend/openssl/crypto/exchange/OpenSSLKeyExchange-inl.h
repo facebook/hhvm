@@ -6,9 +6,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 
 namespace fizz {
+namespace openssl {
 namespace detail {
 
 template <class T>
@@ -93,4 +94,5 @@ std::size_t OpenSSLECKeyExchange<T>::getExpectedKeyShareSize() const {
   return T::keyShareLength;
 }
 
+} // namespace openssl
 } // namespace fizz

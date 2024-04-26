@@ -8,8 +8,7 @@
 
 #include <fizz/extensions/tokenbinding/Validator.h>
 
-#include <fizz/crypto/Sha256.h>
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/extensions/tokenbinding/Utils.h>
 
 using namespace folly;
@@ -79,8 +78,8 @@ void Validator::verify(
     auto pkey = constructEcKeyFromBuf(key);
     auto ecdsa = constructECDSASig(signature);
 
-    std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
-    fizz::Sha256::hash(
+    std::array<uint8_t, fizz::openssl::Sha256::HashLen> hashedMessage;
+    fizz::openssl::Sha256::hash(
         *message,
         folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
     if (ECDSA_do_verify(
@@ -89,7 +88,7 @@ void Validator::verify(
             ecdsa.get(),
             pkey.get()) != 1) {
       throw std::runtime_error(folly::to<std::string>(
-          "Verification failed: ", detail::getOpenSSLError()));
+          "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
 #if FIZZ_OPENSSL_HAS_ED25519
   } else if (keyParams == TokenBindingKeyParameters::ed25519_experimental) {
@@ -117,10 +116,11 @@ void Validator::verify(
 
     // Verify the signature
     try {
-      fizz::detail::edVerify(message->coalesce(), signature->coalesce(), pkey);
+      fizz::openssl::detail::edVerify(
+          message->coalesce(), signature->coalesce(), pkey);
     } catch (const std::exception&) {
       throw std::runtime_error(folly::to<std::string>(
-          "Verification failed: ", detail::getOpenSSLError()));
+          "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
 #endif
   } else {
@@ -178,8 +178,8 @@ EcKeyUniquePtr Validator::constructEcKeyFromBuf(const Buf& key) {
   keyAppender.push(keyReader, keyLen);
   auto combinedRange = combinedKey->coalesce();
 
-  auto evpKey =
-      fizz::detail::decodeECPublicKey(combinedRange, NID_X9_62_prime256v1);
+  auto evpKey = fizz::openssl::detail::decodeECPublicKey(
+      combinedRange, NID_X9_62_prime256v1);
   EcKeyUniquePtr publicKey(EVP_PKEY_get1_EC_KEY(evpKey.get()));
   if (!publicKey) {
     throw std::runtime_error("Error getting EC_key");

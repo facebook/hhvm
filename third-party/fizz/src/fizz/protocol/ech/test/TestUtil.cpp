@@ -31,7 +31,7 @@ ECHConfigContentDraft getECHConfigContent() {
   ECHConfigContentDraft echConfigContent;
   echConfigContent.key_config.config_id = 0xFB;
   echConfigContent.key_config.kem_id = hpke::KEMId::secp256r1;
-  echConfigContent.key_config.public_key = detail::encodeECPublicKey(
+  echConfigContent.key_config.public_key = openssl::detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
   echConfigContent.key_config.cipher_suites = {suite};
   echConfigContent.maximum_name_length = 100;

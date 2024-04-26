@@ -8,13 +8,13 @@
 
 #include "fizz/client/FizzClientContext.h"
 
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 
 namespace fizz {
 namespace client {
 
 FizzClientContext::FizzClientContext()
-    : factory_(std::make_shared<OpenSSLFactory>()),
+    : factory_(std::make_shared<openssl::OpenSSLFactory>()),
       clock_(std::make_shared<SystemClock>()) {}
 
 } // namespace client

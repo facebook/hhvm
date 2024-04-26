@@ -94,7 +94,7 @@ ClientHello getChloOuterHRRWithExt(
 }
 
 TEST(DecrypterTest, TestDecodeSuccess) {
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -118,7 +118,7 @@ TEST(DecrypterTest, TestDecodeSuccess) {
 }
 
 TEST(DecrypterTest, TestDecodeHRRSuccess) {
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -141,7 +141,7 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -172,7 +172,7 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
 
 TEST(DecrypterTest, TestDecodeFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -185,7 +185,7 @@ TEST(DecrypterTest, TestDecodeFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -204,7 +204,7 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;

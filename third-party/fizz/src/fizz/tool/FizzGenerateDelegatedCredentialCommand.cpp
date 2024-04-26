@@ -6,8 +6,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
-#include <fizz/protocol/CertUtils.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <fizz/util/Parse.h>
 #include <folly/FileUtil.h>
@@ -117,17 +117,18 @@ int fizzGenerateDelegatedCredentialCommand(
   try {
     std::shared_ptr<SelfCert> cert;
     if (!certKeyPass.empty()) {
-      cert = CertUtils::makeSelfCert(certData, certKeyData, certKeyPass);
+      cert =
+          openssl::CertUtils::makeSelfCert(certData, certKeyData, certKeyPass);
     } else {
-      cert = CertUtils::makeSelfCert(certData, certKeyData);
+      cert = openssl::CertUtils::makeSelfCert(certData, certKeyData);
     }
 
     folly::ssl::EvpPkeyUniquePtr certPrivKey =
-        CertUtils::readPrivateKeyFromBuffer(
+        openssl::CertUtils::readPrivateKeyFromBuffer(
             certKeyData, certKeyPass.empty() ? nullptr : &certKeyPass[0]);
 
     folly::ssl::EvpPkeyUniquePtr credPrivKey =
-        CertUtils::readPrivateKeyFromBuffer(
+        openssl::CertUtils::readPrivateKeyFromBuffer(
             credKeyData, credKeyPass.empty() ? nullptr : &credKeyPass[0]);
 
     if (!credSignScheme) {
@@ -135,22 +136,31 @@ int fizzGenerateDelegatedCredentialCommand(
     }
 
     if (!credVerifScheme) {
-      switch (CertUtils::getKeyType(credPrivKey)) {
-        case KeyType::RSA:
-          credVerifScheme = CertUtils::getSigSchemes<KeyType::RSA>().front();
-          break;
-        case KeyType::P256:
-          credVerifScheme = CertUtils::getSigSchemes<KeyType::P256>().front();
-          break;
-        case KeyType::P384:
-          credVerifScheme = CertUtils::getSigSchemes<KeyType::P384>().front();
-          break;
-        case KeyType::P521:
-          credVerifScheme = CertUtils::getSigSchemes<KeyType::P521>().front();
-          break;
-        case KeyType::ED25519:
+      switch (openssl::CertUtils::getKeyType(credPrivKey)) {
+        case openssl::KeyType::RSA:
           credVerifScheme =
-              CertUtils::getSigSchemes<KeyType::ED25519>().front();
+              openssl::CertUtils::getSigSchemes<openssl::KeyType::RSA>()
+                  .front();
+          break;
+        case openssl::KeyType::P256:
+          credVerifScheme =
+              openssl::CertUtils::getSigSchemes<openssl::KeyType::P256>()
+                  .front();
+          break;
+        case openssl::KeyType::P384:
+          credVerifScheme =
+              openssl::CertUtils::getSigSchemes<openssl::KeyType::P384>()
+                  .front();
+          break;
+        case openssl::KeyType::P521:
+          credVerifScheme =
+              openssl::CertUtils::getSigSchemes<openssl::KeyType::P521>()
+                  .front();
+          break;
+        case openssl::KeyType::ED25519:
+          credVerifScheme =
+              openssl::CertUtils::getSigSchemes<openssl::KeyType::ED25519>()
+                  .front();
           break;
       }
     }

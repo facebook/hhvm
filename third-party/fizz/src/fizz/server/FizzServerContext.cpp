@@ -8,13 +8,13 @@
 
 #include "fizz/server/FizzServerContext.h"
 
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 
 namespace fizz {
 namespace server {
 
 FizzServerContext::FizzServerContext()
-    : factory_(std::make_shared<OpenSSLFactory>()) {}
+    : factory_(std::make_shared<openssl::OpenSSLFactory>()) {}
 
 } // namespace server
 } // namespace fizz

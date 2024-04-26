@@ -6,8 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/ECCurve.h>
-#include <fizz/crypto/exchange/OpenSSLKeyExchange.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/exchange/X25519.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/ech/Types.h>
@@ -181,11 +180,11 @@ folly::Optional<ech::ECHConfigList> parseECHConfigsBase64(
 
 folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
   auto getKDFId = [](std::string kdfStr) {
-    if (kdfStr == "Sha256") {
+    if (kdfStr == "openssl::Sha256") {
       return hpke::KDFId::Sha256;
-    } else if (kdfStr == "Sha384") {
+    } else if (kdfStr == "openssl::Sha384") {
       return hpke::KDFId::Sha384;
-    } else if (kdfStr == "Sha512") {
+    } else if (kdfStr == "openssl::Sha512") {
       return hpke::KDFId::Sha512;
     }
 

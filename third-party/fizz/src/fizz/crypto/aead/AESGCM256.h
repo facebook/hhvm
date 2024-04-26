@@ -8,18 +8,8 @@
 
 #pragma once
 
-#include <openssl/evp.h>
+#include <fizz/backend/openssl/crypto/aead/AESGCM256.h>
 
 namespace fizz {
-
-struct AESGCM256 {
-  static constexpr auto Cipher = EVP_aes_256_gcm;
-
-  static const size_t kKeyLength{32};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
-  static const bool kOperatesInBlocks{false};
-  static const bool kRequiresPresetTagLen{false};
-};
-
+using AESGCM256 = openssl::AESGCM256;
 } // namespace fizz

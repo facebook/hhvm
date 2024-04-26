@@ -8,11 +8,12 @@
 
 #pragma once
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
 namespace fizz {
+namespace openssl {
 
 namespace detail {
 extern folly::Optional<std::string> getIdentityFromX509(X509* x);
@@ -118,4 +119,5 @@ folly::ssl::X509UniquePtr OpenSSLPeerCertImpl<T>::getX509() const {
   X509_up_ref(cert_.get());
   return folly::ssl::X509UniquePtr(cert_.get());
 }
+} // namespace openssl
 } // namespace fizz

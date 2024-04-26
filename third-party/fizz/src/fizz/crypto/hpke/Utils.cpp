@@ -8,14 +8,7 @@
 
 #include <fizz/crypto/hpke/Utils.h>
 
-#include <fizz/crypto/Sha256.h>
-#include <fizz/crypto/Sha384.h>
-#include <fizz/crypto/Sha512.h>
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESGCM256.h>
-#include <fizz/crypto/aead/ChaCha20Poly1305.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
-#include <fizz/crypto/exchange/ECCurveKeyExchange.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/exchange/X25519.h>
 
 namespace fizz {
@@ -139,15 +132,15 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
     case KDFId::Sha256:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl::create<Sha256>()));
+          std::make_unique<HkdfImpl>(HkdfImpl::create<openssl::Sha256>()));
     case KDFId::Sha384:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl::create<Sha384>()));
+          std::make_unique<HkdfImpl>(HkdfImpl::create<openssl::Sha384>()));
     case KDFId::Sha512:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl::create<Sha512>()));
+          std::make_unique<HkdfImpl>(HkdfImpl::create<openssl::Sha512>()));
     default:
       throw std::runtime_error("hkdf: not implemented");
   }
@@ -156,11 +149,11 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
 std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId) {
   switch (kemId) {
     case KEMId::secp256r1:
-      return std::make_unique<OpenSSLECKeyExchange<P256>>();
+      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
     case KEMId::secp384r1:
-      return std::make_unique<OpenSSLECKeyExchange<P384>>();
+      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
     case KEMId::secp521r1:
-      return std::make_unique<OpenSSLECKeyExchange<P521>>();
+      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P521>>();
     case KEMId::x25519:
       return std::make_unique<X25519KeyExchange>();
     default:
@@ -187,11 +180,11 @@ size_t nenc(KEMId kemId) {
 std::unique_ptr<Aead> makeCipher(AeadId aeadId) {
   switch (aeadId) {
     case AeadId::TLS_CHACHA20_POLY1305_SHA256:
-      return OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
+      return openssl::OpenSSLEVPCipher::makeCipher<openssl::ChaCha20Poly1305>();
     case AeadId::TLS_AES_128_GCM_SHA256:
-      return OpenSSLEVPCipher::makeCipher<AESGCM128>();
+      return openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
     case AeadId::TLS_AES_256_GCM_SHA384:
-      return OpenSSLEVPCipher::makeCipher<AESGCM256>();
+      return openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM256>();
     default:
       throw std::runtime_error("can't make aead: not implemented");
   }

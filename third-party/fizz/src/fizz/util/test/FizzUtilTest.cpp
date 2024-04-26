@@ -158,7 +158,7 @@ TEST(UtilTest, createKeyExchangeFromBuf) {
   }
 
   {
-    // Test P256 KEM
+    // Test openssl::P256 KEM
     folly::ByteRange privKeyBuf((folly::StringPiece(kP256Key)));
     auto kex =
         FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::secp256r1, privKeyBuf);

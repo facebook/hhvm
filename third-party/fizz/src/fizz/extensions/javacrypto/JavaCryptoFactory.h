@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/extensions/javacrypto/JavaCryptoPeerCert.h>
 #include <fizz/protocol/OpenSSLFactory.h>
 
@@ -16,7 +17,7 @@ namespace fizz {
 /**
  * This class instantiates objects using Java Crypto API instead of OpenSSL.
  */
-class JavaCryptoFactory : public OpenSSLFactory {
+class JavaCryptoFactory : public openssl::OpenSSLFactory {
  public:
   ~JavaCryptoFactory() override = default;
 

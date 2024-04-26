@@ -9,9 +9,8 @@
 #include <memory>
 #include <tuple>
 
-#include <fizz/crypto/Sha256.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
-#include <fizz/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/crypto/hpke/DHKEM.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/record/Types.h>
@@ -65,7 +64,7 @@ DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
   auto prefix = "HPKE-v1";
   auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
       folly::IOBuf::copyBuffer(prefix),
-      std::make_unique<HkdfImpl>(HkdfImpl::create<Sha256>()));
+      std::make_unique<HkdfImpl>(HkdfImpl::create<openssl::Sha256>()));
   return DHKEM(
       std::make_unique<MockKeyExchange>(std::move(actualKex)),
       group,
@@ -73,12 +72,14 @@ DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
 }
 
 TEST(DHKEMTest, TestP256EncapDecapEqual) {
-  auto actualKex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto actualKex =
+      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   auto privateKey = getPrivateKey(kP256Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
 
-  auto publicKey = detail::encodeECPublicKey(getPublicKey(kP256PublicKey));
+  auto publicKey =
+      openssl::detail::encodeECPublicKey(getPublicKey(kP256PublicKey));
   std::unique_ptr<folly::IOBuf> sharedKey;
   std::unique_ptr<folly::IOBuf> gotSharedKey;
   std::tie(sharedKey, gotSharedKey) =
@@ -88,7 +89,8 @@ TEST(DHKEMTest, TestP256EncapDecapEqual) {
 }
 
 TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
-  auto actualKex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+  auto actualKex =
+      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
   auto privateKey = getPrivateKey(kP256Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
@@ -113,12 +115,14 @@ TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
 }
 
 TEST(DHKEMTest, TestP384EncapDecapEqual) {
-  auto actualKex = std::make_unique<OpenSSLECKeyExchange<P384>>();
+  auto actualKex =
+      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
   auto privateKey = getPrivateKey(kP384Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp384r1);
 
-  auto publicKey = detail::encodeECPublicKey(getPublicKey(kP384PublicKey));
+  auto publicKey =
+      openssl::detail::encodeECPublicKey(getPublicKey(kP384PublicKey));
   std::unique_ptr<folly::IOBuf> sharedKey;
   std::unique_ptr<folly::IOBuf> gotSharedKey;
   std::tie(sharedKey, gotSharedKey) =

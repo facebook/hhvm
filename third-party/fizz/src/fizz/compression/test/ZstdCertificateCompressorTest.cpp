@@ -90,8 +90,8 @@ TEST_F(ZstdCertificateCompressorTest, TestCompressDecompress) {
   auto certAndKey = createCert("fizz-selfsigned", false, nullptr);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(certAndKey.cert));
-  auto cert =
-      CertUtils::makeSelfCert(std::move(certs), std::move(certAndKey.key));
+  auto cert = openssl::CertUtils::makeSelfCert(
+      std::move(certs), std::move(certAndKey.key));
   auto certMsg = cert->getCertMessage();
 
   // Add extension
@@ -109,7 +109,8 @@ TEST_F(ZstdCertificateCompressorTest, TestCompressDecompress) {
   EXPECT_EQ(decompressedCertMsg.certificate_list.size(), 1);
   auto& certEntry = decompressedCertMsg.certificate_list.at(0);
   EXPECT_EQ(certEntry.extensions.size(), 1);
-  auto decompressedPeer = CertUtils::makePeerCert(certEntry.cert_data->clone());
+  auto decompressedPeer =
+      openssl::CertUtils::makePeerCert(certEntry.cert_data->clone());
   EXPECT_EQ(decompressedPeer->getIdentity(), cert->getIdentity());
 
   EXPECT_TRUE(IOBufEqualTo()(encode(certMsg), encode(decompressedCertMsg)));

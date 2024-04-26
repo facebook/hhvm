@@ -6,13 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
 
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/SlidingBloomReplayCache.h>
 #include <fizz/server/TicketTypes.h>
@@ -164,7 +163,7 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
       ProtocolVersion::tls_1_3, ProtocolVersion::tls_1_3_28};
   bool enableBatch = false;
   size_t batchNumMsgThreshold = 0;
-  std::shared_ptr<SynchronizedBatcher<Sha256>> batcher;
+  std::shared_ptr<SynchronizedBatcher<openssl::Sha256>> batcher;
 
   // Argument Handler Map
   // clang-format off
@@ -223,7 +222,8 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
   serverContext->setSupportedCiphers(std::move(ciphers));
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-      std::make_shared<OpenSSLFactory>(), std::make_shared<CertManager>());
+      std::make_shared<openssl::OpenSSLFactory>(),
+      std::make_shared<CertManager>());
   auto ticketSeed = RandomGenerator<32>().generateRandom();
   ticketCipher->setTicketSecrets({{range(ticketSeed)}});
   serverContext->setTicketCipher(ticketCipher);
@@ -245,16 +245,18 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
     }
     std::unique_ptr<SelfCert> cert;
     if (!keyPass.empty()) {
-      cert = CertUtils::makeSelfCert(certData, keyData, keyPass, compressors);
+      cert = openssl::CertUtils::makeSelfCert(
+          certData, keyData, keyPass, compressors);
     } else {
-      cert = CertUtils::makeSelfCert(certData, keyData, compressors);
+      cert = openssl::CertUtils::makeSelfCert(certData, keyData, compressors);
     }
     std::shared_ptr<SelfCert> sharedCert = std::move(cert);
     if (enableBatch) {
-      batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+      batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
           batchNumMsgThreshold, sharedCert, CertificateVerifyContext::Server);
       auto batchCert =
-          std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
+          std::make_shared<BatchSignatureAsyncSelfCert<openssl::Sha256>>(
+              batcher);
       serverContext->setSupportedSigSchemes(batchCert->getSigSchemes());
       certManager->addCert(batchCert, true);
     } else {

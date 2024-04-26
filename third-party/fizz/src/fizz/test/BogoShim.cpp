@@ -6,12 +6,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/Utils.h>
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>
 #include <folly/String.h>
@@ -255,17 +254,20 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
   Optional<bool> success_;
 };
 
-class TestRsaCert : public OpenSSLSelfCertImpl<KeyType::RSA> {
+class TestRsaCert : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> {
  public:
-  using OpenSSLSelfCertImpl<KeyType::RSA>::OpenSSLSelfCertImpl;
+  using openssl::OpenSSLSelfCertImpl<
+      openssl::KeyType::RSA>::OpenSSLSelfCertImpl;
   std::string getIdentity() const override {
     return "testrsacert";
   }
 };
 
-class TestP256Cert : public OpenSSLSelfCertImpl<KeyType::P256> {
+class TestP256Cert
+    : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> {
  public:
-  using OpenSSLSelfCertImpl<KeyType::P256>::OpenSSLSelfCertImpl;
+  using openssl::OpenSSLSelfCertImpl<
+      openssl::KeyType::P256>::OpenSSLSelfCertImpl;
   std::string getIdentity() const override {
     return "testp256cert";
   }

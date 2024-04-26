@@ -17,8 +17,8 @@
 #ifdef FIZZ_TOOL_ENABLE_ZSTD
 #include <fizz/compression/ZstdCertificateDecompressor.h>
 #endif
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/PskSerializationUtils.h>
-#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/tool/CertificateVerifiers.h>
 #include <fizz/tool/FizzCommandCommon.h>
@@ -487,7 +487,7 @@ class BasicPersistentPskCache : public BasicPskCache {
     std::string serializedPsk;
     readFile(loadFile_.c_str(), serializedPsk);
     try {
-      return deserializePsk(serializedPsk, OpenSSLFactory());
+      return deserializePsk(serializedPsk, openssl::OpenSSLFactory());
     } catch (const std::exception& e) {
       LOG(ERROR) << "Error deserializing: " << loadFile_ << "\n" << e.what();
       throw;
@@ -765,9 +765,9 @@ int fizzClientCommand(const std::vector<std::string>& args) {
 
     std::unique_ptr<SelfCert> cert;
     if (!keyPass.empty()) {
-      cert = CertUtils::makeSelfCert(certData, keyData, keyPass);
+      cert = openssl::CertUtils::makeSelfCert(certData, keyData, keyPass);
     } else {
-      cert = CertUtils::makeSelfCert(certData, keyData);
+      cert = openssl::CertUtils::makeSelfCert(certData, keyData);
     }
     clientContext->setClientCertificate(std::move(cert));
   }

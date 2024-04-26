@@ -8,34 +8,13 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/crypto/signature/Signature.h>
-#include <fizz/protocol/Certificate.h>
-#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
+#include <fizz/protocol/CertUtils.h>
 
 namespace fizz {
 
 template <KeyType T>
-class OpenSSLPeerCertImpl : public PeerCert {
- public:
-  explicit OpenSSLPeerCertImpl(folly::ssl::X509UniquePtr cert);
-
-  ~OpenSSLPeerCertImpl() override = default;
-
-  [[nodiscard]] std::string getIdentity() const override;
-
-  void verify(
-      SignatureScheme scheme,
-      CertificateVerifyContext context,
-      folly::ByteRange toBeSigned,
-      folly::ByteRange signature) const override;
-
-  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
-
- protected:
-  OpenSSLSignature<T> signature_;
-  folly::ssl::X509UniquePtr cert_;
-};
+using OpenSSLPeerCertImpl = openssl::OpenSSLPeerCertImpl<T>;
 
 } // namespace fizz
-
-#include <fizz/protocol/OpenSSLPeerCertImpl-inl.h>

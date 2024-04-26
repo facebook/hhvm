@@ -10,8 +10,7 @@
 
 #include <fizz/extensions/tokenbinding/TokenBindingConstructor.h>
 
-#include <fizz/crypto/Sha256.h>
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/extensions/tokenbinding/Utils.h>
 
 using namespace folly::ssl;
@@ -52,8 +51,8 @@ TokenBinding TokenBindingConstructor::createTokenBinding(
 Buf TokenBindingConstructor::signWithEcKey(
     const EcKeyUniquePtr& key,
     const Buf& message) {
-  std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
-  fizz::Sha256::hash(
+  std::array<uint8_t, fizz::openssl::Sha256::HashLen> hashedMessage;
+  fizz::openssl::Sha256::hash(
       *message,
       folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
 
@@ -103,7 +102,7 @@ void TokenBindingConstructor::addBignumToSignature(
 }
 
 Buf TokenBindingConstructor::encodeEcKey(const EcKeyUniquePtr& ecKey) {
-  auto ecKeyBuf = detail::encodeECPublicKey(ecKey);
+  auto ecKeyBuf = openssl::detail::encodeECPublicKey(ecKey);
   if (ecKeyBuf->isChained() ||
       ecKeyBuf->length() != TokenBindingUtils::kP256EcKeySize + 1) {
     throw std::runtime_error("Incorrect encoded EC Key Length");

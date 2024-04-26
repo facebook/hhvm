@@ -6,11 +6,9 @@
 #include <folly/Random.h>
 #include <folly/init/Init.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/aead/AEGISCipher.h>
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESOCB128.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/record/EncryptedRecordLayer.h>
 
 using namespace fizz;
@@ -82,7 +80,7 @@ void encryptGCM(
   std::vector<std::unique_ptr<folly::IOBuf>> msg_clones;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = OpenSSLEVPCipher::makeCipher<AESGCM128>();
+    aead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
     aead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {
@@ -110,8 +108,9 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead = OpenSSLEVPCipher::makeCipher<AESGCM128>();
-    auto readAead = OpenSSLEVPCipher::makeCipher<AESGCM128>();
+    auto writeAead =
+        openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+    auto readAead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(writeAead));
@@ -145,8 +144,9 @@ void decryptGCMNoRecord(uint32_t n, size_t size) {
   std::vector<std::unique_ptr<folly::IOBuf>> contents;
   auto aad = folly::IOBuf::copyBuffer("aad");
   BENCHMARK_SUSPEND {
-    std::unique_ptr<Aead> writeAead = OpenSSLEVPCipher::makeCipher<AESGCM128>();
-    readAead = OpenSSLEVPCipher::makeCipher<AESGCM128>();
+    std::unique_ptr<Aead> writeAead =
+        openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+    readAead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
     for (size_t i = 0; i < n; ++i) {
@@ -215,7 +215,7 @@ void encryptOCB(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = OpenSSLEVPCipher::makeCipher<AESOCB128>();
+    aead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESOCB128>();
     aead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {

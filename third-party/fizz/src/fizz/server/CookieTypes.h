@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/protocol/Types.h>

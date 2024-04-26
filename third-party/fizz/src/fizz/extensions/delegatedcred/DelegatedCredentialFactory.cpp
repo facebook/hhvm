@@ -30,20 +30,25 @@ std::unique_ptr<PeerCert> makeCredential(
   }
 
   switch (CertUtils::getKeyType(pubKey)) {
-    case KeyType::RSA:
-      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::RSA>>(
+    case openssl::KeyType::RSA:
+      return std::make_unique<
+          PeerDelegatedCredentialImpl<openssl::KeyType::RSA>>(
           std::move(cert), std::move(pubKey), std::move(credential));
-    case KeyType::P256:
-      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P256>>(
+    case openssl::KeyType::P256:
+      return std::make_unique<
+          PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
           std::move(cert), std::move(pubKey), std::move(credential));
-    case KeyType::P384:
-      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P384>>(
+    case openssl::KeyType::P384:
+      return std::make_unique<
+          PeerDelegatedCredentialImpl<openssl::KeyType::P384>>(
           std::move(cert), std::move(pubKey), std::move(credential));
-    case KeyType::P521:
-      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::P521>>(
+    case openssl::KeyType::P521:
+      return std::make_unique<
+          PeerDelegatedCredentialImpl<openssl::KeyType::P521>>(
           std::move(cert), std::move(pubKey), std::move(credential));
-    case KeyType::ED25519:
-      return std::make_unique<PeerDelegatedCredentialImpl<KeyType::ED25519>>(
+    case openssl::KeyType::ED25519:
+      return std::make_unique<
+          PeerDelegatedCredentialImpl<openssl::KeyType::ED25519>>(
           std::move(cert), std::move(pubKey), std::move(credential));
   }
 
@@ -57,9 +62,9 @@ std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
     CertificateEntry entry,
     bool leaf) {
   if (!leaf || entry.extensions.empty()) {
-    return CertUtils::makePeerCert(std::move(entry.cert_data));
+    return openssl::CertUtils::makePeerCert(std::move(entry.cert_data));
   }
-  auto parentCert = CertUtils::makePeerCert(entry.cert_data->clone());
+  auto parentCert = openssl::CertUtils::makePeerCert(entry.cert_data->clone());
   auto parentX509 = parentCert->getX509();
   auto credential = getExtension<DelegatedCredential>(entry.extensions);
 

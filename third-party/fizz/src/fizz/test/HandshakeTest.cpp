@@ -5,8 +5,10 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/test/HandshakeTest.h>
+
+using namespace fizz::openssl;
 
 namespace fizz {
 namespace test {
@@ -360,8 +362,9 @@ TEST_F(HandshakeTest, TestExtensions) {
 TEST_F(HandshakeTest, BasicCertRequest) {
   expectSuccess();
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  expected_.clientCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::RSA>>(
-      getCert(kClientAuthClientCert));
+  expected_.clientCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
+          getCert(kClientAuthClientCert));
   doHandshake();
   verifyParameters();
   sendAppData();
@@ -381,8 +384,9 @@ TEST_P(SigSchemeTest, Schemes) {
 
 TEST_F(HandshakeTest, CertRequestPskPreservesIdentity) {
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  expected_.clientCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::RSA>>(
-      getCert(kClientAuthClientCert));
+  expected_.clientCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
+          getCert(kClientAuthClientCert));
   setupResume();
 
   expectSuccess();
@@ -414,7 +418,7 @@ TEST_F(HandshakeTest, CertRequestBadCert) {
   std::vector<folly::ssl::X509UniquePtr> certVec;
   certVec.emplace_back(std::move(badCert.cert));
   clientContext_->setClientCertificate(
-      std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           std::move(badCert.key), std::move(certVec)));
   expectServerError("alert: bad_certificate", "client certificate failure");
   doHandshake();
@@ -589,8 +593,9 @@ TEST_F(HandshakeTest, EarlyDataTrickleSendRejected) {
   expected_.pskMode = none;
   expected_.earlyDataType = EarlyDataType::Rejected;
   expected_.scheme = SignatureScheme::ecdsa_secp256r1_sha256;
-  expected_.clientCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::RSA>>(
-      getCert(kClientAuthClientCert));
+  expected_.clientCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
+          getCert(kClientAuthClientCert));
 
   expectEarlyDataRejectError();
   expectServerSuccess();

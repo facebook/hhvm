@@ -5,8 +5,8 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
-#include <fizz/protocol/CertUtils.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
@@ -95,21 +95,26 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
   }
 
   std::vector<SignatureScheme> credKeySchemes;
-  switch (CertUtils::getKeyType(credKey)) {
-    case KeyType::RSA:
-      credKeySchemes = CertUtils::getSigSchemes<KeyType::RSA>();
+  switch (openssl::CertUtils::getKeyType(credKey)) {
+    case openssl::KeyType::RSA:
+      credKeySchemes =
+          openssl::CertUtils::getSigSchemes<openssl::KeyType::RSA>();
       break;
-    case KeyType::P256:
-      credKeySchemes = CertUtils::getSigSchemes<KeyType::P256>();
+    case openssl::KeyType::P256:
+      credKeySchemes =
+          openssl::CertUtils::getSigSchemes<openssl::KeyType::P256>();
       break;
-    case KeyType::P384:
-      credKeySchemes = CertUtils::getSigSchemes<KeyType::P384>();
+    case openssl::KeyType::P384:
+      credKeySchemes =
+          openssl::CertUtils::getSigSchemes<openssl::KeyType::P384>();
       break;
-    case KeyType::P521:
-      credKeySchemes = CertUtils::getSigSchemes<KeyType::P521>();
+    case openssl::KeyType::P521:
+      credKeySchemes =
+          openssl::CertUtils::getSigSchemes<openssl::KeyType::P521>();
       break;
-    case KeyType::ED25519:
-      credKeySchemes = CertUtils::getSigSchemes<KeyType::ED25519>();
+    case openssl::KeyType::ED25519:
+      credKeySchemes =
+          openssl::CertUtils::getSigSchemes<openssl::KeyType::ED25519>();
       break;
   }
 

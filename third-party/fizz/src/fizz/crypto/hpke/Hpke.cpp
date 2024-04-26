@@ -172,7 +172,7 @@ std::unique_ptr<folly::IOBuf> deserializePublicKey(
       BIO_write(bio.get(), publicKey.data(), publicKey.size());
       folly::ssl::EvpPkeyUniquePtr pkey(
           PEM_read_bio_PUBKEY(bio.get(), nullptr, nullptr, nullptr));
-      return fizz::detail::encodeECPublicKey(pkey);
+      return fizz::openssl::detail::encodeECPublicKey(pkey);
     }
     default:
       throw std::runtime_error("Unsupported KEM ID");

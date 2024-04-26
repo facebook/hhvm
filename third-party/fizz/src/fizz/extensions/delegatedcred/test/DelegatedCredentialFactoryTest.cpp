@@ -9,11 +9,11 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialFactory.h>
 #include <fizz/extensions/delegatedcred/PeerDelegatedCredential.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
 
 using namespace folly;
 
@@ -85,14 +85,17 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsing) {
   auto cert = factory_.makePeerCert(std::move(entry), true);
   EXPECT_TRUE(cert);
   EXPECT_TRUE(
-      typeid(*cert) == typeid(PeerDelegatedCredentialImpl<KeyType::P256>));
+      typeid(*cert) ==
+      typeid(PeerDelegatedCredentialImpl<openssl::KeyType::P256>));
 }
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {
   auto entry = generateEntry();
   auto cert = factory_.makePeerCert(std::move(entry), false);
   EXPECT_TRUE(cert);
-  EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
+  EXPECT_TRUE(
+      typeid(*cert) ==
+      typeid(openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>));
 }
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
@@ -100,7 +103,9 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
   entry.extensions.clear();
   auto cert = factory_.makePeerCert(std::move(entry), true);
   EXPECT_TRUE(cert);
-  EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
+  EXPECT_TRUE(
+      typeid(*cert) ==
+      typeid(openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>));
 }
 } // namespace test
 } // namespace extensions

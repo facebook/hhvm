@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/SynchronizedLruPskCache.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/ktls/AsyncFizzBaseKTLS.h>
-#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/AeadTicketCipher.h>
@@ -226,7 +226,7 @@ static std::shared_ptr<fizz::server::FizzServerContext>
 makeTestServerContext() {
   auto certmanager = std::make_shared<fizz::server::CertManager>();
   certmanager->addCert(
-      CertUtils::makeSelfCert(
+      openssl::CertUtils::makeSelfCert(
           fizz::test::kP256Certificate.str(), fizz::test::kP256Key.str()),
       true);
 

@@ -6,11 +6,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/test/Mocks.h>
 #include <folly/portability/GTest.h>
@@ -25,9 +25,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
   EXPECT_CALL(*mockBaseCert, getSigSchemes())
       .Times(2)
       .WillRepeatedly(Return(schemes));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, mockBaseCert, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
   EXPECT_EQ(batchCert.getSigner(), mockBaseCert);
   // getIdentity
   EXPECT_CALL(*mockBaseCert, getIdentity())
@@ -90,9 +90,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
 
 TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockAsyncCert) {
   auto mockBaseCert = std::make_shared<MockAsyncSelfCert>();
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, mockBaseCert, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
   EXPECT_EQ(batchCert.getSigner(), mockBaseCert);
   // sign
   EXPECT_CALL(
@@ -119,18 +119,20 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
-      getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+          getPrivateKey(kP256Key), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
 
   // non-batch signature
   auto signature = batchCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  OpenSSLPeerCertImpl<KeyType::P256> peerCert(getCert(kP256Certificate));
+  openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
+      getCert(kP256Certificate));
   peerCert.verify(
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
@@ -156,18 +158,20 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
-      getPrivateKey(kRSAKey), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
+          getPrivateKey(kRSAKey), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
 
   // non-batch signature
   auto signature = batchCert.signFuture(
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  OpenSSLPeerCertImpl<KeyType::RSA> peerCert(getCert(kRSACertificate));
+  openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA> peerCert(
+      getCert(kRSACertificate));
   peerCert.verify(
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
@@ -193,11 +197,12 @@ TEST(BatchSignatureAsyncSelfCertTest, TestUnsuportedHash) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP384Certificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P384>>(
-      getPrivateKey(kP384Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>(
+          getPrivateKey(kP384Key), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
 
   // thow when signing a batch scheme whose Hash doesn't match
   EXPECT_THROW(

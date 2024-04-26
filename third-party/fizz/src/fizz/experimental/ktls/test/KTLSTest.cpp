@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESGCM256.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/experimental/ktls/KTLS.h>
 #include <folly/test/TestUtils.h>
@@ -49,8 +48,8 @@ static TrafficKey createKey() {
   return key;
 }
 
-static const TrafficKey kAES128TrafficKey = createKey<AESGCM128>();
-static const TrafficKey kAES256TrafficKey = createKey<AESGCM256>();
+static const TrafficKey kAES128TrafficKey = createKey<openssl::AESGCM128>();
+static const TrafficKey kAES256TrafficKey = createKey<openssl::AESGCM256>();
 
 TEST_F(KTLSTest, TestSockoptFormat) {
   // An unsupported ktls cipher suite should not work

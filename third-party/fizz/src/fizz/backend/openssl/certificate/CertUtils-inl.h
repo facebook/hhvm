@@ -7,6 +7,7 @@
  */
 
 namespace fizz {
+namespace openssl {
 
 namespace detail {
 folly::Optional<std::string> getIdentityFromX509(X509* x);
@@ -37,4 +38,5 @@ inline std::vector<SignatureScheme>
 CertUtils::getSigSchemes<KeyType::ED25519>() {
   return {SignatureScheme::ed25519};
 }
+} // namespace openssl
 } // namespace fizz

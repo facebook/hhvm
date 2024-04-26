@@ -10,18 +10,17 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/test/Mocks.h>
 #include <fizz/compression/ZlibCertificateCompressor.h>
 #include <fizz/compression/ZlibCertificateDecompressor.h>
 #include <fizz/crypto/Utils.h>
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/tokenbinding/TokenBindingClientExtension.h>
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
@@ -72,7 +71,7 @@ class HandshakeTest : public Test {
     std::vector<ssl::X509UniquePtr> rsaCerts;
     rsaCerts.emplace_back(getCert(kRSACertificate));
     certManager->addCert(
-        std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
+        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
             getPrivateKey(kRSAKey), std::move(rsaCerts), compressors),
         true);
     std::vector<ssl::X509UniquePtr> p256Certs;
@@ -81,12 +80,15 @@ class HandshakeTest : public Test {
     p256Certs.emplace_back(getCert(kP256Certificate));
     p384Certs.emplace_back(getCert(kP384Certificate));
     p521Certs.emplace_back(getCert(kP521Certificate));
-    certManager->addCert(std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
-        getPrivateKey(kP256Key), std::move(p256Certs), compressors));
-    certManager->addCert(std::make_shared<OpenSSLSelfCertImpl<KeyType::P384>>(
-        getPrivateKey(kP384Key), std::move(p384Certs), compressors));
-    certManager->addCert(std::make_shared<OpenSSLSelfCertImpl<KeyType::P521>>(
-        getPrivateKey(kP521Key), std::move(p521Certs), compressors));
+    certManager->addCert(
+        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+            getPrivateKey(kP256Key), std::move(p256Certs), compressors));
+    certManager->addCert(
+        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>(
+            getPrivateKey(kP384Key), std::move(p384Certs), compressors));
+    certManager->addCert(
+        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P521>>(
+            getPrivateKey(kP521Key), std::move(p521Certs), compressors));
     serverContext_->setCertManager(certManager);
     serverContext_->setEarlyDataSettings(
         true,
@@ -103,8 +105,9 @@ class HandshakeTest : public Test {
     serverContext_->setClientCertVerifier(verifier);
     std::vector<folly::ssl::X509UniquePtr> certVec;
     certVec.emplace_back(std::move(clientCert));
-    auto clientSelfCert = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
-        std::move(clientKey), std::move(certVec));
+    auto clientSelfCert =
+        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
+            std::move(clientKey), std::move(certVec));
     clientContext_->setClientCertificate(std::move(clientSelfCert));
 
     auto ticketCipher = std::make_shared<AES128TicketCipher>(

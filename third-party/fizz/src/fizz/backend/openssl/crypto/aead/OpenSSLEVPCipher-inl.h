@@ -7,6 +7,7 @@
  */
 
 namespace fizz {
+namespace openssl {
 
 template <typename EVPImpl>
 std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
@@ -22,4 +23,5 @@ std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
       EVPImpl::kRequiresPresetTagLen));
 }
 
+} // namespace openssl
 } // namespace fizz

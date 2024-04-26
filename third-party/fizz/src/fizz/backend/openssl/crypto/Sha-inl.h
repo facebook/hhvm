@@ -9,6 +9,7 @@
 #pragma once
 
 namespace fizz {
+namespace openssl {
 
 template <typename T>
 void Sha<T>::hash_init() {
@@ -44,4 +45,5 @@ void Sha<T>::hash(const folly::IOBuf& in, folly::MutableByteRange out) {
   CHECK_GE(out.size(), T::HashLen);
   folly::ssl::OpenSSLHash::hash(out, T::HashEngine(), in);
 }
+} // namespace openssl
 } // namespace fizz

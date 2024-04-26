@@ -12,16 +12,16 @@
 namespace fizz {
 namespace extensions {
 
-template <KeyType T>
+template <openssl::KeyType T>
 SelfDelegatedCredentialImpl<T>::InternalSelfCert::InternalSelfCert(
     std::vector<folly::ssl::X509UniquePtr> certs,
     folly::ssl::EvpPkeyUniquePtr privateKey)
-    : OpenSSLSelfCertImpl<T>(std::move(certs)) {
+    : openssl::OpenSSLSelfCertImpl<T>(std::move(certs)) {
   if (certs_.empty()) {
     throw std::runtime_error("Must supply at least 1 cert");
   }
 
-  if (CertUtils::getKeyType(privateKey) != T) {
+  if (openssl::CertUtils::getKeyType(privateKey) != T) {
     throw std::runtime_error("Key and credential type don't match");
   }
 
@@ -30,7 +30,7 @@ SelfDelegatedCredentialImpl<T>::InternalSelfCert::InternalSelfCert(
   signature_.setKey(std::move(privateKey));
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
     std::vector<folly::ssl::X509UniquePtr> certs,
     folly::ssl::EvpPkeyUniquePtr privateKey,
@@ -38,7 +38,7 @@ SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
     const std::vector<std::shared_ptr<CertificateCompressor>>& compressors)
     : selfCertImpl_(std::move(certs), std::move(privateKey)),
       credential_(std::move(credential)) {
-  auto supportedAlgs = CertUtils::getSigSchemes<T>();
+  auto supportedAlgs = openssl::CertUtils::getSigSchemes<T>();
   if (std::find(
           supportedAlgs.begin(),
           supportedAlgs.end(),
@@ -50,7 +50,7 @@ SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
   // Verify credential signature.
   auto signBuffer = DelegatedCredentialUtils::prepareSignatureBuffer(
       credential_, folly::ssl::OpenSSLCertUtils::derEncode(*getX509()));
-  auto parentCert = CertUtils::makePeerCert(getX509());
+  auto parentCert = openssl::CertUtils::makePeerCert(getX509());
   parentCert->verify(
       credential_.credential_scheme,
       CertificateVerifyContext::DelegatedCredential,
@@ -63,24 +63,24 @@ SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
   }
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 std::string SelfDelegatedCredentialImpl<T>::getIdentity() const {
   return selfCertImpl_.getIdentity();
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 std::vector<std::string> SelfDelegatedCredentialImpl<T>::getAltIdentities()
     const {
   return selfCertImpl_.getAltIdentities();
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 std::vector<SignatureScheme> SelfDelegatedCredentialImpl<T>::getSigSchemes()
     const {
   return {credential_.expected_verify_scheme};
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 CertificateMsg SelfDelegatedCredentialImpl<T>::getCertMessage(
     Buf certificateRequestContext) const {
   auto msg = selfCertImpl_.getCertMessage();
@@ -88,13 +88,13 @@ CertificateMsg SelfDelegatedCredentialImpl<T>::getCertMessage(
   return msg;
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 CompressedCertificate SelfDelegatedCredentialImpl<T>::getCompressedCert(
     CertificateCompressionAlgorithm algo) const {
-  return CertUtils::cloneCompressedCert(compressedCerts_.at(algo));
+  return openssl::CertUtils::cloneCompressedCert(compressedCerts_.at(algo));
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 Buf SelfDelegatedCredentialImpl<T>::sign(
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -102,12 +102,12 @@ Buf SelfDelegatedCredentialImpl<T>::sign(
   return selfCertImpl_.sign(scheme, context, std::move(toBeSigned));
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 folly::ssl::X509UniquePtr SelfDelegatedCredentialImpl<T>::getX509() const {
   return selfCertImpl_.getX509();
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 const DelegatedCredential&
 SelfDelegatedCredentialImpl<T>::getDelegatedCredential() const {
   return credential_;

@@ -35,7 +35,8 @@ static std::vector<hpke::AeadId> supportedAeads{
     hpke::AeadId::TLS_AES_256_GCM_SHA384,
     hpke::AeadId::TLS_AES_128_GCM_SHA256};
 
-class MockOpenSSLECKeyExchange256 : public OpenSSLECKeyExchange<P256> {
+class MockOpenSSLECKeyExchange256
+    : public openssl::OpenSSLECKeyExchange<openssl::P256> {
  public:
   MOCK_METHOD(void, generateKeyPair, ());
 };

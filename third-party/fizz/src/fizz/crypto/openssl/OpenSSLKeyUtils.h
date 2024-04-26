@@ -8,76 +8,28 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 #include <fizz/crypto/openssl/OpenSSL.h>
-#include <folly/Range.h>
-#include <folly/io/IOBuf.h>
-#include <folly/ssl/OpenSSLPtrTypes.h>
 
 namespace fizz {
-
-class OpenSSLKeyUtils {
- public:
-  /**
-   * Generates an new EVP_PKEY on the curve.
-   * Throws an exception on error.
-   *
-   * This is a public interface to the namespaced private method below.
-   */
-  static folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid);
-};
+using OpenSSLKeyUtils = openssl::OpenSSLKeyUtils;
 
 namespace detail {
 
-/**
- * Validates whether or not the EVP_PKEY belongs to the
- * curve. If not, this throws an exception.
- */
-void validateECKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid);
+CREATE_FIZZ_FN_ALIAS(validateECKey, openssl::detail::validateECKey)
 
 #if FIZZ_OPENSSL_HAS_ED25519
-/**
- * Validates whether or not the EVP_PKEY belongs to the
- * Edwards curve (currently supports only Ed25519 & Ed448).
- * If not, this throws an exception.
- */
-void validateEdKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid);
+CREATE_FIZZ_FN_ALIAS(validateEdKey, openssl::detail::validateEdKey)
 #endif
 
-/**
- * Generates an new EVP_PKEY on the curve.
- * Throws an exception on error.
- */
-folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid);
+CREATE_FIZZ_FN_ALIAS(generateECKeyPair, openssl::detail::generateECKeyPair)
+CREATE_FIZZ_FN_ALIAS(decodeECPublicKey, openssl::detail::decodeECPublicKey)
+CREATE_FIZZ_FN_ALIAS(encodeECPublicKey, openssl::detail::encodeECPublicKey)
+CREATE_FIZZ_FN_ALIAS(
+    generateEvpSharedSecret,
+    openssl::detail::generateEvpSharedSecret)
+CREATE_FIZZ_FN_ALIAS(getOpenSSLError, openssl::detail::getOpenSSLError)
 
-/**
- * Decodes a EC public key specified as a member of the curve
- * curveNid.
- */
-folly::ssl::EvpPkeyUniquePtr decodeECPublicKey(
-    folly::ByteRange range,
-    int curveNid);
-
-/**
- * Encodes the public key and returns a buffer.
- */
-
-std::unique_ptr<folly::IOBuf> encodeECPublicKey(
-    const folly::ssl::EvpPkeyUniquePtr& key);
-
-std::unique_ptr<folly::IOBuf> encodeECPublicKey(
-    const folly::ssl::EcKeyUniquePtr& ecKey);
-
-/**
- * Generates a shared secred from a private key, key and the
- * peerKey public key.
- */
-std::unique_ptr<folly::IOBuf> generateEvpSharedSecret(
-    const folly::ssl::EvpPkeyUniquePtr& key,
-    const folly::ssl::EvpPkeyUniquePtr& peerKey);
-
-/**
- * Returns the current error in the thread queue as a string.
- */
-std::string getOpenSSLError();
 } // namespace detail
 } // namespace fizz

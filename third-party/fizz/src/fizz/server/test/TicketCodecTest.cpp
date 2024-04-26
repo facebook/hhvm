@@ -54,7 +54,7 @@ static ResumptionState getTestResumptionState(
 }
 
 static ResumptionState x509Decode(Buf encoded) {
-  OpenSSLFactory factory;
+  openssl::OpenSSLFactory factory;
   CertManager certManager;
   return TicketCodec<CertificateStorage::X509>::decode(
       std::move(encoded), factory, certManager);

@@ -12,7 +12,7 @@
 namespace fizz {
 namespace extensions {
 
-template <KeyType T>
+template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::InternalPeerCert::InternalPeerCert(
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey)
@@ -31,7 +31,7 @@ PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
     : peerCertImpl_(std::move(cert), std::move(pubKey)),
       credential_(std::move(credential)) {}
 
-template <KeyType T>
+template <openssl::KeyType T>
 void PeerDelegatedCredentialImpl<T>::verify(
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -52,7 +52,8 @@ void PeerDelegatedCredentialImpl<T>::verify(
   // Verify signature
   auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(
       credential_, folly::ssl::OpenSSLCertUtils::derEncode(*x509));
-  auto parentCert = std::make_unique<OpenSSLPeerCertImpl<T>>(std::move(x509));
+  auto parentCert =
+      std::make_unique<openssl::OpenSSLPeerCertImpl<T>>(std::move(x509));
 
   try {
     parentCert->verify(
@@ -72,7 +73,7 @@ void PeerDelegatedCredentialImpl<T>::verify(
       scheme, context, std::move(toBeSigned), std::move(signature));
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 SignatureScheme PeerDelegatedCredentialImpl<T>::getExpectedScheme() const {
   return credential_.expected_verify_scheme;
 }

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/OpenSSLFactory.h>
 
@@ -17,7 +18,7 @@ namespace extensions {
 /**
  * This class allows delegated credentials to be parsed when sent by the server.
  */
-class DelegatedCredentialFactory : public OpenSSLFactory {
+class DelegatedCredentialFactory : public openssl::OpenSSLFactory {
  public:
   ~DelegatedCredentialFactory() override = default;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/experimental/ktls/AsyncKTLSSocket.h>
 #include <fizz/experimental/ktls/KTLS.h>
 #include <fizz/record/EncryptedRecordLayer.h>
@@ -46,7 +46,8 @@ static std::unique_ptr<T> makeEncryptedRecordLayer(
   // parameter
   static unsigned char dummy;
 
-  auto aead = fizz::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+  auto aead =
+      fizz::openssl::OpenSSLEVPCipher::makeCipher<fizz::openssl::AESGCM128>();
   aead->setKey(std::move(key));
   auto rl = std::make_unique<T>(fizz::EncryptionLevel::AppTraffic);
   rl->setAead(folly::ByteRange(&dummy, 1), std::move(aead));

@@ -6,10 +6,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
 #include <fizz/extensions/exportedauth/Util.h>
-#include <fizz/protocol/CertUtils.h>
-#include <fizz/protocol/OpenSSLFactory.h>
 
 namespace fizz {
 
@@ -34,7 +34,7 @@ Buf ExportedAuthenticator::getAuthenticator(
     const SelfCert& cert,
     Buf authenticatorRequest) {
   auto cipher = transport.getCipher();
-  auto deriver = OpenSSLFactory().makeKeyDeriver(*cipher);
+  auto deriver = openssl::OpenSSLFactory().makeKeyDeriver(*cipher);
   auto hashLength = deriver->hashLength();
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;
@@ -78,7 +78,7 @@ ExportedAuthenticator::validateAuthenticator(
     Buf authenticatorRequest,
     Buf authenticator) {
   auto cipher = transport.getCipher();
-  auto deriver = OpenSSLFactory().makeKeyDeriver(*cipher);
+  auto deriver = openssl::OpenSSLFactory().makeKeyDeriver(*cipher);
   auto hashLength = deriver->hashLength();
   Buf handshakeContext;
   Buf finishedMacKey;
@@ -205,7 +205,7 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto leafCert = folly::IOBuf::create(capacity);
   folly::io::Appender appender(leafCert.get(), capacity);
   detail::writeBuf(certMsg->certificate_list.front().cert_data, appender);
-  auto peerCert = CertUtils::makePeerCert(std::move(leafCert));
+  auto peerCert = openssl::CertUtils::makePeerCert(std::move(leafCert));
   auto encodedCertMsg = encodeHandshake(std::move(*certMsg));
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);

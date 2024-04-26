@@ -6,12 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/client/BatchSignaturePeerCert.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <folly/executors/ManualExecutor.h>
 #include <folly/portability/GTest.h>
@@ -60,11 +60,12 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
-      getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+          getPrivateKey(kP256Key), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature1 = batchSelfCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -73,8 +74,9 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
   executor.drain();
 
   // verify
-  auto peerCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::P256>>(
-      getCert(kP256Certificate));
+  auto peerCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   batchPeerCert.verify(
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -98,11 +100,12 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
-      getPrivateKey(kRSAKey), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
+          getPrivateKey(kRSAKey), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature1 = batchSelfCert.signFuture(
       SignatureScheme::rsa_pss_sha256_batch,
@@ -111,8 +114,9 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
   executor.drain();
 
   // verify
-  auto peerCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::RSA>>(
-      getCert(kRSACertificate));
+  auto peerCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
+          getCert(kRSACertificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   batchPeerCert.verify(
       SignatureScheme::rsa_pss_sha256_batch,
@@ -136,11 +140,12 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
-      getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
+  auto certificate =
+      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+          getPrivateKey(kP256Key), std::move(certs));
+  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature = batchSelfCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -149,8 +154,9 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   executor.drain();
   auto signatureBuf = *std::move(signature).get();
 
-  auto peerCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::P256>>(
-      getCert(kP256Certificate));
+  auto peerCert =
+      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   // normal verify
   EXPECT_NO_THROW(batchPeerCert.verify(
@@ -175,10 +181,11 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
           newSig1.encode()->coalesce()),
       std::runtime_error);
 
-  // throw when signature's path length is larger than Sha256::HashLen * 32
+  // throw when signature's path length is larger than openssl::Sha256::HashLen
+  // * 32
   MerkleTreePath newPath2{
       .index = static_cast<uint32_t>(decodedSig.getIndex())};
-  size_t badLength = Sha256::HashLen * 33;
+  size_t badLength = openssl::Sha256::HashLen * 33;
   newPath2.path = folly::IOBuf::create(badLength);
   newPath2.path->append(badLength);
   BatchSignature newSig2(std::move(newPath2), decodedSig.getSignature());

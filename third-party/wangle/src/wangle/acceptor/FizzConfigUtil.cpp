@@ -16,16 +16,16 @@
 
 #include <wangle/acceptor/FizzConfigUtil.h>
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <folly/Format.h>
 #include <folly/String.h>
 
-using fizz::CertUtils;
 using fizz::DefaultCertificateVerifier;
 using fizz::FizzUtil;
 using fizz::ProtocolVersion;
 using fizz::VerificationContext;
+using fizz::openssl::CertUtils;
 using fizz::server::ClientAuthMode;
 
 namespace wangle {

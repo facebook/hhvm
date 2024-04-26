@@ -8,21 +8,22 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/crypto/exchange/ECCurveKeyExchange.h>
 #include <fizz/crypto/ECCurve.h>
 #include <fizz/crypto/exchange/OpenSSLKeyExchange.h>
-#include <folly/io/IOBuf.h>
 
 namespace fizz {
 
-using P256KeyExchange = OpenSSLECKeyExchange<P256>;
-using P256PublicKeyDecoder = detail::OpenSSLECKeyDecoder<P256>;
-using P256PublicKeyEncoder = detail::OpenSSLECKeyEncoder;
+using P256KeyExchange = openssl::P256KeyExchange;
+using P256PublicKeyDecoder = openssl::P256PublicKeyDecoder;
+using P256PublicKeyEncoder = openssl::P256PublicKeyEncoder;
 
-using P384KeyExchange = OpenSSLECKeyExchange<P384>;
-using P384PublicKeyDecoder = detail::OpenSSLECKeyDecoder<P384>;
-using P384PublicKeyEncoder = detail::OpenSSLECKeyEncoder;
+using P384KeyExchange = openssl::P384KeyExchange;
+using P384PublicKeyDecoder = openssl::P384PublicKeyDecoder;
+using P384PublicKeyEncoder = openssl::P384PublicKeyEncoder;
 
-using P521KeyExchange = OpenSSLECKeyExchange<P521>;
-using P521PublicKeyDecoder = detail::OpenSSLECKeyDecoder<P521>;
-using P521PublicKeyEncoder = detail::OpenSSLECKeyEncoder;
+using P521KeyExchange = openssl::P521KeyExchange;
+using P521PublicKeyDecoder = openssl::P521PublicKeyDecoder;
+using P521PublicKeyEncoder = openssl::P521PublicKeyEncoder;
+
 } // namespace fizz

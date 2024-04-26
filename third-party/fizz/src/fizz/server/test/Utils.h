@@ -7,6 +7,10 @@
  */
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/protocol/CertUtils.h>
@@ -41,8 +45,9 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
         fizz::test::createCert("fizz-test-selfsign", false, nullptr);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto fizzCert = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
-        std::move(certData.key), std::move(certChain));
+    auto fizzCert =
+        std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+            std::move(certData.key), std::move(certChain));
     auto certManager = std::make_unique<CertManager>();
     certManager->addCert(std::move(fizzCert), true);
     ctx_ = std::make_shared<FizzServerContext>();
@@ -90,7 +95,8 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
     if (enable) {
       auto ticketCipher = std::make_shared<
           Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-          std::make_shared<OpenSSLFactory>(), std::make_shared<CertManager>());
+          std::make_shared<openssl::OpenSSLFactory>(),
+          std::make_shared<CertManager>());
       auto ticketSeed = RandomGenerator<32>().generateRandom();
       ticketCipher->setTicketSecrets({{folly::range(ticketSeed)}});
       ctx_->setTicketCipher(ticketCipher);

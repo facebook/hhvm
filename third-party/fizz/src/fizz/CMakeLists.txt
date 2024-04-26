@@ -110,15 +110,21 @@ configure_file(fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATION ${INCLUDE_INSTALL_DIR}/fizz/)
 
 set(FIZZ_HEADER_DIRS
+  backend
+  backend/openssl
+  backend/openssl/crypto
+  backend/openssl/crypto/aead
+  backend/openssl/crypto/exchange
+  backend/openssl/crypto/signature
   client
   compression
   crypto
   crypto/aead
-  crypto/exchange
-  crypto/hpke
   crypto/signature
   crypto/openssl
   experimental/crypto/exchange
+  crypto/exchange
+  crypto/hpke
   experimental/ktls
   experimental/util
   extensions/delegatedcred
@@ -172,20 +178,20 @@ set(FIZZ_SOURCES
   crypto/Utils.cpp
   crypto/exchange/HybridKeyExchange.cpp
   crypto/exchange/X25519.cpp
-  crypto/aead/OpenSSLEVPCipher.cpp
+  backend/openssl/crypto/aead/OpenSSLEVPCipher.cpp
   crypto/aead/IOBufUtil.cpp
   crypto/aead/AEGISCipher.cpp
-  crypto/signature/Signature.cpp
+  backend/openssl/crypto/signature/Signature.cpp
   crypto/Hkdf.cpp
   crypto/KeyDerivation.cpp
-  crypto/Sha256.cpp
-  crypto/Sha384.cpp
+  backend/openssl/crypto/Sha256.cpp
+  backend/openssl/crypto/Sha384.cpp
   crypto/hpke/Context.cpp
   crypto/hpke/DHKEM.cpp
   crypto/hpke/Hkdf.cpp
   crypto/hpke/Hpke.cpp
   crypto/hpke/Utils.cpp
-  crypto/openssl/OpenSSLKeyUtils.cpp
+  backend/openssl/crypto/OpenSSLKeyUtils.cpp
   record/Types.cpp
   record/RecordLayer.cpp
   record/EncryptedRecordLayer.cpp
@@ -209,8 +215,8 @@ set(FIZZ_SOURCES
   protocol/Events.cpp
   protocol/KeyScheduler.cpp
   protocol/Certificate.cpp
-  protocol/CertUtils.cpp
-  protocol/OpenSSLFactory.cpp
+  backend/openssl/certificate/CertUtils.cpp
+  backend/openssl/OpenSSLFactory.cpp
   protocol/Params.cpp
   protocol/clock/SystemClock.cpp
   protocol/ech/Decrypter.cpp
@@ -427,16 +433,16 @@ if(BUILD_TESTS)
   add_gtest(client/test/FizzClientTest.cpp FizzClientTest)
   add_gtest(compression/test/CertDecompressionManagerTest.cpp CertDecompressionManagerTest)
   add_gtest(compression/test/ZlibCertificateCompressorTest.cpp ZlibCertificateCompressorTest)
-  add_gtest(crypto/aead/test/EVPCipherTest.cpp EVPCipherTest)
+  add_gtest(backend/openssl/crypto/aead/test/EVPCipherTest.cpp EVPCipherTest)
   add_gtest(crypto/aead/test/IOBufUtilTest.cpp IOBufUtilTest)
   add_gtest(crypto/exchange/test/X25519KeyExchangeTest.cpp X25519KeyExchangeTest)
-  add_gtest(crypto/exchange/test/ECKeyExchangeTest.cpp ECKeyExchangeTest)
+  add_gtest(backend/openssl/crypto/exchange/test/ECKeyExchangeTest.cpp ECKeyExchangeTest)
   add_gtest(crypto/hpke/test/ContextTest.cpp ContextTest)
   add_gtest(crypto/hpke/test/DHKEMTest.cpp DHKEMTest)
   add_gtest(crypto/hpke/test/HpkeTest.cpp HpkeTest)
-  add_gtest(crypto/openssl/test/OpenSSLKeyUtilsTest.cpp OpenSSLKeyUtilsTest)
-  add_gtest(crypto/signature/test/RSAPSSSignatureTest.cpp RSAPSSSignatureTest)
-  add_gtest(crypto/signature/test/ECSignatureTest.cpp ECSignatureTest)
+  add_gtest(backend/openssl/crypto/test/OpenSSLKeyUtilsTest.cpp OpenSSLKeyUtilsTest)
+  add_gtest(backend/openssl/crypto/signature/test/RSAPSSSignatureTest.cpp RSAPSSSignatureTest)
+  add_gtest(backend/openssl/crypto/signature/test/ECSignatureTest.cpp ECSignatureTest)
   add_gtest(crypto/test/HkdfTest.cpp HkdfTest)
   add_gtest(crypto/test/KeyDerivationTest.cpp KeyDerivationTest)
   add_gtest(crypto/test/RandomGeneratorTest.cpp RandomGeneratorTest)

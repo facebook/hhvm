@@ -26,9 +26,9 @@ namespace test {
 // @lint-ignore-every PRIVATEKEY
 
 /*
- *  Randomly generated ECDSA-P256 private key
+ *  Randomly generated ECDSA-openssl::P256 private key
  *  Command: openssl ecparam -name secp256r1 -genkey
- *  Output: Randomly generated ECDSA-P256 private key
+ *  Output: Randomly generated ECDSA-openssl::P256 private key
  */
 StringPiece kP256CredCertKey = R"(
 -----BEGIN PRIVATE KEY-----
@@ -66,9 +66,9 @@ zj0EAwIDSAAwRQIgB2EWbwWohYziQ2LmY8Qmn8y0WKR6Mbm5aad0rUBvtK4CIQCv
 )";
 
 /*
- *  Randomly generated ECDSA-P256 private key
+ *  Randomly generated ECDSA-openssl::P256 private key
  *  Command: openssl ecparam -name secp256r1 -genkey
- *  Output: Randomly generated ECDSA-P256 private key
+ *  Output: Randomly generated ECDSA-openssl::P256 private key
  */
 StringPiece kP256DelegatedCredKey = R"(
 -----BEGIN EC PARAMETERS-----
@@ -174,8 +174,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerify) {
   ON_CALL(*clock, getCurrentTime())
       .WillByDefault(Return(std::chrono::system_clock::time_point(
           std::chrono::seconds(1712700000))));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
   peerCred->setClock(clock);
 
   // We expect all other verification steps to pass and only the final parent
@@ -198,8 +199,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyNoExtension) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
 
   expectThrows(
       [&]() {
@@ -224,8 +226,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBadSignature) {
   ON_CALL(*clock, getCurrentTime())
       .WillByDefault(Return(std::chrono::system_clock::time_point(
           std::chrono::seconds(1570400000))));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
   peerCred->setClock(clock);
 
   expectThrows(
@@ -246,8 +249,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongAlgo) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
 
   // Should fail early due to mismatch with credential
   expectThrows(
@@ -268,8 +272,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBitFlip) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
 
   auto sig = toBuf(kP256Signature);
   sig->writableData()[1] ^= 0x20;
@@ -289,8 +294,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifySizeMismatch) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred = std::make_shared<PeerDelegatedCredentialImpl<KeyType::P256>>(
-      std::move(cert), std::move(pubKey), std::move(cred));
+  auto peerCred =
+      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
+          std::move(cert), std::move(pubKey), std::move(cred));
 
   auto sig = toBuf(kP256Signature);
   sig->prependChain(IOBuf::copyBuffer("0"));

@@ -6,11 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Assume.h>
 
 namespace fizz {
+namespace openssl {
 
 namespace detail {
 
@@ -189,4 +190,5 @@ inline void OpenSSLSignature<KeyType::RSA>::setKey(
   }
   pkey_ = std::move(pkey);
 }
+} // namespace openssl
 } // namespace fizz

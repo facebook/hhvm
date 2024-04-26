@@ -6,14 +6,21 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/CertUtils.h>
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/fizz-config.h>
+
 #if FIZZ_HAVE_OQS
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
 #include <fizz/experimental/crypto/exchange/OQSKeyExchange.h>
 #endif
 
+#if FIZZ_BUILD_AEGIS
+#include <fizz/crypto/aead/AEGISCipher.h>
+#endif
+
 namespace fizz {
+namespace openssl {
 
 std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
     NamedGroup group,
@@ -119,4 +126,5 @@ std::unique_ptr<PeerCert> OpenSSLFactory::makePeerCert(
   return CertUtils::makePeerCert(std::move(certEntry.cert_data));
 }
 
+} // namespace openssl
 } // namespace fizz

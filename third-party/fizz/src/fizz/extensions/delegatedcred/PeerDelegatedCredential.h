@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/OpenSSLPeerCertImpl.h>
 #include <fizz/protocol/clock/SystemClock.h>
@@ -15,7 +16,6 @@
 namespace fizz {
 namespace extensions {
 
-// This is a base class purely to differentiate between the common
 // peer cert impl, in case a cast is needed at some higher layer.
 class PeerDelegatedCredential : public PeerCert {
  public:

@@ -6,12 +6,13 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/openssl/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/crypto/aead/CryptoUtil.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <folly/lang/CheckedMath.h>
 #include <functional>
 
 namespace fizz {
+namespace openssl {
 
 namespace {
 void encFunc(
@@ -466,4 +467,5 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> OpenSSLEVPCipher::tryDecrypt(
 size_t OpenSSLEVPCipher::getCipherOverhead() const {
   return tagLength_;
 }
+} // namespace openssl
 } // namespace fizz

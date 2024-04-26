@@ -6,11 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/openssl/OpenSSLKeyUtils.h>
+#include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 
 #include <openssl/err.h>
 
 namespace fizz {
+namespace openssl {
 
 /*static*/ folly::ssl::EvpPkeyUniquePtr OpenSSLKeyUtils::generateECKeyPair(
     int curveNid) {
@@ -172,4 +173,5 @@ std::string getOpenSSLError() {
   return std::string(errMsg);
 }
 } // namespace detail
+} // namespace openssl
 } // namespace fizz

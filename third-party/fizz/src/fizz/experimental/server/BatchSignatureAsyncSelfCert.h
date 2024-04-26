@@ -20,7 +20,7 @@ namespace fizz {
  * A decorator class for an exisiting SelfCert/AsyncSelfCert to support both
  * its existing signature schemes and corresponding batch signature schemes.
  */
-template <typename Hash = Sha256>
+template <typename Hash = openssl::Sha256>
 class BatchSignatureAsyncSelfCert : public AsyncSelfCert {
  public:
   /**

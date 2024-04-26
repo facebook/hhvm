@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import c.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -128,7 +126,11 @@ cdef class C(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__C()
+        import importlib
+        types_reflection = importlib.import_module(
+            "c.types_reflection"
+        )
+        return types_reflection.get_reflection__C()
 
     @staticmethod
     def __get_metadata__():
@@ -226,7 +228,11 @@ cdef class E(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__E()
+        import importlib
+        types_reflection = importlib.import_module(
+            "c.types_reflection"
+        )
+        return types_reflection.get_reflection__E()
 
     @staticmethod
     def __get_metadata__():

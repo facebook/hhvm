@@ -60,7 +60,5 @@ import builtins as _builtins
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
-import my.namespacing.extend.test.extend.types_reflection as _types_reflection
-
 
 

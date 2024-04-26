@@ -64,8 +64,6 @@ import module.types as _module_types
 cimport transitive.types as _transitive_types
 import transitive.types as _transitive_types
 
-import service.types_reflection as _types_reflection
-
 
 
 IncludesIncluded = _includes_types.Included

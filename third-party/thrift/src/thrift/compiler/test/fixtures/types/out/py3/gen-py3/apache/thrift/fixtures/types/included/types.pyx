@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import apache.thrift.fixtures.types.included.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -154,7 +152,11 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__std_unordered_map__Map__i32_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.fixtures.types.included.types_reflection"
+        )
+        return types_reflection.get_reflection__std_unordered_map__Map__i32_string()
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
@@ -236,7 +238,11 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__std_unordered_map__Map__i32_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.fixtures.types.included.types_reflection"
+        )
+        return types_reflection.get_reflection__List__std_unordered_map__Map__i32_string()
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)

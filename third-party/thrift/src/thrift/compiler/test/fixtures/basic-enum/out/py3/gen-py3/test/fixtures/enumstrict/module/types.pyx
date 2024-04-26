@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import test.fixtures.enumstrict.module.types_reflection as _types_reflection
-
 
 cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)
 
@@ -306,7 +304,11 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "test.fixtures.enumstrict.module.types_reflection"
+        )
+        return types_reflection.get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -447,7 +449,11 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__MyEnum_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "test.fixtures.enumstrict.module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__MyEnum_string()
 
 Mapping.register(Map__MyEnum_string)
 

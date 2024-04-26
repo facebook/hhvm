@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import module.types_reflection as _types_reflection
-
 
 cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
 
@@ -183,7 +181,11 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__MyStructNestedAnnotation()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__MyStructNestedAnnotation()
 
     @staticmethod
     def __get_metadata__():
@@ -308,7 +310,11 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__SecretStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__SecretStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -432,7 +438,11 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__std_deque_std_string__List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__std_deque_std_string__List__string()
 
 
 Sequence.register(std_deque_std_string__List__string)

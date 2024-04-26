@@ -60,8 +60,6 @@ import builtins as _builtins
 import asyncio
 from folly.coro cimport bridgeCoroTaskWith
 
-import module.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -132,7 +130,11 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Foo()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Foo()
 
     @staticmethod
     def __get_metadata__():

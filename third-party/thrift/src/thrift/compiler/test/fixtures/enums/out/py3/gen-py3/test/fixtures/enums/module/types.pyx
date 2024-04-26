@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import test.fixtures.enums.module.types_reflection as _types_reflection
-
 
 cdef __EnumData __Metasyntactic_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMetasyntactic](), Metasyntactic)
 
@@ -548,7 +546,11 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__SomeStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "test.fixtures.enums.module.types_reflection"
+        )
+        return types_reflection.get_reflection__SomeStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -699,7 +701,11 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "test.fixtures.enums.module.types_reflection"
+        )
+        return types_reflection.get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -825,7 +831,11 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "test.fixtures.enums.module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__i32()
 
 
 Set.register(Set__i32)

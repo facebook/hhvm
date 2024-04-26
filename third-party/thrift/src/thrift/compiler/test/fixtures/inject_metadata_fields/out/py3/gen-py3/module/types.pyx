@@ -60,8 +60,6 @@ import builtins as _builtins
 cimport foo.types as _foo_types
 import foo.types as _foo_types
 
-import module.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -130,7 +128,11 @@ cdef class Fields(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Fields()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Fields()
 
     @staticmethod
     def __get_metadata__():
@@ -246,7 +248,11 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FieldsInjectedToEmptyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FieldsInjectedToEmptyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -371,7 +377,11 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FieldsInjectedToStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FieldsInjectedToStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -518,7 +528,11 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FieldsInjectedWithIncludedStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FieldsInjectedWithIncludedStruct()
 
     @staticmethod
     def __get_metadata__():

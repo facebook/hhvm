@@ -62,8 +62,6 @@ import module0.types as _module0_types
 cimport module1.types as _module1_types
 import module1.types as _module1_types
 
-import module2.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -145,7 +143,11 @@ cdef class Struct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Struct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module2.types_reflection"
+        )
+        return types_reflection.get_reflection__Struct()
 
     @staticmethod
     def __get_metadata__():
@@ -272,7 +274,11 @@ cdef class BigStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__BigStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module2.types_reflection"
+        )
+        return types_reflection.get_reflection__BigStruct()
 
     @staticmethod
     def __get_metadata__():

@@ -104,8 +104,6 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}{{> common/auto_migra
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection as _types_reflection
-
 {{> types/enum }}
 {{> types/union_type_enum }}
 
@@ -414,7 +412,11 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__{{struct:name}}()
+        import importlib
+        types_reflection = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        )
+        return types_reflection.get_reflection__{{struct:name}}()
 
     @staticmethod
     def __get_metadata__():
@@ -617,7 +619,11 @@ cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+        import importlib
+        types_reflection = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        )
+        return types_reflection.get_reflection__{{> types/cython_python_type}}()
 
 
 Sequence.register({{> types/cython_python_type}})
@@ -705,7 +711,11 @@ Sequence.register({{> types/cython_python_type}})
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+        import importlib
+        types_reflection = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        )
+        return types_reflection.get_reflection__{{> types/cython_python_type}}()
 
 
 Set.register({{> types/cython_python_type}})
@@ -843,7 +853,11 @@ Set.register({{> types/cython_python_type}})
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+        import importlib
+        types_reflection = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        )
+        return types_reflection.get_reflection__{{> types/cython_python_type}}()
 
 Mapping.register({{> types/cython_python_type}})
 {{/type:map?}}

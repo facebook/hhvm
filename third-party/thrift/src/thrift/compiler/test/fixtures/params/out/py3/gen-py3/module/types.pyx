@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import module.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -135,7 +133,11 @@ cdef class List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__i32()
 
 
 Sequence.register(List__i32)
@@ -234,7 +236,11 @@ cdef class Map__i32_List__i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_List__i32()
 
 Mapping.register(Map__i32_List__i32)
 
@@ -314,7 +320,11 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__i32()
 
 
 Set.register(Set__i32)
@@ -413,7 +423,11 @@ cdef class Map__i32_Set__i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_Set__i32()
 
 Mapping.register(Map__i32_Set__i32)
 
@@ -510,7 +524,11 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_i32()
 
 Mapping.register(Map__i32_i32)
 
@@ -592,7 +610,11 @@ cdef class List__Map__i32_i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Map__i32_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Map__i32_i32()
 
 
 Sequence.register(List__Map__i32_i32)
@@ -675,7 +697,11 @@ cdef class List__Set__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Set__i32()
 
 
 Sequence.register(List__Set__i32)
@@ -774,7 +800,11 @@ cdef class Map__i32_Map__i32_Set__i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_Map__i32_Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_Map__i32_Set__i32()
 
 Mapping.register(Map__i32_Map__i32_Set__i32)
 
@@ -856,7 +886,11 @@ cdef class List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Map__i32_Map__i32_Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Map__i32_Map__i32_Set__i32()
 
 
 Sequence.register(List__Map__i32_Map__i32_Set__i32)
@@ -939,7 +973,11 @@ cdef class List__List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__Map__i32_Map__i32_Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__Map__i32_Map__i32_Set__i32()
 
 
 Sequence.register(List__List__Map__i32_Map__i32_Set__i32)

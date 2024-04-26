@@ -60,8 +60,6 @@ import builtins as _builtins
 cimport transitive.types as _transitive_types
 import transitive.types as _transitive_types
 
-import includes.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -141,7 +139,11 @@ cdef class Included(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Included()
+        import importlib
+        types_reflection = importlib.import_module(
+            "includes.types_reflection"
+        )
+        return types_reflection.get_reflection__Included()
 
     @staticmethod
     def __get_metadata__():

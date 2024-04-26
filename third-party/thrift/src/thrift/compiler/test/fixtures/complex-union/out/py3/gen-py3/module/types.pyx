@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import module.types_reflection as _types_reflection
-
 
 
 cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
@@ -450,7 +448,11 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ComplexUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ComplexUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -601,7 +603,11 @@ cdef class ListUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ListUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ListUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -752,7 +758,11 @@ cdef class DataUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__DataUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__DataUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -890,7 +900,11 @@ cdef class Val(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Val()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Val()
 
     @staticmethod
     def __get_metadata__():
@@ -1039,7 +1053,11 @@ cdef class ValUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ValUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ValUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -1190,7 +1208,11 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__VirtualComplexUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__VirtualComplexUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -1295,7 +1317,11 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__NonCopyableStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__NonCopyableStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -1423,7 +1449,11 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__NonCopyableUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__NonCopyableUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -1548,7 +1578,11 @@ cdef class List__i64(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__i64()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__i64()
 
 
 Sequence.register(List__i64)
@@ -1627,7 +1661,11 @@ cdef class List__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__string()
 
 
 Sequence.register(List__string)
@@ -1724,7 +1762,11 @@ cdef class Map__i16_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i16_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i16_string()
 
 Mapping.register(Map__i16_string)
 

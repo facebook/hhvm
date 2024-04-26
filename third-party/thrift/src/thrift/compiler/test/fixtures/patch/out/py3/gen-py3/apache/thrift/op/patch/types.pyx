@@ -62,8 +62,6 @@ import apache.thrift.type.id.types as _apache_thrift_type_id_types
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
-import apache.thrift.op.patch.types_reflection as _types_reflection
-
 
 
 @__cython.auto_pickle(False)
@@ -116,7 +114,11 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__GeneratePatch()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.op.patch.types_reflection"
+        )
+        return types_reflection.get_reflection__GeneratePatch()
 
     @staticmethod
     def __get_metadata__():
@@ -216,7 +218,11 @@ cdef class GeneratePatchNew(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__GeneratePatchNew()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.op.patch.types_reflection"
+        )
+        return types_reflection.get_reflection__GeneratePatchNew()
 
     @staticmethod
     def __get_metadata__():
@@ -316,7 +322,11 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AssignOnlyPatch()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.op.patch.types_reflection"
+        )
+        return types_reflection.get_reflection__AssignOnlyPatch()
 
     @staticmethod
     def __get_metadata__():

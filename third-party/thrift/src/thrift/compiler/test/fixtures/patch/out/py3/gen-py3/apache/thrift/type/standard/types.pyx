@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import apache.thrift.type.standard.types_reflection as _types_reflection
-
 
 cdef __EnumData __Void_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cVoid](), Void)
 
@@ -357,7 +355,11 @@ cdef class TypeUri(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__TypeUri()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.type.standard.types_reflection"
+        )
+        return types_reflection.get_reflection__TypeUri()
 
     @staticmethod
     def __get_metadata__():
@@ -778,7 +780,11 @@ cdef class TypeName(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__TypeName()
+        import importlib
+        types_reflection = importlib.import_module(
+            "apache.thrift.type.standard.types_reflection"
+        )
+        return types_reflection.get_reflection__TypeName()
 
     @staticmethod
     def __get_metadata__():

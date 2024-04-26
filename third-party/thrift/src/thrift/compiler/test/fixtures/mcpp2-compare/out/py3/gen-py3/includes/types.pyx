@@ -58,8 +58,6 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-import includes.types_reflection as _types_reflection
-
 
 cdef __EnumData __AnEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnum](), AnEnum)
 
@@ -183,7 +181,11 @@ cdef class AStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "includes.types_reflection"
+        )
+        return types_reflection.get_reflection__AStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -302,7 +304,11 @@ cdef class AStructB(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AStructB()
+        import importlib
+        types_reflection = importlib.import_module(
+            "includes.types_reflection"
+        )
+        return types_reflection.get_reflection__AStructB()
 
     @staticmethod
     def __get_metadata__():

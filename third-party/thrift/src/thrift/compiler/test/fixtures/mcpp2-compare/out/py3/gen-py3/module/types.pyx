@@ -60,8 +60,6 @@ import builtins as _builtins
 cimport includes.types as _includes_types
 import includes.types as _includes_types
 
-import module.types_reflection as _types_reflection
-
 
 cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)
 
@@ -436,7 +434,11 @@ cdef class Empty(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Empty()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Empty()
 
     @staticmethod
     def __get_metadata__():
@@ -554,7 +556,11 @@ cdef class ASimpleStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ASimpleStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ASimpleStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -670,7 +676,11 @@ cdef class ASimpleStructNoexcept(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ASimpleStructNoexcept()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ASimpleStructNoexcept()
 
     @staticmethod
     def __get_metadata__():
@@ -888,7 +898,11 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -1047,7 +1061,11 @@ cdef class SimpleUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__SimpleUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__SimpleUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -1726,7 +1744,11 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ComplexUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ComplexUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -2010,7 +2032,11 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AnException()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__AnException()
 
     @staticmethod
     def __get_metadata__():
@@ -2135,7 +2161,11 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AnotherException()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__AnotherException()
 
     @staticmethod
     def __get_metadata__():
@@ -2723,7 +2753,11 @@ cdef class containerStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__containerStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__containerStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -2873,7 +2907,11 @@ cdef class MyIncludedStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__MyIncludedStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__MyIncludedStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -3427,7 +3465,11 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AnnotatedStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__AnnotatedStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -3556,7 +3598,11 @@ cdef class ComplexContainerStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__ComplexContainerStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__ComplexContainerStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -3681,7 +3727,11 @@ cdef class FloatStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FloatStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FloatStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -3860,7 +3910,11 @@ cdef class FloatUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FloatUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FloatUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -3978,7 +4032,11 @@ cdef class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__AllRequiredNoExceptMoveCtrStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__AllRequiredNoExceptMoveCtrStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -4120,7 +4178,11 @@ cdef class Map__string_i64(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_i64()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_i64()
 
 Mapping.register(Map__string_i64)
 
@@ -4215,7 +4277,11 @@ cdef class Map__Empty_MyStruct(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__Empty_MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__Empty_MyStruct()
 
 Mapping.register(Map__Empty_MyStruct)
 
@@ -4297,7 +4363,11 @@ cdef class List__Map__Empty_MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Map__Empty_MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Map__Empty_MyStruct()
 
 
 Sequence.register(List__Map__Empty_MyStruct)
@@ -4380,7 +4450,11 @@ cdef class List__List__Map__Empty_MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__Map__Empty_MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__Map__Empty_MyStruct()
 
 
 Sequence.register(List__List__Map__Empty_MyStruct)
@@ -4463,7 +4537,11 @@ cdef class List__List__List__Map__Empty_MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__List__Map__Empty_MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__List__Map__Empty_MyStruct()
 
 
 Sequence.register(List__List__List__Map__Empty_MyStruct)
@@ -4540,7 +4618,11 @@ cdef class List__MyEnumA(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__MyEnumA()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__MyEnumA()
 
 
 Sequence.register(List__MyEnumA)
@@ -4620,7 +4702,11 @@ cdef class Set__MyStruct(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__MyStruct()
 
 
 Set.register(Set__MyStruct)
@@ -4697,7 +4783,11 @@ cdef class List__ComplexUnion(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__ComplexUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__ComplexUnion()
 
 
 Sequence.register(List__ComplexUnion)
@@ -4776,7 +4866,11 @@ cdef class List__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__string()
 
 
 Sequence.register(List__string)
@@ -4863,7 +4957,11 @@ cdef class Set__List__string(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__List__string()
 
 
 Set.register(Set__List__string)
@@ -4950,7 +5048,11 @@ cdef class Set__List__List__Map__Empty_MyStruct(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__List__List__Map__Empty_MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__List__List__Map__Empty_MyStruct()
 
 
 Set.register(Set__List__List__Map__Empty_MyStruct)
@@ -5049,7 +5151,11 @@ cdef class Map__i32_List__string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_List__string()
 
 Mapping.register(Map__i32_List__string)
 
@@ -5125,7 +5231,11 @@ cdef class List__bool(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__bool()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__bool()
 
 
 Sequence.register(List__bool)
@@ -5203,7 +5313,11 @@ cdef class List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__i32()
 
 
 Sequence.register(List__i32)
@@ -5286,7 +5400,11 @@ cdef class List__List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__i32()
 
 
 Sequence.register(List__List__i32)
@@ -5369,7 +5487,11 @@ cdef class List__List__List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__List__i32()
 
 
 Sequence.register(List__List__List__i32)
@@ -5452,7 +5574,11 @@ cdef class List__List__List__List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__List__List__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__List__List__List__i32()
 
 
 Sequence.register(List__List__List__List__i32)
@@ -5539,7 +5665,11 @@ cdef class Set__List__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__List__i32()
 
 
 Set.register(Set__List__i32)
@@ -5621,7 +5751,11 @@ cdef class Set__string(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__string()
 
 
 Set.register(Set__string)
@@ -5704,7 +5838,11 @@ cdef class List__Set__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Set__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Set__string()
 
 
 Sequence.register(List__Set__string)
@@ -5806,7 +5944,11 @@ cdef class Map__List__Set__string_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__List__Set__string_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__List__Set__string_string()
 
 Mapping.register(Map__List__Set__string_string)
 
@@ -5909,7 +6051,11 @@ cdef class Map__Set__List__i32_Map__List__Set__string_string(thrift.py3.types.Ma
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__Set__List__i32_Map__List__Set__string_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__Set__List__i32_Map__List__Set__string_string()
 
 Mapping.register(Map__Set__List__i32_Map__List__Set__string_string)
 
@@ -5987,7 +6133,11 @@ cdef class List__binary(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__binary()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__binary()
 
 
 Sequence.register(List__binary)
@@ -6083,7 +6233,11 @@ cdef class Map__MyEnumA_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__MyEnumA_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__MyEnumA_string()
 
 Mapping.register(Map__MyEnumA_string)
 
@@ -6163,7 +6317,11 @@ cdef class Set__i64(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__i64()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__i64()
 
 
 Set.register(Set__i64)
@@ -6260,7 +6418,11 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_i32()
 
 Mapping.register(Map__string_i32)
 
@@ -6336,7 +6498,11 @@ cdef class List__SimpleUnion(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__SimpleUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__SimpleUnion()
 
 
 Sequence.register(List__SimpleUnion)
@@ -6416,7 +6582,11 @@ cdef class Set__SimpleUnion(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__SimpleUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__SimpleUnion()
 
 
 Set.register(Set__SimpleUnion)
@@ -6499,7 +6669,11 @@ cdef class List__Set__SimpleUnion(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Set__SimpleUnion()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Set__SimpleUnion()
 
 
 Sequence.register(List__Set__SimpleUnion)
@@ -6595,7 +6769,11 @@ cdef class Map__string_bool(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_bool()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_bool()
 
 Mapping.register(Map__string_bool)
 
@@ -6675,7 +6853,11 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__i32()
 
 
 Set.register(Set__i32)
@@ -6773,7 +6955,11 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_Map__string_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_Map__string_i32()
 
 Mapping.register(Map__string_Map__string_i32)
 
@@ -6870,7 +7056,11 @@ cdef class Map__string_Map__string_Map__string_i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_Map__string_Map__string_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_Map__string_Map__string_i32()
 
 Mapping.register(Map__string_Map__string_Map__string_i32)
 
@@ -6952,7 +7142,11 @@ cdef class List__Set__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Set__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Set__i32()
 
 
 Sequence.register(List__Set__i32)
@@ -7050,7 +7244,11 @@ cdef class Map__string_List__i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_List__i32()
 
 Mapping.register(Map__string_List__i32)
 
@@ -7129,7 +7327,11 @@ cdef class Set__bool(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__bool()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__bool()
 
 
 Set.register(Set__bool)
@@ -7216,7 +7418,11 @@ cdef class Set__Set__bool(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__Set__bool()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__Set__bool()
 
 
 Set.register(Set__Set__bool)
@@ -7303,7 +7509,11 @@ cdef class Set__Set__Set__bool(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__Set__Set__bool()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__Set__Set__bool()
 
 
 Set.register(Set__Set__Set__bool)
@@ -7400,7 +7610,11 @@ cdef class Map__Bar__double_Baz__i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__Bar__double_Baz__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__Bar__double_Baz__i32()
 
 Mapping.register(Map__Bar__double_Baz__i32)
 
@@ -7477,7 +7691,11 @@ cdef class folly_small_vector_int64_t_8__List__i64(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__folly_small_vector_int64_t_8__List__i64()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__folly_small_vector_int64_t_8__List__i64()
 
 
 Sequence.register(folly_small_vector_int64_t_8__List__i64)
@@ -7559,7 +7777,11 @@ cdef class folly_sorted_vector_set_std_string__Set__string(thrift.py3.types.Set)
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__folly_sorted_vector_set_std_string__Set__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__folly_sorted_vector_set_std_string__Set__string()
 
 
 Set.register(folly_sorted_vector_set_std_string__Set__string)
@@ -7656,7 +7878,11 @@ cdef class FakeMap__Map__i64_double(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__FakeMap__Map__i64_double()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__FakeMap__Map__i64_double()
 
 Mapping.register(FakeMap__Map__i64_double)
 
@@ -7751,7 +7977,11 @@ cdef class std_unordered_map_std_string_containerStruct__Map__string_containerSt
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__std_unordered_map_std_string_containerStruct__Map__string_containerStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__std_unordered_map_std_string_containerStruct__Map__string_containerStruct()
 
 Mapping.register(std_unordered_map_std_string_containerStruct__Map__string_containerStruct)
 
@@ -7828,7 +8058,11 @@ cdef class std_list__List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__std_list__List__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__std_list__List__i32()
 
 
 Sequence.register(std_list__List__i32)
@@ -7907,7 +8141,11 @@ cdef class std_deque__List__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__std_deque__List__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__std_deque__List__string()
 
 
 Sequence.register(std_deque__List__string)
@@ -7989,7 +8227,11 @@ cdef class folly_sorted_vector_set__Set__string(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__folly_sorted_vector_set__Set__string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__folly_sorted_vector_set__Set__string()
 
 
 Set.register(folly_sorted_vector_set__Set__string)
@@ -8086,7 +8328,11 @@ cdef class folly_sorted_vector_map__Map__i64_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__folly_sorted_vector_map__Map__i64_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__folly_sorted_vector_map__Map__i64_string()
 
 Mapping.register(folly_sorted_vector_map__Map__i64_string)
 
@@ -8162,7 +8408,11 @@ cdef class List__Bar__double(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Bar__double()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Bar__double()
 
 
 Sequence.register(List__Bar__double)
@@ -8243,7 +8493,11 @@ cdef class Set__Baz__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Set__Baz__i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Set__Baz__i32()
 
 
 Set.register(Set__Baz__i32)
@@ -8339,7 +8593,11 @@ cdef class Map__string_folly_IOBuf__binary(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_folly_IOBuf__binary()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_folly_IOBuf__binary()
 
 Mapping.register(Map__string_folly_IOBuf__binary)
 
@@ -8434,7 +8692,11 @@ cdef class Map__string_std_unique_ptr_folly_IOBuf__binary(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__string_std_unique_ptr_folly_IOBuf__binary()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__string_std_unique_ptr_folly_IOBuf__binary()
 
 Mapping.register(Map__string_std_unique_ptr_folly_IOBuf__binary)
 
@@ -8530,7 +8792,11 @@ cdef class Map__i32_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i32_string()
 
 Mapping.register(Map__i32_string)
 
@@ -8612,7 +8878,11 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Map__string_i32()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Map__string_i32()
 
 
 Sequence.register(List__Map__string_i32)
@@ -8709,7 +8979,11 @@ cdef class Map__i16_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i16_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__Map__i16_string()
 
 Mapping.register(Map__i16_string)
 
@@ -8791,7 +9065,11 @@ cdef class List__Map__i16_string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__Map__i16_string()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__Map__i16_string()
 
 
 Sequence.register(List__Map__i16_string)
@@ -8868,7 +9146,11 @@ cdef class List__MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__MyStruct()
+        import importlib
+        types_reflection = importlib.import_module(
+            "module.types_reflection"
+        )
+        return types_reflection.get_reflection__List__MyStruct()
 
 
 Sequence.register(List__MyStruct)

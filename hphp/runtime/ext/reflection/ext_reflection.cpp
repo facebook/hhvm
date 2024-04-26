@@ -956,7 +956,7 @@ static Array get_function_user_attributes(const Func* func) {
               sd->same(s_MakeICInaccessible.get()) ||
               sd->same(s_SoftMakeICInaccessible.get()) ||
               sd->same(s_Uncategorized.get())) {
-            if (RO::EvalEmitNativeEnumClassLabels) {
+            if (Cfg::Eval::EmitNativeEnumClassLabels) {
               args.append(make_tv<KindOfEnumClassLabel>(sd));
             } else {
               auto const func = Func::load(s_systemlib_create_opaque_value.get());

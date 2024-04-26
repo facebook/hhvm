@@ -466,8 +466,6 @@ struct RuntimeOption {
   F(bool, EnableFuncCoverage,          false)                           \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
-  /* Whether to log extern compiler performance */                      \
-  F(bool, LogExternCompilerPerf,       false)                           \
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
@@ -755,8 +753,6 @@ struct RuntimeOption {
   F(bool, NoticeOnReadDynamicProp, false)                               \
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
-  F(bool, FoldLazyClassKeys, true)                                      \
-  F(bool, EmitNativeEnumClassLabels, true)                              \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \

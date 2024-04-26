@@ -244,6 +244,14 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
 
+- bool Eval.LogExternCompilerPerf = false, UNKNOWN
+
+  Whether to log extern compiler performance
+
+- bool Eval.FoldLazyClassKeys = true, UNKNOWN, unitcacheflag
+
+- bool Eval.EmitNativeEnumClassLabels = true, UNKNOWN, unitcacheflag
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)

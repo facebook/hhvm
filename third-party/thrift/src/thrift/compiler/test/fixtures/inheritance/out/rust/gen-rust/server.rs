@@ -174,32 +174,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyRoot.do_root", "success");
-                crate::services::my_root::DoRootExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_root::DoRootExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "do_root",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "MyRoot.do_root", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyRoot.do_root", exn);
                 ::tracing::error!(method = "MyRoot.do_root", panic = ?aexn);
-                crate::services::my_root::DoRootExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::my_root::DoRootExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_root::DoRootExn>(
             "do_root",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -532,32 +526,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyNode.do_mid", "success");
-                crate::services::my_node::DoMidExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_node::DoMidExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "do_mid",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "MyNode.do_mid", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyNode.do_mid", exn);
                 ::tracing::error!(method = "MyNode.do_mid", panic = ?aexn);
-                crate::services::my_node::DoMidExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::my_node::DoMidExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_node::DoMidExn>(
             "do_mid",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -901,32 +889,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyLeaf.do_leaf", "success");
-                crate::services::my_leaf::DoLeafExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_leaf::DoLeafExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "do_leaf",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "MyLeaf.do_leaf", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyLeaf.do_leaf", exn);
                 ::tracing::error!(method = "MyLeaf.do_leaf", panic = ?aexn);
-                crate::services::my_leaf::DoLeafExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::my_leaf::DoLeafExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_leaf::DoLeafExn>(
             "do_leaf",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

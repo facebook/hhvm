@@ -23,65 +23,72 @@ pub mod c {
 
     pub type FError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::FExn> for
-        ::std::result::Result<(), FError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::c::FExn {
+        type Success = ();
+        type Return = ();
+        type Error = FError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::c::FExn> for FError {
         fn from(e: crate::services::c::FExn) -> Self {
             match e {
-                crate::services::c::FExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::c::FExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FError::ApplicationException(aexn)),
+                    FError::ApplicationException(aexn),
             }
         }
     }
 
     pub type NumbersError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::NumbersExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, NumbersError>
-    {
-        fn from(e: crate::services::c::NumbersExn) -> Self {
-            match e {
-                crate::services::c::NumbersExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::c::NumbersExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(NumbersError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::c::NumbersExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>;
+        type Error = NumbersError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::c::NumbersResponseExn> for
-        ::std::result::Result<(), NumbersError>
-    {
+    impl ::std::convert::From<crate::services::c::NumbersExn> for NumbersError {
+        fn from(e: crate::services::c::NumbersExn) -> Self {
+            match e {
+                crate::services::c::NumbersExn::ApplicationException(aexn) =>
+                    NumbersError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::c::NumbersResponseExn> for NumbersError {
         fn from(e: crate::services::c::NumbersResponseExn) -> Self {
             match e {
-                crate::services::c::NumbersResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::c::NumbersResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(NumbersError::ApplicationException(aexn)),
+                    NumbersError::ApplicationException(aexn),
             }
         }
     }
 
     pub type NumbersStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::NumbersStreamExn> for
-        ::std::result::Result<crate::types::number, NumbersStreamError>
-    {
+    impl ::std::convert::From<crate::services::c::NumbersStreamExn> for NumbersStreamError {
         fn from(e: crate::services::c::NumbersStreamExn) -> Self {
             match e {
-                crate::services::c::NumbersStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::c::NumbersStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(NumbersStreamError::ApplicationException(aexn)),
+                    NumbersStreamError::ApplicationException(aexn),
             }
         }
     }
@@ -171,18 +178,26 @@ pub mod c {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::c::ThingExn> for
-        ::std::result::Result<::std::string::String, ThingError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::c::ThingExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = ThingError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::c::ThingExn> for ThingError {
         fn from(e: crate::services::c::ThingExn) -> Self {
             match e {
-                crate::services::c::ThingExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::c::ThingExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ThingError::ApplicationException(aexn)),
+                    ThingError::ApplicationException(aexn),
                 crate::services::c::ThingExn::bang(exn) =>
-                    ::std::result::Result::Err(ThingError::bang(exn)),
+                    ThingError::bang(exn),
             }
         }
     }

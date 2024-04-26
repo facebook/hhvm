@@ -201,32 +201,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Service.func", "success");
-                crate::services::service::FuncExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::service::FuncExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "func",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Service.func", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Service.func", exn);
                 ::tracing::error!(method = "Service.func", panic = ?aexn);
-                crate::services::service::FuncExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::service::FuncExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::service::FuncExn>(
             "func",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -613,32 +607,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "AdapterService.count", "success");
-                crate::services::adapter_service::CountExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::CountExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "count",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "AdapterService.count", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.count", exn);
                 ::tracing::error!(method = "AdapterService.count", panic = ?aexn);
-                crate::services::adapter_service::CountExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::adapter_service::CountExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::adapter_service::CountExn>(
             "count",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -687,32 +675,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "AdapterService.adaptedTypes", "success");
-                crate::services::adapter_service::AdaptedTypesExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "adaptedTypes",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "AdapterService.adaptedTypes", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.adaptedTypes", exn);
                 ::tracing::error!(method = "AdapterService.adaptedTypes", panic = ?aexn);
-                crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::adapter_service::AdaptedTypesExn>(
             "adaptedTypes",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

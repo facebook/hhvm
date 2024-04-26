@@ -229,32 +229,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Foo.return", "success");
-                crate::services::foo::ReturnExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::ReturnExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "r#return",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Foo.return", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.return", exn);
                 ::tracing::error!(method = "Foo.return", panic = ?aexn);
-                crate::services::foo::ReturnExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::foo::ReturnExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::foo::ReturnExn>(
             "return",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -303,32 +297,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Foo.super", "success");
-                crate::services::foo::SuperExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::SuperExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "super_",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Foo.super", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.super", exn);
                 ::tracing::error!(method = "Foo.super", panic = ?aexn);
-                crate::services::foo::SuperExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::foo::SuperExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::foo::SuperExn>(
             "super",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

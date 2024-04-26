@@ -103,13 +103,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_interaction::FrobnicateExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction::FrobnicateExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -149,13 +149,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_interaction::PingExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction::PingExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -206,18 +206,17 @@ where
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        crate::services::my_interaction::TruthifyStreamExn::read(&mut de)
+                                        <crate::services::my_interaction::TruthifyStreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_interaction::TruthifyStreamExn::ApplicationException)
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn)))
                                     }
                                 }
                             }).await?;
 
-                            let item: ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError> =
-                                ::std::convert::From::from(res);
-                            item
+                            res.map_err(<crate::errors::my_interaction::TruthifyStreamError as ::std::convert::From<_>>::from)
                         }
                     }
                 }
@@ -225,11 +224,9 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res: crate::services::my_interaction::TruthifyResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction::TruthifyResponseExn, S>(de).await??;
 
-            let initial: ::std::result::Result<(), crate::errors::my_interaction::TruthifyError> =
-                ::std::convert::From::from(res);
+            let initial = res.map_err(<crate::errors::my_interaction::TruthifyError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
             res
         }
@@ -613,13 +610,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_interaction_fast::FrobnicateExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction_fast::FrobnicateExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_interaction_fast::FrobnicateError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -659,13 +656,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_interaction_fast::PingExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction_fast::PingExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_interaction_fast::PingError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -716,18 +713,17 @@ where
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        crate::services::my_interaction_fast::TruthifyStreamExn::read(&mut de)
+                                        <crate::services::my_interaction_fast::TruthifyStreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException)
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn)))
                                     }
                                 }
                             }).await?;
 
-                            let item: ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError> =
-                                ::std::convert::From::from(res);
-                            item
+                            res.map_err(<crate::errors::my_interaction_fast::TruthifyStreamError as ::std::convert::From<_>>::from)
                         }
                     }
                 }
@@ -735,11 +731,9 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res: crate::services::my_interaction_fast::TruthifyResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction_fast::TruthifyResponseExn, S>(de).await??;
 
-            let initial: ::std::result::Result<(), crate::errors::my_interaction_fast::TruthifyError> =
-                ::std::convert::From::from(res);
+            let initial = res.map_err(<crate::errors::my_interaction_fast::TruthifyError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
             res
         }
@@ -1124,13 +1118,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::serial_interaction::FrobnicateExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::serial_interaction::FrobnicateExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::serial_interaction::FrobnicateError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -1410,13 +1404,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_service::FooExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::FooExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_service::FooError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -1464,13 +1458,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_service::InteractExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::InteractExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_service::InteractError::ApplicationException(aexn))
+                }
             };
             let interaction_client: crate::client::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
             res?;
@@ -1518,13 +1512,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_service::InteractFastExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::InteractFastExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_service::InteractFastError::ApplicationException(aexn))
+                }
             };
             let interaction_client: crate::client::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))
@@ -1582,18 +1576,17 @@ where
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        crate::services::my_service::SerializeStreamExn::read(&mut de)
+                                        <crate::services::my_service::SerializeStreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_service::SerializeStreamExn::ApplicationException)
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::SerializeStreamExn::ApplicationException(aexn)))
                                     }
                                 }
                             }).await?;
 
-                            let item: ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError> =
-                                ::std::convert::From::from(res);
-                            item
+                            res.map_err(<crate::errors::my_service::SerializeStreamError as ::std::convert::From<_>>::from)
                         }
                     }
                 }
@@ -1601,11 +1594,9 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res: crate::services::my_service::SerializeResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::SerializeResponseExn, S>(de).await??;
 
-            let initial: ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeError> =
-                ::std::convert::From::from(res);
+            let initial = res.map_err(<crate::errors::my_service::SerializeError as ::std::convert::From<_>>::from);
             let res = initial.map(move |initial| (initial, new_stream));
             let interaction_client: crate::client::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))

@@ -143,38 +143,41 @@ pub mod {{service:snake}} {
     pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
 
     {{/function:exceptions?}}
-    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn> for
-        ::std::result::Result<{{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}, {{function:upcamel}}Error>
-    {
-        fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
-            match e {
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::Success(res) => {
-                    {{^function:stream?}}
-                    ::std::result::Result::Ok(res)
-                    {{/function:stream?}}
-                    {{#function:stream?}}
-                    use ::futures::stream::StreamExt;
+    impl ::fbthrift::help::StreamExn for {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn {
+        type Success = {{>lib/server_ok_type}};
+        type Return = {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}};
+        type Error = {{function:upcamel}}Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                {{^function:stream?}}
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                {{/function:stream?}}
+                {{#function:stream?}}
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
                     {{#function:stream_has_first_response?}}
-                    let (resp, stream) = res;
-                    ::std::result::Result::Ok((resp, stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed()))
+                    let (resp, stream) = success;
+                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
                     {{/function:stream_has_first_response?}}
                     {{^function:stream_has_first_response?}}
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
                     {{/function:stream_has_first_response?}}
-                    {{/function:stream?}}
-                }
+                }),
+                {{/function:stream?}}
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn> for {{function:upcamel}}Error {
+        fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
+            match e {
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err({{function:upcamel}}Error::ApplicationException(aexn)),
+                    {{function:upcamel}}Error::ApplicationException(aexn),
                 {{#function:exceptions}}
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{field:rust_name}}(exn) =>
-                    ::std::result::Result::Err({{function:upcamel}}Error::{{field:rust_name}}(exn)),
+                    {{function:upcamel}}Error::{{field:rust_name}}(exn),
                 {{/function:exceptions}}
             }
         }
@@ -182,21 +185,14 @@ pub mod {{service:snake}} {
 
     {{/function:sink?}}
     {{#function:stream?}}
-    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for
-        ::std::result::Result<{{!
-        }}{{#function:stream_has_first_response?}}{{>lib/function_stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
-        }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
-        }}, {{function:upcamel}}Error>
-    {
+    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for {{function:upcamel}}Error {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn) -> Self {
             match e {
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err({{function:upcamel}}Error::ApplicationException(aexn)),
+                    {{function:upcamel}}Error::ApplicationException(aexn),
                 {{#function:exceptions}}
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) =>
-                    ::std::result::Result::Err({{function:upcamel}}Error::{{field:rust_name}}(exn)),
+                    {{function:upcamel}}Error::{{field:rust_name}}(exn),
                 {{/function:exceptions}}
             }
         }
@@ -292,18 +288,14 @@ pub mod {{service:snake}} {
     pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
 
     {{/function:stream_exceptions?}}
-    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn> for
-        ::std::result::Result<{{>lib/function_stream_elem_type}}, {{function:upcamel}}StreamError>
-    {
+    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn> for {{function:upcamel}}StreamError {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn) -> Self {
             match e {
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err({{function:upcamel}}StreamError::ApplicationException(aexn)),
+                    {{function:upcamel}}StreamError::ApplicationException(aexn),
                 {{#function:stream_exceptions}}
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::{{field:rust_name}}(exn) =>
-                    ::std::result::Result::Err({{function:upcamel}}StreamError::{{field:rust_name}}(exn)),
+                    {{function:upcamel}}StreamError::{{field:rust_name}}(exn),
                 {{/function:stream_exceptions}}
             }
         }

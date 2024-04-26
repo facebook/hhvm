@@ -100,13 +100,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_root::DoRootExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_root::DoRootExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_root::DoRootError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -382,13 +382,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_node::DoMidExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_node::DoMidExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_node::DoMidError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -699,13 +699,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::my_leaf::DoLeafExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_leaf::DoLeafExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::my_leaf::DoLeafError::ApplicationException(aexn))
+                }
             };
             res
         }

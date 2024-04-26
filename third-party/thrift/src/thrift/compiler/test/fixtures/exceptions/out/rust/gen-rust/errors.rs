@@ -62,16 +62,24 @@ pub mod raiser {
 
     pub type DoBlandError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::raiser::DoBlandExn> for
-        ::std::result::Result<(), DoBlandError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::raiser::DoBlandExn {
+        type Success = ();
+        type Return = ();
+        type Error = DoBlandError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::raiser::DoBlandExn> for DoBlandError {
         fn from(e: crate::services::raiser::DoBlandExn) -> Self {
             match e {
-                crate::services::raiser::DoBlandExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::raiser::DoBlandExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DoBlandError::ApplicationException(aexn)),
+                    DoBlandError::ApplicationException(aexn),
             }
         }
     }
@@ -213,38 +221,54 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::raiser::DoRaiseExn> for
-        ::std::result::Result<(), DoRaiseError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::raiser::DoRaiseExn {
+        type Success = ();
+        type Return = ();
+        type Error = DoRaiseError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::raiser::DoRaiseExn> for DoRaiseError {
         fn from(e: crate::services::raiser::DoRaiseExn) -> Self {
             match e {
-                crate::services::raiser::DoRaiseExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::raiser::DoRaiseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DoRaiseError::ApplicationException(aexn)),
+                    DoRaiseError::ApplicationException(aexn),
                 crate::services::raiser::DoRaiseExn::b(exn) =>
-                    ::std::result::Result::Err(DoRaiseError::b(exn)),
+                    DoRaiseError::b(exn),
                 crate::services::raiser::DoRaiseExn::f(exn) =>
-                    ::std::result::Result::Err(DoRaiseError::f(exn)),
+                    DoRaiseError::f(exn),
                 crate::services::raiser::DoRaiseExn::s(exn) =>
-                    ::std::result::Result::Err(DoRaiseError::s(exn)),
+                    DoRaiseError::s(exn),
             }
         }
     }
 
     pub type Get200Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::raiser::Get200Exn> for
-        ::std::result::Result<::std::string::String, Get200Error>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::raiser::Get200Exn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = Get200Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::raiser::Get200Exn> for Get200Error {
         fn from(e: crate::services::raiser::Get200Exn) -> Self {
             match e {
-                crate::services::raiser::Get200Exn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::raiser::Get200Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(Get200Error::ApplicationException(aexn)),
+                    Get200Error::ApplicationException(aexn),
             }
         }
     }
@@ -386,22 +410,30 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::raiser::Get500Exn> for
-        ::std::result::Result<::std::string::String, Get500Error>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::raiser::Get500Exn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = Get500Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::raiser::Get500Exn> for Get500Error {
         fn from(e: crate::services::raiser::Get500Exn) -> Self {
             match e {
-                crate::services::raiser::Get500Exn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::raiser::Get500Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(Get500Error::ApplicationException(aexn)),
+                    Get500Error::ApplicationException(aexn),
                 crate::services::raiser::Get500Exn::f(exn) =>
-                    ::std::result::Result::Err(Get500Error::f(exn)),
+                    Get500Error::f(exn),
                 crate::services::raiser::Get500Exn::b(exn) =>
-                    ::std::result::Result::Err(Get500Error::b(exn)),
+                    Get500Error::b(exn),
                 crate::services::raiser::Get500Exn::s(exn) =>
-                    ::std::result::Result::Err(Get500Error::s(exn)),
+                    Get500Error::s(exn),
             }
         }
     }

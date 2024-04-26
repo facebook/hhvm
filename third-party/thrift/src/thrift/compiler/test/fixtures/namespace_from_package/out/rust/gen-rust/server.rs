@@ -173,32 +173,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "TestService.init", "success");
-                crate::services::test_service::InitExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::test_service::InitExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "init",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "TestService.init", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("TestService.init", exn);
                 ::tracing::error!(method = "TestService.init", panic = ?aexn);
-                crate::services::test_service::InitExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::test_service::InitExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::test_service::InitExn>(
             "init",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

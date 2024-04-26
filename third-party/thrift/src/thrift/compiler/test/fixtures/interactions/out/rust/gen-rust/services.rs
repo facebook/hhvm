@@ -9,8 +9,6 @@
 pub mod my_interaction {
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
-        #[doc(hidden)]
-        Success(::std::primitive::i32),
         ex(crate::types::CustomException),
         ApplicationException(::fbthrift::ApplicationException),
     }
@@ -43,7 +41,6 @@ pub mod my_interaction {
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::ex(exn) => exn.exn_name(),
             }
@@ -51,7 +48,6 @@ pub mod my_interaction {
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
                 Self::ex(exn) => exn.exn_value(),
             }
@@ -59,7 +55,6 @@ pub mod my_interaction {
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 Self::ex(exn) => exn.exn_is_declared(),
             }
@@ -69,7 +64,6 @@ pub mod my_interaction {
     impl ::fbthrift::ResultInfo for FrobnicateExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::ex(_exn) => fbthrift::ResultType::Error,
             }
@@ -85,41 +79,55 @@ pub mod my_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for FrobnicateExn {
+        type Success = ::std::primitive::i32;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Frobnicate");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::I32,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ex(inner) => {
+                ::std::result::Result::Err(Self::ex(inner)) => {
                     p.write_field_begin(
                         "ex",
                         ::fbthrift::TType::Struct,
                         1,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(inner, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for FrobnicateExn {
+        type Success = ::std::primitive::i32;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::I32, 0),
                 ::fbthrift::Field::new("ex", ::fbthrift::TType::Struct, 1),
@@ -136,11 +144,11 @@ pub mod my_interaction {
                     }
                     ((::fbthrift::TType::I32, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::ex(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::ex(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -170,8 +178,7 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum PingExn {
-        #[doc(hidden)]
-        Success(()),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -196,21 +203,18 @@ pub mod my_interaction {
     impl ::fbthrift::ExceptionInfo for PingExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -219,7 +223,6 @@ pub mod my_interaction {
     impl ::fbthrift::ResultInfo for PingExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -234,38 +237,53 @@ pub mod my_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for PingExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Ping");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for PingExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for PingExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -275,7 +293,7 @@ pub mod my_interaction {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -299,29 +317,25 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyStreamExn {
-        #[doc(hidden)]
-        Success(::std::primitive::bool),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -330,7 +344,6 @@ pub mod my_interaction {
     impl ::fbthrift::ResultInfo for TruthifyStreamExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -351,32 +364,47 @@ pub mod my_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for TruthifyStreamExn {
+        type Success = ::std::primitive::bool;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Truthify");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Bool,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for TruthifyStreamExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for TruthifyStreamExn {
+        type Success = ::std::primitive::bool;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
@@ -392,7 +420,7 @@ pub mod my_interaction {
                     }
                     ((::fbthrift::TType::Bool, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -422,8 +450,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyResponseExn {
-        #[doc(hidden)]
-        Success(()),
 
         ApplicationException(::fbthrift::ApplicationException),
     }
@@ -431,21 +457,18 @@ pub mod my_interaction {
     impl ::fbthrift::ExceptionInfo for TruthifyResponseExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -454,7 +477,6 @@ pub mod my_interaction {
     impl ::fbthrift::ResultInfo for TruthifyResponseExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -477,12 +499,24 @@ pub mod my_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for TruthifyResponseExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Truthify");
-            match self {
-                Self::Success(_inner) => {
+            match res {
+                ::std::result::Result::Ok(_success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
@@ -490,24 +524,27 @@ pub mod my_interaction {
                     );
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for TruthifyResponseExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for TruthifyResponseExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -517,7 +554,7 @@ pub mod my_interaction {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -540,9 +577,7 @@ pub mod my_interaction {
     }
 
     pub enum TruthifyExn {
-        #[doc(hidden)]
-        Success(    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -567,21 +602,18 @@ pub mod my_interaction {
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -590,7 +622,6 @@ pub mod my_interaction {
     impl ::fbthrift::ResultInfo for TruthifyExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -608,8 +639,7 @@ pub mod my_interaction {
 pub mod my_interaction_fast {
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
-        #[doc(hidden)]
-        Success(::std::primitive::i32),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -634,21 +664,18 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -657,7 +684,6 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ResultInfo for FrobnicateExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -672,32 +698,47 @@ pub mod my_interaction_fast {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for FrobnicateExn {
+        type Success = ::std::primitive::i32;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Frobnicate");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::I32,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for FrobnicateExn {
+        type Success = ::std::primitive::i32;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::I32, 0),
             ];
@@ -713,7 +754,7 @@ pub mod my_interaction_fast {
                     }
                     ((::fbthrift::TType::I32, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -743,8 +784,7 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum PingExn {
-        #[doc(hidden)]
-        Success(()),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -769,21 +809,18 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ExceptionInfo for PingExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -792,7 +829,6 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ResultInfo for PingExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -807,38 +843,53 @@ pub mod my_interaction_fast {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for PingExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Ping");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for PingExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for PingExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -848,7 +899,7 @@ pub mod my_interaction_fast {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -872,29 +923,25 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyStreamExn {
-        #[doc(hidden)]
-        Success(::std::primitive::bool),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -903,7 +950,6 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ResultInfo for TruthifyStreamExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -924,32 +970,47 @@ pub mod my_interaction_fast {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for TruthifyStreamExn {
+        type Success = ::std::primitive::bool;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Truthify");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Bool,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for TruthifyStreamExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for TruthifyStreamExn {
+        type Success = ::std::primitive::bool;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
@@ -965,7 +1026,7 @@ pub mod my_interaction_fast {
                     }
                     ((::fbthrift::TType::Bool, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -995,8 +1056,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyResponseExn {
-        #[doc(hidden)]
-        Success(()),
 
         ApplicationException(::fbthrift::ApplicationException),
     }
@@ -1004,21 +1063,18 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ExceptionInfo for TruthifyResponseExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1027,7 +1083,6 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ResultInfo for TruthifyResponseExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1050,12 +1105,24 @@ pub mod my_interaction_fast {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for TruthifyResponseExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Truthify");
-            match self {
-                Self::Success(_inner) => {
+            match res {
+                ::std::result::Result::Ok(_success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
@@ -1063,24 +1130,27 @@ pub mod my_interaction_fast {
                     );
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for TruthifyResponseExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for TruthifyResponseExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -1090,7 +1160,7 @@ pub mod my_interaction_fast {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1113,9 +1183,7 @@ pub mod my_interaction_fast {
     }
 
     pub enum TruthifyExn {
-        #[doc(hidden)]
-        Success(    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1140,21 +1208,18 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1163,7 +1228,6 @@ pub mod my_interaction_fast {
     impl ::fbthrift::ResultInfo for TruthifyExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1181,8 +1245,7 @@ pub mod my_interaction_fast {
 pub mod serial_interaction {
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
-        #[doc(hidden)]
-        Success(()),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1207,21 +1270,18 @@ pub mod serial_interaction {
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1230,7 +1290,6 @@ pub mod serial_interaction {
     impl ::fbthrift::ResultInfo for FrobnicateExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1245,38 +1304,53 @@ pub mod serial_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for FrobnicateExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Frobnicate");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for FrobnicateExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -1286,7 +1360,7 @@ pub mod serial_interaction {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1312,8 +1386,7 @@ pub mod serial_interaction {
 pub mod my_service {
     #[derive(Clone, Debug)]
     pub enum FooExn {
-        #[doc(hidden)]
-        Success(()),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1338,21 +1411,18 @@ pub mod my_service {
     impl ::fbthrift::ExceptionInfo for FooExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1361,7 +1431,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for FooExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1376,38 +1445,53 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for FooExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Foo");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for FooExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for FooExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -1417,7 +1501,7 @@ pub mod my_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1441,8 +1525,7 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum InteractExn {
-        #[doc(hidden)]
-        Success(()),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1467,21 +1550,18 @@ pub mod my_service {
     impl ::fbthrift::ExceptionInfo for InteractExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1490,7 +1570,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for InteractExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1505,38 +1584,53 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for InteractExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Interact");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::Void,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for InteractExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for InteractExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = Self::Success(());
+            let mut alt = ::std::result::Result::Ok(());
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -1546,7 +1640,7 @@ pub mod my_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1570,8 +1664,7 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum InteractFastExn {
-        #[doc(hidden)]
-        Success(::std::primitive::i32),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1596,21 +1689,18 @@ pub mod my_service {
     impl ::fbthrift::ExceptionInfo for InteractFastExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1619,7 +1709,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for InteractFastExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1634,32 +1723,47 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for InteractFastExn {
+        type Success = ::std::primitive::i32;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("InteractFast");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::I32,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_aexn) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for InteractFastExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for InteractFastExn {
+        type Success = ::std::primitive::i32;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::I32, 0),
             ];
@@ -1675,7 +1779,7 @@ pub mod my_service {
                     }
                     ((::fbthrift::TType::I32, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1705,29 +1809,25 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum SerializeStreamExn {
-        #[doc(hidden)]
-        Success(::std::primitive::i32),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
     impl ::fbthrift::ExceptionInfo for SerializeStreamExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1736,7 +1836,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for SerializeStreamExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1757,32 +1856,47 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for SerializeStreamExn {
+        type Success = ::std::primitive::i32;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Serialize");
-            match self {
-                Self::Success(inner) => {
+            match res {
+                ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::I32,
                         0i16,
                     );
-                    inner.write(p);
+                    ::fbthrift::Serialize::write(success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for SerializeStreamExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for SerializeStreamExn {
+        type Success = ::std::primitive::i32;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
@@ -1798,7 +1912,7 @@ pub mod my_service {
                     }
                     ((::fbthrift::TType::I32, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1828,8 +1942,6 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum SerializeResponseExn {
-        #[doc(hidden)]
-        Success(::std::primitive::i32),
 
         ApplicationException(::fbthrift::ApplicationException),
     }
@@ -1837,21 +1949,18 @@ pub mod my_service {
     impl ::fbthrift::ExceptionInfo for SerializeResponseExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -1860,7 +1969,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for SerializeResponseExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
@@ -1883,32 +1991,47 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            if let Self::ApplicationException(aexn) = self {
-                return aexn.write(p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for SerializeResponseExn {
+        type Success = ::std::primitive::i32;
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
             }
             p.write_struct_begin("Serialize");
-            match self {
-                Self::Success(_inner) => {
+            match res {
+                ::std::result::Result::Ok(_success) => {
                     p.write_field_begin(
                         "Success",
                         ::fbthrift::TType::I32,
                         0i16,
                     );
-                    _inner.write(p);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
-                Self::ApplicationException(_) => unreachable!(),
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
             p.write_struct_end();
         }
     }
 
-    impl<P> ::fbthrift::Deserialize<P> for SerializeResponseExn
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    impl ::fbthrift::help::DeserializeExn for SerializeResponseExn {
+        type Success = ::std::primitive::i32;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
             static RETURNS: &[::fbthrift::Field] = &[
                 ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
             ];
@@ -1924,7 +2047,7 @@ pub mod my_service {
                     }
                     ((::fbthrift::TType::I32, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1953,12 +2076,7 @@ pub mod my_service {
     }
 
     pub enum SerializeExn {
-        #[doc(hidden)]
-        Success((
-    ::std::primitive::i32,
-    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
-)
-),
+
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1983,21 +2101,18 @@ pub mod my_service {
     impl ::fbthrift::ExceptionInfo for SerializeExn {
         fn exn_name(&self) -> &'static str {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
         }
 
         fn exn_value(&self) -> String {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_value(),
             }
         }
 
         fn exn_is_declared(&self) -> bool {
             match self {
-                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
@@ -2006,7 +2121,6 @@ pub mod my_service {
     impl ::fbthrift::ResultInfo for SerializeExn {
         fn result_type(&self) -> ::fbthrift::ResultType {
             match self {
-                Self::Success(_) => ::fbthrift::ResultType::Return,
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }

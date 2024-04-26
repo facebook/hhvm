@@ -8,16 +8,24 @@ pub mod service1 {
 
     pub type RError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::service1::RExn> for
-        ::std::result::Result<crate::types::T6, RError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::service1::RExn {
+        type Success = crate::types::T6;
+        type Return = crate::types::T6;
+        type Error = RError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::service1::RExn> for RError {
         fn from(e: crate::services::service1::RExn) -> Self {
             match e {
-                crate::services::service1::RExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::service1::RExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(RError::ApplicationException(aexn)),
+                    RError::ApplicationException(aexn),
             }
         }
     }
@@ -29,16 +37,24 @@ pub mod s2 {
 
     pub type RError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::s2::RExn> for
-        ::std::result::Result<crate::types::T6, RError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::s2::RExn {
+        type Success = crate::types::T6;
+        type Return = crate::types::T6;
+        type Error = RError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::s2::RExn> for RError {
         fn from(e: crate::services::s2::RExn) -> Self {
             match e {
-                crate::services::s2::RExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::s2::RExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(RError::ApplicationException(aexn)),
+                    RError::ApplicationException(aexn),
             }
         }
     }
@@ -65,16 +81,24 @@ pub mod all_methods {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::all_methods::FooExn> for
-        ::std::result::Result<(), FooError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::all_methods::FooExn {
+        type Success = ();
+        type Return = ();
+        type Error = FooError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::all_methods::FooExn> for FooError {
         fn from(e: crate::services::all_methods::FooExn) -> Self {
             match e {
-                crate::services::all_methods::FooExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::all_methods::FooExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                    FooError::ApplicationException(aexn),
             }
         }
     }
@@ -164,18 +188,26 @@ pub mod all_methods {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::all_methods::BarExn> for
-        ::std::result::Result<::std::string::String, BarError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::all_methods::BarExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = BarError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::all_methods::BarExn> for BarError {
         fn from(e: crate::services::all_methods::BarExn) -> Self {
             match e {
-                crate::services::all_methods::BarExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::all_methods::BarExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    BarError::ApplicationException(aexn),
                 crate::services::all_methods::BarExn::se(exn) =>
-                    ::std::result::Result::Err(BarError::se(exn)),
+                    BarError::se(exn),
             }
         }
     }
@@ -202,16 +234,24 @@ pub mod one_method {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::one_method::FooExn> for
-        ::std::result::Result<(), FooError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::one_method::FooExn {
+        type Success = ();
+        type Return = ();
+        type Error = FooError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::one_method::FooExn> for FooError {
         fn from(e: crate::services::one_method::FooExn) -> Self {
             match e {
-                crate::services::one_method::FooExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::one_method::FooExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                    FooError::ApplicationException(aexn),
             }
         }
     }
@@ -301,18 +341,26 @@ pub mod one_method {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::one_method::BarExn> for
-        ::std::result::Result<::std::string::String, BarError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::one_method::BarExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = BarError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::one_method::BarExn> for BarError {
         fn from(e: crate::services::one_method::BarExn) -> Self {
             match e {
-                crate::services::one_method::BarExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::one_method::BarExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    BarError::ApplicationException(aexn),
                 crate::services::one_method::BarExn::se(exn) =>
-                    ::std::result::Result::Err(BarError::se(exn)),
+                    BarError::se(exn),
             }
         }
     }
@@ -339,16 +387,24 @@ pub mod one_method_opt_out {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::one_method_opt_out::FooExn> for
-        ::std::result::Result<(), FooError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::one_method_opt_out::FooExn {
+        type Success = ();
+        type Return = ();
+        type Error = FooError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::one_method_opt_out::FooExn> for FooError {
         fn from(e: crate::services::one_method_opt_out::FooExn) -> Self {
             match e {
-                crate::services::one_method_opt_out::FooExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::one_method_opt_out::FooExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                    FooError::ApplicationException(aexn),
             }
         }
     }
@@ -438,18 +494,26 @@ pub mod one_method_opt_out {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::one_method_opt_out::BarExn> for
-        ::std::result::Result<::std::string::String, BarError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::one_method_opt_out::BarExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = BarError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::one_method_opt_out::BarExn> for BarError {
         fn from(e: crate::services::one_method_opt_out::BarExn) -> Self {
             match e {
-                crate::services::one_method_opt_out::BarExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::one_method_opt_out::BarExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+                    BarError::ApplicationException(aexn),
                 crate::services::one_method_opt_out::BarExn::se(exn) =>
-                    ::std::result::Result::Err(BarError::se(exn)),
+                    BarError::se(exn),
             }
         }
     }

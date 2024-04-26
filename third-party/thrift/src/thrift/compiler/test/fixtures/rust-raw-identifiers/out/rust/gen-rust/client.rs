@@ -90,13 +90,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::foo::ReturnExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::foo::ReturnExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::foo::ReturnError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -138,13 +138,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::foo::SuperExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::foo::SuperExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::foo::SuperError::ApplicationException(aexn))
+                }
             };
             res
         }

@@ -142,20 +142,17 @@ where
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::read(&mut de)
+                                        <{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        ::fbthrift::ApplicationException::read(&mut de).map({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException)
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException(aexn)))
                                     }
                                 }
                             }).await?;
 
-                            let item: ::std::result::Result<{{!
-                                }}{{>lib/function_stream_elem_type}}, {{!
-                                }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError> =
-                                ::std::convert::From::from(res);
-                            item
+                            res.map_err(<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError as ::std::convert::From<_>>::from)
                         }
                     }
                 }
@@ -163,18 +160,13 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn, S>(de).await??;
 
+            let initial = res.map_err(<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error as ::std::convert::From<_>>::from);
             {{#function:stream_has_first_response?}}
-            let initial: ::std::result::Result<{{>lib/function_stream_first_response_type}}, {{!
-                }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> =
-                ::std::convert::From::from(res);
             let res = initial.map(move |initial| (initial, new_stream));
             {{/function:stream_has_first_response?}}
             {{^function:stream_has_first_response?}}
-            let initial: ::std::result::Result<(), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> =
-                ::std::convert::From::from(res);
             let res = initial.map(move |_| new_stream);
             {{/function:stream_has_first_response?}}{{!
             }}{{/function:stream?}}{{^function:stream?}}{{!
@@ -187,13 +179,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
+                }
             };
             {{/function:stream?}}
             {{#function:return_type}}{{#function:creates_interaction?}}{{!

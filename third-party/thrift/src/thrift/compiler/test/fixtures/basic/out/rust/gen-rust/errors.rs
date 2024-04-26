@@ -8,16 +8,24 @@ pub mod foo_service {
 
     pub type SimpleRpcError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo_service::SimpleRpcExn> for
-        ::std::result::Result<(), SimpleRpcError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::foo_service::SimpleRpcExn {
+        type Success = ();
+        type Return = ();
+        type Error = SimpleRpcError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::foo_service::SimpleRpcExn> for SimpleRpcError {
         fn from(e: crate::services::foo_service::SimpleRpcExn) -> Self {
             match e {
-                crate::services::foo_service::SimpleRpcExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::foo_service::SimpleRpcExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SimpleRpcError::ApplicationException(aexn)),
+                    SimpleRpcError::ApplicationException(aexn),
             }
         }
     }
@@ -29,16 +37,24 @@ pub mod f_b303_service {
 
     pub type SimpleRpcError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::f_b303_service::SimpleRpcExn> for
-        ::std::result::Result<crate::types::ReservedKeyword, SimpleRpcError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::f_b303_service::SimpleRpcExn {
+        type Success = crate::types::ReservedKeyword;
+        type Return = crate::types::ReservedKeyword;
+        type Error = SimpleRpcError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::f_b303_service::SimpleRpcExn> for SimpleRpcError {
         fn from(e: crate::services::f_b303_service::SimpleRpcExn) -> Self {
             match e {
-                crate::services::f_b303_service::SimpleRpcExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::f_b303_service::SimpleRpcExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SimpleRpcError::ApplicationException(aexn)),
+                    SimpleRpcError::ApplicationException(aexn),
             }
         }
     }
@@ -50,160 +66,240 @@ pub mod my_service {
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PingExn> for
-        ::std::result::Result<(), PingError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::PingExn {
+        type Success = ();
+        type Return = ();
+        type Error = PingError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::PingExn> for PingError {
         fn from(e: crate::services::my_service::PingExn) -> Self {
             match e {
-                crate::services::my_service::PingExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::PingExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(PingError::ApplicationException(aexn)),
+                    PingError::ApplicationException(aexn),
             }
         }
     }
 
     pub type GetRandomDataError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetRandomDataExn> for
-        ::std::result::Result<::std::string::String, GetRandomDataError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::GetRandomDataExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = GetRandomDataError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::GetRandomDataExn> for GetRandomDataError {
         fn from(e: crate::services::my_service::GetRandomDataExn) -> Self {
             match e {
-                crate::services::my_service::GetRandomDataExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::GetRandomDataExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(GetRandomDataError::ApplicationException(aexn)),
+                    GetRandomDataError::ApplicationException(aexn),
             }
         }
     }
 
     pub type SinkError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SinkExn> for
-        ::std::result::Result<(), SinkError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::SinkExn {
+        type Success = ();
+        type Return = ();
+        type Error = SinkError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::SinkExn> for SinkError {
         fn from(e: crate::services::my_service::SinkExn) -> Self {
             match e {
-                crate::services::my_service::SinkExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::SinkExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SinkError::ApplicationException(aexn)),
+                    SinkError::ApplicationException(aexn),
             }
         }
     }
 
     pub type PutDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PutDataByIdExn> for
-        ::std::result::Result<(), PutDataByIdError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::PutDataByIdExn {
+        type Success = ();
+        type Return = ();
+        type Error = PutDataByIdError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::PutDataByIdExn> for PutDataByIdError {
         fn from(e: crate::services::my_service::PutDataByIdExn) -> Self {
             match e {
-                crate::services::my_service::PutDataByIdExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::PutDataByIdExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(PutDataByIdError::ApplicationException(aexn)),
+                    PutDataByIdError::ApplicationException(aexn),
             }
         }
     }
 
     pub type HasDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::HasDataByIdExn> for
-        ::std::result::Result<::std::primitive::bool, HasDataByIdError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::HasDataByIdExn {
+        type Success = ::std::primitive::bool;
+        type Return = ::std::primitive::bool;
+        type Error = HasDataByIdError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::HasDataByIdExn> for HasDataByIdError {
         fn from(e: crate::services::my_service::HasDataByIdExn) -> Self {
             match e {
-                crate::services::my_service::HasDataByIdExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::HasDataByIdExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(HasDataByIdError::ApplicationException(aexn)),
+                    HasDataByIdError::ApplicationException(aexn),
             }
         }
     }
 
     pub type GetDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetDataByIdExn> for
-        ::std::result::Result<::std::string::String, GetDataByIdError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::GetDataByIdExn {
+        type Success = ::std::string::String;
+        type Return = ::std::string::String;
+        type Error = GetDataByIdError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::GetDataByIdExn> for GetDataByIdError {
         fn from(e: crate::services::my_service::GetDataByIdExn) -> Self {
             match e {
-                crate::services::my_service::GetDataByIdExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::GetDataByIdExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(GetDataByIdError::ApplicationException(aexn)),
+                    GetDataByIdError::ApplicationException(aexn),
             }
         }
     }
 
     pub type DeleteDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::DeleteDataByIdExn> for
-        ::std::result::Result<(), DeleteDataByIdError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::DeleteDataByIdExn {
+        type Success = ();
+        type Return = ();
+        type Error = DeleteDataByIdError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::DeleteDataByIdExn> for DeleteDataByIdError {
         fn from(e: crate::services::my_service::DeleteDataByIdExn) -> Self {
             match e {
-                crate::services::my_service::DeleteDataByIdExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::DeleteDataByIdExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DeleteDataByIdError::ApplicationException(aexn)),
+                    DeleteDataByIdError::ApplicationException(aexn),
             }
         }
     }
 
     pub type LobDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::LobDataByIdExn> for
-        ::std::result::Result<(), LobDataByIdError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::LobDataByIdExn {
+        type Success = ();
+        type Return = ();
+        type Error = LobDataByIdError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::LobDataByIdExn> for LobDataByIdError {
         fn from(e: crate::services::my_service::LobDataByIdExn) -> Self {
             match e {
-                crate::services::my_service::LobDataByIdExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::LobDataByIdExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(LobDataByIdError::ApplicationException(aexn)),
+                    LobDataByIdError::ApplicationException(aexn),
             }
         }
     }
 
     pub type InvalidReturnForHackError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InvalidReturnForHackExn> for
-        ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, InvalidReturnForHackError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::InvalidReturnForHackExn {
+        type Success = ::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>;
+        type Return = ::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>;
+        type Error = InvalidReturnForHackError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::InvalidReturnForHackExn> for InvalidReturnForHackError {
         fn from(e: crate::services::my_service::InvalidReturnForHackExn) -> Self {
             match e {
-                crate::services::my_service::InvalidReturnForHackExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::InvalidReturnForHackExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(InvalidReturnForHackError::ApplicationException(aexn)),
+                    InvalidReturnForHackError::ApplicationException(aexn),
             }
         }
     }
 
     pub type RpcSkippedCodegenError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::RpcSkippedCodegenExn> for
-        ::std::result::Result<(), RpcSkippedCodegenError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::RpcSkippedCodegenExn {
+        type Success = ();
+        type Return = ();
+        type Error = RpcSkippedCodegenError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::RpcSkippedCodegenExn> for RpcSkippedCodegenError {
         fn from(e: crate::services::my_service::RpcSkippedCodegenExn) -> Self {
             match e {
-                crate::services::my_service::RpcSkippedCodegenExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::RpcSkippedCodegenExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(RpcSkippedCodegenError::ApplicationException(aexn)),
+                    RpcSkippedCodegenError::ApplicationException(aexn),
             }
         }
     }
@@ -215,32 +311,48 @@ pub mod db_mixed_stack_arguments {
 
     pub type GetDataByKey0Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey0Exn> for
-        ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, GetDataByKey0Error>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::db_mixed_stack_arguments::GetDataByKey0Exn {
+        type Success = ::std::vec::Vec<::std::primitive::u8>;
+        type Return = ::std::vec::Vec<::std::primitive::u8>;
+        type Error = GetDataByKey0Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey0Exn> for GetDataByKey0Error {
         fn from(e: crate::services::db_mixed_stack_arguments::GetDataByKey0Exn) -> Self {
             match e {
-                crate::services::db_mixed_stack_arguments::GetDataByKey0Exn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::db_mixed_stack_arguments::GetDataByKey0Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(GetDataByKey0Error::ApplicationException(aexn)),
+                    GetDataByKey0Error::ApplicationException(aexn),
             }
         }
     }
 
     pub type GetDataByKey1Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey1Exn> for
-        ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, GetDataByKey1Error>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::db_mixed_stack_arguments::GetDataByKey1Exn {
+        type Success = ::std::vec::Vec<::std::primitive::u8>;
+        type Return = ::std::vec::Vec<::std::primitive::u8>;
+        type Error = GetDataByKey1Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey1Exn> for GetDataByKey1Error {
         fn from(e: crate::services::db_mixed_stack_arguments::GetDataByKey1Exn) -> Self {
             match e {
-                crate::services::db_mixed_stack_arguments::GetDataByKey1Exn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::db_mixed_stack_arguments::GetDataByKey1Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(GetDataByKey1Error::ApplicationException(aexn)),
+                    GetDataByKey1Error::ApplicationException(aexn),
             }
         }
     }

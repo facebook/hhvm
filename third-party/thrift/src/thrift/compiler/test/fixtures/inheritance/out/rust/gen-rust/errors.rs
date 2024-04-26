@@ -8,16 +8,24 @@ pub mod my_root {
 
     pub type DoRootError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_root::DoRootExn> for
-        ::std::result::Result<(), DoRootError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_root::DoRootExn {
+        type Success = ();
+        type Return = ();
+        type Error = DoRootError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_root::DoRootExn> for DoRootError {
         fn from(e: crate::services::my_root::DoRootExn) -> Self {
             match e {
-                crate::services::my_root::DoRootExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_root::DoRootExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DoRootError::ApplicationException(aexn)),
+                    DoRootError::ApplicationException(aexn),
             }
         }
     }
@@ -29,16 +37,24 @@ pub mod my_node {
 
     pub type DoMidError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_node::DoMidExn> for
-        ::std::result::Result<(), DoMidError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_node::DoMidExn {
+        type Success = ();
+        type Return = ();
+        type Error = DoMidError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_node::DoMidExn> for DoMidError {
         fn from(e: crate::services::my_node::DoMidExn) -> Self {
             match e {
-                crate::services::my_node::DoMidExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_node::DoMidExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DoMidError::ApplicationException(aexn)),
+                    DoMidError::ApplicationException(aexn),
             }
         }
     }
@@ -50,16 +66,24 @@ pub mod my_leaf {
 
     pub type DoLeafError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_leaf::DoLeafExn> for
-        ::std::result::Result<(), DoLeafError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_leaf::DoLeafExn {
+        type Success = ();
+        type Return = ();
+        type Error = DoLeafError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_leaf::DoLeafExn> for DoLeafError {
         fn from(e: crate::services::my_leaf::DoLeafExn) -> Self {
             match e {
-                crate::services::my_leaf::DoLeafExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_leaf::DoLeafExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(DoLeafError::ApplicationException(aexn)),
+                    DoLeafError::ApplicationException(aexn),
             }
         }
     }

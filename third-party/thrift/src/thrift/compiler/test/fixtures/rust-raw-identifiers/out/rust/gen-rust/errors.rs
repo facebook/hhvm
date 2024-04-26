@@ -8,32 +8,48 @@ pub mod foo {
 
     pub type ReturnError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo::ReturnExn> for
-        ::std::result::Result<(), ReturnError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::foo::ReturnExn {
+        type Success = ();
+        type Return = ();
+        type Error = ReturnError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::foo::ReturnExn> for ReturnError {
         fn from(e: crate::services::foo::ReturnExn) -> Self {
             match e {
-                crate::services::foo::ReturnExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::foo::ReturnExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnError::ApplicationException(aexn)),
+                    ReturnError::ApplicationException(aexn),
             }
         }
     }
 
     pub type SuperError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo::SuperExn> for
-        ::std::result::Result<(), SuperError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::foo::SuperExn {
+        type Success = ();
+        type Return = ();
+        type Error = SuperError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::foo::SuperExn> for SuperError {
         fn from(e: crate::services::foo::SuperExn) -> Self {
             match e {
-                crate::services::foo::SuperExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::foo::SuperExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SuperError::ApplicationException(aexn)),
+                    SuperError::ApplicationException(aexn),
             }
         }
     }

@@ -229,32 +229,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "SomeService.bounce_map", "success");
-                crate::services::some_service::BounceMapExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BounceMapExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "bounce_map",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "SomeService.bounce_map", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.bounce_map", exn);
                 ::tracing::error!(method = "SomeService.bounce_map", panic = ?aexn);
-                crate::services::some_service::BounceMapExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::some_service::BounceMapExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::some_service::BounceMapExn>(
             "bounce_map",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -303,32 +297,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "SomeService.binary_keyed_map", "success");
-                crate::services::some_service::BinaryKeyedMapExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "binary_keyed_map",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "SomeService.binary_keyed_map", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.binary_keyed_map", exn);
                 ::tracing::error!(method = "SomeService.binary_keyed_map", panic = ?aexn);
-                crate::services::some_service::BinaryKeyedMapExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::some_service::BinaryKeyedMapExn>(
             "binary_keyed_map",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

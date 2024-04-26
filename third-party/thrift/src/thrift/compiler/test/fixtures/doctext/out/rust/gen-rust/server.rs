@@ -291,32 +291,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "C.f", "success");
-                crate::services::c::FExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::FExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "f",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "C.f", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("C.f", exn);
                 ::tracing::error!(method = "C.f", panic = ?aexn);
-                crate::services::c::FExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::c::FExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::FExn>(
             "f",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -364,42 +358,34 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "C.numbers", "success");
-                crate::services::c::NumbersExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "numbers",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("C.numbers", exn);
                 ::tracing::error!(method = "C.numbers", panic = ?aexn);
-                crate::services::c::NumbersExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::c::NumbersExn::ApplicationException(aexn))
             }
         };
 
         use ::futures::StreamExt as _;
 
         let (response, stream) = match res {
-            crate::services::c::NumbersExn::Success(res) => {
-                let response = crate::services::c::NumbersResponseExn::Success(());
+            ::std::result::Result::Ok(res) => {
+                let response = ::std::result::Result::Ok(());
                 let stream = res;
 
                 let stream = ::std::panic::AssertUnwindSafe(stream)
                     .catch_unwind()
                     .map(|item| {
                         match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                                let item = crate::services::c::NumbersStreamExn::Success(res);
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, _>(item);
+                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::c::NumbersStreamExn>(
+                                    ::std::result::Result::Ok(success),
+                                );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
-                            }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::Success(_))) => {
-                                panic!("{} attempted to return success via error", "numbers");
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::ApplicationException(aexn))) => {
                                 tracing::info!(?aexn, method="C.numbers", "Streaming ApplicationException");
@@ -415,20 +401,20 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            crate::services::c::NumbersExn::ApplicationException(aexn)=> {
+            ::std::result::Result::Err(crate::services::c::NumbersExn::ApplicationException(aexn)) => {
                 let response = crate::services::c::NumbersResponseExn::ApplicationException(aexn);
-                (response, None)
+                (::std::result::Result::Err(response), None)
             },
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
-                    "numbers",
-                    METHOD_NAME.as_cstr(),
-                    _seqid,
-                    req_ctxt,
-                    &mut ctx_stack,
-                    response
-                )?;
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::NumbersResponseExn>(
+            "numbers",
+            METHOD_NAME.as_cstr(),
+            _seqid,
+            req_ctxt,
+            &mut ctx_stack,
+            response,
+        )?;
 
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         Ok(())
@@ -479,32 +465,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "C.thing", "success");
-                crate::services::c::ThingExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::ThingExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "thing",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "C.thing", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("C.thing", exn);
                 ::tracing::error!(method = "C.thing", panic = ?aexn);
-                crate::services::c::ThingExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::c::ThingExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::ThingExn>(
             "thing",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

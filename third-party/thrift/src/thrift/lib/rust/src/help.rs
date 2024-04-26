@@ -75,34 +75,54 @@ pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
     Ok(length)
 }
 
+pub trait StreamExn: Sized {
+    type Success;
+    type Return;
+    type Error;
+
+    fn map_stream(res: Result<Self::Success, Self>) -> Result<Self::Return, Self::Error>;
+}
+
+pub trait SerializeExn {
+    type Success;
+
+    fn write_result<P>(res: Result<&Self::Success, &Self>, p: &mut P)
+    where
+        P: ProtocolWriter;
+}
+
 /// Serialize a result as encoded into a generated *Exn type, wrapped in an envelope.
-pub fn serialize_result_envelope<P, CTXT, RES>(
+pub fn serialize_result_envelope<P, CTXT, EXN>(
     name: &str,
     name_cstr: &<CTXT::ContextStack as ContextStack>::Name,
     seqid: u32,
     rctxt: &CTXT,
     ctx_stack: &mut CTXT::ContextStack,
-    res: RES,
+    res: Result<EXN::Success, EXN>,
 ) -> anyhow::Result<ProtocolEncodedFinal<P>>
 where
     P: Protocol,
-    RES: ResultInfo + Serialize<P::Sizer> + Serialize<P::Serializer>,
+    EXN: SerializeExn + ResultInfo,
     CTXT: RequestContext<Name = CStr>,
     <CTXT as RequestContext>::ContextStack: ContextStack<Frame = P::Frame>,
     ProtocolEncodedFinal<P>: Clone + Buf + BufExt,
 {
-    let res_type = res.result_type();
-
-    if matches!(res_type, ResultType::Error | ResultType::Exception) {
-        assert_eq!(res.exn_is_declared(), res_type == ResultType::Error);
-
-        rctxt.set_user_exception_header(res.exn_name(), &res.exn_value())?;
-    }
+    let res = res.as_ref();
+    let res_type = match res {
+        Ok(_success) => ResultType::Return,
+        Err(exn) => {
+            let res_type = exn.result_type();
+            assert_ne!(res_type, ResultType::Return);
+            assert_eq!(exn.exn_is_declared(), res_type == ResultType::Error);
+            rctxt.set_user_exception_header(exn.exn_name(), &exn.exn_value())?;
+            res_type
+        }
+    };
 
     ctx_stack.pre_write()?;
     let envelope = serialize!(P, |p| {
         p.write_message_begin(name, res_type.message_type(), seqid);
-        res.write(p);
+        EXN::write_result(res, p);
         p.write_message_end();
     });
 
@@ -117,12 +137,13 @@ where
     Ok(envelope)
 }
 
-pub fn serialize_stream_item<P, RES>(res: RES) -> ProtocolEncodedFinal<P>
+pub fn serialize_stream_item<P, EXN>(res: Result<EXN::Success, EXN>) -> ProtocolEncodedFinal<P>
 where
     P: Protocol,
-    RES: Serialize<P::Sizer> + Serialize<P::Serializer>,
+    EXN: SerializeExn,
 {
-    serialize!(P, |p| res.write(p))
+    let res = res.as_ref();
+    serialize!(P, |p| EXN::write_result(res, p))
 }
 
 /// Serialize a request with envelope.
@@ -146,19 +167,27 @@ where
     Ok(envelope)
 }
 
+pub trait DeserializeExn: Sized {
+    type Success;
+
+    fn read_result<P>(p: &mut P) -> Result<Result<Self::Success, Self>>
+    where
+        P: ProtocolReader;
+}
+
 /// Deserialize a client response. This deserializes the envelope then
 /// deserializes either a reply or an ApplicationException.
-pub fn deserialize_response_envelope<P, T>(
+pub fn deserialize_response_envelope<P, EXN>(
     de: &mut P::Deserializer,
-) -> anyhow::Result<Result<T, ApplicationException>>
+) -> anyhow::Result<Result<Result<EXN::Success, EXN>, ApplicationException>>
 where
     P: Protocol,
-    T: Deserialize<P::Deserializer>,
+    EXN: DeserializeExn,
 {
     let (_, message_type, _) = de.read_message_begin(|_| ())?;
 
     let res = match message_type {
-        MessageType::Reply => Ok(T::read(de)?),
+        MessageType::Reply => Ok(EXN::read_result(de)?),
         MessageType::Exception => Err(ApplicationException::read(de)?),
         MessageType::Call | MessageType::Oneway | MessageType::InvalidMessageType => {
             bail!("Unwanted message type `{:?}`", message_type)
@@ -191,14 +220,15 @@ impl Spawner for NoopSpawner {
     }
 }
 
-pub async fn async_deserialize_response_envelope<P, T, S>(
+pub async fn async_deserialize_response_envelope<P, EXN, S>(
     mut de: P::Deserializer,
-) -> anyhow::Result<Result<T, ApplicationException>>
+) -> anyhow::Result<Result<Result<EXN::Success, EXN>, ApplicationException>>
 where
     P: Protocol,
     P::Deserializer: Send,
-    T: Deserialize<P::Deserializer> + Send + 'static,
+    EXN: DeserializeExn + Send + 'static,
+    EXN::Success: Send + 'static,
     S: Spawner,
 {
-    S::spawn(move || deserialize_response_envelope::<P, T>(&mut de)).await
+    S::spawn(move || deserialize_response_envelope::<P, EXN>(&mut de)).await
 }

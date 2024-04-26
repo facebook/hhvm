@@ -106,83 +106,98 @@ pub mod my_interaction {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::my_interaction::FrobnicateExn> for
-        ::std::result::Result<::std::primitive::i32, FrobnicateError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::FrobnicateExn {
+        type Success = ::std::primitive::i32;
+        type Return = ::std::primitive::i32;
+        type Error = FrobnicateError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::my_interaction::FrobnicateExn) -> Self {
             match e {
-                crate::services::my_interaction::FrobnicateExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FrobnicateError::ApplicationException(aexn)),
+                    FrobnicateError::ApplicationException(aexn),
                 crate::services::my_interaction::FrobnicateExn::ex(exn) =>
-                    ::std::result::Result::Err(FrobnicateError::ex(exn)),
+                    FrobnicateError::ex(exn),
             }
         }
     }
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::PingExn> for
-        ::std::result::Result<(), PingError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::PingExn {
+        type Success = ();
+        type Return = ();
+        type Error = PingError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction::PingExn> for PingError {
         fn from(e: crate::services::my_interaction::PingExn) -> Self {
             match e {
-                crate::services::my_interaction::PingExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_interaction::PingExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(PingError::ApplicationException(aexn)),
+                    PingError::ApplicationException(aexn),
             }
         }
     }
 
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, TruthifyError>
-    {
-        fn from(e: crate::services::my_interaction::TruthifyExn) -> Self {
-            match e {
-                crate::services::my_interaction::TruthifyExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::my_interaction::TruthifyExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::TruthifyExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>;
+        type Error = TruthifyError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyResponseExn> for
-        ::std::result::Result<(), TruthifyError>
-    {
+    impl ::std::convert::From<crate::services::my_interaction::TruthifyExn> for TruthifyError {
+        fn from(e: crate::services::my_interaction::TruthifyExn) -> Self {
+            match e {
+                crate::services::my_interaction::TruthifyExn::ApplicationException(aexn) =>
+                    TruthifyError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction::TruthifyResponseExn> for TruthifyError {
         fn from(e: crate::services::my_interaction::TruthifyResponseExn) -> Self {
             match e {
-                crate::services::my_interaction::TruthifyResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_interaction::TruthifyResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyError::ApplicationException(aexn)),
+                    TruthifyError::ApplicationException(aexn),
             }
         }
     }
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyStreamExn> for
-        ::std::result::Result<::std::primitive::bool, TruthifyStreamError>
-    {
+    impl ::std::convert::From<crate::services::my_interaction::TruthifyStreamExn> for TruthifyStreamError {
         fn from(e: crate::services::my_interaction::TruthifyStreamExn) -> Self {
             match e {
-                crate::services::my_interaction::TruthifyStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyStreamError::ApplicationException(aexn)),
+                    TruthifyStreamError::ApplicationException(aexn),
             }
         }
     }
@@ -194,81 +209,96 @@ pub mod my_interaction_fast {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::FrobnicateExn> for
-        ::std::result::Result<::std::primitive::i32, FrobnicateError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::FrobnicateExn {
+        type Success = ::std::primitive::i32;
+        type Return = ::std::primitive::i32;
+        type Error = FrobnicateError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction_fast::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::my_interaction_fast::FrobnicateExn) -> Self {
             match e {
-                crate::services::my_interaction_fast::FrobnicateExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FrobnicateError::ApplicationException(aexn)),
+                    FrobnicateError::ApplicationException(aexn),
             }
         }
     }
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::PingExn> for
-        ::std::result::Result<(), PingError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::PingExn {
+        type Success = ();
+        type Return = ();
+        type Error = PingError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction_fast::PingExn> for PingError {
         fn from(e: crate::services::my_interaction_fast::PingExn) -> Self {
             match e {
-                crate::services::my_interaction_fast::PingExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_interaction_fast::PingExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(PingError::ApplicationException(aexn)),
+                    PingError::ApplicationException(aexn),
             }
         }
     }
 
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, TruthifyError>
-    {
-        fn from(e: crate::services::my_interaction_fast::TruthifyExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::TruthifyExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::TruthifyExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>;
+        type Error = TruthifyError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyResponseExn> for
-        ::std::result::Result<(), TruthifyError>
-    {
+    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyExn> for TruthifyError {
+        fn from(e: crate::services::my_interaction_fast::TruthifyExn) -> Self {
+            match e {
+                crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn) =>
+                    TruthifyError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyResponseExn> for TruthifyError {
         fn from(e: crate::services::my_interaction_fast::TruthifyResponseExn) -> Self {
             match e {
-                crate::services::my_interaction_fast::TruthifyResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_interaction_fast::TruthifyResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyError::ApplicationException(aexn)),
+                    TruthifyError::ApplicationException(aexn),
             }
         }
     }
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyStreamExn> for
-        ::std::result::Result<::std::primitive::bool, TruthifyStreamError>
-    {
+    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyStreamExn> for TruthifyStreamError {
         fn from(e: crate::services::my_interaction_fast::TruthifyStreamExn) -> Self {
             match e {
-                crate::services::my_interaction_fast::TruthifyStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(TruthifyStreamError::ApplicationException(aexn)),
+                    TruthifyStreamError::ApplicationException(aexn),
             }
         }
     }
@@ -280,16 +310,24 @@ pub mod serial_interaction {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::serial_interaction::FrobnicateExn> for
-        ::std::result::Result<(), FrobnicateError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::serial_interaction::FrobnicateExn {
+        type Success = ();
+        type Return = ();
+        type Error = FrobnicateError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::serial_interaction::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::serial_interaction::FrobnicateExn) -> Self {
             match e {
-                crate::services::serial_interaction::FrobnicateExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FrobnicateError::ApplicationException(aexn)),
+                    FrobnicateError::ApplicationException(aexn),
             }
         }
     }
@@ -301,97 +339,123 @@ pub mod my_service {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::FooExn> for
-        ::std::result::Result<(), FooError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::FooExn {
+        type Success = ();
+        type Return = ();
+        type Error = FooError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::FooExn> for FooError {
         fn from(e: crate::services::my_service::FooExn) -> Self {
             match e {
-                crate::services::my_service::FooExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::FooExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+                    FooError::ApplicationException(aexn),
             }
         }
     }
 
     pub type InteractError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InteractExn> for
-        ::std::result::Result<(), InteractError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::InteractExn {
+        type Success = ();
+        type Return = ();
+        type Error = InteractError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::InteractExn> for InteractError {
         fn from(e: crate::services::my_service::InteractExn) -> Self {
             match e {
-                crate::services::my_service::InteractExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::InteractExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(InteractError::ApplicationException(aexn)),
+                    InteractError::ApplicationException(aexn),
             }
         }
     }
 
     pub type InteractFastError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InteractFastExn> for
-        ::std::result::Result<::std::primitive::i32, InteractFastError>
-    {
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::InteractFastExn {
+        type Success = ::std::primitive::i32;
+        type Return = ::std::primitive::i32;
+        type Error = InteractFastError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::InteractFastExn> for InteractFastError {
         fn from(e: crate::services::my_service::InteractFastExn) -> Self {
             match e {
-                crate::services::my_service::InteractFastExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
                 crate::services::my_service::InteractFastExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(InteractFastError::ApplicationException(aexn)),
+                    InteractFastError::ApplicationException(aexn),
             }
         }
     }
 
     pub type SerializeError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SerializeExn> for
-        ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>), SerializeError>
-    {
-        fn from(e: crate::services::my_service::SerializeExn) -> Self {
-            match e {
-                crate::services::my_service::SerializeExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let (resp, stream) = res;
-                    ::std::result::Result::Ok((resp, stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed()))
-                }
-                crate::services::my_service::SerializeExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SerializeError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::my_service::SerializeExn {
+        type Success = (
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
+)
+;
+        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>);
+        type Error = SerializeError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let (resp, stream) = success;
+                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::my_service::SerializeResponseExn> for
-        ::std::result::Result<::std::primitive::i32, SerializeError>
-    {
+    impl ::std::convert::From<crate::services::my_service::SerializeExn> for SerializeError {
+        fn from(e: crate::services::my_service::SerializeExn) -> Self {
+            match e {
+                crate::services::my_service::SerializeExn::ApplicationException(aexn) =>
+                    SerializeError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::my_service::SerializeResponseExn> for SerializeError {
         fn from(e: crate::services::my_service::SerializeResponseExn) -> Self {
             match e {
-                crate::services::my_service::SerializeResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_service::SerializeResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SerializeError::ApplicationException(aexn)),
+                    SerializeError::ApplicationException(aexn),
             }
         }
     }
 
     pub type SerializeStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SerializeStreamExn> for
-        ::std::result::Result<::std::primitive::i32, SerializeStreamError>
-    {
+    impl ::std::convert::From<crate::services::my_service::SerializeStreamExn> for SerializeStreamError {
         fn from(e: crate::services::my_service::SerializeStreamExn) -> Self {
             match e {
-                crate::services::my_service::SerializeStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::my_service::SerializeStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(SerializeStreamError::ApplicationException(aexn)),
+                    SerializeStreamError::ApplicationException(aexn),
             }
         }
     }

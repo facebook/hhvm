@@ -50,83 +50,85 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, ReturnstreamError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ReturnstreamExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>;
+        type Error = ReturnstreamError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamResponseExn> for
-        ::std::result::Result<(), ReturnstreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamExn> for ReturnstreamError {
+        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn) =>
+                    ReturnstreamError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamResponseExn> for ReturnstreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ReturnstreamResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamError::ApplicationException(aexn)),
+                    ReturnstreamError::ApplicationException(aexn),
             }
         }
     }
 
     pub type ReturnstreamStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ReturnstreamStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamStreamExn> for ReturnstreamStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamStreamError::ApplicationException(aexn)),
+                    ReturnstreamStreamError::ApplicationException(aexn),
             }
         }
     }
 
     pub type StreamthrowsError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, StreamthrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(StreamthrowsError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::StreamthrowsExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>;
+        type Error = StreamthrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsResponseExn> for
-        ::std::result::Result<(), StreamthrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsExn> for StreamthrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn) =>
+                    StreamthrowsError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsResponseExn> for StreamthrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::StreamthrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::StreamthrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(StreamthrowsError::ApplicationException(aexn)),
+                    StreamthrowsError::ApplicationException(aexn),
             }
         }
     }
@@ -207,17 +209,13 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, StreamthrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsStreamExn> for StreamthrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(StreamthrowsStreamError::ApplicationException(aexn)),
+                    StreamthrowsStreamError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::e(exn) =>
-                    ::std::result::Result::Err(StreamthrowsStreamError::e(exn)),
+                    StreamthrowsStreamError::e(exn),
             }
         }
     }
@@ -307,53 +305,52 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, ServicethrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ServicethrowsError::ApplicationException(aexn)),
-                crate::services::pub_sub_streaming_service::ServicethrowsExn::e(exn) =>
-                    ::std::result::Result::Err(ServicethrowsError::e(exn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ServicethrowsExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>;
+        type Error = ServicethrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsResponseExn> for
-        ::std::result::Result<(), ServicethrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsExn> for ServicethrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn) =>
+                    ServicethrowsError::ApplicationException(aexn),
+                crate::services::pub_sub_streaming_service::ServicethrowsExn::e(exn) =>
+                    ServicethrowsError::e(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsResponseExn> for ServicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ServicethrowsError::ApplicationException(aexn)),
+                    ServicethrowsError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::e(exn) =>
-                    ::std::result::Result::Err(ServicethrowsError::e(exn)),
+                    ServicethrowsError::e(exn),
             }
         }
     }
 
     pub type ServicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ServicethrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsStreamExn> for ServicethrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ServicethrowsStreamError::ApplicationException(aexn)),
+                    ServicethrowsStreamError::ApplicationException(aexn),
             }
         }
     }
@@ -469,57 +466,56 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2Exn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, Servicethrows2Error>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2Exn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::ApplicationException(aexn)),
-                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(exn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::e1(exn)),
-                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(exn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::e2(exn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::Servicethrows2Exn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>;
+        type Error = Servicethrows2Error;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn> for
-        ::std::result::Result<(), Servicethrows2Error>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2Exn> for Servicethrows2Error {
+        fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2Exn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn) =>
+                    Servicethrows2Error::ApplicationException(aexn),
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(exn) =>
+                    Servicethrows2Error::e1(exn),
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(exn) =>
+                    Servicethrows2Error::e2(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn> for Servicethrows2Error {
         fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::ApplicationException(aexn)),
+                    Servicethrows2Error::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e1(exn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::e1(exn)),
+                    Servicethrows2Error::e1(exn),
                 crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e2(exn) =>
-                    ::std::result::Result::Err(Servicethrows2Error::e2(exn)),
+                    Servicethrows2Error::e2(exn),
             }
         }
     }
 
     pub type Servicethrows2StreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for
-        ::std::result::Result<::std::primitive::i32, Servicethrows2StreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for Servicethrows2StreamError {
         fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2StreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(Servicethrows2StreamError::ApplicationException(aexn)),
+                    Servicethrows2StreamError::ApplicationException(aexn),
             }
         }
     }
@@ -609,38 +605,41 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, BoththrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::BoththrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::BoththrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BoththrowsError::ApplicationException(aexn)),
-                crate::services::pub_sub_streaming_service::BoththrowsExn::e(exn) =>
-                    ::std::result::Result::Err(BoththrowsError::e(exn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::BoththrowsExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>;
+        type Error = BoththrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsResponseExn> for
-        ::std::result::Result<(), BoththrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsExn> for BoththrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::BoththrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn) =>
+                    BoththrowsError::ApplicationException(aexn),
+                crate::services::pub_sub_streaming_service::BoththrowsExn::e(exn) =>
+                    BoththrowsError::e(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsResponseExn> for BoththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::BoththrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::BoththrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::BoththrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BoththrowsError::ApplicationException(aexn)),
+                    BoththrowsError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::BoththrowsResponseExn::e(exn) =>
-                    ::std::result::Result::Err(BoththrowsError::e(exn)),
+                    BoththrowsError::e(exn),
             }
         }
     }
@@ -721,51 +720,53 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, BoththrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsStreamExn> for BoththrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::BoththrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::BoththrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::BoththrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(BoththrowsStreamError::ApplicationException(aexn)),
+                    BoththrowsStreamError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::BoththrowsStreamExn::e(exn) =>
-                    ::std::result::Result::Err(BoththrowsStreamError::e(exn)),
+                    BoththrowsStreamError::e(exn),
             }
         }
     }
 
     pub type ResponseandstreamstreamthrowsError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> for
-        ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), ResponseandstreamstreamthrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let (resp, stream) = res;
-                    ::std::result::Result::Ok((resp, stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed()))
-                }
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamstreamthrowsError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn {
+        type Success = (
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
+)
+;
+        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>);
+        type Error = ResponseandstreamstreamthrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let (resp, stream) = success;
+                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamstreamthrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> for ResponseandstreamstreamthrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn) =>
+                    ResponseandstreamstreamthrowsError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn> for ResponseandstreamstreamthrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamstreamthrowsError::ApplicationException(aexn)),
+                    ResponseandstreamstreamthrowsError::ApplicationException(aexn),
             }
         }
     }
@@ -846,17 +847,13 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamstreamthrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn> for ResponseandstreamstreamthrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamstreamthrowsStreamError::ApplicationException(aexn)),
+                    ResponseandstreamstreamthrowsStreamError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamstreamthrowsStreamError::e(exn)),
+                    ResponseandstreamstreamthrowsStreamError::e(exn),
             }
         }
     }
@@ -946,53 +943,55 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> for
-        ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), ResponseandstreamservicethrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let (resp, stream) = res;
-                    ::std::result::Result::Ok((resp, stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed()))
-                }
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamservicethrowsError::ApplicationException(aexn)),
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamservicethrowsError::e(exn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn {
+        type Success = (
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
+)
+;
+        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>);
+        type Error = ResponseandstreamservicethrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let (resp, stream) = success;
+                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamservicethrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> for ResponseandstreamservicethrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn) =>
+                    ResponseandstreamservicethrowsError::ApplicationException(aexn),
+                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::e(exn) =>
+                    ResponseandstreamservicethrowsError::e(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn> for ResponseandstreamservicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamservicethrowsError::ApplicationException(aexn)),
+                    ResponseandstreamservicethrowsError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamservicethrowsError::e(exn)),
+                    ResponseandstreamservicethrowsError::e(exn),
             }
         }
     }
 
     pub type ResponseandstreamservicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamservicethrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn> for ResponseandstreamservicethrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamservicethrowsStreamError::ApplicationException(aexn)),
+                    ResponseandstreamservicethrowsStreamError::ApplicationException(aexn),
             }
         }
     }
@@ -1082,38 +1081,44 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> for
-        ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), ResponseandstreamboththrowsError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let (resp, stream) = res;
-                    ::std::result::Result::Ok((resp, stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed()))
-                }
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsError::ApplicationException(aexn)),
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsError::e(exn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn {
+        type Success = (
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
+)
+;
+        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>);
+        type Error = ResponseandstreamboththrowsError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let (resp, stream) = success;
+                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamboththrowsError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> for ResponseandstreamboththrowsError {
+        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn) =>
+                    ResponseandstreamboththrowsError::ApplicationException(aexn),
+                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::e(exn) =>
+                    ResponseandstreamboththrowsError::e(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn> for ResponseandstreamboththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsError::ApplicationException(aexn)),
+                    ResponseandstreamboththrowsError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsError::e(exn)),
+                    ResponseandstreamboththrowsError::e(exn),
             }
         }
     }
@@ -1194,66 +1199,61 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ResponseandstreamboththrowsStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn> for ResponseandstreamboththrowsStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsStreamError::ApplicationException(aexn)),
+                    ResponseandstreamboththrowsStreamError::ApplicationException(aexn),
                 crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::e(exn) =>
-                    ::std::result::Result::Err(ResponseandstreamboththrowsStreamError::e(exn)),
+                    ResponseandstreamboththrowsStreamError::e(exn),
             }
         }
     }
 
     pub type ReturnstreamFastError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastExn> for
-        ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, ReturnstreamFastError>
-    {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(res) => {
-                    use ::futures::stream::StreamExt;
-                    let stream = res;
-                    ::std::result::Result::Ok(stream.map(|res| match res {
-                        ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
-                        ::std::result::Result::Err(exn) => exn.into(),
-                    }).boxed())
-                }
-                crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamFastError::ApplicationException(aexn)),
+    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ReturnstreamFastExn {
+        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
+;
+        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>;
+        type Error = ReturnstreamFastError;
+
+        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
+            match res {
+                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
+                    let stream = success;
+                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
+                }),
+                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
             }
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn> for
-        ::std::result::Result<(), ReturnstreamFastError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastExn> for ReturnstreamFastError {
+        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastExn) -> Self {
+            match e {
+                crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn) =>
+                    ReturnstreamFastError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn> for ReturnstreamFastError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamFastError::ApplicationException(aexn)),
+                    ReturnstreamFastError::ApplicationException(aexn),
             }
         }
     }
 
     pub type ReturnstreamFastStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn> for
-        ::std::result::Result<::std::primitive::i32, ReturnstreamFastStreamError>
-    {
+    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn> for ReturnstreamFastStreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn) -> Self {
             match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::Success(res) =>
-                    ::std::result::Result::Ok(res),
                 crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(ReturnstreamFastStreamError::ApplicationException(aexn)),
+                    ReturnstreamFastStreamError::ApplicationException(aexn),
             }
         }
     }

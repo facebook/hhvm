@@ -88,13 +88,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::c::FExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::FExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::c::FError::ApplicationException(aexn))
+                }
             };
             res
         }
@@ -145,18 +145,17 @@ where
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        crate::services::c::NumbersStreamExn::read(&mut de)
+                                        <crate::services::c::NumbersStreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        ::fbthrift::ApplicationException::read(&mut de).map(crate::services::c::NumbersStreamExn::ApplicationException)
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::ApplicationException(aexn)))
                                     }
                                 }
                             }).await?;
 
-                            let item: ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError> =
-                                ::std::convert::From::from(res);
-                            item
+                            res.map_err(<crate::errors::c::NumbersStreamError as ::std::convert::From<_>>::from)
                         }
                     }
                 }
@@ -164,11 +163,9 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res: crate::services::c::NumbersResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::NumbersResponseExn, S>(de).await??;
 
-            let initial: ::std::result::Result<(), crate::errors::c::NumbersError> =
-                ::std::convert::From::from(res);
+            let initial = res.map_err(<crate::errors::c::NumbersError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
             res
         }
@@ -214,13 +211,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res: ::std::result::Result<crate::services::c::ThingExn, _> =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::ThingExn, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
+                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::c::ThingError::ApplicationException(aexn))
+                }
             };
             res
         }

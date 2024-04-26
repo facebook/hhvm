@@ -300,32 +300,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Raiser.doBland", "success");
-                crate::services::raiser::DoBlandExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoBlandExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "doBland",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Raiser.doBland", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doBland", exn);
                 ::tracing::error!(method = "Raiser.doBland", panic = ?aexn);
-                crate::services::raiser::DoBlandExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::raiser::DoBlandExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::raiser::DoBlandExn>(
             "doBland",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -373,32 +367,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Raiser.doRaise", "success");
-                crate::services::raiser::DoRaiseExn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoRaiseExn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "doRaise",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Raiser.doRaise", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doRaise", exn);
                 ::tracing::error!(method = "Raiser.doRaise", panic = ?aexn);
-                crate::services::raiser::DoRaiseExn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::raiser::DoRaiseExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::raiser::DoRaiseExn>(
             "doRaise",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -446,32 +434,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Raiser.get200", "success");
-                crate::services::raiser::Get200Exn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get200Exn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "get200",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Raiser.get200", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get200", exn);
                 ::tracing::error!(method = "Raiser.get200", panic = ?aexn);
-                crate::services::raiser::Get200Exn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::raiser::Get200Exn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::raiser::Get200Exn>(
             "get200",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())
@@ -519,32 +501,26 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Raiser.get500", "success");
-                crate::services::raiser::Get500Exn::Success(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get500Exn::Success(_))) => {
-                panic!(
-                    "{} attempted to return success via error",
-                    "get500",
-                )
+                ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 ::tracing::info!(method = "Raiser.get500", exception = ?exn);
-                exn
+                ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get500", exn);
                 ::tracing::error!(method = "Raiser.get500", panic = ?aexn);
-                crate::services::raiser::Get500Exn::ApplicationException(aexn)
+                ::std::result::Result::Err(crate::services::raiser::Get500Exn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::raiser::Get500Exn>(
             "get500",
             METHOD_NAME.as_cstr(),
             _seqid,
             req_ctxt,
             &mut ctx_stack,
-            res
+            res,
         )?;
         reply_state.send_reply(env);
         Ok(())

@@ -51,6 +51,15 @@ class ThriftServerConfig {
   std::optional<std::string> getBaselineCPUWorkerThreadName() const;
 
   /**
+   * Get whether to use in memory ticket seeds.
+   * @return true if ticket seeds are stored in memory; false if ticket seeds
+   * are read from a file
+   */
+  bool getUseInMemoryTicketSeeds() const;
+
+  std::optional<bool> getBaselineUseInMemoryTicketSeeds() const;
+
+  /**
    * Get the timeout for joining workers.
    * @return workers joing timeout in seconds
    */
@@ -277,6 +286,13 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   void resetCPUWorkerThreadName(
+      AttributeSource source = AttributeSource::OVERRIDE);
+
+  void setUseInMemoryTicketSeeds(
+      bool cpuWorkerThreadName,
+      AttributeSource source = AttributeSource::OVERRIDE);
+
+  void resetUseInMemoryTicketSeeds(
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
@@ -640,6 +656,17 @@ class ThriftServerConfig {
   //! Milliseconds we'll keep the connection alive for (0 = infinity)
   ServerAttributeStatic<std::chrono::milliseconds> connectionAgeTimeout_{
       DEFAULT_TIMEOUT};
+
+  // This struct contains static server configs that are related to TLS
+  struct StaticTLSConfig {
+    /**
+     * When set to true, the ticket seeds will be stored in memory. By default
+     * this is disabled, and ticket seeds will be read from a file.
+     */
+    ServerAttributeStatic<bool> useInMemoryTicketSeeds_{false};
+  };
+
+  StaticTLSConfig tlsConfig_;
 
   /**
    * The time in milliseconds before an unperformed task expires

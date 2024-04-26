@@ -84,6 +84,15 @@ std::optional<std::string> ThriftServerConfig::getBaselineCPUWorkerThreadName()
   return poolThreadName_.getBaseline();
 }
 
+bool ThriftServerConfig::getUseInMemoryTicketSeeds() const {
+  return tlsConfig_.useInMemoryTicketSeeds_.get();
+}
+
+std::optional<bool> ThriftServerConfig::getBaselineUseInMemoryTicketSeeds()
+    const {
+  return tlsConfig_.useInMemoryTicketSeeds_.getBaseline();
+}
+
 std::chrono::seconds ThriftServerConfig::getWorkersJoinTimeout() const {
   return workersJoinTimeout_.get();
 }
@@ -319,6 +328,18 @@ void ThriftServerConfig::setCPUWorkerThreadName(
 
 void ThriftServerConfig::resetCPUWorkerThreadName(AttributeSource source) {
   resetStaticAttribute(poolThreadName_, source);
+}
+
+void ThriftServerConfig::setUseInMemoryTicketSeeds(
+    bool useInMemoryTicketSeeds, AttributeSource source) {
+  setStaticAttribute(
+      tlsConfig_.useInMemoryTicketSeeds_,
+      std::move(useInMemoryTicketSeeds),
+      source);
+}
+
+void ThriftServerConfig::resetUseInMemoryTicketSeeds(AttributeSource source) {
+  resetStaticAttribute(tlsConfig_.useInMemoryTicketSeeds_, source);
 }
 
 void ThriftServerConfig::setWorkersJoinTimeout(

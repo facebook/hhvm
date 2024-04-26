@@ -1110,6 +1110,28 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
+   * Get whether to use in memory ticket seeds.
+   *
+   * @return true if ticket seeds are stored in memory; false if ticket seeds
+   * are read from a file
+   */
+  bool getUseInMemoryTicketSeeds() const {
+    return thriftConfig_.getUseInMemoryTicketSeeds();
+  }
+
+  /**
+   * Set whether to use in memory ticket seeds.
+   *
+   * @param useInMemoryTicketSeeds true if ticket seeds are stored in memory;
+   * false if ticket seeds are read from a file
+   */
+  void setUseInMemoryTicketSeeds(
+      bool useInMemoryTicketSeeds,
+      AttributeSource source = AttributeSource::OVERRIDE) {
+    thriftConfig_.setUseInMemoryTicketSeeds(useInMemoryTicketSeeds, source);
+  }
+
+  /**
    * Get the maximum # of connections allowed before overload.
    *
    * @return current setting.

@@ -346,6 +346,12 @@ void Debugger::setClientConnected(
 
         RequestInfo::ExecutePerRequest([this] (RequestInfo* ti) {
           this->attachToRequest(ti);
+          if (ti->m_executing == RequestInfo::Executing::UserFunctions ||
+              ti->m_executing == RequestInfo::Executing::RuntimeFunctions) {
+            auto const it = m_requestInfoMap.find(ti);
+            assertx(it != m_requestInfoMap.end());
+            sendThreadEventMessage(it->second, ThreadEventType::ThreadStarted);
+          }
         });
       }
 
@@ -779,6 +785,12 @@ void Debugger::requestInit() {
       -1
     );
   }
+  if (threadInfo->m_executing == RequestInfo::Executing::UserFunctions ||
+      threadInfo->m_executing == RequestInfo::Executing::RuntimeFunctions) {
+    auto const it = m_requestInfoMap.find(threadInfo);
+    assertx(it != m_requestInfoMap.end());
+    sendThreadEventMessage(it->second, ThreadEventType::ThreadStarted);
+  }
 }
 
 void Debugger::enterDebuggerIfPaused(DebuggerRequestInfo* requestInfo) {
@@ -997,11 +1009,6 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
   requestInfo->m_flags.outputHooked = false;
 
   ti->m_reqInjectionData.setDebuggerIntr(true);
-
-  if (ti->m_executing == RequestInfo::Executing::UserFunctions ||
-      ti->m_executing == RequestInfo::Executing::RuntimeFunctions) {
-    sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
-  }
 
   // Try to attach our debugger hook to the request.
   if (!isDebuggerAttached(ti)) {

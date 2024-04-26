@@ -94,3 +94,10 @@ class CppConverterEcho(unittest.TestCase):
         # in thrift-python, but there is no error until field is first accessed
         with self.assertRaises(UnicodeDecodeError):
             s.strField
+
+    def test_type_error(self) -> None:
+        with self.assertRaises(TypeError):
+            converter.echo_simple("hello")  # type: ignore
+
+        with self.assertRaises(TypeError):
+            converter.echo_simple(self.make_nested())  # type: ignore

@@ -8,7 +8,7 @@
 
 
 
-cdef shared_ptr[_fbthrift_ctypes.cHsFoo] HsFoo_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cHsFoo] HsFoo_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.HsFoo?>inst)._cpp_obj
 
 

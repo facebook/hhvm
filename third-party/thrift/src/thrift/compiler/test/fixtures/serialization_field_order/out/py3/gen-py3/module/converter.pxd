@@ -10,9 +10,9 @@ from libcpp.memory cimport shared_ptr
 cimport module.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cFoo] Foo_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cFoo] Foo_convert_to_cpp(object inst) except*
 cdef object Foo_from_cpp(const shared_ptr[_fbthrift_ctypes.cFoo]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFoo2] Foo2_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cFoo2] Foo2_convert_to_cpp(object inst) except*
 cdef object Foo2_from_cpp(const shared_ptr[_fbthrift_ctypes.cFoo2]& c_struct)
 

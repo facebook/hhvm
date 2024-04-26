@@ -10,24 +10,24 @@ from libcpp.memory cimport shared_ptr
 cimport module.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cFiery] Fiery_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cFiery] Fiery_convert_to_cpp(object inst) except*
 cdef object Fiery_from_cpp(const shared_ptr[_fbthrift_ctypes.cFiery]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSerious] Serious_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cSerious] Serious_convert_to_cpp(object inst) except*
 cdef object Serious_from_cpp(const shared_ptr[_fbthrift_ctypes.cSerious]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexFieldNames] ComplexFieldNames_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cComplexFieldNames] ComplexFieldNames_convert_to_cpp(object inst) except*
 cdef object ComplexFieldNames_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexFieldNames]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCustomFieldNames] CustomFieldNames_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cCustomFieldNames] CustomFieldNames_convert_to_cpp(object inst) except*
 cdef object CustomFieldNames_from_cpp(const shared_ptr[_fbthrift_ctypes.cCustomFieldNames]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField] ExceptionWithPrimitiveField_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField] ExceptionWithPrimitiveField_convert_to_cpp(object inst) except*
 cdef object ExceptionWithPrimitiveField_from_cpp(const shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation] ExceptionWithStructuredAnnotation_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation] ExceptionWithStructuredAnnotation_convert_to_cpp(object inst) except*
 cdef object ExceptionWithStructuredAnnotation_from_cpp(const shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cBanal] Banal_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cBanal] Banal_convert_to_cpp(object inst) except*
 cdef object Banal_from_cpp(const shared_ptr[_fbthrift_ctypes.cBanal]& c_struct)
 

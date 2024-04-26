@@ -10,9 +10,9 @@ from libcpp.memory cimport shared_ptr
 cimport apache.thrift.type.standard.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cTypeUri] TypeUri_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cTypeUri] TypeUri_convert_to_cpp(object inst) except*
 cdef object TypeUri_from_cpp(const shared_ptr[_fbthrift_ctypes.cTypeUri]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cTypeName] TypeName_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cTypeName] TypeName_convert_to_cpp(object inst) except*
 cdef object TypeName_from_cpp(const shared_ptr[_fbthrift_ctypes.cTypeName]& c_struct)
 

@@ -8,43 +8,43 @@
 
 
 
-cdef shared_ptr[_fbthrift_ctypes.cFiery] Fiery_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cFiery] Fiery_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Fiery?>inst)._cpp_obj
 
 
 cdef object Fiery_from_cpp(const shared_ptr[_fbthrift_ctypes.cFiery]& c_struct):
     return _fbthrift_ctypes.Fiery._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cSerious] Serious_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cSerious] Serious_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Serious?>inst)._cpp_obj
 
 
 cdef object Serious_from_cpp(const shared_ptr[_fbthrift_ctypes.cSerious]& c_struct):
     return _fbthrift_ctypes.Serious._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cComplexFieldNames] ComplexFieldNames_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cComplexFieldNames] ComplexFieldNames_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ComplexFieldNames?>inst)._cpp_obj
 
 
 cdef object ComplexFieldNames_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexFieldNames]& c_struct):
     return _fbthrift_ctypes.ComplexFieldNames._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cCustomFieldNames] CustomFieldNames_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cCustomFieldNames] CustomFieldNames_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.CustomFieldNames?>inst)._cpp_obj
 
 
 cdef object CustomFieldNames_from_cpp(const shared_ptr[_fbthrift_ctypes.cCustomFieldNames]& c_struct):
     return _fbthrift_ctypes.CustomFieldNames._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField] ExceptionWithPrimitiveField_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField] ExceptionWithPrimitiveField_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ExceptionWithPrimitiveField?>inst)._cpp_obj
 
 
 cdef object ExceptionWithPrimitiveField_from_cpp(const shared_ptr[_fbthrift_ctypes.cExceptionWithPrimitiveField]& c_struct):
     return _fbthrift_ctypes.ExceptionWithPrimitiveField._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation] ExceptionWithStructuredAnnotation_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation] ExceptionWithStructuredAnnotation_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ExceptionWithStructuredAnnotation?>inst)._cpp_obj
 
 
 cdef object ExceptionWithStructuredAnnotation_from_cpp(const shared_ptr[_fbthrift_ctypes.cExceptionWithStructuredAnnotation]& c_struct):
     return _fbthrift_ctypes.ExceptionWithStructuredAnnotation._fbthrift_create(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cBanal] Banal_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cBanal] Banal_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Banal?>inst)._cpp_obj
 
 

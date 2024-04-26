@@ -10,12 +10,12 @@ from libcpp.memory cimport shared_ptr
 cimport apache.thrift.op.patch.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cGeneratePatch] GeneratePatch_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cGeneratePatch] GeneratePatch_convert_to_cpp(object inst) except*
 cdef object GeneratePatch_from_cpp(const shared_ptr[_fbthrift_ctypes.cGeneratePatch]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cGeneratePatchNew] GeneratePatchNew_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cGeneratePatchNew] GeneratePatchNew_convert_to_cpp(object inst) except*
 cdef object GeneratePatchNew_from_cpp(const shared_ptr[_fbthrift_ctypes.cGeneratePatchNew]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAssignOnlyPatch] AssignOnlyPatch_convert_to_cpp(object inst)
+cdef shared_ptr[_fbthrift_ctypes.cAssignOnlyPatch] AssignOnlyPatch_convert_to_cpp(object inst) except*
 cdef object AssignOnlyPatch_from_cpp(const shared_ptr[_fbthrift_ctypes.cAssignOnlyPatch]& c_struct)
 

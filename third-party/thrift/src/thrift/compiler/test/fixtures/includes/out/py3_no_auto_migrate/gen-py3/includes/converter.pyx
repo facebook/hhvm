@@ -13,7 +13,7 @@ from cython.operator cimport dereference as deref
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/includes/thrift_types_capi.h":
     pass
 
-cdef shared_ptr[_fbthrift_ctypes.cIncluded] Included_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cIncluded] Included_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_ctypes.cIncluded](python_to_cpp[_fbthrift_ctypes.cIncluded](inst))
 
 

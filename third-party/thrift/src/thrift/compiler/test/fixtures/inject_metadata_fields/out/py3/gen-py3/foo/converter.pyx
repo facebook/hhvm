@@ -8,7 +8,7 @@
 
 
 
-cdef shared_ptr[_fbthrift_ctypes.cFields] Fields_convert_to_cpp(object inst):
+cdef shared_ptr[_fbthrift_ctypes.cFields] Fields_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Fields?>inst)._cpp_obj
 
 

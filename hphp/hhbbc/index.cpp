@@ -5796,10 +5796,12 @@ namespace { struct DepTracker; };
 
 struct AnalysisIndex::IndexData {
   IndexData(AnalysisIndex& index,
-            AnalysisWorklist& worklist)
+            AnalysisWorklist& worklist,
+            Mode mode)
     : index{index}
     , worklist{worklist}
-    , deps{std::make_unique<DepTracker>(*this)} {}
+    , deps{std::make_unique<DepTracker>(*this)}
+    , mode{mode} {}
 
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
@@ -5859,6 +5861,8 @@ struct AnalysisIndex::IndexData {
   // (will assert). We only gather dependencies when the index is
   // frozen.
   bool frozen{false};
+
+  Mode mode;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -7643,10 +7647,10 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
 
   auto const& caller = *context_for_deps(data).func;
 
-  if (callCtx.callee->cls && callCtx.callee->cls->closureContextCls) {
+  if (data.mode == AnalysisIndex::Mode::Constants) {
     ITRACE_MOD(
       Trace::hhbbc, 4,
-      "Skipping inline interp of {} because closures aren't handled yet\n",
+      "Skipping inline interp of {} because analyzing constants\n",
       func_fullname(func)
     );
     return returnType;
@@ -21010,8 +21014,9 @@ AnalysisIndex::AnalysisIndex(
   VU<php::Class> depClasses,
   VU<php::Func> depFuncs,
   VU<php::Unit> depUnits,
-  AnalysisInput::Meta meta
-) : m_data{std::make_unique<IndexData>(*this, worklist)}
+  AnalysisInput::Meta meta,
+  Mode mode
+) : m_data{std::make_unique<IndexData>(*this, worklist, mode)}
 {
   m_data->badClasses = std::move(meta.badClasses);
   m_data->badFuncs = std::move(meta.badFuncs);
@@ -21263,6 +21268,10 @@ AnalysisIndex::lookup_closure_context(const php::Class& cls) const {
 
 res::Func AnalysisIndex::resolve_func(SString n) const {
   n = normalizeNS(n);
+  if (m_data->mode == Mode::Constants) {
+    return res::Func { res::Func::FuncName { n } };
+  }
+
   m_data->deps->add(AnalysisDeps::Func { n });
   if (auto const finfo = folly::get_default(m_data->finfos, n)) {
     return res::Func { res::Func::Fun2 { finfo } };
@@ -21663,10 +21672,10 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
 
   auto const& func = *calleeCtx.callee;
 
-  if (calleeCtx.callee->cls && calleeCtx.callee->cls->closureContextCls) {
+  if (m_data->mode == Mode::Constants) {
     ITRACE_MOD(
       Trace::hhbbc, 4,
-      "Skipping inline interp of {} because closures aren't handled yet\n",
+      "Skipping inline interp of {} because analyzing constants\n",
       func_fullname(func)
     );
     return R{ TInitCell, false };
@@ -21799,6 +21808,8 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
     assertx(name != s_construct.get());
     return Func { Func::MethodName { maybeCls, name } };
   };
+
+  if (m_data->mode == Mode::Constants) return general(nullptr);
 
   auto const isClass = thisType.subtypeOf(BCls);
   if (name == s_construct.get()) {
@@ -21953,6 +21964,10 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
   assertx(obj.subtypeOf(BObj));
 
   using Func = res::Func;
+
+  if (m_data->mode == Mode::Constants) {
+    return Func { Func::MethodName { nullptr, s_construct.get() } };
+  }
 
   // Can't say anything useful if we don't know the object type.
   if (!is_specialized_obj(obj)) {

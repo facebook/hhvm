@@ -486,7 +486,8 @@ struct AnalyzeConstantsJob {
       std::move(depClasses.vals),
       std::move(depFuncs.vals),
       std::move(depUnits.vals),
-      std::move(meta)
+      std::move(meta),
+      AnalysisIndex::Mode::Constants
     };
 
     // Keep processing work until we reach a fixed-point (nothing new

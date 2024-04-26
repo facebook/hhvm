@@ -2242,6 +2242,12 @@ struct AnalysisIndex {
   template<typename T> using V = std::vector<T>;
   template<typename T> using VU = V<std::unique_ptr<T>>;
 
+  enum class Mode {
+    Constants,
+    Full,
+    Final
+  };
+
   AnalysisIndex(AnalysisWorklist&,
                 VU<php::Class>,
                 VU<php::Func>,
@@ -2254,7 +2260,8 @@ struct AnalysisIndex {
                 VU<php::Class>,
                 VU<php::Func>,
                 VU<php::Unit>,
-                AnalysisInput::Meta);
+                AnalysisInput::Meta,
+                Mode);
   ~AnalysisIndex();
 
   // Must be called in the worker's init() and fini() functions.

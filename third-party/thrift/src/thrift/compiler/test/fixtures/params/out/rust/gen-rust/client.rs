@@ -90,7 +90,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::nested_containers::MapListExn, _>, _) =
+            let res: ::std::result::Result<crate::services::nested_containers::MapListExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -138,7 +138,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::nested_containers::MapSetExn, _>, _) =
+            let res: ::std::result::Result<crate::services::nested_containers::MapSetExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -186,7 +186,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::nested_containers::ListMapExn, _>, _) =
+            let res: ::std::result::Result<crate::services::nested_containers::ListMapExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -234,7 +234,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::nested_containers::ListSetExn, _>, _) =
+            let res: ::std::result::Result<crate::services::nested_containers::ListSetExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -282,7 +282,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::nested_containers::TurtlesExn, _>, _) =
+            let res: ::std::result::Result<crate::services::nested_containers::TurtlesExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {

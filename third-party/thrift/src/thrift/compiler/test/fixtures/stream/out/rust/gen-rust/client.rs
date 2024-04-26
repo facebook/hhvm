@@ -123,7 +123,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ReturnstreamResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ReturnstreamError> =
                 ::std::convert::From::from(res);
@@ -199,7 +199,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::StreamthrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::StreamthrowsError> =
                 ::std::convert::From::from(res);
@@ -275,7 +275,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ServicethrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ServicethrowsError> =
                 ::std::convert::From::from(res);
@@ -351,7 +351,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::Servicethrows2Error> =
                 ::std::convert::From::from(res);
@@ -427,7 +427,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::BoththrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::BoththrowsError> =
                 ::std::convert::From::from(res);
@@ -503,7 +503,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError> =
                 ::std::convert::From::from(res);
@@ -579,7 +579,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError> =
                 ::std::convert::From::from(res);
@@ -655,7 +655,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError> =
                 ::std::convert::From::from(res);
@@ -733,7 +733,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ReturnstreamFastError> =
                 ::std::convert::From::from(res);

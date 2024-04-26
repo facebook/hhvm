@@ -93,7 +93,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::some_service::BounceMapExn, _>, _) =
+            let res: ::std::result::Result<crate::services::some_service::BounceMapExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -141,7 +141,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::some_service::BinaryKeyedMapExn, _>, _) =
+            let res: ::std::result::Result<crate::services::some_service::BinaryKeyedMapExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {

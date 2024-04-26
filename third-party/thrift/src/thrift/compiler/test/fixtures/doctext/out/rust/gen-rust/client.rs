@@ -88,7 +88,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::c::FExn, _>, _) =
+            let res: ::std::result::Result<crate::services::c::FExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -165,7 +165,7 @@ where
 
             let de = P::deserializer(initial);
             let res: crate::services::c::NumbersResponseExn =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await??;
 
             let initial: ::std::result::Result<(), crate::errors::c::NumbersError> =
                 ::std::convert::From::from(res);
@@ -214,7 +214,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::c::ThingExn, _>, _) =
+            let res: ::std::result::Result<crate::services::c::ThingExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {

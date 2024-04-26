@@ -194,18 +194,13 @@ impl Spawner for NoopSpawner {
 }
 
 pub async fn async_deserialize_response_envelope<P, T, S>(
-    de: P::Deserializer,
-) -> anyhow::Result<(Result<T, ApplicationException>, P::Deserializer)>
+    mut de: P::Deserializer,
+) -> anyhow::Result<Result<T, ApplicationException>>
 where
     P: Protocol,
     P::Deserializer: Send,
     T: Deserialize<P::Deserializer> + Send + 'static,
     S: Spawner,
 {
-    S::spawn(move || {
-        let mut de = de;
-        let res = deserialize_response_envelope::<P, T>(&mut de);
-        res.map(|res| (res, de))
-    })
-    .await
+    S::spawn(move || deserialize_response_envelope::<P, T>(&mut de)).await
 }

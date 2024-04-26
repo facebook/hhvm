@@ -100,7 +100,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::service::FuncExn, _>, _) =
+            let res: ::std::result::Result<crate::services::service::FuncExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -427,7 +427,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::adapter_service::CountExn, _>, _) =
+            let res: ::std::result::Result<crate::services::adapter_service::CountExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
@@ -475,7 +475,7 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::adapter_service::AdaptedTypesExn, _>, _) =
+            let res: ::std::result::Result<crate::services::adapter_service::AdaptedTypesExn, _> =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {

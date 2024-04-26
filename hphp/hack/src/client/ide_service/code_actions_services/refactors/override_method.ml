@@ -9,7 +9,7 @@ open Hh_prelude
 
 type t = {
   title: string;
-  text: string;
+  skeleton: Typing_skeleton.t;
   class_name: string;
 }
 
@@ -18,8 +18,9 @@ let stub_method_action
     ~(class_name : string)
     ~(parent_name : string)
     ((meth_name, meth) : string * Typing_defs.class_elt) : t =
-  let text =
-    Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth ^ "\n"
+  let skeleton =
+    Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth
+    |> Typing_skeleton.add_suffix "\n"
   in
   let title =
     Printf.sprintf
@@ -27,7 +28,7 @@ let stub_method_action
       (Utils.strip_ns parent_name)
       meth_name
   in
-  { title; text; class_name }
+  { title; skeleton; class_name }
 
 (* Return a list of quickfixes for [cls] which add a method that
    overrides one in [parent_name]. *)
@@ -85,33 +86,40 @@ let override_method_refactorings_at ~cursor_line ~cursor_col =
       List.concat meth_actions @ acc
   end
 
-let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
-    Code_action_types.edit list =
+let to_edits_and_selection
+    (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
+    Code_action_types.edit list * Pos.t option =
   match
     Classish_positions.find
       (Classish_positions_types.Classish_start_of_body quickfix.class_name)
       classish_positions
   with
   | Some classish_start ->
-    [Code_action_types.{ pos = classish_start; text = quickfix.text }]
+    ( [
+        Code_action_types.
+          {
+            pos = classish_start;
+            text = Typing_skeleton.to_string quickfix.skeleton;
+          };
+      ],
+      Some
+        (Typing_skeleton.cursor_after_insert classish_start quickfix.skeleton)
+    )
   | None ->
     let () =
       HackEventLogger.invariant_violation_bug
         ~data:quickfix.class_name
         "Could not find class position for quickfix"
     in
-    []
+    ([], None)
 
 let refactor_action
     path (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
     Code_action_types.refactor =
-  let edits =
-    lazy
-      (Relative_path.Map.singleton path (to_edits classish_positions quickfix))
-  in
-
+  let (edits, selection) = to_edits_and_selection classish_positions quickfix in
+  let edits = lazy (Relative_path.Map.singleton path edits) in
   Code_action_types.
-    { title = quickfix.title; edits; kind = `Refactor; selection = None }
+    { title = quickfix.title; edits; kind = `Refactor; selection }
 
 let find ~entry pos ctx =
   let (cursor_line, cursor_col) = Pos.line_column pos in

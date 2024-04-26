@@ -133,6 +133,9 @@ val get_text_from_pos : content:string -> 'a pos -> string
 (* Advance the ending position by one character *)
 val advance_one : 'a pos -> 'a pos
 
+(* Advance the ending position by consuming the string *)
+val advance_string : string -> 'a pos -> 'a pos
+
 (* Reduce the size of this position element by one character on the left and
  * one character on the right.  For example, if you've captured a position
  * that includes outside apostrophes, this will shrink it to only the contents

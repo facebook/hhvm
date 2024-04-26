@@ -10,6 +10,11 @@ Code action title: Add override for MyParent::methodInGrandParent
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":47,"line":16},"start":{"character":47,"line":16}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{
@@ -56,6 +61,11 @@ Code action title: Add override for MyParent::methodInParent
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":42,"line":16},"start":{"character":42,"line":16}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{

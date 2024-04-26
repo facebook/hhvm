@@ -691,6 +691,30 @@ let make_from_lnum_bol_offset ~pos_file ~pos_start ~pos_end =
              ~pos_offset:offset_end;
        }
 
+let advance_string (s : string) (p : 'a pos) : 'a pos =
+  let splitted = String.split_on_chars ~on:['\n'] s in
+  let rec add_bol_and_last c xs =
+    match xs with
+    | [] -> (c, "")
+    | [s] -> (c, s)
+    | hd :: tl -> add_bol_and_last (c + String.length hd + 1 (* newline *)) tl
+  in
+  let (add_bol, last) = add_bol_and_last 0 splitted in
+  let num_lines = max 0 (List.length splitted - 1) in
+  let (end_line, end_bol, end_offset) = end_line_beg_offset p in
+  let end_line = end_line + num_lines in
+  let end_bol = end_bol + add_bol in
+  let end_offset =
+    if num_lines = 0 then
+      end_offset + String.length last
+    else
+      end_bol + String.length last
+  in
+  make_from_lnum_bol_offset
+    ~pos_file:(filename p)
+    ~pos_start:(line_beg_offset p)
+    ~pos_end:(end_line, end_bol, end_offset)
+
 let pessimize_enabled pos pessimize_coefficient =
   let path = filename pos in
   let open Float in

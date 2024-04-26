@@ -5,6 +5,11 @@ Add override for FooParent::explicitCapabilityMethods (CodeActionKind: refactor)
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":74,"line":8},"start":{"character":74,"line":8}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{

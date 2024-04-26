@@ -5,6 +5,11 @@ Add override for FooParent::somePureMethod (CodeActionKind: refactor) SELECTED
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":43,"line":8},"start":{"character":43,"line":8}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{

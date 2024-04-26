@@ -10,6 +10,11 @@ Code action title: Add override for FooParent::bar
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":31,"line":9},"start":{"character":31,"line":9}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{
@@ -47,6 +52,11 @@ Code action title: Add override for FooParent::baz
 JSON for selected code action:
 ------------------------------------------
 {
+  "command":{
+    "arguments":[{"end":{"character":31,"line":9},"start":{"character":31,"line":9}}],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
   "diagnostics":[],
   "edit":{
     "changes":{

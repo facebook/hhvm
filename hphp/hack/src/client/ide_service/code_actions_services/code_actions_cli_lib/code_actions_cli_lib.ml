@@ -37,7 +37,11 @@ let lsp_range_to_pos ~source_text path range =
 
 let patched_text_of_command_or_action ~source_text path = function
   | CodeAction.Action
-      CodeAction.{ action = EditOnly Lsp.WorkspaceEdit.{ changes }; _ } ->
+      CodeAction.{ action = EditOnly Lsp.WorkspaceEdit.{ changes }; _ }
+  | CodeAction.Action
+      CodeAction.
+        { action = BothEditThenCommand (Lsp.WorkspaceEdit.{ changes }, _); _ }
+    ->
     let to_patch Lsp.TextEdit.{ range; newText = text } =
       let pos = lsp_range_to_pos ~source_text path range in
       ServerRenameTypes.Replace ServerRenameTypes.{ pos; text }

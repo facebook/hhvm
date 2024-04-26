@@ -8,6 +8,7 @@
 #include "watchman/fs/FileSystem.h"
 #include <fmt/core.h>
 #include <folly/String.h>
+#include <system_error>
 #include "watchman/fs/FSDetect.h"
 #include "watchman/portability/WinError.h"
 #include "watchman/watchman_stream.h"
@@ -349,7 +350,9 @@ w_string readSymbolicLink(const char* path) {
     auto len = readlink(path, &result[0], result.size());
     if (len < 0) {
       throw std::system_error(
-          errno, std::generic_category(), "readlink for readSymbolicLink");
+          errno,
+          std::system_category(),
+          fmt::format("readlink for readSymbolicLink(\"{}\")", path));
     }
     if (size_t(len) < result.size()) {
       return w_string(result.data(), len);
@@ -359,7 +362,9 @@ w_string readSymbolicLink(const char* path) {
     struct stat st;
     if (lstat(path, &st)) {
       throw std::system_error(
-          errno, std::generic_category(), "lstat for readSymbolicLink");
+          errno,
+          std::system_category(),
+          fmt::format("lstat for readSymbolicLink(\"{}\")", path));
     }
 
     result.resize(st.st_size + 1, 0);
@@ -367,8 +372,10 @@ w_string readSymbolicLink(const char* path) {
 
   throw std::system_error(
       E2BIG,
-      std::generic_category(),
-      "readlink for readSymbolicLink: symlink changed while reading it");
+      std::system_category(),
+      fmt::format(
+          "readlink for readSymbolicLink(\"{}\"): symlink changed while reading it",
+          path));
 #else
   return openFileHandle(path, OpenFileHandleOptions::queryFileInfo())
       .readSymbolicLink();

@@ -1479,19 +1479,15 @@ std::shared_ptr<QueryableView> detectEden(
     edenRoot =
         readSymbolicLink(fmt::format("{}/.eden/root", root_path).c_str());
   } catch (const std::system_error& e) {
-    if (e.code() == std::errc::not_connected) {
-      // When Eden fails during graceful takeover, the mount can exist, but it
-      // is disconnected. In this case, we can't use the eden watcher. Log this
-      // error and throw.
-      log(DBG, "Failed to read EdenFS root when mount exists: ", e.what());
-      throw TerminalWatcherError(fmt::format(
-          "{} appears to be a disconnected EdenFS mount. "
-          "Try running `eden doctor` to bring it back online and "
-          "then retry your watch",
-          root_path));
-    } else {
-      throw;
-    }
+    // When Eden fails during graceful takeover, the mount can exist, but it
+    // is disconnected. In this case, we can't use the eden watcher. Log this
+    // error and throw.
+    log(DBG, "Failed to read EdenFS root when mount exists: ", e.what());
+    throw TerminalWatcherError(fmt::format(
+        "{} appears to be a disconnected EdenFS mount. "
+        "Try running `eden doctor` to bring it back online and "
+        "then retry your watch",
+        root_path));
   }
 
 #endif

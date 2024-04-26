@@ -95,6 +95,7 @@
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/ssl/SSLContextConfig.h>
 #include <wangle/ssl/TLSCredProcessor.h>
+#include <wangle/ssl/TLSInMemoryTicketProcessor.h>
 
 FOLLY_GFLAGS_DECLARE_bool(thrift_abort_if_exceeds_shutdown_deadline);
 FOLLY_GFLAGS_DECLARE_string(service_identity);
@@ -145,8 +146,15 @@ class TLSCredentialWatcher {
     credProcessor_.setTicketPathToWatch(path);
   }
 
+  bool hasTicketPathToWatch() const {
+    return credProcessor_.hasTicketPathToWatch();
+  }
+
+  wangle::TLSTicketKeySeeds initInMemoryTicketSeeds(ThriftServer* server);
+
  private:
   wangle::TLSCredProcessor credProcessor_;
+  std::optional<wangle::TLSInMemoryTicketProcessor> inMemoryTicketProcessor_;
 };
 
 /**
@@ -2102,6 +2110,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::unique_ptr<RequestPileInterface> makeStandardRequestPile(
       RoundRobinRequestPile::Options options);
 
+  void scheduleInMemoryTicketSeeds();
+
  public:
   ~ThriftServer() override;
 
@@ -2330,6 +2340,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * longer be watched.  This is not thread safe.
    */
   void watchTicketPathForChanges(const std::string& ticketPath);
+
+  /* In memory ticket seeds should not be scheduled if watchTicketPathForChange
+   * has already been called. Otherwise we should schedule in memory ticket
+   * seeds */
+  bool shouldScheduleInMemoryTicketSeeds();
 
   void setFastOpenOptions(bool enableTFO, uint32_t fastOpenQueueSize) {
     enableTFO_ = enableTFO;

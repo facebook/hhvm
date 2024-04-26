@@ -61,6 +61,10 @@ class TLSCredProcessor {
 
   virtual void setPollInterval(std::chrono::milliseconds pollInterval);
 
+  bool hasTicketPathToWatch() const {
+    return !ticketFile_.empty();
+  }
+
   /**
    * This parses a TLS ticket file with the tickets and returns a
    * TLSTicketKeySeeds structure if the file is valid.

@@ -99,7 +99,9 @@ TEST_F(ProcessTicketTest, TestUpdateTicketFile) {
   Baton<> ticketBaton;
   Baton<> certBaton;
   TLSCredProcessor processor;
+  EXPECT_FALSE(processor.hasTicketPathToWatch());
   processor.setTicketPathToWatch(ticketFile);
+  EXPECT_TRUE(processor.hasTicketPathToWatch());
   processor.setCertPathsToWatch({certFile});
   processor.addTicketCallback([&](TLSTicketKeySeeds) { ticketBaton.post(); });
   processor.addCertCallback([&]() { certBaton.post(); });
@@ -123,7 +125,9 @@ TEST_F(ProcessTicketTest, TestUpdateTicketFile) {
 TEST_F(ProcessTicketTest, TestUpdateTicketFileWithPassword) {
   Baton<> ticketBaton;
   TLSCredProcessor processor;
+  EXPECT_FALSE(processor.hasTicketPathToWatch());
   processor.setTicketPathToWatch(ticketFile, ticketPasswordString);
+  EXPECT_TRUE(processor.hasTicketPathToWatch());
   processor.addTicketCallback([&](TLSTicketKeySeeds) { ticketBaton.post(); });
 
   CHECK(writeFile(encryptedTicketString, ticketFile.c_str()));
@@ -161,7 +165,9 @@ TEST_F(ProcessTicketTest, TestSetPullInterval) {
   Baton<> ticketBaton;
   Baton<> certBaton;
   TLSCredProcessor processor;
+  EXPECT_FALSE(processor.hasTicketPathToWatch());
   processor.setTicketPathToWatch(ticketFile);
+  EXPECT_TRUE(processor.hasTicketPathToWatch());
   processor.setCertPathsToWatch({certFile});
   processor.setPollInterval(std::chrono::seconds(3));
   processor.addTicketCallback([&](TLSTicketKeySeeds) { ticketBaton.post(); });

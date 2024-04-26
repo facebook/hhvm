@@ -110,6 +110,8 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 
 THRIFT_FLAG_DEFINE_bool(fizz_deprecate_draft_versions, true);
 
+THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
+
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     apache::thrift::ThriftServer::DumpSnapshotOnLongShutdownResult,
@@ -248,6 +250,15 @@ TLSCredentialWatcher::TLSCredentialWatcher(ThriftServer* server)
   credProcessor_.addTicketCallback([server](wangle::TLSTicketKeySeeds seeds) {
     server->updateTicketSeeds(std::move(seeds));
   });
+}
+
+wangle::TLSTicketKeySeeds TLSCredentialWatcher::initInMemoryTicketSeeds(
+    ThriftServer* server) {
+  inMemoryTicketProcessor_ = wangle::TLSInMemoryTicketProcessor(
+      {[server](wangle::TLSTicketKeySeeds seeds) {
+        server->updateTicketSeeds(std::move(seeds));
+      }});
+  return inMemoryTicketProcessor_->initInMemoryTicketSeeds();
 }
 
 ThriftServer::ThriftServer()
@@ -583,6 +594,11 @@ void ThriftServer::setup() {
   // Print some libevent stats
   VLOG(1) << "libevent " << folly::EventBase::getLibeventVersion() << " method "
           << serveEventBase->getLibeventMethod();
+
+  if (THRIFT_FLAG(enable_rotation_for_in_memory_ticket_seeds) &&
+      shouldScheduleInMemoryTicketSeeds()) {
+    scheduleInMemoryTicketSeeds();
+  }
 
   try {
 #ifndef _WIN32
@@ -1841,6 +1857,23 @@ void ThriftServer::watchTicketPathForChanges(const std::string& ticketPath) {
     }
     credWatcher->setTicketPathToWatch(ticketPath);
   });
+}
+
+bool ThriftServer::shouldScheduleInMemoryTicketSeeds() {
+  return tlsCredWatcher_.withRLock([](auto& credWatcher) {
+    return !(credWatcher && credWatcher->hasTicketPathToWatch());
+  });
+}
+
+void ThriftServer::scheduleInMemoryTicketSeeds() {
+  wangle::TLSTicketKeySeeds seeds;
+  tlsCredWatcher_.withWLock([this, &seeds](auto& credWatcher) {
+    if (!credWatcher) {
+      credWatcher.emplace(this);
+    }
+    seeds = credWatcher->initInMemoryTicketSeeds(this);
+  });
+  setTicketSeeds(std::move(seeds));
 }
 
 PreprocessResult ThriftServer::preprocess(

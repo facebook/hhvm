@@ -39,12 +39,19 @@ let single_ctx_path env path =
     (Relative_path.create_detect_prefix path)
     (ServerCommandTypes.FileName path)
 
+let log_check_response env =
+  HackEventLogger.check_response
+    (Errors.get_error_list env.errorl
+    |> List.filter_map ~f:(fun { User_error.severity; code; _ } ->
+           match severity with
+           | User_error.Err -> Some code
+           | User_error.Warning -> None))
+
 (* Might raise {!Naming_table.File_info_not_found} *)
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
  fun genv env ~is_stale -> function
   | STATUS { max_errors; _ } ->
-    HackEventLogger.check_response
-      (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
+    log_check_response env;
     let error_list = Errors.sort_and_finalize env.errorl in
     let (error_list, dropped_count) = take_max_errors error_list max_errors in
     let liveness =
@@ -296,15 +303,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         | Ok r -> map_env r ~f:(fun x -> Ok x))
   | REMOVE_DEAD_FIXMES codes ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
-      HackEventLogger.check_response
-        (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
+      log_check_response env;
       (env, `Ok (ServerRename.get_fixme_patches codes env))
     ) else
       (env, `Error (remove_dead_warning "fixme"))
   | REMOVE_DEAD_UNSAFE_CASTS ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
-      HackEventLogger.check_response
-        (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
+      log_check_response env;
       (env, `Ok (ServerRename.get_dead_unsafe_cast_patches env))
     ) else
       (env, `Error (remove_dead_warning "unsafe cast"))

@@ -115,13 +115,13 @@ inline void callerDynamicCallChecks(const Func* func,
   auto dynCallable = func->isDynamicallyCallable();
   if (dynCallable) {
     if (allowDynCallNoPointer) return;
-    if (!RO::EvalForbidDynamicCallsWithAttr) return;
+    if (!Cfg::Eval::ForbidDynamicCallsWithAttr) return;
   }
   auto level = func->isMethod()
     ? (func->isStatic()
-        ? RO::EvalForbidDynamicCallsToClsMeth
-        : RO::EvalForbidDynamicCallsToInstMeth)
-    : RO::EvalForbidDynamicCallsToFunc;
+        ? Cfg::Eval::ForbidDynamicCallsToClsMeth
+        : Cfg::Eval::ForbidDynamicCallsToInstMeth)
+    : Cfg::Eval::ForbidDynamicCallsToFunc;
   if (level <= 0) return;
   if (dynCallable && level < 2) return;
 
@@ -142,7 +142,7 @@ inline void callerDynamicCallChecks(const Func* func,
 }
 
 inline void callerDynamicConstructChecks(const Class* cls) {
-  auto level = RO::EvalForbidDynamicConstructs;
+  auto level = Cfg::Eval::ForbidDynamicConstructs;
   if (level <= 0 || cls->isDynamicallyConstructible()) return;
 
   if (auto const rate = cls->dynConstructSampleRate()) {
@@ -175,7 +175,7 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
 
-  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
+  if (Cfg::Eval::NoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
       error_msg,
       func->fullName()->data()

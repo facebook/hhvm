@@ -605,7 +605,6 @@ int64_t RuntimeOption::ConfigId = 0;
 std::string RuntimeOption::PidFile = "www.pid";
 
 bool RuntimeOption::EnableXHP = true;
-bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::TrustAutoloaderPath = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -613,10 +612,6 @@ bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
-uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
-  kDefaultInitialStaticStringTableSize;
-uint32_t RuntimeOption::EvalInitialTypeTableSize = 30000;
-uint32_t RuntimeOption::EvalInitialFuncTableSize = 3000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::ProfDataTag;
@@ -664,8 +659,6 @@ std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
-std::set<std::string> RuntimeOption::RenamableFunctions;
-std::set<std::string> RuntimeOption::NonInterceptableFunctions;
 
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
@@ -821,8 +814,8 @@ bool RuntimeOption::funcIsRenamable(const StringData* name) {
   if (HPHP::is_generated(name)) return false;
   if (Cfg::Jit::EnableRenameFunction == 0) return false;
   if (Cfg::Jit::EnableRenameFunction == 2) {
-    return RO::RenamableFunctions.find(name->data()) !=
-      RO::RenamableFunctions.end();
+    return Cfg::Eval::RenamableFunctions.find(name->data()) !=
+      Cfg::Eval::RenamableFunctions.end();
   } else {
     return true;
   }
@@ -1620,16 +1613,6 @@ void RuntimeOption::Load(
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
                  true);
-    Config::Bind(EvalInitialTypeTableSize, ini, config,
-                 "Eval.InitialNamedEntityTableSize",
-                 EvalInitialTypeTableSize);
-    Config::Bind(EvalInitialFuncTableSize, ini, config,
-                 "Eval.InitialFuncTableSize",
-                 EvalInitialFuncTableSize);
-    Config::Bind(EvalInitialStaticStringTableSize, ini, config,
-                 "Eval.InitialStaticStringTableSize",
-                 EvalInitialStaticStringTableSize);
-
     static std::string jitSerdesMode;
     Config::Bind(jitSerdesMode, ini, config, "Eval.JitSerdesMode", "Off");
 
@@ -1725,9 +1708,6 @@ void RuntimeOption::Load(
                           EvalProfileHWFastReads,
                           EvalProfileHWExportInterval);
 
-    Config::Bind(EnableIntrinsicsExtension, ini,
-                 config, "Eval.EnableIntrinsicsExtension",
-                 EnableIntrinsicsExtension);
     Config::Bind(RecordCodeCoverage, ini, config, "Eval.RecordCodeCoverage");
     if (Cfg::Jit::Enabled && RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "
@@ -1800,10 +1780,6 @@ void RuntimeOption::Load(
 
       Cfg::Server::FontPath = FileUtil::normalizeDir(Cfg::Server::FontPath);
     }
-
-
-    Config::Bind(RenamableFunctions, ini, config, "Eval.RenamableFunctions");
-    Config::Bind(NonInterceptableFunctions, ini, config, "Eval.NonInterceptableFunctions");
   }
 
   VirtualHost::SortAllowedDirectories(Cfg::Server::AllowedDirectories);

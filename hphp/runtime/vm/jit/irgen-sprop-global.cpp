@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 namespace {
@@ -65,7 +67,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const& prop = cls->staticProperties()[slot];
 
   auto knownType = TCell;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+  if (Cfg::Eval::CheckPropTypeHints >= 3) {
     knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
@@ -277,7 +279,7 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
       true,
       &value
     );
-  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+  } else if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
     value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value, cns(env, true));
   }
@@ -320,7 +322,7 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
         true,
         &value
       );
-    } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    } else if (Cfg::Eval::CheckPropTypeHints > 0) {
       auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
       value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value,
                   cns(env, true));
@@ -403,7 +405,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
       ssaPropName,
       true
     );
-  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+  } else if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
     gen(env, VerifyPropAll, ssaCls, slot, result, cns(env, true));
   }

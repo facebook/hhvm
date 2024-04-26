@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/apc-collection.h"
@@ -90,7 +91,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
 
   auto allTypedValues = true;
   auto mayRaise = !apcObj->m_no_wakeup;
-  auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
+  auto propsDontNeedCheck = Cfg::Eval::CheckPropTypeHints > 0;
   for (unsigned slot = 0; slot < numRealProps; ++slot) {
     auto index = cls->propSlotToIndex(slot);
     auto const attrs = propInfo[slot].attrs;
@@ -137,7 +138,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
     allTypedValues &= val.handle->isTypedValue();
   }
 
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propsDontNeedCheck) {
+  if (Cfg::Eval::CheckPropTypeHints <= 0 || propsDontNeedCheck) {
     apcObj->m_no_verify_prop_types = 1;
   }
 

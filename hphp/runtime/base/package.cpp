@@ -160,7 +160,7 @@ static RDS_LOCAL_NO_CHECK(const PackageInfo::Deployment*, s_requestActiveDeploym
 
 const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
   if (RO::RepoAuthoritative || !RuntimeOption::ServerExecutionMode()) {
-    auto const it = deployments().find(RO::EvalActiveDeployment);
+    auto const it = deployments().find(Cfg::Eval::ActiveDeployment);
     if (it == end(deployments())) return nullptr;
     return &it->second;
   }

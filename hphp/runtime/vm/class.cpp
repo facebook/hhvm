@@ -53,6 +53,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/check-size.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
@@ -951,7 +952,7 @@ void Class::initSProps() const {
 
     if (declaredOnThisClass(sProp)) {
       sProp.typeConstraint.validForPropResolved(sProp.cls, sProp.name);
-      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+      if (Cfg::Eval::CheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
           sProp.val.m_type != KindOfUninit) {
         if (sProp.typeConstraint.isCheckable()) {
@@ -1028,7 +1029,7 @@ void Class::checkPropInitialValues() const {
       ub.validForPropResolved(prop.cls, prop.name);
     }
 
-    if (RO::EvalCheckPropTypeHints <= 0) continue;
+    if (Cfg::Eval::CheckPropTypeHints <= 0) continue;
     if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const index = propSlotToIndex(slot);
     auto const rval = m_declPropInit[index].val;
@@ -1052,7 +1053,7 @@ void Class::checkPropInitialValues() const {
 
 void Class::checkPropTypeRedefinitions() const {
   assertx(m_allFlags.m_maybeRedefsPropTy);
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(m_parent);
   assertx(m_extra.get() != nullptr);
 
@@ -1075,7 +1076,7 @@ void Class::checkPropTypeRedefinitions() const {
 
 void Class::checkPropTypeRedefinition(Slot slot) const {
   assertx(m_allFlags.m_maybeRedefsPropTy);
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(m_parent);
   assertx(slot != kInvalidSlot);
   assertx(slot < numDeclProperties());
@@ -1419,7 +1420,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
         always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
       }
 
-      if (RuntimeOption::EvalCheckPropTypeHints > 2) {
+      if (Cfg::Eval::CheckPropTypeHints > 2) {
         auto const typeOk = [&]{
           auto skipCheck =
             !decl.typeConstraint.isCheckable() ||
@@ -2471,7 +2472,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
       return;
     }
 
-    if (RO::EvalTraitConstantInterfaceBehavior) {
+    if (Cfg::Eval::TraitConstantInterfaceBehavior) {
       if (existingConst.isAbstract()) {
         // the case where the incoming constant is abstract without a default is covered above
         // there are two remaining cases:
@@ -3139,7 +3140,7 @@ void Class::setProperties() {
         }
 
         auto const& tc = preProp->typeConstraint();
-        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+        if (Cfg::Eval::CheckPropTypeHints > 0 &&
             !(preProp->attrs() & AttrNoBadRedeclare) &&
             (tc.maybeInequivalentForProp(prop.typeConstraint) ||
              !preProp->upperBounds().isTop() ||
@@ -3573,7 +3574,7 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
     prop.attrs = Attr(prop.attrs & ~AttrPersistent);
   }
 
-  if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+  if (Cfg::Eval::CheckPropTypeHints > 0 &&
       !(preProp->attrs() & AttrInitialSatisfiesTC) &&
       (preProp->attrs() & AttrSystemInitialValue) &&
       tv.m_type != KindOfUninit) {
@@ -4990,7 +4991,7 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
             (newClass.get()->isPersistent() &&
              classHasPersistentRDS(newClass.get())));
 
-    if (UNLIKELY(RO::EnableIntrinsicsExtension)) {
+    if (UNLIKELY(Cfg::Eval::EnableIntrinsicsExtension)) {
       Lock l(s_priority_serialize_mutex);
       auto const it =
         preClass->userAttributes().find(s__JitSerdesPriority.get());
@@ -5119,7 +5120,7 @@ bool Class::exists(const StringData* name, bool autoload, ClassKind kind) {
 }
 
 std::vector<Class*> prioritySerializeClasses() {
-  assertx(RO::EnableIntrinsicsExtension);
+  assertx(Cfg::Eval::EnableIntrinsicsExtension);
   Lock l(s_priority_serialize_mutex);
   std::vector<Class*> ret;
   for (auto [_p, c] : s_priority_serialize) ret.emplace_back(c);

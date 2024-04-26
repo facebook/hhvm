@@ -142,33 +142,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                  RuntimeOption::RepoDebugInfo);
   }
 
-  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
-               "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
-
-  Config::Bind(RuntimeOption::EvalHackArrCompatSerializeNotices,
-               ini, config, "HackArrCompatSerializeNotices",
-               RuntimeOption::EvalHackArrCompatSerializeNotices);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
-               ini, config, "ForbidDynamicCallsToFunc",
-               RuntimeOption::EvalForbidDynamicCallsToFunc);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToClsMeth,
-               ini, config, "ForbidDynamicCallsToClsMeth",
-               RuntimeOption::EvalForbidDynamicCallsToClsMeth);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToInstMeth,
-               ini, config, "ForbidDynamicCallsToInstMeth",
-               RuntimeOption::EvalForbidDynamicCallsToInstMeth);
-  Config::Bind(RuntimeOption::EvalForbidDynamicConstructs,
-               ini, config, "ForbidDynamicConstructs",
-               RuntimeOption::EvalForbidDynamicConstructs);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsWithAttr,
-               ini, config, "ForbidDynamicCallsWithAttr",
-               RuntimeOption::EvalForbidDynamicCallsWithAttr);
-  Config::Bind(RuntimeOption::EvalLogKnownMethodsAsDynamicCalls,
-               ini, config, "LogKnownMethodsAsDynamicCalls",
-               RuntimeOption::EvalLogKnownMethodsAsDynamicCalls);
-  Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
-               ini, config, "NoticeOnBuiltinDynamicCalls",
-               RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
   Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
                ini, config, "AbortBuildOnVerifyError",
                RuntimeOption::EvalAbortBuildOnVerifyError);
@@ -183,9 +156,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ForceEnableSymbolRefs, ini, config,
                "ForceEnableSymbolRefs", false);
-
-  Config::Bind(RuntimeOption::EvalActiveDeployment, ini, config,
-               "ActiveDeployment", RuntimeOption::EvalActiveDeployment);
 
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);

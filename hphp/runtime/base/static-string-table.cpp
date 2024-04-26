@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -34,6 +35,8 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
 StringData** precomputed_chars;
 
@@ -203,7 +206,7 @@ void create_string_data_map() {
   config.entryCountThreadCacheSize = 10;
   MemoryStats::ResetStaticStringSize();
 
-  s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,
+  s_stringDataMap.emplace(Cfg::Eval::InitialStaticStringTableSize,
                           config);
   insertStaticString(StringData::MakeEmpty());
   if (!precomputed_chars) {
@@ -377,7 +380,7 @@ size_t countStaticStringConstants() {
 }
 
 void refineStaticStringTableSize() {
-  if (RuntimeOption::EvalInitialStaticStringTableSize ==
+  if (Cfg::Eval::InitialStaticStringTableSize ==
       kDefaultInitialStaticStringTableSize ||
       !s_stringDataMap) {
     return;

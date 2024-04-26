@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
@@ -85,7 +86,7 @@ void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
 
 static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot,
                                const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numDeclProperties());
   auto const& prop = objCls->declProperties()[slot];
@@ -101,7 +102,7 @@ static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot,
 
 static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val,
                                      Slot slot, const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numStaticProperties());
   auto const& sprop = objCls->staticProperties()[slot];
@@ -120,7 +121,7 @@ static void verifyPropClsImpl(const Class* objCls,
                               ObjectData* val,
                               Slot slot,
                               const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < objCls->numDeclProperties());
   assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
@@ -136,7 +137,7 @@ static void verifyStaticPropClsImpl(const Class* objCls,
                                     ObjectData* val,
                                     Slot slot,
                                     const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < objCls->numStaticProperties());
   assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
@@ -153,7 +154,7 @@ static TypedValue verifyPropImpl(const Class* cls,
                                  Slot slot,
                                  const TypeConstraint* tc,
                                  TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
   assertx(tc->isCheckable());
@@ -164,7 +165,7 @@ static TypedValue verifyPropImpl(const Class* cls,
 }
 
 static TypedValue verifyPropAll(const Class* cls, Slot slot, TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->declProperties()[slot];
@@ -187,7 +188,7 @@ static TypedValue verifySPropImpl(const Class* cls,
                                   Slot slot,
                                   const TypeConstraint* tc,
                                   TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
   assertx(tc->isCheckable());
@@ -198,7 +199,7 @@ static TypedValue verifySPropImpl(const Class* cls,
 }
 
 static TypedValue verifySPropAll(const Class* cls, Slot slot, TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->staticProperties()[slot];

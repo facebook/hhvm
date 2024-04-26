@@ -438,7 +438,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   }
 
   if (maybeDynamic && (
-      (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
+      (Cfg::Eval::NoticeOnBuiltinDynamicCalls &&
        (func->attrs & AttrBuiltin)) ||
       (dyn_call_error_level(func) > 0))) {
     return false;

@@ -22,11 +22,12 @@
 #include <folly/MapUtil.h>
 #include <folly/Random.h>
 
-#include <hphp/runtime/base/datatype.h>
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
@@ -1126,8 +1127,8 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
             continue;
           case AnnotAction::WarnClassname:
             assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-            assertx(RuntimeOption::EvalClassPassesClassname);
-            assertx(RuntimeOption::EvalClassnameNoticesSampleRate > 0);
+            assertx(Cfg::Eval::ClassPassesClassname);
+            assertx(Cfg::Eval::ClassnameNoticesSampleRate > 0);
             if (Assert) return true;
             fallback = fallback ? std::min(*fallback, result) : result;
             continue;
@@ -1146,7 +1147,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
           // verify*Fail will deal with the conversion/warning
           return false;
         case AnnotAction::WarnClassname:
-          if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
+          if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
             raise_notice(Strings::CLASS_TO_CLASSNAME);
           }
           return true;
@@ -1350,8 +1351,8 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case AnnotAction::WarnClassname:
         if (!isPasses) {
           assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-          assertx(RuntimeOption::EvalClassPassesClassname);
-          assertx(RuntimeOption::EvalClassnameNoticesSampleRate > 0);
+          assertx(Cfg::Eval::ClassPassesClassname);
+          assertx(Cfg::Eval::ClassnameNoticesSampleRate > 0);
           if (isAssert) return true;
           fallback = fallback ? std::min(*fallback, result) : result;
         }
@@ -1369,7 +1370,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       // verify*Fail will deal with the conversion/warning
       return false;
     case AnnotAction::WarnClassname:
-      if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
+      if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
         raise_notice(Strings::CLASS_TO_CLASSNAME);
       }
       return true;
@@ -1530,7 +1531,7 @@ void TypeConstraint::verifyProperty(tv_lval val,
                                     const Class* thisCls,
                                     const Class* declCls,
                                     const StringData* propName) const {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(validForProp());
   if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(val, thisCls))) {
     verifyPropFail(thisCls, declCls, val, propName, false);
@@ -1541,7 +1542,7 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
                                           const Class* thisCls,
                                           const Class* declCls,
                                           const StringData* propName) const {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(validForProp());
   if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(val, thisCls))) {
     verifyPropFail(thisCls, declCls, val, propName, true);
@@ -1665,7 +1666,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
-    if (folly::Random::oneIn(RO::EvalClassStringHintNoticesSampleRate)) {
+    if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate)) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
     }
     val.val().pstr = isClassType(val.type()) ?
@@ -1729,7 +1730,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
                                     tv_lval val,
                                     const StringData* propName,
                                     bool isStatic) const {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(validForProp());
 
   auto const tcInfo = [&]{ return folly::sformat("property {}", propName);};

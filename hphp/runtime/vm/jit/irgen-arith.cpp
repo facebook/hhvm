@@ -292,13 +292,13 @@ SSATmp* implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 
 SSATmp* convToStr(IRGS& env, SSATmp* in, bool should_warn) {
   if (should_warn &&
-      RO::EvalRaiseClassConversionNoticeSampleRate > 0 &&
+      Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0 &&
       in->type().subtypeOfAny(TCls, TLazyCls)) {
     std::string msg;
     string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "comparison");
     gen(env,
         RaiseNotice,
-        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(msg)));
   }
   if (in->isA(TCls))     return gen(env, LdClsName, in);

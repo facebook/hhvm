@@ -243,7 +243,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsTypeStruct:
   case IsTypeStructShallow:
     return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
-           RuntimeOption::EvalIsVecNotices ||
+           Cfg::Eval::IsVecNotices ||
            RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 
   case AddNewElemKeyset:

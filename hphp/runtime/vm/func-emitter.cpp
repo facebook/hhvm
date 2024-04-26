@@ -215,7 +215,7 @@ const StaticString
 namespace {
   bool is_interceptable(const PreClass* preClass, const StringData* name) {
     if (RO::RepoAuthoritative) return false;
-    if (RO::NonInterceptableFunctions.empty()) return true;
+    if (Cfg::Eval::NonInterceptableFunctions.empty()) return true;
     auto fullname = [&]() {
       auto n = name->toCppString();
       if (!preClass) {
@@ -223,7 +223,7 @@ namespace {
       }
       return preClass->name()->toCppString() +"::"+ n;
     }();
-    return RO::NonInterceptableFunctions.count(fullname) == 0;
+    return Cfg::Eval::NonInterceptableFunctions.count(fullname) == 0;
   }
 }
 

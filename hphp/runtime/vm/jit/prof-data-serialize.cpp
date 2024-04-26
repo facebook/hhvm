@@ -64,6 +64,7 @@
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -1804,7 +1805,7 @@ std::string serializeProfData(const std::string& filename) {
     auto const pd = profData();
     write_prof_data(ser, pd);
 
-    if (RO::EnableIntrinsicsExtension) {
+    if (Cfg::Eval::EnableIntrinsicsExtension) {
       write_container(ser, prioritySerializeClasses(), write_class);
     }
     write_container(ser, Class::serializeLazyAPCClasses(), write_class);
@@ -1954,7 +1955,7 @@ std::string deserializeProfData(const std::string& filename,
       pd->forEachProfilingFunc(logFunc);
     }
 
-    if (RO::EnableIntrinsicsExtension) {
+    if (Cfg::Eval::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
     }
     {

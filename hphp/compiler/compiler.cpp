@@ -26,6 +26,7 @@
 #include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/configs/repo-global-data-generated.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -461,61 +462,11 @@ RepoGlobalData getGlobalData() {
   auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
 
-#define C(Config, Name, ...) gd.Name = Config;
-CONFIGS_FOR_REPOGLOBALDATA()
-#undef C
+  Cfg::StoreToGlobalData(gd);
 
-  gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
-  gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
-  gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
-  gd.ForbidDynamicCallsWithAttr  =
-    RuntimeOption::EvalForbidDynamicCallsWithAttr;
-  gd.ForbidDynamicCallsToClsMeth =
-    RuntimeOption::EvalForbidDynamicCallsToClsMeth;
-  gd.ForbidDynamicCallsToInstMeth =
-    RuntimeOption::EvalForbidDynamicCallsToInstMeth;
-  gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
-  gd.LogKnownMethodsAsDynamicCalls =
-    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
-  gd.NoticeOnBuiltinDynamicCalls =
-    RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
-  gd.InitialTypeTableSize =
-    RuntimeOption::EvalInitialTypeTableSize;
-  gd.InitialFuncTableSize =
-    RuntimeOption::EvalInitialFuncTableSize;
-  gd.InitialStaticStringTableSize =
-    RuntimeOption::EvalInitialStaticStringTableSize;
-  gd.HackArrCompatSerializeNotices =
-    RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
-  gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
-  gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
-  gd.RaiseClassConversionNoticeSampleRate =
-    RuntimeOption::EvalRaiseClassConversionNoticeSampleRate;
-  gd.DynamicallyReferencedNoticeSampleRate =
-    RuntimeOption::EvalDynamicallyReferencedNoticeSampleRate;
-  gd.RaiseStrToClsConversionNoticeSampleRate =
-    RuntimeOption::EvalRaiseStrToClsConversionNoticeSampleRate;
-  gd.ClassPassesClassname = RuntimeOption::EvalClassPassesClassname;
-  gd.ClassnameNoticesSampleRate = RuntimeOption::EvalClassnameNoticesSampleRate;
-  gd.StringPassesClass = RuntimeOption::EvalStringPassesClass;
-  gd.ClassNoticesSampleRate = RuntimeOption::EvalClassNoticesSampleRate;
-  gd.ClassStringHintNoticesSampleRate = RO::EvalClassStringHintNoticesSampleRate;
-  gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
-  gd.TraitConstantInterfaceBehavior =
-    RuntimeOption::EvalTraitConstantInterfaceBehavior;
-  gd.BuildMayNoticeOnMethCallerHelperIsObject =
-    RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
-  gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
-  gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
-  gd.ActiveDeployment = RO::EvalActiveDeployment;
-  gd.ModuleLevelTraits = RO::EvalModuleLevelTraits;
-  gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
-  gd.RenamableFunctions = RO::RenamableFunctions;
-  gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
-  gd.LogTsameCollisions = RuntimeOption::EvalLogTsameCollisions;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(Cfg::Server::SourceRoot);
@@ -1179,16 +1130,16 @@ bool process(CompilerOptions &po) {
   }
 
   hphp_fast_set<const StringData*> moduleInDeployment;
-  if (!RO::EvalActiveDeployment.empty()) {
+  if (!Cfg::Eval::ActiveDeployment.empty()) {
     // Many files will be in the same module, so it is better to precompute
     // a mapping of whether a given module is in the current deployment
     auto const& packageInfo =
       RepoOptions::forFile(po.repoOptionsDir).packageInfo();
-    auto const it = packageInfo.deployments().find(RO::EvalActiveDeployment);
+    auto const it = packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
     if (it == end(packageInfo.deployments())) {
       Logger::FError("The active deployment is set to {}; "
                      "however, it is not defined in the {}/{} file",
-                     RO::EvalActiveDeployment,
+                     Cfg::Eval::ActiveDeployment,
                      po.repoOptionsDir,
                      kPackagesToml);
       return false;
@@ -1392,7 +1343,7 @@ bool process(CompilerOptions &po) {
     Package::ParseMetaItemsToSkipSet itemsToSkip;
 
     auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
-      if (RO::EvalActiveDeployment.empty()) return true;
+      if (Cfg::Eval::ActiveDeployment.empty()) return true;
       // If the unit defines any modules, then it is always included
       if (!p.m_definitions.m_modules.empty()) return true;
       return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
@@ -1421,7 +1372,7 @@ bool process(CompilerOptions &po) {
                            "not part of {} deployment",
                            p.m_filepath,
                            p.m_module_use ? p.m_module_use->data() : "top-level",
-                           RO::EvalActiveDeployment);
+                           Cfg::Eval::ActiveDeployment);
           itemsToSkip.insert(i);
           continue;
         }
@@ -1459,7 +1410,7 @@ bool process(CompilerOptions &po) {
                          "not part of {} deployment",
                          p.m_filepath,
                          p.m_module_use ? p.m_module_use->data() : "top-level",
-                         RO::EvalActiveDeployment);
+                         Cfg::Eval::ActiveDeployment);
         itemsToSkip.insert(i);
         continue;
       }

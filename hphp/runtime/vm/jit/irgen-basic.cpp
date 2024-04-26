@@ -29,6 +29,8 @@
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 void emitClassGetC(IRGS& env, ClassGetCMode mode) {
@@ -61,7 +63,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   auto const cls = [&] {
     switch (mode) {
       case ClassGetCMode::Normal:
-        if (RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0
+        if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0
             && name->isA(TStr)) {
           gen(env, RaiseStrToClassNotice, name);
         }
@@ -71,7 +73,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         // instead of raising a fatal error
         if (name->isA(TStr)) {
           auto const cls = ldCls(env, name, LdClsFallback::ThrowClassnameToClassString);
-          if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
+          if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate > 0) {
             if (cls->hasConstVal() &&
                 !cls->clsVal()->isDynamicallyReferenced()) {
               gen(env, RaiseMissingDynamicallyReferenced, cls);

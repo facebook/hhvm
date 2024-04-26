@@ -49,6 +49,8 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <folly/Hash.h>
 #include <folly/ScopeGuard.h>
 
@@ -72,7 +74,7 @@ void verifyTypeHint(const Class* thisCls,
                     tv_lval val) {
   assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
-  if (!prop || RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (!prop || Cfg::Eval::CheckPropTypeHints <= 0) return;
   if (prop->typeConstraint.isCheckable()) {
     prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
   }
@@ -85,7 +87,7 @@ void verifyTypeHint(const Class* thisCls,
 
 ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return;
   if (!prop || prop->typeConstraint.isMixedResolved()) return;
   raise_property_typehint_unset_error(
     prop->cls,
@@ -126,7 +128,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   }
 
   // If we're not hard enforcing, then the prop might contain anything.
-  if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
+  if (Cfg::Eval::CheckPropTypeHints <= 2) return true;
   if (!propDecl.typeConstraint.isCheckable() ||
       propDecl.typeConstraint.isSoft()) return true;
   if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
@@ -1525,7 +1527,7 @@ TypedValue ObjectData::incDecProp(const MemberLookupContext& ctx, IncDecOp op, c
      * that case.
      */
     auto const fast = [&]{
-      if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
+      if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
       auto const isAnyCheckable = lookup.prop && [&] {
         if (lookup.prop->typeConstraint.isCheckable()) return true;
         for (auto const& ub : lookup.prop->ubs.m_constraints) {

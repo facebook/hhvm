@@ -27,6 +27,8 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
@@ -101,7 +103,7 @@ using Resolution = TypeStructureResolution;
 
 Resolution&& maybeMakeBespoke(Resolution&& r) {
   // convert type structure into bespoke versions if possible
-  if (!RO::EvalEmitBespokeTypeStructures) return std::move(r);
+  if (!Cfg::Eval::EmitBespokeTypeStructures) return std::move(r);
 
   if (auto const t = tv(r.type)) {
     auto const ad = val(*t).parr;

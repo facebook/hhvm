@@ -18,49 +18,25 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 void RepoGlobalData::load(bool loadConstantFuncs) const {
-#define C(Config, Name, ...) Config = Name;
-  CONFIGS_FOR_REPOGLOBALDATA()
-#undef C
+  Cfg::LoadFromGlobalData(*this);
 
-  RO::EnableIntrinsicsExtension                    = EnableIntrinsicsExtension;
-  RO::EvalCheckPropTypeHints                       = CheckPropTypeHints;
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
-  RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
-  RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
-  RO::EvalRaiseClassConversionNoticeSampleRate     = RaiseClassConversionNoticeSampleRate;
-  RO::EvalDynamicallyReferencedNoticeSampleRate    = DynamicallyReferencedNoticeSampleRate;
-  RO::EvalRaiseStrToClsConversionNoticeSampleRate  = RaiseStrToClsConversionNoticeSampleRate;
-  RO::EvalClassPassesClassname                     = ClassPassesClassname;
-  RO::EvalClassnameNoticesSampleRate               = ClassnameNoticesSampleRate;
-  RO::EvalStringPassesClass                        = StringPassesClass;
-  RO::EvalClassNoticesSampleRate                   = ClassNoticesSampleRate;
-  RO::EvalClassStringHintNoticesSampleRate         = ClassStringHintNoticesSampleRate;
-  RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
-  RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
-  RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
-    BuildMayNoticeOnMethCallerHelperIsObject;
-  RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
-  RO::EvalEmitBespokeTypeStructures                = EmitBespokeTypeStructures;
-  RO::EvalActiveDeployment                         = ActiveDeployment;
-  RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
-  RO::EvalTreatCaseTypesAsMixed                    = TreatCaseTypesAsMixed;
-  RO::RenamableFunctions                           = RenamableFunctions;
-  RO::NonInterceptableFunctions                    = NonInterceptableFunctions;
-  RO::EvalLogTsameCollisions                       = LogTsameCollisions;
 
-  if (!RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
+  if (!Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {
     RO::EvalNoticeOnMethCallerHelperIsObject = false;
   }
 
@@ -82,49 +58,19 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 
 std::string show(const RepoGlobalData& gd) {
   std::string out;
-#define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
-  SHOW(InitialTypeTableSize);
-  SHOW(InitialFuncTableSize);
-  SHOW(InitialStaticStringTableSize);
-  SHOW(CheckPropTypeHints);
-  SHOW(HackArrCompatSerializeNotices);
-  SHOW(EnableIntrinsicsExtension);
-  SHOW(ForbidDynamicCallsToFunc);
-  SHOW(ForbidDynamicCallsToClsMeth);
-  SHOW(ForbidDynamicCallsToInstMeth);
-  SHOW(ForbidDynamicConstructs);
-  SHOW(ForbidDynamicCallsWithAttr);
-  SHOW(LogKnownMethodsAsDynamicCalls);
-  SHOW(NoticeOnBuiltinDynamicCalls);
-  SHOW(AbortBuildOnVerifyError);
-  SHOW(EnableArgsInBacktraces);
-  SHOW(Signature);
-  SHOW(EmitClsMethPointers);
-  SHOW(IsVecNotices);
-  SHOW(RaiseClassConversionNoticeSampleRate);
-  SHOW(DynamicallyReferencedNoticeSampleRate);
-  SHOW(RaiseStrToClsConversionNoticeSampleRate);
-  SHOW(ClassPassesClassname);
-  SHOW(ClassnameNoticesSampleRate);
-  SHOW(StringPassesClass);
-  SHOW(ClassNoticesSampleRate);
-  SHOW(ClassStringHintNoticesSampleRate);
-  SHOW(ClassIsStringNotices);
-  SHOW(TraitConstantInterfaceBehavior);
-  SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
-  SHOW(DiamondTraitMethods);
-  SHOW(EmitBespokeTypeStructures);
-  SHOW(ModuleLevelTraits);
-  SHOW(TreatCaseTypesAsMixed);
-  SHOW(LogTsameCollisions);
+#define SHOW(x) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #x, gd.x);
+  SHOW(AbortBuildOnVerifyError)
+  SHOW(EnableArgsInBacktraces)
+  SHOW(Signature)
 #undef SHOW
 
-#define C(_, Name, ...) folly::format(&out, "  {}: {}\n", #Name, gd.Name);
+#define C(_, Name, ...) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #Name, gd.Name);
   CONFIGS_FOR_REPOGLOBALDATA()
 #undef C
 
-  folly::format(
-    &out, "  SourceRootForFileBC: {}\n",
+  fmt::format_to(
+    std::back_inserter(out),
+    "  SourceRootForFileBC: {}\n",
     gd.SourceRootForFileBC.value_or("*")
   );
   return out;

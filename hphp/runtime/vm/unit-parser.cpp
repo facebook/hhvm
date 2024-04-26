@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hacklang.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/embedded-data.h"
@@ -125,8 +126,8 @@ CompilerResult hackc_compile(
     .filepath = filename,
     .hhbc_flags = hackc::HhbcFlags {
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
-      .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
-      .emit_cls_meth_pointers = RO::EvalEmitClsMethPointers,
+      .enable_intrinsics_extension = Cfg::Eval::EnableIntrinsicsExtension,
+      .emit_cls_meth_pointers = Cfg::Eval::EmitClsMethPointers,
       .fold_lazy_class_keys = RO::EvalFoldLazyClassKeys,
       .enable_native_enum_class_labels = RO::EvalEmitNativeEnumClassLabels,
     },

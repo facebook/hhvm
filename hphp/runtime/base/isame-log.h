@@ -20,6 +20,7 @@
 #include <folly/Range.h>
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/bstring.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
 
 namespace HPHP {
@@ -31,9 +32,9 @@ int tstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
 
 inline int tstrcmp(const char* s1, const char* s2) {
   auto order = strcmp(s1, s2);
-  if (order == 0 || RO::EvalLogTsameCollisions >= 2) return order;
+  if (order == 0 || Cfg::Eval::LogTsameCollisions >= 2) return order;
   order = strcasecmp(s1, s2);
-  if (order != 0 || RO::EvalLogTsameCollisions == 0) return order;
+  if (order != 0 || Cfg::Eval::LogTsameCollisions == 0) return order;
   return tstrcmp_log(s1, s2);
 }
 
@@ -48,9 +49,9 @@ inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
     return s1.size() < s2.size() ? -1 :
            s1.size() > s2.size() ? 1 : 0;
   }
-  if (RO::EvalLogTsameCollisions >= 2) return order;
+  if (Cfg::Eval::LogTsameCollisions >= 2) return order;
   order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
-  if (order != 0 || RO::EvalLogTsameCollisions == 0) return order;
+  if (order != 0 || Cfg::Eval::LogTsameCollisions == 0) return order;
   return tstrcmp_log_slice(s1, s2);
 }
 

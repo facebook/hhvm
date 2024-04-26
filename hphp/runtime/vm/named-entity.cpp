@@ -28,6 +28,8 @@
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <folly/AtomicHashMap.h>
 
 #include <atomic>
@@ -138,7 +140,7 @@ void initializeNamedTypeMap() {
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
   s_namedTypeMap = new (vm_malloc(sizeof(NamedType::Map)))
-    NamedType::Map(RuntimeOption::EvalInitialTypeTableSize, config);
+    NamedType::Map(Cfg::Eval::InitialTypeTableSize, config);
 }
 
 NEVER_INLINE
@@ -147,7 +149,7 @@ void initializeNamedFuncMap() {
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
   s_namedFuncMap = new (vm_malloc(sizeof(NamedFunc::Map)))
-    NamedFunc::Map(RuntimeOption::EvalInitialFuncTableSize, config);
+    NamedFunc::Map(Cfg::Eval::InitialFuncTableSize, config);
 }
 
 /*

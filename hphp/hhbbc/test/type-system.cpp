@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/extern-worker.h"
 
 namespace HPHP::HHBBC {
@@ -4170,9 +4171,9 @@ TEST(Type, ArrayLikeNewElem) {
     { make_specialized_arrmap(BKeysetN, mapElem7), union_of(ival(1),TStr), make_specialized_arrmap(BKeysetN, mapElem7, TArrKey, TArrKey), false },
   };
 
-  auto old = RO::EvalRaiseClassConversionNoticeSampleRate;
-  RO::EvalRaiseClassConversionNoticeSampleRate = 1;
-  SCOPE_EXIT { RO::EvalRaiseClassConversionNoticeSampleRate = old; };
+  auto old = Cfg::Eval::RaiseClassConversionNoticeSampleRate;
+  Cfg::Eval::RaiseClassConversionNoticeSampleRate = 1;
+  SCOPE_EXIT { Cfg::Eval::RaiseClassConversionNoticeSampleRate = old; };
 
   for (auto const& t : tests) {
     auto const elem = array_like_newelem(std::get<0>(t), std::get<1>(t));

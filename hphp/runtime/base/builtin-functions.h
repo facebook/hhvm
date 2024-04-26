@@ -16,13 +16,14 @@
 
 #pragma once
 
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/portability.h"
-#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,7 +93,7 @@ inline bool is_double(const TypedValue* c) {
 inline bool is_string(const TypedValue* c) {
   if (tvIsString(c)) return true;
   if (tvIsClass(c) || tvIsLazyClass(c)) {
-    if (RuntimeOption::EvalClassIsStringNotices) {
+    if (Cfg::Eval::ClassIsStringNotices) {
       raise_notice("Class used in is_string");
     }
     return true;

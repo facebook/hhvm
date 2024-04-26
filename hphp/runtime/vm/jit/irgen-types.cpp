@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include "hphp/runtime/vm/hhbc-shared.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -36,8 +37,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
-#include <hphp/runtime/vm/hhbc-shared.h>
 
 namespace HPHP::jit::irgen {
 
@@ -263,7 +264,7 @@ void verifyTypeImpl(IRGS& env,
           gen(
             env,
             RaiseNotice,
-            SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
+            SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
             cns(env, makeStaticString(msg))
           );
         }
@@ -280,7 +281,7 @@ void verifyTypeImpl(IRGS& env,
           gen(
             env,
             RaiseNotice,
-            SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
+            SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
             cns(env, makeStaticString(msg))
           );
         }
@@ -290,7 +291,7 @@ void verifyTypeImpl(IRGS& env,
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
         gen(env,
             RaiseNotice,
-            SampleRateData { RO::EvalClassnameNoticesSampleRate },
+            SampleRateData { Cfg::Eval::ClassnameNoticesSampleRate },
             cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
     }
@@ -598,7 +599,7 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   mc.ifTypeThen(src, TStr, [&](SSATmp*) { return cns(env, true); });
 
   mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) {
-    if (RuntimeOption::EvalClassIsStringNotices) {
+    if (Cfg::Eval::ClassIsStringNotices) {
       gen(env, RaiseNotice, SampleRateData {},
           cns(env, s_CLASS_IS_STRING.get()));
     }
@@ -606,7 +607,7 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   });
 
   mc.ifTypeThen(src, TCls, [&](SSATmp*) {
-    if (RuntimeOption::EvalClassIsStringNotices) {
+    if (Cfg::Eval::ClassIsStringNotices) {
       gen(env, RaiseNotice, SampleRateData {},
           cns(env, s_CLASS_IS_STRING.get()));
     }
@@ -694,7 +695,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
   if (!src->isA(TObj)) {
     if (src->isA(TCls | TLazyCls)) {
       if (!interface_supports_string(className)) return cns(env, false);
-      if (RuntimeOption::EvalClassIsStringNotices && src->isA(TCls)) {
+      if (Cfg::Eval::ClassIsStringNotices && src->isA(TCls)) {
         gen(
           env,
           RaiseNotice,
@@ -759,7 +760,7 @@ void emitInstanceOf(IRGS& env) {
     if (t2->isA(TStr))     return gen(env, InterfaceSupportsStr, t1);
     if (t2->isA(TDbl))     return gen(env, InterfaceSupportsDbl, t1);
     if (t2->isA(TCls)) {
-      if (RO::EvalRaiseClassConversionNoticeSampleRate == 0) {
+      if (Cfg::Eval::RaiseClassConversionNoticeSampleRate == 0) {
         return gen(env, InterfaceSupportsStr, t1);
       }
       return cond(
@@ -772,7 +773,7 @@ void emitInstanceOf(IRGS& env) {
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "instanceof");
           gen(env,
             RaiseNotice,
-            SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+            SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
             cns(env, makeStaticString(msg)));
           return cns(env, true);
         },
@@ -1024,7 +1025,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       return primitive(primitiveKindToType(kind));
     case TypeStructure::Kind::T_string: {
       if (t->type().maybe(TLazyCls) &&
-          RuntimeOption::EvalClassIsStringNotices) {
+          Cfg::Eval::ClassIsStringNotices) {
         ifElse(env,
           [&] (Block* taken) {
             gen(env, CheckType, TLazyCls, taken, t);
@@ -1036,7 +1037,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
         );
       }
       if (t->type().maybe(TCls) &&
-          RuntimeOption::EvalClassIsStringNotices) {
+          Cfg::Eval::ClassIsStringNotices) {
         ifElse(env,
           [&] (Block* taken) {
             gen(env, CheckType, TCls, taken, t);
@@ -1056,7 +1057,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey: {
       if (t->type().maybe(TLazyCls) &&
-          RuntimeOption::EvalClassIsStringNotices) {
+          Cfg::Eval::ClassIsStringNotices) {
         ifElse(env,
           [&] (Block* taken) {
             gen(env, CheckType, TLazyCls, taken, t);
@@ -1068,7 +1069,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
         );
       }
       if (t->type().maybe(TCls) &&
-          RuntimeOption::EvalClassIsStringNotices) {
+          Cfg::Eval::ClassIsStringNotices) {
         ifElse(env,
           [&] (Block* taken) {
             gen(env, CheckType, TCls, taken, t);
@@ -1148,7 +1149,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
               primitives.emplace(primitiveKindToType(arr_kind));
               break;
             case TypeStructure::Kind::T_string:
-              if (RO::EvalClassIsStringNotices) {
+              if (Cfg::Eval::ClassIsStringNotices) {
                 // punt
                 fallback = true;
                 return true; // short-circuit
@@ -1589,7 +1590,7 @@ void verifyPropType(IRGS& env,
   assertx(val->isA(TCell));
 
   if (coerce) *coerce = val;
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return;
 
   auto const verifyFunc = [&](const TypeConstraint* tc) {
     if (!tc || !tc->isCheckable()) return;
@@ -1643,7 +1644,7 @@ void verifyPropType(IRGS& env,
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
-          hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
+          hard && Cfg::Eval::CheckPropTypeHints >= 3;
         gen(
           env,
           failHard ? VerifyPropFailHard : VerifyPropFail,

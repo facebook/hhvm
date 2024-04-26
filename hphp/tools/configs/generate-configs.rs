@@ -45,7 +45,9 @@ If the Owner is unknown use `UNKNOWN` as the owner.
 Possible features are:
 - private, will make the config private so it can only be used as default value
   for other configs in the same section
-- globaldata, if the config should be part of RepoGlobalData
+- globaldata(options), if the config should be part of RepoGlobalData.
+  options is a pipe separated list of options.
+  - noload: Do not load it in RepoGlobalData::load
 - unitcacheflag, if the config should be part of the unit cache hash key
 - repooptionsflag(name[, systemlibdefault]), if the config can be set in
   hhvmconfig.hdf inside the repo that contains the hack code. Use systemlibdefault
@@ -130,10 +132,18 @@ impl ConfigValue {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Default)]
+pub enum GlobalDataLoad {
+    #[default]
+    Always,
+    OnlyHHBBC,
+    Never,
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum ConfigFeature {
     Private,
-    GlobalData,
+    GlobalData(GlobalDataLoad),
     UnitCacheFlag,
     RepoOptionsFlag(String, Option<String>),
     CompilerOption(String),
@@ -141,6 +151,11 @@ pub enum ConfigFeature {
     NoBind,
     PostProcess,
     StaticDefault(String),
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub struct ConfigFeatureGlobalData {
+    pub load: GlobalDataLoad,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -154,7 +169,7 @@ pub struct ConfigFeatures {
     pub is_repo_specific: bool,
     pub is_request_level: bool,
     pub is_private: bool,
-    pub is_global_data: bool,
+    pub global_data: Option<ConfigFeatureGlobalData>,
     pub is_unit_cache_flag: bool,
     pub repo_options_flag: Option<ConfigFeatureRepoOptionFlag>,
     pub compiler_option: Option<String>,
@@ -505,7 +520,22 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 tag("|"),
                 alt((
                     value(ConfigFeature::Private, tag("private")),
-                    value(ConfigFeature::GlobalData, tag("globaldata")),
+                    map(
+                        tuple((
+                            tag("globaldata"),
+                            opt(delimited(
+                                tag("("),
+                                alt((
+                                    value(GlobalDataLoad::Never, tag("noload")),
+                                    value(GlobalDataLoad::OnlyHHBBC, tag("onlyhhbbc")),
+                                )),
+                                tag(")"),
+                            )),
+                        )),
+                        |(_, load)| {
+                            ConfigFeature::GlobalData(load.unwrap_or(GlobalDataLoad::Always))
+                        },
+                    ),
                     value(ConfigFeature::UnitCacheFlag, tag("unitcacheflag")),
                     map(
                         delimited(
@@ -552,7 +582,9 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             for f in v.unwrap_or(vec![]).into_iter() {
                 match f {
                     ConfigFeature::Private => features.is_private = true,
-                    ConfigFeature::GlobalData => features.is_global_data = true,
+                    ConfigFeature::GlobalData(load) => {
+                        features.global_data = Some(ConfigFeatureGlobalData { load })
+                    }
                     ConfigFeature::UnitCacheFlag => features.is_unit_cache_flag = true,
                     ConfigFeature::RepoOptionsFlag(prefix, default_value) => {
                         features.repo_options_flag = Some(ConfigFeatureRepoOptionFlag {
@@ -836,6 +868,37 @@ fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             );
         }
 
+        let has_global_data_store = section
+            .configs
+            .iter()
+            .any(|c| c.features.global_data.is_some());
+        if has_global_data_store {
+            public_methods.push("  static void StoreToGlobalData(RepoGlobalData& gd);".to_string());
+        }
+
+        let has_global_data_load = section.configs.iter().any(|c| {
+            if let Some(gd) = &c.features.global_data {
+                return gd.load == GlobalDataLoad::Always;
+            }
+            false
+        });
+        if has_global_data_load {
+            public_methods
+                .push("  static void LoadFromGlobalData(const RepoGlobalData& gd);".to_string());
+        }
+
+        let has_global_data_onlyhhbbc_load = section.configs.iter().any(|c| {
+            if let Some(gd) = &c.features.global_data {
+                return gd.load == GlobalDataLoad::OnlyHHBBC;
+            }
+            false
+        });
+        if has_global_data_onlyhhbbc_load {
+            public_methods.push(
+                "  static void LoadFromGlobalDataOnlyHHBBC(const RepoGlobalData& gd);".to_string(),
+            );
+        }
+
         let h_content = format!(
             r#"#pragma once
 
@@ -843,8 +906,9 @@ fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
 
 namespace HPHP {{
 
-struct IniSettingMap;
 struct Hdf;
+struct IniSettingMap;
+struct RepoGlobalData;
 struct RepoOptionsFlags;
 
 namespace Cfg {{
@@ -876,6 +940,9 @@ private:
         let mut bind_calls = vec![];
         let mut debug_calls = vec![];
         let mut compiler_option_calls = vec![];
+        let mut global_data_load_calls = vec![];
+        let mut global_data_load_onlyhhbbc_calls = vec![];
+        let mut global_data_store_calls = vec![];
         let mut repo_options_flags_calls = vec![];
         let mut repo_options_flags_from_config_calls = vec![];
         let mut repo_options_flags_for_systemlib_calls = vec![];
@@ -935,8 +1002,34 @@ private:
                 ));
                 if let Some(compiler_option_name) = &config.features.compiler_option {
                     compiler_option_calls.push(format!(
-                        r#"  Config::Bind(Cfg::{}::{}, ini, config, "{}", {});"#,
-                        section_shortname, shortname, compiler_option_name, default_value,
+                        r#"  Config::Bind(Cfg::{}::{}, ini, config, "{}", Cfg::{}::{});"#,
+                        section_shortname,
+                        shortname,
+                        compiler_option_name,
+                        section_shortname,
+                        shortname,
+                    ));
+                }
+
+                if let Some(global_data) = &config.features.global_data {
+                    match global_data.load {
+                        GlobalDataLoad::Always => {
+                            global_data_load_calls.push(format!(
+                                r#"  Cfg::{}::{} = gd.{}_{};"#,
+                                section_shortname, shortname, section_shortname, shortname
+                            ));
+                        }
+                        GlobalDataLoad::OnlyHHBBC => {
+                            global_data_load_onlyhhbbc_calls.push(format!(
+                                r#"  Cfg::{}::{} = gd.{}_{};"#,
+                                section_shortname, shortname, section_shortname, shortname
+                            ));
+                        }
+                        GlobalDataLoad::Never => {}
+                    }
+                    global_data_store_calls.push(format!(
+                        r#"  gd.{}_{} = Cfg::{}::{};"#,
+                        section_shortname, shortname, section_shortname, shortname
                     ));
                 }
             }
@@ -980,11 +1073,51 @@ void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
             );
         }
 
+        let mut global_data_load_method = String::new();
+        if has_global_data_load {
+            global_data_load_method = format!(
+                r#"void {}Loader::LoadFromGlobalData(const RepoGlobalData& gd) {{
+{}
+}}
+
+"#,
+                section_shortname,
+                global_data_load_calls.join("\n"),
+            );
+        }
+
+        let mut global_data_load_onlyhhbbc_method = String::new();
+        if has_global_data_onlyhhbbc_load {
+            global_data_load_onlyhhbbc_method = format!(
+                r#"void {}Loader::LoadFromGlobalDataOnlyHHBBC(const RepoGlobalData& gd) {{
+{}
+}}
+
+"#,
+                section_shortname,
+                global_data_load_onlyhhbbc_calls.join("\n"),
+            );
+        }
+
+        let mut global_data_store_method = String::new();
+        if has_global_data_store {
+            global_data_store_method = format!(
+                r#"void {}Loader::StoreToGlobalData(RepoGlobalData& gd) {{
+{}
+}}
+
+"#,
+                section_shortname,
+                global_data_store_calls.join("\n"),
+            );
+        }
+
         let cpp_content = format!(
             r#"#include "hphp/runtime/base/configs/{}-loader.h"
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/util/configs/{}.h"
 #include "hphp/util/hdf-extract.h"
 
@@ -1003,7 +1136,7 @@ std::string {}Loader::Debug() {{
   return out;
 }}
 
-{}{}}} // namespace HPHP::Cfg
+{}{}{}{}{}}} // namespace HPHP::Cfg
 "#,
             lower_section_shortname,
             lower_section_shortname,
@@ -1012,7 +1145,10 @@ std::string {}Loader::Debug() {{
             section_shortname,
             debug_calls.join("\n"),
             &repo_options_methods,
-            &compiler_options_method
+            &compiler_options_method,
+            &global_data_load_method,
+            &global_data_load_onlyhhbbc_method,
+            &global_data_store_method,
         );
 
         let mut cpp_output_file = output_dir.clone();
@@ -1022,7 +1158,7 @@ std::string {}Loader::Debug() {{
         // macro files
         for config in section.configs.iter() {
             let shortname = config.shortname(&section.name);
-            if config.features.is_global_data {
+            if config.features.global_data.is_some() {
                 repo_global_data.push(format!(
                     "  C(Cfg::{}::{}, {}_{}, {})\\",
                     section_shortname,
@@ -1104,6 +1240,9 @@ std::string {}Loader::Debug() {{
     let mut config_load_includes = vec![];
     let mut config_load_calls = vec![];
     let mut config_load_compiler_calls = vec![];
+    let mut config_load_global_data_load_calls = vec![];
+    let mut config_load_global_data_load_onlyhhbbc_calls = vec![];
+    let mut config_load_global_data_store_calls = vec![];
     let mut repo_options_flags_calls = vec![];
     let mut repo_options_flags_from_config_calls = vec![];
     let mut repo_options_flags_for_systemlib_calls = vec![];
@@ -1126,6 +1265,41 @@ std::string {}Loader::Debug() {{
         {
             config_load_compiler_calls.push(format!(
                 "  Cfg::{}Loader::LoadForCompiler(ini, config);",
+                section_shortname
+            ));
+        }
+
+        if section
+            .configs
+            .iter()
+            .any(|c| c.features.global_data.is_some())
+        {
+            config_load_global_data_store_calls.push(format!(
+                "  Cfg::{}Loader::StoreToGlobalData(gd);",
+                section_shortname
+            ));
+        }
+
+        if section.configs.iter().any(|c| {
+            if let Some(gd) = &c.features.global_data {
+                return gd.load == GlobalDataLoad::Always;
+            }
+            false
+        }) {
+            config_load_global_data_load_calls.push(format!(
+                "  Cfg::{}Loader::LoadFromGlobalData(gd);",
+                section_shortname
+            ));
+        }
+
+        if section.configs.iter().any(|c| {
+            if let Some(gd) = &c.features.global_data {
+                return gd.load == GlobalDataLoad::OnlyHHBBC;
+            }
+            false
+        }) {
+            config_load_global_data_load_onlyhhbbc_calls.push(format!(
+                "  Cfg::{}Loader::LoadFromGlobalDataOnlyHHBBC(gd);",
                 section_shortname
             ));
         }
@@ -1171,6 +1345,18 @@ void LoadForCompiler(const IniSettingMap& ini, const Hdf& config) {{
 {}
 }}
 
+void StoreToGlobalData(RepoGlobalData& gd) {{
+{}
+}}
+
+void LoadFromGlobalData(const RepoGlobalData& gd) {{
+{}
+}}
+
+void LoadFromGlobalDataOnlyHHBBC(const RepoGlobalData& gd) {{
+{}
+}}
+
 void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config) {{
 {}
 }}
@@ -1190,6 +1376,9 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
         config_load_includes.join("\n"),
         config_load_calls.join("\n"),
         config_load_compiler_calls.join("\n"),
+        config_load_global_data_store_calls.join("\n"),
+        config_load_global_data_load_calls.join("\n"),
+        config_load_global_data_load_onlyhhbbc_calls.join("\n"),
         repo_options_flags_calls.join("\n"),
         repo_options_flags_from_config_calls.join("\n"),
         repo_options_flags_for_systemlib_calls.join("\n"),
@@ -1201,8 +1390,6 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 
 fn main() -> ExitCode {
     let args = Arguments::parse();
-
-    println!("OUT {:?} {:?}", args.output_dir, args.input);
 
     let contents = fs::read_to_string(args.input).expect("Should have been able to read the file");
 

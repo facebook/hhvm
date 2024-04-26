@@ -66,14 +66,14 @@ bool check_nargs_in_range(const php::Func* func, uint32_t nArgs) {
 int dyn_call_error_level(const php::Func* func) {
   auto const def = [&] {
     if (!(func->attrs & AttrDynamicallyCallable) ||
-        RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+        Cfg::Eval::ForbidDynamicCallsWithAttr) {
       if (func->cls) {
         if (func->attrs & AttrStatic) {
-          return RuntimeOption::EvalForbidDynamicCallsToClsMeth;
+          return Cfg::Eval::ForbidDynamicCallsToClsMeth;
         }
-        return RuntimeOption::EvalForbidDynamicCallsToInstMeth;
+        return Cfg::Eval::ForbidDynamicCallsToInstMeth;
       }
-      return RuntimeOption::EvalForbidDynamicCallsToFunc;
+      return Cfg::Eval::ForbidDynamicCallsToFunc;
     }
     return 0;
   }();

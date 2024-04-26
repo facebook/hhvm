@@ -59,8 +59,6 @@ struct IniSettingMap;
 
 constexpr const char* kPackagesToml = "PACKAGES.toml";
 
-constexpr int kDefaultInitialStaticStringTableSize = 500000;
-
 using StringToIntMap = std::unordered_map<std::string, int>;
 
 enum class JitSerdesMode {
@@ -346,8 +344,6 @@ struct RuntimeOption {
   static hphp_string_imap<std::string> PhpFileExtensions;
     static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
-  static std::set<std::string> RenamableFunctions;
-  static std::set<std::string> NonInterceptableFunctions;
 
   static std::string AdminServerIP;
   static int AdminServerPort;
@@ -404,7 +400,6 @@ struct RuntimeOption {
 
   // Eval options
   static bool EnableXHP;
-  static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool TrustAutoloaderPath;
   static bool EnableArgsInBacktraces;
@@ -412,9 +407,6 @@ struct RuntimeOption {
   static bool TimeoutsUseWallTime;
   static bool EvalAuthoritativeMode;
   static int CheckCLIClientCommands;
-  static uint32_t EvalInitialStaticStringTableSize;
-  static uint32_t EvalInitialTypeTableSize;
-  static uint32_t EvalInitialFuncTableSize;
   static JitSerdesMode EvalJitSerdesMode;
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
@@ -500,29 +492,12 @@ struct RuntimeOption {
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
   F(uint32_t, TsameCollisionSampleRate, 1)                              \
-  /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
-  F(uint32_t, LogTsameCollisions, 0)                                    \
   /* CheckBuiltinParamTypeHints
    * 0 - Do not check parameter type hints of builtins
    * 1 - Treat builtin parameter type hints as <<__Soft>>
    * 2 - Enforce builtin parameter type hints
    */                                                                   \
   F(int32_t, CheckBuiltinParamTypeHints, 2)                             \
-  /*
-    CheckPropTypeHints:
-    0 - No checks or enforcement of property type hints.
-    1 - Raises E_WARNING if a property type hint fails.
-    2 - Raises E_RECOVERABLE_ERROR if regular property type hint fails, raises
-        E_WARNING if soft property type hint fails. If a regular property type
-        hint fails, it's possible for execution to resume normally if the user
-        error handler doesn't throw and returns something other than boolean
-        false.
-    3 - Same as 2, except if a regular property type hint fails the runtime will
-        not allow execution to resume normally; if the user error handler
-        returns something other than boolean false, the runtime will throw a
-        fatal error.
-  */                                                                    \
-  F(int32_t, CheckPropTypeHints,       3)                               \
   /* Unused. Scheduled for removal: T175741557 */                       \
   F(int32_t, EnforceGenericsUB,        2)                               \
   /* WarnOnTooManyArguments:
@@ -728,8 +703,6 @@ struct RuntimeOption {
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
   F(int64_t, ObjProfMaxNesting, 2000)                                   \
-  /* Should we use type structures? */                                  \
-  F(bool, EmitBespokeTypeStructures, false)                             \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \
@@ -764,7 +737,6 @@ struct RuntimeOption {
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
-  F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \
   /* Raise a notice when the result of appending to a dict or darray    \
@@ -773,24 +745,8 @@ struct RuntimeOption {
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \
-  /* Raise a notice if a Class type is passed to is_string */           \
-  F(bool, ClassIsStringNotices, false)                                  \
-  /* Raise a notice if a Class type is passed to function that expects a
-     string */                                                          \
-  F(uint32_t, ClassStringHintNoticesSampleRate, 0)                      \
-  F(uint32_t, DynamicallyReferencedNoticeSampleRate, 0)                 \
   /* Raise a notice if a Class type is used as a memo key */            \
   F(bool, ClassMemoNotices, false)                                      \
-  /* When this options is on, classname type-hints accepts classes */   \
-  F(bool, ClassPassesClassname, true)                                   \
-  /* Raise notice if a Class type is passed to a classname type-hint */ \
-  F(uint32_t, ClassnameNoticesSampleRate, 0)                            \
-  /* When this options is on, class type-hints accept strings */        \
-  F(bool, StringPassesClass, true)                                      \
-  /* Raise notice if a string type is passed to a class type-hint */    \
-  F(uint32_t, ClassNoticesSampleRate, 0)                                \
-  /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
-  F(bool, IsVecNotices, false)                                          \
   /*  Raise a notice if a ClsMeth type is passed to a function that
    *  expects a vec/varray */                                           \
   F(bool, VecHintNotices, false)                                        \
@@ -799,10 +755,6 @@ struct RuntimeOption {
   F(bool, NoticeOnReadDynamicProp, false)                               \
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
-  F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
-  /* Raise notice when class pointers are used as strings. */           \
-  F(uint32_t, RaiseClassConversionNoticeSampleRate, 0)                  \
-  F(bool, EmitClsMethPointers, true)                                    \
   F(bool, FoldLazyClassKeys, true)                                      \
   F(bool, EmitNativeEnumClassLabels, true)                              \
   /* When this flag is on, var_dump for
@@ -817,8 +769,6 @@ struct RuntimeOption {
   /* When this flag is on, print_r for
    * classes and lazy classes outputs a string. */                      \
   F(bool, ClassAsStringGetType, true)                                   \
-  /* Raise sampled notice when strings are used as classes. */          \
-  F(uint32_t, RaiseStrToClsConversionNoticeSampleRate, 0)               \
   /* trigger E_USER_WARNING error when getClassName()/getMethodName()
    * is used on __SystemLib\MethCallerHelper */                         \
   F(bool, NoticeOnMethCallerHelperUse, false)                           \
@@ -832,40 +782,9 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, ForbidMethCallerAPCSerialize, 0)                           \
   F(int32_t, ForbidMethCallerHelperSerialize, 0)                        \
-  /*                                                                    \
-   * When Eval.NoticeOnMethCallerHelperIsObject is set calling is_object\
-   * on instance of MethCallerHelper will raise notices.                \
-   *                                                                    \
-   * In Repo.Authoritative mode, Eval.NoticeOnMethCallerHelperIsObject  \
-   * can only be set if the repo was built with the option              \
-   * Eval.BuildMayNoticeOnMethCallerHelperIsObject set to true.         \
-   */                                                                   \
-  F(bool, BuildMayNoticeOnMethCallerHelperIsObject, false)              \
   F(bool, NoticeOnMethCallerHelperIsObject, false)                      \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
-  /*                                                                    \
-   * Control dynamic calls to functions and dynamic constructs of       \
-   * classes which haven't opted into being called that way.            \
-   *                                                                    \
-   * 0 - Do nothing                                                     \
-   * 1 - Warn if target is not annotated                                \
-   * 2 - Throw exception if target is not annotated; warn if dynamic    \
-   *     callsite is using a raw string or array (depending on          \
-   *     ForbidDynamicCallsWithAttr setting)                            \
-   * 3 - Throw exception                                                \
-   */                                                                   \
-  F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
-  F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
-  F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
-  F(int32_t, ForbidDynamicConstructs, 0)                                \
-  /*                                                                    \
-   * Keep logging dynamic calls according to options above even if      \
-   * __DynamicallyCallable attribute is present at declaration.         \
-   */                                                                   \
-  F(bool, ForbidDynamicCallsWithAttr, true)                             \
-  /* Toggles logging for expressions of type $var::name() */            \
-  F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \
    * Don't allow unserializing to __PHP_Incomplete_Class                \
    * 0 - Nothing                                                        \
@@ -879,11 +798,6 @@ struct RuntimeOption {
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
-  /*                                                                    \
-   * Describes the active deployment for selecting the set of packages  \
-   * Value is only read in repo authoritative or cli mode.              \
-   */                                                                   \
-  F(std::string, ActiveDeployment, "")                                  \
   /*                                                                    \
    * Enforce deployment boundaries.                                     \
    */                                                                   \
@@ -981,9 +895,6 @@ struct RuntimeOption {
   F(int32_t, RequestTearingSkewMicros, 1500)                            \
   F(bool,    SampleRequestTearingForce, true)                           \
   F(bool, EnableAbstractContextConstants, true)                         \
-  F(bool, TraitConstantInterfaceBehavior, false)                        \
-  F(bool, DiamondTraitMethods, false)                                   \
-  F(bool, TreatCaseTypesAsMixed, false)                                 \
   /* The maximum number of resolved variants allowed in a single case
      type. This value is determined after flattening. */                \
   F(uint32_t, MaxCaseTypeVariants, 48)                                  \
@@ -1003,7 +914,6 @@ struct RuntimeOption {
   F(bool, Replay, false)                                                \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
   F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
-  F(bool, ModuleLevelTraits, false)                                     \
   F(bool, AutoloadEagerSyncUnitCache, true)                             \
   F(bool, AutoloadEagerReloadUnitCache, true)                           \
   F(bool, AutoloadInitEarly, false)                                     \

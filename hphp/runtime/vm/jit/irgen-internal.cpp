@@ -50,25 +50,25 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
 SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   assertx (key->type().isKnownDataType());
   if (key->isA(TCls)) {
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
                     "string key conversion");
       gen(env,
           RaiseNotice,
-          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
           cns(env, makeStaticString(msg)));
     }
     return gen(env, LdClsName, key);
   }
   if (key->isA(TLazyCls)) {
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
                     "string key conversion");
       gen(env,
           RaiseNotice,
-          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
           cns(env, makeStaticString(msg)));
     }
     return gen(env, LdLazyClsName, key);

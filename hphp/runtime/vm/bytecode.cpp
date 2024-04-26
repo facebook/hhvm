@@ -32,6 +32,7 @@
 
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
@@ -993,7 +994,7 @@ static inline Class* classnameToClass(TypedValue* input) {
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
-      if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
+      if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate) &&
           !class_->isDynamicallyReferenced()) {
         raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, name->data());
       }
@@ -2271,7 +2272,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 }
 
 OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
-  if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
     raise_class_to_string_conversion_notice("bytecode");
   }
 }
@@ -3369,7 +3370,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
   if (constant) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+  if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
     auto const& tc = sprop.typeConstraint;
     if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
@@ -3491,7 +3492,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
                                           ss.name->data());
   }
   auto const checkable_sprop = [&]() -> const Class::SProp* {
-    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
+    if (Cfg::Eval::CheckPropTypeHints <= 0) return nullptr;
     auto const& sprop = ss.cls->staticProperties()[ss.slot];
     return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
   }();
@@ -4248,7 +4249,7 @@ iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   vmStack().ndiscard(2);
   assertx(cls && methName);
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
-    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+    Cfg::Eval::LogKnownMethodsAsDynamicCalls;
   return fcallClsMethodImpl<true>(
     retToJit, origpc, pc, fca, cls, methName, false, logAsDynamicCall);
 }
@@ -4264,7 +4265,7 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   auto const methNameC = const_cast<StringData*>(methName);
   assertx(cls && methNameC);
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
-    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+    Cfg::Eval::LogKnownMethodsAsDynamicCalls;
   if (isString) {
     return fcallClsMethodImpl<true>(
       retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
@@ -5300,7 +5301,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto const slot = ctx->lookupSProp(propName);
         assertx(slot != kInvalidSlot);
         auto ret = cls->getSPropData(slot);
-        if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+        if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& sprop = cls->staticProperties()[slot];
           auto const& tc = sprop.typeConstraint;
           if (tc.isCheckable()) {
@@ -5317,7 +5318,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto const index = cls->propSlotToIndex(slot);
         assertx(slot != kInvalidSlot);
         auto ret = (*propVec)[index].val;
-        if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+        if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& prop = cls->declProperties()[slot];
           auto const& tc = prop.typeConstraint;
           if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);

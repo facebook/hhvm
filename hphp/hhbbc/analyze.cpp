@@ -23,8 +23,9 @@
 #include <vector>
 
 
-#include "hphp/util/trace.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
@@ -1545,11 +1546,11 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           TriBool::Yes
         };
       case AnnotMetaType::Classname:
-        if (!RO::EvalClassPassesClassname) {
+        if (!Cfg::Eval::ClassPassesClassname) {
           return exact(TStr);
         }
         return C{
-          RO::EvalClassnameNoticesSampleRate > 0 ?
+          Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
             TStr : union_of(TStr, TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
@@ -1632,7 +1633,7 @@ std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
       assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
       if (result.couldBe(BCls | BLazyCls)) {
         result = promote_classish(std::move(result));
-        if (effectFree && (RO::EvalClassStringHintNoticesSampleRate > 0 ||
+        if (effectFree && (Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
                            !promote_classish(t).moreRefined(lookup.lower))) {
           effectFree = false;
         }
@@ -1659,7 +1660,7 @@ Type adjust_type_for_prop(const IIndex& index,
                           const Type& ty) {
   if (!tc) return ty;
   assertx(tc->validForProp());
-  if (RO::EvalCheckPropTypeHints <= 2) return ty;
+  if (Cfg::Eval::CheckPropTypeHints <= 2) return ty;
   auto lookup = lookup_constraint(
     index,
     Context { nullptr, nullptr, &propCls },

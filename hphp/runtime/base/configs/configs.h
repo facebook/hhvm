@@ -25,14 +25,18 @@
 
 namespace HPHP {
 
-struct IniSettingMap;
 struct Hdf;
+struct IniSettingMap;
+struct RepoGlobalData;
 struct RepoOptionsFlags;
 
 namespace Cfg {
 
 void Load(const IniSettingMap& ini, const Hdf& config);
 void LoadForCompiler(const IniSettingMap& ini, const Hdf& config);
+void LoadFromGlobalData(const RepoGlobalData& gd);
+void LoadFromGlobalDataOnlyHHBBC(const RepoGlobalData& gd);
+void StoreToGlobalData(RepoGlobalData& gd);
 
 void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);
 void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config,

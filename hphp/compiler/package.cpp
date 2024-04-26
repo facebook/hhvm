@@ -1579,7 +1579,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
     // indicies of each unit.
     auto parseMetasAndItemsToSkip = co_await callback(group.m_files);
     auto& [parseMetas, itemsToSkip] = parseMetasAndItemsToSkip;
-    if (RO::EvalActiveDeployment.empty()) {
+    if (Cfg::Eval::ActiveDeployment.empty()) {
       // If a deployment is not set, then we should have gotten results for
       // all files
       always_assert(parseMetas.size() == workItems);
@@ -1601,7 +1601,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
         fprintf(stderr, "%s", meta.m_abort.c_str());
         _Exit(HPHP_EXIT_FAILURE);
       }
-      if (Option::ForceEnableSymbolRefs || RO::EvalActiveDeployment.empty()) {
+      if (Option::ForceEnableSymbolRefs || Cfg::Eval::ActiveDeployment.empty()) {
         auto const filename = makeStaticString(group.m_files[i].native());
         // Resolve any symbol refs into files to parse ondemand
         resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);

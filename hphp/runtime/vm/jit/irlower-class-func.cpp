@@ -35,8 +35,9 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include "hphp/util/trace.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
@@ -156,7 +157,7 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
 void cgPropTypeRedefineCheck(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->src(0)->clsVal();
   auto const slot = inst->src(1)->intVal();
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(cls->maybeRedefinesPropTypes());
   assertx(slot != kInvalidSlot);
   assertx(slot < cls->numDeclProperties());

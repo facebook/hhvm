@@ -53,6 +53,8 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_parse);
@@ -948,7 +950,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
   auto const getTypeStructureConst = [&] (const PreClassEmitter::Const& cconst) {
     auto const val = cconst.valOption();
-    if (!RO::EvalEmitBespokeTypeStructures ||
+    if (!Cfg::Eval::EmitBespokeTypeStructures ||
         !val.has_value() ||
         !isArrayLikeType(val->type())) {
       return val;
@@ -1091,7 +1093,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   FTRACE(2, "  type alias: {}\n", te.name()->data());
 
   auto ts = te.typeStructure();
-  if (RO::EvalEmitBespokeTypeStructures) {
+  if (Cfg::Eval::EmitBespokeTypeStructures) {
     if (!ts.isNull() && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
       auto const newTs = bespoke::TypeStructure::MakeFromVanillaStatic(ts.get(), true);
       ts = ArrNR{newTs};

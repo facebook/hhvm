@@ -44,6 +44,8 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <functional>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -537,7 +539,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   // TODO(T61738946): We can remove the temporary here once we no longer coerce
   // class_meth types.
   auto tmp = value;
-  if (RuntimeOption::EvalCheckPropTypeHints > 0 && tc.isCheckable()) {
+  if (Cfg::Eval::CheckPropTypeHints > 0 && tc.isCheckable()) {
     tc.verifyStaticProperty(tmp.asTypedValue(), class_, sprop.cls, prop.get());
   }
   tvAsVariant(lookup.val) = tmp;

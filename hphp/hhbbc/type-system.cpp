@@ -41,6 +41,7 @@
 #include "hphp/hhbbc/type-structure.h"
 
 #include "hphp/util/check-size.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP::HHBBC {
 
@@ -4411,7 +4412,7 @@ Type from_hni_constraint(SString s) {
     return union_of(std::move(ret), TArrLike);
   }
   if (!tstrcmp(p, annotTypeName(AnnotType::Classname))) {
-    if (!RO::EvalClassPassesClassname) {
+    if (!Cfg::Eval::ClassPassesClassname) {
       return union_of(ret, TStr);
     }
     return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
@@ -6338,7 +6339,7 @@ bool could_contain_objects(const Type& t) {
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   auto const mayLogClsMeth =
-    RO::EvalIsVecNotices &&
+    Cfg::Eval::IsVecNotices &&
     valTy.couldBe(BClsMeth) &&
     (testTy.is(BVec | BClsMeth) ||
      testTy.is(BArrLike | BClsMeth));
@@ -6351,7 +6352,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   }
 
   if (testTy.is(BStr | BCls | BLazyCls)) {
-    return RO::EvalClassIsStringNotices && valTy.couldBe(BCls | BLazyCls);
+    return Cfg::Eval::ClassIsStringNotices && valTy.couldBe(BCls | BLazyCls);
   } else if (testTy.is(BVec) || testTy.is(BVec | BClsMeth)) {
     return mayLogClsMeth;
   } else if (testTy.is(BDict)) {
@@ -6483,8 +6484,8 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 }
 
 bool compare_might_raise(const Type& t1, const Type& t2) {
-  if (!RuntimeOption::EvalEmitClsMethPointers &&
-      RuntimeOption::EvalRaiseClassConversionNoticeSampleRate == 0) {
+  if (!Cfg::Eval::EmitClsMethPointers &&
+      Cfg::Eval::RaiseClassConversionNoticeSampleRate == 0) {
     return false;
   }
 
@@ -6501,14 +6502,12 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
   if (auto const f = checkOne(BVec)) return *f;
   if (auto const f = checkOne(BKeyset)) return *f;
 
-  if (RuntimeOption::EvalEmitClsMethPointers) {
-    if (RuntimeOption::EvalEmitClsMethPointers) {
-      if (t1.couldBe(BClsMeth) && t2.couldBe(BVec))     return true;
-      if (t1.couldBe(BVec)     && t2.couldBe(BClsMeth)) return true;
-    }
+  if (Cfg::Eval::EmitClsMethPointers) {
+    if (t1.couldBe(BClsMeth) && t2.couldBe(BVec))     return true;
+    if (t1.couldBe(BVec)     && t2.couldBe(BClsMeth)) return true;
   }
 
-  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+  if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
     if (t1.couldBe(BStr) && t2.couldBe(BLazyCls)) return true;
     if (t1.couldBe(BStr) && t2.couldBe(BCls)) return true;
     if (t1.couldBe(BLazyCls) && t2.couldBe(BStr)) return true;
@@ -7471,7 +7470,7 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
   return std::make_pair(
     std::move(ty),
     promoted
-    ? (RO::EvalRaiseClassConversionNoticeSampleRate > 0
+    ? (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0
        ? Promotion::YesMightThrow
        : Promotion::Yes)
     : Promotion::No

@@ -753,7 +753,7 @@ inline bool classHasPersistentRDS(const Class* cls) {
 
 inline const StringData* classToStringHelper(const Class* cls,
                                              const char* source) {
-  if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
     raise_class_to_string_conversion_notice(source);
  }
  return cls->name();

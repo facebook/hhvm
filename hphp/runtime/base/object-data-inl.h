@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +173,7 @@ inline void ObjectData::instanceInit(Class* cls) {
 
 inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
                                                const Class::Prop& prop) const {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val.tv()));
 
   auto const& tc = prop.typeConstraint;
@@ -203,7 +204,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
 inline void ObjectData::verifyPropTypeHints(size_t end) {
   assertx(end <= m_cls->declProperties().size());
 
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return;
 
   auto const declProps = m_cls->declProperties();
   for (size_t slot = 0; slot < end; ++slot) {
@@ -218,7 +219,7 @@ inline void ObjectData::verifyPropTypeHints() {
 
 inline void ObjectData::verifyPropTypeHint(Slot slot) {
   assertx(slot < m_cls->declProperties().size());
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return;
   auto index = m_cls->propSlotToIndex(slot);
   verifyPropTypeHintImpl(props()->at(index), m_cls->declProperties()[slot]);
 }

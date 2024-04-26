@@ -81,12 +81,168 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool ErrorHandling.LogNativeStackOnOOM = false, UNKNOWN
 - int64_t ErrorHandling.NoticeFrequency = 1, UNKNOWN
 - int64_t ErrorHandling.WarningFrequency = 1, UNKNOWN
-
 - bool ErrorHandling.VerboseCLIServerLogs = false, paulbiss
 
   When set print error log messages for each CLI-server request on start and
   finish. Otherwise logs are only generated for commands which exit with a
   non-zero return code.
+
+# Eval
+
+- int32_t Eval.CheckPropTypeHints = 3, UNKNOWN, globaldata|compileroption(CheckPropTypeHints)
+
+  CheckPropTypeHints:
+  0 - No checks or enforcement of property type hints.
+  1 - Raises E_WARNING if a property type hint fails.
+  2 - Raises E_RECOVERABLE_ERROR if regular property type hint fails, raises
+      E_WARNING if soft property type hint fails. If a regular property type
+      hint fails, it's possible for execution to resume normally if the user
+      error handler doesn't throw and returns something other than boolean
+      false.
+  3 - Same as 2, except if a regular property type hint fails the runtime will
+      not allow execution to resume normally; if the user error handler
+      returns something other than boolean false, the runtime will throw a
+      fatal error.
+
+- bool Eval.EmitClsMethPointers = true, UNKNOWN, globaldata|unitcacheflag
+- uint32_t Eval.RaiseClassConversionNoticeSampleRate = 0, UNKNOWN, globaldata
+
+  Whether implicit class conversions can raise a notice.
+
+- uint32_t Eval.DynamicallyReferencedNoticeSampleRate = 0, UNKNOWN, globaldata
+
+  Whether classname_to_class raises notice if <<__DynamicallyReferenced>>
+  is missing on a class definition.
+
+- uint32_t Eval.RaiseStrToClsConversionNoticeSampleRate = 0, UNKNOWN, globaldata
+
+  Whether operations like $c::foo() raise a notice when $c is a string
+
+- uint32_t Eval.ClassStringHintNoticesSampleRate = 0, UNKNOWN, globaldata
+
+  Raise a notice if a Class type is passed to function that expects a
+  string
+
+- bool Eval.StringPassesClass = true, UNKNOWN, globaldata|unitcacheflag
+
+  When this options is on, class type-hints accept strings
+
+- bool Eval.ClassPassesClassname = true, UNKNOWN, globaldata|unitcacheflag
+
+  When this options is on, classname type-hints accepts classes
+
+- bool Eval.ClassIsStringNotices = false, UNKNOWN, globaldata
+
+  Raise a notice if a Class type is passed to is_string
+
+- uint32_t Eval.ClassnameNoticesSampleRate = 0, UNKNOWN, globaldata
+
+  Raise notice if a Class type is passed to a classname type-hint
+
+- uint32_t Eval.ClassNoticesSampleRate = 0, UNKNOWN, globaldata
+
+  Raise notice if a string type is passed to a class type-hint
+
+- bool Eval.TreatCaseTypesAsMixed = false, UNKNOWN, globaldata|unitcacheflag
+
+  Treats caseType int | bool as mixed
+
+- bool Eval.DiamondTraitMethods = false, UNKNOWN, globaldata|unitcacheflag
+
+  Enable a method defined in a trait to be imported multiple times
+  along trait use paths
+
+- bool Eval.EmitBespokeTypeStructures = false, UNKNOWN, globaldata
+
+  Whether bespoke type structures should be used
+
+- bool Eval.ModuleLevelTraits = false, UNKNOWN, globaldata|unitcacheflag
+
+  Enable the "Module level traits" semantics: methods defined in a trait
+  that belongs to module A, are considered as belonging to module A
+  even if the trait is used by a class that lives in module B.
+
+- bool Eval.TraitConstantInterfaceBehavior = false, UNKNOWN, globaldata|unitcacheflag
+
+  Constants from traits behave like constants from interfaces (error on conflict)
+
+- std::string Eval.ActiveDeployment = "", UNKNOWN, globaldata|compileroption(ActiveDeployment)
+
+  Describes the active deployment for selecting the set of packages
+  Value is only read in repo authoritative or cli mode.
+
+- bool Eval.EnableIntrinsicsExtension = Eval.EnableIntrinsicsExtension, UNKNOWN, globaldata|unitcacheflag
+
+  Should the extension containing HHVM intrinsics be enabled?
+  This is used by HackC to turn on / off magic decl driven bytecode functions like
+  `HH\embed_type_decl`
+
+- uint32_t Eval.LogTsameCollisions = 0, UNKNOWN, globaldata
+
+  0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive
+
+- bool Eval.BuildMayNoticeOnMethCallerHelperIsObject = false, UNKNOWN, globaldata
+
+  When Eval.NoticeOnMethCallerHelperIsObject is set calling is_object
+  on instance of MethCallerHelper will raise notices.
+  In Repo.Authoritative mode, Eval.NoticeOnMethCallerHelperIsObject
+  can only be set if the repo was built with the option
+  Eval.BuildMayNoticeOnMethCallerHelperIsObject set to true.
+
+- int32_t Eval.ForbidDynamicCallsToFunc = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToFunc)|unitcacheflag
+
+  Control dynamic calls to functions and dynamic constructs of
+  classes which haven't opted into being called that way.
+  0 - Do nothing
+  1 - Warn if target is not annotated
+  2 - Throw exception if target is not annotated; warn if dynamic
+      callsite is using a raw string or array (depending on
+      ForbidDynamicCallsWithAttr setting)
+  3 - Throw exception
+
+- int32_t Eval.ForbidDynamicCallsToClsMeth = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToClsMeth)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- int32_t Eval.ForbidDynamicCallsToInstMeth = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToInstMeth)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- int32_t Eval.ForbidDynamicConstructs = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicConstructs)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- bool Eval.ForbidDynamicCallsWithAttr = true, UNKNOWN, globaldata|compileroption(ForbidDynamicCallsWithAttr)|unitcacheflag
+
+  Keep logging dynamic calls according to Eval.ForbidDynamic... above even if
+  __DynamicallyCallable attribute is present at declaration.
+
+- uint32_t Eval.InitialStaticStringTableSize = Eval.InitialStaticStringTableSize, UNKNOWN, globaldata(noload)|staticdefault(500000)
+
+- uint32_t Eval.InitialTypeTableSize = Eval.InitialTypeTableSize, UNKNOWN, globaldata(noload)|staticdefault(30000)|lookuppath(Eval.InitialNamedEntityTableSize)
+
+- uint32_t Eval.InitialFuncTableSize = Eval.InitialFuncTableSize, UNKNOWN, globaldata(noload)|staticdefault(3000)
+
+- bool Eval.HackArrCompatSerializeNotices = false, UNKNOWN, globaldata(onlyhhbbc)|compileroption(HackArrCompatSerializeNotices)|unitcacheflag
+
+- bool Eval.LogKnownMethodsAsDynamicCalls = true, UNKNOWN, globaldata(onlyhhbbc)|compileroption(LogKnownMethodsAsDynamicCalls)|unitcacheflag
+
+  If set to true calls to class methods of form $cls::meth() will not be
+  logged as dynamic calls, which means behavior for such calls would be
+  as if ForbidDynamicCallsToClsMeth was set to 0.
+
+- bool Eval.IsVecNotices = false, UNKNOWN, globaldata(onlyhhbbc)
+
+  Raise a notice if a ClsMeth type is passed to is_vec/is_array.
+  hhbbc IsTypeX optimization may be disabled.
+
+- bool Eval.NoticeOnBuiltinDynamicCalls = false, UNKNOWN, globaldata(onlyhhbbc)|compileroption(NoticeOnBuiltinDynamicCalls)|unitcacheflag
+
+  Should the runtime emit notices whenever a builtin is called dynamically?
+
+- std::set<std::string> Eval.RenamableFunctions = {}, UNKNOWN, globaldata
+
+- std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
 
 # Hack.Lang
 

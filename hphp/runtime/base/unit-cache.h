@@ -96,36 +96,16 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalGenerateDocComments)                    \
   R(EnableXHP)                                  \
   R(EvalEnableCallBuiltin)                      \
-  R(EvalHackArrCompatSerializeNotices)          \
   R(EvalLoadFilepathFromUnitCache)              \
-  R(EvalForbidDynamicCallsToFunc)               \
-  R(EvalForbidDynamicCallsToClsMeth)            \
-  R(EvalForbidDynamicCallsToInstMeth)           \
-  R(EvalForbidDynamicConstructs)                \
-  R(EvalForbidDynamicCallsWithAttr)             \
-  R(EvalLogKnownMethodsAsDynamicCalls)          \
-  R(EvalNoticeOnBuiltinDynamicCalls)            \
   R(EvalAssemblerFoldDefaultValues)             \
   R(RepoDebugInfo)                              \
-  R(EvalEmitClsMethPointers)                    \
-  R(EvalIsVecNotices)                           \
   R(EvalAllowHhas)                              \
   R(EvalAssemblerMaxScalarSize)                 \
   R(EvalFoldLazyClassKeys)                      \
   R(EvalEmitNativeEnumClassLabels)              \
   R(EvalEnableAbstractContextConstants)         \
-  R(EvalTraitConstantInterfaceBehavior)         \
   R(EvalUnitCacheBreaker)                       \
-  R(EvalDiamondTraitMethods)                    \
-  R(EvalClassPassesClassname)                   \
-  R(EvalStringPassesClass)                      \
   R(EvalEnableDecl)                             \
-  /* This is used by HackC to turn on / off     \
-   * magic decl driven bytecode functions like  \
-   * `HH\embed_type_decl`  */                   \
-  R(EnableIntrinsicsExtension)                  \
-  R(EvalModuleLevelTraits)                      \
-  R(EvalTreatCaseTypesAsMixed)                  \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

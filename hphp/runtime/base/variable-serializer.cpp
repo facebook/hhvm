@@ -1064,7 +1064,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     }
 
     if (info.is_vector || kind == ArrayKind::Keyset) {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+      if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices) &&
           kind == ArrayKind::DArray) {
         if (size == 0 && m_edWarn && !m_hasEDWarned) {
           raise_hackarr_compat_notice("JSON encoding empty darray");
@@ -1076,7 +1076,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       }
       m_buf->append('[');
     } else {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+      if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices) &&
           kind == ArrayKind::DArray && m_ddWarn && !m_hasDDWarned) {
         raise_hackarr_compat_notice("JSON encoding dict-like darray");
         m_hasDDWarned = true;
@@ -2000,7 +2000,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
 
 void VariableSerializer::serializeArray(const ArrayData* arr,
                                         bool skipNestCheck /* = false */) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices)) {
+  if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices)) {
     if (UNLIKELY(m_hackWarn && !m_hasHackWarned)) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;

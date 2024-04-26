@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -1013,7 +1014,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::Classname:
-        if (!RO::EvalClassPassesClassname) {
+        if (!Cfg::Eval::ClassPassesClassname) {
           return TStr;
         }
         return TStr | TCls | TLazyCls;

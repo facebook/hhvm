@@ -482,7 +482,7 @@ static struct IntrinsicsExtension final : Extension {
   IntrinsicsExtension() : Extension("intrinsics", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   bool moduleEnabled() const override {
-    return RuntimeOption::EnableIntrinsicsExtension;
+    return Cfg::Eval::EnableIntrinsicsExtension;
   }
 
   void moduleRegisterNative() override {

@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
@@ -539,7 +541,7 @@ inline bool Func::isInternal() const {
 
 inline const StringData* Func::moduleName() const {
   auto const ex = extShared();
-  if (RO::EvalModuleLevelTraits && ex) {
+  if (Cfg::Eval::ModuleLevelTraits && ex) {
     assertx(!unit()->moduleName() || ex->m_originalModuleName);
     return ex->m_originalModuleName;
   }

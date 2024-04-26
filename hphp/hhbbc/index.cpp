@@ -70,6 +70,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/check-size.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/lock-free-lazy.h"
 #include "hphp/util/match.h"
@@ -4563,7 +4564,7 @@ bool Class::mustHaveReifiedParent() const {
 }
 
 bool Class::mightCareAboutDynConstructs() const {
-  if (!RuntimeOption::EvalForbidDynamicConstructs) return false;
+  if (!Cfg::Eval::ForbidDynamicConstructs) return false;
   graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return !(ci->cls->attrs & AttrDynamicallyConstructible);
@@ -4575,7 +4576,7 @@ bool Class::mightCareAboutDynConstructs() const {
 }
 
 bool Class::mightCareAboutDynamicallyReferenced() const {
-  if (RuntimeOption::EvalDynamicallyReferencedNoticeSampleRate == 0) return false;
+  if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate == 0) return false;
   graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return !(ci->cls->attrs & AttrDynamicallyReferenced);
@@ -4962,15 +4963,15 @@ bool Func::couldHaveReifiedGenerics() const {
 }
 
 bool Func::mightCareAboutDynCalls() const {
-  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
+  if (Cfg::Eval::NoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
     return true;
   }
   auto const mightCareAboutFuncs =
-    RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+    Cfg::Eval::ForbidDynamicCallsToFunc > 0;
   auto const mightCareAboutInstMeth =
-    RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+    Cfg::Eval::ForbidDynamicCallsToInstMeth > 0;
   auto const mightCareAboutClsMeth =
-    RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+    Cfg::Eval::ForbidDynamicCallsToClsMeth > 0;
 
   return match<bool>(
     val,
@@ -7920,7 +7921,7 @@ PropMergeResult prop_tc_effects(const Index& index,
 
   // If we're not actually checking property type-hints, everything
   // goes
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return R{ val, TriBool::No };
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return R{ val, TriBool::No };
 
   auto const ctx = Context { nullptr, nullptr, ci->cls };
 
@@ -9934,7 +9935,7 @@ private:
       return true;
     };
 
-    if (RO::EvalTraitConstantInterfaceBehavior) {
+    if (Cfg::Eval::TraitConstantInterfaceBehavior) {
       // trait constants must be inserted before constants shallowly
       // declared on the class to match the interface semantics
       if (!addTraitConstants()) return false;
@@ -10124,10 +10125,10 @@ private:
       }
 
       // Constants from traits silently lose
-      if (!RO::EvalTraitConstantInterfaceBehavior && fromTrait) return true;
+      if (!Cfg::Eval::TraitConstantInterfaceBehavior && fromTrait) return true;
 
       if ((cnsCls.attrs & AttrInterface ||
-           (RO::EvalTraitConstantInterfaceBehavior &&
+           (Cfg::Eval::TraitConstantInterfaceBehavior &&
             (cnsCls.attrs & AttrTrait))) &&
           (existing.isAbstract ||
            cns.kind == ConstModifiers::Kind::Type)) {
@@ -10139,7 +10140,7 @@ private:
         // A constant from an interface or from an included enum
         // collides with an existing constant.
         if (cnsCls.attrs & (AttrInterface | AttrEnum | AttrEnumClass) ||
-            (RO::EvalTraitConstantInterfaceBehavior &&
+            (Cfg::Eval::TraitConstantInterfaceBehavior &&
              (cnsCls.attrs & AttrTrait))) {
           ITRACE(
             2,
@@ -10582,7 +10583,7 @@ private:
         (orig.cls->attrs & AttrInternal)
         && dstCls.userAttributes.count(s___ModuleLevelTrait.get());;
 
-      if (RO::EvalModuleLevelTraits &&
+      if (Cfg::Eval::ModuleLevelTraits &&
           (copyFromModuleLevelTrait || copyFromInternal)) {
         return true;
       } else {
@@ -15353,9 +15354,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   auto typeBuckets = consistently_bucketize(
     [&] {
       // Temporarily suppress case collision logging
-      auto oldLogLevel = RuntimeOption::EvalLogTsameCollisions;
-      RuntimeOption::EvalLogTsameCollisions = 0;
-      SCOPE_EXIT { RuntimeOption::EvalLogTsameCollisions = oldLogLevel; };
+      auto oldLogLevel = Cfg::Eval::LogTsameCollisions;
+      Cfg::Eval::LogTsameCollisions = 0;
+      SCOPE_EXIT { Cfg::Eval::LogTsameCollisions = oldLogLevel; };
 
       std::vector<SString> roots;
       roots.reserve(meta.classes.size() + meta.funcs.size());
@@ -15712,10 +15713,10 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   tasks.reserve(typeBuckets.size() + fixupBuckets.size() + 1);
 
   // Temporarily suppress case collision logging
-  auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-  RuntimeOption::EvalLogTsameCollisions = 0;
+  auto oldTypeLogLevel = Cfg::Eval::LogTsameCollisions;
+  Cfg::Eval::LogTsameCollisions = 0;
   SCOPE_EXIT {
-    RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
+    Cfg::Eval::LogTsameCollisions = oldTypeLogLevel;
   };
 
   for (auto& work : typeBuckets) {
@@ -17132,10 +17133,10 @@ void make_local(IndexData& index) {
 
   {
     // Temporarily suppress case collision logging
-    auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-    RuntimeOption::EvalLogTsameCollisions = 0;
+    auto oldTypeLogLevel = Cfg::Eval::LogTsameCollisions;
+    Cfg::Eval::LogTsameCollisions = 0;
     SCOPE_EXIT {
-      RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
+      Cfg::Eval::LogTsameCollisions = oldTypeLogLevel;
     };
 
     coro::blockingWait(coro::collectAllRange(

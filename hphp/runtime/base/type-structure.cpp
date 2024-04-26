@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -466,7 +467,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr);
 
 Array maybeMakeBespoke(Array& ts) {
   if (allowBespokeArrayLikes() &&
-      RO::EvalEmitBespokeTypeStructures &&
+      Cfg::Eval::EmitBespokeTypeStructures &&
       bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
     auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
     if (bespokeTS) return Array::attach(bespokeTS);

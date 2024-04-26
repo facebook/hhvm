@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
@@ -125,15 +126,15 @@ void raise_return_typehint_error(const std::string& msg) {
 
 void raise_property_typehint_error(const std::string& msg,
                                    bool isSoft, bool isUB) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
 
-  if (RuntimeOption::EvalCheckPropTypeHints == 1 || isSoft) {
+  if (Cfg::Eval::CheckPropTypeHints == 1 || isSoft) {
     raise_warning_unsampled(msg);
     return;
   }
 
   raise_recoverable_error(msg);
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+  if (Cfg::Eval::CheckPropTypeHints >= 3) {
     raise_error("Error handler tried to recover from a property typehint "
                 "violation");
   }
@@ -511,7 +512,7 @@ void raise_message(ErrorMode mode,
 }
 
 void raise_str_to_class_notice(const StringData* name) {
-  if (folly::Random::oneIn(RO::EvalRaiseStrToClsConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate)) {
     raise_notice("Implicit string to Class conversion for classname %s",
                  name->data());
   }

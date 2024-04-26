@@ -16,6 +16,7 @@
 #pragma once
 #include "hphp/runtime/base/isame-log.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 
@@ -168,9 +169,9 @@ inline bool StringData::same(const StringData* s) const {
 inline bool StringData::tsame(const StringData* s) const {
   assertx(s);
   if (this == s || same(s)) return true;
-  if (m_len != s->m_len || RO::EvalLogTsameCollisions >= 2) return false;
+  if (m_len != s->m_len || Cfg::Eval::LogTsameCollisions >= 2) return false;
   if (!bstrcaseeq(data(), s->data(), m_len)) return false;
-  return RO::EvalLogTsameCollisions != 1 || tsame_log(this, s);
+  return Cfg::Eval::LogTsameCollisions != 1 || tsame_log(this, s);
 }
 
 inline bool StringData::fsame(const StringData* s) const {

@@ -36,6 +36,8 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 const StaticString s_unresolved("[unresolved]");
@@ -59,7 +61,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfLazyClass: {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
-        if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
+        if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
           // TODO(vmladenov) appears untested
           raise_class_to_string_conversion_notice("instanceof");
         }
@@ -637,7 +639,7 @@ bool checkTypeStructureMatchesTVImpl(
       return isIntType(type) || isDoubleType(type);
     case TypeStructure::Kind::T_arraykey:
       if (isClassType(type) || isLazyClassType(type)) {
-        if (RO::EvalClassIsStringNotices) {
+        if (Cfg::Eval::ClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }
         return true;
@@ -646,7 +648,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_string:
       if (isClassType(type) || isLazyClassType(type)) {
-        if (RO::EvalClassIsStringNotices) {
+        if (Cfg::Eval::ClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }
         return true;

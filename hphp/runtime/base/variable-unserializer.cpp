@@ -50,6 +50,8 @@
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
@@ -833,7 +835,7 @@ void VariableUnserializer::unserializeVariant(
           self
         );
       } else {
-        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+        if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
           raise_class_to_string_conversion_notice("variable unserialization");
         }
         tvMove(
@@ -1548,7 +1550,7 @@ Array VariableUnserializer::unserializeKeyset() {
 }
 
 Array VariableUnserializer::unserializeBespokeTypeStructure() {
-  assertx(RO::EvalEmitBespokeTypeStructures);
+  assertx(Cfg::Eval::EmitBespokeTypeStructures);
 
   auto arr = unserializeDict();
   auto const ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());

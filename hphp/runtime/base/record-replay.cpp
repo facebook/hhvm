@@ -45,6 +45,8 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/native-data.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::rr {
 
 namespace {
@@ -299,7 +301,7 @@ String serialize(const TypedValue& value) {
 template<>
 Variant unserialize(const String& recordedValue) {
   ErrorSuppressor _1;
-  TmpAssign _2{RO::EvalCheckPropTypeHints, 0};
+  TmpAssign _2{Cfg::Eval::CheckPropTypeHints, 0};
   return VariableUnserializer{
     recordedValue.data(),
     static_cast<std::size_t>(recordedValue.size()),

@@ -52,6 +52,7 @@
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/text-util.h"
 
@@ -659,25 +660,25 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (value->isA(TRes))  return gen(env, ConvResToInt, value);
   if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
   if (value->isA(TLazyCls))  {
-		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+		if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       // TODO(vmladenov) appears untested
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, op);
       gen(env,
         RaiseNotice,
-        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(msg)));
     }
     return gen(env, LdLazyClsName, value);
   }
   if (value->isA(TCls))  {
-		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+		if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       // TODO(vmladenov) appears untested
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, op);
       gen(env,
           RaiseNotice,
-          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
           cns(env, makeStaticString(msg)));
     }
     return gen(env, LdClsName, value);
@@ -1608,7 +1609,7 @@ SSATmp* maybeCoerceValue(
     if (!val->type().maybe(TLazyCls | TCls)) return bail();
 
     auto castW = [&] (SSATmp* val){
-      if (RO::EvalClassStringHintNoticesSampleRate > 0) {
+      if (Cfg::Eval::ClassStringHintNoticesSampleRate > 0) {
         auto tcInfo = folly::sformat(
           "argument {} passed to {}()", id + 1, func->fullName());
         std::string msg;
@@ -1616,7 +1617,7 @@ SSATmp* maybeCoerceValue(
         gen(
           env,
           RaiseNotice,
-          SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
+          SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
           cns(env, makeStaticString(msg))
         );
       }
@@ -1950,7 +1951,7 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
     case AnnotMetaType::ArrayLike:
       return TArrLike;
     case AnnotMetaType::Classname:
-      if (!RO::EvalClassPassesClassname) {
+      if (!Cfg::Eval::ClassPassesClassname) {
         return TStr;
       }
       return TStr | TCls | TLazyCls;

@@ -26,8 +26,9 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/containers.h"
 
-#include "hphp/util/functional.h"
 #include "hphp/util/check-size.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/functional.h"
 #include "hphp/util/trace.h"
 
 #include <functional>
@@ -772,7 +773,7 @@ bool tcCouldBeReified(const Func*, uint32_t);
 inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
                                 SetOpOp op,
                                 tv_rval lhs) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0 || !tc.isCheckable()) {
+  if (Cfg::Eval::CheckPropTypeHints <= 0 || !tc.isCheckable()) {
     return false;
   }
   if (op != SetOpOp::ConcatEqual) return true;

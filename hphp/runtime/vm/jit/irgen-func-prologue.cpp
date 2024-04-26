@@ -246,7 +246,7 @@ void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
 
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                  SSATmp* prologueFlags) {
-  if (!RuntimeOption::EvalNoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
+  if (!Cfg::Eval::NoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
     return;
   }
 

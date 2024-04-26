@@ -174,7 +174,7 @@ struct Eq {
   bool eqStringishTypes(TypedValue lhs, const StringData* rhs) const {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
-    if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
+    if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
       raise_class_to_string_conversion_notice("comparison");
     }
     return lhs.m_data.pstr->equal(rhs);

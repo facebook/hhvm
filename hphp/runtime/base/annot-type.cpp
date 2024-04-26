@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
 
 namespace HPHP {
@@ -201,11 +202,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::ArrayKey:
       if (isClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+        return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
           ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
       }
       if (isLazyClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+        return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
           ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
       }
       return (isIntType(dt) || isStringType(dt))
@@ -232,10 +233,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Classname:
       if (isStringType(dt)) return AnnotAction::Pass;
       if (isClassType(dt) || isLazyClassType(dt)) {
-        if (!RO::EvalClassPassesClassname) {
+        if (!Cfg::Eval::ClassPassesClassname) {
           return AnnotAction::Fail;
         }
-        return RO::EvalClassnameNoticesSampleRate > 0 ?
+        return Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
           AnnotAction::WarnClassname : AnnotAction::Pass;
       }
       return AnnotAction::Fail;
@@ -252,11 +253,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           metatype == AnnotMetaType::SubObject ||
           metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
-    return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+    return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
   }
   if (at == AnnotType::String && dt == KindOfLazyClass) {
-    return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+    return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
 
@@ -295,13 +296,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+          return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
             ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
         }
         return AnnotAction::Fail;
       case KindOfLazyClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
+          return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
             ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
         }
         return AnnotAction::Fail;

@@ -23,6 +23,7 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/array-init.h"
@@ -1296,8 +1297,8 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   auto const t2 = topC(env, 1);
 
   auto warningsEnabled =
-    (RuntimeOption::EvalEmitClsMethPointers ||
-     RuntimeOption::EvalRaiseClassConversionNoticeSampleRate > 0);
+    (Cfg::Eval::EmitClsMethPointers ||
+     Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0);
 
   auto const result = [&] {
     auto const v1 = tv(t1);
@@ -2381,7 +2382,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
       auto const may_raise = t.subtypeOf(BStr) && [&] {
         switch (kind) {
           case ClassGetCMode::Normal:
-            return RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0;
+            return Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0;
           case ClassGetCMode::ExplicitConversion:
             return rcls->mightCareAboutDynamicallyReferenced();
         }
@@ -2730,7 +2731,7 @@ void isTypeObj(ISS& env, const Type& ty) {
   if (ty.subtypeOf(BObj)) {
     auto const incompl = objExact(
       builtin_class(env.index, s_PHP_Incomplete_Class.get()));
-    if (RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
+    if (Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {
       auto const c =
         objExact(builtin_class(env.index, s_MethCallerHelper.get()));
       if (ty.couldBe(c)) return push(env, TBool);
@@ -4482,7 +4483,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
     : TCls;
   auto const rfunc = env.index.resolve_method(env.ctx, ctxTy, methName);
   auto const skipLogAsDynamicCall =
-    !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
+    !Cfg::Eval::LogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       module_check_always_passes(env, dcls_of(clsTy)) &&
@@ -4543,11 +4544,11 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   auto const maybeDynamicCall = t.couldBe(TStr);
   auto const skipLogAsDynamicCall =
-    !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
+    !Cfg::Eval::LogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       module_check_always_passes(env, dcls_of(clsTy)) &&
-      (RO::EvalRaiseStrToClsConversionNoticeSampleRate == 0 || !maybeDynamicCall) &&
+      (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate == 0 || !maybeDynamicCall) &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall
@@ -5253,7 +5254,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
       if (result.couldBe(BCls | BLazyCls)) {
         result = promote_classish(std::move(result));
         if (effectFree && (ts_flavor ||
-                           RO::EvalClassStringHintNoticesSampleRate > 0 ||
+                           Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
                            !promote_classish(stackT).moreRefined(type.lower))) {
           effectFree = false;
         }
@@ -5730,10 +5731,10 @@ void in(ISS& env, const bc::InitProp& op) {
     auto const refine =
       [&] (const TypeConstraint& tc) -> std::pair<Type, bool> {
       assertx(tc.validForProp());
-      if (RO::EvalCheckPropTypeHints == 0) return { t, true };
+      if (Cfg::Eval::CheckPropTypeHints == 0) return { t, true };
       auto const lookup = lookup_constraint(env.index, env.ctx, tc, t);
       if (t.moreRefined(lookup.lower)) return { t, true };
-      if (RO::EvalClassStringHintNoticesSampleRate > 0) return { t, false };
+      if (Cfg::Eval::ClassStringHintNoticesSampleRate > 0) return { t, false };
       if (!t.couldBe(lookup.upper)) return { t, false };
       if (lookup.coerceClassToString != TriBool::Yes) return { t, false };
       auto promoted = promote_classish(t);

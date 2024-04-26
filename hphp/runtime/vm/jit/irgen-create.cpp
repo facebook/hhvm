@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
@@ -129,7 +130,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
 void checkPropTypeRedefs(IRGS& env, const Class* cls) {
   assertx(cls->maybeRedefinesPropTypes());
   assertx(cls->parent());
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
 
   ifThen(
     env,
@@ -197,7 +198,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         gen(env, PropTypeValid, cns(env, cls));
         return;
       }
-      assertx(RO::EvalCheckPropTypeHints > 0);
+      assertx(Cfg::Eval::CheckPropTypeHints > 0);
 
       for (Slot slot = 0; slot < props.size(); ++slot) {
         auto const& prop = props[slot];

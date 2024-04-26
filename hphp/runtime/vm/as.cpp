@@ -81,6 +81,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
@@ -3036,7 +3037,7 @@ void parse_alias(AsmState& as, AliasKind kind) {
   }
 
   auto value = [&]() {
-    if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
+    if (Cfg::Eval::TreatCaseTypesAsMixed && tis.size() > 1) {
       return TypeConstraint::makeMixed();
     }
     return TypeConstraint::makeUnion(namestr, tis);

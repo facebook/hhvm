@@ -196,14 +196,14 @@ void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
   auto const dynCallable = callee->isDynamicallyCallable();
-  if (dynCallable && !RO::EvalForbidDynamicCallsWithAttr) {
+  if (dynCallable && !Cfg::Eval::ForbidDynamicCallsWithAttr) {
     return;
   }
   auto const level = callee->isMethod()
     ? (callee->isStatic()
-        ? RO::EvalForbidDynamicCallsToClsMeth
-        : RO::EvalForbidDynamicCallsToInstMeth)
-    : RO::EvalForbidDynamicCallsToFunc;
+        ? Cfg::Eval::ForbidDynamicCallsToClsMeth
+        : Cfg::Eval::ForbidDynamicCallsToInstMeth)
+    : Cfg::Eval::ForbidDynamicCallsToFunc;
   if (level <= 0) return;
   if (dynCallable && level < 2) return;
   gen(env, RaiseForbiddenDynCall, cns(env, callee));
@@ -211,7 +211,7 @@ void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
 
 void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   assertx(!callee->hasConstVal());
-  if (RO::EvalForbidDynamicCallsWithAttr) {
+  if (Cfg::Eval::ForbidDynamicCallsWithAttr) {
     gen(env, RaiseForbiddenDynCall, callee);
   } else {
     ifElse(
@@ -1510,7 +1510,7 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
 }
 
 void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
-  if (RuntimeOption::EvalForbidDynamicConstructs <= 0) return;
+  if (Cfg::Eval::ForbidDynamicConstructs <= 0) return;
   if (cls->hasConstVal()) {
     if (cls->clsVal()->isDynamicallyConstructible()) return;
     gen(env, RaiseForbiddenDynConstruct, cls);
@@ -2047,7 +2047,7 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
   auto const suppressDynCallCheck =
     op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
-    !RO::EvalLogKnownMethodsAsDynamicCalls;
+    !Cfg::Eval::LogKnownMethodsAsDynamicCalls;
 
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, false,
                        true, suppressDynCallCheck,
@@ -2065,7 +2065,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const cls = [&] {
     if (name->isA(TCls)) return name;
     if (name->isA(TStr) &&
-      RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0) {
+      Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
       gen(env, RaiseStrToClassNotice, name);
     }
     auto const ret = name->isA(TObj) ?
@@ -2077,7 +2077,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
   auto const suppressDynCallCheck =
     op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
-    !RO::EvalLogKnownMethodsAsDynamicCalls;
+    !Cfg::Eval::LogKnownMethodsAsDynamicCalls;
 
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), false,
                        name->isA(TStr), suppressDynCallCheck, 1);

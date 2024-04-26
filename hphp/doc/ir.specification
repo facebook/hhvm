@@ -2293,7 +2293,7 @@ ReqBindJmp and CallFuncEntry.
 
   Raise a notice that the provided class (result of classname_to_class) is
   missing the `<<__DynamicallyReferenced>>` attribute. Notice is sampled at a
-  rate set by the `DynamicallyReferencedNoticeSampleRate` runtime option.
+  rate set by `Cfg::Eval::DynamicallyReferencedNoticeSampleRate`.
 
 | RaiseCoeffectsCallViolation<func>, ND, S(Int) S(Int), NF
 
@@ -2338,7 +2338,7 @@ ReqBindJmp and CallFuncEntry.
 
   Raise a notice if a class is being loaded from a string e.g. in a `$c::f()`
   expression where $c is a string. S0 contains the string. Notice is sampled at
-  a rate set by the `RaiseStrToClsConversionNoticeSampleRate` runtime option.
+  a rate set by `Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate`
 
 | CheckClsMethFunc, ND, S(Func), NF
 

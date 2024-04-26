@@ -217,13 +217,13 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   auto const defaultOff = bcOff(env) + iv.strvec()[numCases].dest;
 
  if (UNLIKELY(testVal->isA(TCls) || testVal->isA(TLazyCls))) {
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       // TODO(vmladenov) appears untested
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "string switch");
       gen(env,
         RaiseNotice,
-        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(msg)));
     }
     testVal = gen(env, testVal->isA(TCls) ? LdClsName : LdLazyClsName, testVal);
@@ -264,12 +264,12 @@ void emitThrowNonExhaustiveSwitch(IRGS& env) {
 }
 
 void emitRaiseClassStringConversionNotice(IRGS& env) {
-  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+  if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
     std::string msg;
     string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "bytecode");
     gen(env,
         RaiseNotice,
-        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(msg)));
   }
 }

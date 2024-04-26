@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/zend/zend-string.h"
 
@@ -278,7 +279,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
             }
             case kind::LazyClass:{
               if (folly::Random::oneIn(
-                    RO::EvalRaiseClassConversionNoticeSampleRate)) {
+                    Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
                 raise_class_to_string_conversion_notice("dict key");
               }
               auto const s = toStaticString(elt.key.LazyClass._0._0);
@@ -376,7 +377,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     if (tis.size() == 1) {
       return translateTypeInfo(tis[0]).second;
     }
-    if (RO::EvalTreatCaseTypesAsMixed) {
+    if (Cfg::Eval::TreatCaseTypesAsMixed) {
       return TypeConstraint::makeMixed();
     }
 

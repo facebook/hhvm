@@ -387,14 +387,14 @@ SSATmp* extractBase(IRGS& env) {
 
 SSATmp* classConvertPuntOnRaise(IRGS& env, SSATmp* key) {
   if (key->isA(TCls)) {
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       // TODO(vmladenov) if punting is too slow, could gen RaiseNotice
       PUNT(BespokeClsConvert);
     }
     return gen(env, LdClsName, key);
   }
   if (key->isA(TLazyCls)) {
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       PUNT(BespokeClsConvert);
     }
     return gen(env, LdLazyClsName, key);

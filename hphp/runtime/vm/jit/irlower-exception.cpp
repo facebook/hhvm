@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -161,12 +162,12 @@ IMPL_OPCODE_CALL(DebugBacktrace)
 
 static void raiseForbiddenDynCall(const Func* func) {
   auto dynCallable = func->isDynamicallyCallable();
-  assertx(!dynCallable || RO::EvalForbidDynamicCallsWithAttr);
+  assertx(!dynCallable || Cfg::Eval::ForbidDynamicCallsWithAttr);
   auto level = func->isMethod()
     ? (func->isStatic()
-        ? RO::EvalForbidDynamicCallsToClsMeth
-        : RO::EvalForbidDynamicCallsToInstMeth)
-    : RO::EvalForbidDynamicCallsToFunc;
+        ? Cfg::Eval::ForbidDynamicCallsToClsMeth
+        : Cfg::Eval::ForbidDynamicCallsToInstMeth)
+    : Cfg::Eval::ForbidDynamicCallsToFunc;
   if (level <= 0) return;
   if (dynCallable && level < 2) return;
 
@@ -187,7 +188,7 @@ static void raiseForbiddenDynCall(const Func* func) {
 }
 
 static void raiseForbiddenDynConstruct(const Class* cls) {
-  auto level = RO::EvalForbidDynamicConstructs;
+  auto level = Cfg::Eval::ForbidDynamicConstructs;
   assertx(level > 0);
   assertx(!cls->isDynamicallyConstructible());
 
@@ -223,7 +224,7 @@ void cgRaiseForbiddenDynConstruct(IRLS& env, const IRInstruction* inst) {
 }
 
 static void raiseMissingDynamicallyReferenced(const Class* cls) {
-  if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate)) {
     raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
   }
 }

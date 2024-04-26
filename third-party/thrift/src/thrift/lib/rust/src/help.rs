@@ -21,13 +21,11 @@ use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Display;
 use std::future::Future;
-use std::pin::Pin;
 
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
 use bytes::Buf;
-use futures::future::FutureExt;
 
 use crate::serialize;
 use crate::ApplicationException;
@@ -174,7 +172,7 @@ where
 
 /// Abstract spawning some potentially CPU-heavy work onto a CPU thread
 pub trait Spawner: 'static {
-    fn spawn<F, R>(func: F) -> Pin<Box<dyn Future<Output = R> + Send>>
+    fn spawn<F, R>(func: F) -> impl Future<Output = R> + Send
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static;
@@ -184,12 +182,12 @@ pub trait Spawner: 'static {
 pub struct NoopSpawner;
 impl Spawner for NoopSpawner {
     #[inline]
-    fn spawn<F, R>(func: F) -> Pin<Box<dyn Future<Output = R> + Send>>
+    async fn spawn<F, R>(func: F) -> R
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
     {
-        async { func() }.boxed()
+        func()
     }
 }
 

@@ -73,15 +73,6 @@ pub mod c {
         }
     }
 
-    impl ::std::convert::From<crate::services::c::NumbersResponseExn> for NumbersError {
-        fn from(e: crate::services::c::NumbersResponseExn) -> Self {
-            match e {
-                crate::services::c::NumbersResponseExn::ApplicationException(aexn) =>
-                    NumbersError::ApplicationException(aexn),
-            }
-        }
-    }
-
     pub type NumbersStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::c::NumbersStreamExn> for NumbersStreamError {

@@ -80,13 +80,9 @@ pub mod service1 {
             }
             p.write_struct_begin("R");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Struct,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Struct, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -224,13 +220,9 @@ pub mod s2 {
             }
             p.write_struct_begin("R");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Struct,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Struct, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -379,13 +371,9 @@ pub mod all_methods {
             }
             p.write_struct_begin("Foo");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -536,13 +524,9 @@ pub mod all_methods {
             }
             p.write_struct_begin("Bar");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::se(inner)) => {
@@ -704,13 +688,9 @@ pub mod one_method {
             }
             p.write_struct_begin("Foo");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -850,13 +830,9 @@ pub mod one_method {
             }
             p.write_struct_begin("Bar");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::se(inner)) => {
@@ -1018,13 +994,9 @@ pub mod one_method_opt_out {
             }
             p.write_struct_begin("Foo");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -1164,13 +1136,9 @@ pub mod one_method_opt_out {
             }
             p.write_struct_begin("Bar");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::se(inner)) => {

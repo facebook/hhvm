@@ -185,19 +185,6 @@ pub mod {{service:snake}} {
 
     {{/function:sink?}}
     {{#function:stream?}}
-    impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for {{function:upcamel}}Error {
-        fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn) -> Self {
-            match e {
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::ApplicationException(aexn) =>
-                    {{function:upcamel}}Error::ApplicationException(aexn),
-                {{#function:exceptions}}
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) =>
-                    {{function:upcamel}}Error::{{field:rust_name}}(exn),
-                {{/function:exceptions}}
-            }
-        }
-    }
-
     {{#function:stream_exceptions?}}
     #[derive(Debug)]
     pub enum {{function:upcamel}}StreamError {

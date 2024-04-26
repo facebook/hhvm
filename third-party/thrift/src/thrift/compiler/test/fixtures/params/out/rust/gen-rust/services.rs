@@ -80,13 +80,9 @@ pub mod nested_containers {
             }
             p.write_struct_begin("MapList");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -215,13 +211,9 @@ pub mod nested_containers {
             }
             p.write_struct_begin("MapSet");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -350,13 +342,9 @@ pub mod nested_containers {
             }
             p.write_struct_begin("ListMap");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -485,13 +473,9 @@ pub mod nested_containers {
             }
             p.write_struct_begin("ListSet");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -620,13 +604,9 @@ pub mod nested_containers {
             }
             p.write_struct_begin("Turtles");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 

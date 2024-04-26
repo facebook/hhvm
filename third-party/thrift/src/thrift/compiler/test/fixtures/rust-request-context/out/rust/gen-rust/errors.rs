@@ -207,15 +207,6 @@ pub mod my_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::my_service::StreamByIdResponseExn> for StreamByIdError {
-        fn from(e: crate::services::my_service::StreamByIdResponseExn) -> Self {
-            match e {
-                crate::services::my_service::StreamByIdResponseExn::ApplicationException(aexn) =>
-                    StreamByIdError::ApplicationException(aexn),
-            }
-        }
-    }
-
     pub type StreamByIdStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::my_service::StreamByIdStreamExn> for StreamByIdStreamError {
@@ -250,15 +241,6 @@ pub mod my_service {
         fn from(e: crate::services::my_service::StreamByIdWithExceptionExn) -> Self {
             match e {
                 crate::services::my_service::StreamByIdWithExceptionExn::ApplicationException(aexn) =>
-                    StreamByIdWithExceptionError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::my_service::StreamByIdWithExceptionResponseExn> for StreamByIdWithExceptionError {
-        fn from(e: crate::services::my_service::StreamByIdWithExceptionResponseExn) -> Self {
-            match e {
-                crate::services::my_service::StreamByIdWithExceptionResponseExn::ApplicationException(aexn) =>
                     StreamByIdWithExceptionError::ApplicationException(aexn),
             }
         }
@@ -377,15 +359,6 @@ pub mod my_service {
         fn from(e: crate::services::my_service::StreamByIdWithResponseExn) -> Self {
             match e {
                 crate::services::my_service::StreamByIdWithResponseExn::ApplicationException(aexn) =>
-                    StreamByIdWithResponseError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::my_service::StreamByIdWithResponseResponseExn> for StreamByIdWithResponseError {
-        fn from(e: crate::services::my_service::StreamByIdWithResponseResponseExn) -> Self {
-            match e {
-                crate::services::my_service::StreamByIdWithResponseResponseExn::ApplicationException(aexn) =>
                     StreamByIdWithResponseError::ApplicationException(aexn),
             }
         }

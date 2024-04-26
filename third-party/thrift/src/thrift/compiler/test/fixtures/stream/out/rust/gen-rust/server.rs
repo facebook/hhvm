@@ -739,13 +739,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ReturnstreamResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamExn>(
             "returnstream",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -851,13 +848,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::StreamthrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::StreamthrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::StreamthrowsExn>(
             "streamthrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -956,17 +950,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::e(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::e(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ServicethrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ServicethrowsExn>(
             "servicethrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1065,21 +1052,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e1(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e2(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::Servicethrows2Exn>(
             "servicethrows2",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1185,17 +1161,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::e(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::BoththrowsResponseExn::e(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::BoththrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::BoththrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::BoththrowsExn>(
             "boththrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1301,13 +1270,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn>(
             "responseandstreamstreamthrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1406,17 +1372,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::e(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::e(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn>(
             "responseandstreamservicethrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1522,17 +1481,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::e(exn)) => {
-                let response = crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::e(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn>(
             "responseandstreamboththrows",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1632,13 +1584,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn)) => {
-                let response = crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamFastExn>(
             "returnstreamFast",
             METHOD_NAME.as_cstr(),
             _seqid,

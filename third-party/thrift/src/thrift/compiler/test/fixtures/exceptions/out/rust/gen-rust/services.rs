@@ -80,13 +80,9 @@ pub mod raiser {
             }
             p.write_struct_begin("DoBland");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -248,13 +244,9 @@ pub mod raiser {
             }
             p.write_struct_begin("DoRaise");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::b(inner)) => {
@@ -422,13 +414,9 @@ pub mod raiser {
             }
             p.write_struct_begin("Get200");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -596,13 +584,9 @@ pub mod raiser {
             }
             p.write_struct_begin("Get500");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::f(inner)) => {

@@ -163,7 +163,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::NumbersResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::NumbersExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::c::NumbersError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);

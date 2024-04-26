@@ -401,13 +401,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::c::NumbersExn::ApplicationException(aexn)) => {
-                let response = crate::services::c::NumbersResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::NumbersResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::NumbersExn>(
             "numbers",
             METHOD_NAME.as_cstr(),
             _seqid,

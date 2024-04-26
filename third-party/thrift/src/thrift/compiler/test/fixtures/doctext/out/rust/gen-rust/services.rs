@@ -82,13 +82,9 @@ pub mod c {
             }
             p.write_struct_begin("F");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
 
@@ -273,130 +269,6 @@ pub mod c {
     }
 
     #[derive(Clone, Debug)]
-    pub enum NumbersResponseExn {
-
-        ApplicationException(::fbthrift::ApplicationException),
-    }
-
-    impl ::fbthrift::ExceptionInfo for NumbersResponseExn {
-        fn exn_name(&self) -> &'static str {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_name(),
-            }
-        }
-
-        fn exn_value(&self) -> String {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_value(),
-            }
-        }
-
-        fn exn_is_declared(&self) -> bool {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-            }
-        }
-    }
-
-    impl ::fbthrift::ResultInfo for NumbersResponseExn {
-        fn result_type(&self) -> ::fbthrift::ResultType {
-            match self {
-                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-            }
-        }
-    }
-
-
-
-    impl ::std::convert::From<::fbthrift::ApplicationException> for NumbersResponseExn {
-        fn from(exn: ::fbthrift::ApplicationException) -> Self {
-            Self::ApplicationException(exn)
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for NumbersResponseExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
-        }
-    }
-
-    impl ::fbthrift::help::SerializeExn for NumbersResponseExn {
-        type Success = ();
-
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
-                return;
-            }
-            p.write_struct_begin("Numbers");
-            match res {
-                ::std::result::Result::Ok(_success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::Void,
-                        0i16,
-                    );
-                    p.write_field_end();
-                }
-
-                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
-            }
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-
-    impl ::fbthrift::help::DeserializeExn for NumbersResponseExn {
-        type Success = ();
-
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            static RETURNS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
-            ];
-            let _ = p.read_struct_begin(|_| ())?;
-            let mut once = false;
-            let mut alt = ::std::result::Result::Ok(());
-            loop {
-                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                match ((fty, fid as ::std::primitive::i32), once) {
-                    ((::fbthrift::TType::Stop, _), _) => {
-                        p.read_field_end()?;
-                        break;
-                    }
-                    ((::fbthrift::TType::Void, 0i32), false) => {
-                        once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
-                    }
-                    ((ty, _id), false) => p.skip(ty)?,
-                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                        ::fbthrift::ApplicationException::new(
-                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                            format!(
-                                "unwanted extra union {} field ty {:?} id {}",
-                                "NumbersResponseExn",
-                                badty,
-                                badid,
-                            ),
-                        )
-                    )),
-                }
-                p.read_field_end()?;
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(alt)
-        }
-    }
-
-    #[derive(Clone, Debug)]
     pub enum NumbersExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -448,7 +320,83 @@ pub mod c {
         }
     }
 
+    impl<P> ::fbthrift::Serialize<P> for NumbersExn
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+        }
+    }
 
+    impl ::fbthrift::help::SerializeExn for NumbersExn {
+        type Success = ();
+
+        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            p.write_struct_begin("Numbers");
+            match res {
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl ::fbthrift::help::DeserializeExn for NumbersExn {
+        type Success = ();
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "NumbersExn",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
 
     #[derive(Clone, Debug)]
     pub enum ThingExn {
@@ -535,13 +483,9 @@ pub mod c {
             }
             p.write_struct_begin("Thing");
             match res {
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        ::fbthrift::TType::String,
-                        0i16,
-                    );
-                    ::fbthrift::Serialize::write(success, p);
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::bang(inner)) => {

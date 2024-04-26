@@ -697,7 +697,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_service::StreamByIdError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
@@ -770,7 +770,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdWithExceptionResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdWithExceptionExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_service::StreamByIdWithExceptionError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
@@ -843,7 +843,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdWithResponseResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::StreamByIdWithResponseExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_service::StreamByIdWithResponseError as ::std::convert::From<_>>::from);
             let res = initial.map(move |initial| (initial, new_stream));

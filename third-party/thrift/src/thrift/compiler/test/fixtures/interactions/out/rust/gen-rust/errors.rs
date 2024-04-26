@@ -182,15 +182,6 @@ pub mod my_interaction {
         }
     }
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyResponseExn> for TruthifyError {
-        fn from(e: crate::services::my_interaction::TruthifyResponseExn) -> Self {
-            match e {
-                crate::services::my_interaction::TruthifyResponseExn::ApplicationException(aexn) =>
-                    TruthifyError::ApplicationException(aexn),
-            }
-        }
-    }
-
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::my_interaction::TruthifyStreamExn> for TruthifyStreamError {
@@ -278,15 +269,6 @@ pub mod my_interaction_fast {
         fn from(e: crate::services::my_interaction_fast::TruthifyExn) -> Self {
             match e {
                 crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn) =>
-                    TruthifyError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyResponseExn> for TruthifyError {
-        fn from(e: crate::services::my_interaction_fast::TruthifyResponseExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::TruthifyResponseExn::ApplicationException(aexn) =>
                     TruthifyError::ApplicationException(aexn),
             }
         }
@@ -435,15 +417,6 @@ pub mod my_service {
         fn from(e: crate::services::my_service::SerializeExn) -> Self {
             match e {
                 crate::services::my_service::SerializeExn::ApplicationException(aexn) =>
-                    SerializeError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::my_service::SerializeResponseExn> for SerializeError {
-        fn from(e: crate::services::my_service::SerializeResponseExn) -> Self {
-            match e {
-                crate::services::my_service::SerializeResponseExn::ApplicationException(aexn) =>
                     SerializeError::ApplicationException(aexn),
             }
         }

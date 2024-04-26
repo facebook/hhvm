@@ -76,15 +76,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamResponseExn> for ReturnstreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamResponseExn::ApplicationException(aexn) =>
-                    ReturnstreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
     pub type ReturnstreamStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamStreamExn> for ReturnstreamStreamError {
@@ -119,15 +110,6 @@ pub mod pub_sub_streaming_service {
         fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsExn) -> Self {
             match e {
                 crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn) =>
-                    StreamthrowsError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsResponseExn> for StreamthrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::StreamthrowsResponseExn::ApplicationException(aexn) =>
                     StreamthrowsError::ApplicationException(aexn),
             }
         }
@@ -333,17 +315,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsResponseExn> for ServicethrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::ApplicationException(aexn) =>
-                    ServicethrowsError::ApplicationException(aexn),
-                crate::services::pub_sub_streaming_service::ServicethrowsResponseExn::e(exn) =>
-                    ServicethrowsError::e(exn),
-            }
-        }
-    }
-
     pub type ServicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsStreamExn> for ServicethrowsStreamError {
@@ -496,19 +467,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn> for Servicethrows2Error {
-        fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::ApplicationException(aexn) =>
-                    Servicethrows2Error::ApplicationException(aexn),
-                crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e1(exn) =>
-                    Servicethrows2Error::e1(exn),
-                crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e2(exn) =>
-                    Servicethrows2Error::e2(exn),
-            }
-        }
-    }
-
     pub type Servicethrows2StreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for Servicethrows2StreamError {
@@ -633,17 +591,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsResponseExn> for BoththrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::BoththrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::BoththrowsResponseExn::ApplicationException(aexn) =>
-                    BoththrowsError::ApplicationException(aexn),
-                crate::services::pub_sub_streaming_service::BoththrowsResponseExn::e(exn) =>
-                    BoththrowsError::e(exn),
-            }
-        }
-    }
-
     #[derive(Debug)]
     pub enum BoththrowsStreamError {
         e(crate::types::FooStreamEx),
@@ -757,15 +704,6 @@ pub mod pub_sub_streaming_service {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn) -> Self {
             match e {
                 crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn) =>
-                    ResponseandstreamstreamthrowsError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn> for ResponseandstreamstreamthrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsResponseExn::ApplicationException(aexn) =>
                     ResponseandstreamstreamthrowsError::ApplicationException(aexn),
             }
         }
@@ -974,17 +912,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn> for ResponseandstreamservicethrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::ApplicationException(aexn) =>
-                    ResponseandstreamservicethrowsError::ApplicationException(aexn),
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsResponseExn::e(exn) =>
-                    ResponseandstreamservicethrowsError::e(exn),
-            }
-        }
-    }
-
     pub type ResponseandstreamservicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn> for ResponseandstreamservicethrowsStreamError {
@@ -1112,17 +1039,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn> for ResponseandstreamboththrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::ApplicationException(aexn) =>
-                    ResponseandstreamboththrowsError::ApplicationException(aexn),
-                crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsResponseExn::e(exn) =>
-                    ResponseandstreamboththrowsError::e(exn),
-            }
-        }
-    }
-
     #[derive(Debug)]
     pub enum ResponseandstreamboththrowsStreamError {
         e(crate::types::FooStreamEx),
@@ -1233,15 +1149,6 @@ pub mod pub_sub_streaming_service {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastExn) -> Self {
             match e {
                 crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn) =>
-                    ReturnstreamFastError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn> for ReturnstreamFastError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastResponseExn::ApplicationException(aexn) =>
                     ReturnstreamFastError::ApplicationException(aexn),
             }
         }

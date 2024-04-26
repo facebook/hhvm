@@ -456,13 +456,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn)) => {
-                let response = crate::services::my_interaction::TruthifyResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
             "truthify",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -1059,13 +1056,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn)) => {
-                let response = crate::services::my_interaction_fast::TruthifyResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
             "truthify",
             METHOD_NAME.as_cstr(),
             _seqid,
@@ -2189,13 +2183,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            ::std::result::Result::Err(crate::services::my_service::SerializeExn::ApplicationException(aexn)) => {
-                let response = crate::services::my_service::SerializeResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_service::SerializeResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_service::SerializeExn>(
             "serialize",
             METHOD_NAME.as_cstr(),
             _seqid,

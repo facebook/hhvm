@@ -23,7 +23,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }}{{#service:docs?}}
     #![doc = {{service:docs}}]
     {{/service:docs?}}{{!
-    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:stream?}}
+    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}{{#function:stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
@@ -206,229 +206,8 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             )
         }
     }
-
-    #[derive(Clone, Debug)]
-    pub enum {{function:upcamel}}ResponseExn {
-        {{#function:exceptions}}
-        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
-        }}{{/function:exceptions}}
-        ApplicationException(::fbthrift::ApplicationException),
-    }{{!
-    }}
-
-    impl ::fbthrift::ExceptionInfo for {{function:upcamel}}ResponseExn {
-        fn exn_name(&self) -> &'static str {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_name(),
-                {{#function:exceptions}}
-                Self::{{field:rust_name}}(exn) => exn.exn_name(),
-                {{/function:exceptions}}
-            }
-        }
-
-        fn exn_value(&self) -> String {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_value(),
-                {{#function:exceptions}}
-                Self::{{field:rust_name}}(exn) => exn.exn_value(),
-                {{/function:exceptions}}
-            }
-        }
-
-        fn exn_is_declared(&self) -> bool {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-                {{#function:exceptions}}
-                Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
-                {{/function:exceptions}}
-            }
-        }
-    }
-
-    impl ::fbthrift::ResultInfo for {{function:upcamel}}ResponseExn {
-        fn result_type(&self) -> ::fbthrift::ResultType {
-            match self {
-                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-                {{#function:exceptions}}
-                Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
-                {{/function:exceptions}}
-            }
-        }
-    }
-
-    {{#function:uniqueExceptions}}
-    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}ResponseExn {
-        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-            Self::{{field:rust_name}}(exn)
-        }
-    }{{!
-    }}{{/function:uniqueExceptions}}
-
-    impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}ResponseExn {
-        fn from(exn: ::fbthrift::ApplicationException) -> Self {
-            Self::ApplicationException(exn)
-        }
-    }
-    {{#function:enable_anyhow_to_application_exn}}
-
-    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
-        fn from(exn: ::anyhow::Error) -> Self {
-            Self::ApplicationException(
-                ::fbthrift::ApplicationException {
-                    message: format!("{exn:#}"),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                }
-            )
-        }
-    }
-    {{/function:enable_anyhow_to_application_exn}}
-
-    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}ResponseExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
-        }
-    }
-
-    impl ::fbthrift::help::SerializeExn for {{function:upcamel}}ResponseExn {
-        type Success = {{#function:stream_has_first_response?}}{{!
-            }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
-        }}{{/function:stream_has_first_response?}}{{!
-        }}{{^function:stream_has_first_response?}}{{!
-            }}(){{!
-        }}{{/function:stream_has_first_response?}};
-
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
-                return;
-            }
-            p.write_struct_begin("{{function:upcamel}}");
-            match res {
-                ::std::result::Result::Ok(_success) => {
-                    p.write_field_begin(
-                        "Success",
-                        {{#function:stream_has_first_response?}}
-                        {{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}},
-                        {{/function:stream_has_first_response?}}
-                        {{^function:stream_has_first_response?}}
-                        ::fbthrift::TType::Void,
-                        {{/function:stream_has_first_response?}}
-                        0i16,
-                    );
-                    {{#function:stream_has_first_response?}}
-                    ::fbthrift::Serialize::write(_success, p);
-                    {{/function:stream_has_first_response?}}
-                    p.write_field_end();
-                }
-                {{#function:exceptions}}
-                ::std::result::Result::Err(Self::{{field:rust_name}}(inner)) => {
-                    p.write_field_begin(
-                        "{{field:name}}",
-                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
-                        {{field:key}},
-                    );
-                    ::fbthrift::Serialize::write(inner, p);
-                    p.write_field_end();
-                }{{!
-                }}{{/function:exceptions}}
-                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
-            }
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-
-    impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}ResponseExn {
-        type Success = {{#function:stream_has_first_response?}}{{!
-            }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
-        }}{{/function:stream_has_first_response?}}{{!
-        }}{{^function:stream_has_first_response?}}{{!
-            }}(){{!
-        }}{{/function:stream_has_first_response?}};
-
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            static RETURNS: &[::fbthrift::Field] = &[
-                {{#function:returns_by_name}}
-                {{.}},
-                {{/function:returns_by_name}}
-            ];
-            let _ = p.read_struct_begin(|_| ())?;
-            let mut once = false;
-            let mut alt = {{!
-                }}{{^function:stream_has_first_response?}}{{!
-                    }}::std::result::Result::Ok(()){{!
-                }}{{/function:stream_has_first_response?}}{{!
-                }}{{#function:stream_has_first_response?}}::std::option::Option::None{{/function:stream_has_first_response?}}{{!
-            }};
-            loop {
-                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                match ((fty, fid as ::std::primitive::i32), once) {
-                    ((::fbthrift::TType::Stop, _), _) => {
-                        p.read_field_end()?;
-                        break;
-                    }
-                    (({{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                      }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
-                      }}, 0i32), false) => {
-                        once = true;
-                        alt = {{!
-                            }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                            }}::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?){{!
-                            }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
-                        }};
-                    }{{!
-                    }}{{#function:exceptions}}
-                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
-                        once = true;
-                        alt = {{!
-                            }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                            }}::std::result::Result::Err(Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)){{!
-                            }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
-                        }};
-                    }{{!
-                    }}{{/function:exceptions}}
-                    ((ty, _id), false) => p.skip(ty)?,
-                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                        ::fbthrift::ApplicationException::new(
-                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                            format!(
-                                "unwanted extra union {} field ty {:?} id {}",
-                                "{{function:upcamel}}ResponseExn",
-                                badty,
-                                badid,
-                            ),
-                        )
-                    )),
-                }
-                p.read_field_end()?;
-            }
-            p.read_struct_end()?;{{!
-            }}{{^function:stream_has_first_response?}}
-            ::std::result::Result::Ok(alt){{!
-            }}{{/function:stream_has_first_response?}}{{!
-            }}{{#function:stream_has_first_response?}}
-            alt.ok_or_else(||
-                ::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "{{function:upcamel}}ResponseExn"),
-                )
-                .into(),
-            ){{!
-            }}{{/function:stream_has_first_response?}}
-        }
-    }
     {{/function:stream?}}
 
-    {{^function:sink?}}
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}Exn {
         {{#function:exceptions}}
@@ -519,7 +298,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         }
     }
 
-    {{^function:stream?}}
     impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -530,7 +308,15 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}Exn {
-        type Success = {{>lib/server_ok_type}};
+        type Success = {{!
+            }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!
+            }}{{#function:stream?}}{{!
+                }}{{#function:stream_has_first_response?}}{{!
+                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                }}{{/function:stream_has_first_response?}}{{!
+                }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
+            }}{{/function:stream?}}{{!
+        }};
 
         fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
         where
@@ -542,22 +328,29 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }
             p.write_struct_begin("{{function:upcamel}}");
             match res {
-                {{!We handle serialization of response and stream items with a separate logic.
-                However, the service exceptions can have the same serialization logic}}
-                ::std::result::Result::Ok(success) => {
-                    p.write_field_begin(
-                        "Success",
-                        {{#function:return_type}}{{>lib/ttype}}{{/function:return_type}},
-                        0i16,
-                    );
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", {{!
+                        }}{{^function:stream?}}{{!
+                            }}{{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}{{!
+                        }}{{/function:stream?}}{{!
+                        }}{{#function:stream?}}{{!
+                            }}{{#function:stream_has_first_response?}}{{!
+                                }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                            }}{{/function:stream_has_first_response?}}{{!
+                            }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
+                        }}{{/function:stream?}}{{!
+                    }}, 0i16);
+                    {{^function:stream?}}
                     ::fbthrift::Serialize::write({{#function:return_type}}{{!
                         }}{{#type:has_adapter?}}{{!
-                            }}&{{>lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(success, 0){{!
+                            }}&{{>lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
                         }}{{/type:has_adapter?}}{{!
-                        }}{{^type:has_adapter?}}{{!
-                            }}success{{!
-                        }}{{/type:has_adapter?}}{{!
+                        }}{{^type:has_adapter?}}_success{{/type:has_adapter?}}{{!
                     }}{{/function:return_type}}, p);
+                    {{/function:stream?}}
+                    {{#function:stream?}}{{#function:stream_has_first_response?}}
+                    ::fbthrift::Serialize::write(_success, p);
+                    {{/function:stream_has_first_response?}}{{/function:stream?}}
                     p.write_field_end();
                 }
                 {{#function:exceptions}}
@@ -577,11 +370,17 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:stream?}}
 
-    {{^function:stream?}}
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}Exn {
-        type Success = {{>lib/server_ok_type}};
+        type Success = {{!
+            }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!
+            }}{{#function:stream?}}{{!
+                }}{{#function:stream_has_first_response?}}{{!
+                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                }}{{/function:stream_has_first_response?}}{{!
+                }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
+            }}{{/function:stream?}}{{!
+        }};
 
         fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
         where
@@ -595,10 +394,10 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
             let mut alt = {{!
-                }}{{#function:void_excluding_interaction?}}{{!
+                }}{{#function:void_or_void_stream?}}{{!
                     }}::std::result::Result::Ok(()){{!
-                }}{{/function:void_excluding_interaction?}}{{!
-                }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
+                }}{{/function:void_or_void_stream?}}{{!
+                }}{{^function:void_or_void_stream?}}::std::option::Option::None{{/function:void_or_void_stream?}}{{!
             }};
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
@@ -607,21 +406,41 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         p.read_field_end()?;
                         break;
                     }
-                    (({{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}, 0i32), false) => {
+                    (({{!
+                        }}{{^function:stream?}}{{!
+                            }}{{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}{{!
+                        }}{{/function:stream?}}{{!
+                        }}{{#function:stream?}}{{!
+                            }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
+                            }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
+                        }}{{/function:stream?}}{{!
+                    }}, 0i32), false) => {
                         once = true;
                         alt = {{!
-                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}::std::result::Result::Ok({{#function:return_type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{/function:return_type}}){{!
-                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                            }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
+                            }}::std::result::Result::Ok({{!
+                                }}{{^function:stream?}}{{#function:return_type}}{{!
+                                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
+                                    }}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{!
+                                }}{{/function:return_type}}{{/function:stream?}}{{!
+                                }}{{#function:stream?}}::fbthrift::Deserialize::read(p)?{{/function:stream?}}{{!
+                            }}){{!
+                            }}{{^function:void_or_void_stream?}}){{/function:void_or_void_stream?}}{{!
                         }};
                     }{{!
                     }}{{#function:exceptions}}
                     (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
                         alt = {{!
-                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}::std::result::Result::Err(Self::{{field:rust_name}}({{#function:return_type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{/function:return_type}})){{!
-                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                            }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
+                            }}::std::result::Result::Err(Self::{{field:rust_name}}({{!
+                                }}{{^function:stream?}}{{#function:return_type}}{{!
+                                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
+                                    }}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{!
+                                }}{{/function:return_type}}{{/function:stream?}}{{!
+                                }}{{#function:stream?}}::fbthrift::Deserialize::read(p)?{{/function:stream?}}{{!
+                            }})){{!
+                            }}{{^function:void_or_void_stream?}}){{/function:void_or_void_stream?}}{{!
                         }};
                     }{{!
                     }}{{/function:exceptions}}
@@ -641,10 +460,10 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 p.read_field_end()?;
             }
             p.read_struct_end()?;{{!
-            }}{{#function:void_excluding_interaction?}}
+            }}{{#function:void_or_void_stream?}}
             ::std::result::Result::Ok(alt){{!
-            }}{{/function:void_excluding_interaction?}}{{!
-            }}{{^function:void_excluding_interaction?}}
+            }}{{/function:void_or_void_stream?}}{{!
+            }}{{^function:void_or_void_stream?}}
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
@@ -652,10 +471,9 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 )
                 .into(),
             ){{!
-            }}{{/function:void_excluding_interaction?}}
+            }}{{/function:void_or_void_stream?}}
         }
     }
-    {{/function:stream?}}{{/function:sink?}}{{!
-    }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+    {{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 {{!newline}}

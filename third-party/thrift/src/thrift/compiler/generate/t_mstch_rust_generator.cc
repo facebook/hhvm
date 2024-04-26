@@ -1133,8 +1133,8 @@ class rust_mstch_function : public mstch_function {
          {"function:docs", &rust_mstch_function::rust_doc},
          {"function:interaction_name",
           &rust_mstch_function::rust_interaction_name},
-         {"function:void_excluding_interaction?",
-          &rust_mstch_function::rust_void_excluding_interaction},
+         {"function:void_or_void_stream?",
+          &rust_mstch_function::rust_void_or_void_stream},
          {"function:enable_anyhow_to_application_exn",
           &rust_mstch_function::rust_anyhow_to_application_exn}});
   }
@@ -1261,8 +1261,12 @@ class rust_mstch_function : public mstch_function {
     return interaction ? interaction->get_name()
                        : function_->return_type()->get_name();
   }
-  mstch::node rust_void_excluding_interaction() {
-    return function_->return_type()->is_void() && !function_->sink_or_stream();
+  mstch::node rust_void_or_void_stream() {
+    if (function_->sink_or_stream()) {
+      return !function_->has_return_type();
+    } else {
+      return function_->return_type()->is_void();
+    }
   }
   mstch::node rust_anyhow_to_application_exn() {
     // First look for annotation on the function.

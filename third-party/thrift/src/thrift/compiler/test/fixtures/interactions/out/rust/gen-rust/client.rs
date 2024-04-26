@@ -224,7 +224,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction::TruthifyResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction::TruthifyExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_interaction::TruthifyError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
@@ -731,7 +731,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction_fast::TruthifyResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_interaction_fast::TruthifyExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_interaction_fast::TruthifyError as ::std::convert::From<_>>::from);
             let res = initial.map(move |_| new_stream);
@@ -1594,7 +1594,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::SerializeResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::my_service::SerializeExn, S>(de).await??;
 
             let initial = res.map_err(<crate::errors::my_service::SerializeError as ::std::convert::From<_>>::from);
             let res = initial.map(move |initial| (initial, new_stream));

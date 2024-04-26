@@ -382,19 +382,10 @@ where
                     .boxed();
                 (response, Some(stream))
             },
-            {{#function:exceptions}}
-            ::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{field:rust_name}}(exn)) => {
-                let response = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{field:rust_name}}(exn);
-                (::std::result::Result::Err(response), None)
-            },
-            {{/function:exceptions}}
-            ::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn)) => {
-                let response = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::ApplicationException(aexn);
-                (::std::result::Result::Err(response), None)
-            },
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
         };
 
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn>(
+        let response = ::fbthrift::help::serialize_result_envelope::<P, R, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn>(
             "{{function:name}}",
             METHOD_NAME.as_cstr(),
             _seqid,

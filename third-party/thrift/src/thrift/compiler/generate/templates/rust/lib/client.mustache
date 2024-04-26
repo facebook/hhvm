@@ -160,7 +160,7 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn, S>(de).await??;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn, S>(de).await??;
 
             let initial = res.map_err(<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error as ::std::convert::From<_>>::from);
             {{#function:stream_has_first_response?}}

@@ -46,10 +46,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ReturnstreamStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ReturnstreamStreamExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -179,10 +175,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ReturnstreamResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ReturnstreamResponseExn
@@ -318,10 +310,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ReturnstreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -372,10 +360,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for StreamthrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for StreamthrowsStreamExn
@@ -521,10 +505,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for StreamthrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for StreamthrowsResponseExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -658,10 +638,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for StreamthrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -702,10 +678,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ServicethrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ServicethrowsStreamExn
@@ -846,10 +818,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ServicethrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ServicethrowsResponseExn
@@ -1009,10 +977,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ServicethrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -1053,10 +1017,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for Servicethrows2StreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for Servicethrows2StreamExn
@@ -1206,10 +1166,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for Servicethrows2ResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for Servicethrows2ResponseExn
@@ -1393,10 +1349,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for Servicethrows2Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -1447,10 +1399,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for BoththrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BoththrowsStreamExn
@@ -1603,10 +1551,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for BoththrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BoththrowsResponseExn
@@ -1766,10 +1710,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for BoththrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -1820,10 +1760,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ResponseandstreamstreamthrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamstreamthrowsStreamExn
@@ -1969,10 +1905,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ResponseandstreamstreamthrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamstreamthrowsResponseExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -2113,10 +2045,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ResponseandstreamstreamthrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -2157,10 +2085,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ResponseandstreamservicethrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamservicethrowsStreamExn
@@ -2301,10 +2225,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ResponseandstreamservicethrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamservicethrowsResponseExn
@@ -2471,10 +2391,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ResponseandstreamservicethrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -2525,10 +2441,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ResponseandstreamboththrowsStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamboththrowsStreamExn
@@ -2681,10 +2593,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ResponseandstreamboththrowsResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ResponseandstreamboththrowsResponseExn
@@ -2851,10 +2759,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ResponseandstreamboththrowsExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -2895,10 +2799,6 @@ pub mod pub_sub_streaming_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for ReturnstreamFastStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ReturnstreamFastStreamExn
@@ -3032,10 +2932,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::GetTType for ReturnstreamFastResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ReturnstreamFastResponseExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -3167,10 +3063,6 @@ pub mod pub_sub_streaming_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for ReturnstreamFastExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
 

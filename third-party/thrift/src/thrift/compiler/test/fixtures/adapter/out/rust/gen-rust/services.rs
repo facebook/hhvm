@@ -58,10 +58,6 @@ pub mod service {
         }
     }
 
-    impl ::fbthrift::GetTType for FuncExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FuncExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -206,10 +202,6 @@ pub mod adapter_service {
         }
     }
 
-    impl ::fbthrift::GetTType for CountExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for CountExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -349,10 +341,6 @@ pub mod adapter_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for AdaptedTypesExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for AdaptedTypesExn

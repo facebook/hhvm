@@ -58,10 +58,6 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::GetTType for MapListExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for MapListExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -195,10 +191,6 @@ pub mod nested_containers {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for MapSetExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for MapSetExn
@@ -336,10 +328,6 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::GetTType for ListMapExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ListMapExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -475,10 +463,6 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::GetTType for ListSetExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ListSetExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -612,10 +596,6 @@ pub mod nested_containers {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for TurtlesExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for TurtlesExn

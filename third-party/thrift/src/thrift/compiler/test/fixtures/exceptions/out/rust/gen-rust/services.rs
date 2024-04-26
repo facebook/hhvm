@@ -58,10 +58,6 @@ pub mod raiser {
         }
     }
 
-    impl ::fbthrift::GetTType for DoBlandExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for DoBlandExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -228,10 +224,6 @@ pub mod raiser {
                 Self::s(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for DoRaiseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for DoRaiseExn
@@ -408,10 +400,6 @@ pub mod raiser {
         }
     }
 
-    impl ::fbthrift::GetTType for Get200Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for Get200Exn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -584,10 +572,6 @@ pub mod raiser {
                 Self::s(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for Get500Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for Get500Exn

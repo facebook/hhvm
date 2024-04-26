@@ -69,10 +69,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for PingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PingExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -221,10 +217,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for GetRandomDataExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for GetRandomDataExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -364,10 +356,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for HasDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for HasDataByIdExn
@@ -511,10 +499,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for GetDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for GetDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -656,10 +640,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for PutDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PutDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -795,10 +775,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for LobDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for LobDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -932,10 +908,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for DoNothingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for DoNothingExn
@@ -1076,10 +1048,6 @@ pub mod my_service_prio_parent {
         }
     }
 
-    impl ::fbthrift::GetTType for PingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PingExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1213,10 +1181,6 @@ pub mod my_service_prio_parent {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for PongExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for PongExn
@@ -1355,10 +1319,6 @@ pub mod my_service_prio_child {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for PangExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for PangExn
@@ -1500,10 +1460,6 @@ pub mod bad_interaction {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1639,10 +1595,6 @@ pub mod bad_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BarExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BarExn
@@ -1789,10 +1741,6 @@ pub mod foo_bar_baz_service {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1928,10 +1876,6 @@ pub mod foo_bar_baz_service {
         }
     }
 
-    impl ::fbthrift::GetTType for BarExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for BarExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -2065,10 +2009,6 @@ pub mod foo_bar_baz_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BazExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BazExn

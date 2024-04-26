@@ -60,10 +60,6 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::GetTType for FExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -185,10 +181,6 @@ pub mod c {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for NumbersStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for NumbersStreamExn
@@ -320,10 +312,6 @@ pub mod c {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for NumbersResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for NumbersResponseExn
@@ -459,10 +447,6 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::GetTType for NumbersExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
     #[derive(Clone, Debug)]
@@ -526,10 +510,6 @@ pub mod c {
                 Self::bang(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for ThingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for ThingExn

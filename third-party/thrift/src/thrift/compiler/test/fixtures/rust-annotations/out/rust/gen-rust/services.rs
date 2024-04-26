@@ -58,10 +58,6 @@ pub mod service1 {
         }
     }
 
-    impl ::fbthrift::GetTType for RExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for RExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -204,10 +200,6 @@ pub mod s2 {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for RExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for RExn
@@ -365,10 +357,6 @@ pub mod all_methods {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -524,10 +512,6 @@ pub mod all_methods {
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BarExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BarExn
@@ -698,10 +682,6 @@ pub mod one_method {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -846,10 +826,6 @@ pub mod one_method {
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BarExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BarExn
@@ -1020,10 +996,6 @@ pub mod one_method_opt_out {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1168,10 +1140,6 @@ pub mod one_method_opt_out {
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BarExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BarExn

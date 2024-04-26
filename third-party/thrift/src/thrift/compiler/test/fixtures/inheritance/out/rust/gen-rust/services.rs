@@ -58,10 +58,6 @@ pub mod my_root {
         }
     }
 
-    impl ::fbthrift::GetTType for DoRootExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for DoRootExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -200,10 +196,6 @@ pub mod my_node {
         }
     }
 
-    impl ::fbthrift::GetTType for DoMidExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for DoMidExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -340,10 +332,6 @@ pub mod my_leaf {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for DoLeafExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for DoLeafExn

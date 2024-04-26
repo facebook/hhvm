@@ -100,10 +100,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
     {{/function:enable_anyhow_to_application_exn}}
 
-    impl ::fbthrift::GetTType for {{function:upcamel}}StreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}StreamExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -304,15 +300,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         }
     }
     {{/function:enable_anyhow_to_application_exn}}
-
-    impl ::fbthrift::GetTType for {{function:upcamel}}ResponseExn {
-        {{#function:stream_has_first_response?}}
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-        {{/function:stream_has_first_response?}}
-        {{^function:stream_has_first_response?}}
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
-        {{/function:stream_has_first_response?}}
-    }
 
     impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}ResponseExn
     where
@@ -550,10 +537,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 {{/function:exceptions}}
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for {{function:upcamel}}Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     {{^function:stream?}}

@@ -58,10 +58,6 @@ pub mod foo_service {
         }
     }
 
-    impl ::fbthrift::GetTType for SimpleRpcExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for SimpleRpcExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -198,10 +194,6 @@ pub mod f_b303_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for SimpleRpcExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for SimpleRpcExn
@@ -348,10 +340,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for PingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PingExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -485,10 +473,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for GetRandomDataExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for GetRandomDataExn
@@ -632,10 +616,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for SinkExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for SinkExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -771,10 +751,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for PutDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PutDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -908,10 +884,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for HasDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for HasDataByIdExn
@@ -1055,10 +1027,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for GetDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for GetDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1200,10 +1168,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for DeleteDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for DeleteDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1339,10 +1303,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for LobDataByIdExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for LobDataByIdExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1476,10 +1436,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for InvalidReturnForHackExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for InvalidReturnForHackExn
@@ -1623,10 +1579,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for RpcSkippedCodegenExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for RpcSkippedCodegenExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1763,10 +1715,6 @@ pub mod db_mixed_stack_arguments {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for GetDataByKey0Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for GetDataByKey0Exn
@@ -1908,10 +1856,6 @@ pub mod db_mixed_stack_arguments {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for GetDataByKey1Exn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for GetDataByKey1Exn

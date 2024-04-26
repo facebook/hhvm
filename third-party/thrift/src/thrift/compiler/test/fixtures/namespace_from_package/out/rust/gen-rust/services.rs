@@ -58,10 +58,6 @@ pub mod test_service {
         }
     }
 
-    impl ::fbthrift::GetTType for InitExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for InitExn
     where
         P: ::fbthrift::ProtocolWriter,

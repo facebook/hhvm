@@ -70,10 +70,6 @@ pub mod my_interaction {
         }
     }
 
-    impl ::fbthrift::GetTType for FrobnicateExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -228,10 +224,6 @@ pub mod my_interaction {
         }
     }
 
-    impl ::fbthrift::GetTType for PingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PingExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -353,10 +345,6 @@ pub mod my_interaction {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for TruthifyStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for TruthifyStreamExn
@@ -488,10 +476,6 @@ pub mod my_interaction {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for TruthifyResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for TruthifyResponseExn
@@ -627,10 +611,6 @@ pub mod my_interaction {
         }
     }
 
-    impl ::fbthrift::GetTType for TruthifyExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
 }
@@ -687,10 +667,6 @@ pub mod my_interaction_fast {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for FrobnicateExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
@@ -834,10 +810,6 @@ pub mod my_interaction_fast {
         }
     }
 
-    impl ::fbthrift::GetTType for PingExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for PingExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -959,10 +931,6 @@ pub mod my_interaction_fast {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for TruthifyStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for TruthifyStreamExn
@@ -1094,10 +1062,6 @@ pub mod my_interaction_fast {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for TruthifyResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
     }
 
     impl<P> ::fbthrift::Serialize<P> for TruthifyResponseExn
@@ -1233,10 +1197,6 @@ pub mod my_interaction_fast {
         }
     }
 
-    impl ::fbthrift::GetTType for TruthifyExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
 
 
 }
@@ -1293,10 +1253,6 @@ pub mod serial_interaction {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for FrobnicateExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
@@ -1436,10 +1392,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for FooExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for FooExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1573,10 +1525,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for InteractExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for InteractExn
@@ -1714,10 +1662,6 @@ pub mod my_service {
         }
     }
 
-    impl ::fbthrift::GetTType for InteractFastExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for InteractFastExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -1845,10 +1789,6 @@ pub mod my_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for SerializeStreamExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for SerializeStreamExn
@@ -1980,10 +1920,6 @@ pub mod my_service {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
         }
-    }
-
-    impl ::fbthrift::GetTType for SerializeResponseExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for SerializeResponseExn
@@ -2124,10 +2060,6 @@ pub mod my_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for SerializeExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
 

@@ -58,10 +58,6 @@ pub mod foo {
         }
     }
 
-    impl ::fbthrift::GetTType for ReturnExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for ReturnExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -195,10 +191,6 @@ pub mod foo {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for SuperExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for SuperExn

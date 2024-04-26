@@ -58,10 +58,6 @@ pub mod some_service {
         }
     }
 
-    impl ::fbthrift::GetTType for BounceMapExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-
     impl<P> ::fbthrift::Serialize<P> for BounceMapExn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -201,10 +197,6 @@ pub mod some_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
         }
-    }
-
-    impl ::fbthrift::GetTType for BinaryKeyedMapExn {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
     impl<P> ::fbthrift::Serialize<P> for BinaryKeyedMapExn

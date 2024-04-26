@@ -68,6 +68,16 @@ class {{> structs/unadapted_name}}(metaclass={{!
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
+    {{!
+      makes reflection work in auto-migrated thrift-py3
+    }}{{#program:py3_auto_migrate?}}
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("{{program:module_path}}.types_reflection")
+        return types_reflection.get_reflection__{{struct:name}}()
+    {{/program:py3_auto_migrate?}}
 
     {{#struct:exception?}}
     {{#struct:exception_message?}}

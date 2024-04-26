@@ -155,6 +155,8 @@ class python_mstch_program : public mstch_program {
             {"program:adapter_modules", &python_mstch_program::adapter_modules},
             {"program:adapter_type_hint_modules",
              &python_mstch_program::adapter_type_hint_modules},
+            {"program:py3_auto_migrate?",
+             &python_mstch_program::py3_auto_migrate},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -164,6 +166,8 @@ class python_mstch_program : public mstch_program {
     visit_types_for_typedefs();
     visit_types_for_adapters();
   }
+
+  mstch::node py3_auto_migrate() { return has_option("auto_migrate"); }
 
   mstch::node is_types_file() { return has_option("is_types_file"); }
 

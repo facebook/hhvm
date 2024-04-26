@@ -40,6 +40,12 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_SimpleException()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__SimpleException()
+
     def _to_python(self):
         return self
 
@@ -84,6 +90,12 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_OptionalRefStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__OptionalRefStruct()
 
     def _to_python(self):
         return self
@@ -193,6 +205,12 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_SimpleStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__SimpleStruct()
+
     def _to_python(self):
         return self
 
@@ -256,6 +274,12 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_HiddenTypeFieldsStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__HiddenTypeFieldsStruct()
+
     def _to_python(self):
         return self
 
@@ -301,6 +325,12 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_AdaptedUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__AdaptedUnion()
+
     def _to_python(self):
         return self
 
@@ -345,6 +375,12 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_HiddenException()
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__HiddenException()
 
     def _to_python(self):
         return self
@@ -463,6 +499,12 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__ComplexStruct()
+
     def _to_python(self):
         return self
 
@@ -508,6 +550,12 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_BinaryUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__BinaryUnion()
+
     def _to_python(self):
         return self
 
@@ -552,6 +600,12 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_BinaryUnionStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__BinaryUnionStruct()
 
     def _to_python(self):
         return self

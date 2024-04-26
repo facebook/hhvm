@@ -8,19 +8,6 @@ pub mod service {
 
     pub type FuncError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::service::FuncExn {
-        type Success = crate::types::MyI32_4873;
-        type Return = crate::types::MyI32_4873;
-        type Error = FuncError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::service::FuncExn> for FuncError {
         fn from(e: crate::services::service::FuncExn) -> Self {
             match e {
@@ -30,25 +17,15 @@ pub mod service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FuncReader {}
+
 }
 
 /// Error definitions for `AdapterService`.
 pub mod adapter_service {
 
     pub type CountError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::adapter_service::CountExn {
-        type Success = crate::types::CountingStruct;
-        type Return = crate::types::CountingStruct;
-        type Error = CountError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::adapter_service::CountExn> for CountError {
         fn from(e: crate::services::adapter_service::CountExn) -> Self {
@@ -59,20 +36,10 @@ pub mod adapter_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum CountReader {}
+
     pub type AdaptedTypesError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::adapter_service::AdaptedTypesExn {
-        type Success = crate::types::HeapAllocated;
-        type Return = crate::types::HeapAllocated;
-        type Error = AdaptedTypesError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::adapter_service::AdaptedTypesExn> for AdaptedTypesError {
         fn from(e: crate::services::adapter_service::AdaptedTypesExn) -> Self {
@@ -82,6 +49,9 @@ pub mod adapter_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum AdaptedTypesReader {}
 
 }
 

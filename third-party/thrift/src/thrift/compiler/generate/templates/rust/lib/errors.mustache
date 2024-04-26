@@ -143,33 +143,6 @@ pub mod {{service:snake}} {
     pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
 
     {{/function:exceptions?}}
-    impl ::fbthrift::help::StreamExn for {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn {
-        type Success = {{>lib/server_ok_type}};
-        type Return = {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}};
-        type Error = {{function:upcamel}}Error;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                {{^function:stream?}}
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                {{/function:stream?}}
-                {{#function:stream?}}
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    {{#function:stream_has_first_response?}}
-                    let (resp, stream) = success;
-                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
-                    {{/function:stream_has_first_response?}}
-                    {{^function:stream_has_first_response?}}
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                    {{/function:stream_has_first_response?}}
-                }),
-                {{/function:stream?}}
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn> for {{function:upcamel}}Error {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
             match e {
@@ -182,6 +155,9 @@ pub mod {{service:snake}} {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum {{function:upcamel}}Reader {}
 
     {{/function:sink?}}
     {{#function:stream?}}
@@ -287,6 +263,9 @@ pub mod {{service:snake}} {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum {{function:upcamel}}StreamReader {}
 
     {{/function:stream?}}
     {{/function:starts_interaction?}}

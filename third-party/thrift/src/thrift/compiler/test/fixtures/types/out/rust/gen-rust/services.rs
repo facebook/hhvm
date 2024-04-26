@@ -93,10 +93,11 @@ pub mod some_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BounceMapExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::some_service::BounceMapReader {
         type Success = included__types::SomeMap;
+        type Error = crate::errors::some_service::BounceMapError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod some_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BounceMapExn",
+                                "BounceMapError",
                                 badty,
                                 badid,
                             ),
@@ -136,7 +137,7 @@ pub mod some_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BounceMapExn"),
+                    format!("Empty union {}", "BounceMapError"),
                 )
                 .into(),
             )
@@ -230,10 +231,11 @@ pub mod some_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BinaryKeyedMapExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::some_service::BinaryKeyedMapReader {
         type Success = ::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>;
+        type Error = crate::errors::some_service::BinaryKeyedMapError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -260,7 +262,7 @@ pub mod some_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BinaryKeyedMapExn",
+                                "BinaryKeyedMapError",
                                 badty,
                                 badid,
                             ),
@@ -273,7 +275,7 @@ pub mod some_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BinaryKeyedMapExn"),
+                    format!("Empty union {}", "BinaryKeyedMapError"),
                 )
                 .into(),
             )

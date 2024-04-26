@@ -23,19 +23,6 @@ pub mod c {
 
     pub type FError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::c::FExn {
-        type Success = ();
-        type Return = ();
-        type Error = FError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::c::FExn> for FError {
         fn from(e: crate::services::c::FExn) -> Self {
             match e {
@@ -45,24 +32,10 @@ pub mod c {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FReader {}
+
     pub type NumbersError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::c::NumbersExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>;
-        type Error = NumbersError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::c::NumbersExn> for NumbersError {
         fn from(e: crate::services::c::NumbersExn) -> Self {
@@ -72,6 +45,9 @@ pub mod c {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum NumbersReader {}
 
     pub type NumbersStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -83,6 +59,9 @@ pub mod c {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum NumbersStreamReader {}
 
     /// Errors for thing (client side).
     #[derive(Debug)]
@@ -169,19 +148,6 @@ pub mod c {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::c::ThingExn {
-        type Success = ::std::string::String;
-        type Return = ::std::string::String;
-        type Error = ThingError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::c::ThingExn> for ThingError {
         fn from(e: crate::services::c::ThingExn) -> Self {
             match e {
@@ -192,6 +158,9 @@ pub mod c {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ThingReader {}
 
 }
 

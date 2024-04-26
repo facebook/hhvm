@@ -93,10 +93,11 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for MapListExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::nested_containers::MapListReader {
         type Success = ();
+        type Error = crate::errors::nested_containers::MapListError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod nested_containers {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "MapListExn",
+                                "MapListError",
                                 badty,
                                 badid,
                             ),
@@ -224,10 +225,11 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for MapSetExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::nested_containers::MapSetReader {
         type Success = ();
+        type Error = crate::errors::nested_containers::MapSetError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -254,7 +256,7 @@ pub mod nested_containers {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "MapSetExn",
+                                "MapSetError",
                                 badty,
                                 badid,
                             ),
@@ -355,10 +357,11 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ListMapExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::nested_containers::ListMapReader {
         type Success = ();
+        type Error = crate::errors::nested_containers::ListMapError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -385,7 +388,7 @@ pub mod nested_containers {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ListMapExn",
+                                "ListMapError",
                                 badty,
                                 badid,
                             ),
@@ -486,10 +489,11 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ListSetExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::nested_containers::ListSetReader {
         type Success = ();
+        type Error = crate::errors::nested_containers::ListSetError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -516,7 +520,7 @@ pub mod nested_containers {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ListSetExn",
+                                "ListSetError",
                                 badty,
                                 badid,
                             ),
@@ -617,10 +621,11 @@ pub mod nested_containers {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for TurtlesExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::nested_containers::TurtlesReader {
         type Success = ();
+        type Error = crate::errors::nested_containers::TurtlesError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -647,7 +652,7 @@ pub mod nested_containers {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "TurtlesExn",
+                                "TurtlesError",
                                 badty,
                                 badid,
                             ),

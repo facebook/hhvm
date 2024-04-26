@@ -93,10 +93,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::some_service::BounceMapExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::some_service::BounceMapReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::some_service::BounceMapError::ApplicationException(aexn))
                 }
@@ -141,10 +141,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::some_service::BinaryKeyedMapExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::some_service::BinaryKeyedMapReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::some_service::BinaryKeyedMapError::ApplicationException(aexn))
                 }

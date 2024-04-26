@@ -112,10 +112,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::service1::RExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::service1::RReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::service1::RError::ApplicationException(aexn))
                 }
@@ -397,10 +397,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::s2::RExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::s2::RReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::s2::RError::ApplicationException(aexn))
                 }
@@ -682,10 +682,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::all_methods::FooExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::all_methods::FooReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::all_methods::FooError::ApplicationException(aexn))
                 }
@@ -728,10 +728,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::all_methods::BarExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::all_methods::BarReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::all_methods::BarError::ApplicationException(aexn))
                 }
@@ -1065,10 +1065,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::one_method::FooExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::one_method::FooReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::one_method::FooError::ApplicationException(aexn))
                 }
@@ -1111,10 +1111,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::one_method::BarExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::one_method::BarReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::one_method::BarError::ApplicationException(aexn))
                 }
@@ -1448,10 +1448,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::one_method_opt_out::FooExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::one_method_opt_out::FooReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::one_method_opt_out::FooError::ApplicationException(aexn))
                 }
@@ -1494,10 +1494,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::one_method_opt_out::BarExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::one_method_opt_out::BarReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::one_method_opt_out::BarError::ApplicationException(aexn))
                 }

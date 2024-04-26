@@ -93,10 +93,11 @@ pub mod my_root {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for DoRootExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::my_root::DoRootReader {
         type Success = ();
+        type Error = crate::errors::my_root::DoRootError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod my_root {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "DoRootExn",
+                                "DoRootError",
                                 badty,
                                 badid,
                             ),
@@ -227,10 +228,11 @@ pub mod my_node {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for DoMidExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::my_node::DoMidReader {
         type Success = ();
+        type Error = crate::errors::my_node::DoMidError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -257,7 +259,7 @@ pub mod my_node {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "DoMidExn",
+                                "DoMidError",
                                 badty,
                                 badid,
                             ),
@@ -361,10 +363,11 @@ pub mod my_leaf {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for DoLeafExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::my_leaf::DoLeafReader {
         type Success = ();
+        type Error = crate::errors::my_leaf::DoLeafError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -391,7 +394,7 @@ pub mod my_leaf {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "DoLeafExn",
+                                "DoLeafError",
                                 badty,
                                 badid,
                             ),

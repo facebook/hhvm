@@ -88,10 +88,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::raiser::DoBlandExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::raiser::DoBlandReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::raiser::DoBlandError::ApplicationException(aexn))
                 }
@@ -134,10 +134,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::raiser::DoRaiseExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::raiser::DoRaiseReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::raiser::DoRaiseError::ApplicationException(aexn))
                 }
@@ -180,10 +180,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::raiser::Get200Exn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::raiser::Get200Reader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::raiser::Get200Error::ApplicationException(aexn))
                 }
@@ -226,10 +226,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::raiser::Get500Exn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::raiser::Get500Reader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::raiser::Get500Error::ApplicationException(aexn))
                 }

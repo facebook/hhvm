@@ -93,10 +93,11 @@ pub mod service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for FuncExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::service::FuncReader {
         type Success = crate::types::MyI32_4873;
+        type Error = crate::errors::service::FuncError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "FuncExn",
+                                "FuncError",
                                 badty,
                                 badid,
                             ),
@@ -136,7 +137,7 @@ pub mod service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "FuncExn"),
+                    format!("Empty union {}", "FuncError"),
                 )
                 .into(),
             )
@@ -233,10 +234,11 @@ pub mod adapter_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for CountExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::adapter_service::CountReader {
         type Success = crate::types::CountingStruct;
+        type Error = crate::errors::adapter_service::CountError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -263,7 +265,7 @@ pub mod adapter_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "CountExn",
+                                "CountError",
                                 badty,
                                 badid,
                             ),
@@ -276,7 +278,7 @@ pub mod adapter_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "CountExn"),
+                    format!("Empty union {}", "CountError"),
                 )
                 .into(),
             )
@@ -370,10 +372,11 @@ pub mod adapter_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for AdaptedTypesExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::adapter_service::AdaptedTypesReader {
         type Success = crate::types::HeapAllocated;
+        type Error = crate::errors::adapter_service::AdaptedTypesError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -400,7 +403,7 @@ pub mod adapter_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "AdaptedTypesExn",
+                                "AdaptedTypesError",
                                 badty,
                                 badid,
                             ),
@@ -413,7 +416,7 @@ pub mod adapter_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "AdaptedTypesExn"),
+                    format!("Empty union {}", "AdaptedTypesError"),
                 )
                 .into(),
             )

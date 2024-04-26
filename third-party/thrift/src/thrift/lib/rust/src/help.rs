@@ -75,14 +75,6 @@ pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
     Ok(length)
 }
 
-pub trait StreamExn: Sized {
-    type Success;
-    type Return;
-    type Error;
-
-    fn map_stream(res: Result<Self::Success, Self>) -> Result<Self::Return, Self::Error>;
-}
-
 pub trait SerializeExn {
     type Success;
 
@@ -169,8 +161,9 @@ where
 
 pub trait DeserializeExn: Sized {
     type Success;
+    type Error;
 
-    fn read_result<P>(p: &mut P) -> Result<Result<Self::Success, Self>>
+    fn read_result<P>(p: &mut P) -> Result<Result<Self::Success, Self::Error>>
     where
         P: ProtocolReader;
 }
@@ -179,7 +172,7 @@ pub trait DeserializeExn: Sized {
 /// deserializes either a reply or an ApplicationException.
 pub fn deserialize_response_envelope<P, EXN>(
     de: &mut P::Deserializer,
-) -> anyhow::Result<Result<Result<EXN::Success, EXN>, ApplicationException>>
+) -> anyhow::Result<Result<Result<EXN::Success, EXN::Error>, ApplicationException>>
 where
     P: Protocol,
     EXN: DeserializeExn,
@@ -222,12 +215,13 @@ impl Spawner for NoopSpawner {
 
 pub async fn async_deserialize_response_envelope<P, EXN, S>(
     mut de: P::Deserializer,
-) -> anyhow::Result<Result<Result<EXN::Success, EXN>, ApplicationException>>
+) -> anyhow::Result<Result<Result<EXN::Success, EXN::Error>, ApplicationException>>
 where
     P: Protocol,
     P::Deserializer: Send,
     EXN: DeserializeExn + Send + 'static,
     EXN::Success: Send + 'static,
+    EXN::Error: Send + 'static,
     S: Spawner,
 {
     S::spawn(move || deserialize_response_envelope::<P, EXN>(&mut de)).await

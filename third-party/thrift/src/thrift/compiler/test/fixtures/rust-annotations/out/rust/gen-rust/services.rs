@@ -93,10 +93,11 @@ pub mod service1 {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for RExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::service1::RReader {
         type Success = crate::types::T6;
+        type Error = crate::errors::service1::RError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod service1 {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "RExn",
+                                "RError",
                                 badty,
                                 badid,
                             ),
@@ -136,7 +137,7 @@ pub mod service1 {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "RExn"),
+                    format!("Empty union {}", "RError"),
                 )
                 .into(),
             )
@@ -233,10 +234,11 @@ pub mod s2 {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for RExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::s2::RReader {
         type Success = crate::types::T6;
+        type Error = crate::errors::s2::RError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -263,7 +265,7 @@ pub mod s2 {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "RExn",
+                                "RError",
                                 badty,
                                 badid,
                             ),
@@ -276,7 +278,7 @@ pub mod s2 {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "RExn"),
+                    format!("Empty union {}", "RError"),
                 )
                 .into(),
             )
@@ -384,10 +386,11 @@ pub mod all_methods {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for FooExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::all_methods::FooReader {
         type Success = ();
+        type Error = crate::errors::all_methods::FooError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -414,7 +417,7 @@ pub mod all_methods {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "FooExn",
+                                "FooError",
                                 badty,
                                 badid,
                             ),
@@ -545,10 +548,11 @@ pub mod all_methods {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BarExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::all_methods::BarReader {
         type Success = ::std::string::String;
+        type Error = crate::errors::all_methods::BarError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -572,7 +576,7 @@ pub mod all_methods {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::se(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::se(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -580,7 +584,7 @@ pub mod all_methods {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BarExn",
+                                "BarError",
                                 badty,
                                 badid,
                             ),
@@ -593,7 +597,7 @@ pub mod all_methods {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BarExn"),
+                    format!("Empty union {}", "BarError"),
                 )
                 .into(),
             )
@@ -701,10 +705,11 @@ pub mod one_method {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for FooExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::one_method::FooReader {
         type Success = ();
+        type Error = crate::errors::one_method::FooError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -731,7 +736,7 @@ pub mod one_method {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "FooExn",
+                                "FooError",
                                 badty,
                                 badid,
                             ),
@@ -851,10 +856,11 @@ pub mod one_method {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BarExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::one_method::BarReader {
         type Success = ::std::string::String;
+        type Error = crate::errors::one_method::BarError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -878,7 +884,7 @@ pub mod one_method {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::se(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::se(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -886,7 +892,7 @@ pub mod one_method {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BarExn",
+                                "BarError",
                                 badty,
                                 badid,
                             ),
@@ -899,7 +905,7 @@ pub mod one_method {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BarExn"),
+                    format!("Empty union {}", "BarError"),
                 )
                 .into(),
             )
@@ -1007,10 +1013,11 @@ pub mod one_method_opt_out {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for FooExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::one_method_opt_out::FooReader {
         type Success = ();
+        type Error = crate::errors::one_method_opt_out::FooError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1037,7 +1044,7 @@ pub mod one_method_opt_out {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "FooExn",
+                                "FooError",
                                 badty,
                                 badid,
                             ),
@@ -1157,10 +1164,11 @@ pub mod one_method_opt_out {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BarExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::one_method_opt_out::BarReader {
         type Success = ::std::string::String;
+        type Error = crate::errors::one_method_opt_out::BarError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1184,7 +1192,7 @@ pub mod one_method_opt_out {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::se(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::se(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1192,7 +1200,7 @@ pub mod one_method_opt_out {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BarExn",
+                                "BarError",
                                 badty,
                                 badid,
                             ),
@@ -1205,7 +1213,7 @@ pub mod one_method_opt_out {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BarExn"),
+                    format!("Empty union {}", "BarError"),
                 )
                 .into(),
             )

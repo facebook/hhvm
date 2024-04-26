@@ -95,10 +95,11 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for FExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::c::FReader {
         type Success = ();
+        type Error = crate::errors::c::FError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -125,7 +126,7 @@ pub mod c {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "FExn",
+                                "FError",
                                 badty,
                                 badid,
                             ),
@@ -218,10 +219,11 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for NumbersStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::c::NumbersStreamReader {
         type Success = crate::types::number;
+        type Error = crate::errors::c::NumbersStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -248,7 +250,7 @@ pub mod c {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "NumbersStreamExn",
+                                "NumbersStreamError",
                                 badty,
                                 badid,
                             ),
@@ -261,7 +263,7 @@ pub mod c {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "NumbersStreamExn"),
+                    format!("Empty union {}", "NumbersStreamError"),
                 )
                 .into(),
             )
@@ -354,10 +356,11 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for NumbersExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::c::NumbersReader {
         type Success = ();
+        type Error = crate::errors::c::NumbersError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -384,7 +387,7 @@ pub mod c {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "NumbersExn",
+                                "NumbersError",
                                 badty,
                                 badid,
                             ),
@@ -504,10 +507,11 @@ pub mod c {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ThingExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::c::ThingReader {
         type Success = ::std::string::String;
+        type Error = crate::errors::c::ThingError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -531,7 +535,7 @@ pub mod c {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::bang(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::bang(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -539,7 +543,7 @@ pub mod c {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ThingExn",
+                                "ThingError",
                                 badty,
                                 badid,
                             ),
@@ -552,7 +556,7 @@ pub mod c {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ThingExn"),
+                    format!("Empty union {}", "ThingError"),
                 )
                 .into(),
             )

@@ -90,10 +90,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::nested_containers::MapListExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::nested_containers::MapListReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::nested_containers::MapListError::ApplicationException(aexn))
                 }
@@ -138,10 +138,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::nested_containers::MapSetExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::nested_containers::MapSetReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::nested_containers::MapSetError::ApplicationException(aexn))
                 }
@@ -186,10 +186,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::nested_containers::ListMapExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::nested_containers::ListMapReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::nested_containers::ListMapError::ApplicationException(aexn))
                 }
@@ -234,10 +234,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::nested_containers::ListSetExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::nested_containers::ListSetReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::nested_containers::ListSetError::ApplicationException(aexn))
                 }
@@ -282,10 +282,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::nested_containers::TurtlesExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::nested_containers::TurtlesReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::nested_containers::TurtlesError::ApplicationException(aexn))
                 }

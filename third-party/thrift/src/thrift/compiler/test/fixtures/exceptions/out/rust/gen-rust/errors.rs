@@ -62,19 +62,6 @@ pub mod raiser {
 
     pub type DoBlandError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::raiser::DoBlandExn {
-        type Success = ();
-        type Return = ();
-        type Error = DoBlandError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::raiser::DoBlandExn> for DoBlandError {
         fn from(e: crate::services::raiser::DoBlandExn) -> Self {
             match e {
@@ -83,6 +70,9 @@ pub mod raiser {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum DoBlandReader {}
 
     /// Errors for doRaise (client side).
     #[derive(Debug)]
@@ -221,19 +211,6 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::raiser::DoRaiseExn {
-        type Success = ();
-        type Return = ();
-        type Error = DoRaiseError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::raiser::DoRaiseExn> for DoRaiseError {
         fn from(e: crate::services::raiser::DoRaiseExn) -> Self {
             match e {
@@ -249,20 +226,10 @@ pub mod raiser {
         }
     }
 
+    #[doc(hidden)]
+    pub enum DoRaiseReader {}
+
     pub type Get200Error = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::raiser::Get200Exn {
-        type Success = ::std::string::String;
-        type Return = ::std::string::String;
-        type Error = Get200Error;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::raiser::Get200Exn> for Get200Error {
         fn from(e: crate::services::raiser::Get200Exn) -> Self {
@@ -272,6 +239,9 @@ pub mod raiser {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum Get200Reader {}
 
     /// Errors for get500 (client side).
     #[derive(Debug)]
@@ -410,19 +380,6 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::raiser::Get500Exn {
-        type Success = ::std::string::String;
-        type Return = ::std::string::String;
-        type Error = Get500Error;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::raiser::Get500Exn> for Get500Error {
         fn from(e: crate::services::raiser::Get500Exn) -> Self {
             match e {
@@ -437,6 +394,9 @@ pub mod raiser {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum Get500Reader {}
 
 }
 

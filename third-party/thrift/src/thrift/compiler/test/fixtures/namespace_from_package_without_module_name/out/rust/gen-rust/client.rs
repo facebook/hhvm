@@ -90,10 +90,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::test_service::InitExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::test_service::InitReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::test_service::InitError::ApplicationException(aexn))
                 }

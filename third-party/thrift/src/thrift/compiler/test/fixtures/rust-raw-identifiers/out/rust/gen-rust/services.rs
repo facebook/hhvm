@@ -93,10 +93,11 @@ pub mod foo {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ReturnExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::foo::ReturnReader {
         type Success = ();
+        type Error = crate::errors::foo::ReturnError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod foo {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ReturnExn",
+                                "ReturnError",
                                 badty,
                                 badid,
                             ),
@@ -224,10 +225,11 @@ pub mod foo {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for SuperExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::foo::SuperReader {
         type Success = ();
+        type Error = crate::errors::foo::SuperError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -254,7 +256,7 @@ pub mod foo {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "SuperExn",
+                                "SuperError",
                                 badty,
                                 badid,
                             ),

@@ -50,23 +50,6 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ReturnstreamExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>;
-        type Error = ReturnstreamError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamExn> for ReturnstreamError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamExn) -> Self {
             match e {
@@ -75,6 +58,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ReturnstreamReader {}
 
     pub type ReturnstreamStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -87,24 +73,10 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ReturnstreamStreamReader {}
+
     pub type StreamthrowsError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::StreamthrowsExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>;
-        type Error = StreamthrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsExn> for StreamthrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsExn) -> Self {
@@ -114,6 +86,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum StreamthrowsReader {}
 
     #[derive(Debug)]
     pub enum StreamthrowsStreamError {
@@ -202,6 +177,9 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum StreamthrowsStreamReader {}
+
     /// Errors for servicethrows (client side).
     #[derive(Debug)]
     pub enum ServicethrowsError {
@@ -287,23 +265,6 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ServicethrowsExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>;
-        type Error = ServicethrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsExn> for ServicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsExn) -> Self {
             match e {
@@ -315,6 +276,9 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ServicethrowsReader {}
+
     pub type ServicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsStreamExn> for ServicethrowsStreamError {
@@ -325,6 +289,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ServicethrowsStreamReader {}
 
     /// Errors for servicethrows2 (client side).
     #[derive(Debug)]
@@ -437,23 +404,6 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::Servicethrows2Exn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>;
-        type Error = Servicethrows2Error;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2Exn> for Servicethrows2Error {
         fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2Exn) -> Self {
             match e {
@@ -467,6 +417,9 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum Servicethrows2Reader {}
+
     pub type Servicethrows2StreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for Servicethrows2StreamError {
@@ -477,6 +430,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum Servicethrows2StreamReader {}
 
     /// Errors for boththrows (client side).
     #[derive(Debug)]
@@ -563,23 +519,6 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::BoththrowsExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>;
-        type Error = BoththrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsExn> for BoththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::BoththrowsExn) -> Self {
             match e {
@@ -590,6 +529,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum BoththrowsReader {}
 
     #[derive(Debug)]
     pub enum BoththrowsStreamError {
@@ -678,27 +620,10 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum BoththrowsStreamReader {}
+
     pub type ResponseandstreamstreamthrowsError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn {
-        type Success = (
-    ::std::primitive::i32,
-    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
-)
-;
-        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>);
-        type Error = ResponseandstreamstreamthrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let (resp, stream) = success;
-                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> for ResponseandstreamstreamthrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn) -> Self {
@@ -708,6 +633,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ResponseandstreamstreamthrowsReader {}
 
     #[derive(Debug)]
     pub enum ResponseandstreamstreamthrowsStreamError {
@@ -796,6 +724,9 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ResponseandstreamstreamthrowsStreamReader {}
+
     /// Errors for responseandstreamservicethrows (client side).
     #[derive(Debug)]
     pub enum ResponseandstreamservicethrowsError {
@@ -881,26 +812,6 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn {
-        type Success = (
-    ::std::primitive::i32,
-    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
-)
-;
-        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>);
-        type Error = ResponseandstreamservicethrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let (resp, stream) = success;
-                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> for ResponseandstreamservicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn) -> Self {
             match e {
@@ -912,6 +823,9 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ResponseandstreamservicethrowsReader {}
+
     pub type ResponseandstreamservicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn> for ResponseandstreamservicethrowsStreamError {
@@ -922,6 +836,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ResponseandstreamservicethrowsStreamReader {}
 
     /// Errors for responseandstreamboththrows (client side).
     #[derive(Debug)]
@@ -1008,26 +925,6 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn {
-        type Success = (
-    ::std::primitive::i32,
-    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
-)
-;
-        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>);
-        type Error = ResponseandstreamboththrowsError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let (resp, stream) = success;
-                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> for ResponseandstreamboththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn) -> Self {
             match e {
@@ -1038,6 +935,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ResponseandstreamboththrowsReader {}
 
     #[derive(Debug)]
     pub enum ResponseandstreamboththrowsStreamError {
@@ -1126,24 +1026,10 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ResponseandstreamboththrowsStreamReader {}
+
     pub type ReturnstreamFastError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::pub_sub_streaming_service::ReturnstreamFastExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>;
-        type Error = ReturnstreamFastError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastExn> for ReturnstreamFastError {
         fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastExn) -> Self {
@@ -1153,6 +1039,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ReturnstreamFastReader {}
 
     pub type ReturnstreamFastStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -1164,6 +1053,9 @@ pub mod pub_sub_streaming_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum ReturnstreamFastStreamReader {}
 
 }
 

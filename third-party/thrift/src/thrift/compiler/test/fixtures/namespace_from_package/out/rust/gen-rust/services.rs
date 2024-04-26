@@ -93,10 +93,11 @@ pub mod test_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for InitExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::test_service::InitReader {
         type Success = ::std::primitive::i64;
+        type Error = crate::errors::test_service::InitError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -123,7 +124,7 @@ pub mod test_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "InitExn",
+                                "InitError",
                                 badty,
                                 badid,
                             ),
@@ -136,7 +137,7 @@ pub mod test_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "InitExn"),
+                    format!("Empty union {}", "InitError"),
                 )
                 .into(),
             )

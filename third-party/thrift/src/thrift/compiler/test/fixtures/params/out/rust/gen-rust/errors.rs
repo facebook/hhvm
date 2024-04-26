@@ -8,19 +8,6 @@ pub mod nested_containers {
 
     pub type MapListError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::nested_containers::MapListExn {
-        type Success = ();
-        type Return = ();
-        type Error = MapListError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::nested_containers::MapListExn> for MapListError {
         fn from(e: crate::services::nested_containers::MapListExn) -> Self {
             match e {
@@ -30,20 +17,10 @@ pub mod nested_containers {
         }
     }
 
+    #[doc(hidden)]
+    pub enum MapListReader {}
+
     pub type MapSetError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::nested_containers::MapSetExn {
-        type Success = ();
-        type Return = ();
-        type Error = MapSetError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::nested_containers::MapSetExn> for MapSetError {
         fn from(e: crate::services::nested_containers::MapSetExn) -> Self {
@@ -54,20 +31,10 @@ pub mod nested_containers {
         }
     }
 
+    #[doc(hidden)]
+    pub enum MapSetReader {}
+
     pub type ListMapError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::nested_containers::ListMapExn {
-        type Success = ();
-        type Return = ();
-        type Error = ListMapError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::nested_containers::ListMapExn> for ListMapError {
         fn from(e: crate::services::nested_containers::ListMapExn) -> Self {
@@ -78,20 +45,10 @@ pub mod nested_containers {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ListMapReader {}
+
     pub type ListSetError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::nested_containers::ListSetExn {
-        type Success = ();
-        type Return = ();
-        type Error = ListSetError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::nested_containers::ListSetExn> for ListSetError {
         fn from(e: crate::services::nested_containers::ListSetExn) -> Self {
@@ -102,20 +59,10 @@ pub mod nested_containers {
         }
     }
 
+    #[doc(hidden)]
+    pub enum ListSetReader {}
+
     pub type TurtlesError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::nested_containers::TurtlesExn {
-        type Success = ();
-        type Return = ();
-        type Error = TurtlesError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::nested_containers::TurtlesExn> for TurtlesError {
         fn from(e: crate::services::nested_containers::TurtlesExn) -> Self {
@@ -125,6 +72,9 @@ pub mod nested_containers {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum TurtlesReader {}
 
 }
 

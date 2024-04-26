@@ -8,19 +8,6 @@ pub mod my_root {
 
     pub type DoRootError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::fbthrift::help::StreamExn for crate::services::my_root::DoRootExn {
-        type Success = ();
-        type Return = ();
-        type Error = DoRootError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::my_root::DoRootExn> for DoRootError {
         fn from(e: crate::services::my_root::DoRootExn) -> Self {
             match e {
@@ -30,25 +17,15 @@ pub mod my_root {
         }
     }
 
+    #[doc(hidden)]
+    pub enum DoRootReader {}
+
 }
 
 /// Error definitions for `MyNode`.
 pub mod my_node {
 
     pub type DoMidError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_node::DoMidExn {
-        type Success = ();
-        type Return = ();
-        type Error = DoMidError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_node::DoMidExn> for DoMidError {
         fn from(e: crate::services::my_node::DoMidExn) -> Self {
@@ -59,25 +36,15 @@ pub mod my_node {
         }
     }
 
+    #[doc(hidden)]
+    pub enum DoMidReader {}
+
 }
 
 /// Error definitions for `MyLeaf`.
 pub mod my_leaf {
 
     pub type DoLeafError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_leaf::DoLeafExn {
-        type Success = ();
-        type Return = ();
-        type Error = DoLeafError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_leaf::DoLeafExn> for DoLeafError {
         fn from(e: crate::services::my_leaf::DoLeafExn) -> Self {
@@ -87,6 +54,9 @@ pub mod my_leaf {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum DoLeafReader {}
 
 }
 

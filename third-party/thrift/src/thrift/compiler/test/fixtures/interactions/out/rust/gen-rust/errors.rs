@@ -106,19 +106,6 @@ pub mod my_interaction {
             Self::ApplicationException(ae)
         }
     }
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::FrobnicateExn {
-        type Success = ::std::primitive::i32;
-        type Return = ::std::primitive::i32;
-        type Error = FrobnicateError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
-
     impl ::std::convert::From<crate::services::my_interaction::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::my_interaction::FrobnicateExn) -> Self {
             match e {
@@ -130,20 +117,10 @@ pub mod my_interaction {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FrobnicateReader {}
+
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::PingExn {
-        type Success = ();
-        type Return = ();
-        type Error = PingError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_interaction::PingExn> for PingError {
         fn from(e: crate::services::my_interaction::PingExn) -> Self {
@@ -154,24 +131,10 @@ pub mod my_interaction {
         }
     }
 
+    #[doc(hidden)]
+    pub enum PingReader {}
+
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction::TruthifyExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>;
-        type Error = TruthifyError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_interaction::TruthifyExn> for TruthifyError {
         fn from(e: crate::services::my_interaction::TruthifyExn) -> Self {
@@ -181,6 +144,9 @@ pub mod my_interaction {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum TruthifyReader {}
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -193,25 +159,15 @@ pub mod my_interaction {
         }
     }
 
+    #[doc(hidden)]
+    pub enum TruthifyStreamReader {}
+
 }
 
 /// Error definitions for `MyInteractionFast`.
 pub mod my_interaction_fast {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::FrobnicateExn {
-        type Success = ::std::primitive::i32;
-        type Return = ::std::primitive::i32;
-        type Error = FrobnicateError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_interaction_fast::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::my_interaction_fast::FrobnicateExn) -> Self {
@@ -222,20 +178,10 @@ pub mod my_interaction_fast {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FrobnicateReader {}
+
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::PingExn {
-        type Success = ();
-        type Return = ();
-        type Error = PingError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_interaction_fast::PingExn> for PingError {
         fn from(e: crate::services::my_interaction_fast::PingExn) -> Self {
@@ -246,24 +192,10 @@ pub mod my_interaction_fast {
         }
     }
 
+    #[doc(hidden)]
+    pub enum PingReader {}
+
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_interaction_fast::TruthifyExn {
-        type Success =     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-;
-        type Return = ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>;
-        type Error = TruthifyError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let stream = success;
-                    ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from)))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyExn> for TruthifyError {
         fn from(e: crate::services::my_interaction_fast::TruthifyExn) -> Self {
@@ -273,6 +205,9 @@ pub mod my_interaction_fast {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum TruthifyReader {}
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -285,25 +220,15 @@ pub mod my_interaction_fast {
         }
     }
 
+    #[doc(hidden)]
+    pub enum TruthifyStreamReader {}
+
 }
 
 /// Error definitions for `SerialInteraction`.
 pub mod serial_interaction {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::serial_interaction::FrobnicateExn {
-        type Success = ();
-        type Return = ();
-        type Error = FrobnicateError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::serial_interaction::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::serial_interaction::FrobnicateExn) -> Self {
@@ -314,25 +239,15 @@ pub mod serial_interaction {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FrobnicateReader {}
+
 }
 
 /// Error definitions for `MyService`.
 pub mod my_service {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_service::FooExn {
-        type Success = ();
-        type Return = ();
-        type Error = FooError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_service::FooExn> for FooError {
         fn from(e: crate::services::my_service::FooExn) -> Self {
@@ -343,20 +258,10 @@ pub mod my_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum FooReader {}
+
     pub type InteractError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_service::InteractExn {
-        type Success = ();
-        type Return = ();
-        type Error = InteractError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_service::InteractExn> for InteractError {
         fn from(e: crate::services::my_service::InteractExn) -> Self {
@@ -367,20 +272,10 @@ pub mod my_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum InteractReader {}
+
     pub type InteractFastError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_service::InteractFastExn {
-        type Success = ::std::primitive::i32;
-        type Return = ::std::primitive::i32;
-        type Error = InteractFastError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok(success),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_service::InteractFastExn> for InteractFastError {
         fn from(e: crate::services::my_service::InteractFastExn) -> Self {
@@ -391,27 +286,10 @@ pub mod my_service {
         }
     }
 
+    #[doc(hidden)]
+    pub enum InteractFastReader {}
+
     pub type SerializeError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::fbthrift::help::StreamExn for crate::services::my_service::SerializeExn {
-        type Success = (
-    ::std::primitive::i32,
-    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
-)
-;
-        type Return = (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>);
-        type Error = SerializeError;
-
-        fn map_stream(res: ::std::result::Result<Self::Success, Self>) -> ::std::result::Result<Self::Return, Self::Error> {
-            match res {
-                ::std::result::Result::Ok(success) => ::std::result::Result::Ok({
-                    let (resp, stream) = success;
-                    (resp, ::futures::StreamExt::boxed(::futures::StreamExt::map(stream, |res| res.map_err(::std::convert::From::from))))
-                }),
-                ::std::result::Result::Err(exn) => ::std::result::Result::Err(::std::convert::From::from(exn)),
-            }
-        }
-    }
 
     impl ::std::convert::From<crate::services::my_service::SerializeExn> for SerializeError {
         fn from(e: crate::services::my_service::SerializeExn) -> Self {
@@ -421,6 +299,9 @@ pub mod my_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum SerializeReader {}
 
     pub type SerializeStreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -432,6 +313,9 @@ pub mod my_service {
             }
         }
     }
+
+    #[doc(hidden)]
+    pub enum SerializeStreamReader {}
 
 }
 

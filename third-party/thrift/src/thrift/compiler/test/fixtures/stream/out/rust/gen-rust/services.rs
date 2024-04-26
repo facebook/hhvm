@@ -85,10 +85,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ReturnstreamStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ReturnstreamStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ReturnstreamStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -115,7 +116,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ReturnstreamStreamExn",
+                                "ReturnstreamStreamError",
                                 badty,
                                 badid,
                             ),
@@ -128,7 +129,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ReturnstreamStreamExn"),
+                    format!("Empty union {}", "ReturnstreamStreamError"),
                 )
                 .into(),
             )
@@ -221,10 +222,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ReturnstreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ReturnstreamReader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::ReturnstreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -251,7 +253,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ReturnstreamExn",
+                                "ReturnstreamError",
                                 badty,
                                 badid,
                             ),
@@ -362,10 +364,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for StreamthrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::StreamthrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::StreamthrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -388,7 +391,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -396,7 +399,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "StreamthrowsStreamExn",
+                                "StreamthrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -409,7 +412,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "StreamthrowsStreamExn"),
+                    format!("Empty union {}", "StreamthrowsStreamError"),
                 )
                 .into(),
             )
@@ -502,10 +505,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for StreamthrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::StreamthrowsReader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::StreamthrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -532,7 +536,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "StreamthrowsExn",
+                                "StreamthrowsError",
                                 badty,
                                 badid,
                             ),
@@ -625,10 +629,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ServicethrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ServicethrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ServicethrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -656,7 +661,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ServicethrowsStreamExn",
+                                "ServicethrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -669,7 +674,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ServicethrowsStreamExn"),
+                    format!("Empty union {}", "ServicethrowsStreamError"),
                 )
                 .into(),
             )
@@ -781,10 +786,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ServicethrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ServicethrowsReader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::ServicethrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -808,7 +814,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -816,7 +822,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ServicethrowsExn",
+                                "ServicethrowsError",
                                 badty,
                                 badid,
                             ),
@@ -909,10 +915,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for Servicethrows2StreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::Servicethrows2StreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::Servicethrows2StreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -941,7 +948,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "Servicethrows2StreamExn",
+                                "Servicethrows2StreamError",
                                 badty,
                                 badid,
                             ),
@@ -954,7 +961,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "Servicethrows2StreamExn"),
+                    format!("Empty union {}", "Servicethrows2StreamError"),
                 )
                 .into(),
             )
@@ -1085,10 +1092,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for Servicethrows2Exn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::Servicethrows2Reader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::Servicethrows2Error;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1113,11 +1121,11 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::result::Result::Err(Self::e1(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::result::Result::Err(Self::Error::e1(::fbthrift::Deserialize::read(p)?));
                     }
                     ((::fbthrift::TType::Struct, 2), false) => {
                         once = true;
-                        alt = ::std::result::Result::Err(Self::e2(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::result::Result::Err(Self::Error::e2(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1125,7 +1133,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "Servicethrows2Exn",
+                                "Servicethrows2Error",
                                 badty,
                                 badid,
                             ),
@@ -1236,10 +1244,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BoththrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::BoththrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::BoththrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1263,7 +1272,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1271,7 +1280,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BoththrowsStreamExn",
+                                "BoththrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -1284,7 +1293,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "BoththrowsStreamExn"),
+                    format!("Empty union {}", "BoththrowsStreamError"),
                 )
                 .into(),
             )
@@ -1396,10 +1405,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for BoththrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::BoththrowsReader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::BoththrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1423,7 +1433,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1431,7 +1441,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "BoththrowsExn",
+                                "BoththrowsError",
                                 badty,
                                 badid,
                             ),
@@ -1542,10 +1552,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamstreamthrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1568,7 +1579,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1576,7 +1587,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamstreamthrowsStreamExn",
+                                "ResponseandstreamstreamthrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -1589,7 +1600,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamstreamthrowsStreamExn"),
+                    format!("Empty union {}", "ResponseandstreamstreamthrowsStreamError"),
                 )
                 .into(),
             )
@@ -1683,10 +1694,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamstreamthrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1713,7 +1725,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamstreamthrowsExn",
+                                "ResponseandstreamstreamthrowsError",
                                 badty,
                                 badid,
                             ),
@@ -1726,7 +1738,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamstreamthrowsExn"),
+                    format!("Empty union {}", "ResponseandstreamstreamthrowsError"),
                 )
                 .into(),
             )
@@ -1812,10 +1824,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamservicethrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1843,7 +1856,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamservicethrowsStreamExn",
+                                "ResponseandstreamservicethrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -1856,7 +1869,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamservicethrowsStreamExn"),
+                    format!("Empty union {}", "ResponseandstreamservicethrowsStreamError"),
                 )
                 .into(),
             )
@@ -1969,10 +1982,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamservicethrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -1996,7 +2010,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2004,7 +2018,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamservicethrowsExn",
+                                "ResponseandstreamservicethrowsError",
                                 badty,
                                 badid,
                             ),
@@ -2017,7 +2031,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamservicethrowsExn"),
+                    format!("Empty union {}", "ResponseandstreamservicethrowsError"),
                 )
                 .into(),
             )
@@ -2121,10 +2135,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamboththrowsStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -2148,7 +2163,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2156,7 +2171,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamboththrowsStreamExn",
+                                "ResponseandstreamboththrowsStreamError",
                                 badty,
                                 badid,
                             ),
@@ -2169,7 +2184,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamboththrowsStreamExn"),
+                    format!("Empty union {}", "ResponseandstreamboththrowsStreamError"),
                 )
                 .into(),
             )
@@ -2282,10 +2297,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ResponseandstreamboththrowsExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -2309,7 +2325,7 @@ pub mod pub_sub_streaming_service {
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::e(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::e(::fbthrift::Deserialize::read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2317,7 +2333,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ResponseandstreamboththrowsExn",
+                                "ResponseandstreamboththrowsError",
                                 badty,
                                 badid,
                             ),
@@ -2330,7 +2346,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ResponseandstreamboththrowsExn"),
+                    format!("Empty union {}", "ResponseandstreamboththrowsError"),
                 )
                 .into(),
             )
@@ -2416,10 +2432,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ReturnstreamFastStreamExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamReader {
         type Success = ::std::primitive::i32;
+        type Error = crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -2446,7 +2463,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ReturnstreamFastStreamExn",
+                                "ReturnstreamFastStreamError",
                                 badty,
                                 badid,
                             ),
@@ -2459,7 +2476,7 @@ pub mod pub_sub_streaming_service {
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "ReturnstreamFastStreamExn"),
+                    format!("Empty union {}", "ReturnstreamFastStreamError"),
                 )
                 .into(),
             )
@@ -2552,10 +2569,11 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for ReturnstreamFastExn {
+    impl ::fbthrift::help::DeserializeExn for crate::errors::pub_sub_streaming_service::ReturnstreamFastReader {
         type Success = ();
+        type Error = crate::errors::pub_sub_streaming_service::ReturnstreamFastError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -2582,7 +2600,7 @@ pub mod pub_sub_streaming_service {
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "ReturnstreamFastExn",
+                                "ReturnstreamFastError",
                                 badty,
                                 badid,
                             ),

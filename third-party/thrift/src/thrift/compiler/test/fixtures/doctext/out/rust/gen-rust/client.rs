@@ -88,10 +88,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::FExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::c::FReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::c::FError::ApplicationException(aexn))
                 }
@@ -141,21 +141,19 @@ where
                         ::std::result::Result::Err(err) =>
                             ::std::result::Result::Err(crate::errors::c::NumbersStreamError::from(err)),
                         ::std::result::Result::Ok(item_enc) => {
-                            let res = S::spawn(move || {
+                            S::spawn(move || {
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        <crate::services::c::NumbersStreamExn as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                        <crate::errors::c::NumbersStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::ApplicationException(aexn)))
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::c::NumbersStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?;
-
-                            res.map_err(<crate::errors::c::NumbersStreamError as ::std::convert::From<_>>::from)
+                            }).await?
                         }
                     }
                 }
@@ -163,10 +161,9 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::NumbersExn, S>(de).await??;
-
-            let initial = res.map_err(<crate::errors::c::NumbersError as ::std::convert::From<_>>::from);
-            let res = initial.map(move |_| new_stream);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::c::NumbersReader, S>(de)
+                .await??
+                .map(move |_| new_stream);
             res
         }
         .instrument(::tracing::info_span!("stream", method = "C.numbers"))
@@ -211,10 +208,10 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::services::c::ThingExn, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::c::ThingReader, S>(de).await?;
 
             let res = match res {
-                ::std::result::Result::Ok(res) => ::fbthrift::help::StreamExn::map_stream(res),
+                ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
                     ::std::result::Result::Err(crate::errors::c::ThingError::ApplicationException(aexn))
                 }

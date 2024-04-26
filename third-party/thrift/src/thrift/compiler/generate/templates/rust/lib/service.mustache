@@ -149,10 +149,11 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}StreamExn {
+    impl ::fbthrift::help::DeserializeExn for {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader {
         type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
+        type Error = {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -178,7 +179,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                     }}{{#function:stream_exceptions}}
                     (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)));
                     }{{!
                     }}{{/function:stream_exceptions}}
                     ((ty, _id), false) => p.skip(ty)?,
@@ -187,7 +188,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "{{function:upcamel}}StreamExn",
+                                "{{function:upcamel}}StreamError",
                                 badty,
                                 badid,
                             ),
@@ -200,7 +201,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "{{function:upcamel}}StreamExn"),
+                    format!("Empty union {}", "{{function:upcamel}}StreamError"),
                 )
                 .into(),
             )
@@ -371,7 +372,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         }
     }
 
-    impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}Exn {
+    impl ::fbthrift::help::DeserializeExn for {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader {
         type Success = {{!
             }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!
             }}{{#function:stream?}}{{!
@@ -381,8 +382,9 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
             }}{{/function:stream?}}{{!
         }};
+        type Error = {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error;
 
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self>>
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
         where
             P: ::fbthrift::ProtocolReader,
         {
@@ -433,7 +435,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         once = true;
                         alt = {{!
                             }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
-                            }}::std::result::Result::Err(Self::{{field:rust_name}}({{!
+                            }}::std::result::Result::Err(Self::Error::{{field:rust_name}}({{!
                                 }}{{^function:stream?}}{{#function:return_type}}{{!
                                     }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
                                     }}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{!
@@ -450,7 +452,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                             ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
                             format!(
                                 "unwanted extra union {} field ty {:?} id {}",
-                                "{{function:upcamel}}Exn",
+                                "{{function:upcamel}}Error",
                                 badty,
                                 badid,
                             ),
@@ -467,7 +469,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                    format!("Empty union {}", "{{function:upcamel}}Exn"),
+                    format!("Empty union {}", "{{function:upcamel}}Error"),
                 )
                 .into(),
             ){{!

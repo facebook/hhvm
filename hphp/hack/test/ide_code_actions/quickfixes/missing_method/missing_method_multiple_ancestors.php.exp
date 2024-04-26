@@ -48,7 +48,7 @@ trait MyTrait {
 
 class MyClass extends MyParent {
   <<__Override>>
-  public function methodInGrandParent(): void {}
+  public function methodInGrandParent(): void {>||<}
 
 
   //                  ^ at-caret
@@ -99,7 +99,7 @@ trait MyTrait {
 
 class MyClass extends MyParent {
   <<__Override>>
-  public function methodInParent(): void {}
+  public function methodInParent(): void {>||<}
 
 
   //                  ^ at-caret

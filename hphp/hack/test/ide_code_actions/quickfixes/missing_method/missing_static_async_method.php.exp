@@ -35,7 +35,7 @@ abstract class MyClass {
 
 class MyChild extends MyClass {
   <<__Override>>
-  public static async function foo(): Awaitable<void> {}
+  public static async function foo(): Awaitable<void> {>||<}
 
 
                      // ^ at-caret

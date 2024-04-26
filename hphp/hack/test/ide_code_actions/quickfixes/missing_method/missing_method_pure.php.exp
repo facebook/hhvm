@@ -35,7 +35,7 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function somePureMethod()[]: int {}
+  public function somePureMethod()[]: int {>||<}
 
 }
   //                  ^ at-caret

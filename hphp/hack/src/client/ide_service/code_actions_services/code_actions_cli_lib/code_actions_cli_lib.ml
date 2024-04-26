@@ -35,13 +35,26 @@ let lsp_range_to_pos ~source_text path range =
   in
   Lsp_helpers.lsp_range_to_pos ~line_to_offset path range |> Pos.to_absolute
 
-let patched_text_of_command_or_action ~source_text path = function
+let extract_cursor_position_for_code_action
+    ~source_text path (code_action : _ CodeAction.command_or_action_) :
+    (Pos.absolute option, string) Result.t =
+  match code_action with
+  | CodeAction.Action CodeAction.{ action = BothEditThenCommand (_, c); _ } ->
+    Result.map
+      (Lsp_extra_commands.parse_set_selection c)
+      ~f:(Option.map ~f:(lsp_range_to_pos ~source_text path))
+  | _ -> Ok None
+
+let patched_text_of_command_or_action ~source_text path code_action :
+    (string option, string) Result.t =
+  match code_action with
   | CodeAction.Action
       CodeAction.{ action = EditOnly Lsp.WorkspaceEdit.{ changes }; _ }
   | CodeAction.Action
       CodeAction.
         { action = BothEditThenCommand (Lsp.WorkspaceEdit.{ changes }, _); _ }
     ->
+    let open Result.Let_syntax in
     let to_patch Lsp.TextEdit.{ range; newText = text } =
       let pos = lsp_range_to_pos ~source_text path range in
       ServerRenameTypes.Replace ServerRenameTypes.{ pos; text }
@@ -49,12 +62,34 @@ let patched_text_of_command_or_action ~source_text path = function
     let patches =
       Lsp.DocumentUri.Map.values changes |> List.concat |> List.map ~f:to_patch
     in
+    (* The new cursor position is relative to the content *after* patching.
+       So first patch... *)
     let source_text = Sys_utils.cat @@ Relative_path.to_absolute path in
     let rewritten_contents = apply_patches_to_string source_text patches in
-    Some rewritten_contents
+    (* ... and only then indicate the cursor position *)
+    let* cursor_position =
+      extract_cursor_position_for_code_action
+        ~source_text:(Full_fidelity_source_text.make path rewritten_contents)
+        path
+        code_action
+    in
+    let rewritten_contents =
+      match cursor_position with
+      | None -> rewritten_contents
+      | Some selection ->
+        let patches =
+          ServerRenameTypes.
+            [
+              Replace { pos = Pos.shrink_to_start selection; text = ">|" };
+              Replace { pos = Pos.shrink_to_end selection; text = "|<" };
+            ]
+        in
+        apply_patches_to_string rewritten_contents patches
+    in
+    Ok (Some rewritten_contents)
   | CodeAction.Action _
   | CodeAction.Command _ ->
-    None
+    Ok None
 
 let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
   let commands_or_actions = Code_actions_services.go ~ctx ~entry ~range in
@@ -118,9 +153,14 @@ let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
             resolved
         in
         match patched_opt with
-        | Some patched ->
+        | Ok (Some patched) ->
           Printf.sprintf "\nApplied edit for code action:%s%s" separator patched
-        | None -> "\nThe command_or_action cannot be converted into patches.\n"
+        | Ok None ->
+          "\nThe command_or_action cannot be converted into patches.\n"
+        | Error error ->
+          Printf.sprintf
+            "\nError while converting the command_or_action into patches: %s"
+            error
       in
       Printf.printf "\nJSON for selected code action:%s" separator;
       resolved

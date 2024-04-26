@@ -41,7 +41,7 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function bar(): void {}
+  public function bar(): void {>||<}
 
 }
   //                  ^ at-caret
@@ -83,7 +83,7 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function baz(): void {}
+  public function baz(): void {>||<}
 
 }
   //                  ^ at-caret

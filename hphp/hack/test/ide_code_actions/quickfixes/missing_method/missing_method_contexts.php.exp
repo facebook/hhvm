@@ -35,7 +35,7 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function explicitCapabilityMethods()[globals, write_props]: int {}
+  public function explicitCapabilityMethods()[globals, write_props]: int {>||<}
 
 }
   //                  ^ at-caret

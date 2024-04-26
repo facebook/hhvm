@@ -35,7 +35,7 @@ class TheParent {
 
 class B extends /*range-start*/TheParent/*range-end*/ {
   <<__Override>>
-  public function foo(): void {}
+  public function foo(): void {>||<}
 
 }
 

@@ -596,6 +596,16 @@ void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
   }
 }
 
+// Remove only requires writing fields that exists in the patch.
+void insertRemoveWriteFieldsToMask(Mask& mask, const std::vector<Value>& ids) {
+  if (mask == allMask()) {
+    return;
+  }
+  for (const Value& id : ids) {
+    mask.includes_ref().ensure().emplace(id.as_i16(), allMask());
+  }
+}
+
 // If recursive, it constructs the mask from the patch object for the field.
 // If view, it uses address of Value to populate map mask. If not view, it
 // uses the appropriate integer map mask and string map mask after parsing
@@ -616,6 +626,7 @@ void insertFieldsToMask(
       // Object patch can get here only patch* operations, which require
       // reading existing value to know if/how given operations can/should be
       // applied. Hence always generate allMask() read mask for them.
+      // TODO(dokwon): Not all field patch operations requires reading.
       insertMask(masks.read, id, allMask(), getIncludesObjRef);
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
     }
@@ -688,10 +699,15 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
       return {allMask(), allMask()};
     }
   }
-  // All types (set, map, and struct) use a set for Remove, so they are
-  // indistinguishable. It is a read-write operation if not intristic default.
+  // We can only distinguish struct. For struct, add removed fields to write
+  // mask. Both set and map use a set for Remove, so they are indistinguishable.
+  // For set and map, it is a read-write operation if not intristic default.
   if (auto* value = findOp(patch, PatchOp::Remove)) {
-    if (!isIntrinsicDefault(*value)) {
+    if (value->is_list()) {
+      // struct patch
+      insertRemoveWriteFieldsToMask(masks.write, value->as_list());
+    } else if (!isIntrinsicDefault(*value)) {
+      // set/map patch
       return {allMask(), allMask()};
     }
   }

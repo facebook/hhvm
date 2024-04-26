@@ -1068,16 +1068,17 @@ TEST_F(PatchTest, Struct) {
         op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({1}));
     EXPECT_EQ(
         protocol::Object{}, applyContainerPatch(patchObj, value).as_object());
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
+
+    // For read, we don't need to read anything.
+    // For write, we only need to write the field that is removed.
+    Mask readMask, writeMask;
+    readMask = noneMask();
+    writeMask.includes_ref().emplace()[1] = allMask();
+
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskViewFromPatch(patchObj), readMask, writeMask));
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskFromPatch(patchObj), readMask, writeMask));
   }
   {
     Object patchObj = makePatch(

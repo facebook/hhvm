@@ -6,7 +6,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":55,"line":8},"start":{"character":55,"line":8}}],
+    "arguments":[{"end":{"character":4,"line":9},"start":{"character":4,"line":9}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -15,7 +15,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public static async function foo(): Awaitable<void> {}\n\n",
+          "newText":"\n  <<__Override>>\n  public static async function foo(): Awaitable<void> {\n    \n  }\n\n",
           "range":{"end":{"character":31,"line":6},"start":{"character":31,"line":6}}
         }
       ]
@@ -35,7 +35,9 @@ abstract class MyClass {
 
 class MyChild extends MyClass {
   <<__Override>>
-  public static async function foo(): Awaitable<void> {>||<}
+  public static async function foo(): Awaitable<void> {
+    >||<
+  }
 
 
                      // ^ at-caret

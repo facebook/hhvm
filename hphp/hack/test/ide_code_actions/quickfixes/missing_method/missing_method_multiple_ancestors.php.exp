@@ -11,7 +11,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":47,"line":16},"start":{"character":47,"line":16}}],
+    "arguments":[{"end":{"character":4,"line":17},"start":{"character":4,"line":17}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -20,7 +20,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public function methodInGrandParent(): void {}\n\n",
+          "newText":"\n  <<__Override>>\n  public function methodInGrandParent(): void {\n    \n  }\n\n",
           "range":{"end":{"character":32,"line":14},"start":{"character":32,"line":14}}
         }
       ]
@@ -48,7 +48,9 @@ trait MyTrait {
 
 class MyClass extends MyParent {
   <<__Override>>
-  public function methodInGrandParent(): void {>||<}
+  public function methodInGrandParent(): void {
+    >||<
+  }
 
 
   //                  ^ at-caret
@@ -62,7 +64,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":42,"line":16},"start":{"character":42,"line":16}}],
+    "arguments":[{"end":{"character":4,"line":17},"start":{"character":4,"line":17}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -71,7 +73,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public function methodInParent(): void {}\n\n",
+          "newText":"\n  <<__Override>>\n  public function methodInParent(): void {\n    \n  }\n\n",
           "range":{"end":{"character":32,"line":14},"start":{"character":32,"line":14}}
         }
       ]
@@ -99,7 +101,9 @@ trait MyTrait {
 
 class MyClass extends MyParent {
   <<__Override>>
-  public function methodInParent(): void {>||<}
+  public function methodInParent(): void {
+    >||<
+  }
 
 
   //                  ^ at-caret

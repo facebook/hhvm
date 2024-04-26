@@ -6,7 +6,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":74,"line":8},"start":{"character":74,"line":8}}],
+    "arguments":[{"end":{"character":4,"line":9},"start":{"character":4,"line":9}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -15,7 +15,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public function explicitCapabilityMethods()[globals, write_props]: int {}\n\n",
+          "newText":"\n  <<__Override>>\n  public function explicitCapabilityMethods()[globals, write_props]: int {\n    \n  }\n\n",
           "range":{"end":{"character":29,"line":6},"start":{"character":29,"line":6}}
         }
       ]
@@ -35,7 +35,9 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function explicitCapabilityMethods()[globals, write_props]: int {>||<}
+  public function explicitCapabilityMethods()[globals, write_props]: int {
+    >||<
+  }
 
 }
   //                  ^ at-caret

@@ -303,9 +303,13 @@ let stub_all_methods_quickfix
       methods
       ~f:(fun { member_name; parent_class_elt; member_kind; is_override; _ } ->
         let is_static = MemberKind.is_static member_kind in
-        Typing_skeleton.(
-          of_method member_name parent_class_elt ~is_static ~is_override
-          |> to_string))
+        Typing_skeleton.of_method
+          member_name
+          parent_class_elt
+          ~is_static
+          ~is_override
+          ~open_braces:false
+        |> Typing_skeleton.to_string)
   in
   let classish_end_new_text = String.concat method_texts in
   Quickfix.make

@@ -175,7 +175,9 @@ let of_implicit_params (impl_params : decl_ty fun_implicit_params) : string =
       Printf.sprintf "[%s]" (String.concat ~sep:", " contexts)
     | _ -> "")
 
-let of_method (name : string) (meth : class_elt) ~is_static ~is_override : t =
+let of_method
+    (name : string) (meth : class_elt) ~is_static ~is_override ~open_braces : t
+    =
   (* TODO: when we start supporting NoAutoDynamic, revisit this *)
   let (_, ty_) = deref (strip_supportdyn (Lazy.force meth.ce_type)) in
   let (params, return_ty, async_modifier, capabilities) =
@@ -209,5 +211,17 @@ let of_method (name : string) (meth : class_elt) ~is_static ~is_override : t =
       capabilities
       return_ty
   in
+  let prefix =
+    if open_braces then
+      prefix ^ "\n    "
+    else
+      prefix
+  in
   let suffix = "}\n" in
+  let suffix =
+    if open_braces then
+      "\n  " ^ suffix
+    else
+      suffix
+  in
   { prefix; suffix = Some suffix }

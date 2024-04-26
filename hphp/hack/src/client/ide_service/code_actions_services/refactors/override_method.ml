@@ -19,7 +19,12 @@ let stub_method_action
     ~(parent_name : string)
     ((meth_name, meth) : string * Typing_defs.class_elt) : t =
   let skeleton =
-    Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth
+    Typing_skeleton.of_method
+      ~is_static
+      ~is_override:true
+      ~open_braces:true
+      meth_name
+      meth
     |> Typing_skeleton.add_suffix "\n"
   in
   let title =

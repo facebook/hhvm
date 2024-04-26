@@ -11,7 +11,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":31,"line":9},"start":{"character":31,"line":9}}],
+    "arguments":[{"end":{"character":4,"line":10},"start":{"character":4,"line":10}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -20,7 +20,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public function bar(): void {}\n\n",
+          "newText":"\n  <<__Override>>\n  public function bar(): void {\n    \n  }\n\n",
           "range":{"end":{"character":29,"line":7},"start":{"character":29,"line":7}}
         }
       ]
@@ -41,7 +41,9 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function bar(): void {>||<}
+  public function bar(): void {
+    >||<
+  }
 
 }
   //                  ^ at-caret
@@ -53,7 +55,7 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":31,"line":9},"start":{"character":31,"line":9}}],
+    "arguments":[{"end":{"character":4,"line":10},"start":{"character":4,"line":10}}],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -62,7 +64,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"\n  <<__Override>>\n  public function baz(): void {}\n\n",
+          "newText":"\n  <<__Override>>\n  public function baz(): void {\n    \n  }\n\n",
           "range":{"end":{"character":29,"line":7},"start":{"character":29,"line":7}}
         }
       ]
@@ -83,7 +85,9 @@ abstract class FooParent {
 
 class Foo extends FooParent {
   <<__Override>>
-  public function baz(): void {>||<}
+  public function baz(): void {
+    >||<
+  }
 
 }
   //                  ^ at-caret

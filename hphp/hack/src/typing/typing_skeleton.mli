@@ -20,4 +20,9 @@ val cursor_after_insert : Pos.t -> t -> Pos.t
 (** Generates source code for a method skeleton that matches [meth],
     with the appropriate static modifier and override attribute.*)
 val of_method :
-  string -> Typing_defs.class_elt -> is_static:bool -> is_override:bool -> t
+  string ->
+  Typing_defs.class_elt ->
+  is_static:bool ->
+  is_override:bool ->
+  open_braces:bool ->
+  t

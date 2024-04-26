@@ -227,7 +227,7 @@ std::chrono::system_clock::time_point parseDateTime(
   const int TM_YEAR_BASE = 1900;
 
   // Clean struct and set daylight savings to information not available
-  struct tm time_tm = {0};
+  struct tm time_tm = {};
 
   time_tm.tm_isdst = -1;
   std::string microseconds_str;

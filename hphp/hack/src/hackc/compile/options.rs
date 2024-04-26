@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 
 use bstr::BString;
+pub use options_gen::HhbcFlags;
 pub use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
 use serde::Serialize;
@@ -60,49 +61,6 @@ impl Default for Options {
             compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HhbcFlags {
-    /// PHP7 left-to-right assignment semantics
-    pub ltr_assign: bool,
-
-    /// PHP7 Uniform Variable Syntax
-    pub uvs: bool,
-
-    pub log_extern_compiler_perf: bool,
-    pub enable_intrinsics_extension: bool,
-    pub emit_cls_meth_pointers: bool,
-    pub fold_lazy_class_keys: bool,
-    pub optimize_reified_param_checks: bool,
-    pub stress_shallow_decl_deps: bool,
-    pub stress_folded_decl_deps: bool,
-    pub enable_native_enum_class_labels: bool,
-    pub optimize_param_lifetimes: bool,
-    pub optimize_local_lifetimes: bool,
-    pub optimize_local_iterators: bool,
-    pub optimize_is_type_checks: bool,
-}
-
-impl Default for HhbcFlags {
-    fn default() -> Self {
-        Self {
-            ltr_assign: false,
-            uvs: false,
-            log_extern_compiler_perf: false,
-            enable_intrinsics_extension: false,
-            emit_cls_meth_pointers: true,
-            fold_lazy_class_keys: true,
-            optimize_reified_param_checks: false,
-            stress_shallow_decl_deps: false,
-            stress_folded_decl_deps: false,
-            enable_native_enum_class_labels: false,
-            optimize_param_lifetimes: true,
-            optimize_local_lifetimes: true,
-            optimize_local_iterators: true,
-            optimize_is_type_checks: true,
         }
     }
 }

@@ -12,5 +12,6 @@ path = "../../options.rs"
 
 [dependencies]
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
+options_gen = { version = "0.0.0", path = "../options_gen" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }

@@ -27,6 +27,10 @@
 }}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
 }}, unused_imports, clippy::all)]
 
+{{#program:services_include_srcs}}
+include!("{{.}}");
+{{/program:services_include_srcs}}
+
 #[doc(inline)]
 pub use {{program:types}} as types;
 

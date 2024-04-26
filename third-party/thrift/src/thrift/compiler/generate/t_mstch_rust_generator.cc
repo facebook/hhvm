@@ -79,6 +79,8 @@ struct rust_codegen_options {
 
   // List of extra sources to include at top level of crate.
   mstch::array types_include_srcs;
+  mstch::array clients_include_srcs;
+  mstch::array services_include_srcs;
 
   // The current program being generated and its Rust module path.
   const t_program* current_program;
@@ -648,6 +650,10 @@ class rust_mstch_program : public mstch_program {
             {"program:docs", &rust_mstch_program::rust_docs},
             {"program:types_include_srcs",
              &rust_mstch_program::rust_types_include_srcs},
+            {"program:clients_include_srcs",
+             &rust_mstch_program::rust_clients_include_srcs},
+            {"program:services_include_srcs",
+             &rust_mstch_program::rust_services_include_srcs},
             {"program:has_default_tests?",
              &rust_mstch_program::rust_has_default_tests},
             {"program:structs_for_default_test",
@@ -817,6 +823,12 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }
   mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
+  mstch::node rust_clients_include_srcs() {
+    return options_.clients_include_srcs;
+  }
+  mstch::node rust_services_include_srcs() {
+    return options_.services_include_srcs;
+  }
   mstch::node rust_has_default_tests() {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
@@ -2363,6 +2375,10 @@ void t_mstch_rust_generator::generate_program() {
 
   parse_include_srcs(
       options_.types_include_srcs, get_option("types_include_srcs"));
+  parse_include_srcs(
+      options_.clients_include_srcs, get_option("clients_include_srcs"));
+  parse_include_srcs(
+      options_.services_include_srcs, get_option("services_include_srcs"));
 
   if (options_.multifile_mode) {
     options_.current_crate = "crate::" + multifile_module_name(program_);
@@ -2567,8 +2583,8 @@ THRIFT_REGISTER_GENERATOR(
     "    deprecated_optional_with_default_is_some:\n"
     "                     Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions\n"
     "    include_prefix=: Set program:include_prefix.\n"
-    "    types_include_srcs=:\n"
-    "                     Additional Rust source files to include in types crate, `:` separated\n"
+    "    types_include_srcs=, clients_include_srcs=, services_include_srcs=:\n"
+    "                     Additional Rust source files to include in each crate, `:` separated\n"
     "    cratemap=map:    Mapping file from services to crate names\n"
     "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n");
 } // namespace rust

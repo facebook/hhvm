@@ -597,6 +597,8 @@ void ThriftServer::setup() {
 
   if (THRIFT_FLAG(enable_rotation_for_in_memory_ticket_seeds) &&
       shouldScheduleInMemoryTicketSeeds()) {
+    fizzConfig_.supportedPskModes = {
+        fizz::PskKeyExchangeMode::psk_ke, fizz::PskKeyExchangeMode::psk_dhe_ke};
     scheduleInMemoryTicketSeeds();
   }
 

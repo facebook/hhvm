@@ -87,6 +87,10 @@ FizzConfigUtil::createFizzContext(const ServerSocketConfig& config) {
        ProtocolVersion::tls_1_3_26});
   ctx->setVersionFallbackEnabled(true);
 
+  if (!config.fizzConfig.supportedPskModes.empty()) {
+    ctx->setSupportedPskModes(config.fizzConfig.supportedPskModes);
+  }
+
   // Fizz does not yet support randomized next protocols so we use the highest
   // weighted list on the first context.
   const auto& list = config.sslContextConfigs.front().nextProtocols;

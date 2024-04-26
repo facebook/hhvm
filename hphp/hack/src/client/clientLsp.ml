@@ -1080,6 +1080,18 @@ let ide_diagnostics_to_lsp_diagnostics
       (diagnostic : ClientIdeMessage.diagnostic) :
       Lsp.PublishDiagnostics.diagnostic list =
     let diagnostic_error = diagnostic.ClientIdeMessage.diagnostic_error in
+    let {
+      User_error.severity;
+      code;
+      claim = _;
+      reasons = _;
+      custom_msgs;
+      is_fixmed = _;
+      flags = _;
+      quickfixes = _;
+    } =
+      diagnostic_error
+    in
     let all_messages =
       User_error.to_list diagnostic_error |> List.map ~f:location_message
     in
@@ -1107,15 +1119,19 @@ let ide_diagnostics_to_lsp_diagnostics
     in
     let first_loc = fst first_message in
     let custom_errors =
-      List.map diagnostic_error.User_error.custom_msgs ~f:(fun relatedMessage ->
+      List.map custom_msgs ~f:(fun relatedMessage ->
           PublishDiagnostics.{ relatedLocation = first_loc; relatedMessage })
     in
     let relatedInformation = relatedInformation @ custom_errors in
     let error_for_diagnostic =
       {
         Lsp.PublishDiagnostics.range;
-        severity = Some Lsp.PublishDiagnostics.Error;
-        code = PublishDiagnostics.IntCode (User_error.get_code diagnostic_error);
+        severity =
+          Some
+            (match severity with
+            | User_error.Err -> Lsp.PublishDiagnostics.Error
+            | User_error.Warning -> Lsp.PublishDiagnostics.Warning);
+        code = PublishDiagnostics.IntCode code;
         source = Some "Hack";
         message;
         relatedInformation;

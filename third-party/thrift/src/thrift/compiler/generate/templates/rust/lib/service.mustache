@@ -163,12 +163,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
-            let mut alt = {{!
-                }}{{#function:void_excluding_interaction?}}{{!
-                    }}::std::result::Result::Ok(()){{!
-                }}{{/function:void_excluding_interaction?}}{{!
-                }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
-            }};
+            let mut alt = ::std::option::Option::None;
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
                 match ((fty, fid as ::std::primitive::i32), once) {
@@ -178,20 +173,12 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                     }
                     (({{#function:stream_elem_type}}{{>lib/ttype}}{{/function:stream_elem_type}}, 0i32), false) => {
                         once = true;
-                        alt = {{!
-                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?){{!
-                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                        }};
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }{{!
                     }}{{#function:stream_exceptions}}
                     (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
-                        alt = {{!
-                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}::std::result::Result::Err(Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)){{!
-                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                        }};
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)));
                     }{{!
                     }}{{/function:stream_exceptions}}
                     ((ty, _id), false) => p.skip(ty)?,
@@ -209,19 +196,14 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 }
                 p.read_field_end()?;
             }
-            p.read_struct_end()?;{{!
-            }}{{#function:void_excluding_interaction?}}
-            ::std::result::Result::Ok(alt){{!
-            }}{{/function:void_excluding_interaction?}}{{!
-            }}{{^function:void_excluding_interaction?}}
+            p.read_struct_end()?;
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
                     format!("Empty union {}", "{{function:upcamel}}StreamExn"),
                 )
                 .into(),
-            ){{!
-            }}{{/function:void_excluding_interaction?}}
+            )
         }
     }
 

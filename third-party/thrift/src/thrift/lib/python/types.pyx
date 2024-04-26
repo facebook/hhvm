@@ -248,8 +248,12 @@ cdef class StructInfo:
 
                 adapter_info: if the field has an adapter, or None.
 
-                is_primitive (bool): Whether the field has a "orimitive" type,
+                is_primitive (bool): Whether the field has a "primitive" type,
                     such as: bool, byte, i16, i32, i62, double, float.
+                    Note that this definition of "primitive" DOES NOT match that
+                    of Thrift IDL primitive types, as the latter include string
+                    and binary (see:
+                    https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#primitive-types).
             )
 
         cpp_obj: cDynamicStructInfo for this struct.

@@ -30,8 +30,8 @@
     }}{{#type:i64?}}long{{/type:i64?}}{{!
     }}{{#type:double?}}double{{/type:double?}}{{!
     }}{{#type:float?}}float{{/type:float?}}{{!
-    }}{{^type:primitive?}}{{^type:typedef?}}{{!
+    }}{{^type:numeric_or_void?}}{{^type:typedef?}}{{!
         }}{{> BoxedType}}{{!
-    }}{{/type:typedef?}}{{/type:primitive?}}{{!
+    }}{{/type:typedef?}}{{/type:numeric_or_void?}}{{!
   }}{{/type:typedef?}}{{!
 }}{{/type:javaType}}

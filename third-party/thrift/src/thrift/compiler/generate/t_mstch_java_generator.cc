@@ -784,7 +784,7 @@ class mstch_java_field : public mstch_field {
             {"field:typeFieldName", &mstch_java_field::type_field_name},
             {"field:isSensitive?", &mstch_java_field::is_sensitive},
             {"field:hasInitialValue?", &mstch_java_field::has_initial_value},
-            {"field:isPrimitive?", &mstch_java_field::is_primitive},
+            {"field:isNumericOrVoid?", &mstch_java_field::is_numeric_or_void},
             {"field:hasWrapper?", &mstch_java_field::has_wrapper},
             {"field:wrapper",
              &mstch_java_field::get_structured_wrapper_class_name},
@@ -916,7 +916,7 @@ class mstch_java_field : public mstch_field {
     nestedDepth--;
     return mstch::node();
   }
-  mstch::node is_primitive() {
+  mstch::node is_numeric_or_void() {
     auto type = field_->get_type()->get_true_type();
     return type->is_void() || type->is_bool() || type->is_byte() ||
         type->is_i16() || type->is_i32() || type->is_i64() ||

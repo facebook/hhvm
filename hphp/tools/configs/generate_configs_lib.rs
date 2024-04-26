@@ -67,10 +67,7 @@ Possible features are:
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
-use std::process::ExitCode;
 
-use clap::Parser;
-use clap::ValueEnum;
 use nom::branch::alt;
 use nom::bytes::complete::escaped;
 use nom::bytes::complete::tag;
@@ -91,10 +88,8 @@ use nom::combinator::opt;
 use nom::combinator::recognize;
 use nom::combinator::value;
 use nom::error::context;
-use nom::error::convert_error;
 use nom::error::ContextError;
 use nom::error::ParseError;
-use nom::error::VerboseError;
 use nom::multi::count;
 use nom::multi::many0;
 use nom::multi::many1;
@@ -103,7 +98,6 @@ use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::sequence::preceded;
 use nom::sequence::tuple;
-use nom::Err;
 use nom::IResult;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -321,21 +315,6 @@ impl ConfigSection {
     fn shortname(&self) -> String {
         self.name.replace('.', "")
     }
-}
-
-#[derive(Debug, Clone, ValueEnum)]
-enum OutputType {
-    Defs,
-    Loader,
-}
-
-#[derive(Debug, Parser)]
-#[clap(name = "HHVM Generate Configs")]
-struct Arguments {
-    #[clap(value_enum)]
-    output_type: OutputType,
-    output_dir: PathBuf,
-    input: PathBuf,
 }
 
 fn parse_type<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, ConfigType, E> {
@@ -680,7 +659,7 @@ fn parse_section<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     )(input)
 }
 
-fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Vec<ConfigSection>, E> {
     all_consuming(preceded(
@@ -689,7 +668,7 @@ fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     ))(input)
 }
 
-fn generate_defs(sections: Vec<ConfigSection>, output_dir: PathBuf) {
+pub fn generate_defs(sections: Vec<ConfigSection>, output_dir: PathBuf) {
     let section_names = sections.iter().map(|s| s.name.clone()).collect::<Vec<_>>();
 
     for section in sections.iter() {
@@ -798,7 +777,7 @@ namespace HPHP::Cfg {{
     }
 }
 
-fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
+pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
     let mut repo_global_data = vec![];
     let mut unit_cache_flags = vec![];
     let mut repo_options_includes = vec![];
@@ -1388,33 +1367,10 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
     fs::write(configs_load_file, configs_load_content).unwrap();
 }
 
-fn main() -> ExitCode {
-    let args = Arguments::parse();
-
-    let contents = fs::read_to_string(args.input).expect("Should have been able to read the file");
-
-    let res = parse_option_doc::<VerboseError<&str>>(&contents);
-    match res {
-        Ok((_, sections)) => {
-            match args.output_type {
-                OutputType::Defs => generate_defs(sections, args.output_dir),
-                OutputType::Loader => generate_loader(sections, args.output_dir),
-            }
-            ExitCode::from(0)
-        }
-        Err(Err::Error(e)) | Err(Err::Failure(e)) => {
-            println!(
-                "error parsing header: {}",
-                convert_error(contents.as_str(), e)
-            );
-            ExitCode::from(1)
-        }
-        Err(Err::Incomplete(_)) => ExitCode::from(2),
-    }
-}
-
 #[cfg(test)]
 mod test {
+    use nom::error::VerboseError;
+
     use super::*;
 
     #[test]

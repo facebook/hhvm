@@ -2230,12 +2230,14 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
          tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
          hybridKexObserver = enableHybridKex(),
          aegisObserver = enableAegis(),
-         pskModeObserver = preferPskKe()]() {
+         pskModeObserver = preferPskKe(),
+         dcReceiveObserver = enableReceivingDelegatedCreds()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
           (void)**hybridKexObserver;
           (void)**aegisObserver;
           (void)**pskModeObserver;
+          (void)**dcReceiveObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -2433,6 +2435,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   static folly::observer::Observer<bool> enableTLSCertRevocation();
   static folly::observer::Observer<bool> enforceTLSCertRevocation();
+
+  static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 
 #if FOLLY_HAS_COROUTINES
   /**

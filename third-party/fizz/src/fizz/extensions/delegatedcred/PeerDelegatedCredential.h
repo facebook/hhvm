@@ -62,8 +62,8 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
         folly::ssl::X509UniquePtr cert,
         folly::ssl::EvpPkeyUniquePtr pubKey);
 
-    using OpenSSLPeerCertImpl<T>::cert_;
     using OpenSSLPeerCertImpl<T>::signature_;
+    using OpenSSLPeerCertImpl<T>::cert_;
   };
   InternalPeerCert peerCertImpl_;
   DelegatedCredential credential_;

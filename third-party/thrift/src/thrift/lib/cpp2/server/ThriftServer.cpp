@@ -106,6 +106,7 @@ THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
 
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
+THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 
 THRIFT_FLAG_DEFINE_bool(fizz_deprecate_draft_versions, true);
 
@@ -2120,6 +2121,10 @@ folly::observer::Observer<bool> ThriftServer::enableTLSCertRevocation() {
 
 folly::observer::Observer<bool> ThriftServer::enforceTLSCertRevocation() {
   return THRIFT_FLAG_OBSERVE(enforce_mrl_check_for_thrift_server);
+}
+
+folly::observer::Observer<bool> ThriftServer::enableReceivingDelegatedCreds() {
+  return THRIFT_FLAG_OBSERVE(server_fizz_enable_receiving_dc);
 }
 
 folly::observer::CallbackHandle ThriftServer::getSSLCallbackHandle() {

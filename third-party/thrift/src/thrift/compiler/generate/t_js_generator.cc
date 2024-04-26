@@ -375,8 +375,9 @@ string t_js_generator::render_const_value(
 
   type = type->get_true_type();
 
-  if (type->is_base_type()) {
-    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+  if (type->is_primitive_type()) {
+    t_primitive_type::t_primitive tbase =
+        ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
@@ -401,7 +402,7 @@ string t_js_generator::render_const_value(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_primitive_type::t_base_name(tbase));
+            t_primitive_type::t_primitive_name(tbase));
     }
   } else if (type->is_enum()) {
     out << value->get_integer();
@@ -1241,11 +1242,12 @@ void t_js_generator::generate_deserialize_field(
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, name);
-  } else if (type->is_base_type() || type->is_enum()) {
+  } else if (type->is_primitive_type() || type->is_enum()) {
     indent(out) << name << " = input.";
 
-    if (type->is_base_type()) {
-      t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+    if (type->is_primitive_type()) {
+      t_primitive_type::t_primitive tbase =
+          ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
         case t_primitive_type::TYPE_VOID:
           throw std::runtime_error(
@@ -1276,7 +1278,7 @@ void t_js_generator::generate_deserialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no JS name for base type " +
-              t_primitive_type::t_base_name(tbase));
+              t_primitive_type::t_primitive_name(tbase));
       }
     } else if (type->is_enum()) {
       out << "readI32()";
@@ -1454,7 +1456,7 @@ void t_js_generator::generate_serialize_field(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is_container()) {
     generate_serialize_container(out, type, prefix + tfield->get_name());
-  } else if (type->is_base_type() || type->is_enum()) {
+  } else if (type->is_primitive_type() || type->is_enum()) {
     string name = tfield->get_name();
 
     // Hack for when prefix is defined (always a hash ref)
@@ -1463,8 +1465,9 @@ void t_js_generator::generate_serialize_field(
 
     indent(out) << "output.";
 
-    if (type->is_base_type()) {
-      t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+    if (type->is_primitive_type()) {
+      t_primitive_type::t_primitive tbase =
+          ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
         case t_primitive_type::TYPE_VOID:
           throw std::runtime_error(
@@ -1495,7 +1498,7 @@ void t_js_generator::generate_serialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no JS name for base type " +
-              t_primitive_type::t_base_name(tbase));
+              t_primitive_type::t_primitive_name(tbase));
       }
     } else if (type->is_enum()) {
       out << "writeI32(" << name << ")";
@@ -1638,8 +1641,9 @@ string t_js_generator::declare_field(
 
   if (init) {
     const t_type* type = tfield->get_type()->get_true_type();
-    if (type->is_base_type()) {
-      t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+    if (type->is_primitive_type()) {
+      t_primitive_type::t_primitive tbase =
+          ((t_primitive_type*)type)->primitive_type();
       switch (tbase) {
         case t_primitive_type::TYPE_VOID:
           break;
@@ -1656,7 +1660,7 @@ string t_js_generator::declare_field(
         default:
           throw std::runtime_error(
               "compiler error: no JS initializer for base type " +
-              t_primitive_type::t_base_name(tbase));
+              t_primitive_type::t_primitive_name(tbase));
       }
     } else if (type->is_enum()) {
       result += " = null";
@@ -1731,8 +1735,9 @@ string t_js_generator::argument_list(
 string t_js_generator ::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
-  if (type->is_base_type()) {
-    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+  if (type->is_primitive_type()) {
+    t_primitive_type::t_primitive tbase =
+        ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
       case t_primitive_type::TYPE_VOID:
         throw std::runtime_error("NO T_VOID CONSTRUCT");

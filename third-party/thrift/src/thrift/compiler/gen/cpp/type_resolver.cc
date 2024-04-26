@@ -403,7 +403,7 @@ std::string type_resolver::gen_standard_type(
     const t_type& node, type_resolve_fn resolve_fn) {
   // Base types have fixed type mappings.
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&node)) {
-    return default_type(tbase_type->base_type());
+    return default_type(tbase_type->primitive_type());
   }
 
   // Containers have fixed template mappings.

@@ -140,7 +140,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"union?", type.is_union()},
       {"enum?", type.is_enum()},
       {"service?", type.is_service()},
-      {"base?", type.is_base_type()},
+      {"base?", type.is_primitive_type()},
       {"container?", type.is_container()},
       {"list?", type.is_list()},
       {"set?", type.is_set()},

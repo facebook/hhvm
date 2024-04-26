@@ -230,8 +230,9 @@ string t_json_generator::type_to_string(const t_type* type) {
     type = type->get_true_type();
   }
 
-  if (type->is_base_type()) {
-    t_primitive_type::t_base tbase = ((t_primitive_type*)type)->get_base();
+  if (type->is_primitive_type()) {
+    t_primitive_type::t_primitive tbase =
+        ((t_primitive_type*)type)->primitive_type();
     switch (tbase) {
       case t_primitive_type::TYPE_VOID:
         return "VOID";
@@ -287,7 +288,7 @@ string t_json_generator::type_to_spec_args(const t_type* ttype) {
     ttype = ttype->get_true_type();
   }
 
-  if (ttype->is_base_type()) {
+  if (ttype->is_primitive_type()) {
     return "null";
   } else if (
       ttype->is_struct() || ttype->is_exception() || ttype->is_service() ||

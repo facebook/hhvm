@@ -985,12 +985,12 @@ class cpp_mstch_type : public mstch_type {
   std::string get_type_namespace(const t_program* program) override {
     return cpp2::get_gen_namespace(*program);
   }
-  mstch::node resolves_to_base() { return resolved_type_->is_base_type(); }
+  mstch::node resolves_to_base() { return resolved_type_->is_primitive_type(); }
   mstch::node resolves_to_integral() {
     return resolved_type_->is_byte() || resolved_type_->is_any_int();
   }
   mstch::node resolves_to_base_or_enum() {
-    return resolved_type_->is_base_type() || resolved_type_->is_enum();
+    return resolved_type_->is_primitive_type() || resolved_type_->is_enum();
   }
   mstch::node resolves_to_container() { return resolved_type_->is_container(); }
   mstch::node resolves_to_container_or_struct() {
@@ -1232,7 +1232,7 @@ class cpp_mstch_struct : public mstch_struct {
         continue;
       }
       if (type->is_enum() ||
-          (type->is_base_type() && !type->is_string_or_binary()) ||
+          (type->is_primitive_type() && !type->is_string_or_binary()) ||
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
           (type->is_container() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
@@ -1243,7 +1243,7 @@ class cpp_mstch_struct : public mstch_struct {
              field->get_req() != t_field::e_req::optional))) ||
           (type->is_container() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional) ||
-          (type->is_base_type() && cpp2::is_explicit_ref(field) &&
+          (type->is_primitive_type() && cpp2::is_explicit_ref(field) &&
            field->get_req() != t_field::e_req::optional)) {
         filtered_fields.push_back(field);
       }

@@ -260,7 +260,7 @@ bool is_orderable_walk(
     return std::unique_ptr<void, decltype(deleter)>(&f, deleter);
   };
   auto g = make_scope_guard([&] { context.seen.erase(&type); });
-  if (type.is_base_type() || type.is_enum()) {
+  if (type.is_primitive_type() || type.is_enum()) {
     return true;
   }
   bool result = false;

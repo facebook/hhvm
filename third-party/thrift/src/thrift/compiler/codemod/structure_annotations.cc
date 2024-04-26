@@ -42,7 +42,7 @@ class structure_annotations {
 
   std::set<std::string> visit_type(t_type_ref typeRef, const t_named& node) {
     std::set<std::string> to_add;
-    if (!typeRef.resolve() || typeRef->is_base_type() ||
+    if (!typeRef.resolve() || typeRef->is_primitive_type() ||
         typeRef->is_container() ||
         (typeRef->is_typedef() &&
          static_cast<const t_typedef&>(*typeRef).typedef_kind() !=

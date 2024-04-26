@@ -839,7 +839,7 @@ class mstch_type : public mstch_base {
   mstch::node is_union() { return resolved_type_->is_union(); }
   mstch::node is_enum() { return resolved_type_->is_enum(); }
   mstch::node is_service() { return resolved_type_->is_service(); }
-  mstch::node is_base() { return resolved_type_->is_base_type(); }
+  mstch::node is_base() { return resolved_type_->is_primitive_type(); }
   mstch::node is_container() { return resolved_type_->is_container(); }
   mstch::node is_list() { return resolved_type_->is_list(); }
   mstch::node is_set() { return resolved_type_->is_set(); }

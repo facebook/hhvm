@@ -421,12 +421,12 @@ void lower_type_annotations(
       (node_type->is_typedef() &&
        static_cast<const t_typedef*>(node_type)->typedef_kind() !=
            t_typedef::kind::defined) ||
-      (node_type->is_base_type() && !node_type->annotations().empty())) {
+      (node_type->is_primitive_type() && !node_type->annotations().empty())) {
     // This is a new type we can modify in place
     for (auto& pair : unstructured) {
       const_cast<t_type*>(node_type)->set_annotation(pair.first, pair.second);
     }
-  } else if (node_type->is_base_type()) {
+  } else if (node_type->is_primitive_type()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
     auto& program = mCtx.program();
     auto unnamed = std::make_unique<t_primitive_type>(

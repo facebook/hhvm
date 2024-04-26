@@ -166,7 +166,7 @@ class const_checker {
   // to a floating point.
   void check_base_value(
       const t_primitive_type* type, const t_const_value* value) {
-    switch (type->base_type()) {
+    switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
@@ -204,7 +204,7 @@ class const_checker {
 
   void check_base_type(
       const t_primitive_type* type, const t_const_value* value) {
-    switch (type->base_type()) {
+    switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
         error("type error: cannot declare a void const: {}", name_);
         break;

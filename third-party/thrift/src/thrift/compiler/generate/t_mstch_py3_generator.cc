@@ -642,7 +642,7 @@ class py3_mstch_type : public mstch_type {
   mstch::node hasCustomTypeBehavior() { return has_custom_type_behavior(); }
 
   mstch::node isSimple() {
-    return (type_->is_base_type() || type_->is_enum()) &&
+    return (type_->is_primitive_type() || type_->is_enum()) &&
         !has_custom_type_behavior();
   }
 

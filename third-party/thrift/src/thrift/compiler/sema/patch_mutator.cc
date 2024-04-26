@@ -502,7 +502,7 @@ t_type_ref patch_generator::find_patch_type(
 
   // Base types use a shared representation defined in patch.thrift.
   if (auto* base_type = dynamic_cast<const t_primitive_type*>(ttype)) {
-    const char* name = getPatchTypeName(base_type->base_type());
+    const char* name = getPatchTypeName(base_type->primitive_type());
     if (const auto* result = program_.scope()->find_type(name)) {
       return t_type_ref::from_ptr(result);
     }

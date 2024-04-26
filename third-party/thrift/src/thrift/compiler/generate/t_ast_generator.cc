@@ -296,7 +296,7 @@ void t_ast_generator::generate_program() {
       } else if (auto map_type = dynamic_cast<const t_map*>(ref.get_type())) {
         recurse(map_type->key_type(), recurse);
         recurse(map_type->val_type(), recurse);
-      } else if (ref->is_base_type()) {
+      } else if (ref->is_primitive_type()) {
       } else {
         try {
           cpp2::IdentifierRef ident;

@@ -1260,7 +1260,7 @@ void t_hack_generator::generate_json_field(
       const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
     std::string typeConversionString = "";
     std::string number_limit = "";
-    switch (tbase_type->get_base()) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_VOID:
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
@@ -1284,7 +1284,8 @@ void t_hack_generator::generate_json_field(
       default:
         throw std::runtime_error(
             "compiler error: no PHP reader for base type " +
-            t_primitive_type::t_base_name(tbase_type->get_base()) + name);
+            t_primitive_type::t_primitive_name(tbase_type->primitive_type()) +
+            name);
     }
 
     if (number_limit.empty()) {
@@ -1403,11 +1404,11 @@ void t_hack_generator::generate_json_map_element(
       "compiler error: Thrift Hack compiler"
       "does not support complex types as the key of a map.";
 
-  if (!keytype->is_enum() && !keytype->is_base_type()) {
+  if (!keytype->is_enum() && !keytype->is_primitive_type()) {
     throw error_msg;
   }
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(keytype)) {
-    switch (tbase_type->get_base()) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_VOID:
       case t_primitive_type::TYPE_DOUBLE:
       case t_primitive_type::TYPE_FLOAT:
@@ -1829,7 +1830,7 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
     return is_hack_const_type(ttypedef->get_type());
   }
   type = type->get_true_type();
-  if (type->is_base_type() || type->is_enum()) {
+  if (type->is_primitive_type() || type->is_enum()) {
     return true;
   } else if (arrays_ && type->is_container()) {
     if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
@@ -1933,7 +1934,7 @@ std::string t_hack_generator::render_const_value_helper(
   }
 
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
-    switch (tbase_type->get_base()) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
         out << render_string(value->get_string());
@@ -1962,7 +1963,7 @@ std::string t_hack_generator::render_const_value_helper(
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_primitive_type::t_base_name(tbase_type->get_base()));
+            t_primitive_type::t_primitive_name(tbase_type->primitive_type()));
     }
   } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
     const t_enum_value* val = tenum->find_value(value->get_integer());
@@ -2207,7 +2208,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
   std::string dval;
   type = type->get_true_type();
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
-    t_primitive_type::t_base tbase = tbase_type->get_base();
+    t_primitive_type::t_primitive tbase = tbase_type->primitive_type();
     switch (tbase) {
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
@@ -2229,7 +2230,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       default:
         throw std::runtime_error(
             "compiler error: no const of base type " +
-            t_primitive_type::t_base_name(tbase));
+            t_primitive_type::t_primitive_name(tbase));
     }
   } else if (type->is_enum()) {
     dval = "null";
@@ -2265,7 +2266,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
 
 t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
     const t_primitive_type* tbase) {
-  switch (tbase->get_base()) {
+  switch (tbase->primitive_type()) {
     case t_primitive_type::TYPE_BOOL:
       return ThriftPrimitiveType::THRIFT_BOOL_TYPE;
     case t_primitive_type::TYPE_BYTE:
@@ -2289,7 +2290,7 @@ t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
     default:
       throw std::invalid_argument(
           "compiler error: no ThriftPrimitiveType mapped to base type " +
-          t_primitive_type::t_base_name(tbase->get_base()));
+          t_primitive_type::t_primitive_name(tbase->primitive_type()));
   }
 }
 
@@ -2921,12 +2922,12 @@ void t_hack_generator::generate_php_type_spec(
   t = t->get_true_type();
   indent(out) << "'type' => " << type_to_enum(t) << ",\n";
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(t)) {
-    if (tbase_type->get_base() == t_primitive_type::TYPE_BINARY) {
+    if (tbase_type->primitive_type() == t_primitive_type::TYPE_BINARY) {
       indent(out) << "'is_binary' => true,\n";
     }
   }
 
-  if (t->is_base_type()) {
+  if (t->is_primitive_type()) {
     // Noop, type is all we need
   } else if (t->is_enum()) {
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
@@ -3211,7 +3212,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
   bool stringify_map_keys = false;
   if (shape_arraykeys_) {
     const t_type* key_type = t->get_key_type();
-    if (key_type->is_base_type() && key_type->is_string_or_binary()) {
+    if (key_type->is_primitive_type() && key_type->is_string_or_binary()) {
       stringify_map_keys = true;
     }
   }
@@ -3639,7 +3640,7 @@ bool t_hack_generator::
       if (shape_arraykeys_) {
         const t_type* key_type =
             static_cast<const t_map*>(ttype)->get_key_type();
-        if (is_shape_method && key_type->is_base_type() &&
+        if (is_shape_method && key_type->is_primitive_type() &&
             key_type->is_string_or_binary()) {
           stringify_map_keys = true;
           indent_up();
@@ -4040,7 +4041,7 @@ bool t_hack_generator::is_async_type(
     return true;
   }
   type = type->get_true_type();
-  if (type->is_base_type() || type->is_enum()) {
+  if (type->is_primitive_type() || type->is_enum()) {
     return false;
   } else if (type->is_container()) {
     if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
@@ -6512,8 +6513,8 @@ std::string t_hack_generator::type_to_typehint(
   }
 
   ttype = ttype->get_true_type();
-  if (ttype->is_base_type()) {
-    switch ((dynamic_cast<const t_primitive_type*>(ttype))->get_base()) {
+  if (ttype->is_primitive_type()) {
+    switch ((dynamic_cast<const t_primitive_type*>(ttype))->primitive_type()) {
       case t_primitive_type::TYPE_VOID:
         return "void";
       case t_primitive_type::TYPE_STRING:
@@ -7314,7 +7315,7 @@ std::string t_hack_generator::declare_field(
   if (init) {
     const t_type* type = tfield->get_type()->get_true_type();
     if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
-      switch (tbase_type->get_base()) {
+      switch (tbase_type->primitive_type()) {
         case t_primitive_type::TYPE_VOID:
           break;
         case t_primitive_type::TYPE_STRING:
@@ -7337,7 +7338,7 @@ std::string t_hack_generator::declare_field(
         default:
           throw std::runtime_error(
               "compiler error: no Hack initializer for base type " +
-              t_primitive_type::t_base_name(tbase_type->get_base()));
+              t_primitive_type::t_primitive_name(tbase_type->primitive_type()));
       }
     } else if (type->is_enum()) {
       result += " = null";
@@ -7473,7 +7474,7 @@ std::string t_hack_generator::generate_function_helper_name(
  */
 std::string t_hack_generator::type_to_cast(const t_type* type) {
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
-    switch (tbase_type->get_base()) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_BOOL:
         return "(bool)";
       case t_primitive_type::TYPE_BYTE:
@@ -7503,7 +7504,7 @@ std::string t_hack_generator::type_to_enum(const t_type* type) {
   type = type->get_true_type();
 
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(type)) {
-    switch (tbase_type->get_base()) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::TYPE_VOID:
         throw std::runtime_error("NO T_VOID CONSTRUCT");
       case t_primitive_type::TYPE_STRING:

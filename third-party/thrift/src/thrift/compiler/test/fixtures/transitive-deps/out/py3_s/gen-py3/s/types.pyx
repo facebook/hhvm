@@ -62,7 +62,7 @@ import b.types as _b_types
 cimport c.types as _c_types
 import c.types as _c_types
 
-cimport s.types_reflection as _types_reflection
+import s.types_reflection as _types_reflection
 
 
 

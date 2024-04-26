@@ -62,7 +62,7 @@ import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
-cimport test.fixtures.patch.module.types_reflection as _types_reflection
+import test.fixtures.patch.module.types_reflection as _types_reflection
 
 
 cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)

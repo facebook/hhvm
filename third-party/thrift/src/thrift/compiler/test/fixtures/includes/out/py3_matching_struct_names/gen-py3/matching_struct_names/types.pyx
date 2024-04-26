@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport module.types as _module_types
 import module.types as _module_types
 
-cimport matching_struct_names.types_reflection as _types_reflection
+import matching_struct_names.types_reflection as _types_reflection
 
 
 

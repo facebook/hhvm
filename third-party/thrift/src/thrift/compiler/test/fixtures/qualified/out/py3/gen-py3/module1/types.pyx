@@ -58,7 +58,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-cimport module1.types_reflection as _types_reflection
+import module1.types_reflection as _types_reflection
 
 
 cdef __EnumData __Enum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEnum](), Enum)

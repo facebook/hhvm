@@ -790,6 +790,8 @@ class py3_mstch_struct : public mstch_struct {
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
             {"struct:py3_fields?", &py3_mstch_struct::has_py3_fields},
             {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
+            {"struct:has_defaulted_field?",
+             &py3_mstch_struct::has_defaulted_field},
         });
     py3_fields_ = struct_->fields().copy();
     py3_fields_.erase(
@@ -836,6 +838,18 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node has_py3_fields() { return !py3_fields_.empty(); }
 
   mstch::node has_hidden_fields() { return hidden_fields; }
+
+  mstch::node has_defaulted_field() {
+    if (struct_->is_union()) {
+      return false;
+    }
+    for (const auto& field : py3_fields_) {
+      if (field->get_value()) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   mstch::node fields_and_mixin_fields() {
     std::vector<const t_field*> fields = py3_fields_;
@@ -1371,8 +1385,7 @@ void t_mstch_py3_generator::generate_types() {
   };
 
   std::vector<std::string> cythonFilesNoTypeContext{
-      "types_reflection.pxd",
-      "types_reflection.pyx",
+      "types_reflection.py",
       "types_fields.pxd",
       "types_fields.pyx",
       "builders.pxd",

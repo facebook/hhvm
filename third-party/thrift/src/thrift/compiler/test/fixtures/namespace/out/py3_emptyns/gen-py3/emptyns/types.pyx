@@ -58,7 +58,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-cimport emptyns.types_reflection as _types_reflection
+import emptyns.types_reflection as _types_reflection
 
 
 

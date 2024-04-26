@@ -62,7 +62,7 @@ import module0.types as _module0_types
 cimport module1.types as _module1_types
 import module1.types as _module1_types
 
-cimport module2.types_reflection as _types_reflection
+import module2.types_reflection as _types_reflection
 
 
 

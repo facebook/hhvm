@@ -68,7 +68,7 @@ cdef class StructSpec:
         self.annotations = MappingProxyType(annotations)
 
     @staticmethod
-    cdef _fbthrift_create(str name, StructType kind, dict annotations):
+    def _fbthrift_create(str name, StructType kind, dict annotations):
         return StructSpec.__new__(StructSpec, name, None, kind, annotations)
 
     def __iter__(self):
@@ -82,7 +82,7 @@ cdef class StructSpec:
             return False
         return tuple(self) == tuple(other)
 
-    cdef void add_field(self, FieldSpec field):
+    def add_field(self, FieldSpec field):
         Py_INCREF(field)
         self._fields.push_back(<PyObject*>field)
 
@@ -118,7 +118,7 @@ cdef class FieldSpec:
         self.annotations = MappingProxyType(annotations)
 
     @staticmethod
-    cdef _fbthrift_create(
+    def _fbthrift_create(
         int id,
         str name,
         str py_name,
@@ -152,7 +152,7 @@ cdef class ListSpec:
         self.kind = NumberType(kind)
 
     @staticmethod
-    cdef _fbthrift_create(object value, NumberType kind):
+    def _fbthrift_create(object value, NumberType kind):
         return ListSpec.__new__(ListSpec, value, kind)
 
     def __iter__(self):
@@ -172,7 +172,7 @@ cdef class SetSpec:
         self.kind = NumberType(kind)
 
     @staticmethod
-    cdef _fbthrift_create(object value, NumberType kind):
+    def _fbthrift_create(object value, NumberType kind):
         return SetSpec.__new__(SetSpec, value, kind)
 
     def __iter__(self):
@@ -200,7 +200,7 @@ cdef class MapSpec:
         self.value_kind = NumberType(value_kind)
 
     @staticmethod
-    cdef _fbthrift_create(
+    def _fbthrift_create(
         object key,
         NumberType key_kind,
         object value,

@@ -46,10 +46,6 @@ cdef class StructSpec:
     cdef readonly object kind
     cdef readonly object annotations
 
-    @staticmethod
-    cdef _fbthrift_create(str name, StructType kind, dict annotations)
-    cdef void add_field(self, FieldSpec field)
-
 
 cdef class FieldSpec:
     cdef readonly int id
@@ -61,33 +57,15 @@ cdef class FieldSpec:
     cdef readonly object default "default_"
     cdef readonly object annotations
 
-    @staticmethod
-    cdef _fbthrift_create(
-        int id,
-        str name,
-        str py_name,
-        object type,
-        NumberType kind,
-        Qualifier qualifier,
-        object default,
-        dict annotations,
-    )
-
 
 cdef class ListSpec:
     cdef readonly object value
     cdef readonly object kind
 
-    @staticmethod
-    cdef _fbthrift_create(object value, NumberType kind)
-
 
 cdef class SetSpec:
     cdef readonly object value
     cdef readonly object kind
-
-    @staticmethod
-    cdef _fbthrift_create(object value, NumberType kind)
 
 
 cdef class MapSpec:
@@ -95,14 +73,6 @@ cdef class MapSpec:
     cdef readonly object key_kind
     cdef readonly object value
     cdef readonly object value_kind
-
-    @staticmethod
-    cdef _fbthrift_create(
-        object key,
-        NumberType key_kind,
-        object value,
-        NumberType value_kind,
-    )
 
 
 cdef class InterfaceSpec:

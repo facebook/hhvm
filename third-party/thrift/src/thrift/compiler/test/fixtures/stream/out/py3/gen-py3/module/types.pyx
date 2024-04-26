@@ -60,7 +60,7 @@ import builtins as _builtins
 import asyncio
 from folly.coro cimport bridgeCoroTaskWith
 
-cimport module.types_reflection as _types_reflection
+import module.types_reflection as _types_reflection
 
 
 

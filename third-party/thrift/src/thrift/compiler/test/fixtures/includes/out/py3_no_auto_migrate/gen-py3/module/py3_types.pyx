@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport includes.py3_types as _includes_types
 import includes.py3_types as _includes_types
 
-cimport module.types_reflection as _types_reflection
+import module.types_reflection as _types_reflection
 
 
 

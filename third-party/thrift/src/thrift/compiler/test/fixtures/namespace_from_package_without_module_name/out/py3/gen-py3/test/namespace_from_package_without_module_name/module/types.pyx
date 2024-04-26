@@ -58,7 +58,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-cimport test.namespace_from_package_without_module_name.module.types_reflection as _types_reflection
+import test.namespace_from_package_without_module_name.module.types_reflection as _types_reflection
 
 
 

@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport transitive.py3_types as _transitive_types
 import transitive.py3_types as _transitive_types
 
-cimport includes.types_reflection as _types_reflection
+import includes.types_reflection as _types_reflection
 
 
 

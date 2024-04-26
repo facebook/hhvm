@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
-cimport apache.thrift.fixtures.types.module.types_reflection as _types_reflection
+import apache.thrift.fixtures.types.module.types_reflection as _types_reflection
 
 
 cdef __EnumData __has_bitwise_ops_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[chas_bitwise_ops](), has_bitwise_ops)

@@ -58,7 +58,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-cimport apache.thrift.type.id.types_reflection as _types_reflection
+import apache.thrift.type.id.types_reflection as _types_reflection
 
 
 

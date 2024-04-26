@@ -62,7 +62,7 @@ import apache.thrift.type.id.types as _apache_thrift_type_id_types
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
-cimport apache.thrift.op.patch.types_reflection as _types_reflection
+import apache.thrift.op.patch.types_reflection as _types_reflection
 
 
 

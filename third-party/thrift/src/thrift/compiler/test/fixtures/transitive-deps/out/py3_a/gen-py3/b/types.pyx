@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport c.types as _c_types
 import c.types as _c_types
 
-cimport b.types_reflection as _types_reflection
+import b.types_reflection as _types_reflection
 
 
 

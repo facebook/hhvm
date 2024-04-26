@@ -64,7 +64,7 @@ import module.py3_types as _module_types
 cimport transitive.py3_types as _transitive_types
 import transitive.py3_types as _transitive_types
 
-cimport service.types_reflection as _types_reflection
+import service.types_reflection as _types_reflection
 
 
 

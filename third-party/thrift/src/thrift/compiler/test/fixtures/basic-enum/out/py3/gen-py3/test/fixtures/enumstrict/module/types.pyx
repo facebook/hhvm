@@ -58,7 +58,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 
-cimport test.fixtures.enumstrict.module.types_reflection as _types_reflection
+import test.fixtures.enumstrict.module.types_reflection as _types_reflection
 
 
 cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)

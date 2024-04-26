@@ -60,7 +60,7 @@ import builtins as _builtins
 cimport includes.types as _includes_types
 import includes.types as _includes_types
 
-cimport module.types_reflection as _types_reflection
+import module.types_reflection as _types_reflection
 
 
 cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)

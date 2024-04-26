@@ -133,6 +133,7 @@ set(WANGLE_SOURCES
   ssl/SSLUtil.cpp
   ssl/TLSTicketKeyManager.cpp
   ssl/TLSCredProcessor.cpp
+  ssl/TLSInMemoryTicketProcessor.cpp
   util/FilePoller.cpp
 )
 
@@ -293,6 +294,7 @@ if(BUILD_TESTS)
   #  add_gtest(ssl/test/SSLCacheTest.cpp SSLCacheTest)
   add_gtest(ssl/test/SSLContextManagerTest.cpp SSLContextManagerTest)
   add_gtest(ssl/test/TLSCredProcessorTest.cpp TLSCredProcessorTest)
+  add_gtest(ssl/test/TLSInMemoryTicketProcessorTest.cpp TLSInMemoryTicketProcessorTest)
   add_gtest(util/test/FilePollerTest.cpp FilePollerTest)
 endif()
 

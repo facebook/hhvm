@@ -40,6 +40,7 @@
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -511,15 +512,11 @@ void RocketServerConnection::handleUntrackedFrame(
           if (auto context = frameHandler_->getCpp2ConnContext()) {
             auto md =
                 clientMeta.transportMetadataPush_ref()->transportMetadata_ref();
-            THRIFT_CONNECTION_EVENT(transport.metadata).log(*context, [&] {
-              folly::dynamic transportMetadata = folly::dynamic::object;
-              if (md) {
-                for (auto p : *md) {
-                  transportMetadata[p.first] = p.second;
-                }
-              }
-              return transportMetadata;
-            });
+            std::optional<folly::F14NodeMap<std::string, std::string>> metadata;
+            if (md) {
+              metadata = std::move(*md);
+            }
+            logTransportMetadata(*context, std::move(metadata));
           }
           break;
         }

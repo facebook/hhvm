@@ -263,6 +263,7 @@ add_library(
   server/LegacyHeaderRoutingHandler.cpp
   server/LoggingEvent.cpp
   server/LoggingEventHelper.cpp
+  server/LoggingEventTransportMetadata.cpp
   server/MonitoringMethodNames.cpp
   server/ParallelConcurrencyController.cpp
   server/TokenBucketConcurrencyController.cpp

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/source_location.h>
 
 #include <fmt/core.h>
@@ -99,6 +100,17 @@ std::optional<source> source_manager::get_file(const std::string& file_name) {
     path = itr->second;
   } else {
     path = file_name;
+  }
+
+  std::string absPath;
+  if (detail::platform_is_windows()) {
+    // Without the "\\?\" prefix, path in Windows can not exceed 260 characters.
+    // https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+    constexpr auto kPrefix = R"(\\?\)";
+    if (path.substr(0, std::strlen(kPrefix)) != kPrefix) {
+      absPath = kPrefix + std::filesystem::absolute(path).string();
+      path = absPath;
+    }
   }
 
   // Read the file.

@@ -388,6 +388,20 @@ std::string parse_args(
 
   // Return the input file name.
   assert(arg_i == arguments.size() - 1);
+  if (detail::platform_is_windows()) {
+    // The path here is used in schema.thrift
+    //
+    // * In Linux, buck uses relative path.
+    // * In Windows, buck uses absolute path.
+    //
+    // To make the generated schema.thrift consistent with Unix, we need to
+    // convert it to relative path when possible.
+    //
+    // Not that the path might not exist since when thrift compiler is used as
+    // library, user's code can use `source_manager::add_virtual_file(...)`
+    // method to create a virtual file.
+    return std::filesystem::proximate(arguments[arg_i]).generic_string();
+  }
   return arguments[arg_i];
 }
 

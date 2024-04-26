@@ -1011,9 +1011,7 @@ class rust_mstch_service : public mstch_service {
          {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
          {"service:parent_service_name",
-          &rust_mstch_service::parent_service_name},
-         {"service:enable_anyhow_to_application_exn",
-          &rust_mstch_service::rust_anyhow_to_application_exn}});
+          &rust_mstch_service::parent_service_name}});
   }
   mstch::node rust_name() { return named_rust_name(service_); }
   mstch::node rust_functions();
@@ -1083,15 +1081,6 @@ class rust_mstch_service : public mstch_service {
   mstch::node rust_has_doc() { return service_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(service_); }
 
-  mstch::node rust_anyhow_to_application_exn() {
-    if (const t_const* annot =
-            find_structured_service_exn_annotation(*service_)) {
-      return get_annotation_property_bool(annot, "anyhow_to_application_exn");
-    }
-
-    return false;
-  }
-
  private:
   std::unordered_multiset<std::string> function_upcamel_names_;
   const rust_codegen_options& options_;
@@ -1147,10 +1136,7 @@ class rust_mstch_function : public mstch_function {
          {"function:void_excluding_interaction?",
           &rust_mstch_function::rust_void_excluding_interaction},
          {"function:enable_anyhow_to_application_exn",
-          &rust_mstch_function::rust_anyhow_to_application_exn},
-         {"function:check_service_for_enable_anyhow_to_application_exn",
-          &rust_mstch_function::
-              rust_check_service_for_anyhow_to_application_exn}});
+          &rust_mstch_function::rust_anyhow_to_application_exn}});
   }
   mstch::node rust_name() { return named_rust_name(function_); }
   mstch::node rust_upcamel() {
@@ -1279,26 +1265,24 @@ class rust_mstch_function : public mstch_function {
     return function_->return_type()->is_void() && !function_->sink_or_stream();
   }
   mstch::node rust_anyhow_to_application_exn() {
-    if (const t_const* annot =
-            find_structured_service_exn_annotation(*function_)) {
-      return get_annotation_property_bool(annot, "anyhow_to_application_exn");
-    }
-
-    return false;
-  }
-  mstch::node rust_check_service_for_anyhow_to_application_exn() {
-    // Only check for the service annotation if we didn't explicitly define it
-    // on the function.
+    // First look for annotation on the function.
     if (const t_const* annot =
             find_structured_service_exn_annotation(*function_)) {
       for (const auto& item : annot->value()->get_map()) {
         if (item.first->get_string() == "anyhow_to_application_exn") {
-          return false;
+          return get_annotation_property_bool(
+              annot, "anyhow_to_application_exn");
         }
       }
     }
 
-    return true;
+    // If not present on function, look at service annotations.
+    if (const t_const* annot =
+            find_structured_service_exn_annotation(*interface_)) {
+      return get_annotation_property_bool(annot, "anyhow_to_application_exn");
+    }
+
+    return false;
   }
 
  private:

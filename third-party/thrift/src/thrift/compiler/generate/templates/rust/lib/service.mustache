@@ -429,9 +429,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     {{/function:stream?}}
 
     {{^function:sink?}}
-    {{^function:stream?}}
     #[derive(Clone, Debug)]
-    {{/function:stream?}}
     pub enum {{function:upcamel}}Exn {
         {{#function:exceptions}}
         {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!

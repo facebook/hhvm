@@ -1225,6 +1225,7 @@ pub mod my_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum StreamByIdExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -1553,6 +1554,7 @@ pub mod my_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum StreamByIdWithExceptionExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -1866,6 +1868,7 @@ pub mod my_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum StreamByIdWithResponseExn {
 
         ApplicationException(::fbthrift::ApplicationException),

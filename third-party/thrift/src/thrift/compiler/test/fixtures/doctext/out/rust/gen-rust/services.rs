@@ -396,6 +396,7 @@ pub mod c {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum NumbersExn {
 
         ApplicationException(::fbthrift::ApplicationException),

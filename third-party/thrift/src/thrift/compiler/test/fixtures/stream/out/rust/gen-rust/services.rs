@@ -259,6 +259,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ReturnstreamExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -587,6 +588,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum StreamthrowsExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -915,6 +917,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ServicethrowsExn {
         e(crate::types::FooEx),
         ApplicationException(::fbthrift::ApplicationException),
@@ -1276,6 +1279,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum Servicethrows2Exn {
         e1(crate::types::FooEx),        e2(crate::types::FooEx2),
         ApplicationException(::fbthrift::ApplicationException),
@@ -1648,6 +1652,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum BoththrowsExn {
         e(crate::types::FooEx),
         ApplicationException(::fbthrift::ApplicationException),
@@ -1994,6 +1999,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ResponseandstreamstreamthrowsExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -2329,6 +2335,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ResponseandstreamservicethrowsExn {
         e(crate::types::FooEx),
         ApplicationException(::fbthrift::ApplicationException),
@@ -2697,6 +2704,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ResponseandstreamboththrowsExn {
         e(crate::types::FooEx),
         ApplicationException(::fbthrift::ApplicationException),
@@ -3014,6 +3022,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum ReturnstreamFastExn {
 
         ApplicationException(::fbthrift::ApplicationException),

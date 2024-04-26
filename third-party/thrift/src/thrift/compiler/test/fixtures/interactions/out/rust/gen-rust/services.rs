@@ -560,6 +560,7 @@ pub mod my_interaction {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum TruthifyExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -1146,6 +1147,7 @@ pub mod my_interaction_fast {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum TruthifyExn {
 
         ApplicationException(::fbthrift::ApplicationException),
@@ -2011,6 +2013,7 @@ pub mod my_service {
         }
     }
 
+    #[derive(Clone, Debug)]
     pub enum SerializeExn {
 
         ApplicationException(::fbthrift::ApplicationException),

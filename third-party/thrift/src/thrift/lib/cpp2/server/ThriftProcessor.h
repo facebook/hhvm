@@ -22,6 +22,7 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/synchronization/DelayedInit.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
@@ -66,7 +67,7 @@ class ThriftProcessor {
       std::unique_ptr<Cpp2ConnContext> connContext) noexcept;
 
  private:
-  std::unique_ptr<AsyncProcessor> processor_;
+  folly::DelayedInit<std::unique_ptr<AsyncProcessor>> processor_;
   ThriftServer& server_;
 };
 

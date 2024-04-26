@@ -980,7 +980,12 @@ class ast_builder : public parser_actions {
     const std::string& path = program_.path();
     auto src = sm.get_file(path);
     if (!src) {
-      diags_.error(loc, "failed to open file: {}", path);
+      diags_.report(
+          loc,
+          params_.allow_missing_includes ? diagnostic_level::warning
+                                         : diagnostic_level::error,
+          "failed to open file: {}",
+          path);
       end_parsing();
     }
     program_.set_src_range({src->start, src->start});
@@ -1029,7 +1034,12 @@ std::unique_ptr<t_program_bundle> parse_ast(
     auto path_or_error = sm.find_include_file(
         include_path, parent.path(), params.incl_searchpath);
     if (path_or_error.index() == 1) {
-      diags.error(range.begin, "{}", std::get<1>(path_or_error));
+      diags.report(
+          range.begin,
+          params.allow_missing_includes ? diagnostic_level::warning
+                                        : diagnostic_level::error,
+          "{}",
+          std::get<1>(path_or_error));
       if (!params.allow_missing_includes) {
         end_parsing();
       }

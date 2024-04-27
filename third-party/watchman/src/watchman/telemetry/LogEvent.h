@@ -70,4 +70,12 @@ struct DispatchCommand : public MetadataEvent {
   }
 };
 
+struct ClockTest : public BaseEvent {
+  static constexpr const char* type = "clock_test";
+
+  void populate(DynamicEvent& event) const {
+    BaseEvent::populate(event);
+  }
+};
+
 } // namespace watchman

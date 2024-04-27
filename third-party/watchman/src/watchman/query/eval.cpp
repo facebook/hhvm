@@ -22,6 +22,8 @@
 #include "watchman/root/Root.h"
 #include "watchman/saved_state/SavedStateInterface.h"
 #include "watchman/scm/SCM.h"
+#include "watchman/telemetry/LogEvent.h"
+#include "watchman/telemetry/WatchmanStructuredLogger.h"
 
 using namespace watchman;
 
@@ -158,6 +160,7 @@ static void default_generators(
 
 static void execute_common(
     QueryContext* ctx,
+    QueryExecute* queryExecute,
     PerfSample* sample,
     QueryResult* res,
     QueryGenerator generator) {
@@ -214,6 +217,10 @@ static void execute_common(
       }
     }
 
+    // NOTE: sample and queryExecute are either both non-null or both null
+    queryExecute->num_special_files = ctx->namesToLog.size();
+    queryExecute->special_files = json_array(std::move(nameList)).toString();
+
     sample->add_meta(
         "num_special_files_in_result_set",
         json_integer(ctx->namesToLog.size()));
@@ -222,19 +229,33 @@ static void execute_common(
     sample->force_log();
   }
 
-  if (sample && sample->finish()) {
-    sample->add_root_metadata(ctx->root->getRootMetadata());
-    auto meta = json_object({
-        {"fresh_instance", json_boolean(res->isFreshInstance)},
-        {"num_deduped", json_integer(ctx->num_deduped)},
-        {"num_results", json_integer(ctx->resultsArray.size())},
-        {"num_walked", json_integer(ctx->getNumWalked())},
-    });
+  if (sample) {
+    // NOTE: sample and queryExecute are either both non-null or both null
+    RootMetadata root_metadata = ctx->root->getRootMetadata();
+    addRootMetadataToEvent(root_metadata, *queryExecute);
+    queryExecute->fresh_instance = res->isFreshInstance;
+    queryExecute->deduped = ctx->num_deduped;
+    queryExecute->results = ctx->resultsArray.size();
+    queryExecute->walked = ctx->getNumWalked();
     if (ctx->query->query_spec) {
-      meta.set("query", json_ref(*ctx->query->query_spec));
+      queryExecute->query = ctx->query->query_spec->toString();
     }
-    sample->add_meta("query_execute", std::move(meta));
-    sample->log();
+    getLogger()->logEvent(*queryExecute);
+
+    if (sample->finish()) {
+      sample->add_root_metadata(root_metadata);
+      auto meta = json_object({
+          {"fresh_instance", json_boolean(res->isFreshInstance)},
+          {"num_deduped", json_integer(ctx->num_deduped)},
+          {"num_results", json_integer(ctx->resultsArray.size())},
+          {"num_walked", json_integer(ctx->getNumWalked())},
+      });
+      if (ctx->query->query_spec) {
+        meta.set("query", json_ref(*ctx->query->query_spec));
+      }
+      sample->add_meta("query_execute", std::move(meta));
+      sample->log();
+    }
   }
 
   res->resultsArray = ctx->renderResults();
@@ -254,9 +275,11 @@ QueryResult w_query_execute(
   bool disableFreshInstance{false};
   auto requestId = query->request_id;
 
+  QueryExecute queryExecute;
   PerfSample sample("query_execute");
   if (requestId && !requestId->empty()) {
     log(DBG, "request_id = ", *requestId, "\n");
+    queryExecute.request_id = requestId->string();
     sample.add_meta("request_id", w_string_to_json(*requestId));
   }
 
@@ -447,11 +470,11 @@ QueryResult w_query_execute(
       QueryResult r;
       c.clockAtStartOfQuery = ctx.clockAtStartOfQuery;
       c.since = ctx.since;
-      execute_common(&c, nullptr, &r, generator);
+      execute_common(&c, nullptr, nullptr, &r, generator);
     }
   }
 
-  execute_common(&ctx, &sample, &res, generator);
+  execute_common(&ctx, &queryExecute, &sample, &res, generator);
   return res;
 }
 

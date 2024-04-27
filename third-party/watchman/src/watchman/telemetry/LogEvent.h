@@ -143,4 +143,36 @@ struct SavedState : public MetadataEvent {
   }
 };
 
+struct QueryExecute : public MetadataEvent {
+  static constexpr const char* type = "query_execute";
+
+  std::string request_id;
+  int64_t num_special_files = 0;
+  std::string special_files;
+  bool fresh_instance = false;
+  int64_t deduped = 0;
+  int64_t results = 0;
+  int64_t walked = 0;
+  std::string query;
+
+  void populate(DynamicEvent& event) const {
+    MetadataEvent::populate(event);
+
+    if (!request_id.empty()) {
+      event.addString("request_id", request_id);
+    }
+    event.addInt("num_special_files", num_special_files);
+    if (!special_files.empty()) {
+      event.addString("special_files", special_files);
+    }
+    event.addBool("fresh_instance", fresh_instance);
+    event.addInt("deduped", deduped);
+    event.addInt("results", results);
+    event.addInt("walked", walked);
+    if (!query.empty()) {
+      event.addString("query", query);
+    }
+  }
+};
+
 } // namespace watchman

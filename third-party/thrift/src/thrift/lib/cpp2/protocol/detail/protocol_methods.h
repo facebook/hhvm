@@ -104,7 +104,13 @@ auto reserve_if_possible(Container* t, Size size) {
 
 template <typename Container>
 typename Container::reference emplace_back_default(Container& c) {
-  return c.emplace_back(detail::default_set_element(c));
+  constexpr auto pass_alloc =
+      alloc_should_propagate<Container, typename Container::value_type>;
+  if constexpr (pass_alloc) {
+    return c.emplace_back(typename Container::value_type(c.get_allocator()));
+  } else {
+    return c.emplace_back();
+  }
 }
 
 template <typename Container, typename Map>

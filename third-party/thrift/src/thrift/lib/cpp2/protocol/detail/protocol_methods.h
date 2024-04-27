@@ -91,6 +91,8 @@ namespace pm {
 
 template <typename C, typename... A>
 using detect_reserve = decltype(FOLLY_DECLVAL(C).reserve(FOLLY_DECLVAL(A)...));
+template <typename C, typename... A>
+using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
 
 template <typename Container, typename Size>
 auto reserve_if_possible(Container* t, Size size) {
@@ -544,9 +546,21 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
           protocol::TProtocolException::throwTruncatedData();
         }
 
-        reserve_if_possible(&out, list_size);
-        while (list_size--) {
-          read_one(protocol, out);
+        // Do special treatments for lists of primitive types, as we found
+        // resize is more performant than reserve.
+        constexpr auto should_resize =
+            folly::is_detected_v<detect_resize, Type, decltype(list_size)> &&
+            std::is_arithmetic_v<elem_type>;
+        if constexpr (should_resize) {
+          out.resize(list_size);
+          for (auto&& elem : out) {
+            elem_methods::read(protocol, elem);
+          }
+        } else {
+          reserve_if_possible(&out, list_size);
+          while (list_size--) {
+            read_one(protocol, out);
+          }
         }
       }
     }

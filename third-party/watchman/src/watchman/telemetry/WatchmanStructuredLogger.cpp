@@ -39,6 +39,9 @@ DynamicEvent WatchmanStructuredLogger::populateDefaultFields(const char* type) {
     event.addInt("sandcastle_instance_id", *sessionInfo_.ciInstanceId);
   }
   event.addString("version", sessionInfo_.appVersion);
+#ifdef WATCHMAN_BUILD_INFO
+  event.addString("buildinfo", WATCHMAN_BUILD_INFO);
+#endif
   event.addString("logged_by", "watchman");
   return event;
 }

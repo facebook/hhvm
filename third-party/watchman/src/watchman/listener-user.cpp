@@ -10,6 +10,7 @@
 #include "watchman/Client.h"
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
+#include "watchman/PerfSample.h"
 #include "watchman/Shutdown.h"
 #include "watchman/root/Root.h"
 #include "watchman/root/resolve.h"
@@ -85,6 +86,11 @@ resolveRootByName(Client* client, const char* rootName, bool create) {
         create = false;
       }
       root = w_root_resolve(rootName, create);
+    }
+
+    if (client->dispatch_command) {
+      addRootMetadataToEvent(
+          root->getRootMetadata(), *client->dispatch_command);
     }
 
     if (client->perf_sample) {

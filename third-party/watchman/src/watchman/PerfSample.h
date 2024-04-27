@@ -27,6 +27,14 @@ struct RootMetadata {
   w_string watcher;
 };
 
+template <typename T>
+void addRootMetadataToEvent(const RootMetadata& root_metadata, T& event) {
+  event.root = root_metadata.root_path.string();
+  event.recrawl = root_metadata.recrawl_count;
+  event.case_sensitive = root_metadata.case_sensitive;
+  event.watcher = root_metadata.watcher.string();
+}
+
 class PerfSample {
  public:
   // What we're sampling across

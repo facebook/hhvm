@@ -7,18 +7,19 @@
 
 #pragma once
 
-#include <eden/common/utils/ProcessInfoCache.h>
 #include <fmt/core.h>
 
 #include <chrono>
 #include <deque>
 #include <unordered_map>
 
+#include "eden/common/utils/ProcessInfoCache.h"
 #include "watchman/Clock.h"
 #include "watchman/CommandRegistry.h"
 #include "watchman/Logging.h"
 #include "watchman/PDU.h"
 #include "watchman/PerfSample.h"
+#include "watchman/telemetry/LogEvent.h"
 #include "watchman/watchman_stream.h"
 
 namespace watchman {
@@ -55,6 +56,9 @@ class Client : public std::enable_shared_from_this<Client> {
   // The PerfSample wrapping the current command's execution. Only set by the
   // client thread.
   PerfSample* perf_sample = nullptr;
+  // The DispatchCommand wrapping the current command's execution. Only set by
+  // the client thread.
+  DispatchCommand* dispatch_command = nullptr;
 
   // Queue of things to send to the client.
   std::deque<json_ref> responses;

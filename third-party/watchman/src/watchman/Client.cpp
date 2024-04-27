@@ -8,6 +8,7 @@
 #include "watchman/Client.h"
 
 #include <folly/MapUtil.h>
+#include <folly/stop_watch.h>
 
 #include "eden/common/utils/ProcessInfoCache.h"
 #include "watchman/Command.h"
@@ -19,6 +20,8 @@
 #include "watchman/QueryableView.h"
 #include "watchman/Shutdown.h"
 #include "watchman/root/Root.h"
+#include "watchman/telemetry/LogEvent.h"
+#include "watchman/telemetry/WatchmanStructuredLogger.h"
 #include "watchman/watchman_cmd.h"
 
 namespace watchman {
@@ -76,6 +79,10 @@ void Client::sendErrorResponse(std::string_view formatted) {
   UntypedResponse resp;
   resp.set("error", typed_string_to_json(formatted));
 
+  if (dispatch_command) {
+    dispatch_command->error = formatted;
+  }
+
   if (perf_sample) {
     perf_sample->add_meta("error", typed_string_to_json(formatted));
   }
@@ -129,10 +136,16 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
     // Scope for the perf sample
     {
       logf(DBG, "dispatch_command: {}\n", def->name);
+      folly::stop_watch<> dispatchCommandStart;
+      DispatchCommand dispatchCommand;
+      dispatchCommand.command = command.name();
+      dispatch_command = &dispatchCommand;
       auto sample_name = "dispatch_command:" + std::string{def->name};
       PerfSample sample(sample_name.c_str());
       perf_sample = &sample;
+
       SCOPE_EXIT {
+        dispatch_command = nullptr;
         perf_sample = nullptr;
       };
 
@@ -148,8 +161,14 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
         enqueueResponse(def->handler(this, rendered));
       } catch (const ErrorResponse& e) {
         sendErrorResponse(e.what());
+        dispatchCommand.error = e.what();
       } catch (const ResponseWasHandledManually&) {
       }
+
+      dispatchCommand.duration =
+          std::chrono::duration<double>{dispatchCommandStart.elapsed()}.count();
+      dispatchCommand.args = rendered.toString();
+      getLogger()->logEvent(dispatchCommand);
 
       if (sample.finish()) {
         sample.add_meta("args", std::move(rendered));

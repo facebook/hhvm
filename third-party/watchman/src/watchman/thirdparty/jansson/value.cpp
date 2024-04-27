@@ -13,7 +13,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fmt/core.h>
 #include <string>
+#include <sstream>
 
 #include "utf.h"
 #include "watchman/watchman_string.h"
@@ -104,6 +106,53 @@ std::optional<w_string> json_ref::asOptionalString() const {
     return std::nullopt;
   }
   return json_to_string(ref_)->value;
+}
+
+std::string json_ref::toString() const {
+  switch (this->type()) {
+    case JSON_OBJECT:
+    {
+      std::stringstream ss;
+      const auto& obj = this->object();
+      ss << "{";
+      for (auto itr = obj.begin(); itr != obj.end(); itr++) {
+        ss << itr->first.c_str() << ":" << itr->second.toString() << ",";
+      }
+      if (obj.size() > 0) {
+        // remove last comma
+        ss.seekp(-1, std::ios_base::end);
+      }
+      ss << "}";
+      return ss.str();
+    }
+    case JSON_ARRAY:
+    {
+      std::stringstream ss;
+      const auto& arr = this->array();
+      ss << "[";
+      for (const auto& elem: arr) {
+        ss << elem.toString() << ",";
+      }
+      if (arr.size() > 0) {
+        // remove last comma
+        ss.seekp(-1, std::ios_base::end);
+      }
+      ss << "]";
+      return ss.str();
+    }
+    case JSON_STRING:
+      return fmt::format("\"{}\"", json_string_value(*this));
+    case JSON_INTEGER:
+    case JSON_REAL:
+      return std::to_string(json_number_value(*this));
+    case JSON_TRUE:
+      return "true";
+    case JSON_FALSE:
+      return "false";
+    case JSON_NULL:
+      return "null";
+  }
+  return std::string();
 }
 
 const char* json_ref::asCString() const {

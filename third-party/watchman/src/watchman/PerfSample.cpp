@@ -16,7 +16,6 @@
 #include "watchman/Options.h"
 #include "watchman/WatchmanConfig.h"
 #include "watchman/sockname.h"
-#include "watchman/telemetry/WatchmanStructuredLogger.h"
 #include "watchman/watchman_system.h"
 #include "watchman/watchman_time.h"
 
@@ -337,9 +336,6 @@ void PerfSample::log() {
   // Log to the log file
   auto dumped = json_dumps(info, 0);
   watchman::log(ERR, "PERF: ", dumped, "\n");
-
-  // TODO: Log to structured logger
-  auto logger = getLogger();
 
   if (!cfg_get_json("perf_logger_command")) {
     return;

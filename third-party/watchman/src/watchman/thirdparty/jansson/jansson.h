@@ -209,6 +209,11 @@ class json_ref {
    */
   std::optional<w_string> asOptionalString() const;
 
+  /**
+   * Converts to a JSON formatted string.
+   */
+  std::string toString() const;
+
   const char* asCString() const;
   bool asBool() const;
   json_int_t asInt() const;

@@ -15,6 +15,7 @@
 #include "watchman/IgnoreSet.h"
 #include "watchman/PendingCollection.h"
 #include "watchman/PubSub.h"
+#include "watchman/QueryableView.h"
 #include "watchman/Serde.h"
 #include "watchman/WatchmanConfig.h"
 #include "watchman/fs/FileSystem.h"

@@ -14,11 +14,19 @@ pub mod c {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::c::FError> for FExn {
-        fn from(err: crate::errors::c::FError) -> Self {
+    impl ::std::convert::From<FExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: FExn) -> Self {
             match err {
-                crate::errors::c::FError::ApplicationException(aexn) => FExn::ApplicationException(aexn),
-                crate::errors::c::FError::ThriftError(err) => FExn::ApplicationException(::fbthrift::ApplicationException {
+                FExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for FExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => FExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => FExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -180,11 +188,19 @@ pub mod c {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::c::NumbersError> for NumbersExn {
-        fn from(err: crate::errors::c::NumbersError) -> Self {
+    impl ::std::convert::From<NumbersExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: NumbersExn) -> Self {
             match err {
-                crate::errors::c::NumbersError::ApplicationException(aexn) => NumbersExn::ApplicationException(aexn),
-                crate::errors::c::NumbersError::ThriftError(err) => NumbersExn::ApplicationException(::fbthrift::ApplicationException {
+                NumbersExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for NumbersExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => NumbersExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => NumbersExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -272,18 +288,6 @@ pub mod c {
         }
     }
 
-    impl ::std::convert::From<crate::errors::c::ThingError> for ThingExn {
-        fn from(err: crate::errors::c::ThingError) -> Self {
-            match err {
-                crate::errors::c::ThingError::bang(err) => ThingExn::bang(err),
-                crate::errors::c::ThingError::ApplicationException(aexn) => ThingExn::ApplicationException(aexn),
-                crate::errors::c::ThingError::ThriftError(err) => ThingExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for ThingExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {

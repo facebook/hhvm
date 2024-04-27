@@ -10,8 +10,6 @@ pub mod consts;
 pub use self::consts::*;
 pub mod services;
 
-pub mod errors;
-
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 

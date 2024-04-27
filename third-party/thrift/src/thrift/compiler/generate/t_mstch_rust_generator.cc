@@ -2305,9 +2305,11 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
   field_map_t field_map;
   function_map_t function_map;
   for (const auto& fun : service_->functions()) {
-    for (const t_field& fld : get_elems(fun.exceptions())) {
-      function_map[&fld.type().deref()].push_back(&fun);
-      field_map[&fld.type().deref()].push_back(&fld);
+    if (!fun.sink()) {
+      for (const t_field& fld : get_elems(fun.exceptions())) {
+        function_map[&fld.type().deref()].push_back(&fun);
+        field_map[&fld.type().deref()].push_back(&fld);
+      }
     }
   }
 

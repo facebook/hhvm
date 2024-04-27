@@ -8,17 +8,8 @@ pub mod service1 {
 
     pub type RError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::service1::RExn> for RError {
-        fn from(e: crate::services::service1::RExn) -> Self {
-            match e {
-                crate::services::service1::RExn::ApplicationException(aexn) =>
-                    RError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum RReader {}
+    pub(crate) enum RReader {}
 
     impl ::fbthrift::help::DeserializeExn for RReader {
         type Success = crate::types::T6;
@@ -72,23 +63,18 @@ pub mod service1 {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::service1::*;
 
 /// Error definitions for `S2`.
 pub mod s2 {
 
     pub type RError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::s2::RExn> for RError {
-        fn from(e: crate::services::s2::RExn) -> Self {
-            match e {
-                crate::services::s2::RExn::ApplicationException(aexn) =>
-                    RError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum RReader {}
+    pub(crate) enum RReader {}
 
     impl ::fbthrift::help::DeserializeExn for RReader {
         type Success = crate::types::T6;
@@ -142,6 +128,10 @@ pub mod s2 {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::s2::*;
 
 /// Error definitions for `AllMethods`.
 pub mod all_methods {
@@ -163,17 +153,8 @@ pub mod all_methods {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::all_methods::FooExn> for FooError {
-        fn from(e: crate::services::all_methods::FooExn) -> Self {
-            match e {
-                crate::services::all_methods::FooExn::ApplicationException(aexn) =>
-                    FooError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FooReader {}
+    pub(crate) enum FooReader {}
 
     impl ::fbthrift::help::DeserializeExn for FooReader {
         type Success = ();
@@ -305,6 +286,7 @@ pub mod all_methods {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::all_methods::BarExn> for BarError {
         fn from(e: crate::services::all_methods::BarExn) -> Self {
             match e {
@@ -316,8 +298,20 @@ pub mod all_methods {
         }
     }
 
-    #[doc(hidden)]
-    pub enum BarReader {}
+    impl ::std::convert::From<BarError> for crate::services::all_methods::BarExn {
+        fn from(err: BarError) -> Self {
+            match err {
+                BarError::se(err) => crate::services::all_methods::BarExn::se(err),
+                BarError::ApplicationException(aexn) => crate::services::all_methods::BarExn::ApplicationException(aexn),
+                BarError::ThriftError(err) => crate::services::all_methods::BarExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum BarReader {}
 
     impl ::fbthrift::help::DeserializeExn for BarReader {
         type Success = ::std::string::String;
@@ -377,6 +371,10 @@ pub mod all_methods {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::all_methods::*;
+
 /// Error definitions for `OneMethod`.
 pub mod one_method {
 
@@ -397,17 +395,8 @@ pub mod one_method {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::one_method::FooExn> for FooError {
-        fn from(e: crate::services::one_method::FooExn) -> Self {
-            match e {
-                crate::services::one_method::FooExn::ApplicationException(aexn) =>
-                    FooError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FooReader {}
+    pub(crate) enum FooReader {}
 
     impl ::fbthrift::help::DeserializeExn for FooReader {
         type Success = ();
@@ -539,6 +528,7 @@ pub mod one_method {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::one_method::BarExn> for BarError {
         fn from(e: crate::services::one_method::BarExn) -> Self {
             match e {
@@ -550,8 +540,20 @@ pub mod one_method {
         }
     }
 
-    #[doc(hidden)]
-    pub enum BarReader {}
+    impl ::std::convert::From<BarError> for crate::services::one_method::BarExn {
+        fn from(err: BarError) -> Self {
+            match err {
+                BarError::se(err) => crate::services::one_method::BarExn::se(err),
+                BarError::ApplicationException(aexn) => crate::services::one_method::BarExn::ApplicationException(aexn),
+                BarError::ThriftError(err) => crate::services::one_method::BarExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum BarReader {}
 
     impl ::fbthrift::help::DeserializeExn for BarReader {
         type Success = ::std::string::String;
@@ -611,6 +613,10 @@ pub mod one_method {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::one_method::*;
+
 /// Error definitions for `OneMethodOptOut`.
 pub mod one_method_opt_out {
 
@@ -631,17 +637,8 @@ pub mod one_method_opt_out {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::one_method_opt_out::FooExn> for FooError {
-        fn from(e: crate::services::one_method_opt_out::FooExn) -> Self {
-            match e {
-                crate::services::one_method_opt_out::FooExn::ApplicationException(aexn) =>
-                    FooError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FooReader {}
+    pub(crate) enum FooReader {}
 
     impl ::fbthrift::help::DeserializeExn for FooReader {
         type Success = ();
@@ -773,6 +770,7 @@ pub mod one_method_opt_out {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::one_method_opt_out::BarExn> for BarError {
         fn from(e: crate::services::one_method_opt_out::BarExn) -> Self {
             match e {
@@ -784,8 +782,20 @@ pub mod one_method_opt_out {
         }
     }
 
-    #[doc(hidden)]
-    pub enum BarReader {}
+    impl ::std::convert::From<BarError> for crate::services::one_method_opt_out::BarExn {
+        fn from(err: BarError) -> Self {
+            match err {
+                BarError::se(err) => crate::services::one_method_opt_out::BarExn::se(err),
+                BarError::ApplicationException(aexn) => crate::services::one_method_opt_out::BarExn::ApplicationException(aexn),
+                BarError::ThriftError(err) => crate::services::one_method_opt_out::BarExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum BarReader {}
 
     impl ::fbthrift::help::DeserializeExn for BarReader {
         type Success = ::std::string::String;
@@ -844,4 +854,8 @@ pub mod one_method_opt_out {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::one_method_opt_out::*;
 

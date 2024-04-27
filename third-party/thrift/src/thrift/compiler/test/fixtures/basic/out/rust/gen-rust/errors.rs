@@ -8,17 +8,8 @@ pub mod foo_service {
 
     pub type SimpleRpcError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo_service::SimpleRpcExn> for SimpleRpcError {
-        fn from(e: crate::services::foo_service::SimpleRpcExn) -> Self {
-            match e {
-                crate::services::foo_service::SimpleRpcExn::ApplicationException(aexn) =>
-                    SimpleRpcError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum SimpleRpcReader {}
+    pub(crate) enum SimpleRpcReader {}
 
     impl ::fbthrift::help::DeserializeExn for SimpleRpcReader {
         type Success = ();
@@ -67,22 +58,17 @@ pub mod foo_service {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::foo_service::*;
+
 /// Error definitions for `FB303Service`.
 pub mod f_b303_service {
 
     pub type SimpleRpcError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::f_b303_service::SimpleRpcExn> for SimpleRpcError {
-        fn from(e: crate::services::f_b303_service::SimpleRpcExn) -> Self {
-            match e {
-                crate::services::f_b303_service::SimpleRpcExn::ApplicationException(aexn) =>
-                    SimpleRpcError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum SimpleRpcReader {}
+    pub(crate) enum SimpleRpcReader {}
 
     impl ::fbthrift::help::DeserializeExn for SimpleRpcReader {
         type Success = crate::types::ReservedKeyword;
@@ -137,22 +123,17 @@ pub mod f_b303_service {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::f_b303_service::*;
+
 /// Error definitions for `MyService`.
 pub mod my_service {
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PingExn> for PingError {
-        fn from(e: crate::services::my_service::PingExn) -> Self {
-            match e {
-                crate::services::my_service::PingExn::ApplicationException(aexn) =>
-                    PingError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PingReader {}
+    pub(crate) enum PingReader {}
 
     impl ::fbthrift::help::DeserializeExn for PingReader {
         type Success = ();
@@ -201,17 +182,8 @@ pub mod my_service {
 
     pub type GetRandomDataError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetRandomDataExn> for GetRandomDataError {
-        fn from(e: crate::services::my_service::GetRandomDataExn) -> Self {
-            match e {
-                crate::services::my_service::GetRandomDataExn::ApplicationException(aexn) =>
-                    GetRandomDataError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetRandomDataReader {}
+    pub(crate) enum GetRandomDataReader {}
 
     impl ::fbthrift::help::DeserializeExn for GetRandomDataReader {
         type Success = ::std::string::String;
@@ -266,17 +238,8 @@ pub mod my_service {
 
     pub type SinkError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SinkExn> for SinkError {
-        fn from(e: crate::services::my_service::SinkExn) -> Self {
-            match e {
-                crate::services::my_service::SinkExn::ApplicationException(aexn) =>
-                    SinkError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum SinkReader {}
+    pub(crate) enum SinkReader {}
 
     impl ::fbthrift::help::DeserializeExn for SinkReader {
         type Success = ();
@@ -325,17 +288,8 @@ pub mod my_service {
 
     pub type PutDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PutDataByIdExn> for PutDataByIdError {
-        fn from(e: crate::services::my_service::PutDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::PutDataByIdExn::ApplicationException(aexn) =>
-                    PutDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PutDataByIdReader {}
+    pub(crate) enum PutDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for PutDataByIdReader {
         type Success = ();
@@ -384,17 +338,8 @@ pub mod my_service {
 
     pub type HasDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::HasDataByIdExn> for HasDataByIdError {
-        fn from(e: crate::services::my_service::HasDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::HasDataByIdExn::ApplicationException(aexn) =>
-                    HasDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum HasDataByIdReader {}
+    pub(crate) enum HasDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for HasDataByIdReader {
         type Success = ::std::primitive::bool;
@@ -449,17 +394,8 @@ pub mod my_service {
 
     pub type GetDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetDataByIdExn> for GetDataByIdError {
-        fn from(e: crate::services::my_service::GetDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::GetDataByIdExn::ApplicationException(aexn) =>
-                    GetDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetDataByIdReader {}
+    pub(crate) enum GetDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for GetDataByIdReader {
         type Success = ::std::string::String;
@@ -514,17 +450,8 @@ pub mod my_service {
 
     pub type DeleteDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::DeleteDataByIdExn> for DeleteDataByIdError {
-        fn from(e: crate::services::my_service::DeleteDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::DeleteDataByIdExn::ApplicationException(aexn) =>
-                    DeleteDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum DeleteDataByIdReader {}
+    pub(crate) enum DeleteDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for DeleteDataByIdReader {
         type Success = ();
@@ -573,17 +500,8 @@ pub mod my_service {
 
     pub type LobDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::LobDataByIdExn> for LobDataByIdError {
-        fn from(e: crate::services::my_service::LobDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::LobDataByIdExn::ApplicationException(aexn) =>
-                    LobDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum LobDataByIdReader {}
+    pub(crate) enum LobDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for LobDataByIdReader {
         type Success = ();
@@ -632,17 +550,8 @@ pub mod my_service {
 
     pub type InvalidReturnForHackError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InvalidReturnForHackExn> for InvalidReturnForHackError {
-        fn from(e: crate::services::my_service::InvalidReturnForHackExn) -> Self {
-            match e {
-                crate::services::my_service::InvalidReturnForHackExn::ApplicationException(aexn) =>
-                    InvalidReturnForHackError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum InvalidReturnForHackReader {}
+    pub(crate) enum InvalidReturnForHackReader {}
 
     impl ::fbthrift::help::DeserializeExn for InvalidReturnForHackReader {
         type Success = ::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>;
@@ -697,17 +606,8 @@ pub mod my_service {
 
     pub type RpcSkippedCodegenError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::RpcSkippedCodegenExn> for RpcSkippedCodegenError {
-        fn from(e: crate::services::my_service::RpcSkippedCodegenExn) -> Self {
-            match e {
-                crate::services::my_service::RpcSkippedCodegenExn::ApplicationException(aexn) =>
-                    RpcSkippedCodegenError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum RpcSkippedCodegenReader {}
+    pub(crate) enum RpcSkippedCodegenReader {}
 
     impl ::fbthrift::help::DeserializeExn for RpcSkippedCodegenReader {
         type Success = ();
@@ -756,22 +656,17 @@ pub mod my_service {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::my_service::*;
+
 /// Error definitions for `DbMixedStackArguments`.
 pub mod db_mixed_stack_arguments {
 
     pub type GetDataByKey0Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey0Exn> for GetDataByKey0Error {
-        fn from(e: crate::services::db_mixed_stack_arguments::GetDataByKey0Exn) -> Self {
-            match e {
-                crate::services::db_mixed_stack_arguments::GetDataByKey0Exn::ApplicationException(aexn) =>
-                    GetDataByKey0Error::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetDataByKey0Reader {}
+    pub(crate) enum GetDataByKey0Reader {}
 
     impl ::fbthrift::help::DeserializeExn for GetDataByKey0Reader {
         type Success = ::std::vec::Vec<::std::primitive::u8>;
@@ -826,17 +721,8 @@ pub mod db_mixed_stack_arguments {
 
     pub type GetDataByKey1Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::db_mixed_stack_arguments::GetDataByKey1Exn> for GetDataByKey1Error {
-        fn from(e: crate::services::db_mixed_stack_arguments::GetDataByKey1Exn) -> Self {
-            match e {
-                crate::services::db_mixed_stack_arguments::GetDataByKey1Exn::ApplicationException(aexn) =>
-                    GetDataByKey1Error::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetDataByKey1Reader {}
+    pub(crate) enum GetDataByKey1Reader {}
 
     impl ::fbthrift::help::DeserializeExn for GetDataByKey1Reader {
         type Success = ::std::vec::Vec<::std::primitive::u8>;
@@ -890,4 +776,8 @@ pub mod db_mixed_stack_arguments {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::db_mixed_stack_arguments::*;
 

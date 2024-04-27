@@ -42,7 +42,7 @@ pub mod {{service:snake}} {
 
     {{/service:rust_exceptions}}
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     {{#function:exceptions?}}
     /// Errors for {{function:rust_name}} (client side).
     #[derive(Debug)]
@@ -137,12 +137,7 @@ pub mod {{service:snake}} {
             Self::ApplicationException(ae)
         }
     }
-    {{/function:exceptions?}}
-    {{^function:sink?}}
-    {{^function:exceptions?}}
-    pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
 
-    {{/function:exceptions?}}
     impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn> for {{function:upcamel}}Error {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
             match e {
@@ -156,8 +151,27 @@ pub mod {{service:snake}} {
         }
     }
 
-    #[doc(hidden)]
-    pub enum {{function:upcamel}}Reader {}
+    impl ::std::convert::From<{{function:upcamel}}Error> for {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn {
+        fn from(err: {{function:upcamel}}Error) -> Self {
+            match err {
+                {{#function:exceptions}}
+                {{function:upcamel}}Error::{{field:rust_name}}(err) => {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{field:rust_name}}(err),
+                {{/function:exceptions}}
+                {{function:upcamel}}Error::ApplicationException(aexn) => {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn),
+                {{function:upcamel}}Error::ThriftError(err) => {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+    {{/function:exceptions?}}
+    {{^function:exceptions?}}
+    pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
+
+    {{/function:exceptions?}}
+
+    pub(crate) enum {{function:upcamel}}Reader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}Reader {
         type Success = {{!
@@ -264,7 +278,6 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{/function:sink?}}
     {{#function:stream?}}
     {{#function:stream_exceptions?}}
     #[derive(Debug)]
@@ -351,11 +364,6 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{/function:stream_exceptions?}}
-    {{^function:stream_exceptions?}}
-    pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
-
-    {{/function:stream_exceptions?}}
     impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn> for {{function:upcamel}}StreamError {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn) -> Self {
             match e {
@@ -369,8 +377,12 @@ pub mod {{service:snake}} {
         }
     }
 
-    #[doc(hidden)]
-    pub enum {{function:upcamel}}StreamReader {}
+    {{/function:stream_exceptions?}}
+    {{^function:stream_exceptions?}}
+    pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
+
+    {{/function:stream_exceptions?}}
+    pub(crate) enum {{function:upcamel}}StreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}StreamReader {
         type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
@@ -432,8 +444,12 @@ pub mod {{service:snake}} {
     }
 
     {{/function:stream?}}
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::{{service:snake}}::*;
 
 {{!newline}}

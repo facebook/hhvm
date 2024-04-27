@@ -8,17 +8,8 @@ pub mod service {
 
     pub type FuncError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::service::FuncExn> for FuncError {
-        fn from(e: crate::services::service::FuncExn) -> Self {
-            match e {
-                crate::services::service::FuncExn::ApplicationException(aexn) =>
-                    FuncError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FuncReader {}
+    pub(crate) enum FuncReader {}
 
     impl ::fbthrift::help::DeserializeExn for FuncReader {
         type Success = crate::types::MyI32_4873;
@@ -73,22 +64,17 @@ pub mod service {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::service::*;
+
 /// Error definitions for `AdapterService`.
 pub mod adapter_service {
 
     pub type CountError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::adapter_service::CountExn> for CountError {
-        fn from(e: crate::services::adapter_service::CountExn) -> Self {
-            match e {
-                crate::services::adapter_service::CountExn::ApplicationException(aexn) =>
-                    CountError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum CountReader {}
+    pub(crate) enum CountReader {}
 
     impl ::fbthrift::help::DeserializeExn for CountReader {
         type Success = crate::types::CountingStruct;
@@ -143,17 +129,8 @@ pub mod adapter_service {
 
     pub type AdaptedTypesError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::adapter_service::AdaptedTypesExn> for AdaptedTypesError {
-        fn from(e: crate::services::adapter_service::AdaptedTypesExn) -> Self {
-            match e {
-                crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn) =>
-                    AdaptedTypesError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum AdaptedTypesReader {}
+    pub(crate) enum AdaptedTypesReader {}
 
     impl ::fbthrift::help::DeserializeExn for AdaptedTypesReader {
         type Success = crate::types::HeapAllocated;
@@ -207,4 +184,8 @@ pub mod adapter_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::adapter_service::*;
 

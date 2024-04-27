@@ -12,11 +12,19 @@ pub mod raiser {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::raiser::DoBlandError> for DoBlandExn {
-        fn from(err: crate::errors::raiser::DoBlandError) -> Self {
+    impl ::std::convert::From<DoBlandExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: DoBlandExn) -> Self {
             match err {
-                crate::errors::raiser::DoBlandError::ApplicationException(aexn) => DoBlandExn::ApplicationException(aexn),
-                crate::errors::raiser::DoBlandError::ThriftError(err) => DoBlandExn::ApplicationException(::fbthrift::ApplicationException {
+                DoBlandExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for DoBlandExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => DoBlandExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => DoBlandExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -117,20 +125,6 @@ pub mod raiser {
         }
     }
 
-    impl ::std::convert::From<crate::errors::raiser::DoRaiseError> for DoRaiseExn {
-        fn from(err: crate::errors::raiser::DoRaiseError) -> Self {
-            match err {
-                crate::errors::raiser::DoRaiseError::b(err) => DoRaiseExn::b(err),
-                crate::errors::raiser::DoRaiseError::f(err) => DoRaiseExn::f(err),
-                crate::errors::raiser::DoRaiseError::s(err) => DoRaiseExn::s(err),
-                crate::errors::raiser::DoRaiseError::ApplicationException(aexn) => DoRaiseExn::ApplicationException(aexn),
-                crate::errors::raiser::DoRaiseError::ThriftError(err) => DoRaiseExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for DoRaiseExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -243,11 +237,19 @@ pub mod raiser {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::raiser::Get200Error> for Get200Exn {
-        fn from(err: crate::errors::raiser::Get200Error) -> Self {
+    impl ::std::convert::From<Get200Exn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: Get200Exn) -> Self {
             match err {
-                crate::errors::raiser::Get200Error::ApplicationException(aexn) => Get200Exn::ApplicationException(aexn),
-                crate::errors::raiser::Get200Error::ThriftError(err) => Get200Exn::ApplicationException(::fbthrift::ApplicationException {
+                Get200Exn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for Get200Exn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Get200Exn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Get200Exn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -348,20 +350,6 @@ pub mod raiser {
         }
     }
 
-    impl ::std::convert::From<crate::errors::raiser::Get500Error> for Get500Exn {
-        fn from(err: crate::errors::raiser::Get500Error) -> Self {
-            match err {
-                crate::errors::raiser::Get500Error::f(err) => Get500Exn::f(err),
-                crate::errors::raiser::Get500Error::b(err) => Get500Exn::b(err),
-                crate::errors::raiser::Get500Error::s(err) => Get500Exn::s(err),
-                crate::errors::raiser::Get500Error::ApplicationException(aexn) => Get500Exn::ApplicationException(aexn),
-                crate::errors::raiser::Get500Error::ThriftError(err) => Get500Exn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for Get500Exn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {

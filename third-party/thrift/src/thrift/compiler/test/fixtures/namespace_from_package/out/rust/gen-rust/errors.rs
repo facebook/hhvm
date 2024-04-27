@@ -8,17 +8,8 @@ pub mod test_service {
 
     pub type InitError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::test_service::InitExn> for InitError {
-        fn from(e: crate::services::test_service::InitExn) -> Self {
-            match e {
-                crate::services::test_service::InitExn::ApplicationException(aexn) =>
-                    InitError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum InitReader {}
+    pub(crate) enum InitReader {}
 
     impl ::fbthrift::help::DeserializeExn for InitReader {
         type Success = ::std::primitive::i64;
@@ -72,4 +63,8 @@ pub mod test_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::test_service::*;
 

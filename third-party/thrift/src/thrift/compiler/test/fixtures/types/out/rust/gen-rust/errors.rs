@@ -8,17 +8,8 @@ pub mod some_service {
 
     pub type BounceMapError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::some_service::BounceMapExn> for BounceMapError {
-        fn from(e: crate::services::some_service::BounceMapExn) -> Self {
-            match e {
-                crate::services::some_service::BounceMapExn::ApplicationException(aexn) =>
-                    BounceMapError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum BounceMapReader {}
+    pub(crate) enum BounceMapReader {}
 
     impl ::fbthrift::help::DeserializeExn for BounceMapReader {
         type Success = included__types::SomeMap;
@@ -73,17 +64,8 @@ pub mod some_service {
 
     pub type BinaryKeyedMapError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::some_service::BinaryKeyedMapExn> for BinaryKeyedMapError {
-        fn from(e: crate::services::some_service::BinaryKeyedMapExn) -> Self {
-            match e {
-                crate::services::some_service::BinaryKeyedMapExn::ApplicationException(aexn) =>
-                    BinaryKeyedMapError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum BinaryKeyedMapReader {}
+    pub(crate) enum BinaryKeyedMapReader {}
 
     impl ::fbthrift::help::DeserializeExn for BinaryKeyedMapReader {
         type Success = ::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>;
@@ -137,4 +119,8 @@ pub mod some_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::some_service::*;
 

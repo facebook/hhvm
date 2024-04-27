@@ -10,31 +10,7 @@
 #[doc(inline)]
 pub use :: as types;
 
-pub mod errors {
-    #[doc(inline)]
-    pub use ::::errors::foo_service;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::foo_service::*;
-
-    #[doc(inline)]
-    pub use ::::errors::f_b303_service;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::f_b303_service::*;
-
-    #[doc(inline)]
-    pub use ::::errors::my_service;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::my_service::*;
-
-    #[doc(inline)]
-    pub use ::::errors::db_mixed_stack_arguments;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::db_mixed_stack_arguments::*;
-}
+pub mod errors;
 
 pub(crate) use crate as client;
 pub(crate) use ::::services;

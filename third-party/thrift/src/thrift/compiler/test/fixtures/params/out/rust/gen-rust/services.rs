@@ -12,11 +12,19 @@ pub mod nested_containers {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::nested_containers::MapListError> for MapListExn {
-        fn from(err: crate::errors::nested_containers::MapListError) -> Self {
+    impl ::std::convert::From<MapListExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: MapListExn) -> Self {
             match err {
-                crate::errors::nested_containers::MapListError::ApplicationException(aexn) => MapListExn::ApplicationException(aexn),
-                crate::errors::nested_containers::MapListError::ThriftError(err) => MapListExn::ApplicationException(::fbthrift::ApplicationException {
+                MapListExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MapListExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => MapListExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => MapListExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -99,11 +107,19 @@ pub mod nested_containers {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::nested_containers::MapSetError> for MapSetExn {
-        fn from(err: crate::errors::nested_containers::MapSetError) -> Self {
+    impl ::std::convert::From<MapSetExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: MapSetExn) -> Self {
             match err {
-                crate::errors::nested_containers::MapSetError::ApplicationException(aexn) => MapSetExn::ApplicationException(aexn),
-                crate::errors::nested_containers::MapSetError::ThriftError(err) => MapSetExn::ApplicationException(::fbthrift::ApplicationException {
+                MapSetExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MapSetExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => MapSetExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => MapSetExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -186,11 +202,19 @@ pub mod nested_containers {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::nested_containers::ListMapError> for ListMapExn {
-        fn from(err: crate::errors::nested_containers::ListMapError) -> Self {
+    impl ::std::convert::From<ListMapExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ListMapExn) -> Self {
             match err {
-                crate::errors::nested_containers::ListMapError::ApplicationException(aexn) => ListMapExn::ApplicationException(aexn),
-                crate::errors::nested_containers::ListMapError::ThriftError(err) => ListMapExn::ApplicationException(::fbthrift::ApplicationException {
+                ListMapExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ListMapExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ListMapExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ListMapExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -273,11 +297,19 @@ pub mod nested_containers {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::nested_containers::ListSetError> for ListSetExn {
-        fn from(err: crate::errors::nested_containers::ListSetError) -> Self {
+    impl ::std::convert::From<ListSetExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ListSetExn) -> Self {
             match err {
-                crate::errors::nested_containers::ListSetError::ApplicationException(aexn) => ListSetExn::ApplicationException(aexn),
-                crate::errors::nested_containers::ListSetError::ThriftError(err) => ListSetExn::ApplicationException(::fbthrift::ApplicationException {
+                ListSetExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ListSetExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ListSetExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ListSetExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -360,11 +392,19 @@ pub mod nested_containers {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::nested_containers::TurtlesError> for TurtlesExn {
-        fn from(err: crate::errors::nested_containers::TurtlesError) -> Self {
+    impl ::std::convert::From<TurtlesExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: TurtlesExn) -> Self {
             match err {
-                crate::errors::nested_containers::TurtlesError::ApplicationException(aexn) => TurtlesExn::ApplicationException(aexn),
-                crate::errors::nested_containers::TurtlesError::ThriftError(err) => TurtlesExn::ApplicationException(::fbthrift::ApplicationException {
+                TurtlesExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for TurtlesExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => TurtlesExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => TurtlesExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

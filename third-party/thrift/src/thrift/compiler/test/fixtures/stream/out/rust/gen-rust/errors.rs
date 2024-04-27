@@ -50,17 +50,8 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamExn> for ReturnstreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn) =>
-                    ReturnstreamError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ReturnstreamReader {}
+    pub(crate) enum ReturnstreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ReturnstreamReader {
         type Success = ();
@@ -109,17 +100,7 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamStreamExn> for ReturnstreamStreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamStreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::ApplicationException(aexn) =>
-                    ReturnstreamStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum ReturnstreamStreamReader {}
+    pub(crate) enum ReturnstreamStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ReturnstreamStreamReader {
         type Success = ::std::primitive::i32;
@@ -174,17 +155,8 @@ pub mod pub_sub_streaming_service {
 
     pub type StreamthrowsError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::StreamthrowsExn> for StreamthrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::StreamthrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn) =>
-                    StreamthrowsError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum StreamthrowsReader {}
+    pub(crate) enum StreamthrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for StreamthrowsReader {
         type Success = ();
@@ -318,8 +290,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum StreamthrowsStreamReader {}
+    pub(crate) enum StreamthrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for StreamthrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -461,6 +432,7 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsExn> for ServicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsExn) -> Self {
             match e {
@@ -472,8 +444,20 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ServicethrowsReader {}
+    impl ::std::convert::From<ServicethrowsError> for crate::services::pub_sub_streaming_service::ServicethrowsExn {
+        fn from(err: ServicethrowsError) -> Self {
+            match err {
+                ServicethrowsError::e(err) => crate::services::pub_sub_streaming_service::ServicethrowsExn::e(err),
+                ServicethrowsError::ApplicationException(aexn) => crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn),
+                ServicethrowsError::ThriftError(err) => crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum ServicethrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for ServicethrowsReader {
         type Success = ();
@@ -527,17 +511,7 @@ pub mod pub_sub_streaming_service {
 
     pub type ServicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ServicethrowsStreamExn> for ServicethrowsStreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ServicethrowsStreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::ApplicationException(aexn) =>
-                    ServicethrowsStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum ServicethrowsStreamReader {}
+    pub(crate) enum ServicethrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ServicethrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -702,6 +676,7 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2Exn> for Servicethrows2Error {
         fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2Exn) -> Self {
             match e {
@@ -715,8 +690,21 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum Servicethrows2Reader {}
+    impl ::std::convert::From<Servicethrows2Error> for crate::services::pub_sub_streaming_service::Servicethrows2Exn {
+        fn from(err: Servicethrows2Error) -> Self {
+            match err {
+                Servicethrows2Error::e1(err) => crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(err),
+                Servicethrows2Error::e2(err) => crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(err),
+                Servicethrows2Error::ApplicationException(aexn) => crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn),
+                Servicethrows2Error::ThriftError(err) => crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum Servicethrows2Reader {}
 
     impl ::fbthrift::help::DeserializeExn for Servicethrows2Reader {
         type Success = ();
@@ -775,17 +763,7 @@ pub mod pub_sub_streaming_service {
 
     pub type Servicethrows2StreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for Servicethrows2StreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2StreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::ApplicationException(aexn) =>
-                    Servicethrows2StreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum Servicethrows2StreamReader {}
+    pub(crate) enum Servicethrows2StreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for Servicethrows2StreamReader {
         type Success = ::std::primitive::i32;
@@ -925,6 +903,7 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::BoththrowsExn> for BoththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::BoththrowsExn) -> Self {
             match e {
@@ -936,8 +915,20 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum BoththrowsReader {}
+    impl ::std::convert::From<BoththrowsError> for crate::services::pub_sub_streaming_service::BoththrowsExn {
+        fn from(err: BoththrowsError) -> Self {
+            match err {
+                BoththrowsError::e(err) => crate::services::pub_sub_streaming_service::BoththrowsExn::e(err),
+                BoththrowsError::ApplicationException(aexn) => crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn),
+                BoththrowsError::ThriftError(err) => crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum BoththrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for BoththrowsReader {
         type Success = ();
@@ -1076,8 +1067,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum BoththrowsStreamReader {}
+    pub(crate) enum BoththrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for BoththrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -1137,17 +1127,8 @@ pub mod pub_sub_streaming_service {
 
     pub type ResponseandstreamstreamthrowsError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> for ResponseandstreamstreamthrowsError {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn) =>
-                    ResponseandstreamstreamthrowsError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ResponseandstreamstreamthrowsReader {}
+    pub(crate) enum ResponseandstreamstreamthrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamstreamthrowsReader {
         type Success = ::std::primitive::i32;
@@ -1287,8 +1268,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ResponseandstreamstreamthrowsStreamReader {}
+    pub(crate) enum ResponseandstreamstreamthrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamstreamthrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -1430,6 +1410,7 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> for ResponseandstreamservicethrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn) -> Self {
             match e {
@@ -1441,8 +1422,20 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ResponseandstreamservicethrowsReader {}
+    impl ::std::convert::From<ResponseandstreamservicethrowsError> for crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn {
+        fn from(err: ResponseandstreamservicethrowsError) -> Self {
+            match err {
+                ResponseandstreamservicethrowsError::e(err) => crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::e(err),
+                ResponseandstreamservicethrowsError::ApplicationException(aexn) => crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn),
+                ResponseandstreamservicethrowsError::ThriftError(err) => crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum ResponseandstreamservicethrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamservicethrowsReader {
         type Success = ::std::primitive::i32;
@@ -1502,17 +1495,7 @@ pub mod pub_sub_streaming_service {
 
     pub type ResponseandstreamservicethrowsStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn> for ResponseandstreamservicethrowsStreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::ApplicationException(aexn) =>
-                    ResponseandstreamservicethrowsStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum ResponseandstreamservicethrowsStreamReader {}
+    pub(crate) enum ResponseandstreamservicethrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamservicethrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -1651,6 +1634,7 @@ pub mod pub_sub_streaming_service {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> for ResponseandstreamboththrowsError {
         fn from(e: crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn) -> Self {
             match e {
@@ -1662,8 +1646,20 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ResponseandstreamboththrowsReader {}
+    impl ::std::convert::From<ResponseandstreamboththrowsError> for crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn {
+        fn from(err: ResponseandstreamboththrowsError) -> Self {
+            match err {
+                ResponseandstreamboththrowsError::e(err) => crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::e(err),
+                ResponseandstreamboththrowsError::ApplicationException(aexn) => crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn),
+                ResponseandstreamboththrowsError::ThriftError(err) => crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum ResponseandstreamboththrowsReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamboththrowsReader {
         type Success = ::std::primitive::i32;
@@ -1808,8 +1804,7 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ResponseandstreamboththrowsStreamReader {}
+    pub(crate) enum ResponseandstreamboththrowsStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ResponseandstreamboththrowsStreamReader {
         type Success = ::std::primitive::i32;
@@ -1869,17 +1864,8 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamFastError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastExn> for ReturnstreamFastError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn) =>
-                    ReturnstreamFastError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ReturnstreamFastReader {}
+    pub(crate) enum ReturnstreamFastReader {}
 
     impl ::fbthrift::help::DeserializeExn for ReturnstreamFastReader {
         type Success = ();
@@ -1928,17 +1914,7 @@ pub mod pub_sub_streaming_service {
 
     pub type ReturnstreamFastStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn> for ReturnstreamFastStreamError {
-        fn from(e: crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn) -> Self {
-            match e {
-                crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::ApplicationException(aexn) =>
-                    ReturnstreamFastStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum ReturnstreamFastStreamReader {}
+    pub(crate) enum ReturnstreamFastStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for ReturnstreamFastStreamReader {
         type Success = ::std::primitive::i32;
@@ -1992,4 +1968,8 @@ pub mod pub_sub_streaming_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::pub_sub_streaming_service::*;
 

@@ -12,11 +12,19 @@ pub mod test_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::test_service::InitError> for InitExn {
-        fn from(err: crate::errors::test_service::InitError) -> Self {
+    impl ::std::convert::From<InitExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: InitExn) -> Self {
             match err {
-                crate::errors::test_service::InitError::ApplicationException(aexn) => InitExn::ApplicationException(aexn),
-                crate::errors::test_service::InitError::ThriftError(err) => InitExn::ApplicationException(::fbthrift::ApplicationException {
+                InitExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for InitExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => InitExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => InitExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

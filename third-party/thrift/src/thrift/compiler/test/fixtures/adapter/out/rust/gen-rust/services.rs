@@ -12,11 +12,19 @@ pub mod service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::service::FuncError> for FuncExn {
-        fn from(err: crate::errors::service::FuncError) -> Self {
+    impl ::std::convert::From<FuncExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: FuncExn) -> Self {
             match err {
-                crate::errors::service::FuncError::ApplicationException(aexn) => FuncExn::ApplicationException(aexn),
-                crate::errors::service::FuncError::ThriftError(err) => FuncExn::ApplicationException(::fbthrift::ApplicationException {
+                FuncExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for FuncExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => FuncExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => FuncExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -102,11 +110,19 @@ pub mod adapter_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::adapter_service::CountError> for CountExn {
-        fn from(err: crate::errors::adapter_service::CountError) -> Self {
+    impl ::std::convert::From<CountExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: CountExn) -> Self {
             match err {
-                crate::errors::adapter_service::CountError::ApplicationException(aexn) => CountExn::ApplicationException(aexn),
-                crate::errors::adapter_service::CountError::ThriftError(err) => CountExn::ApplicationException(::fbthrift::ApplicationException {
+                CountExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for CountExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => CountExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => CountExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -189,11 +205,19 @@ pub mod adapter_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::adapter_service::AdaptedTypesError> for AdaptedTypesExn {
-        fn from(err: crate::errors::adapter_service::AdaptedTypesError) -> Self {
+    impl ::std::convert::From<AdaptedTypesExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: AdaptedTypesExn) -> Self {
             match err {
-                crate::errors::adapter_service::AdaptedTypesError::ApplicationException(aexn) => AdaptedTypesExn::ApplicationException(aexn),
-                crate::errors::adapter_service::AdaptedTypesError::ThriftError(err) => AdaptedTypesExn::ApplicationException(::fbthrift::ApplicationException {
+                AdaptedTypesExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for AdaptedTypesExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => AdaptedTypesExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => AdaptedTypesExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

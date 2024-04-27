@@ -8,17 +8,8 @@ pub mod nested_containers {
 
     pub type MapListError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::nested_containers::MapListExn> for MapListError {
-        fn from(e: crate::services::nested_containers::MapListExn) -> Self {
-            match e {
-                crate::services::nested_containers::MapListExn::ApplicationException(aexn) =>
-                    MapListError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum MapListReader {}
+    pub(crate) enum MapListReader {}
 
     impl ::fbthrift::help::DeserializeExn for MapListReader {
         type Success = ();
@@ -67,17 +58,8 @@ pub mod nested_containers {
 
     pub type MapSetError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::nested_containers::MapSetExn> for MapSetError {
-        fn from(e: crate::services::nested_containers::MapSetExn) -> Self {
-            match e {
-                crate::services::nested_containers::MapSetExn::ApplicationException(aexn) =>
-                    MapSetError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum MapSetReader {}
+    pub(crate) enum MapSetReader {}
 
     impl ::fbthrift::help::DeserializeExn for MapSetReader {
         type Success = ();
@@ -126,17 +108,8 @@ pub mod nested_containers {
 
     pub type ListMapError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::nested_containers::ListMapExn> for ListMapError {
-        fn from(e: crate::services::nested_containers::ListMapExn) -> Self {
-            match e {
-                crate::services::nested_containers::ListMapExn::ApplicationException(aexn) =>
-                    ListMapError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ListMapReader {}
+    pub(crate) enum ListMapReader {}
 
     impl ::fbthrift::help::DeserializeExn for ListMapReader {
         type Success = ();
@@ -185,17 +158,8 @@ pub mod nested_containers {
 
     pub type ListSetError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::nested_containers::ListSetExn> for ListSetError {
-        fn from(e: crate::services::nested_containers::ListSetExn) -> Self {
-            match e {
-                crate::services::nested_containers::ListSetExn::ApplicationException(aexn) =>
-                    ListSetError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ListSetReader {}
+    pub(crate) enum ListSetReader {}
 
     impl ::fbthrift::help::DeserializeExn for ListSetReader {
         type Success = ();
@@ -244,17 +208,8 @@ pub mod nested_containers {
 
     pub type TurtlesError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::nested_containers::TurtlesExn> for TurtlesError {
-        fn from(e: crate::services::nested_containers::TurtlesExn) -> Self {
-            match e {
-                crate::services::nested_containers::TurtlesExn::ApplicationException(aexn) =>
-                    TurtlesError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum TurtlesReader {}
+    pub(crate) enum TurtlesReader {}
 
     impl ::fbthrift::help::DeserializeExn for TurtlesReader {
         type Success = ();
@@ -302,4 +257,8 @@ pub mod nested_containers {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::nested_containers::*;
 

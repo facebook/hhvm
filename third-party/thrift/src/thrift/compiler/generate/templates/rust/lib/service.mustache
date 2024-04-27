@@ -179,20 +179,27 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
     {{/function:enable_anyhow_to_application_exn}}
 
-    impl ::std::convert::From<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> for {{function:upcamel}}Exn {
-        fn from(err: {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error) -> Self {
+    {{^function:exceptions?}}
+    impl ::std::convert::From<{{function:upcamel}}Exn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: {{function:upcamel}}Exn) -> Self {
             match err {
-                {{#function:exceptions}}
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::{{field:rust_name}}(err) => {{function:upcamel}}Exn::{{field:rust_name}}(err),
-                {{/function:exceptions}}
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn) => {{function:upcamel}}Exn::ApplicationException(aexn),
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ThriftError(err) => {{function:upcamel}}Exn::ApplicationException(::fbthrift::ApplicationException {
+                {{function:upcamel}}Exn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for {{function:upcamel}}Exn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => {{function:upcamel}}Exn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => {{function:upcamel}}Exn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
             }
         }
     }
+    {{/function:exceptions?}}
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Exn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {

@@ -12,11 +12,19 @@ pub mod foo {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::foo::ReturnError> for ReturnExn {
-        fn from(err: crate::errors::foo::ReturnError) -> Self {
+    impl ::std::convert::From<ReturnExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ReturnExn) -> Self {
             match err {
-                crate::errors::foo::ReturnError::ApplicationException(aexn) => ReturnExn::ApplicationException(aexn),
-                crate::errors::foo::ReturnError::ThriftError(err) => ReturnExn::ApplicationException(::fbthrift::ApplicationException {
+                ReturnExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ReturnExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ReturnExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ReturnExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -99,11 +107,19 @@ pub mod foo {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::foo::SuperError> for SuperExn {
-        fn from(err: crate::errors::foo::SuperError) -> Self {
+    impl ::std::convert::From<SuperExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: SuperExn) -> Self {
             match err {
-                crate::errors::foo::SuperError::ApplicationException(aexn) => SuperExn::ApplicationException(aexn),
-                crate::errors::foo::SuperError::ThriftError(err) => SuperExn::ApplicationException(::fbthrift::ApplicationException {
+                SuperExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for SuperExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => SuperExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => SuperExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

@@ -91,11 +91,19 @@ pub mod pub_sub_streaming_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ReturnstreamError> for ReturnstreamExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ReturnstreamError) -> Self {
+    impl ::std::convert::From<ReturnstreamExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ReturnstreamExn) -> Self {
             match err {
-                crate::errors::pub_sub_streaming_service::ReturnstreamError::ApplicationException(aexn) => ReturnstreamExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ReturnstreamError::ThriftError(err) => ReturnstreamExn::ApplicationException(::fbthrift::ApplicationException {
+                ReturnstreamExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ReturnstreamExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ReturnstreamExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ReturnstreamExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -274,11 +282,19 @@ pub mod pub_sub_streaming_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::StreamthrowsError> for StreamthrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::StreamthrowsError) -> Self {
+    impl ::std::convert::From<StreamthrowsExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: StreamthrowsExn) -> Self {
             match err {
-                crate::errors::pub_sub_streaming_service::StreamthrowsError::ApplicationException(aexn) => StreamthrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::StreamthrowsError::ThriftError(err) => StreamthrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                StreamthrowsExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for StreamthrowsExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => StreamthrowsExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => StreamthrowsExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -445,18 +461,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ServicethrowsError> for ServicethrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ServicethrowsError) -> Self {
-            match err {
-                crate::errors::pub_sub_streaming_service::ServicethrowsError::e(err) => ServicethrowsExn::e(err),
-                crate::errors::pub_sub_streaming_service::ServicethrowsError::ApplicationException(aexn) => ServicethrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ServicethrowsError::ThriftError(err) => ServicethrowsExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for ServicethrowsExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -635,19 +639,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::Servicethrows2Error> for Servicethrows2Exn {
-        fn from(err: crate::errors::pub_sub_streaming_service::Servicethrows2Error) -> Self {
-            match err {
-                crate::errors::pub_sub_streaming_service::Servicethrows2Error::e1(err) => Servicethrows2Exn::e1(err),
-                crate::errors::pub_sub_streaming_service::Servicethrows2Error::e2(err) => Servicethrows2Exn::e2(err),
-                crate::errors::pub_sub_streaming_service::Servicethrows2Error::ApplicationException(aexn) => Servicethrows2Exn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::Servicethrows2Error::ThriftError(err) => Servicethrows2Exn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for Servicethrows2Exn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -850,18 +841,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::BoththrowsError> for BoththrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::BoththrowsError) -> Self {
-            match err {
-                crate::errors::pub_sub_streaming_service::BoththrowsError::e(err) => BoththrowsExn::e(err),
-                crate::errors::pub_sub_streaming_service::BoththrowsError::ApplicationException(aexn) => BoththrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::BoththrowsError::ThriftError(err) => BoththrowsExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for BoththrowsExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -1046,11 +1025,19 @@ pub mod pub_sub_streaming_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError> for ResponseandstreamstreamthrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError) -> Self {
+    impl ::std::convert::From<ResponseandstreamstreamthrowsExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ResponseandstreamstreamthrowsExn) -> Self {
             match err {
-                crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError::ApplicationException(aexn) => ResponseandstreamstreamthrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError::ThriftError(err) => ResponseandstreamstreamthrowsExn::ApplicationException(::fbthrift::ApplicationException {
+                ResponseandstreamstreamthrowsExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ResponseandstreamstreamthrowsExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ResponseandstreamstreamthrowsExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ResponseandstreamstreamthrowsExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -1218,18 +1205,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError> for ResponseandstreamservicethrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError) -> Self {
-            match err {
-                crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError::e(err) => ResponseandstreamservicethrowsExn::e(err),
-                crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError::ApplicationException(aexn) => ResponseandstreamservicethrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError::ThriftError(err) => ResponseandstreamservicethrowsExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for ResponseandstreamservicethrowsExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -1421,18 +1396,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError> for ResponseandstreamboththrowsExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError) -> Self {
-            match err {
-                crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError::e(err) => ResponseandstreamboththrowsExn::e(err),
-                crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError::ApplicationException(aexn) => ResponseandstreamboththrowsExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError::ThriftError(err) => ResponseandstreamboththrowsExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for ResponseandstreamboththrowsExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -1600,11 +1563,19 @@ pub mod pub_sub_streaming_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::pub_sub_streaming_service::ReturnstreamFastError> for ReturnstreamFastExn {
-        fn from(err: crate::errors::pub_sub_streaming_service::ReturnstreamFastError) -> Self {
+    impl ::std::convert::From<ReturnstreamFastExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: ReturnstreamFastExn) -> Self {
             match err {
-                crate::errors::pub_sub_streaming_service::ReturnstreamFastError::ApplicationException(aexn) => ReturnstreamFastExn::ApplicationException(aexn),
-                crate::errors::pub_sub_streaming_service::ReturnstreamFastError::ThriftError(err) => ReturnstreamFastExn::ApplicationException(::fbthrift::ApplicationException {
+                ReturnstreamFastExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for ReturnstreamFastExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => ReturnstreamFastExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => ReturnstreamFastExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

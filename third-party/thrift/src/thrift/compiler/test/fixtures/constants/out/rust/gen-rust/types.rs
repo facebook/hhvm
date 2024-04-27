@@ -8,8 +8,6 @@
 pub mod consts;
 #[doc(inline)]
 pub use self::consts::*;
-pub mod errors;
-
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 

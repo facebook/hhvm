@@ -8,17 +8,8 @@ pub mod my_service {
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PingExn> for PingError {
-        fn from(e: crate::services::my_service::PingExn) -> Self {
-            match e {
-                crate::services::my_service::PingExn::ApplicationException(aexn) =>
-                    PingError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PingReader {}
+    pub(crate) enum PingReader {}
 
     impl ::fbthrift::help::DeserializeExn for PingReader {
         type Success = ();
@@ -67,17 +58,8 @@ pub mod my_service {
 
     pub type GetRandomDataError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetRandomDataExn> for GetRandomDataError {
-        fn from(e: crate::services::my_service::GetRandomDataExn) -> Self {
-            match e {
-                crate::services::my_service::GetRandomDataExn::ApplicationException(aexn) =>
-                    GetRandomDataError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetRandomDataReader {}
+    pub(crate) enum GetRandomDataReader {}
 
     impl ::fbthrift::help::DeserializeExn for GetRandomDataReader {
         type Success = ::std::string::String;
@@ -132,17 +114,8 @@ pub mod my_service {
 
     pub type HasDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::HasDataByIdExn> for HasDataByIdError {
-        fn from(e: crate::services::my_service::HasDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::HasDataByIdExn::ApplicationException(aexn) =>
-                    HasDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum HasDataByIdReader {}
+    pub(crate) enum HasDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for HasDataByIdReader {
         type Success = ::std::primitive::bool;
@@ -197,17 +170,8 @@ pub mod my_service {
 
     pub type GetDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::GetDataByIdExn> for GetDataByIdError {
-        fn from(e: crate::services::my_service::GetDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::GetDataByIdExn::ApplicationException(aexn) =>
-                    GetDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum GetDataByIdReader {}
+    pub(crate) enum GetDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for GetDataByIdReader {
         type Success = ::std::string::String;
@@ -262,17 +226,8 @@ pub mod my_service {
 
     pub type PutDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::PutDataByIdExn> for PutDataByIdError {
-        fn from(e: crate::services::my_service::PutDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::PutDataByIdExn::ApplicationException(aexn) =>
-                    PutDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PutDataByIdReader {}
+    pub(crate) enum PutDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for PutDataByIdReader {
         type Success = ();
@@ -321,17 +276,8 @@ pub mod my_service {
 
     pub type LobDataByIdError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::LobDataByIdExn> for LobDataByIdError {
-        fn from(e: crate::services::my_service::LobDataByIdExn) -> Self {
-            match e {
-                crate::services::my_service::LobDataByIdExn::ApplicationException(aexn) =>
-                    LobDataByIdError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum LobDataByIdReader {}
+    pub(crate) enum LobDataByIdReader {}
 
     impl ::fbthrift::help::DeserializeExn for LobDataByIdReader {
         type Success = ();
@@ -379,4 +325,8 @@ pub mod my_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::my_service::*;
 

@@ -13,11 +13,19 @@ pub mod my_interaction {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_interaction::PingError> for PingExn {
-        fn from(err: crate::errors::my_interaction::PingError) -> Self {
+    impl ::std::convert::From<PingExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: PingExn) -> Self {
             match err {
-                crate::errors::my_interaction::PingError::ApplicationException(aexn) => PingExn::ApplicationException(aexn),
-                crate::errors::my_interaction::PingError::ThriftError(err) => PingExn::ApplicationException(::fbthrift::ApplicationException {
+                PingExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for PingExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => PingExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => PingExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -102,11 +110,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::PingError> for PingExn {
-        fn from(err: crate::errors::my_service::PingError) -> Self {
+    impl ::std::convert::From<PingExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: PingExn) -> Self {
             match err {
-                crate::errors::my_service::PingError::ApplicationException(aexn) => PingExn::ApplicationException(aexn),
-                crate::errors::my_service::PingError::ThriftError(err) => PingExn::ApplicationException(::fbthrift::ApplicationException {
+                PingExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for PingExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => PingExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => PingExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -189,11 +205,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::GetRandomDataError> for GetRandomDataExn {
-        fn from(err: crate::errors::my_service::GetRandomDataError) -> Self {
+    impl ::std::convert::From<GetRandomDataExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: GetRandomDataExn) -> Self {
             match err {
-                crate::errors::my_service::GetRandomDataError::ApplicationException(aexn) => GetRandomDataExn::ApplicationException(aexn),
-                crate::errors::my_service::GetRandomDataError::ThriftError(err) => GetRandomDataExn::ApplicationException(::fbthrift::ApplicationException {
+                GetRandomDataExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for GetRandomDataExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => GetRandomDataExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => GetRandomDataExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -276,11 +300,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::HasDataByIdError> for HasDataByIdExn {
-        fn from(err: crate::errors::my_service::HasDataByIdError) -> Self {
+    impl ::std::convert::From<HasDataByIdExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: HasDataByIdExn) -> Self {
             match err {
-                crate::errors::my_service::HasDataByIdError::ApplicationException(aexn) => HasDataByIdExn::ApplicationException(aexn),
-                crate::errors::my_service::HasDataByIdError::ThriftError(err) => HasDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                HasDataByIdExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for HasDataByIdExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => HasDataByIdExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => HasDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -363,11 +395,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::GetDataByIdError> for GetDataByIdExn {
-        fn from(err: crate::errors::my_service::GetDataByIdError) -> Self {
+    impl ::std::convert::From<GetDataByIdExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: GetDataByIdExn) -> Self {
             match err {
-                crate::errors::my_service::GetDataByIdError::ApplicationException(aexn) => GetDataByIdExn::ApplicationException(aexn),
-                crate::errors::my_service::GetDataByIdError::ThriftError(err) => GetDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                GetDataByIdExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for GetDataByIdExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => GetDataByIdExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => GetDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -450,11 +490,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::PutDataByIdError> for PutDataByIdExn {
-        fn from(err: crate::errors::my_service::PutDataByIdError) -> Self {
+    impl ::std::convert::From<PutDataByIdExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: PutDataByIdExn) -> Self {
             match err {
-                crate::errors::my_service::PutDataByIdError::ApplicationException(aexn) => PutDataByIdExn::ApplicationException(aexn),
-                crate::errors::my_service::PutDataByIdError::ThriftError(err) => PutDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                PutDataByIdExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for PutDataByIdExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => PutDataByIdExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => PutDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -537,11 +585,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::LobDataByIdError> for LobDataByIdExn {
-        fn from(err: crate::errors::my_service::LobDataByIdError) -> Self {
+    impl ::std::convert::From<LobDataByIdExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: LobDataByIdExn) -> Self {
             match err {
-                crate::errors::my_service::LobDataByIdError::ApplicationException(aexn) => LobDataByIdExn::ApplicationException(aexn),
-                crate::errors::my_service::LobDataByIdError::ThriftError(err) => LobDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                LobDataByIdExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for LobDataByIdExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => LobDataByIdExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => LobDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -703,11 +759,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::StreamByIdError> for StreamByIdExn {
-        fn from(err: crate::errors::my_service::StreamByIdError) -> Self {
+    impl ::std::convert::From<StreamByIdExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: StreamByIdExn) -> Self {
             match err {
-                crate::errors::my_service::StreamByIdError::ApplicationException(aexn) => StreamByIdExn::ApplicationException(aexn),
-                crate::errors::my_service::StreamByIdError::ThriftError(err) => StreamByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                StreamByIdExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for StreamByIdExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => StreamByIdExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => StreamByIdExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -886,11 +950,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::StreamByIdWithExceptionError> for StreamByIdWithExceptionExn {
-        fn from(err: crate::errors::my_service::StreamByIdWithExceptionError) -> Self {
+    impl ::std::convert::From<StreamByIdWithExceptionExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: StreamByIdWithExceptionExn) -> Self {
             match err {
-                crate::errors::my_service::StreamByIdWithExceptionError::ApplicationException(aexn) => StreamByIdWithExceptionExn::ApplicationException(aexn),
-                crate::errors::my_service::StreamByIdWithExceptionError::ThriftError(err) => StreamByIdWithExceptionExn::ApplicationException(::fbthrift::ApplicationException {
+                StreamByIdWithExceptionExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for StreamByIdWithExceptionExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => StreamByIdWithExceptionExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => StreamByIdWithExceptionExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -1051,11 +1123,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::StreamByIdWithResponseError> for StreamByIdWithResponseExn {
-        fn from(err: crate::errors::my_service::StreamByIdWithResponseError) -> Self {
+    impl ::std::convert::From<StreamByIdWithResponseExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: StreamByIdWithResponseExn) -> Self {
             match err {
-                crate::errors::my_service::StreamByIdWithResponseError::ApplicationException(aexn) => StreamByIdWithResponseExn::ApplicationException(aexn),
-                crate::errors::my_service::StreamByIdWithResponseError::ThriftError(err) => StreamByIdWithResponseExn::ApplicationException(::fbthrift::ApplicationException {
+                StreamByIdWithResponseExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for StreamByIdWithResponseExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => StreamByIdWithResponseExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => StreamByIdWithResponseExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -1138,11 +1218,19 @@ pub mod my_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::my_service::StartPingInteractionError> for StartPingInteractionExn {
-        fn from(err: crate::errors::my_service::StartPingInteractionError) -> Self {
+    impl ::std::convert::From<StartPingInteractionExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: StartPingInteractionExn) -> Self {
             match err {
-                crate::errors::my_service::StartPingInteractionError::ApplicationException(aexn) => StartPingInteractionExn::ApplicationException(aexn),
-                crate::errors::my_service::StartPingInteractionError::ThriftError(err) => StartPingInteractionExn::ApplicationException(::fbthrift::ApplicationException {
+                StartPingInteractionExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for StartPingInteractionExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => StartPingInteractionExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => StartPingInteractionExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

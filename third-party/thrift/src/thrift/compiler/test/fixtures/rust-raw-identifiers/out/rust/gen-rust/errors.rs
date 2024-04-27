@@ -8,17 +8,8 @@ pub mod foo {
 
     pub type ReturnError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo::ReturnExn> for ReturnError {
-        fn from(e: crate::services::foo::ReturnExn) -> Self {
-            match e {
-                crate::services::foo::ReturnExn::ApplicationException(aexn) =>
-                    ReturnError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum ReturnReader {}
+    pub(crate) enum ReturnReader {}
 
     impl ::fbthrift::help::DeserializeExn for ReturnReader {
         type Success = ();
@@ -67,17 +58,8 @@ pub mod foo {
 
     pub type SuperError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::foo::SuperExn> for SuperError {
-        fn from(e: crate::services::foo::SuperExn) -> Self {
-            match e {
-                crate::services::foo::SuperExn::ApplicationException(aexn) =>
-                    SuperError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum SuperReader {}
+    pub(crate) enum SuperReader {}
 
     impl ::fbthrift::help::DeserializeExn for SuperReader {
         type Success = ();
@@ -125,4 +107,8 @@ pub mod foo {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::foo::*;
 

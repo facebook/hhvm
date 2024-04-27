@@ -12,11 +12,19 @@ pub mod some_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::some_service::BounceMapError> for BounceMapExn {
-        fn from(err: crate::errors::some_service::BounceMapError) -> Self {
+    impl ::std::convert::From<BounceMapExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: BounceMapExn) -> Self {
             match err {
-                crate::errors::some_service::BounceMapError::ApplicationException(aexn) => BounceMapExn::ApplicationException(aexn),
-                crate::errors::some_service::BounceMapError::ThriftError(err) => BounceMapExn::ApplicationException(::fbthrift::ApplicationException {
+                BounceMapExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for BounceMapExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => BounceMapExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => BounceMapExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),
@@ -99,11 +107,19 @@ pub mod some_service {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::some_service::BinaryKeyedMapError> for BinaryKeyedMapExn {
-        fn from(err: crate::errors::some_service::BinaryKeyedMapError) -> Self {
+    impl ::std::convert::From<BinaryKeyedMapExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: BinaryKeyedMapExn) -> Self {
             match err {
-                crate::errors::some_service::BinaryKeyedMapError::ApplicationException(aexn) => BinaryKeyedMapExn::ApplicationException(aexn),
-                crate::errors::some_service::BinaryKeyedMapError::ThriftError(err) => BinaryKeyedMapExn::ApplicationException(::fbthrift::ApplicationException {
+                BinaryKeyedMapExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for BinaryKeyedMapExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => BinaryKeyedMapExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => BinaryKeyedMapExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

@@ -23,17 +23,8 @@ pub mod c {
 
     pub type FError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::FExn> for FError {
-        fn from(e: crate::services::c::FExn) -> Self {
-            match e {
-                crate::services::c::FExn::ApplicationException(aexn) =>
-                    FError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FReader {}
+    pub(crate) enum FReader {}
 
     impl ::fbthrift::help::DeserializeExn for FReader {
         type Success = ();
@@ -82,17 +73,8 @@ pub mod c {
 
     pub type NumbersError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::NumbersExn> for NumbersError {
-        fn from(e: crate::services::c::NumbersExn) -> Self {
-            match e {
-                crate::services::c::NumbersExn::ApplicationException(aexn) =>
-                    NumbersError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum NumbersReader {}
+    pub(crate) enum NumbersReader {}
 
     impl ::fbthrift::help::DeserializeExn for NumbersReader {
         type Success = ();
@@ -141,17 +123,7 @@ pub mod c {
 
     pub type NumbersStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::c::NumbersStreamExn> for NumbersStreamError {
-        fn from(e: crate::services::c::NumbersStreamExn) -> Self {
-            match e {
-                crate::services::c::NumbersStreamExn::ApplicationException(aexn) =>
-                    NumbersStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum NumbersStreamReader {}
+    pub(crate) enum NumbersStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for NumbersStreamReader {
         type Success = crate::types::number;
@@ -289,6 +261,7 @@ pub mod c {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::c::ThingExn> for ThingError {
         fn from(e: crate::services::c::ThingExn) -> Self {
             match e {
@@ -300,8 +273,20 @@ pub mod c {
         }
     }
 
-    #[doc(hidden)]
-    pub enum ThingReader {}
+    impl ::std::convert::From<ThingError> for crate::services::c::ThingExn {
+        fn from(err: ThingError) -> Self {
+            match err {
+                ThingError::bang(err) => crate::services::c::ThingExn::bang(err),
+                ThingError::ApplicationException(aexn) => crate::services::c::ThingExn::ApplicationException(aexn),
+                ThingError::ThriftError(err) => crate::services::c::ThingExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum ThingReader {}
 
     impl ::fbthrift::help::DeserializeExn for ThingReader {
         type Success = ::std::string::String;
@@ -360,4 +345,8 @@ pub mod c {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::c::*;
 

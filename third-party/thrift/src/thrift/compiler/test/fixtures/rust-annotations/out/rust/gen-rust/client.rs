@@ -10,37 +10,7 @@
 #[doc(inline)]
 pub use :: as types;
 
-pub mod errors {
-    #[doc(inline)]
-    pub use ::::errors::service1;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::service1::*;
-
-    #[doc(inline)]
-    pub use ::::errors::s2;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::s2::*;
-
-    #[doc(inline)]
-    pub use ::::errors::all_methods;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::all_methods::*;
-
-    #[doc(inline)]
-    pub use ::::errors::one_method;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::one_method::*;
-
-    #[doc(inline)]
-    pub use ::::errors::one_method_opt_out;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::errors::one_method_opt_out::*;
-}
+pub mod errors;
 
 pub(crate) use crate as client;
 pub(crate) use ::::services;

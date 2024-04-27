@@ -106,6 +106,7 @@ pub mod my_interaction {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::my_interaction::FrobnicateExn> for FrobnicateError {
         fn from(e: crate::services::my_interaction::FrobnicateExn) -> Self {
             match e {
@@ -117,8 +118,20 @@ pub mod my_interaction {
         }
     }
 
-    #[doc(hidden)]
-    pub enum FrobnicateReader {}
+    impl ::std::convert::From<FrobnicateError> for crate::services::my_interaction::FrobnicateExn {
+        fn from(err: FrobnicateError) -> Self {
+            match err {
+                FrobnicateError::ex(err) => crate::services::my_interaction::FrobnicateExn::ex(err),
+                FrobnicateError::ApplicationException(aexn) => crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn),
+                FrobnicateError::ThriftError(err) => crate::services::my_interaction::FrobnicateExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum FrobnicateReader {}
 
     impl ::fbthrift::help::DeserializeExn for FrobnicateReader {
         type Success = ::std::primitive::i32;
@@ -178,17 +191,8 @@ pub mod my_interaction {
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::PingExn> for PingError {
-        fn from(e: crate::services::my_interaction::PingExn) -> Self {
-            match e {
-                crate::services::my_interaction::PingExn::ApplicationException(aexn) =>
-                    PingError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PingReader {}
+    pub(crate) enum PingReader {}
 
     impl ::fbthrift::help::DeserializeExn for PingReader {
         type Success = ();
@@ -237,17 +241,8 @@ pub mod my_interaction {
 
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyExn> for TruthifyError {
-        fn from(e: crate::services::my_interaction::TruthifyExn) -> Self {
-            match e {
-                crate::services::my_interaction::TruthifyExn::ApplicationException(aexn) =>
-                    TruthifyError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum TruthifyReader {}
+    pub(crate) enum TruthifyReader {}
 
     impl ::fbthrift::help::DeserializeExn for TruthifyReader {
         type Success = ();
@@ -296,17 +291,7 @@ pub mod my_interaction {
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction::TruthifyStreamExn> for TruthifyStreamError {
-        fn from(e: crate::services::my_interaction::TruthifyStreamExn) -> Self {
-            match e {
-                crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn) =>
-                    TruthifyStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum TruthifyStreamReader {}
+    pub(crate) enum TruthifyStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for TruthifyStreamReader {
         type Success = ::std::primitive::bool;
@@ -361,22 +346,17 @@ pub mod my_interaction {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::my_interaction::*;
+
 /// Error definitions for `MyInteractionFast`.
 pub mod my_interaction_fast {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::FrobnicateExn> for FrobnicateError {
-        fn from(e: crate::services::my_interaction_fast::FrobnicateExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn) =>
-                    FrobnicateError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FrobnicateReader {}
+    pub(crate) enum FrobnicateReader {}
 
     impl ::fbthrift::help::DeserializeExn for FrobnicateReader {
         type Success = ::std::primitive::i32;
@@ -431,17 +411,8 @@ pub mod my_interaction_fast {
 
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::PingExn> for PingError {
-        fn from(e: crate::services::my_interaction_fast::PingExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::PingExn::ApplicationException(aexn) =>
-                    PingError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum PingReader {}
+    pub(crate) enum PingReader {}
 
     impl ::fbthrift::help::DeserializeExn for PingReader {
         type Success = ();
@@ -490,17 +461,8 @@ pub mod my_interaction_fast {
 
     pub type TruthifyError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyExn> for TruthifyError {
-        fn from(e: crate::services::my_interaction_fast::TruthifyExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn) =>
-                    TruthifyError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum TruthifyReader {}
+    pub(crate) enum TruthifyReader {}
 
     impl ::fbthrift::help::DeserializeExn for TruthifyReader {
         type Success = ();
@@ -549,17 +511,7 @@ pub mod my_interaction_fast {
 
     pub type TruthifyStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_interaction_fast::TruthifyStreamExn> for TruthifyStreamError {
-        fn from(e: crate::services::my_interaction_fast::TruthifyStreamExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn) =>
-                    TruthifyStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum TruthifyStreamReader {}
+    pub(crate) enum TruthifyStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for TruthifyStreamReader {
         type Success = ::std::primitive::bool;
@@ -614,22 +566,17 @@ pub mod my_interaction_fast {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::my_interaction_fast::*;
+
 /// Error definitions for `SerialInteraction`.
 pub mod serial_interaction {
 
     pub type FrobnicateError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::serial_interaction::FrobnicateExn> for FrobnicateError {
-        fn from(e: crate::services::serial_interaction::FrobnicateExn) -> Self {
-            match e {
-                crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn) =>
-                    FrobnicateError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FrobnicateReader {}
+    pub(crate) enum FrobnicateReader {}
 
     impl ::fbthrift::help::DeserializeExn for FrobnicateReader {
         type Success = ();
@@ -678,22 +625,17 @@ pub mod serial_interaction {
 
 }
 
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::serial_interaction::*;
+
 /// Error definitions for `MyService`.
 pub mod my_service {
 
     pub type FooError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::FooExn> for FooError {
-        fn from(e: crate::services::my_service::FooExn) -> Self {
-            match e {
-                crate::services::my_service::FooExn::ApplicationException(aexn) =>
-                    FooError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum FooReader {}
+    pub(crate) enum FooReader {}
 
     impl ::fbthrift::help::DeserializeExn for FooReader {
         type Success = ();
@@ -742,17 +684,8 @@ pub mod my_service {
 
     pub type InteractError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InteractExn> for InteractError {
-        fn from(e: crate::services::my_service::InteractExn) -> Self {
-            match e {
-                crate::services::my_service::InteractExn::ApplicationException(aexn) =>
-                    InteractError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum InteractReader {}
+    pub(crate) enum InteractReader {}
 
     impl ::fbthrift::help::DeserializeExn for InteractReader {
         type Success = ();
@@ -801,17 +734,8 @@ pub mod my_service {
 
     pub type InteractFastError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::InteractFastExn> for InteractFastError {
-        fn from(e: crate::services::my_service::InteractFastExn) -> Self {
-            match e {
-                crate::services::my_service::InteractFastExn::ApplicationException(aexn) =>
-                    InteractFastError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum InteractFastReader {}
+    pub(crate) enum InteractFastReader {}
 
     impl ::fbthrift::help::DeserializeExn for InteractFastReader {
         type Success = ::std::primitive::i32;
@@ -866,17 +790,8 @@ pub mod my_service {
 
     pub type SerializeError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SerializeExn> for SerializeError {
-        fn from(e: crate::services::my_service::SerializeExn) -> Self {
-            match e {
-                crate::services::my_service::SerializeExn::ApplicationException(aexn) =>
-                    SerializeError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum SerializeReader {}
+    pub(crate) enum SerializeReader {}
 
     impl ::fbthrift::help::DeserializeExn for SerializeReader {
         type Success = ::std::primitive::i32;
@@ -931,17 +846,7 @@ pub mod my_service {
 
     pub type SerializeStreamError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::my_service::SerializeStreamExn> for SerializeStreamError {
-        fn from(e: crate::services::my_service::SerializeStreamExn) -> Self {
-            match e {
-                crate::services::my_service::SerializeStreamExn::ApplicationException(aexn) =>
-                    SerializeStreamError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    #[doc(hidden)]
-    pub enum SerializeStreamReader {}
+    pub(crate) enum SerializeStreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for SerializeStreamReader {
         type Success = ::std::primitive::i32;
@@ -995,4 +900,8 @@ pub mod my_service {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::my_service::*;
 

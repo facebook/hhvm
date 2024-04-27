@@ -62,17 +62,8 @@ pub mod raiser {
 
     pub type DoBlandError = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::raiser::DoBlandExn> for DoBlandError {
-        fn from(e: crate::services::raiser::DoBlandExn) -> Self {
-            match e {
-                crate::services::raiser::DoBlandExn::ApplicationException(aexn) =>
-                    DoBlandError::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum DoBlandReader {}
+    pub(crate) enum DoBlandReader {}
 
     impl ::fbthrift::help::DeserializeExn for DoBlandReader {
         type Success = ();
@@ -256,6 +247,7 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::raiser::DoRaiseExn> for DoRaiseError {
         fn from(e: crate::services::raiser::DoRaiseExn) -> Self {
             match e {
@@ -271,8 +263,22 @@ pub mod raiser {
         }
     }
 
-    #[doc(hidden)]
-    pub enum DoRaiseReader {}
+    impl ::std::convert::From<DoRaiseError> for crate::services::raiser::DoRaiseExn {
+        fn from(err: DoRaiseError) -> Self {
+            match err {
+                DoRaiseError::b(err) => crate::services::raiser::DoRaiseExn::b(err),
+                DoRaiseError::f(err) => crate::services::raiser::DoRaiseExn::f(err),
+                DoRaiseError::s(err) => crate::services::raiser::DoRaiseExn::s(err),
+                DoRaiseError::ApplicationException(aexn) => crate::services::raiser::DoRaiseExn::ApplicationException(aexn),
+                DoRaiseError::ThriftError(err) => crate::services::raiser::DoRaiseExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum DoRaiseReader {}
 
     impl ::fbthrift::help::DeserializeExn for DoRaiseReader {
         type Success = ();
@@ -336,17 +342,8 @@ pub mod raiser {
 
     pub type Get200Error = ::fbthrift::NonthrowingFunctionError;
 
-    impl ::std::convert::From<crate::services::raiser::Get200Exn> for Get200Error {
-        fn from(e: crate::services::raiser::Get200Exn) -> Self {
-            match e {
-                crate::services::raiser::Get200Exn::ApplicationException(aexn) =>
-                    Get200Error::ApplicationException(aexn),
-            }
-        }
-    }
 
-    #[doc(hidden)]
-    pub enum Get200Reader {}
+    pub(crate) enum Get200Reader {}
 
     impl ::fbthrift::help::DeserializeExn for Get200Reader {
         type Success = ::std::string::String;
@@ -536,6 +533,7 @@ pub mod raiser {
             Self::ApplicationException(ae)
         }
     }
+
     impl ::std::convert::From<crate::services::raiser::Get500Exn> for Get500Error {
         fn from(e: crate::services::raiser::Get500Exn) -> Self {
             match e {
@@ -551,8 +549,22 @@ pub mod raiser {
         }
     }
 
-    #[doc(hidden)]
-    pub enum Get500Reader {}
+    impl ::std::convert::From<Get500Error> for crate::services::raiser::Get500Exn {
+        fn from(err: Get500Error) -> Self {
+            match err {
+                Get500Error::f(err) => crate::services::raiser::Get500Exn::f(err),
+                Get500Error::b(err) => crate::services::raiser::Get500Exn::b(err),
+                Get500Error::s(err) => crate::services::raiser::Get500Exn::s(err),
+                Get500Error::ApplicationException(aexn) => crate::services::raiser::Get500Exn::ApplicationException(aexn),
+                Get500Error::ThriftError(err) => crate::services::raiser::Get500Exn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum Get500Reader {}
 
     impl ::fbthrift::help::DeserializeExn for Get500Reader {
         type Success = ::std::string::String;
@@ -621,4 +633,8 @@ pub mod raiser {
     }
 
 }
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::raiser::*;
 

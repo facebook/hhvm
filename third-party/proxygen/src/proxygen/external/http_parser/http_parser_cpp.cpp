@@ -679,11 +679,11 @@ size_t http_parser_execute_options (http_parser *parser,
   /* technically we could combine all of these (except for url_mark) into one
      variable, saving stack space, but it seems more clear to have them
      separated. */
-  const char *header_field_mark = 0;
-  const char *header_value_mark = 0;
-  const char *url_mark = 0;
-  const char *reason_mark = 0;
-  const char *body_mark = 0;
+  const char *header_field_mark = nullptr;
+  const char *header_value_mark = nullptr;
+  const char *url_mark = nullptr;
+  const char *reason_mark = nullptr;
+  const char *body_mark = nullptr;
 
   if (state == s_header_field)
     header_field_mark = data;

@@ -31,6 +31,8 @@ namespace HPHP::HHBBC {
 // Map case-insensitive class name => Set<case-sensitive method name>
 using MethodMap = hphp_fast_string_tmap<hphp_fast_string_set>;
 
+void add_to_method_map(MethodMap&, const std::vector<std::string>&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -41,7 +43,7 @@ struct Options {
    * When debugging, it can be useful to ask for certain functions to be traced
    * at a higher level than the rest of the program.
    */
-  MethodMap TraceFunctions;
+  MethodMap TraceFunctions = init_trace_functions();
 
   //////////////////////////////////////////////////////////////////////
 
@@ -158,6 +160,8 @@ struct Options {
   size_t ExternWorkerEngineConnectionCount = 4;
   size_t ExternWorkerActionCacheConnectionCount = 16;
   std::string ExternWorkerFeaturesFile;
+
+  static MethodMap init_trace_functions();
 
   template <typename SerDe> void serde(SerDe& sd) {
     sd(TraceFunctions, string_lessi{}, std::less<std::string>{})

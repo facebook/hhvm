@@ -333,10 +333,8 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     return "Analyzing: " + show(ctx);
   };
 
-  auto const bump = trace_bump_for(ctx.cls, ctx.func);
-  Trace::Bump bumper1{Trace::hhbbc, bump};
-  Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
-  Trace::Bump bumper3{Trace::hhbbc_index, bump};
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
 
   if (knownArgs) {
     using namespace folly::gen;
@@ -821,9 +819,13 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
   assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
 
   {
-    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-      is_systemlib_part(ctx.unit)};
-    FTRACE(2, "{:#^70}\n", "Class");
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    FTRACE(
+      2, "{:#^70}\n-- {}\n",
+      index.frozen() ? " Class (Frozen) " : " Class ",
+      ctx.cls->name
+    );
   }
 
   ContextPusher _{index, ctx};
@@ -1264,8 +1266,8 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
     // improve properties nor return types.
   }
 
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(ctx.unit)};
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {

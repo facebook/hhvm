@@ -21230,6 +21230,8 @@ void AnalysisIndex::freeze() {
   m_data->frozen = true;
 }
 
+bool AnalysisIndex::frozen() const { return m_data->frozen; }
+
 const php::Unit& AnalysisIndex::lookup_func_unit(const php::Func& f) const {
   auto const it = m_data->units.find(f.unit);
   always_assert_flog(
@@ -22566,6 +22568,10 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 //////////////////////////////////////////////////////////////////////
 
 #define UNIMPLEMENTED always_assert_flog(false, "{} not implemented for AnalysisIndex", __func__)
+
+bool AnalysisIndexAdaptor::frozen() const {
+  return index.frozen();
+}
 
 void AnalysisIndexAdaptor::push_context(const Context& ctx) const {
   index.push_context(ctx);

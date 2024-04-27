@@ -1589,6 +1589,8 @@ struct IIndex {
   IIndex& operator=(const IIndex&) = delete;
   IIndex& operator=(IIndex&&) = delete;
 
+  virtual bool frozen() const = 0;
+
   virtual const php::Unit* lookup_func_unit(const php::Func&) const = 0;
 
   virtual const php::Unit* lookup_class_unit(const php::Class&) const = 0;
@@ -1708,6 +1710,8 @@ struct ContextPusher {
 struct IndexAdaptor : public IIndex {
   explicit IndexAdaptor(const Index& index)
    : index{const_cast<Index&>(index)} {}
+
+  bool frozen() const override { return index.frozen(); }
 
   const php::Unit* lookup_func_unit(const php::Func& f) const override {
     return index.lookup_func_unit(f);
@@ -2269,6 +2273,7 @@ struct AnalysisIndex {
   static void stop();
 
   void freeze();
+  bool frozen() const;
 
   const php::Unit& lookup_func_unit(const php::Func&) const;
 
@@ -2366,6 +2371,8 @@ private:
 struct AnalysisIndexAdaptor : public IIndex {
   explicit AnalysisIndexAdaptor(const AnalysisIndex& index)
     : index{const_cast<AnalysisIndex&>(index)} {}
+
+  bool frozen() const;
 
   const php::Unit* lookup_func_unit(const php::Func&) const override;
   const php::Unit* lookup_class_unit(const php::Class&) const override;

@@ -149,4 +149,30 @@ Config Config::get(RepoGlobalData gd) {
 
 //////////////////////////////////////////////////////////////////////
 
+MethodMap Options::init_trace_functions() {
+  MethodMap mm;
+  if (auto const p = getenv("HHBBC_TRACE_FUNCS")) {
+    std::vector<std::string> parts;
+    folly::split(",", p, parts);
+    add_to_method_map(mm, parts);
+  }
+  return mm;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void add_to_method_map(MethodMap& mm, const std::vector<std::string>& in) {
+  for (auto const& str : in) {
+    std::vector<std::string> parts;
+    folly::split("::", str, parts);
+    if (parts.size() != 2) {
+      mm[str].clear();
+      continue;
+    }
+    mm[parts[0]].insert(parts[1]);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

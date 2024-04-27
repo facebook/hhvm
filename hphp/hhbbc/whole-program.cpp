@@ -546,6 +546,9 @@ private:
     SCOPE_ASSERT_DETAIL("update func") {
       return "Updating Func: " + show(fa.ctx);
     };
+
+    auto const UNUSED bump =
+      trace_bump(fa.ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     AnalysisIndexAdaptor adaptor{index};
     ContextPusher _{adaptor, fa.ctx};
     index.refine_return_info(fa);

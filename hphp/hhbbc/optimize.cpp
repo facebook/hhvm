@@ -812,16 +812,17 @@ Bytecode gen_constant(const TypedValue& cell) {
 
 void optimize_func(const Index& index, FuncAnalysis&& ainfo,
                    php::WideFunc& func) {
-  auto const bump = trace_bump_for(ainfo.ctx.cls, func);
-
   SCOPE_ASSERT_DETAIL("optimize_func") {
     return "Optimizing:" + show(ainfo.ctx);
   };
 
-  Trace::Bump bumper1{Trace::hhbbc, bump};
-  Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
-  Trace::Bump bumper3{Trace::hhbbc_dce, bump};
-  Trace::Bump bumper4{Trace::hhbbc_index, bump};
+  auto const UNUSED bump = trace_bump(
+    ainfo.ctx,
+    Trace::hhbbc,
+    Trace::hhbbc_cfg,
+    Trace::hhbbc_dce,
+    Trace::hhbbc_index
+  );
   do_optimize(index, std::move(ainfo), func);
 }
 

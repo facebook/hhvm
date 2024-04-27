@@ -74,21 +74,6 @@ bool logging = true;
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename SinglePassReadableRange>
-MethodMap make_method_map(SinglePassReadableRange& range) {
-  auto ret = MethodMap{};
-  for (auto& str : range) {
-    std::vector<std::string> parts;
-    folly::split("::", str, parts);
-    if (parts.size() != 2) {
-      ret[""].insert(str);
-      continue;
-    }
-    ret[parts[0]].insert(parts[1]);
-  }
-  return ret;
-}
-
 void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
@@ -207,7 +192,7 @@ void parse_options(int argc, char** argv) {
   }
 
   options.CoreDump = !no_cores;
-  options.TraceFunctions = make_method_map(trace_fns);
+  add_to_method_map(options.TraceFunctions, trace_fns);
 
   if (!options.profileMemory.empty()) {
     mallctlWrite("prof.active", true);

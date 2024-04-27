@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/options-util.h"
 
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -23,27 +24,99 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
 bool method_map_contains(const MethodMap& mmap,
-                         const php::Class* cls,
-                         const php::Func* func) {
-  std::string const clsname = cls ? cls->name->data() : "";
-  auto it = mmap.find(clsname);
-  if (it == end(mmap)) return false;
-  return it->second.count(func == nullptr ? "" :
-                          (func->name->empty() ?
-                           func->unit : func->name)->data());
+                         SString cls,
+                         SString func,
+                         SString unit) {
+  if (unit) {
+    if (auto const m = folly::get_ptr(mmap, unit->toCppString())) {
+      return m->empty();
+    }
+  }
+  if (cls) {
+    if (auto const m = folly::get_ptr(mmap, cls->toCppString())) {
+      if (m->empty()) return true;
+      return func && m->count(func->toCppString());
+    }
+    return false;
+  }
+  if (func) {
+    if (auto const m = folly::get_ptr(mmap, func->toCppString())) {
+      return m->empty();
+    }
+  }
+  return false;
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool is_trace_function(const php::Class* cls,
-                       const php::Func* func) {
-  return method_map_contains(options.TraceFunctions, cls, func);
+                       const php::Func* func,
+                       const php::Unit* inUnit) {
+  auto const unit = [&] () -> SString {
+    if (inUnit) return inUnit->filename;
+    if (cls) return cls->unit;
+    if (func) return func->unit;
+    return nullptr;
+  }();
+  return is_trace_function(cls ? cls->name : nullptr,
+                           func ? func->name : nullptr,
+                           unit);
+}
+
+bool is_trace_function(const Context& ctx) {
+  auto const unit = [&] () -> SString {
+    if (ctx.unit) return ctx.unit;
+    if (ctx.cls) return ctx.cls->unit;
+    if (ctx.func) return ctx.func->unit;
+    return nullptr;
+  }();
+  return is_trace_function(ctx.cls ? ctx.cls->name : nullptr,
+                           ctx.func ? ctx.func->name : nullptr,
+                           unit);
+}
+
+bool is_trace_function(SString cls,
+                       SString func,
+                       SString unit) {
+  return method_map_contains(options.TraceFunctions, cls, func, unit);
 }
 
 int trace_bump_for(const php::Class* cls,
-                   const php::Func* func) {
-  auto const unit = func ? func->unit : cls->unit;
-  return is_trace_function(cls, func) ? kTraceFuncBump :
-    (is_systemlib_part(unit) ? kSystemLibBump : 0);
+                   const php::Func* func,
+                   const php::Unit* inUnit) {
+  auto const unit = [&] () -> SString {
+    if (inUnit) return inUnit->filename;
+    if (cls) return cls->unit;
+    if (func) return func->unit;
+    return nullptr;
+  }();
+  return trace_bump_for(cls ? cls->name : nullptr,
+                        func ? func->name : nullptr,
+                        unit);
+  }
+
+int trace_bump_for(const Context& ctx) {
+  auto const unit = [&] () -> SString {
+    if (ctx.unit) return ctx.unit;
+    if (ctx.cls) return ctx.cls->unit;
+    if (ctx.func) return ctx.func->unit;
+    return nullptr;
+  }();
+  return trace_bump_for(ctx.cls ? ctx.cls->name : nullptr,
+                        ctx.func ? ctx.func->name : nullptr,
+                        unit);
+}
+
+int trace_bump_for(SString cls,
+                   SString func,
+                   SString unit) {
+  return is_trace_function(cls, func, unit) ? kTraceFuncBump :
+    ((unit && is_systemlib_part(unit)) ? kSystemLibBump : 0);
 }
 
 //////////////////////////////////////////////////////////////////////

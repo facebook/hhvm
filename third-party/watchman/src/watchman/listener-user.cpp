@@ -6,6 +6,7 @@
  */
 
 #include <folly/ScopeGuard.h>
+
 #include "watchman/Client.h"
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
@@ -87,7 +88,7 @@ resolveRootByName(Client* client, const char* rootName, bool create) {
     }
 
     if (client->perf_sample) {
-      root->addPerfSampleMetadata(*client->perf_sample);
+      client->perf_sample->add_root_metadata(root->getRootMetadata());
     }
     return root;
 

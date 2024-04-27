@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <unordered_map>
+
 #include "watchman/Clock.h"
 #include "watchman/CookieSync.h"
 #include "watchman/IgnoreSet.h"
@@ -30,7 +31,7 @@ class Root;
 struct TriggerCommand;
 class QueryableView;
 struct QueryContext;
-class PerfSample;
+struct RootMetadata;
 
 enum ClientStateDisposition {
   PendingEnter,
@@ -343,8 +344,9 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
   static std::vector<RootDebugStatus> getStatusForAllRoots();
   RootDebugStatus getStatus() const;
 
-  // Annotate the sample with some standard metadata taken from a root.
-  void addPerfSampleMetadata(PerfSample& sample) const;
+  // Collect standard metadata taken from a root.
+  RootMetadata getRootMetadata() const;
+  void collectRootMetadata(RootMetadata& rootMetadata) const;
 
   SaveGlobalStateHook getSaveGlobalStateHook() const {
     return saveGlobalStateHook_;

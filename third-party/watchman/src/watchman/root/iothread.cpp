@@ -79,7 +79,7 @@ void InMemoryView::fullCrawl(
 
   root->cookies.abortAllCookies();
 
-  root->addPerfSampleMetadata(sample);
+  sample.add_root_metadata(root->getRootMetadata());
 
   sample.finish();
   sample.force_log();

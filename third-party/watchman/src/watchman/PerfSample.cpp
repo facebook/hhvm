@@ -163,6 +163,17 @@ bool PerfSample::finish() {
   return will_log;
 }
 
+void PerfSample::add_root_metadata(const RootMetadata& root_metadata) {
+  auto meta = json_object(
+      {{"path", w_string_to_json(root_metadata.root_path)},
+       {"recrawl_count", json_integer(root_metadata.recrawl_count)},
+       {"case_sensitive", json_boolean(root_metadata.case_sensitive)}});
+  if (!root_metadata.watcher.empty()) {
+    meta.set({{"watcher", w_string_to_json(root_metadata.watcher)}});
+  }
+  add_meta("root", std::move(meta));
+}
+
 void PerfSample::add_meta(const char* key, json_ref&& val) {
   meta_data.set(key, std::move(val));
 }

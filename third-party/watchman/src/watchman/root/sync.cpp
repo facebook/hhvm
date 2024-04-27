@@ -22,7 +22,7 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
   try {
     auto result = view()->syncToNow(root, timeout);
     if (sample.finish()) {
-      root->addPerfSampleMetadata(sample);
+      sample.add_root_metadata(root->getRootMetadata());
       sample.add_meta(
           "sync_to_now",
           json_object(
@@ -34,7 +34,7 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
   } catch (const std::exception& exc) {
     sample.force_log();
     sample.finish();
-    root->addPerfSampleMetadata(sample);
+    sample.add_root_metadata(root->getRootMetadata());
     sample.add_meta(
         "sync_to_now",
         json_object(

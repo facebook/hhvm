@@ -47,7 +47,7 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
     }
   }
   if (sample.finish()) {
-    addPerfSampleMetadata(sample);
+    sample.add_root_metadata(getRootMetadata());
     sample.log();
   }
 }

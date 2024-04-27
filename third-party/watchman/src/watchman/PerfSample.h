@@ -10,11 +10,22 @@
 #include <folly/portability/SysTime.h>
 #include <string>
 #include <vector>
+
 #include "watchman/thirdparty/jansson/jansson.h"
 
 // Performance metrics sampling
 
 namespace watchman {
+
+/**
+ * Contains metadata regarding root used in structured logging.
+ */
+struct RootMetadata {
+  w_string root_path;
+  int64_t recrawl_count;
+  bool case_sensitive;
+  w_string watcher;
+};
 
 class PerfSample {
  public:
@@ -68,6 +79,9 @@ class PerfSample {
   // Mark the end of a sample.  Returns true if the policy is to log this
   // sample.  This allows the caller to conditionally build and add metadata
   bool finish();
+
+  // Annotate sample with Root metadata.
+  void add_root_metadata(const RootMetadata& root_metadata);
 
   // Annotate the sample with metadata
   void add_meta(const char* key, json_ref&& val);

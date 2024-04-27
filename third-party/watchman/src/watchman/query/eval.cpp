@@ -6,8 +6,10 @@
  */
 
 #include "watchman/query/eval.h"
+
 #include <fmt/chrono.h>
 #include <folly/ScopeGuard.h>
+
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/PerfSample.h"
@@ -221,7 +223,7 @@ static void execute_common(
   }
 
   if (sample && sample->finish()) {
-    ctx->root->addPerfSampleMetadata(*sample);
+    sample->add_root_metadata(ctx->root->getRootMetadata());
     auto meta = json_object({
         {"fresh_instance", json_boolean(res->isFreshInstance)},
         {"num_deduped", json_integer(ctx->num_deduped)},
@@ -297,8 +299,8 @@ QueryResult w_query_execute(
             query->since_spec->savedStateConfig.value(),
             scm,
             root->config,
-            [root](PerfSample& sample) {
-              root->addPerfSampleMetadata(sample);
+            [root](RootMetadata& root_metadata) {
+              root->collectRootMetadata(root_metadata);
             });
         auto savedStateResult = savedStateInterface->getMostRecentSavedState(
             resultClock.scmMergeBase ? resultClock.scmMergeBase->piece()

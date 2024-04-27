@@ -108,4 +108,39 @@ struct SyncToNow : public MetadataEvent {
   }
 };
 
+struct SavedState : public MetadataEvent {
+  enum Target { Manifold = 1, Xdb = 2 };
+  enum Action { GetProperties = 1, Connect = 2, Query = 3 };
+
+  static constexpr const char* type = "saved_state";
+
+  Target target = Manifold;
+  Action action = GetProperties;
+  std::string project;
+  std::string path;
+  int64_t commit_date = 0;
+  std::string metadata;
+  std::string properties;
+  bool success = false;
+
+  void populate(DynamicEvent& event) const {
+    MetadataEvent::populate(event);
+
+    event.addInt("target", target);
+    event.addInt("action", action);
+    event.addString("project", project);
+    if (!path.empty()) {
+      event.addString("path", path);
+    }
+    event.addInt("commit_date", commit_date);
+    if (!metadata.empty()) {
+      event.addString("metadata", metadata);
+    }
+    if (!properties.empty()) {
+      event.addString("properties", properties);
+    }
+    event.addBool("success", success);
+  }
+};
+
 } // namespace watchman

@@ -94,4 +94,18 @@ struct AgeOut : public MetadataEvent {
   }
 };
 
+struct SyncToNow : public MetadataEvent {
+  static constexpr const char* type = "sync_to_now";
+
+  bool success = false;
+  int64_t timeoutms = 0;
+
+  void populate(DynamicEvent& event) const {
+    MetadataEvent::populate(event);
+
+    event.addBool("success", success);
+    event.addInt("timeoutms", timeoutms);
+  }
+};
+
 } // namespace watchman

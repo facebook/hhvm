@@ -179,4 +179,16 @@ struct FullCrawl : public MetadataEvent {
   static constexpr const char* type = "full_crawl";
 };
 
+struct Dropped : public MetadataEvent {
+  static constexpr const char* type = "dropped";
+
+  bool isKernel = false;
+
+  void populate(DynamicEvent& event) const {
+    MetadataEvent::populate(event);
+
+    event.addBool("isKernel", isKernel);
+  }
+};
+
 } // namespace watchman

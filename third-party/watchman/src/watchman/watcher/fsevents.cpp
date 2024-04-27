@@ -5,23 +5,29 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "watchman/watcher/fsevents.h"
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <condition_variable>
 #include <iterator>
 #include <mutex>
-#include <vector>
+
 #include "watchman/Client.h"
 #include "watchman/FlagMap.h"
 #include "watchman/InMemoryView.h"
 #include "watchman/LogConfig.h"
 #include "watchman/fs/Pipe.h"
-#include "watchman/root/Root.h"
 #include "watchman/watcher/WatcherRegistry.h"
 #include "watchman/watchman_cmd.h"
 
 #if HAVE_FSEVENTS
+
+#include "watchman/watcher/fsevents.h"
+
+#include <vector>
+
+#include "watchman/root/Root.h"
+#include "watchman/telemetry/LogEvent.h"
+#include "watchman/telemetry/WatchmanStructuredLogger.h"
 
 namespace watchman {
 
@@ -131,8 +137,25 @@ std::shared_ptr<FSEventsWatcher> watcherFromRoot(
 
 /** Generate a perf event for the drop */
 static void log_drop_event(const std::shared_ptr<Root>& root, bool isKernel) {
+  auto root_metadata = root->getRootMetadata();
+  auto dropped = Dropped{
+      // MetdataEvent
+      {
+          // BaseEvent
+          {
+              root_metadata.root_path.string(), // root
+              std::string() // error
+          },
+          root_metadata.recrawl_count, // recrawl
+          root_metadata.case_sensitive, // case_sensitive
+          root_metadata.watcher.string() // watcher
+      },
+      isKernel // isKernel
+  };
+  getLogger()->logEvent(dropped);
+
   PerfSample sample(isKernel ? "KernelDropped" : "UserDropped");
-  sample.add_root_metadata(root->getRootMetadata());
+  sample.add_root_metadata(root_metadata);
   sample.finish();
   sample.force_log();
   sample.log();

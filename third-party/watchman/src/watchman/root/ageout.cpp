@@ -7,6 +7,8 @@
 
 #include "watchman/QueryableView.h"
 #include "watchman/root/Root.h"
+#include "watchman/telemetry/LogEvent.h"
+#include "watchman/telemetry/WatchmanStructuredLogger.h"
 
 using namespace watchman;
 
@@ -32,7 +34,10 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
   // of build tooling or atomic renames)
   watchman::PerfSample sample("age_out");
 
-  view()->ageOut(sample, std::chrono::seconds(min_age));
+  int64_t walked = 0;
+  int64_t files = 0;
+  int64_t dirs = 0;
+  view()->ageOut(walked, files, dirs, std::chrono::seconds(min_age));
 
   // Age out cursors too.
   {
@@ -46,8 +51,35 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
       }
     }
   }
+
+  auto root_metadata = getRootMetadata();
+  auto ageOut = AgeOut{
+      // MetadataEvent
+      {
+          // BaseEvent
+          {
+              root_metadata.root_path.string(), // root
+              std::string() // error
+          },
+          root_metadata.recrawl_count, // recrawl
+          root_metadata.case_sensitive, // case_sensitive
+          root_metadata.watcher.string() // watcher
+      },
+      walked, // walked
+      files, // files
+      dirs // dirs
+  };
+  getLogger()->logEvent(ageOut);
+
   if (sample.finish()) {
-    sample.add_root_metadata(getRootMetadata());
+    sample.add_meta(
+        "age_out",
+        json_object(
+            {{"walked", json_integer(walked)},
+             {"files", json_integer(files)},
+             {"dirs", json_integer(dirs)}}));
+
+    sample.add_root_metadata(root_metadata);
     sample.log();
   }
 }

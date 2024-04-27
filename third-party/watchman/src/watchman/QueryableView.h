@@ -9,9 +9,11 @@
 
 #include <folly/futures/Future.h>
 #include <vector>
+
 #include "watchman/Clock.h"
 #include "watchman/CookieSync.h"
 #include "watchman/PerfSample.h"
+#include "watchman/telemetry/LogEvent.h"
 #include "watchman/watchman_string.h"
 
 namespace watchman {
@@ -50,7 +52,11 @@ class QueryableView : public std::enable_shared_from_this<QueryableView> {
   virtual w_string getCurrentClockString() const = 0;
   virtual ClockTicks getLastAgeOutTickValue() const;
   virtual std::chrono::system_clock::time_point getLastAgeOutTimeStamp() const;
-  virtual void ageOut(PerfSample& sample, std::chrono::seconds minAge);
+  virtual void ageOut(
+      int64_t& walked,
+      int64_t& files,
+      int64_t& dirs,
+      std::chrono::seconds minAge);
 
   virtual folly::SemiFuture<folly::Unit> waitForSettle(
       std::chrono::milliseconds settle_period) = 0;

@@ -164,7 +164,11 @@ class InMemoryView final : public QueryableView {
     };
   }
 
-  void ageOut(PerfSample& sample, std::chrono::seconds minAge) override;
+  void ageOut(
+      int64_t& walked,
+      int64_t& files,
+      int64_t& dirs,
+      std::chrono::seconds minAge) override;
 
   folly::SemiFuture<folly::Unit> waitForSettle(
       std::chrono::milliseconds settle_period) override;

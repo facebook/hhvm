@@ -510,9 +510,13 @@ ClockStamp InMemoryView::ageOutFile(
   return ageOutOtime;
 }
 
-void InMemoryView::ageOut(PerfSample& sample, std::chrono::seconds minAge) {
-  uint32_t num_aged_files = 0;
-  uint32_t num_walked = 0;
+void InMemoryView::ageOut(
+    int64_t& walked,
+    int64_t& files,
+    int64_t& dirs,
+    std::chrono::seconds minAge) {
+  files = 0;
+  walked = 0;
   std::unordered_set<w_string> dirs_to_erase;
 
   auto now = std::chrono::system_clock::now();
@@ -522,7 +526,7 @@ void InMemoryView::ageOut(PerfSample& sample, std::chrono::seconds minAge) {
   watchman_file* file = view->getLatestFile();
   watchman_file* prior = nullptr;
   while (file) {
-    ++num_walked;
+    ++walked;
     if (file->exists ||
         std::chrono::system_clock::from_time_t(file->otime.timestamp) + minAge >
             now) {
@@ -536,7 +540,7 @@ void InMemoryView::ageOut(PerfSample& sample, std::chrono::seconds minAge) {
     // Revise tick for fresh instance reporting
     lastAgeOutTick_ = std::max(lastAgeOutTick_, agedOtime.ticks);
 
-    num_aged_files++;
+    files++;
 
     // Go back to last good file node; we can't trust that the
     // value of file->next saved before age_out_file is a valid
@@ -552,15 +556,11 @@ void InMemoryView::ageOut(PerfSample& sample, std::chrono::seconds minAge) {
     }
   }
 
-  if (num_aged_files + dirs_to_erase.size()) {
-    logf(ERR, "aged {} files, {} dirs\n", num_aged_files, dirs_to_erase.size());
+  if (files + dirs_to_erase.size()) {
+    logf(ERR, "aged {} files, {} dirs\n", files, dirs_to_erase.size());
   }
-  sample.add_meta(
-      "age_out",
-      json_object(
-          {{"walked", json_integer(num_walked)},
-           {"files", json_integer(num_aged_files)},
-           {"dirs", json_integer(dirs_to_erase.size())}}));
+
+  dirs = dirs_to_erase.size();
 }
 
 void InMemoryView::timeGenerator(const Query* query, QueryContext* ctx) const {

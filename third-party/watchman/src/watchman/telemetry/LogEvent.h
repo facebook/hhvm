@@ -78,4 +78,20 @@ struct ClockTest : public BaseEvent {
   }
 };
 
+struct AgeOut : public MetadataEvent {
+  static constexpr const char* type = "age_out";
+
+  int64_t walked = 0;
+  int64_t files = 0;
+  int64_t dirs = 0;
+
+  void populate(DynamicEvent& event) const {
+    MetadataEvent::populate(event);
+
+    event.addInt("walked", walked);
+    event.addInt("files", files);
+    event.addInt("dirs", dirs);
+  }
+};
+
 } // namespace watchman

@@ -66,4 +66,6 @@ WatchmanStats::getStatsForCurrentThread<TelemetryStats>() {
   return *telemetryStats_.get();
 }
 
+WatchmanStatsPtr getWatchmanStats();
+
 } // namespace watchman

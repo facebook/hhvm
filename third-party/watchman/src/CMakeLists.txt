@@ -462,8 +462,10 @@ target_link_libraries(third_party_deps INTERFACE
   glog::glog
   gflags
   ${Boost_LIBRARIES}
+  fb303::fb303
   fmt::fmt
   edencommon::edencommon_utils
+  edencommon::edencommon_telemetry
 )
 target_include_directories(third_party_deps INTERFACE
   ${FOLLY_INCLUDE_DIR}
@@ -688,6 +690,8 @@ watchman/saved_state/SavedStateInterface.cpp
 watchman/scm/Git.cpp
 watchman/scm/Mercurial.cpp
 watchman/scm/SCM.cpp
+watchman/telemetry/WatchmanStats.cpp
+watchman/telemetry/WatchmanStructuredLogger.cpp
 watchman/thirdparty/getopt/GetOpt.cpp
 watchman/watcher/Watcher.cpp
 watchman/watcher/WatcherRegistry.cpp

@@ -19,4 +19,12 @@ void WatchmanStats::flush() {
   facebook::fb303::ServiceData::get()->getQuantileStatMap()->flushAll();
 }
 
+WatchmanStatsPtr getWatchmanStats() {
+  // A running Watchman daemon only needs a single WatchmanStats instance. Avoid
+  // atomic reference counts with RefPtr::singleton. We could use
+  // folly::Singleton but that makes unit testing harder.
+  static WatchmanStats* gWatchmanStats = new WatchmanStats;
+  return WatchmanStatsPtr::singleton(*gWatchmanStats);
+}
+
 } // namespace watchman

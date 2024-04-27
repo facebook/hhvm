@@ -29,6 +29,7 @@ use clap::Args;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use log::info;
+use options::HhbcFlags;
 use options::Hhvm;
 use options::ParserOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
@@ -223,7 +224,7 @@ impl Opts {
             po_auto_namespace_map: compile::auto_namespace_map().collect(),
             ..hhvm_config::parser_options(&hhvm_config)?
         };
-        let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
+        let hhbc_flags = HhbcFlags::from_config(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: relative_path::RelativePath::make(relative_path::Prefix::Dummy, path),
             hhvm: Hhvm {

@@ -78,6 +78,7 @@ use nom::Err;
 enum OutputType {
     Defs,
     Loader,
+    Hackc,
 }
 
 #[derive(Debug, Parser)]
@@ -101,6 +102,9 @@ fn main() -> ExitCode {
                 OutputType::Defs => generate_configs_lib::generate_defs(sections, args.output_dir),
                 OutputType::Loader => {
                     generate_configs_lib::generate_loader(sections, args.output_dir)
+                }
+                OutputType::Hackc => {
+                    generate_configs_lib::generate_hackc(sections, args.output_dir)
                 }
             }
             ExitCode::from(0)

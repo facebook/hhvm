@@ -104,7 +104,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
       returns something other than boolean false, the runtime will throw a
       fatal error.
 
-- bool Eval.EmitClsMethPointers = true, UNKNOWN, globaldata|unitcacheflag
+- bool Eval.EmitClsMethPointers = true, UNKNOWN, globaldata|unitcacheflag|hackc(hhbc)
 - uint32_t Eval.RaiseClassConversionNoticeSampleRate = 0, UNKNOWN, globaldata
 
   Whether implicit class conversions can raise a notice.
@@ -171,7 +171,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   Describes the active deployment for selecting the set of packages
   Value is only read in repo authoritative or cli mode.
 
-- bool Eval.EnableIntrinsicsExtension = Eval.EnableIntrinsicsExtension, UNKNOWN, globaldata|unitcacheflag
+- bool Eval.EnableIntrinsicsExtension = Eval.EnableIntrinsicsExtension, UNKNOWN, globaldata|unitcacheflag|hackc(hhbc, false)
 
   Should the extension containing HHVM intrinsics be enabled?
   This is used by HackC to turn on / off magic decl driven bytecode functions like
@@ -244,13 +244,13 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
 
-- bool Eval.LogExternCompilerPerf = false, UNKNOWN
+- bool Eval.LogExternCompilerPerf = false, UNKNOWN, hackc(hhbc)
 
   Whether to log extern compiler performance
 
-- bool Eval.FoldLazyClassKeys = true, UNKNOWN, unitcacheflag
+- bool Eval.FoldLazyClassKeys = true, UNKNOWN, unitcacheflag|hackc(hhbc)
 
-- bool Eval.EmitNativeEnumClassLabels = true, UNKNOWN, unitcacheflag
+- bool Eval.EmitNativeEnumClassLabels = true, UNKNOWN, unitcacheflag|hackc(hhbc, false)
 
 # Hack.Lang
 
@@ -262,9 +262,9 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)
 - bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)
 - bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+- bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+- bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 
   Emit specialized bytecodes when we an infer a typehint does not contain a
   reified generic bytecode, powered by decl directed bytecode
@@ -276,8 +276,8 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {}, UNKNOWN, repooptionsflag(Parser)|lookuppath(AliasedNamespaces)
 
-- bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)
-- bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc, true)
+- bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc, true)
 
   When set the frontend compiler will attempt to shorten the live ranges of
   parameter and non-parameter named locals when these flags are set. This may
@@ -285,14 +285,14 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   mean that values that are no longer needed by the program may not be visible
   to the debugger anymore.
 
-- bool Hack.Lang.OptimizeLocalIterators = false, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.OptimizeLocalIterators = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc, true)
 
   When set the frontend will attempt to emit LIter bytecodes when compiling
   foreach style loops where the iterand is stored in a local, which during the
   course of the loop is either not modified, or is only modified at the $key
   location.
 
-- bool Hack.Lang.OptimizeIsTypeChecks = false, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.OptimizeIsTypeChecks = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc, true)
 
   Controls whether hackc will attempt to emit IsTypeC instructions in place of
   IsTypeStructC for primitive types that are trivially checkable.
@@ -618,8 +618,8 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - bool PHP7.DisallowUnsafeCurlUploads = PHP7.all, UNKNOWN
 
-- bool PHP7.UVS = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
-- bool PHP7.LTRAssign = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
+- bool PHP7.UVS = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)|hackc(hhbc, false)
+- bool PHP7.LTRAssign = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)|hackc(hhbc, false)
 
 # Proxy
 

@@ -23,7 +23,6 @@ use direct_decl_parser::DeclParserOptions;
 use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
 use hhbc::Unit;
-use options::HhbcFlags;
 use options::Hhvm;
 use options::ParserOptions;
 use parser_core_types::source_text::SourceText;
@@ -581,22 +580,7 @@ impl ffi::NativeEnv {
                     ..Default::default()
                 },
             },
-            hhbc_flags: HhbcFlags {
-                ltr_assign: self.hhbc_flags.ltr_assign,
-                uvs: self.hhbc_flags.uvs,
-                log_extern_compiler_perf: self.hhbc_flags.log_extern_compiler_perf,
-                enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
-                emit_cls_meth_pointers: self.hhbc_flags.emit_cls_meth_pointers,
-                fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
-                optimize_reified_param_checks: self.hhbc_flags.optimize_reified_param_checks,
-                stress_shallow_decl_deps: self.hhbc_flags.stress_shallow_decl_deps,
-                stress_folded_decl_deps: self.hhbc_flags.stress_folded_decl_deps,
-                enable_native_enum_class_labels: self.hhbc_flags.enable_native_enum_class_labels,
-                optimize_param_lifetimes: self.hhbc_flags.optimize_param_lifetimes,
-                optimize_local_lifetimes: self.hhbc_flags.optimize_local_lifetimes,
-                optimize_local_iterators: self.hhbc_flags.optimize_local_iterators,
-                optimize_is_type_checks: self.hhbc_flags.optimize_is_type_checks,
-            },
+            hhbc_flags: self.hhbc_flags,
             flags: EnvFlags {
                 is_systemlib: self.flags.is_systemlib,
                 for_debugger_eval: self.flags.for_debugger_eval,

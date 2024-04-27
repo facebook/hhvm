@@ -5,6 +5,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::collections::BTreeMap;
 
+#[cfg(fbcode_build)]
+mod options_gen;
+#[cfg(not(fbcode_build))]
+mod options_gen {
+    include!(concat!(env!("OUT_DIR"), "/options_gen.rs"));
+}
+
 use bstr::BString;
 pub use options_gen::HhbcFlags;
 pub use oxidized::parser_options::ParserOptions;

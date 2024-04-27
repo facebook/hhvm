@@ -2728,7 +2728,7 @@ fn emit_special_function<'a, 'd>(
                 instr::cls_cns_l(local),
             ])))
         }
-        ("__SystemLib\\unwrap_opaque_value", _) if e.options().hhbc.enable_native_enum_class_labels => match *args {
+        ("__SystemLib\\unwrap_opaque_value", _) if e.options().hhbc.emit_native_enum_class_labels => match *args {
             [_, ref val] =>
             Ok(Some(InstrSeq::gather(vec![
                  emit_expr(e, env, error::expect_normal_paramkind(val)?)?,
@@ -3334,7 +3334,7 @@ fn emit_label<'a, 'd>(
     pos: &Pos,
     label: &(Option<aast_defs::ClassName>, String),
 ) -> Result<InstrSeq> {
-    if emitter.options().hhbc.enable_native_enum_class_labels {
+    if emitter.options().hhbc.emit_native_enum_class_labels {
         Ok(InstrSeq::gather(vec![
             emit_pos(pos),
             instr::enum_class_label(hhbc::intern_bytes(label.1.as_bytes())),

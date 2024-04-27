@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
 use hhvm_options::HhvmConfig;
-use options::HhbcFlags;
 use options::ParserOptions;
 
 /*
@@ -16,44 +15,6 @@ files are turned into hackc/compile::NativeEnv (and its embedded options)
 
 see hphp/runtime/base/config.{cpp,h} and runtime_option.{cpp,h}
 */
-
-pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
-    let mut flags = HhbcFlags::default();
-    // Use the config setting if provided; otherwise preserve existing value.
-    let init = |flag: &mut bool, name: &str| -> Result<()> {
-        match config.get_bool(name)? {
-            Some(b) => Ok(*flag = b),
-            None => Ok(()),
-        }
-    };
-
-    init(&mut flags.ltr_assign, "php7.ltr_assign")?;
-    init(&mut flags.uvs, "php7.uvs")?;
-    init(
-        &mut flags.log_extern_compiler_perf,
-        "Eval.LogExternCompilerPerf",
-    )?;
-    init(
-        &mut flags.enable_intrinsics_extension,
-        "Eval.EnableIntrinsicsExtension",
-    )?;
-    init(
-        &mut flags.emit_cls_meth_pointers,
-        "Eval.EmitClsMethPointers",
-    )?;
-
-    flags.optimize_reified_param_checks = config
-        .get_bool("Hack.Lang.OptimizeReifiedParamChecks")?
-        .unwrap_or(false);
-
-    flags.enable_native_enum_class_labels = config
-        .get_bool("Eval.EmitNativeEnumClassLabels")?
-        .unwrap_or(false);
-
-    // Only hdf version
-    flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
-    Ok(flags)
-}
 
 pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
     let mut flags = ParserOptions::default();

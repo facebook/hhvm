@@ -129,7 +129,7 @@ CompilerResult hackc_compile(
       .enable_intrinsics_extension = Cfg::Eval::EnableIntrinsicsExtension,
       .emit_cls_meth_pointers = Cfg::Eval::EmitClsMethPointers,
       .fold_lazy_class_keys = Cfg::Eval::FoldLazyClassKeys,
-      .enable_native_enum_class_labels = Cfg::Eval::EmitNativeEnumClassLabels,
+      .emit_native_enum_class_labels = Cfg::Eval::EmitNativeEnumClassLabels,
     },
     .parser_flags = hackc::ParserFlags {
       .enable_class_level_where_clauses = Cfg::HackLang::EnableClassLevelWhereClauses,

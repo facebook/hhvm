@@ -1346,6 +1346,7 @@ impl FunctionParser<'_> {
             "create_special_implicit_context" => I::Hhbc(H::CreateSpecialImplicitContext(self.vid2(tok)?, loc)),
             "div" => I::Hhbc(H::Div(self.vid2(tok)?, loc)),
             "enter" => parse_instr!(tok, I::Terminator(T::Enter(p0, loc)), "to" <p0:parse_bid>),
+            "enum_class_label_name" => I::Hhbc(H::EnumClassLabelName(self.vid(tok)?, loc)),
             "eval" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::Eval, vid: self.vid(tok)?, loc })),
             "exit" => I::Terminator(T::Exit(self.vid(tok)?, loc)),
             "fatal" => parse_instr!(tok, I::Terminator(T::Fatal(p0, p1, loc)), <p1:parse_fatal_op> "," <p0:self.vid>),

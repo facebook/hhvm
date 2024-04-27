@@ -328,6 +328,11 @@ pub(crate) fn parse_imm(tokenizer: &mut Tokenizer<'_>) -> Result<Immediate> {
                 };
                 Immediate::NewCol(kind)
             }
+            "enum_class_label" => {
+                tokenizer.expect_any_token()?;
+                parse!(tokenizer, "(" <value:parse_string_id> ")");
+                Immediate::EnumClassLabel(value)
+            }
             _ => parse_typed_value(tokenizer)?.into(),
         },
         _ => parse_typed_value(tokenizer)?.into(),
@@ -778,7 +783,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
             let id = ir_core::intern_bytes(unescape(&s)?);
             TypedValue::String(id)
         }
-        _ => return Err(t.bail("Invalid TypedValue, got '{t}'")),
+        _ => return Err(t.bail(format!("Invalid TypedValue, got '{t}'"))),
     })
 }
 

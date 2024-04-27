@@ -7,11 +7,15 @@
 
 #include <fmt/chrono.h>
 #include <chrono>
+
 #include "watchman/Errors.h"
 #include "watchman/InMemoryView.h"
+#include "watchman/PerfSample.h"
 #include "watchman/fs/ParallelWalk.h"
 #include "watchman/root/Root.h"
 #include "watchman/root/warnerr.h"
+#include "watchman/telemetry/LogEvent.h"
+#include "watchman/telemetry/WatchmanStructuredLogger.h"
 #include "watchman/watcher/Watcher.h"
 #include "watchman/watchman_dir.h"
 #include "watchman/watchman_file.h"
@@ -79,8 +83,23 @@ void InMemoryView::fullCrawl(
 
   root->cookies.abortAllCookies();
 
-  sample.add_root_metadata(root->getRootMetadata());
+  RootMetadata root_metadata = root->getRootMetadata();
+  auto fullCrawl = FullCrawl{
+      // MetadataEvent
+      {
+          // BaseEvent
+          {
+              root_metadata.root_path.string(), // root
+              std::string() // error
+          },
+          root_metadata.recrawl_count, // recrawl
+          root_metadata.case_sensitive, // case_sensitive
+          root_metadata.watcher.string() // watcher
+      },
+  };
+  getLogger()->logEvent(fullCrawl);
 
+  sample.add_root_metadata(root_metadata);
   sample.finish();
   sample.force_log();
   sample.log();

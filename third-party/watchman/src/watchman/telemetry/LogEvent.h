@@ -175,4 +175,8 @@ struct QueryExecute : public MetadataEvent {
   }
 };
 
+struct FullCrawl : public MetadataEvent {
+  static constexpr const char* type = "full_crawl";
+};
+
 } // namespace watchman

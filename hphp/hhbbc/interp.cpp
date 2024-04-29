@@ -4926,7 +4926,7 @@ void iterNextImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
     auto const iterId = safe_cast<IterId>(ita.iterId);
     return baseLoc == NoLocalId
       ? reduce(env, bc::IterFree { iterId })
-      : reduce(env, bc::LIterFree { iterId, baseLoc });
+      : reduce(env, bc::LIterFree { iterId });
   }
 
   mayReadLocal(env, baseLoc);
@@ -4987,7 +4987,6 @@ void in(ISS& env, const bc::IterFree& op) {
 
 void in(ISS& env, const bc::LIterFree& op) {
   nothrow(env);
-  mayReadLocal(env, op.loc2);
   freeIter(env, op.iter1);
 }
 

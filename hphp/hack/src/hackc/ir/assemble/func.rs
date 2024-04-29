@@ -685,10 +685,7 @@ impl FunctionParser<'_> {
         let iter_id = IterId::new(iter_id);
         Ok(match op.identifier() {
             "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
-            "lfree" => {
-                parse!(tokenizer, <lid:self.lid>);
-                Instr::Hhbc(Hhbc::LIterFree(iter_id, lid, loc))
-            }
+            "lfree" => Instr::Hhbc(Hhbc::LIterFree(iter_id, loc)),
             "init" => {
                 parse!(tokenizer, "from" <vid:self.vid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
                 Instr::Terminator(Terminator::IterInit(

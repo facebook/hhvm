@@ -1212,10 +1212,9 @@ fn emit_foreach_impl<'a, 'd>(
         instr::empty()
     };
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = if let Some(loc) = liter_local {
-            e.iterator_mut().gen_liter(loc)
-        } else {
-            e.iterator_mut().gen_iter()
+        let iter_id = match liter_local {
+            None => e.iterator_mut().gen_iter(),
+            Some(_) => e.iterator_mut().gen_liter(),
         };
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();

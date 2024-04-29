@@ -638,7 +638,7 @@ void optimize_iterators(VisitContext& visit) {
         newOps = {
           bc_with_loc(
             op.srcLoc,
-            bc::LIterFree { op.IterFree.iter1, fixup.base }
+            bc::LIterFree { op.IterFree.iter1 }
           )
         };
         break;

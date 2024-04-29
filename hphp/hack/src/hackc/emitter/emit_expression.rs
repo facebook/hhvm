@@ -1054,7 +1054,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
     f: F,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = e.iterator_mut().gen_liter(*collection);
+        let iter_id = e.iterator_mut().gen_liter();
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
         let loop_end = e.label_gen_mut().next_regular();

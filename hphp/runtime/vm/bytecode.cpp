@@ -4489,7 +4489,7 @@ OPTBLD_INLINE void iopIterFree(Iter* it) {
   it->free();
 }
 
-OPTBLD_INLINE void iopLIterFree(Iter* it, tv_lval) {
+OPTBLD_INLINE void iopLIterFree(Iter* it) {
   it->kill();
 }
 

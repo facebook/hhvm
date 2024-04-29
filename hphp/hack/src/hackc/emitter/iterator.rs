@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc::IterId;
-use hhbc::Local;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 
 #[derive(Debug, Clone)]
 enum IterKind {
     Iter,
-    LIter(Local),
+    LIter,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -38,8 +37,8 @@ impl IterGen {
         self.gen(IterKind::Iter)
     }
 
-    pub fn gen_liter(&mut self, loc: Local) -> IterId {
-        self.gen(IterKind::LIter(loc))
+    pub fn gen_liter(&mut self) -> IterId {
+        self.gen(IterKind::LIter)
     }
 
     pub fn free(&mut self, count: usize) -> InstrSeq {
@@ -54,7 +53,7 @@ impl IterGen {
                     let id = IterId::new(total - i - 1);
                     match it {
                         IterKind::Iter => instr::iter_free(id),
-                        IterKind::LIter(loc) => instr::l_iter_free(id, loc),
+                        IterKind::LIter => instr::l_iter_free(id),
                     }
                 })
                 .collect(),

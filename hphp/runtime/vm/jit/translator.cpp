@@ -296,7 +296,7 @@ static const struct {
   { OpIterNext,    {None,             Local,        OutUnknown      }},
   { OpLIterNext,   {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
-  { OpLIterFree,   {Local,            None,         OutNone         }},
+  { OpLIterFree,   {None,             None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -612,7 +612,6 @@ size_t localImmIdx(Op op) {
   switch (op) {
     case Op::LIterInit:
     case Op::LIterNext:
-    case Op::LIterFree:
       return 1;
     default:
       break;

@@ -48,7 +48,6 @@ impl LocalInfo {
             | Opcode::IsTypeL(local, _)
             | Opcode::IsUnsetL(local)
             | Opcode::IssetL(local)
-            | Opcode::LIterFree(_, local)
             | Opcode::LIterInit(_, local, _)
             | Opcode::LIterNext(_, local, _) => LocalInfo::Read(*local),
 
@@ -178,6 +177,7 @@ impl LocalInfo {
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)
             | Opcode::LazyClassFromClass
+            | Opcode::LIterFree(..)
             | Opcode::LockObj
             | Opcode::Lt
             | Opcode::Lte

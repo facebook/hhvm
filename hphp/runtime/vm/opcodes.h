@@ -205,7 +205,7 @@ namespace HPHP {
   O(IterNext,        TWO(ITA,BA),      NOV,             NOV,        CF) \
   O(LIterNext,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
-  O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
+  O(LIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    NF) \

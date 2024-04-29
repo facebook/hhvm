@@ -675,9 +675,8 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         (Hhbc::IterFree(x0, _), Hhbc::IterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("IterFree param x")?;
         }
-        (Hhbc::LIterFree(x0, y0, _), Hhbc::LIterFree(x1, y1, _)) => {
+        (Hhbc::LIterFree(x0, _), Hhbc::LIterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("LIterFree param x")?;
-            cmp_eq(y0, y1).qualified("LIterFree param y")?;
         }
         (Hhbc::NewDictArray(x0, _), Hhbc::NewDictArray(x1, _)) => {
             cmp_eq(x0, x1).qualified("NewDictArray param x")?;

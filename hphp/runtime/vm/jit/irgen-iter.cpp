@@ -206,7 +206,7 @@ void emitIterFree(IRGS& env, int32_t iterId) {
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 
-void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
+void emitLIterFree(IRGS& env, int32_t iterId) {
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 

@@ -399,7 +399,7 @@ impl<'a> State<'a> {
                 self.step_iter_init(builder, iter_args, Some(local), target)
             }
             Instruct::Opcode(Opcode::IterFree(iter_id))
-            | Instruct::Opcode(Opcode::LIterFree(iter_id, _)) => self.step_iter_free(iter_id),
+            | Instruct::Opcode(Opcode::LIterFree(iter_id)) => self.step_iter_free(iter_id),
             Instruct::Opcode(Opcode::IterNext(ref iter_args, target)) => {
                 self.step_iter_next(builder, iter_args, None, target)
             }
@@ -1781,7 +1781,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::InitProp(_, _)
         | Opcode::IterInit(_, _)
         | Opcode::IterNext(_, _)
-        | Opcode::LIterFree(_, _)
+        | Opcode::LIterFree(_)
         | Opcode::LIterInit(_, _, _)
         | Opcode::LIterNext(_, _, _)
         | Opcode::ResolveClsMethodD(_, _)

@@ -30,12 +30,13 @@ using fizz::server::ClientAuthMode;
 
 namespace wangle {
 
-std::unique_ptr<fizz::server::CertManager> FizzConfigUtil::createCertManager(
-    const ServerSocketConfig& config,
-    const std::shared_ptr<PasswordInFileFactory>& pwFactory) {
-  auto certMgr = std::make_unique<fizz::server::CertManager>();
-  auto loadedCert = false;
-  for (const auto& sslConfig : config.sslContextConfigs) {
+bool FizzConfigUtil::addCertsToManager(
+    const std::vector<SSLContextConfig>& configs,
+    fizz::server::CertManager& manager,
+    const std::shared_ptr<PasswordInFileFactory>& pwFactory,
+    bool strictSSL) {
+  bool loadedCert = false;
+  for (const auto& sslConfig : configs) {
     for (const auto& cert : sslConfig.certificates) {
       try {
         std::unique_ptr<fizz::SelfCert> selfCert;
@@ -54,14 +55,14 @@ std::unique_ptr<fizz::server::CertManager> FizzConfigUtil::createCertManager(
           selfCert =
               CertUtils::makeSelfCert(std::move(x509Chain), std::move(pkey));
         }
-        certMgr->addCert(std::move(selfCert), sslConfig.isDefault);
+        manager.addCert(std::move(selfCert), sslConfig.isDefault);
         loadedCert = true;
       } catch (const std::runtime_error& ex) {
         auto msg = folly::sformat(
             "Failed to load cert or key at key path {}, cert path {}",
             cert.keyPath,
             cert.certPath);
-        if (config.strictSSL) {
+        if (strictSSL) {
           throw std::runtime_error(ex.what() + msg);
         } else {
           LOG(ERROR) << msg << ex.what();
@@ -69,7 +70,15 @@ std::unique_ptr<fizz::server::CertManager> FizzConfigUtil::createCertManager(
       }
     }
   }
-  if (!loadedCert) {
+  return loadedCert;
+}
+
+std::unique_ptr<fizz::server::CertManager> FizzConfigUtil::createCertManager(
+    const ServerSocketConfig& config,
+    const std::shared_ptr<PasswordInFileFactory>& pwFactory) {
+  auto certMgr = std::make_unique<fizz::server::CertManager>();
+  if (!addCertsToManager(
+          config.sslContextConfigs, *certMgr, pwFactory, config.strictSSL)) {
     return nullptr;
   }
   return certMgr;

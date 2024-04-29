@@ -31,6 +31,17 @@ class FizzConfigUtil {
       const ServerSocketConfig& config,
       const std::shared_ptr<PasswordInFileFactory>& pwFactory);
 
+  /*
+   * Adds certs to the cert manager from context configs.
+   * If strictSSL is specified will throw on any failed cert load.
+   * Returns true if atleast one cert was successfully loaded
+   */
+  static bool addCertsToManager(
+      const std::vector<SSLContextConfig>& configs,
+      fizz::server::CertManager& manager,
+      const std::shared_ptr<PasswordInFileFactory>& pwFactory,
+      bool strictSSL);
+
   static std::shared_ptr<fizz::server::FizzServerContext> createFizzContext(
       const wangle::ServerSocketConfig& config);
 

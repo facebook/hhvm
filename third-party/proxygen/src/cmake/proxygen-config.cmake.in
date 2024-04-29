@@ -50,3 +50,12 @@ endif()
 if(NOT proxygen_FIND_QUIETLY)
     message(STATUS "Found proxygen: ${PACKAGE_PREFIX_DIR}")
 endif()
+
+set(proxygen_LIBRARIES
+  proxygen::proxygen
+  proxygen::proxygencurl
+  proxygen::proxygendeviousbaton
+  proxygen::proxygenhqloggerhelper
+  proxygen::proxygenhttpserver
+  proxygen::proxygenhqserver
+)

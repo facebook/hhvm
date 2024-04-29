@@ -333,6 +333,18 @@ uint32_t numNVArgs(const php::Func& f) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+std::string show(const ConstIndex& idx, const IIndex& index) {
+  if (auto const cls = index.lookup_class(idx.cls)) {
+    assertx(idx.idx < cls->constants.size());
+    return folly::sformat("{}::{}", idx.cls, cls->constants[idx.idx].name);
+  }
+  return show(idx);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Currently inferred information about a PHP function.
  *
@@ -4203,7 +4215,16 @@ struct ClassInfo2 {
    * representing the constant. This map is flattened across the
    * inheritance hierarchy.
    */
-  SStringToOneT<ConstIndex> clsConstants;
+  struct ConstIndexAndKind {
+    ConstIndex idx;
+    // Store the kind here as well, so we don't need to potentially
+    // find another class to determine it.
+    ConstModifiers::Kind kind;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(idx)(kind);
+    }
+  };
+  SStringToOneT<ConstIndexAndKind> clsConstants;
 
   /*
    * Inferred information about a class constant declared on this
@@ -5860,6 +5881,10 @@ struct AnalysisIndex::IndexData {
   // (we can have multiple because of inline interp).
   std::vector<Context> contexts;
 
+  // If we're currently resolving class type constants. This changes
+  // how some of the dependencies are treated.
+  bool inTypeCns{false};
+
   size_t foldableInterpNestingLevel{0};
   size_t contextualInterpNestingLevel{0};
 
@@ -6119,7 +6144,7 @@ private:
     if (auto const p = from(cns)) {
       return folly::sformat("{}::{}", p->cls, p->name);
     }
-    return show(cns);
+    return show(cns, AnalysisIndexAdaptor { index.index });
   }
 
   static std::string displayAdded(Type t) {
@@ -9922,10 +9947,14 @@ private:
     auto const addShallowConstants = [&] {
       auto const numConstants = cls.constants.size();
       for (uint32_t idx = 0; idx < numConstants; ++idx) {
+        auto const& cns = cls.constants[idx];
         auto const added = add_constant(
           index, cinfo, state,
-          cls.constants[idx].name,
-          ConstIndex { cls.name, idx },
+          cns.name,
+          ClassInfo2::ConstIndexAndKind {
+            ConstIndex { cls.name, idx },
+            cns.kind
+          },
           false
         );
         if (!added) return false;
@@ -9979,7 +10008,7 @@ private:
       * above.
       */
       auto const& existing = cinfo.clsConstants.find(c.name);
-      if (existing->second.cls->tsame(c.cls)) {
+      if (existing->second.idx.cls->tsame(c.cls)) {
         state.m_traitCns.emplace_back(c);
         state.m_traitCns.back().isFromTrait = true;
       }
@@ -10006,13 +10035,13 @@ private:
 
     for (auto const name : sortedClsConstants) {
       auto& cnsIdx = cinfo.clsConstants.find(name)->second;
-      if (cnsIdx.cls->tsame(cls.name)) continue;
+      if (cnsIdx.idx.cls->tsame(cls.name)) continue;
 
-      auto const& cns = index.cns(cnsIdx);
+      auto const& cns = index.cns(cnsIdx.idx);
       if (!cns.isAbstract || !cns.val) continue;
 
       if (cns.val->m_type == KindOfUninit) {
-        auto const& cnsCls = index.cls(cnsIdx.cls);
+        auto const& cnsCls = index.cls(cnsIdx.idx.cls);
         assertx(!cnsCls.methods.empty());
         assertx(cnsCls.methods.back()->name == s_86cinit.get());
         auto const& cnsCInit = *cnsCls.methods.back();
@@ -10050,8 +10079,9 @@ private:
       copy.isAbstract = false;
       state.m_cnsFromTrait.erase(copy.name);
 
-      cnsIdx.cls = cls.name;
-      cnsIdx.idx = cls.constants.size();
+      cnsIdx.idx.cls = cls.name;
+      cnsIdx.idx.idx = cls.constants.size();
+      cnsIdx.kind = copy.kind;
       cls.constants.emplace_back(std::move(copy));
     }
 
@@ -10062,7 +10092,7 @@ private:
                            ClassInfo2& cinfo,
                            State& state,
                            SString name,
-                           const ConstIndex& cnsIdx,
+                           const ClassInfo2::ConstIndexAndKind& cnsIdx,
                            bool fromTrait) {
     auto [it, emplaced] = cinfo.clsConstants.emplace(name, cnsIdx);
     if (emplaced) {
@@ -10076,11 +10106,11 @@ private:
     auto& existingIdx = it->second;
 
     // Same constant (from an interface via two different paths) is ok
-    if (existingIdx.cls->tsame(cnsIdx.cls)) return true;
+    if (existingIdx.idx.cls->tsame(cnsIdx.idx.cls)) return true;
 
-    auto const& existingCnsCls = index.cls(existingIdx.cls);
-    auto const& existing = index.cns(existingIdx);
-    auto const& cns = index.cns(cnsIdx);
+    auto const& existingCnsCls = index.cls(existingIdx.idx.cls);
+    auto const& existing = index.cns(existingIdx.idx);
+    auto const& cns = index.cns(cnsIdx.idx);
 
     if (existing.kind != cns.kind) {
       ITRACE(
@@ -10089,9 +10119,9 @@ private:
         "`{}' as a {} and by `{}' as a {}\n",
         cinfo.name,
         name,
-        cnsIdx.cls,
+        cnsIdx.idx.cls,
         ConstModifiers::show(cns.kind),
-        existingIdx.cls,
+        existingIdx.idx.cls,
         ConstModifiers::show(existing.kind)
       );
       return false;
@@ -10114,22 +10144,22 @@ private:
        *
        * Type and Context constants can be overridden.
        */
-      auto const& cnsCls = index.cls(cnsIdx.cls);
+      auto const& cnsCls = index.cls(cnsIdx.idx.cls);
       if (cns.kind == ConstModifiers::Kind::Value &&
           !existing.isAbstract &&
           (existingCnsCls.attrs & AttrInterface) &&
           !((cnsCls.attrs & AttrInterface) && fromTrait)) {
         auto const& cls = index.cls(cinfo.name);
         for (auto const iface : cls.interfaceNames) {
-          if (existingIdx.cls->tsame(iface)) {
+          if (existingIdx.idx.cls->tsame(iface)) {
             ITRACE(
               2,
               "Adding constant failed for `{}' because "
               "`{}' was defined by both `{}' and `{}'\n",
               cinfo.name,
               name,
-              cnsIdx.cls,
-              existingIdx.cls
+              cnsIdx.idx.cls,
+              existingIdx.idx.cls
             );
             return false;
           }
@@ -10160,8 +10190,8 @@ private:
             "`{}' was defined by both `{}' and `{}'\n",
             cinfo.name,
             name,
-            cnsIdx.cls,
-            existingIdx.cls
+            cnsIdx.idx.cls,
+            existingIdx.idx.cls
           );
           return false;
         }
@@ -10831,8 +10861,8 @@ private:
 
       c.cls = cls.name;
       state.m_cnsFromTrait.erase(c.name);
-      cnsIdx.cls = cls.name;
-      cnsIdx.idx = cls.constants.size();
+      cnsIdx.idx.cls = cls.name;
+      cnsIdx.idx.idx = cls.constants.size();
       cls.constants.emplace_back(std::move(c));
     }
     state.m_traitCns.clear();
@@ -12571,7 +12601,7 @@ struct BuildSubclassListJob {
     auto const addCnsBase = [&] (const ClassInfo2& cinfo) {
       auto& bases = meta.cnsBases[cinfo.name];
       for (auto const& [_, idx] : cinfo.clsConstants) {
-        if (!cinfo.name->tsame(idx.cls)) bases.emplace(idx.cls);
+        if (!cinfo.name->tsame(idx.idx.cls)) bases.emplace(idx.idx.cls);
       }
     };
     for (auto const& cinfo : classes.vals) addCnsBase(*cinfo);
@@ -16410,7 +16440,7 @@ void make_class_infos_local(
 
         cinfo->clsConstants.reserve(rcinfo->clsConstants.size());
         for (auto const& [name, cns] : rcinfo->clsConstants) {
-          auto const it = index.classes.find(cns.cls);
+          auto const it = index.classes.find(cns.idx.cls);
           always_assert_flog(
             it != end(index.classes),
             "php::Class for {} not found in index",
@@ -16418,7 +16448,7 @@ void make_class_infos_local(
           );
           cinfo->clsConstants.emplace(
             name,
-            ClassInfo::ConstIndex { it->second, cns.idx }
+            ClassInfo::ConstIndex { it->second, cns.idx.idx }
           );
         }
 
@@ -18447,6 +18477,12 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
   return *result;
 }
 
+std::vector<std::pair<SString, ConstIndex>>
+Index::lookup_flattened_class_type_constants(const php::Class&) const {
+  // Should never be used with an Index.
+  always_assert(false);
+}
+
 std::vector<std::pair<SString, ClsConstInfo>>
 Index::lookup_class_constants(const php::Class& cls) const {
   std::vector<std::pair<SString, ClsConstInfo>> out;
@@ -18573,6 +18609,14 @@ Index::lookup_class_type_constant(
 
   ITRACE(4, "-> {}\n", show(*result));
   return *result;
+}
+
+ClsTypeConstLookupResult
+Index::lookup_class_type_constant(const php::Class&,
+                                  SString,
+                                  HHBBC::ConstIndex) const {
+  // Should never be called with an Index.
+  always_assert(false);
 }
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
@@ -21064,10 +21108,10 @@ TSStringSet record_cns_bases(const php::Class& cls,
   TSStringSet out;
   if (!cls.cinfo) return out;
   for (auto const& [_, idx] : cls.cinfo->clsConstants) {
-    if (!cls.name->tsame(idx.cls)) out.emplace(idx.cls);
-    if (auto const cnsCls = folly::get_default(index.classes, idx.cls)) {
-      assertx(idx.idx < cnsCls->constants.size());
-      auto const& cns = cnsCls->constants[idx.idx];
+    if (!cls.name->tsame(idx.idx.cls)) out.emplace(idx.idx.cls);
+    if (auto const cnsCls = folly::get_default(index.classes, idx.idx.cls)) {
+      assertx(idx.idx.idx < cnsCls->constants.size());
+      auto const& cns = cnsCls->constants[idx.idx.idx];
       if (!cls.name->tsame(cns.cls)) out.emplace(cns.cls);
     }
   }
@@ -21309,6 +21353,12 @@ void AnalysisIndex::pop_context() {
   m_data->contexts.pop_back();
 }
 
+bool AnalysisIndex::set_in_type_cns(bool b) {
+  auto const was = m_data->inTypeCns;
+  m_data->inTypeCns = b;
+  return was;
+}
+
 void AnalysisIndex::freeze() {
   FTRACE(2, "Freezing index...\n");
   assertx(!m_data->frozen);
@@ -21351,6 +21401,10 @@ const php::Class*
 AnalysisIndex::lookup_const_class(const php::Const& cns) const {
   m_data->deps->add(AnalysisDeps::Class { cns.cls });
   return folly::get_default(m_data->classes, cns.cls);
+}
+
+const php::Class* AnalysisIndex::lookup_class(SString name) const {
+  return folly::get_default(m_data->classes, name);
 }
 
 const php::Class&
@@ -21430,6 +21484,29 @@ Type AnalysisIndex::lookup_constant(SString name) const {
   return m_data->badConstants.count(name) ? TBottom : TInitCell;
 }
 
+std::vector<std::pair<SString, ConstIndex>>
+AnalysisIndex::lookup_flattened_class_type_constants(
+  const php::Class& cls
+) const {
+  std::vector<std::pair<SString, ConstIndex>> out;
+
+  auto const cinfo = cls.cinfo;
+  if (!cinfo) return out;
+
+  out.reserve(cinfo->clsConstants.size());
+  for (auto const& [name, idx] : cinfo->clsConstants) {
+    if (idx.kind != ConstModifiers::Kind::Type) continue;
+    out.emplace_back(name, idx.idx);
+  }
+  std::sort(
+    begin(out), end(out),
+    [] (auto const& p1, auto const& p2) {
+      return string_data_lt{}(p1.first, p2.first);
+    }
+  );
+  return out;
+}
+
 std::vector<std::pair<SString, ClsConstInfo>>
 AnalysisIndex::lookup_class_constants(const php::Class& cls) const {
   std::vector<std::pair<SString, ClsConstInfo>> out;
@@ -21499,15 +21576,15 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     if (idxIt == end(cinfo->clsConstants)) return notFound();
     auto const& idx = idxIt->second;
 
-    assertx(!m_data->badClasses.count(idx.cls));
+    assertx(!m_data->badClasses.count(idx.idx.cls));
 
-    m_data->deps->add(AnalysisDeps::Class { idx.cls });
-    auto const cnsClsIt = m_data->classes.find(idx.cls);
+    m_data->deps->add(AnalysisDeps::Class { idx.idx.cls });
+    auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
     if (cnsClsIt == end(m_data->classes)) return conservative();
     auto const& cnsCls = cnsClsIt->second;
 
-    assertx(idx.idx < cnsCls->constants.size());
-    auto const& cns = cnsCls->constants[idx.idx];
+    assertx(idx.idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx.idx.idx];
     if (cns.kind != ConstModifiers::Kind::Value || !cns.val.has_value()) {
       return notFound();
     }
@@ -21533,7 +21610,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
       }
 
       ITRACE(4, "(dynamic)\n");
-      m_data->deps->add(idx);
+      m_data->deps->add(idx.idx);
       if (!cnsCls->cinfo) return conservative();
       auto const info =
         folly::get_ptr(cnsCls->cinfo->clsConstantInfo, cns.name);
@@ -21614,15 +21691,15 @@ AnalysisIndex::lookup_class_type_constant(
     if (idxIt == end(cinfo->clsConstants)) return notFound();
     auto const& idx = idxIt->second;
 
-    assertx(!m_data->badClasses.count(idx.cls));
+    assertx(!m_data->badClasses.count(idx.idx.cls));
 
-    m_data->deps->add(AnalysisDeps::Class { idx.cls });
-    auto const cnsClsIt = m_data->classes.find(idx.cls);
+    m_data->deps->add(AnalysisDeps::Class { idx.idx.cls });
+    auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
     if (cnsClsIt == end(m_data->classes)) return conservative();
     auto const& cnsCls = cnsClsIt->second;
 
-    assertx(idx.idx < cnsCls->constants.size());
-    auto const& cns = cnsCls->constants[idx.idx];
+    assertx(idx.idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx.idx.idx];
     if (cns.kind != ConstModifiers::Kind::Type) return notFound();
     if (!cns.val.has_value()) return abstract();
 
@@ -21653,6 +21730,80 @@ AnalysisIndex::lookup_class_type_constant(
 
   // Subclasses not yet implemented
   return conservative();
+}
+
+ClsTypeConstLookupResult
+AnalysisIndex::lookup_class_type_constant(const php::Class& ctx,
+                                          SString name,
+                                          ConstIndex idx) const {
+  ITRACE(4, "lookup_class_type_constant: ({}) {}::{} (from {})\n",
+         show(current_context(*m_data)),
+         ctx.name, name,
+         show(idx, AnalysisIndexAdaptor{ *this }));
+  Trace::Indent _;
+
+  assertx(!m_data->badClasses.count(idx.cls));
+
+  using R = ClsTypeConstLookupResult;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R {
+      TypeStructureResolution { TSDictN, true },
+      TriBool::Maybe,
+      TriBool::Maybe
+    };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::No
+    };
+  };
+
+  // Unlike lookup_class_constant, we distinguish abstract from
+  // not-found, as the runtime sometimes treats them differently.
+  auto const abstract = [] {
+    ITRACE(4, "abstract\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::Yes
+    };
+  };
+
+  m_data->deps->add(idx);
+  auto const cinfo = folly::get_default(m_data->cinfos, idx.cls);
+  if (!cinfo) return conservative();
+
+  assertx(idx.idx < cinfo->cls->constants.size());
+  auto const& cns = cinfo->cls->constants[idx.idx];
+  if (cns.kind != ConstModifiers::Kind::Type) return notFound();
+  if (!cns.val.has_value()) return abstract();
+
+  assertx(tvIsDict(*cns.val));
+
+  ITRACE(4, "({}) {}\n", cns.cls, show(dict_val(val(*cns.val).parr)));
+
+  auto resolved = resolve_type_structure(
+    AnalysisIndexAdaptor { *this }, cns, ctx
+  );
+
+  // The result of resolve_type_structure isn't, in general,
+  // static. However a type-constant will always be, so force that
+  // here.
+  assertx(resolved.type.is(BBottom) || resolved.type.couldBe(BUnc));
+  resolved.type &= TUnc;
+  auto const r = R{
+    std::move(resolved),
+    TriBool::Yes,
+    TriBool::No
+  };
+  ITRACE(4, "-> {}\n", show(r));
+  return r;
 }
 
 PropState AnalysisIndex::lookup_private_props(const php::Class& cls) const {
@@ -22683,6 +22834,10 @@ void AnalysisIndexAdaptor::pop_context() const {
   index.pop_context();
 }
 
+bool AnalysisIndexAdaptor::set_in_type_cns(bool b) const {
+  return index.set_in_type_cns(b);
+}
+
 const php::Unit* AnalysisIndexAdaptor::lookup_func_unit(const php::Func& func) const {
   return &index.lookup_func_unit(func);
 }
@@ -22694,6 +22849,9 @@ const php::Class* AnalysisIndexAdaptor::lookup_const_class(const php::Const& cns
 }
 const php::Class* AnalysisIndexAdaptor::lookup_closure_context(const php::Class& cls) const {
   return &index.lookup_closure_context(cls);
+}
+const php::Class* AnalysisIndexAdaptor::lookup_class(SString c) const {
+  return index.lookup_class(c);
 }
 
 const CompactVector<const php::Class*>*
@@ -22756,6 +22914,20 @@ AnalysisIndexAdaptor::lookup_class_type_constant(
   const Index::ClsTypeConstLookupResolver& resolver
 ) const {
   return index.lookup_class_type_constant(cls, name, resolver);
+}
+
+ClsTypeConstLookupResult
+AnalysisIndexAdaptor::lookup_class_type_constant(const php::Class& ctx,
+                                                 SString n,
+                                                 ConstIndex idx) const {
+  return index.lookup_class_type_constant(ctx, n, idx);
+}
+
+std::vector<std::pair<SString, ConstIndex>>
+AnalysisIndexAdaptor::lookup_flattened_class_type_constants(
+  const php::Class& cls
+) const {
+  return index.lookup_flattened_class_type_constants(cls);
 }
 
 Type AnalysisIndexAdaptor::lookup_constant(Context, SString n) const {

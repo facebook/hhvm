@@ -297,6 +297,7 @@ struct ConstIndex {
 };
 
 std::string show(const ConstIndex&);
+std::string show(const ConstIndex&, const IIndex&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1266,6 +1267,20 @@ struct Index {
     const ClsTypeConstLookupResolver& resolver = {}) const;
 
   /*
+   * Lookup metadata about the constant given by the ConstIndex (with
+   * the given name). The php::Class is used to provide the context.
+   */
+  ClsTypeConstLookupResult
+  lookup_class_type_constant(const php::Class&, SString, ConstIndex) const;
+
+  /*
+   * Retrive all type constants on the given class, whether declared
+   * on the class or inherited.
+   */
+  std::vector<std::pair<SString, HHBBC::ConstIndex>>
+  lookup_flattened_class_type_constants(const php::Class&) const;
+
+  /*
    * Lookup what the best known Type for a constant would be, using a
    * given Index and Context, if a constant of that name were defined.
    */
@@ -1605,6 +1620,8 @@ struct IIndex {
 
   virtual const php::Class* lookup_closure_context(const php::Class&) const = 0;
 
+  virtual const php::Class* lookup_class(SString) const = 0;
+
   virtual const CompactVector<const php::Class*>*
   lookup_closures(const php::Class*) const = 0;
 
@@ -1636,10 +1653,19 @@ struct IIndex {
   lookup_class_constant(Context, const Type& cls, const Type& name) const = 0;
 
   virtual ClsTypeConstLookupResult lookup_class_type_constant(
-      const Type& cls,
-      const Type& name,
-      const Index::ClsTypeConstLookupResolver& resolver = {}
+    const Type& cls,
+    const Type& name,
+    const Index::ClsTypeConstLookupResolver& resolver = {}
   ) const = 0;
+
+  virtual ClsTypeConstLookupResult lookup_class_type_constant(
+    const php::Class&,
+    SString,
+    ConstIndex
+  ) const = 0;
+
+  virtual std::vector<std::pair<SString, ConstIndex>>
+  lookup_flattened_class_type_constants(const php::Class&) const = 0;
 
   virtual Type lookup_constant(Context, SString) const = 0;
 
@@ -1696,7 +1722,10 @@ private:
   virtual void push_context(const Context&) const = 0;
   virtual void pop_context() const = 0;
 
+  virtual bool set_in_type_cns(bool) const = 0;
+
   friend struct ContextPusher;
+  friend struct InTypeCns;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1708,7 +1737,21 @@ struct ContextPusher {
     index.push_context(ctx);
   }
   ~ContextPusher() { index.pop_context(); }
+private:
   const IIndex& index;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// RAII class to mark that we're resolving a class' type-constants.
+struct InTypeCns {
+  explicit InTypeCns(const IIndex& index, bool b = true)
+    : index{index}
+    , was{index.set_in_type_cns(b)} {}
+  ~InTypeCns() { index.set_in_type_cns(was); }
+private:
+  const IIndex& index;
+  bool was;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1730,6 +1773,9 @@ struct IndexAdaptor : public IIndex {
   }
   const php::Class* lookup_closure_context(const php::Class& c) const override {
     return index.lookup_closure_context(c);
+  }
+  const php::Class* lookup_class(SString c) const override {
+    return index.lookup_class(c);
   }
   const CompactVector<const php::Class*>*
   lookup_closures(const php::Class* c) const override {
@@ -1782,6 +1828,16 @@ struct IndexAdaptor : public IIndex {
     const Index::ClsTypeConstLookupResolver& r = {}
   ) const override {
     return index.lookup_class_type_constant(c, n, r);
+  }
+  ClsTypeConstLookupResult
+  lookup_class_type_constant(const php::Class& ctx,
+                             SString n,
+                             ConstIndex idx) const override {
+    return index.lookup_class_type_constant(ctx, n, idx);
+  }
+  std::vector<std::pair<SString, ConstIndex>>
+  lookup_flattened_class_type_constants(const php::Class& cls) const override {
+    return index.lookup_flattened_class_type_constants(cls);
   }
   Type lookup_constant(Context c, SString s) const override {
     return index.lookup_constant(c, s);
@@ -1854,6 +1910,8 @@ struct IndexAdaptor : public IIndex {
 private:
   void push_context(const Context&) const override {}
   void pop_context() const override {}
+
+  bool set_in_type_cns(bool) const override { return false; }
 
   Index& index;
 };
@@ -2293,6 +2351,8 @@ struct AnalysisIndex {
 
   const php::Class& lookup_closure_context(const php::Class&) const;
 
+  const php::Class* lookup_class(SString) const;
+
   Optional<res::Class> resolve_class(SString) const;
   Optional<res::Class> resolve_class(const php::Class&) const;
 
@@ -2311,6 +2371,12 @@ struct AnalysisIndex {
     const Type& cls,
     const Type& name,
     const Index::ClsTypeConstLookupResolver& resolver = {}) const;
+
+  ClsTypeConstLookupResult
+  lookup_class_type_constant(const php::Class&, SString, ConstIndex) const;
+
+  std::vector<std::pair<SString, ConstIndex>>
+  lookup_flattened_class_type_constants(const php::Class&) const;
 
   PropState lookup_private_props(const php::Class&) const;
   PropState lookup_private_statics(const php::Class&) const;
@@ -2373,6 +2439,8 @@ private:
   void push_context(const Context&);
   void pop_context();
 
+  bool set_in_type_cns(bool);
+
   friend struct AnalysisIndexAdaptor;
 };
 
@@ -2382,12 +2450,13 @@ struct AnalysisIndexAdaptor : public IIndex {
   explicit AnalysisIndexAdaptor(const AnalysisIndex& index)
     : index{const_cast<AnalysisIndex&>(index)} {}
 
-  bool frozen() const;
+  bool frozen() const override;
 
   const php::Unit* lookup_func_unit(const php::Func&) const override;
   const php::Unit* lookup_class_unit(const php::Class&) const override;
   const php::Class* lookup_const_class(const php::Const&) const override;
   const php::Class* lookup_closure_context(const php::Class&) const override;
+  const php::Class* lookup_class(SString) const override;
 
   const CompactVector<const php::Class*>*
   lookup_closures(const php::Class*) const override;
@@ -2420,6 +2489,14 @@ struct AnalysisIndexAdaptor : public IIndex {
     const Type&,
     const Type&,
     const Index::ClsTypeConstLookupResolver& r = {}) const override;
+
+  ClsTypeConstLookupResult
+  lookup_class_type_constant(const php::Class&,
+                             SString,
+                             ConstIndex) const override;
+
+  std::vector<std::pair<SString, ConstIndex>>
+  lookup_flattened_class_type_constants(const php::Class&) const override;
 
   Type lookup_constant(Context, SString) const override;
   bool func_depends_on_arg(const php::Func*, size_t) const override;
@@ -2466,6 +2543,8 @@ struct AnalysisIndexAdaptor : public IIndex {
 private:
   void push_context(const Context&) const override;
   void pop_context() const override;
+
+  bool set_in_type_cns(bool) const override;
 
   AnalysisIndex& index;
 };

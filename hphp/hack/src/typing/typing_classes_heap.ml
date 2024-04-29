@@ -14,35 +14,7 @@ module SN = Naming_special_names
 
 type class_t = Typing_class_types.class_t [@@deriving show]
 
-let make_eager_class_decl decl =
-  ( decl,
-    {
-      methods = String.Table.create ();
-      static_methods = String.Table.create ();
-      props = String.Table.create ();
-      static_props = String.Table.create ();
-      construct = ref None;
-    } )
-
-let make_eager_class_type ctx class_name declare_folded_class =
-  match Decl_store.((get ()).get_class class_name) with
-  | Some decl -> Some (make_eager_class_decl decl)
-  | None -> begin
-    match Naming_provider.get_type_kind ctx class_name with
-    | None -> None
-    | Some Naming_types.TTypedef -> None
-    | Some Naming_types.TClass ->
-      Deferred_decl.raise_if_should_defer ();
-      (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
-       * like what we do above, which makes our test redundant but cleaner.
-       * It also writes into Decl_heap.Classes and other Decl_heaps. *)
-      let (decl, _) = declare_folded_class ctx class_name in
-      Some (make_eager_class_decl decl)
-  end
-
-let get (ctx : Provider_context.t) (class_name : string) declare_folded_class :
-    class_t option =
-  make_eager_class_type ctx class_name declare_folded_class
+let make_class_t x = x
 
 module ApiShallow = struct
   let abstract (decl, t, _ctx) =
@@ -468,9 +440,3 @@ module Api = struct
     else
       false
 end
-
-let get_class_with_cache ctx class_name decl_cache declare_folded_class =
-  Provider_backend.Decl_cache.find_or_add
-    decl_cache
-    ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
-    ~default:(fun () -> get ctx class_name declare_folded_class)

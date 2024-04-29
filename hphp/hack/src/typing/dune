@@ -131,8 +131,6 @@
   decl
   decl_counters
   decl_folded_class
-  deferred_decl
-  naming_provider
   shallow_decl_defs
   typing_class_types
   typing_defs)

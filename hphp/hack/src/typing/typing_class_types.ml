@@ -31,6 +31,15 @@ type eager_members = {
     (Typing_defs.class_elt option * Typing_defs_core.consistent_kind) option ref;
 }
 
+let create_eager_members () =
+  {
+    methods = String.Table.create ();
+    static_methods = String.Table.create ();
+    props = String.Table.create ();
+    static_props = String.Table.create ();
+    construct = ref None;
+  }
+
 (** class_t:
 This type is an abstraction layer over the way folded decls are stored, and
 provides a view of classes which includes all inherited members and their types.
@@ -40,3 +49,5 @@ with many entries for the types of each of its members (those member entries are
 looked up lazily, as needed). *)
 type class_t = Decl_defs.decl_class_type * (eager_members[@opaque])
 [@@deriving show]
+
+let make_class_t decl = (decl, create_eager_members ())

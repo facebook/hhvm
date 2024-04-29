@@ -13,15 +13,7 @@ open Typing_defs
 
 type class_t
 
-val make_eager_class_decl : Decl_defs.decl_class_type -> class_t
-
-val get :
-  Provider_context.t ->
-  string ->
-  (Provider_context.t ->
-  string ->
-  Decl_defs.decl_class_type * Decl_store.class_members option) ->
-  class_t option
+val make_class_t : Typing_class_types.class_t -> class_t
 
 module Api : sig
   (** This type "t" is what all APIs operate upon. It includes
@@ -182,10 +174,3 @@ module Api : sig
     get_class:(Provider_context.t -> string -> t option) ->
     class_elt option
 end
-
-val get_class_with_cache :
-  Provider_context.t ->
-  string ->
-  Provider_backend.Decl_cache.t ->
-  (Provider_context.t -> string -> Decl_defs.decl_class_type * 'a) ->
-  class_t option

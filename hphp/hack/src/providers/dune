@@ -76,6 +76,7 @@
   decl_counters
   decl_class
   decl_enforceability
+  deferred_decl
   direct_decl_utils
   provider_backend
   rust_provider_backend_stubs

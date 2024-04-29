@@ -153,8 +153,8 @@ val local_changes_pop_sharedmem_stack : unit -> unit
 
 val lookup_or_populate_class_cache :
   type_key ->
-  (type_key -> Typing_classes_heap.class_t option) ->
-  Typing_classes_heap.class_t option
+  (type_key -> Typing_class_types.class_t option) ->
+  Typing_class_types.class_t option
 
 val declare_folded_class_in_file_FOR_TESTS_ONLY :
   Provider_context.t -> type_key -> Decl_defs.decl_class_type

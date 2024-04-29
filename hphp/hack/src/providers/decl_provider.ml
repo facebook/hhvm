@@ -33,7 +33,7 @@ module Cache =
   SharedMem.FreqCache
     (StringKey)
     (struct
-      type t = Typing_classes_heap.class_t
+      type t = Typing_class_types.class_t
 
       let description = "Decl_Typing_ClassType"
     end)
@@ -91,6 +91,27 @@ let lookup_or_populate_class_cache class_name populate =
       result
   end
 
+(** Lookup class in Decl_store. If not found, fold the class.
+    Defer folding if need be. *)
+let get_class_from_decl_store ctx class_name =
+  match Decl_store.((get ()).get_class class_name) with
+  | Some decl -> Some (Typing_class_types.make_class_t decl)
+  | None -> begin
+    match Naming_provider.get_type_kind ctx class_name with
+    | None -> None
+    | Some Naming_types.TTypedef -> None
+    | Some Naming_types.TClass ->
+      Deferred_decl.raise_if_should_defer ();
+      let (decl, _) = declare_folded_class ctx class_name in
+      Some (Typing_class_types.make_class_t decl)
+  end
+
+let get_class_with_cache ctx class_name decl_cache =
+  Provider_backend.Decl_cache.find_or_add
+    decl_cache
+    ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
+    ~default:(fun () -> get_class_from_decl_store ctx class_name)
+
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -103,12 +124,12 @@ let get_class
        Note that in the case of eager, the class_t is really just a fairly simple
        derivation of the decl_class_type that lives in shmem.
      DECL BACKEND - the class_t is cached in the worker-local 'Cache' heap *)
-  match Provider_context.get_backend ctx with
+  (match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
           Decl_store.((get ()).get_class class_name)
-          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+          |> Option.map ~f:Typing_class_types.make_class_t)
     with
     | None -> Decl_entry.DoesNotExist
     | Some v -> Decl_entry.Found (counter, v, Some ctx)
@@ -120,26 +141,20 @@ let get_class
      * Crucially, we do not use the [Cache] here, which would contain
      * outdated member types once we update its members during
      * pessimisation. *)
-    match Typing_classes_heap.get ctx class_name declare_folded_class with
+    match get_class_from_decl_store ctx class_name with
     | None -> Decl_entry.DoesNotExist
     | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
   | Provider_backend.Shared_memory -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
-          Typing_classes_heap.get ctx class_name declare_folded_class)
+          get_class_from_decl_store ctx class_name)
     with
     | None -> Decl_entry.DoesNotExist
     | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } -> begin
-    match
-      Typing_classes_heap.get_class_with_cache
-        ctx
-        class_name
-        decl_cache
-        declare_folded_class
-    with
+    match get_class_with_cache ctx class_name decl_cache with
     | None -> Decl_entry.DoesNotExist
     | Some cls -> Decl_entry.Found (counter, cls, Some ctx)
   end
@@ -150,11 +165,12 @@ let get_class
             backend
             (Naming_provider.rust_backend_ctx_proxy ctx)
             class_name
-          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+          |> Option.map ~f:Typing_class_types.make_class_t)
     with
     | None -> Decl_entry.DoesNotExist
     | Some v -> Decl_entry.Found (counter, v, Some ctx)
-  end
+  end)
+  |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Typing_classes_heap.make_class_t)
 
 let maybe_pessimise_fun_decl ctx fun_decl =
   if Provider_context.implicit_sdt_for_fun ctx fun_decl then

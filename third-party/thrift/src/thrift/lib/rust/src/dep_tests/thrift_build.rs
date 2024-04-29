@@ -28,7 +28,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("test_deprecated_optional_with_default_is_some_if__types");
     conf.clients_crate("test_deprecated_optional_with_default_is_some_if__clients");
-    conf.services_crate("test_deprecated_optional_with_default_is_some_if__services");
     conf.options("deprecated_optional_with_default_is_some");
     let srcs = &["test_deprecated_optional_with_default_is_some.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");

@@ -29,7 +29,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("hack__types");
     conf.clients_crate("hack__clients");
-    conf.services_crate("hack__services");
     let srcs = &["../../../../../annotation/hack.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

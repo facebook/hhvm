@@ -29,7 +29,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("java__types");
     conf.clients_crate("java__clients");
-    conf.services_crate("java__services");
     let srcs = &["../../../../../annotation/java.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

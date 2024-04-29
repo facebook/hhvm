@@ -46,11 +46,10 @@ namespace compiler {
 namespace rust {
 
 struct rust_codegen_options {
-  // Names that the main crate uses to refer to its dependency on the other
-  // crates.
+  // Crate names used for referring to sibling crates within the same Thrift
+  // library.
   std::string types_crate;
   std::string clients_crate;
-  std::string services_crate;
 
   // Buck target label that identifies the Rust library built from the sources
   // currently being generated.
@@ -620,7 +619,6 @@ class rust_mstch_program : public mstch_program {
             {"program:types?", &rust_mstch_program::rust_has_types},
             {"program:types", &rust_mstch_program::rust_types},
             {"program:clients", &rust_mstch_program::rust_clients},
-            {"program:servers", &rust_mstch_program::rust_servers},
             {"program:structsOrEnums?",
              &rust_mstch_program::rust_structs_or_enums},
             {"program:nonexhaustiveStructs?",
@@ -698,14 +696,6 @@ class rust_mstch_program : public mstch_program {
       clients += "::" + multifile_module_name(program_);
     }
     return clients;
-  }
-
-  mstch::node rust_servers() {
-    auto servers = "::" + options_.services_crate;
-    if (options_.multifile_mode) {
-      servers += "::" + multifile_module_name(program_);
-    }
-    return servers;
   }
 
   mstch::node rust_structs_or_enums() {
@@ -2350,11 +2340,6 @@ void t_mstch_rust_generator::generate_program() {
   if (auto clients_crate_flag = get_option("clients_crate")) {
     options_.clients_crate =
         boost::algorithm::replace_all_copy(*clients_crate_flag, "-", "_");
-  }
-
-  if (auto services_crate_flag = get_option("services_crate")) {
-    options_.services_crate =
-        boost::algorithm::replace_all_copy(*services_crate_flag, "-", "_");
   }
 
   if (auto cratemap_flag = get_option("cratemap")) {

@@ -787,13 +787,54 @@ bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////
 
-using FuncOrCls = Either<const php::Func*, const php::Class*>;
+struct FuncClsUnit {
+  FuncClsUnit() : tagged{Tag::Func, nullptr} {}
+  /* implicit */ FuncClsUnit(const php::Func* f) : tagged{Tag::Func, f} {}
+  /* implicit */ FuncClsUnit(const php::Class* c) : tagged{Tag::Class, c} {}
+  /* implicit */ FuncClsUnit(const php::Unit* u) : tagged{Tag::Unit, u} {}
+  /* implicit */ FuncClsUnit(std::nullptr_t) : tagged{Tag::Func, nullptr} {}
 
-struct FuncOrClsHasher {
-  size_t operator()(FuncOrCls f) const { return f.toOpaque(); }
+  operator bool() const { return (bool)tagged.ptr(); }
+
+  const php::Func* func() const {
+    return tagged.tag() == Tag::Func
+      ? (const php::Func*)tagged.ptr()
+      : nullptr;
+  }
+  const php::Class* cls() const {
+    return tagged.tag() == Tag::Class
+      ? (const php::Class*)tagged.ptr()
+      : nullptr;
+  }
+  const php::Unit* unit() const {
+    return tagged.tag() == Tag::Unit
+      ? (const php::Unit*)tagged.ptr()
+      : nullptr;
+  }
+
+  size_t hash() const { return pointer_hash<const void>{}(tagged.ptr()); }
+
+  bool operator==(FuncClsUnit o) const {
+    // The same pointer will never have different tags, so this is
+    // sufficient.
+    return tagged.ptr() == o.tagged.ptr();
+  }
+  bool operator!=(FuncClsUnit o) const { return !(*this == o); }
+
+private:
+  enum class Tag : uint8_t {
+    Func,
+    Class,
+    Unit
+  };
+  CompactTaggedPtr<const void, Tag> tagged;
 };
 
-std::string show(FuncOrCls);
+struct FuncClsUnitHasher {
+  size_t operator()(FuncClsUnit f) const { return f.hash(); }
+};
+
+std::string show(FuncClsUnit);
 
 //////////////////////////////////////////////////////////////////////
 

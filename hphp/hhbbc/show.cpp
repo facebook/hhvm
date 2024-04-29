@@ -794,11 +794,13 @@ std::string show(const MethRef& m) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(FuncOrCls fc) {
-  if (auto const f = fc.left()) {
+std::string show(FuncClsUnit fc) {
+  if (auto const f = fc.func()) {
     return folly::sformat("func {}", f->name);
-  } else if (auto const c = fc.right()) {
+  } else if (auto const c = fc.cls()) {
     return folly::sformat("class {}", c->name);
+  } else if (auto const u = fc.unit()) {
+    return folly::sformat("unit {}", u->filename);
   } else {
     return "(null)";
   }

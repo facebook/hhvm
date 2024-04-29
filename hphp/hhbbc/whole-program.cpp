@@ -513,10 +513,10 @@ private:
   static bool process(AnalysisIndex& index,
                       AnalysisWorklist& worklist) {
     auto const w = worklist.next();
-    if (auto const c = w.right()) {
+    if (auto const c = w.cls()) {
       auto results = analyze(*c, index);
       for (auto& r : results) update(std::move(r), index);
-    } else if (auto const f = w.left()) {
+    } else if (auto const f = w.func()) {
       update(analyze(*f, index), index);
     } else {
       return false;

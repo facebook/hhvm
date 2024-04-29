@@ -2231,12 +2231,12 @@ private:
 // within the same job. This speeds up convergence by avoiding another
 // whole roundtrip through the scheduler.
 struct AnalysisWorklist {
-  FuncOrCls next();
+  FuncClsUnit next();
 
-  void schedule(FuncOrCls);
+  void schedule(FuncClsUnit);
 private:
-  hphp_fast_set<FuncOrCls, FuncOrClsHasher> in;
-  std::deque<FuncOrCls> list;
+  hphp_fast_set<FuncClsUnit, FuncClsUnitHasher> in;
+  std::deque<FuncClsUnit> list;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2278,6 +2278,8 @@ struct AnalysisIndex {
   const php::Unit& lookup_func_unit(const php::Func&) const;
 
   const php::Unit& lookup_class_unit(const php::Class&) const;
+
+  const php::Unit& lookup_unit(SString) const;
 
   const php::Class* lookup_const_class(const php::Const&) const;
 

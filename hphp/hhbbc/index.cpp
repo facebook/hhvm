@@ -5896,10 +5896,12 @@ const Context& context_for_deps(const AnalysisIndex::IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-FuncOrCls fc_from_context(const Context& ctx) {
+FuncClsUnit fc_from_context(const Context& ctx,
+                            const AnalysisIndex::IndexData& index) {
   if (ctx.cls) return ctx.cls;
-  assertx(ctx.func);
-  return ctx.func;
+  if (ctx.func) return ctx.func;
+  assertx(ctx.unit);
+  return &index.index.lookup_unit(ctx.unit);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5925,7 +5927,7 @@ struct DepTracker {
     if (!index.frozen) return;
     auto const fc = context();
     auto& d = deps[fc];
-    if (!(fc.right() && fc.right()->name->tsame(c.name)) && d.add(c)) {
+    if (!(fc.cls() && fc.cls()->name->tsame(c.name)) && d.add(c)) {
       FTRACE(2, "{} now depends on class {}\n", HHBBC::show(fc), c.name);
     }
     // Class either exists or not and won't change within the job, so
@@ -6050,7 +6052,7 @@ struct DepTracker {
     schedule(folly::get_ptr(constants, &cns));
   }
 
-  AnalysisDeps take(FuncOrCls fc) {
+  AnalysisDeps take(FuncClsUnit fc) {
     auto it = deps.find(fc);
     if (it == end(deps)) return AnalysisDeps{};
     return std::move(it->second);
@@ -6063,7 +6065,7 @@ private:
   // Return appropriate entity to attribute the dependency to. If
   // we're analyzing a function within a class, use the class. If it's
   // a top-level function, use that.
-  FuncOrCls context() const {
+  FuncClsUnit context() const {
     auto const& ctx = context_for_deps(index);
     if (ctx.cls) {
       // If this is a closure, the context is the closure's declaring
@@ -6120,39 +6122,39 @@ private:
     return out;
   }
 
-  using FuncOrClsSet =
-    hphp_fast_set<FuncOrCls, FuncOrClsHasher>;
-  using FuncOrClsToType =
-    hphp_fast_map<FuncOrCls, Type, FuncOrClsHasher>;
+  using FuncClsUnitSet =
+    hphp_fast_set<FuncClsUnit, FuncClsUnitHasher>;
+  using FuncClsUnitToType =
+    hphp_fast_map<FuncClsUnit, Type, FuncClsUnitHasher>;
 
-  void schedule(const FuncOrClsSet* fcs) {
+  void schedule(const FuncClsUnitSet* fcs) {
    if (!fcs || fcs->empty()) return;
-    TinyVector<FuncOrCls, 4> v;
+    TinyVector<FuncClsUnit, 4> v;
     v.insert(begin(*fcs), end(*fcs));
     addToWorklist(v);
   }
 
-  void schedule(const FuncOrClsToType* fcs, Type t) {
+  void schedule(const FuncClsUnitToType* fcs, Type t) {
     assertx(!(t & Type::Meta));
     if (!fcs || fcs->empty()) return;
-    TinyVector<FuncOrCls, 4> v;
+    TinyVector<FuncClsUnit, 4> v;
     for (auto const [fc, t2] : *fcs) {
       if (t & t2) v.emplace_back(fc);
     }
     addToWorklist(v);
   }
 
-  void addToWorklist(TinyVector<FuncOrCls, 4>& fcs) {
+  void addToWorklist(TinyVector<FuncClsUnit, 4>& fcs) {
     if (fcs.empty()) return;
     std::sort(
       fcs.begin(), fcs.end(),
-      [] (FuncOrCls fc1, FuncOrCls fc2) {
-        if (auto const f1 = fc1.left()) {
-          auto const f2 = fc2.left();
+      [] (FuncClsUnit fc1, FuncClsUnit fc2) {
+        if (auto const f1 = fc1.func()) {
+          auto const f2 = fc2.func();
           return !f2 || string_data_lt_func{}(f1->name, f2->name);
         }
-        auto const c1 = fc1.right();
-        auto const c2 = fc2.right();
+        auto const c1 = fc1.cls();
+        auto const c2 = fc2.cls();
         return c2 && string_data_lt_type{}(c1->name, c2->name);
       }
     );
@@ -6162,11 +6164,11 @@ private:
 
   const AnalysisIndex::IndexData& index;
   AnalysisChangeSet changes;
-  hphp_fast_map<FuncOrCls, AnalysisDeps, FuncOrClsHasher> deps;
+  hphp_fast_map<FuncClsUnit, AnalysisDeps, FuncClsUnitHasher> deps;
 
-  hphp_fast_map<const php::Func*, FuncOrClsToType> funcs;
-  hphp_fast_map<const php::Const*, FuncOrClsSet> clsConstants;
-  hphp_fast_map<const php::Constant*, FuncOrClsSet> constants;
+  hphp_fast_map<const php::Func*, FuncClsUnitToType> funcs;
+  hphp_fast_map<const php::Const*, FuncClsUnitSet> clsConstants;
+  hphp_fast_map<const php::Constant*, FuncClsUnitSet> constants;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -6297,8 +6299,8 @@ const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
 void ClassGraph::storeAuxs(AnalysisIndex::IndexData& i, bool children) const {
   // Get the current context and store this ClassGraph on it's aux
   // list.
-  auto const fc = fc_from_context(context_for_deps(i));
-  if (auto const c = fc.right()) {
+  auto const fc = fc_from_context(context_for_deps(i), i);
+  if (auto const c = fc.cls()) {
     if (!c->cinfo || c->cinfo == cinfo2()) return;
     if (children) {
       if (!c->cinfo->auxClassGraphs.withChildren.emplace(*this).second) return;
@@ -6312,7 +6314,7 @@ void ClassGraph::storeAuxs(AnalysisIndex::IndexData& i, bool children) const {
       c->name, name(),
       children ? " (with children)" : ""
     );
-  } else if (auto const f = fc.left()) {
+  } else if (auto const f = fc.func()) {
     auto& fi = func_info(i, *f);
     if (!fi.auxClassGraphs) {
       fi.auxClassGraphs = std::make_unique<AuxClassGraphs>();
@@ -19850,16 +19852,16 @@ void Index::thaw() {
 
 //////////////////////////////////////////////////////////////////////
 
-FuncOrCls AnalysisWorklist::next() {
-  if (list.empty()) return FuncOrCls{};
+FuncClsUnit AnalysisWorklist::next() {
+  if (list.empty()) return FuncClsUnit{};
   auto n = list.front();
   in.erase(n);
   list.pop_front();
   return n;
 }
 
-void AnalysisWorklist::schedule(FuncOrCls fc) {
-  assertx(fc.left() || !is_closure(*fc.right()));
+void AnalysisWorklist::schedule(FuncClsUnit fc) {
+  assertx(IMPLIES(fc.cls(), !is_closure(*fc.cls())));
   if (!in.emplace(fc).second) return;
   ITRACE(2, "scheduling {} onto worklist\n", show(fc));
   list.emplace_back(fc);
@@ -21252,6 +21254,16 @@ const php::Unit& AnalysisIndex::lookup_class_unit(const php::Class& c) const {
   return *it->second;
 }
 
+const php::Unit& AnalysisIndex::lookup_unit(SString n) const {
+  auto const it = m_data->units.find(n);
+  always_assert_flog(
+    it != end(m_data->units),
+    "Attempting to access missing unit {}",
+    n
+  );
+  return *it->second;
+}
+
 const php::Class*
 AnalysisIndex::lookup_const_class(const php::Const& cns) const {
   m_data->deps->add(AnalysisDeps::Class { cns.cls });
@@ -22401,7 +22413,7 @@ void AnalysisIndex::update_bytecode(FuncAnalysisResult& fa) {
       fa.ctx.func->name == s_86cinit.get()) {
     ITRACE(2, "Updated bytecode for {} in a way that requires re-analysis\n",
            func_fullname(*fa.ctx.func));
-    m_data->worklist.schedule(fc_from_context(fa.ctx));
+    m_data->worklist.schedule(fc_from_context(fa.ctx, *m_data));
   }
 
   m_data->deps->update(*fa.ctx.func, AnalysisDeps::Type::Bytecode);

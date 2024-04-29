@@ -39,6 +39,7 @@ class Cpp2ConnContext;
 class Cpp2RequestContext;
 class AdaptiveConcurrencyController;
 class CPUConcurrencyController;
+class IMetricCollector;
 class ResourcePoolSet;
 class TProcessorEventHandler;
 
@@ -76,6 +77,9 @@ class ServerConfigs {
 
   // @see ThriftServer::getObserver function.
   virtual server::TServerObserver* getObserver() const = 0;
+
+  // @see ThriftServer::getMetricCollector function.
+  virtual IMetricCollector* getMetricCollector() const = 0;
 
   // @see ThriftServer::getAdaptiveConcurrencyController function.
   virtual AdaptiveConcurrencyController& getAdaptiveConcurrencyController() = 0;

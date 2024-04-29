@@ -285,7 +285,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
 
 } // namespace apache::thrift::detail
 
-class RequestInstrumentationTest : public testing::Test {
+class RequestInstrumentationTest : public ::testing::Test {
  protected:
   RequestInstrumentationTest() {}
 
@@ -775,7 +775,7 @@ TEST_P(RecentRequestsTest, Exclude) {
 }
 
 INSTANTIATE_TEST_CASE_P(
-    RecentRequestsTest, RecentRequestsTest, testing::Values(true, false));
+    RecentRequestsTest, RecentRequestsTest, ::testing::Values(true, false));
 
 class RequestInstrumentationTestWithFinishedDebugPayload
     : public RequestInstrumentationTest {
@@ -843,7 +843,7 @@ TEST_F(
   std::move(req3).get();
 }
 
-class ServerInstrumentationTest : public testing::Test {};
+class ServerInstrumentationTest : public ::testing::Test {};
 
 TEST_F(ServerInstrumentationTest, simpleServerTest) {
   EXPECT_EQ(
@@ -930,7 +930,7 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
         ASSERT_TRUE(started.try_wait_for(2s));
         // Server shuts down when we exit the scope.
       }),
-      testing::ExitedWithCode(kExitCode),
+      ::testing::ExitedWithCode(kExitCode),
       "");
 }
 
@@ -973,12 +973,13 @@ TEST_P(RequestInstrumentationTestP, FinishedRequests) {
 INSTANTIATE_TEST_CASE_P(
     FinishedRequestsSequence,
     RequestInstrumentationTestP,
-    testing::Combine(
-        testing::Values(0, 3, 20),
-        testing::Values(3, 10),
-        testing::Values(true, false)));
+    ::testing::Combine(
+        ::testing::Values(0, 3, 20),
+        ::testing::Values(3, 10),
+        ::testing::Values(true, false)));
 
-class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
+class RegistryTests
+    : public ::testing::TestWithParam<std::tuple<size_t, bool>> {
  protected:
   // test params
   int finishedMax_;
@@ -1078,8 +1079,8 @@ TEST_P(RegistryTests, Destruction) {
 INSTANTIATE_TEST_CASE_P(
     RegistryTestsSequence,
     RegistryTests,
-    testing::Combine(
-        testing::Values(0, 1, 2, 10), testing::Values(true, false)));
+    ::testing::Combine(
+        ::testing::Values(0, 1, 2, 10), ::testing::Values(true, false)));
 
 TEST(RegistryTests, RootId) {
   RequestsRegistry registry(0, 0, 0);
@@ -1148,7 +1149,7 @@ TEST_P(MaxRequestsTest, Bypass) {
 }
 
 INSTANTIATE_TEST_CASE_P(
-    MaxRequestsTestsSequence, MaxRequestsTest, testing::Values(true, false));
+    MaxRequestsTestsSequence, MaxRequestsTest, ::testing::Values(true, false));
 
 class TimestampsTest
     : public RequestInstrumentationTest,
@@ -1249,5 +1250,5 @@ TEST_P(TimestampsTest, QueueTimeout) {
 INSTANTIATE_TEST_CASE_P(
     TimestampsTestSequence,
     TimestampsTest,
-    testing::Combine(
-        testing::Values(true, false), testing::Values(true, false)));
+    ::testing::Combine(
+        ::testing::Values(true, false), ::testing::Values(true, false)));

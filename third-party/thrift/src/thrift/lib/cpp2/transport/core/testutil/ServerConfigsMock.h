@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
+#include <thrift/lib/cpp2/server/metrics/tests/Utils.h>
 #include <thrift/lib/cpp2/transport/core/testutil/FakeServerObserver.h>
 
 namespace apache {
@@ -54,6 +55,10 @@ class ServerConfigsMock : public ServerConfigs {
 
   server::TServerObserver* getObserver() const override {
     return observer_.get();
+  }
+
+  IMetricCollector* getMetricCollector() const override {
+    return metricCollector_.get();
   }
 
   size_t getNumIOWorkerThreads() const override { return numIOWorkerThreads_; }
@@ -159,6 +164,8 @@ class ServerConfigsMock : public ServerConfigs {
   std::chrono::milliseconds taskTimeout_{std::chrono::milliseconds(500)};
   std::shared_ptr<server::TServerObserver> observer_{
       std::make_shared<FakeServerObserver>()};
+  std::shared_ptr<IMetricCollector> metricCollector_{
+      std::make_shared<testing::MockMetricCollector>()};
   size_t numIOWorkerThreads_{10};
   std::chrono::milliseconds streamExpireTime_{std::chrono::minutes(1)};
 

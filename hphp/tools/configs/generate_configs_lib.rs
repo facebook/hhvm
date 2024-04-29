@@ -944,6 +944,13 @@ pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
         let section_shortname = section.shortname();
         let lower_section_shortname = section_shortname.to_lowercase();
 
+        let has_hackc_hhbc_flags = section.configs.iter().any(|c| {
+            if let Some(hackc_flag) = &c.features.hackc_flag {
+                return hackc_flag.type_ == HackcFlagType::HHBC;
+            }
+            false
+        });
+
         let has_repo_option_flags = section
             .configs
             .iter()
@@ -988,6 +995,10 @@ pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                 "  static void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);"
                     .to_string(),
             );
+        }
+
+        if has_hackc_hhbc_flags {
+            public_methods.push("  static void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& flags);".to_string());
         }
 
         let has_compiler_option = section
@@ -1044,6 +1055,10 @@ struct IniSettingMap;
 struct RepoGlobalData;
 struct RepoOptionsFlags;
 
+namespace hackc {{
+struct HhbcFlags;
+}}
+
 namespace Cfg {{
 
 struct {}Loader {{
@@ -1079,8 +1094,10 @@ private:
         let mut repo_options_flags_calls = vec![];
         let mut repo_options_flags_from_config_calls = vec![];
         let mut repo_options_flags_for_systemlib_calls = vec![];
+        let mut init_hhbc_flags_calls = vec![];
         for config in section.configs.iter() {
             let shortname = config.shortname(&section.name);
+            let snake_shortname = shortname.from_case(Case::Camel).to_case(Case::Snake);
             let default_value = match &config.default_value {
                 Some(v) => v.string(&section_names),
                 None => format!("{}Default()", shortname),
@@ -1109,6 +1126,14 @@ private:
                         panic!("repooptionflags need a constant default value");
                     })
                 ));
+                if let Some(hackc_flag) = &config.features.hackc_flag {
+                    if hackc_flag.type_ == HackcFlagType::HHBC {
+                        init_hhbc_flags_calls.push(format!(
+                            r#"  flags.{} = repo_flags.{};"#,
+                            snake_shortname, shortname,
+                        ));
+                    }
+                }
                 debug_calls.push(format!(
                     r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = Repo Option Flag so UNKNOWN!\n");"#,
                     section_shortname, shortname,
@@ -1165,12 +1190,39 @@ private:
                         section_shortname, shortname, section_shortname, shortname
                     ));
                 }
+
+                if let Some(hackc_flag) = &config.features.hackc_flag {
+                    if hackc_flag.type_ == HackcFlagType::HHBC {
+                        init_hhbc_flags_calls.push(format!(
+                            r#"  flags.{} = Cfg::{}::{};"#,
+                            snake_shortname, section_shortname, shortname,
+                        ));
+                    }
+                }
             }
         }
 
-        let mut repo_options_methods = String::new();
+        let mut methods = vec![
+            format!(
+                r#"void {}Loader::Load(const IniSetting::Map& ini, const Hdf& config) {{
+{}
+}}"#,
+                section_shortname,
+                bind_calls.join("\n"),
+            ),
+            format!(
+                r#"std::string {}Loader::Debug() {{
+    std::string out;
+{}
+    return out;
+}}"#,
+                section_shortname,
+                debug_calls.join("\n"),
+            ),
+        ];
+
         if has_repo_option_flags {
-            repo_options_methods = format!(
+            methods.push(format!(
                 r#"void {}Loader::GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSetting::Map& ini, const Hdf& config) {{
 {}
 }}
@@ -1181,47 +1233,48 @@ void {}Loader::GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf&
 
 void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 {}
-}}
-
-"#,
+}}"#,
                 section_shortname,
                 repo_options_flags_calls.join("\n"),
                 section_shortname,
                 repo_options_flags_from_config_calls.join("\n"),
                 section_shortname,
                 repo_options_flags_for_systemlib_calls.join("\n"),
-            );
+                            ));
         }
 
-        let mut compiler_options_method = String::new();
+        if has_hackc_hhbc_flags {
+            methods.push(format!(
+                                r#"void {}Loader::InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& flags) {{
+{}
+}}"#,
+                                section_shortname,
+                                init_hhbc_flags_calls.join("\n"),
+                            ));
+        }
+
         if has_compiler_option {
-            compiler_options_method = format!(
+            methods.push(format!(
                 r#"void {}Loader::LoadForCompiler(const IniSettingMap& ini, const Hdf& config) {{
 {}
-}}
-
-"#,
+}}"#,
                 section_shortname,
                 compiler_option_calls.join("\n"),
-            );
+            ));
         }
 
-        let mut global_data_load_method = String::new();
         if has_global_data_load {
-            global_data_load_method = format!(
+            methods.push(format!(
                 r#"void {}Loader::LoadFromGlobalData(const RepoGlobalData& gd) {{
 {}
-}}
-
-"#,
+}}"#,
                 section_shortname,
                 global_data_load_calls.join("\n"),
-            );
+            ));
         }
 
-        let mut global_data_load_onlyhhbbc_method = String::new();
         if has_global_data_onlyhhbbc_load {
-            global_data_load_onlyhhbbc_method = format!(
+            methods.push(format!(
                 r#"void {}Loader::LoadFromGlobalDataOnlyHHBBC(const RepoGlobalData& gd) {{
 {}
 }}
@@ -1229,25 +1282,23 @@ void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 "#,
                 section_shortname,
                 global_data_load_onlyhhbbc_calls.join("\n"),
-            );
+            ));
         }
 
-        let mut global_data_store_method = String::new();
         if has_global_data_store {
-            global_data_store_method = format!(
+            methods.push(format!(
                 r#"void {}Loader::StoreToGlobalData(RepoGlobalData& gd) {{
 {}
-}}
-
-"#,
+}}"#,
                 section_shortname,
                 global_data_store_calls.join("\n"),
-            );
+            ));
         }
 
         let cpp_content = format!(
             r#"#include "hphp/runtime/base/configs/{}-loader.h"
 
+#include "hphp/hack/src/hackc/compile/options_gen.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -1259,29 +1310,13 @@ void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 
 namespace HPHP::Cfg {{
 
-void {}Loader::Load(const IniSetting::Map& ini, const Hdf& config) {{
 {}
-}}
 
-std::string {}Loader::Debug() {{
-  std::string out;
-{}
-  return out;
-}}
-
-{}{}{}{}{}}} // namespace HPHP::Cfg
+}} // namespace HPHP::Cfg
 "#,
             lower_section_shortname,
             lower_section_shortname,
-            section_shortname,
-            bind_calls.join("\n"),
-            section_shortname,
-            debug_calls.join("\n"),
-            &repo_options_methods,
-            &compiler_options_method,
-            &global_data_load_method,
-            &global_data_load_onlyhhbbc_method,
-            &global_data_store_method,
+            methods.join("\n\n"),
         );
 
         let mut cpp_output_file = output_dir.clone();
@@ -1379,6 +1414,7 @@ std::string {}Loader::Debug() {{
     let mut repo_options_flags_calls = vec![];
     let mut repo_options_flags_from_config_calls = vec![];
     let mut repo_options_flags_for_systemlib_calls = vec![];
+    let mut hackc_hhbc_flags_calls = vec![];
 
     for section in sections.iter() {
         let section_shortname = section.shortname();
@@ -1455,6 +1491,18 @@ std::string {}Loader::Debug() {{
                 section_shortname,
             ));
         }
+
+        if section.configs.iter().any(|c| {
+            if let Some(hackc_flag) = &c.features.hackc_flag {
+                return hackc_flag.type_ == HackcFlagType::HHBC;
+            }
+            false
+        }) {
+            hackc_hhbc_flags_calls.push(format!(
+                "  Cfg::{}Loader::InitHackcHHBCFlags(repo_flags, flags);",
+                section_shortname,
+            ));
+        }
     }
 
     let configs_load_content = format!(
@@ -1467,6 +1515,10 @@ namespace HPHP {{
 struct IniSettingMap;
 struct Hdf;
 struct RepoOptionsFlags;
+
+namespace hackc {{
+struct HhbcFlags;
+}}
 
 namespace Cfg {{
 
@@ -1502,6 +1554,10 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 {}
 }}
 
+void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& flags) {{
+{}
+}}
+
 }} // namespace Cfg
 
 }} // namespace HPHP
@@ -1515,6 +1571,7 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
         repo_options_flags_calls.join("\n"),
         repo_options_flags_from_config_calls.join("\n"),
         repo_options_flags_for_systemlib_calls.join("\n"),
+        hackc_hhbc_flags_calls.join("\n"),
     );
     let mut configs_load_file = output_dir.clone();
     configs_load_file.push("configs-generated.cpp");

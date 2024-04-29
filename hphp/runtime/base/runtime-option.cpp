@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/hack/src/hackc/compile/options_gen.h"
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -305,15 +306,7 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
 }
 
 void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
-  flags.ltr_assign = LTRAssign;
-  flags.uvs = UVS;
-  flags.optimize_reified_param_checks = OptimizeReifiedParamChecks;
-  flags.stress_shallow_decl_deps = StressShallowDeclDeps;
-  flags.stress_folded_decl_deps = StressFoldedDeclDeps;
-  flags.optimize_param_lifetimes = OptimizeParamLifetimes;
-  flags.optimize_local_lifetimes = OptimizeLocalLifetimes;
-  flags.optimize_local_iterators = OptimizeLocalIterators;
-  flags.optimize_is_type_checks = OptimizeIsTypeChecks;
+  Cfg::InitHackcHHBCFlags(*this, flags);
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {

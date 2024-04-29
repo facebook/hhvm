@@ -124,13 +124,6 @@ CompilerResult hackc_compile(
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .hhbc_flags = hackc::HhbcFlags {
-      .log_extern_compiler_perf = Cfg::Eval::LogExternCompilerPerf,
-      .enable_intrinsics_extension = Cfg::Eval::EnableIntrinsicsExtension,
-      .emit_cls_meth_pointers = Cfg::Eval::EmitClsMethPointers,
-      .fold_lazy_class_keys = Cfg::Eval::FoldLazyClassKeys,
-      .emit_native_enum_class_labels = Cfg::Eval::EmitNativeEnumClassLabels,
-    },
     .parser_flags = hackc::ParserFlags {
       .enable_class_level_where_clauses = Cfg::HackLang::EnableClassLevelWhereClauses,
     },

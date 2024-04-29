@@ -1655,6 +1655,28 @@ TEST(StructPatchTest, AssignOnly) {
     EXPECT_NE(
         output.find("Merging dynamic patch is not implemented"), output.npos);
   }
+  {
+    auto patch = genPatch();
+    EXPECT_FALSE(
+        apache::thrift::op::isEmpty<type::infer_tag<AssignOnlyPatch>>(patch));
+  }
+}
+
+TEST(PatchDiscrepancy, StructWithAssignOnlyField) {
+  StructWithAssignOnlyField obj;
+  // Create a patch with patch prior. This is possible if the patch is created
+  // from dynamic patch.
+  protocol::Object dynPatch;
+  dynPatch[static_cast<FieldId>(op::PatchOp::PatchPrior)]
+      .emplace_object()[FieldId{1}]
+      .emplace_object()[static_cast<FieldId>(op::PatchOp::PatchPrior)]
+      .emplace_object()[FieldId{1}]
+      .emplace_object()[static_cast<FieldId>(op::PatchOp::Assign)]
+      .emplace_i32(42);
+  auto patch = apache::thrift::protocol::fromObjectStruct<
+      apache::thrift::type::infer_tag<StructWithAssignOnlyFieldPatch>>(
+      dynPatch);
+  EXPECT_FALSE(patch.empty());
 }
 
 TEST(StructPatchTest, BinaryInUnion) {

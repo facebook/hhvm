@@ -133,6 +133,10 @@ struct AssignOnly {
   2: optional i32 optField;
 }
 
+struct StructWithAssignOnlyField {
+  1: AssignOnly field;
+}
+
 struct Def {
   1: i32 field;
 }

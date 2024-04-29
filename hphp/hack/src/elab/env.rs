@@ -57,7 +57,7 @@ impl Flags {
         );
         flags.set(Self::EVERYTHING_SDT, tco.tco_everything_sdt);
         flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
-        flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
+        flags.set(Self::CONST_STATIC_PROPS, tco.po_const_static_props);
         flags.set(Self::ERROR_PHP_LAMBDAS, tco.tco_error_php_lambdas);
 
         flags.set(Self::IS_HHI, pso.is_hhi);

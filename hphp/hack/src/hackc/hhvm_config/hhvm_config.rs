@@ -47,7 +47,7 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
 
     // Only hdf version found in use
     init(
-        &mut flags.tco_const_static_props,
+        &mut flags.po_const_static_props,
         "Hack.Lang.ConstStaticProps",
     )?;
 

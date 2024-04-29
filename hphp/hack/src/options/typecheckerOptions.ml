@@ -147,7 +147,7 @@ let disallow_unresolved_type_variables t =
 
 let custom_error_config t = t.GlobalOptions.tco_custom_error_config
 
-let const_static_props t = t.GlobalOptions.tco_const_static_props
+let const_static_props t = t.GlobalOptions.po_const_static_props
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
 

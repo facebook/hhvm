@@ -36,7 +36,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
 
     let po_disable_lval_as_an_expression = bool::from_ocaml(*ocaml_opts.add(3)).unwrap();
     let po_disable_legacy_soft_typehints = bool::from_ocaml(*ocaml_opts.add(4)).unwrap();
-    let tco_const_static_props = bool::from_ocaml(*ocaml_opts.add(5)).unwrap();
+    let po_const_static_props = bool::from_ocaml(*ocaml_opts.add(5)).unwrap();
     let po_disable_legacy_attribute_syntax = bool::from_ocaml(*ocaml_opts.add(6)).unwrap();
     let po_const_default_func_args = bool::from_ocaml(*ocaml_opts.add(7)).unwrap();
     let po_abstract_static_props = bool::from_ocaml(*ocaml_opts.add(8)).unwrap();
@@ -54,7 +54,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
-    parser_options.tco_const_static_props = tco_const_static_props;
+    parser_options.po_const_static_props = po_const_static_props;
     parser_options.po_disable_legacy_attribute_syntax = po_disable_legacy_attribute_syntax;
     parser_options.po_const_default_func_args = po_const_default_func_args;
     parser_options.po_abstract_static_props = po_abstract_static_props;

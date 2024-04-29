@@ -888,7 +888,7 @@ let parse_options () =
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
-      ~tco_const_static_props:!const_static_props
+      ~po_const_static_props:!const_static_props
       ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
       ~tco_const_attribute:!const_attribute
       ~po_const_default_func_args:!const_default_func_args

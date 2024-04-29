@@ -264,7 +264,7 @@ impl HhConfig {
             po_enable_class_level_where_clauses: default.po_enable_class_level_where_clauses,
             po_disable_legacy_soft_typehints: default.po_disable_legacy_soft_typehints,
             po_allowed_decl_fixme_codes: hhconfig.get_int_set_or("allowed_decl_fixme_codes", default.po_allowed_decl_fixme_codes)?,
-            tco_const_static_props: default.tco_const_static_props,
+            po_const_static_props: default.po_const_static_props,
             po_disable_legacy_attribute_syntax: default.po_disable_legacy_attribute_syntax,
             tco_const_attribute: default.tco_const_attribute,
             po_const_default_func_args: hhconfig.get_bool_or("const_default_func_args", default.po_const_default_func_args)?,

@@ -116,7 +116,7 @@ type t = {
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   po_allowed_decl_fixme_codes: ISet.t;
-  tco_const_static_props: bool;
+  po_const_static_props: bool;
   po_disable_legacy_attribute_syntax: bool;
   tco_const_attribute: bool;
   po_const_default_func_args: bool;
@@ -249,7 +249,7 @@ let default =
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
     po_allowed_decl_fixme_codes = ISet.empty;
-    tco_const_static_props = false;
+    po_const_static_props = false;
     po_disable_legacy_attribute_syntax = false;
     tco_const_attribute = false;
     po_const_default_func_args = false;
@@ -380,7 +380,7 @@ let set
     ?po_enable_class_level_where_clauses
     ?po_disable_legacy_soft_typehints
     ?po_allowed_decl_fixme_codes
-    ?tco_const_static_props
+    ?po_const_static_props
     ?po_disable_legacy_attribute_syntax
     ?tco_const_attribute
     ?po_const_default_func_args
@@ -585,8 +585,8 @@ let set
         options.po_disable_legacy_soft_typehints;
     po_allowed_decl_fixme_codes =
       setting po_allowed_decl_fixme_codes options.po_allowed_decl_fixme_codes;
-    tco_const_static_props =
-      setting tco_const_static_props options.tco_const_static_props;
+    po_const_static_props =
+      setting po_const_static_props options.po_const_static_props;
     po_disable_legacy_attribute_syntax =
       setting
         po_disable_legacy_attribute_syntax

@@ -558,7 +558,7 @@ impl ffi::NativeEnv {
                     po_abstract_static_props: self.parser_flags.abstract_static_props,
                     po_allow_unstable_features: self.parser_flags.allow_unstable_features,
                     po_const_default_func_args: self.parser_flags.const_default_func_args,
-                    tco_const_static_props: self.parser_flags.const_static_props,
+                    po_const_static_props: self.parser_flags.const_static_props,
                     po_disable_lval_as_an_expression: self
                         .parser_flags
                         .disable_lval_as_an_expression,

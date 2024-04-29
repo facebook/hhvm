@@ -66,10 +66,10 @@ let with_disable_legacy_attribute_syntax po b =
 
 let disallow_silence po = po.GlobalOptions.po_disallow_silence
 
-let const_static_props po = po.GlobalOptions.tco_const_static_props
+let const_static_props po = po.GlobalOptions.po_const_static_props
 
 let with_const_static_props po b =
-  { po with GlobalOptions.tco_const_static_props = b }
+  { po with GlobalOptions.po_const_static_props = b }
 
 let abstract_static_props po = po.GlobalOptions.po_abstract_static_props
 
@@ -170,7 +170,7 @@ let make
       po_const_default_func_args = const_default_func_args;
       po_const_default_lambda_args = const_default_lambda_args;
       po_disallow_silence = disallow_silence;
-      tco_const_static_props = const_static_props;
+      po_const_static_props = const_static_props;
       po_abstract_static_props = abstract_static_props;
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;

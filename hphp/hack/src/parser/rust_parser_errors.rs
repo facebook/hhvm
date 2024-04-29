@@ -4866,7 +4866,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             })
         };
         if let PropertyDeclaration(x) = &node.children {
-            if self.env.parser_options.tco_const_static_props && has_modifier_static(node) {
+            if self.env.parser_options.po_const_static_props && has_modifier_static(node) {
                 if self.env.parser_options.po_abstract_static_props && has_modifier_abstract(node) {
                     check_decls(
                         self,

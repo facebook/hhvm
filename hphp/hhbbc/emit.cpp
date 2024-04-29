@@ -1216,13 +1216,13 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
   auto const te = ue.newTypeAliasEmitter(alias.name->toCppString());
 
   te->init(
-      std::get<0>(alias.srcInfo.loc),
-      std::get<1>(alias.srcInfo.loc),
-      alias.attrs,
-      alias.value,
-      alias.kind,
-      alias.typeStructure,
-      alias.resolvedTypeStructure
+    std::get<0>(alias.srcInfo.loc),
+    std::get<1>(alias.srcInfo.loc),
+    alias.attrs,
+    alias.value,
+    alias.kind,
+    Array::attach(const_cast<ArrayData*>(alias.typeStructure)),
+    Array::attach(const_cast<ArrayData*>(alias.resolvedTypeStructure))
   );
   te->setUserAttributes(alias.userAttrs);
 }

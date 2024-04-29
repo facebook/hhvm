@@ -43,6 +43,10 @@ struct TypeStructureResolution {
              // the type-structure can be statically pre-resolved,
              // this will be a static array.
   bool mightFail; // Whether the resolution can possibly fail
+  bool contextSensitive{false}; // If the resolution involved context
+                                // sensitive information. If so, only
+                                // the declaring class can safely use
+                                // the resolved type.
 
   // If the resolution results in a static array with no possibility
   // of failure, return it.
@@ -58,6 +62,7 @@ struct TypeStructureResolution {
   TypeStructureResolution& operator|=(const TypeStructureResolution& o) {
     type |= o.type;
     mightFail |= o.mightFail;
+    contextSensitive |= o.contextSensitive;
     return *this;
   }
 };
@@ -73,6 +78,14 @@ TypeStructureResolution resolve_type_structure(const IIndex&,
 TypeStructureResolution resolve_type_structure(const IIndex&,
                                                const CollectedInfo*,
                                                const php::TypeAlias&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the type-structure represents a class or an unresolved type,
+ * retrieve the associated name of the class.
+ */
+SString type_structure_name(SArray);
 
 //////////////////////////////////////////////////////////////////////
 

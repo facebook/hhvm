@@ -978,7 +978,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         cconst.kind(),
         php::Const::Invariance::None,
         cconst.isAbstract(),
-        cconst.isFromTrait()
+        cconst.isFromTrait(),
+        false
       }
     );
   }
@@ -1002,6 +1003,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
             nullptr,
             ConstModifiers::Kind::Value,
             php::Const::Invariance::None,
+            false,
             false,
             false
           }
@@ -1092,13 +1094,14 @@ std::unique_ptr<php::Module> parse_module(const Module& m) {
 std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   FTRACE(2, "  type alias: {}\n", te.name()->data());
 
-  auto ts = te.typeStructure();
-  if (Cfg::Eval::EmitBespokeTypeStructures) {
-    if (!ts.isNull() && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
-      auto const newTs = bespoke::TypeStructure::MakeFromVanillaStatic(ts.get(), true);
-      ts = ArrNR{newTs};
-    }
-  }
+  auto const ts = [&] () -> SArray {
+    auto const a = te.typeStructure();
+    if (a.isNull()) return nullptr;
+    assertx(a->isStatic());
+    if (!Cfg::Eval::EmitBespokeTypeStructures) return a.get();
+    if (!bespoke::TypeStructure::isValidTypeStructure(a.get())) return a.get();
+    return bespoke::TypeStructure::MakeFromVanillaStatic(a.get(), true);
+  }();
 
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     php::SrcInfo { te.getLocation() },
@@ -1108,7 +1111,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     te.kind(),
     te.userAttributes(),
     ts,
-    Array{}
+    nullptr
   });
 }
 

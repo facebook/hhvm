@@ -98,7 +98,7 @@ int trace_bump_for(const php::Class* cls,
   return trace_bump_for(cls ? cls->name : nullptr,
                         func ? func->name : nullptr,
                         unit);
-  }
+}
 
 int trace_bump_for(const Context& ctx) {
   auto const unit = [&] () -> SString {

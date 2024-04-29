@@ -536,6 +536,17 @@ struct Const {
   Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
+  /*
+   * Whether resolvedTypeStructure incorporates context sensitive
+   * types. If true, the resolvedTypeStructure cannot be safely used
+   * by classes other than the one which defined it.
+   */
+  bool contextInsensitive : 1;
+  /*
+   * Whether resolvedTypeStructure was determined in the current
+   * worker.
+   */
+  bool resolvedLocally : 1 = false;
 
   template <typename SerDe> void serde(SerDe&);
 };
@@ -710,8 +721,13 @@ struct TypeAlias {
   TypeConstraint value;
   AliasKind kind;
   UserAttributeMap userAttrs;
-  Array typeStructure{ArrayData::CreateDict()};
-  Array resolvedTypeStructure;
+  SArray typeStructure{nullptr};
+  SArray resolvedTypeStructure{nullptr};
+  /*
+   * Whether resolvedTypeStructure was determined in the current
+   * worker.
+   */
+  bool resolvedLocally{false};
 
   template <typename SerDe> void serde(SerDe&);
 };

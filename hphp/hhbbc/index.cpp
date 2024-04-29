@@ -17446,7 +17446,7 @@ void Index::preresolve_type_structures() {
     [&] (const std::unique_ptr<php::Unit>& unit) {
       CompactVector<TAUpdate> updates;
       for (auto const& typeAlias : unit->typeAliases) {
-        assertx(typeAlias->resolvedTypeStructure.isNull());
+        assertx(!typeAlias->resolvedTypeStructure);
         if (auto const ts = resolve_type_structure(
               IndexAdaptor { *this },
               nullptr,
@@ -17467,8 +17467,7 @@ void Index::preresolve_type_structures() {
         assertx(u.ts->isStatic());
         assertx(u.ts->isDictType());
         assertx(!u.ts->empty());
-        u.typeAlias->resolvedTypeStructure =
-          Array::attach(const_cast<ArrayData*>(u.ts));
+        u.typeAlias->resolvedTypeStructure = u.ts;
       }
     }
   );

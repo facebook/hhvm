@@ -46,6 +46,8 @@ namespace TS = TypeStructure;
 
 namespace {
 
+TRACE_SET_MOD(hhbbc_index);
+
 // Whether the kind represents a type-structure which is inherently
 // resolved. We don't need to look at those at all.
 bool kind_is_resolved(TS::Kind kind) {
@@ -92,7 +94,7 @@ bool kind_is_resolved(TS::Kind kind) {
   always_assert(false);
 }
 
-const StaticString& keyForAliasKind(AliasKind kind) {
+const StaticString& key_for_alias_kind(AliasKind kind) {
   switch (kind) {
     case AliasKind::TypeAlias: return s_alias;
     case AliasKind::CaseType: return s_case_type;
@@ -101,7 +103,7 @@ const StaticString& keyForAliasKind(AliasKind kind) {
 
 using Resolution = TypeStructureResolution;
 
-Resolution&& maybeMakeBespoke(Resolution&& r) {
+Resolution&& maybe_make_bespoke(Resolution&& r) {
   // convert type structure into bespoke versions if possible
   if (!Cfg::Eval::EmitBespokeTypeStructures) return std::move(r);
 
@@ -109,7 +111,8 @@ Resolution&& maybeMakeBespoke(Resolution&& r) {
     auto const ad = val(*t).parr;
     if (!bespoke::TypeStructure::isValidTypeStructure(ad)) return std::move(r);
 
-    if (auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad, false)) {
+    if (auto const ts =
+        bespoke::TypeStructure::MakeFromVanillaStatic(ad, false)) {
       r.type = dict_val(ts);
     }
   }
@@ -185,6 +188,7 @@ struct Builder {
     assertx(!s.second);
     r.type = std::move(s.first);
     r.mightFail |= o.mightFail;
+    r.contextSensitive |= o.contextSensitive;
     return *this;
   }
 
@@ -208,6 +212,7 @@ struct Builder {
     assertx(!s.second);
     r.type = std::move(s.first);
     r.mightFail |= o.mightFail;
+    r.contextSensitive |= o.contextSensitive;
     return *this;
   }
 
@@ -226,6 +231,11 @@ struct Builder {
     return set(key.get(), v);
   }
 
+  Builder& set(const StaticString& key, SString v) {
+    assertx(v->isStatic());
+    return set(key.get(), make_tv<KindOfString>(const_cast<StringData*>(v)));
+  }
+
   Builder& append(const Resolution& o) {
     assertx(IMPLIES(r.type.is(BBottom), r.mightFail));
     assertx(IMPLIES(o.type.is(BBottom), o.mightFail));
@@ -241,6 +251,12 @@ struct Builder {
     assertx(!a.second);
     r.type = std::move(a.first);
     r.mightFail |= o.mightFail;
+    r.contextSensitive |= o.contextSensitive;
+    return *this;
+  }
+
+  Builder& usedThis(bool used = true) {
+    if (used) r.contextSensitive = true;
     return *this;
   }
 
@@ -253,8 +269,7 @@ struct Builder {
   Resolution&& finishTS() {
     assertx(IMPLIES(r.type.is(BBottom), r.mightFail));
     assertx(r.type.subtypeOf(BDict));
-
-    return maybeMakeBespoke(std::move(r));
+    return maybe_make_bespoke(std::move(r));
   }
 
 private:
@@ -271,7 +286,8 @@ struct Cache;
 using ResolvingMap = SStringToOneT<AliasKind>;
 
 struct ResolveCtx {
-  ResolveCtx(Context ctx, const IIndex* index, Cache* cache, ResolvingMap* resolving)
+  ResolveCtx(Context ctx, const IIndex* index,
+             Cache* cache, ResolvingMap* resolving)
     : ctx{ctx}, index{index}, cache{cache}, resolving{resolving} {}
   Context ctx;
   const IIndex* index;
@@ -287,9 +303,7 @@ struct ResolveCtx {
 // context. Removes the alias on delete.
 struct WithResolving {
   ~WithResolving() {
-    if (m_clsName) {
-      m_resolving->erase(m_clsName);
-    }
+    if (m_clsName) m_resolving->erase(m_clsName);
   }
   WithResolving(SString clsName,
                 AliasKind ak,
@@ -404,7 +418,7 @@ struct Cache {
 };
 
 // Map a name into an appropriate TCls specialization.
-Type name_to_cls_type(ResolveCtx& ctx, SString name) {
+std::pair<Type, bool> name_to_cls_type(ResolveCtx& ctx, SString name) {
   auto const resolveCls = [&] (const php::Class* cls) {
     auto const rcls = ctx.index->resolve_class(cls->name);
     if (!rcls) return TBottom;
@@ -418,17 +432,19 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
 
   if (ctx.selfCls) {
     if (name->tsame(s_hh_this.get())) {
-      if (ctx.thisCls) return resolveCls(ctx.thisCls);
+      if (ctx.thisCls) return std::make_pair(resolveCls(ctx.thisCls), true);
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
-      if (!rcls) return TBottom;
-      return subCls(*rcls);
+      if (!rcls) return std::make_pair(TBottom, false);
+      return std::make_pair(subCls(*rcls), false);
     }
 
-    if (name->tsame(s_self.get())) return resolveCls(ctx.selfCls);
+    if (name->tsame(s_self.get())) {
+      return std::make_pair(resolveCls(ctx.selfCls), false);
+    }
 
     if (name->tsame(s_parent.get())) {
-      if (!ctx.selfCls->parentName) return TBottom;
-      return resolveStr(ctx.selfCls->parentName);
+      if (!ctx.selfCls->parentName) return std::make_pair(TBottom, false);
+      return std::make_pair(resolveStr(ctx.selfCls->parentName), false);
     }
   }
 
@@ -436,13 +452,22 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
     auto const lookup = ctx.index->lookup_class_or_type_alias(name);
     if (lookup.cls) {
       auto const rcls = ctx.index->resolve_class(*lookup.cls);
-      if (!rcls) return TBottom;
-      return clsExact(*rcls);
+      if (!rcls) return std::make_pair(TBottom, false);
+      return std::make_pair(clsExact(*rcls), false);
     }
-    if (!lookup.typeAlias) return lookup.maybeExists ? TCls : TBottom;
+    if (!lookup.typeAlias) {
+      if (!lookup.maybeExists) return std::make_pair(TBottom, false);
+      // It might exist, so treat it as an unresolved class.
+      auto const rcls = ctx.index->resolve_class(name);
+      if (!rcls) return std::make_pair(TBottom, false);
+      return std::make_pair(clsExact(*rcls), false);
+    }
     auto const typeAlias = lookup.typeAlias;
-    assertx(typeAlias->typeStructure.exists(s_kind));
-    if (!typeAlias->typeStructure.exists(s_classname)) return TBottom;
+    assertx(typeAlias->typeStructure);
+    assertx(typeAlias->typeStructure->exists(s_kind));
+    if (!typeAlias->typeStructure->exists(s_classname)) {
+      return std::make_pair(TBottom, false);
+    }
     auto const tv = typeAlias->typeStructure->get(s_classname);
     assertx(tvIsString(tv));
     name = val(tv).pstr;
@@ -452,7 +477,7 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
 }
 
 Resolution resolve(ResolveCtx&, SArray ts);
-Resolution resolveBespoke(ResolveCtx& ctx, SArray ts);
+Resolution resolve_bespoke(ResolveCtx& ctx, SArray ts);
 
 Resolution resolve_list(ResolveCtx& ctx, SArray ts) {
   assertx(ts->isStatic());
@@ -462,7 +487,7 @@ Resolution resolve_list(ResolveCtx& ctx, SArray ts) {
   for (size_t i = 0; i < size; ++i) {
     auto const tv = ts->get(i);
     assertx(tvIsDict(tv));
-    auto const r = resolveBespoke(ctx, val(tv).parr);
+    auto const r = resolve_bespoke(ctx, val(tv).parr);
     b.append(r);
     if (b.alwaysFails()) break;
   }
@@ -479,7 +504,7 @@ Optional<std::vector<Resolution>> resolve_list_separate(ResolveCtx& ctx,
   for (size_t i = 0; i < size; ++i) {
     auto const tv = ts->get(i);
     assertx(tvIsDict(tv));
-    out.emplace_back(resolveBespoke(ctx, val(tv).parr));
+    out.emplace_back(resolve_bespoke(ctx, val(tv).parr));
     if (out.back().type.is(BBottom)) return std::nullopt;
   }
   return out;
@@ -487,9 +512,9 @@ Optional<std::vector<Resolution>> resolve_list_separate(ResolveCtx& ctx,
 
 Resolution resolve_fun(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_fun)
-    .resolve(s_return_type, get_ts_return_type(ts), ctx, resolveBespoke)
+    .resolve(s_return_type, get_ts_return_type(ts), ctx, resolve_bespoke)
     .resolve(s_param_types, get_ts_param_types(ts), ctx, resolve_list)
-    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolveBespoke)
+    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolve_bespoke)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
     .optCopy(s_case_type, ts)
@@ -540,12 +565,12 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
     assertx(tvIsArrayLike(fieldValue));
     auto const fieldValueArr = val(fieldValue).parr;
 
-    auto const key = [&] {
+    auto const [key, mightFail, sensitive] = [&] {
       auto const fieldKey = fields->nvGetKey(i);
       assertx(tvIsString(fieldKey) || tvIsInt(fieldKey));
 
       if (!fieldValueArr->exists(s_is_cls_cns)) {
-        return std::make_pair(from_cell(fieldKey), false);
+        return std::make_tuple(from_cell(fieldKey), false, false);
       }
 
       assertx(tvIsString(fieldKey));
@@ -557,10 +582,10 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
       auto const cnsName = makeStaticString(cnsNameStr);
 
       auto const fails = [&] {
-        return std::make_pair(TBottom, true);
+        return std::make_tuple(TBottom, true, false);
       };
 
-      auto const cls = name_to_cls_type(ctx, clsName);
+      auto const [cls, sensitive] = name_to_cls_type(ctx, clsName);
       if (cls.is(BBottom)) return fails();
 
       auto lookup = lookupClsConstant(
@@ -578,9 +603,10 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
         !lookup.mightThrow &&
         lookup.ty.subtypeOf(BArrKey);
 
-      return std::make_pair(
+      return std::make_tuple(
         intersection_of(loosen_likeness(std::move(lookup.ty)), TArrKey),
-        !noFail
+        !noFail,
+        sensitive
       );
     }();
 
@@ -601,9 +627,10 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
         .set(s_optional_shape_field, make_tv<KindOfBoolean>(true))
         .finish();
     }();
-    resolution.mightFail |= key.second;
+    resolution.mightFail |= mightFail;
+    resolution.contextSensitive |= sensitive;
 
-    b.set(key.first, maybeMakeBespoke(std::move(resolution)));
+    b.set(key, maybe_make_bespoke(std::move(resolution)));
     if (b.alwaysFails()) break;
   }
 
@@ -641,7 +668,14 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
 
       auto r = [&] {
         if (cns.resolvedTypeStructure) {
-          return Resolution { dict_val(cns.resolvedTypeStructure), false };
+          if (!cns.resolvedLocally &&
+              (cns.contextInsensitive || cns.cls->tsame(thiz.name))) {
+            return Resolution {
+              dict_val(cns.resolvedTypeStructure),
+              false,
+              !cns.contextInsensitive
+            };
+          }
         }
         ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache, ctx.resolving};
         newCtx.selfCls = ctx.index->lookup_const_class(cns);
@@ -651,6 +685,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
         return resolve(newCtx, val(*cns.val).parr);
       }();
 
+      r.contextSensitive = false;
       assertx(r.type.subtypeOf(BDictN));
       if (r.type.is(BBottom)) return Resolution{ TBottom, true };
       if (idx == accessList->size() - 1) return r;
@@ -680,7 +715,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
 
       auto next =
         resolve_type_access_list(ctx, clsExact(*rcls), accessList, idx+1);
-      next.mightFail |= (!kindPresent || !clsNamePresent);
+      next.mightFail |= (!kindPresent || !clsNamePresent || r.mightFail);
       return next;
     }
   );
@@ -690,17 +725,22 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
   auto const mightFail =
     lookup.found != TriBool::Yes ||
     lookup.resolution.mightFail;
-  return Resolution{ std::move(lookup.resolution.type), mightFail };
+  return Resolution{
+    std::move(lookup.resolution.type),
+    mightFail,
+    lookup.resolution.contextSensitive
+  };
 }
 
 Resolution resolve_type_access(ResolveCtx& ctx, SArray ts) {
-  auto const clsType = name_to_cls_type(ctx, get_ts_root_name(ts));
+  auto const [clsType, sensitive] = name_to_cls_type(ctx, get_ts_root_name(ts));
   if (clsType.is(BBottom)) return Resolution{ TBottom, true };
   return Builder::attach(
     resolve_type_access_list(ctx, clsType, get_ts_access_list(ts), 0)
   ).copyModifiers(ts)
    .optCopy(s_alias, ts)
    .optCopy(s_case_type, ts)
+   .usedThis(sensitive)
    .finish();
 }
 
@@ -742,17 +782,32 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
         .finish();
   };
 
+  auto const conservative = [&] {
+    // Even if we're returning a conservative result, still process
+    // the generic types to ensure we record dependencies on them.
+    if (auto const g = get_ts_generic_types_opt(ts)) {
+      resolve_list(ctx, g);
+    }
+    return Resolution{ TDictN, true };
+  };
+
+  auto const fail = [&] {
+    return Resolution{ TBottom, true };
+  };
+
   if (ctx.selfCls) {
     if (clsName->tsame(s_hh_this.get())) {
       if (ctx.thisCls) {
-        return resolvedCls(ctx.thisCls->name, ctx.thisCls->attrs, true);
+        auto r = resolvedCls(ctx.thisCls->name, ctx.thisCls->attrs, true);
+        r.contextSensitive = true;
+        return r;
       }
       if (ctx.selfCls->attrs & AttrNoOverride) {
         return resolvedCls(ctx.selfCls->name, ctx.selfCls->attrs, true);
       }
 
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
-      if (!rcls) return Resolution{ TBottom, true };
+      if (!rcls) return fail();
 
       Optional<Resolution> resolution;
       auto const knowsChildren = rcls->forEachSubclass(
@@ -764,8 +819,8 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
           }
         }
       );
-      if (!knowsChildren) return Resolution{ TDictN, true };
-      if (!resolution) return Resolution{ TBottom, true };
+      if (!knowsChildren) return conservative();
+      if (!resolution) return fail();
       return *resolution;
     }
 
@@ -774,13 +829,13 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     }
 
     if (clsName->tsame(s_parent.get())) {
-      if (!ctx.selfCls->parentName) return Resolution { TBottom, true };
+      if (!ctx.selfCls->parentName) return fail();
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->parentName);
-      if (!rcls) return Resolution { TBottom, true };
+      if (!rcls) return fail();
       if (auto const cls = rcls->cls()) {
         return resolvedCls(cls->name, cls->attrs, false);
       }
-      return Resolution{ TDictN, true };
+      return conservative();
     }
   }
 
@@ -789,11 +844,14 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     return resolvedCls(lookup.cls->name, lookup.cls->attrs, false);
   }
   if (!lookup.typeAlias) {
-    return Resolution { lookup.maybeExists ? TDictN : TBottom, true };
+    return lookup.maybeExists
+      ? conservative()
+      : fail();
   }
   auto const typeAlias = lookup.typeAlias;
-  assertx(!typeAlias->typeStructure.empty());
-  assertx(typeAlias->typeStructure.isDict());
+  assertx(typeAlias->typeStructure);
+  assertx(!typeAlias->typeStructure->empty());
+  assertx(typeAlias->typeStructure->isDictType());
 
   auto ty = ctx.resolving->find(clsName);
   if (ty != ctx.resolving->end()) {
@@ -809,10 +867,10 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       case AliasKind::CaseType: {
         // This is a recursive case type. It's allowed - but we just need to
         // set a few fields.
-        Builder res = Builder::dict();
-        res.set(s_kind, *typeStructureKindToVariant(TypeStructure::Kind::T_recursiveUnion).asTypedValue());
-        res.set(s_case_type, *Variant{const_cast<StringData*>(clsName)}.asTypedValue());
-        return res.finish();
+        return Builder::dict()
+          .set(s_kind, make_tv<KindOfInt64>((int64_t)TS::Kind::T_recursiveUnion))
+          .set(s_case_type, clsName)
+          .finish();
       }
     }
   }
@@ -825,27 +883,34 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     [&, typeAlias=typeAlias] (const GenericsMap& g = {},
                               const TypevarTypes* typevarTypes = nullptr) {
     auto b = [&, typeAlias=typeAlias] {
-      auto const& preresolved = typeAlias->resolvedTypeStructure;
-      if (!preresolved.isNull()) {
-        assertx(preresolved.isDict());
-        return Builder::attach(
-          Resolution{ dict_val(preresolved.get()), false }
-        );
+      assertx(typeAlias->typeStructure);
+
+      if (typeAlias->resolvedTypeStructure) {
+        assertx(typeAlias->resolvedTypeStructure->isStatic());
+        assertx(typeAlias->resolvedTypeStructure->isDictType());
+        if (!typeAlias->resolvedLocally) {
+          return Builder::attach(
+            Resolution { dict_val(typeAlias->resolvedTypeStructure), false }
+          );
+        }
       }
 
       ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache, ctx.resolving};
       newCtx.generics = &g;
 
-      auto const toResolve = [&] {
-        if (!typevarTypes) return typeAlias->typeStructure.get();
-        auto removed = typeAlias->typeStructure;
+      auto const toResolve = [&] () -> SArray {
+        if (!typevarTypes) return typeAlias->typeStructure;
+        auto removed =
+          Array::attach(const_cast<ArrayData*>(typeAlias->typeStructure));
         removed.remove(s_typevars);
         removed.setEvalScalar();
         return removed.get();
       }();
 
-      const StaticString& key = keyForAliasKind(typeAlias->kind);
-      return Builder::attach(resolve(newCtx, toResolve))
+      const StaticString& key = key_for_alias_kind(typeAlias->kind);
+      auto r = resolve(newCtx, toResolve);
+      assertx(!r.contextSensitive);
+      return Builder::attach(std::move(r))
         .set(key, make_tv<KindOfPersistentString>(clsName));
     }();
 
@@ -854,7 +919,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       for (auto const& kv : *typevarTypes) {
         d.set(
           makeStaticString(kv.first),
-          maybeMakeBespoke(Resolution { kv.second, false })
+          maybe_make_bespoke(Resolution { kv.second, false })
         );
       }
       b.set(s_typevar_types, d.finish());
@@ -862,22 +927,22 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     return b.copyModifiers(ts).finish();
   };
 
-  if (typeAlias->typeStructure.exists(s_typevars) &&
+  if (typeAlias->typeStructure->exists(s_typevars) &&
       ts->exists(s_generic_types)) {
+    auto const tv = typeAlias->typeStructure->get(s_typevars);
+    assertx(tvIsString(tv));
     std::vector<std::string> typevars;
-    folly::split(
-      ',',
-      typeAlias->typeStructure[s_typevars].asCStrRef().data(),
-      typevars
-    );
+    folly::split(',', val(tv).pstr->data(), typevars);
 
     auto rgenerics = resolve_list_separate(ctx, get_ts_generic_types(ts));
-    if (!rgenerics) return Resolution { TBottom, true };
+    if (!rgenerics) return fail();
 
     auto mightFail = false;
+    auto sensitive = false;
     for (auto const& r : *rgenerics) {
       mightFail |= r.mightFail;
-      if (mightFail) break;
+      sensitive |= r.contextSensitive;
+      if (mightFail && sensitive) break;
     }
 
     auto const size = std::min<size_t>(typevars.size(), rgenerics->size());
@@ -890,6 +955,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     }
     auto r = resolveTA(genericsMap, &typevarTypes);
     r.mightFail |= mightFail;
+    r.contextSensitive |= sensitive;
     return r;
   }
   return resolveTA();
@@ -958,10 +1024,17 @@ Resolution resolve_impl(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
 }
 
 Resolution resolve(ResolveCtx& ctx, SArray ts) {
+  ITRACE(2, "resolve_type_structure: ({} {}) {}\n",
+         ctx.selfCls ? ctx.selfCls->name->toCppString() : "-",
+         ctx.thisCls ? ctx.thisCls->name->toCppString() : "-",
+         staticArrayStreamer(ts));
+  Trace::Indent _;
+
   // If the type-structure is trivially resolved, we can return it
   // immediately and skip the cache check.
   auto const kind = get_ts_kind(ts);
   if (kind_is_resolved(kind)) {
+    ITRACE(2, "no resolution needed\n");
     return Resolution{ dict_val(ts), false };
   }
 
@@ -969,11 +1042,17 @@ Resolution resolve(ResolveCtx& ctx, SArray ts) {
   auto const r = resolve_impl(ctx, kind, ts);
   assertx(r.type.subtypeOf(BDictN));
   ctx.cache->exit(ctx, ts, r);
+  ITRACE(
+    2, "--> {}{}{}\n",
+    show(r.type),
+    r.mightFail ? " (might fail)" : "",
+    r.contextSensitive ? " (ctx sensitive)" : ""
+  );
   return r;
 }
 
-Resolution resolveBespoke(ResolveCtx& ctx, SArray ts) {
-  return maybeMakeBespoke(resolve(ctx, ts));
+Resolution resolve_bespoke(ResolveCtx& ctx, SArray ts) {
+  return maybe_make_bespoke(resolve(ctx, ts));
 }
 
 } // namespace
@@ -989,7 +1068,7 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
   ResolveCtx ctx{env.ctx, &env.index, &cache, &resolving};
   ctx.selfCls = env.ctx.cls;
   ctx.collect = &env.collect;
-  return resolveBespoke(ctx, ts);
+  return resolve_bespoke(ctx, ts);
 }
 
 Resolution resolve_type_structure(const IIndex& index,
@@ -1001,8 +1080,16 @@ Resolution resolve_type_structure(const IIndex& index,
   assertx(val(*cns.val).parr->isStatic());
 
   if (cns.resolvedTypeStructure) {
+    assertx(cns.resolvedTypeStructure->isStatic());
     assertx(cns.resolvedTypeStructure->isDictType());
-    return Resolution { dict_val(cns.resolvedTypeStructure), false };
+    if (!cns.resolvedLocally &&
+        (cns.contextInsensitive || cns.cls->tsame(thiz.name))) {
+      return Resolution {
+        dict_val(cns.resolvedTypeStructure),
+        false,
+        !cns.contextInsensitive
+      };
+    }
   }
 
   Cache cache;
@@ -1013,17 +1100,22 @@ Resolution resolve_type_structure(const IIndex& index,
 
   // If the self class isn't present we need to be pessimistic.
   if (!ctx.selfCls) return Resolution { TDictN, true };
-  return resolveBespoke(ctx, val(*cns.val).parr);
+  return resolve_bespoke(ctx, val(*cns.val).parr);
 }
 
 Resolution resolve_type_structure(const IIndex& index,
                                   const CollectedInfo* collect,
                                   const php::TypeAlias& typeAlias) {
-  auto const& preresolved = typeAlias.resolvedTypeStructure;
-  if (!preresolved.isNull()) {
-    assertx(preresolved.isDict());
-    assertx(!preresolved.empty());
-    return Resolution { dict_val(preresolved.get()), false };
+  assertx(typeAlias.typeStructure);
+  assertx(typeAlias.typeStructure->isStatic());
+  assertx(typeAlias.typeStructure->isDictType());
+
+  if (typeAlias.resolvedTypeStructure) {
+    assertx(typeAlias.resolvedTypeStructure->isStatic());
+    assertx(typeAlias.resolvedTypeStructure->isDictType());
+    if (!typeAlias.resolvedLocally) {
+      return Resolution { dict_val(typeAlias.resolvedTypeStructure), false };
+    }
   }
 
   Cache cache;
@@ -1031,10 +1123,56 @@ Resolution resolve_type_structure(const IIndex& index,
   WithResolving withResolving(typeAlias.name, typeAlias.kind, &resolving);
   ResolveCtx ctx{Context{}, &index, &cache, &resolving};
   ctx.collect = collect;
-  const StaticString& key = keyForAliasKind(typeAlias.kind);
-  return Builder::attach(resolve(ctx, typeAlias.typeStructure.get()))
+  const StaticString& key = key_for_alias_kind(typeAlias.kind);
+  return Builder::attach(resolve(ctx, typeAlias.typeStructure))
     .set(key, make_tv<KindOfPersistentString>(typeAlias.name))
     .finishTS();
+}
+
+SString type_structure_name(SArray ts) {
+  assertx(ts->isStatic());
+  assertx(ts->isDictType());
+
+  switch (get_ts_kind(ts)) {
+    case TS::Kind::T_enum:
+    case TS::Kind::T_trait:
+    case TS::Kind::T_class:
+    case TS::Kind::T_interface:
+    case TS::Kind::T_unresolved:
+      return get_ts_classname(ts);
+    case TS::Kind::T_fun:
+    case TS::Kind::T_tuple:
+    case TS::Kind::T_darray:
+    case TS::Kind::T_varray:
+    case TS::Kind::T_varray_or_darray:
+    case TS::Kind::T_dict:
+    case TS::Kind::T_vec:
+    case TS::Kind::T_keyset:
+    case TS::Kind::T_vec_or_dict:
+    case TS::Kind::T_any_array:
+    case TS::Kind::T_shape:
+    case TS::Kind::T_typevar:
+    case TS::Kind::T_typeaccess:
+    case TS::Kind::T_reifiedtype:
+    case TS::Kind::T_union:
+    case TS::Kind::T_int:
+    case TS::Kind::T_bool:
+    case TS::Kind::T_float:
+    case TS::Kind::T_string:
+    case TS::Kind::T_num:
+    case TS::Kind::T_arraykey:
+    case TS::Kind::T_void:
+    case TS::Kind::T_null:
+    case TS::Kind::T_nothing:
+    case TS::Kind::T_noreturn:
+    case TS::Kind::T_mixed:
+    case TS::Kind::T_dynamic:
+    case TS::Kind::T_nonnull:
+    case TS::Kind::T_resource:
+    case TS::Kind::T_xhp:
+    case TS::Kind::T_recursiveUnion:
+      return nullptr;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

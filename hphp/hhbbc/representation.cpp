@@ -195,6 +195,9 @@ template <typename SerDe> void Const::serde(SerDe& sd) {
   SERDE_BITFIELD(invariance, sd);
   SERDE_BITFIELD(isAbstract, sd);
   SERDE_BITFIELD(isFromTrait, sd);
+  SERDE_BITFIELD(contextInsensitive, sd);
+  // NB: resolvedLocally not encoded since it only has meaning within
+  // a worker.
 }
 
 template <typename SerDe> void Class::serde(SerDe& sd) {

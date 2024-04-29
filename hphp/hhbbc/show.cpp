@@ -767,7 +767,10 @@ std::string show(const Type& t) {
 
 std::string show(Context ctx) {
   if (!ctx.func) {
-    if (!ctx.cls) return "-";
+    if (!ctx.cls) {
+      if (!ctx.unit) return "-";
+      return ctx.unit->toCppString();
+    }
     return ctx.cls->name->toCppString();
   }
   auto ret = std::string{};
@@ -840,9 +843,10 @@ std::string show(const ClsConstLookupResult& r) {
 
 std::string show(const ClsTypeConstLookupResult& r) {
   return folly::sformat(
-    "{{ty:{},fail:{},found:{},abstract:{}}}",
+    "{{ty:{},fail:{},sens:{},found:{},abstract:{}}}",
     show(r.resolution.type),
     r.resolution.mightFail,
+    r.resolution.contextSensitive,
     show(r.found),
     show(r.abstract)
   );

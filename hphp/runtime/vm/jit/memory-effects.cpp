@@ -846,7 +846,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case IterInit:
-  case LIterInit:
+  case LIterInitArr:
+  case LIterInitObj:
   case IterNext:
   case LIterNextArr:
   case LIterNextObj: {
@@ -858,7 +859,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case IterInitK:
-  case LIterInitK:
+  case LIterInitArrK:
+  case LIterInitObjK:
   case IterNextK:
   case LIterNextArrK:
   case LIterNextObjK: {

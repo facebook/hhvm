@@ -598,7 +598,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case IterInit:
-  case LIterInit:
+  case LIterInitArr:
+  case LIterInitObj:
   case IterNext:
   case LIterNextArr:
   case LIterNextObj: {
@@ -609,7 +610,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case IterInitK:
-  case LIterInitK:
+  case LIterInitArrK:
+  case LIterInitObjK:
   case IterNextK:
   case LIterNextArrK:
   case LIterNextObjK: {

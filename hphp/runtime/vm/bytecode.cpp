@@ -4396,9 +4396,10 @@ OPTBLD_INLINE void iopLockObj() {
 
 namespace {
 
+template<bool Local>
 void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
                   PC targetpc, IterTypeOp op) {
-  auto base = local != nullptr ? *local : *vmStack().topC();
+  auto base = Local ? *local : *vmStack().topC();
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
@@ -4412,17 +4413,17 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
 
   if (isArrayLikeType(type(base))) {
     handleArrayLike(val(base).parr, op);
-    if (local == nullptr) vmStack().discard();
+    if (!Local) vmStack().discard();
     return;
   }
 
   // The base is extracted and we already handled ArrayLike.
   assertx(isObjectType(type(base)));
-  if (!new_iter_object(it, val(base).pobj, value, key)) {
+  if (!new_iter_object<Local>(it, val(base).pobj, value, key)) {
     pc = targetpc;
   }
 
-  if (local == nullptr) vmStack().popC();
+  if (!Local) vmStack().popC();
 }
 
 void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
@@ -4441,8 +4442,8 @@ void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
       assertx(isObjectType(type(base)));
       auto const obj = val(base).pobj;
       return key
-        ? liter_object_next_key_ind(it, value, key, obj)
-        : liter_object_next_ind(it, value, obj);
+        ? liter_object_next_key_ind(value, key, obj)
+        : liter_object_next_ind(value, obj);
     }
     return key ? iter_next_key_ind(it, value, key) : iter_next_ind(it, value);
   }();
@@ -4464,7 +4465,7 @@ OPTBLD_INLINE void iopIterBase() {
 
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
   auto const op = IterTypeOp::NonLocal;
-  implIterInit(pc, ita, nullptr, targetpc, op);
+  implIterInit<false>(pc, ita, nullptr, targetpc, op);
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
@@ -4472,7 +4473,7 @@ OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
   auto const op = ita.flags & IterArgs::Flags::BaseConst
     ? IterTypeOp::LocalBaseConst
     : IterTypeOp::LocalBaseMutable;
-  implIterInit(pc, ita, base, targetpc, op);
+  implIterInit<true>(pc, ita, base, targetpc, op);
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
@@ -4489,7 +4490,7 @@ OPTBLD_INLINE void iopIterFree(Iter* it) {
 }
 
 OPTBLD_INLINE void iopLIterFree(Iter* it, tv_lval) {
-  it->free();
+  it->kill();
 }
 
 OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {

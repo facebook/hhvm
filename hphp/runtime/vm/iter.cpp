@@ -543,6 +543,7 @@ IterInitArrKey new_iter_array_key_helper(IterTypeOp type) {
  * new_iter_object creates an iterator for the specified Iterator object, with
  * borrow refcount semantics.
  */
+template<bool Local>
 int64_t new_iter_object(Iter* dest, ObjectData* obj,
                         TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, obj %p, Iterator\n",
@@ -567,10 +568,19 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj,
     );
   }
 
-  unwrap(dest)->setObject(obj);
-  obj->incRefCount();
+  if (!Local) {
+    unwrap(dest)->setObject(obj);
+    obj->incRefCount();
+  } else if (debug) {
+    unwrap(dest)->kill();
+  }
   return 1LL;
 }
+
+template
+int64_t new_iter_object<false>(Iter*, ObjectData*, TypedValue*, TypedValue*);
+template
+int64_t new_iter_object<true>(Iter*, ObjectData*, TypedValue*, TypedValue*);
 
 /**
  * Version of new_iter_object() used by JIT, which expects us to consume
@@ -579,7 +589,7 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj,
 int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
                             TypedValue* valOut, TypedValue* keyOut) {
   SCOPE_EXIT { decRefObj(obj); };
-  return new_iter_object(dest, obj, valOut, keyOut);
+  return new_iter_object<false>(dest, obj, valOut, keyOut);
 }
 
 // Generic next implementation for non-local iterators. This method is used for
@@ -631,20 +641,14 @@ int64_t liter_array_next_cold(Iter* iter,
   return 1;
 }
 
-uint64_t liter_object_next_impl(Iter* iter,
-                                ObjectData* obj,
+uint64_t liter_object_next_impl(ObjectData* obj,
                                 TypedValue* valOut,
                                 TypedValue* keyOut) {
   obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
 
   auto const end =
     !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
-  if (end) {
-    // As of now, LIterInit still stores the object into the iter, so it needs
-    // to be decRefd upon end of iteration.
-    decRefObj(unwrap(iter)->getObject());
-    return 0LL;
-  }
+  if (end) return 0LL;
 
   tvMove(
     obj->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0).detach(),
@@ -997,22 +1001,19 @@ int64_t liter_array_next_key_ind(Iter* iter,
   return helper(iter, valOut, keyOut, ad);
 }
 
-int64_t liter_object_next_ind(Iter* iter, TypedValue* valOut, ObjectData* obj) {
-  TRACE(2, "liter_object_next_ind: I %p\n", iter);
-  assertx(unwrap(iter)->checkInvariants(nullptr));
+int64_t liter_object_next_ind(TypedValue* valOut, ObjectData* obj) {
+  TRACE(2, "liter_object_next_ind: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
-  return liter_object_next_impl(iter, obj, valOut, nullptr);
+  return liter_object_next_impl(obj, valOut, nullptr);
 }
 
-int64_t liter_object_next_key_ind(Iter* iter,
-                                 TypedValue* valOut,
-                                 TypedValue* keyOut,
-                                 ObjectData* obj) {
-  TRACE(2, "liter_object_next_key_ind: I %p\n", iter);
-  assertx(unwrap(iter)->checkInvariants(nullptr));
+int64_t liter_object_next_key_ind(TypedValue* valOut,
+                                  TypedValue* keyOut,
+                                  ObjectData* obj) {
+  TRACE(2, "liter_object_next_key_ind: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
-  return liter_object_next_impl(iter, obj, valOut, keyOut);
+  return liter_object_next_impl(obj, valOut, keyOut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

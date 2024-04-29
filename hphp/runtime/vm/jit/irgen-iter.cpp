@@ -177,10 +177,9 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   if (iterInitEmptyBase(env, doneOffset, base, true)) return;
   specializeIterInit(env, doneOffset, ita, baseLocalId);
 
-  if (base->isA(TObj)) gen(env, IncRef, base);
   auto const op = base->isA(TArrLike)
-    ? (ita.hasKey() ? LIterInitK : LIterInit)
-    : (ita.hasKey() ? IterInitK : IterInit);
+    ? (ita.hasKey() ? LIterInitArrK : LIterInitArr)
+    : (ita.hasKey() ? LIterInitObjK : LIterInitObj);
   auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
   widenLocalIterBase(env, baseLocalId);
@@ -208,9 +207,6 @@ void emitIterFree(IRGS& env, int32_t iterId) {
 }
 
 void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
-  auto const baseType = env.irb->local(baseLocalId, DataTypeSpecific).type;
-  if (!baseType.subtypeOfAny(TArrLike, TObj)) PUNT(LIterFree);
-  if (!(baseType <= TArrLike)) gen(env, IterFree, IterId(iterId), fp(env));
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 

@@ -2783,9 +2783,13 @@ ReqBindJmp and CallFuncEntry.
 
 | IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
 
-| LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr),     LA
+| LIterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr),     LA
+| LIterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+
+| LIterInitObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
+
+| LIterInitObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2804,12 +2808,12 @@ ReqBindJmp and CallFuncEntry.
   value (and key) into the local variable with index valId (and keyId,
   respectively).
 
-  The LIter variations only accept arrays and do not take ownership of their
-  base. Instead, the base is provided on each operation on the iterator, so
-  that we can avoid inc-ref-ing the base (in cases where that's safe).
-
   This instruction has the ConsumesRC property because it either decrements the
   reference count of S0 or stores a reference to S0 into the new iterator.
+
+  The LIter variations do not take ownership of their base. Instead, the base
+  is provided on each operation on the iterator, so that we can avoid
+  inc-ref-ing the base.
 
 | IterNext<IterData>,   D(Bool), S(FramePtr), NF
 

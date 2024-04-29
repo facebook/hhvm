@@ -295,6 +295,7 @@ private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
+  template<bool Local>
   friend int64_t new_iter_object(Iter*, ObjectData* obj,
                                  TypedValue* val, TypedValue* key);
   template<bool HasKey, bool Local>
@@ -446,6 +447,7 @@ using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 IterInitArr    new_iter_array_helper(IterTypeOp type);
 IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
 
+template<bool Local>
 int64_t new_iter_object(Iter* dest, ObjectData* obj,
                         TypedValue* val, TypedValue* key);
 int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
@@ -464,8 +466,8 @@ NEVER_INLINE int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
 NEVER_INLINE int64_t liter_array_next_ind(Iter*, TypedValue*, ArrayData*);
 NEVER_INLINE int64_t liter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t liter_object_next_ind(Iter*, TypedValue*, ObjectData*);
-NEVER_INLINE int64_t liter_object_next_key_ind(Iter*, TypedValue*, TypedValue*, ObjectData*);
+NEVER_INLINE int64_t liter_object_next_ind(TypedValue*, ObjectData*);
+NEVER_INLINE int64_t liter_object_next_key_ind(TypedValue*, TypedValue*, ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

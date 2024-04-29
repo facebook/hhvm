@@ -594,8 +594,10 @@ bool canDCE(const IRInstruction& inst) {
   case IterExtractBase:
   case IterInit:
   case IterInitK:
-  case LIterInit:
-  case LIterInitK:
+  case LIterInitArr:
+  case LIterInitArrK:
+  case LIterInitObj:
+  case LIterInitObjK:
   case IterNext:
   case IterNextK:
   case LIterNextArr:

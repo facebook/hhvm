@@ -350,6 +350,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdTypeCns:
   case LdTypeCnsClsName:
   case LdTypeCnsNoThrow:
+  case LIterInitObj:
+  case LIterInitObjK:
   case LIterNextObj:
   case LIterNextObjK:
   case LookupClsCns:
@@ -808,8 +810,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdWHNotDone:
   case LdWHResult:
   case LdWHState:
-  case LIterInit:
-  case LIterInitK:
+  case LIterInitArr:
+  case LIterInitArrK:
   case LIterNextArr:
   case LIterNextArrK:
   case LockObj:

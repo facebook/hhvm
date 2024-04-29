@@ -82,8 +82,9 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const isInitK = inst->is(IterInitK, LIterInitK);
-  auto const isLInit = inst->is(LIterInit, LIterInitK);
+  auto const isInitK = inst->is(IterInitK, LIterInitArrK, LIterInitObjK);
+  auto const isLInit = inst->is(LIterInitArr, LIterInitArrK,
+                                LIterInitObj, LIterInitObjK);
   auto const extra = &inst->extra<IterData>()->args;
 
   auto const src = inst->src(0);
@@ -117,7 +118,6 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   }
 
   always_assert(src->type() <= TObj);
-  always_assert(!isLInit);
 
   args.addr(fp, valOff);
   if (isInitK) {
@@ -126,7 +126,9 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.imm(0);
   }
 
-  auto const target = CallSpec::direct(new_iter_object_jit);
+  auto const target = isLInit
+    ? CallSpec::direct(new_iter_object<true>)
+    : CallSpec::direct(new_iter_object_jit);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
@@ -161,9 +163,9 @@ void implLIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
   auto const sync = isArr ? SyncOptions::None : SyncOptions::Sync;
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 1).reg();
-    auto ret = argGroup(env, inst)
-      .addr(fp, iterOffset(inst->marker(), extra->iterId))
-      .addr(fp, localOffset(extra->valId));
+    auto ret = argGroup(env, inst);
+    if (isArr) ret.addr(fp, iterOffset(inst->marker(), extra->iterId));
+    ret.addr(fp, localOffset(extra->valId));
     if (isKey) ret.addr(fp, localOffset(extra->keyId));
     ret.ssa(0);
     return ret;
@@ -325,11 +327,19 @@ void cgIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterInit(IRLS& env, const IRInstruction* inst) {
+void cgLIterInitArr(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterInitK(IRLS& env, const IRInstruction* inst) {
+void cgLIterInitArrK(IRLS& env, const IRInstruction* inst) {
+  implIterInit(env, inst);
+}
+
+void cgLIterInitObj(IRLS& env, const IRInstruction* inst) {
+  implIterInit(env, inst);
+}
+
+void cgLIterInitObjK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 

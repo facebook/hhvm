@@ -1677,6 +1677,14 @@ TEST(PatchDiscrepancy, StructWithAssignOnlyField) {
       apache::thrift::type::infer_tag<StructWithAssignOnlyFieldPatch>>(
       dynPatch);
   EXPECT_FALSE(patch.empty());
+
+  patch.apply(obj);
+  EXPECT_EQ(obj.field()->field(), 42);
+  EXPECT_EQ(patch.toObject(), dynPatch);
+
+  auto dynObj = protocol::asValueStruct<type::struct_c>(obj).as_object();
+  protocol::applyPatch(patch.toObject(), dynObj);
+  EXPECT_EQ(dynObj[FieldId{1}].as_object()[FieldId{1}].as_i32(), 42);
 }
 
 TEST(StructPatchTest, BinaryInUnion) {

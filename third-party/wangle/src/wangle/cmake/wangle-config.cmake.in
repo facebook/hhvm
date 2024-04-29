@@ -23,3 +23,7 @@ set(WANGLE_LIBRARIES wangle::wangle)
 if (NOT wangle_FIND_QUIETLY)
   message(STATUS "Found wangle: ${PACKAGE_PREFIX_DIR}")
 endif()
+
+set(wangle_LIBRARIES
+  wangle::wangle
+)

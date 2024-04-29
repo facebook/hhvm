@@ -5627,10 +5627,16 @@ struct Index::IndexData {
   TSStringToOneT<SString> closureToClass;
   TSStringToOneT<SString> closureToFunc;
 
+  // Maps a class to the classes which it has inherited class
+  // constants from.
+  TSStringToOneT<TSStringSet> classToCnsBases;
+
   // All the classes that have a 86*init function.
   TSStringSet classesWith86Inits;
   // All the 86cinit functions for "dynamic" top-level constants.
   FSStringSet constantInitFuncs;
+  // All the units that have type-aliases within them.
+  SStringSet unitsWithTypeAliases;
 
   std::unique_ptr<php::Program> program;
 
@@ -5827,8 +5833,8 @@ struct AnalysisIndex::IndexData {
 
   SStringToOneT<php::Unit*> units;
 
-  SStringToOneT<php::Constant*> constants;
-  TSStringToOneT<php::TypeAlias*> typeAliases;
+  SStringToOneT<std::pair<php::Constant*, php::Unit*>> constants;
+  TSStringToOneT<std::pair<php::TypeAlias*, php::Unit*>> typeAliases;
 
   std::vector<FuncInfo2*> finfosByIdx;
 
@@ -6006,8 +6012,8 @@ struct DepTracker {
       if (deps[fc].add(cns)) {
         FTRACE(2, "{} now depends on constant {}\n", HHBBC::show(fc), cns.name);
       }
-    } else if (auto const p = folly::get_default(index.constants, cns.name)) {
-      constants[p].emplace(fc);
+    } else if (auto const p = folly::get_ptr(index.constants, cns.name)) {
+      constants[p->first].emplace(fc);
     }
   }
 
@@ -12356,12 +12362,17 @@ struct BuildSubclassListJob {
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     std::vector<std::vector<SString>> regOnlyEquivCandidates;
 
+    // For every output class, the set of classes which that class has
+    // inherited class constants from.
+    TSStringToOneT<TSStringSet> cnsBases;
+
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
         (newFuncFamilyIds)
         (nameOnly)
         (regOnlyEquivCandidates)
+        (cnsBases, string_data_lt_type{}, string_data_lt_type{})
         ;
     }
   };
@@ -12556,6 +12567,15 @@ struct BuildSubclassListJob {
 
     Variadic<FuncFamilyGroup> funcFamilyGroups;
     group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+
+    auto const addCnsBase = [&] (const ClassInfo2& cinfo) {
+      auto& bases = meta.cnsBases[cinfo.name];
+      for (auto const& [_, idx] : cinfo.clsConstants) {
+        if (!cinfo.name->tsame(idx.cls)) bases.emplace(idx.cls);
+      }
+    };
+    for (auto const& cinfo : classes.vals) addCnsBase(*cinfo);
+    for (auto const& cinfo : leafs.vals)   addCnsBase(*cinfo);
 
     // We only need to provide php::Class which correspond to a class
     // which wasn't a dep.
@@ -14585,6 +14605,7 @@ void build_subclass_lists(IndexData& index,
     std::vector<std::pair<SString, UniquePtrRef<ClassInfo2>>> leafs;
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     std::vector<std::pair<SString, SString>> candidateRegOnlyEquivs;
+    TSStringToOneT<TSStringSet> cnsBases;
   };
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
@@ -14751,6 +14772,7 @@ void build_subclass_lists(IndexData& index,
         updates.candidateRegOnlyEquivs.emplace_back(name, c);
       }
     }
+    updates.cnsBases = std::move(outMeta.cnsBases);
 
     co_return updates;
   };
@@ -14822,7 +14844,9 @@ void build_subclass_lists(IndexData& index,
         [&] {
           for (auto& u : updates) {
             for (auto& [name, ids] : u.funcFamilyDeps) {
-              always_assert(funcFamilyDeps.emplace(name, std::move(ids)).second);
+              always_assert(
+                funcFamilyDeps.emplace(name, std::move(ids)).second
+              );
             }
           }
         },
@@ -14834,6 +14858,15 @@ void build_subclass_lists(IndexData& index,
             for (auto [name, candidate] : u.candidateRegOnlyEquivs) {
               initTypesMeta.classes[name]
                 .candidateRegOnlyEquivs.emplace(candidate);
+            }
+          }
+        },
+        [&] {
+          for (auto& u : updates) {
+            for (auto& [n, o] : u.cnsBases) {
+              always_assert(
+                index.classToCnsBases.emplace(n, std::move(o)).second
+              );
             }
           }
         }
@@ -15825,6 +15858,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
       );
       if (isTypeAlias) {
         always_assert(index.typeAliasToUnit.emplace(name, unit.name).second);
+        index.unitsWithTypeAliases.emplace(unit.name);
       }
     }
 
@@ -16773,8 +16807,10 @@ void make_local(IndexData& index) {
   decltype(index.funcToUnit){}.swap(index.funcToUnit);
   decltype(index.constantToUnit){}.swap(index.constantToUnit);
   decltype(index.constantInitFuncs){}.swap(index.constantInitFuncs);
+  decltype(index.unitsWithTypeAliases){}.swap(index.unitsWithTypeAliases);
   decltype(index.closureToFunc){}.swap(index.closureToFunc);
   decltype(index.closureToClass){}.swap(index.closureToClass);
+  decltype(index.classToCnsBases){}.swap(index.classToCnsBases);
 
   // Unlike other cases, we want to bound each bucket to roughly the
   // same total byte size (since ultimately we're going to download
@@ -17360,6 +17396,10 @@ const TSStringSet& Index::classes_with_86inits() const {
 
 const FSStringSet& Index::constant_init_funcs() const {
   return m_data->constantInitFuncs;
+}
+
+const SStringSet& Index::units_with_type_aliases() const {
+  return m_data->unitsWithTypeAliases;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -20205,6 +20245,25 @@ void AnalysisScheduler::updateDepState(AnalysisOutput& output,
     assertx(!state.newDeps);
     state.deps.reset();
   }
+
+  for (auto& [cls, bases] : output.meta.cnsBases) {
+    auto const state = folly::get_ptr(classState, cls);
+    always_assert_flog(
+      state,
+      "Trying to update cns bases for untracked class {}",
+      cls
+    );
+    auto old = folly::get_ptr(index.m_data->classToCnsBases, cls);
+    if (!old) {
+      assertx(bases.empty());
+      continue;
+    }
+    if (debug) {
+      // Class constant base classes should only shrink.
+      for (auto const b : bases) always_assert(old->contains(b));
+    }
+    *old = std::move(bases);
+  }
 }
 
 // Record the output of an analysis job. This means updating the
@@ -20954,6 +21013,8 @@ std::vector<AnalysisInput> AnalysisScheduler::schedule(size_t bucketSize) {
 
 namespace {
 
+//////////////////////////////////////////////////////////////////////
+
 // If we optimized a top-level constant's value to a scalar, we no
 // longer need the associated 86cinit function. This fixes up the
 // metadata to remove it.
@@ -20965,7 +21026,7 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
     if (!cnsName) continue;
     auto const it = index.constants.find(cnsName);
     if (it == end(index.constants)) continue;
-    auto const& cns = *it->second;
+    auto const& cns = *it->second.first;
     if (type(cns.val) == KindOfUninit) continue;
     stripped.emplace(name);
   }
@@ -20997,6 +21058,23 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
 
   return stripped;
 }
+
+TSStringSet record_cns_bases(const php::Class& cls,
+                             const AnalysisIndex::IndexData& index) {
+  TSStringSet out;
+  if (!cls.cinfo) return out;
+  for (auto const& [_, idx] : cls.cinfo->clsConstants) {
+    if (!cls.name->tsame(idx.cls)) out.emplace(idx.cls);
+    if (auto const cnsCls = folly::get_default(index.classes, idx.cls)) {
+      assertx(idx.idx < cnsCls->constants.size());
+      auto const& cns = cnsCls->constants[idx.idx];
+      if (!cls.name->tsame(cns.cls)) out.emplace(cns.cls);
+    }
+  }
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -21166,7 +21244,9 @@ AnalysisIndex::AnalysisIndex(
   auto const addUnit = [&] (php::Unit* unit) {
     auto const isNative = is_native_unit(*unit);
     for (auto& cns : unit->constants) {
-      always_assert(m_data->constants.emplace(cns->name, cns.get()).second);
+      always_assert(
+        m_data->constants.try_emplace(cns->name, cns.get(), unit).second
+      );
       assertx(!m_data->badConstants.count(cns->name));
       if (isNative && type(cns->val) == KindOfUninit) {
         m_data->dynamicConstants.emplace(cns->name);
@@ -21174,7 +21254,11 @@ AnalysisIndex::AnalysisIndex(
     }
     for (auto& typeAlias : unit->typeAliases) {
       always_assert(
-        m_data->typeAliases.emplace(typeAlias->name, typeAlias.get()).second
+        m_data->typeAliases.try_emplace(
+          typeAlias->name,
+          typeAlias.get(),
+          unit
+        ).second
       );
       assertx(!m_data->badTypeAliases.count(typeAlias->name));
     }
@@ -21331,7 +21415,8 @@ res::Func AnalysisIndex::resolve_func_or_method(const php::Func& f) const {
 Type AnalysisIndex::lookup_constant(SString name) const {
   m_data->deps->add(AnalysisDeps::Constant { name });
 
-  if (auto const cns = folly::get_default(m_data->constants, name)) {
+  if (auto const p = folly::get_ptr(m_data->constants, name)) {
+    auto const cns = p->first;
     if (type(cns->val) != KindOfUninit) return from_cell(cns->val);
     if (m_data->dynamicConstants.count(name)) return TInitCell;
     auto const fname = Constant::funcNameFromName(name);
@@ -22041,8 +22126,8 @@ AnalysisIndex::lookup_type_alias(SString name) const {
     return std::make_pair(nullptr, false);
   }
   m_data->deps->add(AnalysisDeps::TypeAlias { name });
-  if (auto const ta = folly::get_default(m_data->typeAliases, name)) {
-    return std::make_pair(ta, true);
+  if (auto const ta = folly::get_ptr(m_data->typeAliases, name)) {
+    return std::make_pair(ta->first, true);
   }
   return std::make_pair(nullptr, !m_data->badTypeAliases.count(name));
 }
@@ -22054,9 +22139,9 @@ AnalysisIndex::lookup_class_or_type_alias(SString n) const {
     m_data->deps->add(AnalysisDeps::Class { n });
     return Index::ClassOrTypeAlias{cls, nullptr, true};
   }
-  if (auto const ta = folly::get_default(m_data->typeAliases, n)) {
+  if (auto const ta = folly::get_ptr(m_data->typeAliases, n)) {
     m_data->deps->add(AnalysisDeps::TypeAlias { n });
-    return Index::ClassOrTypeAlias{nullptr, ta, true};
+    return Index::ClassOrTypeAlias{nullptr, ta->first, true};
   }
 
   // It could be either, so register a dependency on both.
@@ -22091,13 +22176,14 @@ void AnalysisIndex::refine_constants(const FuncAnalysisResult& fa) {
   auto const name = Constant::nameFromFuncName(func.name);
   if (!name) return;
 
-  auto const cns = folly::get_default(m_data->constants, name);
+  auto const cnsPtr = folly::get_ptr(m_data->constants, name);
   always_assert_flog(
-    cns,
+    cnsPtr,
     "Attempting to refine constant {} "
     "which we don't have meta-data for",
     name
   );
+  auto const cns = cnsPtr->first;
   auto const val = tv(fa.inferredReturn);
   if (!val) {
     always_assert_flog(
@@ -22289,13 +22375,13 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
 
   if (changes & AnalysisDeps::Type::RetType) {
     if (auto const name = Constant::nameFromFuncName(func.name)) {
-      auto const cns = folly::get_default(m_data->constants, name, nullptr);
+      auto const cns = folly::get_ptr(m_data->constants, name);
       always_assert_flog(
         cns,
         "Attempting to update constant {} type, but constant is not present!",
         name
       );
-      m_data->deps->update(*cns);
+      m_data->deps->update(*cns->first);
     }
   }
   m_data->deps->update(func, changes);
@@ -22435,6 +22521,11 @@ AnalysisIndex::Output AnalysisIndex::finish() {
 
   // Remove any 86cinits that are now unneeded.
   meta.removedFuncs = strip_unneeded_constant_inits(*m_data);
+
+  for (auto const name : m_data->outClassNames) {
+    auto const& cls = m_data->allClasses.at(name);
+    meta.cnsBases[cls->name] = record_cns_bases(*cls, *m_data);
+  }
 
   classes.vals.reserve(m_data->outClassNames.size());
   clsBC.vals.reserve(m_data->outClassNames.size());

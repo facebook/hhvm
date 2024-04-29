@@ -1085,6 +1085,12 @@ struct Index {
   const FSStringSet& constant_init_funcs() const;
 
   /*
+   * The names of all units which have type-aliases defined within
+   * them.
+   */
+  const SStringSet& units_with_type_aliases() const;
+
+  /*
    * Access the php::Program this Index is analyzing.
    */
   const php::Program& program() const;
@@ -2097,12 +2103,14 @@ struct AnalysisOutput {
     std::vector<AnalysisDeps> classDeps;
     AnalysisChangeSet changed;
     FSStringSet removedFuncs;
+    TSStringToOneT<TSStringSet> cnsBases;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(funcDeps)
         (classDeps)
         (changed)
         (removedFuncs, string_data_lt_func{})
+        (cnsBases, string_data_lt_type{}, string_data_lt_type{})
         ;
     }
   };

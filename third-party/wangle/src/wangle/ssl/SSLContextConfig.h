@@ -56,6 +56,16 @@ struct SSLContextConfig {
     bool isBuffer{false};
   };
 
+  /*
+   * If using a delegated credential, in this case we expect
+   * a combined pem. Also we expect the key here to refer to the
+   * key used for the delegated credential and not the leaf cert. We further
+   * expect the actual delegated credential to exist alongside the cert
+   */
+  struct DelegatedCredInfo {
+    std::string combinedCertPath;
+  };
+
   static const std::string& getDefaultCiphers() {
     static const std::string& defaultCiphers =
         folly::join(':', folly::ssl::SSLServerOptions::ciphers());
@@ -112,6 +122,10 @@ struct SSLContextConfig {
     certificates.emplace_back(cert, key);
   }
 
+  void addDelegatedCredential(const std::string& credPath) {
+    delegatedCredentials.emplace_back(DelegatedCredInfo{credPath});
+  }
+
   /**
    * Set the optional list of protocols to advertise via TLS
    * Next Protocol Negotiation. An empty list means NPN is not enabled.
@@ -124,6 +138,7 @@ struct SSLContextConfig {
   typedef std::function<bool(char const* server_name)> SNINoMatchFn;
 
   std::vector<CertificateInfo> certificates;
+  std::vector<DelegatedCredInfo> delegatedCredentials;
   folly::SSLContext::SSLVersion sslVersion{folly::SSLContext::TLSv1_2};
   bool sessionCacheEnabled{true};
   bool sessionTicketEnabled{true};

@@ -64,6 +64,7 @@ Possible features are:
 
 */
 
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
@@ -136,10 +137,11 @@ pub enum GlobalDataLoad {
     Never,
 }
 
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Default)]
 pub enum HackcFlagType {
     #[default]
     HHBC,
+    Parser,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -573,7 +575,10 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         delimited(
                             tag("hackc("),
                             tuple((
-                                value(HackcFlagType::HHBC, tag("hhbc")),
+                                alt((
+                                    value(HackcFlagType::HHBC, tag("hhbc")),
+                                    value(HackcFlagType::Parser, tag("parser")),
+                                )),
                                 opt(preceded(
                                     tuple((space0, tag(","), space0)),
                                     parse_constant_value,
@@ -819,47 +824,67 @@ namespace HPHP::Cfg {{
 }
 
 pub fn generate_hackc(sections: Vec<ConfigSection>, output_dir: PathBuf) {
-    let mut hackc_hhbc_flags_headers = vec![];
-    let mut hackc_hhbc_flags_rs_properties = vec![];
-    let mut hackc_hhbc_flags_rs_defaults = vec![];
-    let mut hackc_hhbc_flags_rs_from_config = vec![];
+    let mut hackc_flags_headers = HashMap::<HackcFlagType, Vec<String>>::new();
+    hackc_flags_headers.insert(HackcFlagType::HHBC, vec![]);
+    hackc_flags_headers.insert(HackcFlagType::Parser, vec![]);
+    let mut hackc_flags_rs_properties = HashMap::<HackcFlagType, Vec<String>>::new();
+    hackc_flags_rs_properties.insert(HackcFlagType::HHBC, vec![]);
+    hackc_flags_rs_properties.insert(HackcFlagType::Parser, vec![]);
+    let mut hackc_flags_rs_defaults = HashMap::<HackcFlagType, Vec<String>>::new();
+    hackc_flags_rs_defaults.insert(HackcFlagType::HHBC, vec![]);
+    hackc_flags_rs_defaults.insert(HackcFlagType::Parser, vec![]);
+    let mut hackc_flags_rs_from_config = HashMap::<HackcFlagType, Vec<String>>::new();
+    hackc_flags_rs_from_config.insert(HackcFlagType::HHBC, vec![]);
+    hackc_flags_rs_from_config.insert(HackcFlagType::Parser, vec![]);
+    let mut hackc_parser_to_parser_options = vec![];
 
     for section in sections.iter() {
         for config in section.configs.iter() {
             if let Some(hackc_flag) = &config.features.hackc_flag {
-                if hackc_flag.type_ != HackcFlagType::HHBC {
-                    continue;
-                }
-
                 let shortname = config.shortname(&section.name);
                 let snake_case = shortname.from_case(Case::Camel).to_case(Case::Snake);
 
-                hackc_hhbc_flags_headers.push(format!("  {} {};", &config.type_.str(), snake_case));
+                hackc_flags_headers
+                    .get_mut(&hackc_flag.type_)
+                    .unwrap()
+                    .push(format!("  {} {};", &config.type_.str(), snake_case));
 
-                hackc_hhbc_flags_rs_properties.push(format!(
-                    "    pub {}: {},",
-                    snake_case,
-                    &config.type_.str()
-                ));
+                hackc_flags_rs_properties
+                    .get_mut(&hackc_flag.type_)
+                    .unwrap()
+                    .push(format!("    pub {}: {},", snake_case, &config.type_.str()));
 
-                hackc_hhbc_flags_rs_defaults.push(format!(
-                    "            {}: {},",
-                    snake_case,
-                    hackc_flag.default_value.as_ref().unwrap_or_else(|| {
-                        if let Some(ConfigValue::Const(s)) = &config.default_value {
-                            return s;
-                        }
-                        panic!("hackc need a constant default value");
-                    })
-                ));
+                hackc_flags_rs_defaults
+                    .get_mut(&hackc_flag.type_)
+                    .unwrap()
+                    .push(format!(
+                        "            {}: {},",
+                        snake_case,
+                        hackc_flag.default_value.as_ref().unwrap_or_else(|| {
+                            if let Some(ConfigValue::Const(s)) = &config.default_value {
+                                return s;
+                            }
+                            panic!("hackc need a constant default value");
+                        })
+                    ));
 
-                hackc_hhbc_flags_rs_from_config.push(format!(
-                    r#"        if let Some(v) = config.get_bool("{}")? {{
+                hackc_flags_rs_from_config
+                    .get_mut(&hackc_flag.type_)
+                    .unwrap()
+                    .push(format!(
+                        r#"        if let Some(v) = config.get_bool("{}")? {{
                 flags.{} = v;
             }}"#,
-                    config.hdf_path(section),
-                    snake_case,
-                ));
+                        config.hdf_path(section),
+                        snake_case,
+                    ));
+
+                if hackc_flag.type_ == HackcFlagType::Parser {
+                    hackc_parser_to_parser_options.push(format!(
+                        "            po_{}: self.{},",
+                        snake_case, snake_case
+                    ));
+                }
             }
         }
     }
@@ -874,8 +899,13 @@ struct HhbcFlags {{
 {}
 }};
 
+struct ParserFlags {{
+{}
+}};
+
 }}"#,
-        hackc_hhbc_flags_headers.join("\n")
+        hackc_flags_headers[&HackcFlagType::HHBC].join("\n"),
+        hackc_flags_headers[&HackcFlagType::Parser].join("\n"),
     );
     let mut hackc_options_generated_header_file = output_dir.clone();
     hackc_options_generated_header_file.push("options_gen.h");
@@ -889,6 +919,7 @@ struct HhbcFlags {{
     let hackc_options_generated_rs_content = format!(
         r#"use anyhow::Result;
 use hhvm_options::HhvmConfig;
+use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -917,10 +948,48 @@ impl HhbcFlags {{
 {}
         Ok(flags)
     }}
+}}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Copy)]
+#[repr(C)]
+pub struct ParserFlags {{
+{}
+}}
+
+unsafe impl cxx::ExternType for ParserFlags {{
+    type Id = cxx::type_id!("HPHP::hackc::ParserFlags");
+    type Kind = cxx::kind::Trivial;
+}}
+
+impl Default for ParserFlags {{
+    fn default() -> Self {{
+        Self {{
+{}
+        }}
+    }}
+}}
+
+impl ParserFlags {{
+    pub fn from_config(config: &HhvmConfig) -> Result<Self> {{
+        let mut flags = Self::default();
+{}
+        Ok(flags)
+    }}
+
+    pub fn to_parser_options(&self) -> ParserOptions {{
+        ParserOptions {{
+{}
+            ..Default::default()
+        }}
+    }}
 }}"#,
-        hackc_hhbc_flags_rs_properties.join("\n"),
-        hackc_hhbc_flags_rs_defaults.join("\n"),
-        hackc_hhbc_flags_rs_from_config.join("\n"),
+        hackc_flags_rs_properties[&HackcFlagType::HHBC].join("\n"),
+        hackc_flags_rs_defaults[&HackcFlagType::HHBC].join("\n"),
+        hackc_flags_rs_from_config[&HackcFlagType::HHBC].join("\n"),
+        hackc_flags_rs_properties[&HackcFlagType::Parser].join("\n"),
+        hackc_flags_rs_defaults[&HackcFlagType::Parser].join("\n"),
+        hackc_flags_rs_from_config[&HackcFlagType::Parser].join("\n"),
+        hackc_parser_to_parser_options.join("\n"),
     );
     let mut hackc_options_generated_rs_file = output_dir.clone();
     hackc_options_generated_rs_file.push("options_gen.rs");

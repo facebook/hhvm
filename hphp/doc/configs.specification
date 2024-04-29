@@ -254,14 +254,14 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 # Hack.Lang
 
-- bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.AbstractStaticProps = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.DisallowFuncPtrsInConstants = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)
-- bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.AbstractStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.DisallowFuncPtrsInConstants = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
@@ -269,7 +269,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   Emit specialized bytecodes when we an infer a typehint does not contain a
   reified generic bytecode, powered by decl directed bytecode
 
-- bool Hack.Lang.DisallowDirectSuperglobalsRefs = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.DisallowDirectSuperglobalsRefs = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 
   Make it so referencing superglobals directly via their $_[A-Z]+ "variable"
   name hard-fails rather than emitting, e.g., CgetG
@@ -305,7 +305,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   users, unless you really explicitly want to set them differently for
   some reason.
 
-- bool Hack.Lang.EnableClassLevelWhereClauses = false, UNKNOWN, unitcacheflag
+- bool Hack.Lang.EnableClassLevelWhereClauses = false, UNKNOWN, unitcacheflag|hackc(parser)
 
   Enables the class-level where constraints
   true => allow the feature, false => disable the feature

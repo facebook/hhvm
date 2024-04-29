@@ -61,21 +61,6 @@ mod ffi {
         enable_ir: bool,
     }
 
-    struct ParserFlags {
-        abstract_static_props: bool,
-        allow_unstable_features: bool,
-        const_default_func_args: bool,
-        const_static_props: bool,
-        disable_lval_as_an_expression: bool,
-        disallow_inst_meth: bool,
-        disable_xhp_element_mangling: bool,
-        disallow_func_ptrs_in_constants: bool,
-        enable_xhp_class_modifier: bool,
-        enable_class_level_where_clauses: bool,
-        disallow_static_constants_in_default_func_args: bool,
-        disallow_direct_superglobals_refs: bool,
-    }
-
     struct DeclParserConfig {
         aliased_namespaces: Vec<StringMapEntry>,
         disable_xhp_element_mangling: bool,
@@ -524,6 +509,7 @@ mod ffi {
         include!("hphp/hack/src/hackc/compile/options_gen.h");
 
         type HhbcFlags = options::HhbcFlags;
+        type ParserFlags = options::ParserFlags;
     }
 }
 
@@ -555,29 +541,8 @@ impl ffi::NativeEnv {
                     po_auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))
                         .collect(),
-                    po_abstract_static_props: self.parser_flags.abstract_static_props,
-                    po_allow_unstable_features: self.parser_flags.allow_unstable_features,
-                    po_const_default_func_args: self.parser_flags.const_default_func_args,
-                    po_const_static_props: self.parser_flags.const_static_props,
-                    po_disable_lval_as_an_expression: self
-                        .parser_flags
-                        .disable_lval_as_an_expression,
-                    po_disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
-                    po_disallow_func_ptrs_in_constants: self
-                        .parser_flags
-                        .disallow_func_ptrs_in_constants,
-                    po_enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
-                    po_enable_class_level_where_clauses: self
-                        .parser_flags
-                        .enable_class_level_where_clauses,
-                    po_disallow_static_constants_in_default_func_args: self
-                        .parser_flags
-                        .disallow_static_constants_in_default_func_args,
-                    po_disallow_direct_superglobals_refs: self
-                        .parser_flags
-                        .disallow_direct_superglobals_refs,
                     po_nameof_precedence: true,
-                    ..Default::default()
+                    ..self.parser_flags.to_parser_options()
                 },
             },
             hhbc_flags: self.hhbc_flags,

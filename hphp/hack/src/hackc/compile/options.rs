@@ -14,6 +14,7 @@ mod options_gen {
 
 use bstr::BString;
 pub use options_gen::HhbcFlags;
+pub use options_gen::ParserFlags;
 pub use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
 use serde::Serialize;

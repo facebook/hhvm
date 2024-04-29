@@ -20,7 +20,10 @@ namespace apache::thrift {
 
 class IMetricCollector {
  public:
- private:
+  virtual ~IMetricCollector() = default;
+
+  virtual void requestRejected() = 0;
+  virtual void requestRejectedServerOverloaded() = 0;
 };
 
 } // namespace apache::thrift

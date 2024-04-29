@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -291,6 +292,9 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   std::shared_ptr<Cpp2Connection> this_;
 
   bool connectionAdded_{false};
+
+ private:
+  IMetricCollector* const metricCollector_;
 };
 
 } // namespace thrift

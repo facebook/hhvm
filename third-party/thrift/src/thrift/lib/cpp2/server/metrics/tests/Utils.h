@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <folly/portability/GMock.h>
+
 #include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 
 #pragma once
@@ -22,7 +24,10 @@ namespace apache {
 namespace thrift {
 namespace testing {
 
-class MockMetricCollector : public IMetricCollector {};
+class MockMetricCollector : public IMetricCollector {
+  MOCK_METHOD(void, requestRejected, (), (override));
+  MOCK_METHOD(void, requestRejectedServerOverloaded, (), (override));
+};
 
 } // namespace testing
 } // namespace thrift

@@ -57,6 +57,7 @@ namespace apache {
 namespace thrift {
 
 class Cpp2ConnContext;
+class IMetricCollector;
 class RocketSinkClientCallback;
 class RocketStreamClientCallback;
 
@@ -92,7 +93,8 @@ class RocketServerConnection final
       std::unique_ptr<RocketServerHandler> frameHandler,
       MemoryTracker& ingressMemoryTracker,
       MemoryTracker& egressMemoryTracker,
-      const Config& cfg = {});
+      const Config& cfg = {},
+      IMetricCollector* metricCollector = nullptr);
 
   void send(
       std::unique_ptr<folly::IOBuf> data,
@@ -549,6 +551,8 @@ class RocketServerConnection final
 
   MemoryTracker& ingressMemoryTracker_;
   MemoryTracker& egressMemoryTracker_;
+
+  IMetricCollector* const metricCollector_;
 
   ~RocketServerConnection();
 

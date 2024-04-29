@@ -39,6 +39,7 @@ namespace thrift {
 
 class AsyncProcessor;
 class Cpp2ConnContext;
+class IMetricCollector;
 class RequestRpcMetadata;
 class ThriftRequestCore;
 using ThriftRequestCoreUniquePtr =
@@ -125,6 +126,8 @@ class ThriftRocketServerHandler : public RocketServerHandler {
   std::chrono::milliseconds maxResponseWriteTime_;
 
   folly::once_flag setupLoggingFlag_;
+
+  IMetricCollector* const metricCollector_;
 
   template <class F>
   void handleRequestCommon(

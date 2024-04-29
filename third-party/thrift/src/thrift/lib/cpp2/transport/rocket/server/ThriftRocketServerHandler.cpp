@@ -106,7 +106,8 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
       maxResponseWriteTime_(worker_->getServer()
                                 ->getThriftServerConfig()
                                 .getMaxResponseWriteTime()
-                                .get()) {
+                                .get()),
+      metricCollector_{worker_->getServer()->getMetricCollector()} {
   connContext_.setTransportType(Cpp2ConnContext::TransportType::ROCKET);
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&connContext_);
@@ -448,6 +449,9 @@ void ThriftRocketServerHandler::handleRequestCommon(
       if (auto* observer = serverConfigs_->getObserver()) {
         observer->taskKilled();
       }
+      if (metricCollector_) {
+        metricCollector_->requestRejected();
+      }
       handleRequestWithFdsExtractionFailure(
           makeActiveRequest(
               std::move(metadata),
@@ -676,6 +680,9 @@ void ThriftRocketServerHandler::handleRequestWithBadMetadata(
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
+  }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::UNSUPPORTED_CLIENT_TYPE,
@@ -688,6 +695,9 @@ void ThriftRocketServerHandler::handleRequestWithBadChecksum(
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
+  }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::CHECKSUM_MISMATCH, "Checksum mismatch"),
@@ -698,6 +708,9 @@ void ThriftRocketServerHandler::handleDecompressionFailure(
     ThriftRequestCoreUniquePtr request, std::string&& reason) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
+  }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -712,6 +725,9 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
     const std::string& errorMessage) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->serverOverloaded();
+  }
+  if (metricCollector_) {
+    metricCollector_->requestRejectedServerOverloaded();
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -729,6 +745,9 @@ void ThriftRocketServerHandler::handleQuotaExceededException(
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
+  }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::TENANT_QUOTA_EXCEEDED, errorMessage),
@@ -740,6 +759,9 @@ void ThriftRocketServerHandler::handleAppError(
     const PreprocessResult& appErrorResult) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
+  }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
   }
 
   folly::variant_match(
@@ -758,6 +780,9 @@ void ThriftRocketServerHandler::handleRequestWithFdsExtractionFailure(
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
+  }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::UNKNOWN, std::move(errorMessage)),
@@ -770,6 +795,9 @@ void ThriftRocketServerHandler::handleServerNotReady(
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
+  }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::LOADSHEDDING, "server not ready"),
@@ -780,6 +808,9 @@ void ThriftRocketServerHandler::handleServerShutdown(
     ThriftRequestCoreUniquePtr request) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
+  }
+  if (metricCollector_) {
+    metricCollector_->requestRejected();
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -793,6 +824,9 @@ void ThriftRocketServerHandler::handleInjectedFault(
     case InjectedFault::ERROR:
       if (auto* observer = serverConfigs_->getObserver()) {
         observer->taskKilled();
+      }
+      if (metricCollector_) {
+        metricCollector_->requestRejected();
       }
       request->sendErrorWrapped(
           folly::make_exception_wrapper<TApplicationException>(

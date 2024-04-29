@@ -148,7 +148,8 @@ Cpp2Connection::Cpp2Connection(
           worker_->getServer()->getClientIdentityHook(),
           worker_.get()),
       transport_(transport),
-      executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()) {
+      executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()),
+      metricCollector_{worker_->getServer()->getMetricCollector()} {
   processor_->coalesceWithServerScopedLegacyEventHandlers(
       *worker_->getServer());
   if (worker_->getServer()->resourcePoolSet().empty()) {
@@ -192,6 +193,9 @@ void Cpp2Connection::stop() {
       req->cancelRequest();
       if (auto* observer = worker_->getServer()->getObserver()) {
         observer->taskKilled();
+      }
+      if (metricCollector_) {
+        metricCollector_->requestRejected();
       }
     }
   }
@@ -298,6 +302,14 @@ void Cpp2Connection::killRequest(
       observer->serverOverloaded();
     } else {
       observer->taskKilled();
+    }
+  }
+  if (metricCollector_) {
+    if (reason ==
+        TApplicationException::TApplicationExceptionType::LOADSHEDDING) {
+      metricCollector_->requestRejectedServerOverloaded();
+    } else {
+      metricCollector_->requestRejected();
     }
   }
 

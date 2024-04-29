@@ -29,6 +29,7 @@
 #include <folly/io/async/AsyncTransport.h>
 
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
@@ -58,7 +59,8 @@ THRIFT_DETAIL_REGISTER_SERVER_EXTENSION_DEFAULT(
 
 } // namespace detail
 
-RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server) {
+RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server)
+    : metricCollector_{server.getMetricCollector()} {
   auto addSetupFramehandler = [&](auto&& handlerFactory) {
     if (auto handler = handlerFactory(server)) {
       setupFrameHandlers_.push_back(std::move(handler));

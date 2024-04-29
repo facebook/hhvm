@@ -151,11 +151,14 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void implLIterNext(IRLS& env, const IRInstruction* inst) {
-  always_assert(inst->is(LIterNext, LIterNextK));
-  auto const isKey = inst->is(LIterNextK);
+void implLIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
+  always_assert(inst->is(LIterNextArr, LIterNextArrK,
+                         LIterNextObj, LIterNextObjK));
+  auto const isArr = inst->is(LIterNextArr, LIterNextArrK);
+  auto const isKey = inst->is(LIterNextArrK, LIterNextObjK);
   auto const extra = &inst->extra<IterData>()->args;
 
+  auto const sync = isArr ? SyncOptions::None : SyncOptions::Sync;
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 1).reg();
     auto ret = argGroup(env, inst)
@@ -166,11 +169,8 @@ void implLIterNext(IRLS& env, const IRInstruction* inst) {
     return ret;
   }();
 
-  auto const target = isKey
-    ? CallSpec::direct(liter_next_key_ind)
-    : CallSpec::direct(liter_next_ind);
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  cgCallHelper(v, env, target, callDest(env, inst), sync, args);
 }
 
 void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
@@ -341,12 +341,20 @@ void cgIterNextK(IRLS& env, const IRInstruction* inst) {
   implIterNext(env, inst);
 }
 
-void cgLIterNext(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst);
+void cgLIterNextArr(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst, CallSpec::direct(liter_array_next_ind));
 }
 
-void cgLIterNextK(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst);
+void cgLIterNextArrK(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst, CallSpec::direct(liter_array_next_key_ind));
+}
+
+void cgLIterNextObj(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst, CallSpec::direct(liter_object_next_ind));
+}
+
+void cgLIterNextObjK(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst, CallSpec::direct(liter_object_next_key_ind));
 }
 
 void cgIterFree(IRLS& env, const IRInstruction* inst) {

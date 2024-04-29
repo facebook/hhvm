@@ -194,14 +194,10 @@ void emitLIterNext(IRGS& env, IterArgs ita,
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
 
-  auto const result = [&]{
-    if (base->isA(TArrLike)) {
-      auto const op = ita.hasKey() ? LIterNextK : LIterNext;
-      return gen(env, op, IterData(ita), base, fp(env));
-    }
-    auto const op = ita.hasKey() ? IterNextK : IterNext;
-    return gen(env, op, IterData(ita), fp(env));
-  }();
+  auto const op = base->isA(TArrLike)
+    ? ita.hasKey() ? LIterNextArrK : LIterNextArr
+    : ita.hasKey() ? LIterNextObjK : LIterNextObj;
+  auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, loopOffset, result, ita.iterId);
 }

@@ -615,20 +615,50 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 //
 // Since local iterators are always over arrays, we take an ArrayData here.
 NEVER_INLINE
-int64_t liter_next_cold(Iter* iter,
-                        const ArrayData* ad,
-                        TypedValue* valOut,
-                        TypedValue* keyOut) {
+int64_t liter_array_next_cold(Iter* iter,
+                              const ArrayData* ad,
+                              TypedValue* valOut,
+                              TypedValue* keyOut) {
   auto const ai = unwrap(iter);
   assertx(ai->hasArrayData());
   assertx(!ai->getArrayData());
   if (ai->nextLocal(ad)) {
-    ai->~IterImpl();
+    ai->kill();
     return 0;
   }
   liter_value_cell_local_impl(iter, valOut, ad);
   if (keyOut) liter_key_cell_local_impl(iter, keyOut, ad);
   return 1;
+}
+
+uint64_t liter_object_next_impl(Iter* iter,
+                                ObjectData* obj,
+                                TypedValue* valOut,
+                                TypedValue* keyOut) {
+  obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
+
+  auto const end =
+    !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
+  if (end) {
+    // As of now, LIterInit still stores the object into the iter, so it needs
+    // to be decRefd upon end of iteration.
+    decRefObj(unwrap(iter)->getObject());
+    return 0LL;
+  }
+
+  tvMove(
+    obj->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0).detach(),
+    *valOut
+  );
+
+  if (keyOut) {
+    tvMove(
+      obj->o_invoke_few_args(s_key, RuntimeCoeffects::fixme(), 0).detach(),
+      *keyOut
+    );
+  }
+
+  return 1LL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -816,7 +846,7 @@ int64_t iterNextArray(Iter* it, TypedValue* valOut) {
 
 int64_t literNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArray: I %p\n", it);
-  return liter_next_cold(it, ad, valOut, nullptr);
+  return liter_array_next_cold(it, ad, valOut, nullptr);
 }
 
 int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
@@ -826,7 +856,7 @@ int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
 
 int64_t literNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArray: I %p\n", it);
-  return liter_next_cold(it, ad, valOut, keyOut);
+  return liter_array_next_cold(it, ad, valOut, keyOut);
 }
 
 int64_t iterNextObject(Iter* it, TypedValue* valOut) {
@@ -945,8 +975,8 @@ int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return helper(iter, valOut, keyOut);
 }
 
-int64_t liter_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "liter_next_ind: I %p\n", iter);
+int64_t liter_array_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
+  TRACE(2, "liter_array_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   auto const index = unwrap(iter)->getHelperIndex();
@@ -954,17 +984,35 @@ int64_t liter_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
   return helper(iter, valOut, ad);
 }
 
-int64_t liter_next_key_ind(Iter* iter,
-                           TypedValue* valOut,
-                           TypedValue* keyOut,
-                           ArrayData* ad) {
-  TRACE(2, "liter_next_key_ind: I %p\n", iter);
+int64_t liter_array_next_key_ind(Iter* iter,
+                                 TypedValue* valOut,
+                                 TypedValue* keyOut,
+                                 ArrayData* ad) {
+  TRACE(2, "liter_array_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
   auto const index = unwrap(iter)->getHelperIndex();
   LIterNextKHelper helper = g_literNextKHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, keyOut, ad);
+}
+
+int64_t liter_object_next_ind(Iter* iter, TypedValue* valOut, ObjectData* obj) {
+  TRACE(2, "liter_object_next_ind: I %p\n", iter);
+  assertx(unwrap(iter)->checkInvariants(nullptr));
+  assertx(tvIsPlausible(*valOut));
+  return liter_object_next_impl(iter, obj, valOut, nullptr);
+}
+
+int64_t liter_object_next_key_ind(Iter* iter,
+                                 TypedValue* valOut,
+                                 TypedValue* keyOut,
+                                 ObjectData* obj) {
+  TRACE(2, "liter_object_next_key_ind: I %p\n", iter);
+  assertx(unwrap(iter)->checkInvariants(nullptr));
+  assertx(tvIsPlausible(*valOut));
+  assertx(tvIsPlausible(*keyOut));
+  return liter_object_next_impl(iter, obj, valOut, keyOut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -4426,17 +4426,25 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
 }
 
 void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
-  auto val = frame_local(vmfp(), ita.valId);
+  auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  auto const more = [&]{
-    if (base != nullptr && isArrayLikeType(base->m_type)) {
-      auto const arr = base->m_data.parr;
-      return key ? liter_next_key_ind(it, val, key, arr)
-                 : liter_next_ind(it, val, arr);
+  auto const more = [&] {
+    if (base != nullptr) {
+      if (isArrayLikeType(type(base))) {
+        auto const arr = val(base).parr;
+        return key
+          ? liter_array_next_key_ind(it, value, key, arr)
+          : liter_array_next_ind(it, value, arr);
+      }
+      assertx(isObjectType(type(base)));
+      auto const obj = val(base).pobj;
+      return key
+        ? liter_object_next_key_ind(it, value, key, obj)
+        : liter_object_next_ind(it, value, obj);
     }
-    return key ? iter_next_key_ind(it, val, key) : iter_next_ind(it, val);
+    return key ? iter_next_key_ind(it, value, key) : iter_next_ind(it, value);
   }();
 
   if (more) {

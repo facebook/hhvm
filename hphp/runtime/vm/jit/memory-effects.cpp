@@ -848,7 +848,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInit:
   case LIterInit:
   case IterNext:
-  case LIterNext: {
+  case LIterNextArr:
+  case LIterNextObj: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(!args.hasKey());
     auto const fp = inst.src(inst.op() == IterNext ? 0 : 1);
@@ -859,7 +860,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInitK:
   case LIterInitK:
   case IterNextK:
-  case LIterNextK: {
+  case LIterNextArrK:
+  case LIterNextObjK: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(args.hasKey());
     auto const fp = inst.src(inst.op() == IterNextK ? 0 : 1);

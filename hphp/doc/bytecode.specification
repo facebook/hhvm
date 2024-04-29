@@ -2789,8 +2789,8 @@ LIterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 
   Iterator next with local. The iterator with ID given in %1 must have been
   initialized with LIterInit. This instructions behaves similarily to IterNext,
-  except that if %2 is an array-like, it will use this local as the iterator's
-  base rather than the one stored in the iterator.
+  except that it will use the %2 local as the iterator's base rather than the
+  one stored in the iterator.
 
 IterFree <iterator id>    []  ->  []
 

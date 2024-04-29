@@ -2815,9 +2815,13 @@ ReqBindJmp and CallFuncEntry.
 
 | IterNextK<IterData>,  D(Bool), S(FramePtr), NF
 
-| LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
+| LIterNextArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterNextK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+| LIterNextArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+
+| LIterNextObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
+
+| LIterNextObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local

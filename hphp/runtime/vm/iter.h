@@ -397,7 +397,7 @@ struct alignas(16) Iter {
   static TypedValue extractBase(TypedValue base, const Class* ctx);
 
   // Returns true if there are more elems. Only used for non-local iterators.
-  // For local iterators, use liter_next_ind / liter_next_key_ind below.
+  // For local iterators, use liter_*_next_ind / liter_*_next_key_ind below.
   bool next();
 
   // Returns true if the iterator is at its end.
@@ -462,8 +462,10 @@ int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
 NEVER_INLINE int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
-NEVER_INLINE int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t liter_array_next_ind(Iter*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t liter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t liter_object_next_ind(Iter*, TypedValue*, ObjectData*);
+NEVER_INLINE int64_t liter_object_next_key_ind(Iter*, TypedValue*, TypedValue*, ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

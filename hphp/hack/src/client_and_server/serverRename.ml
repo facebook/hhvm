@@ -266,7 +266,7 @@ let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
   | Decl_entry.NotYetAvailable ->
     false
   | Decl_entry.Found cls ->
-    (match Decl_provider.Class.kind cls with
+    (match Folded_class.kind cls with
     | Ast_defs.Cinterface -> true
     | _ -> false)
 
@@ -380,7 +380,7 @@ let get_deprecated_wrapper_patch
 
 let method_might_support_dynamic ctx ~class_name ~method_name =
   let open Option.Monad_infix in
-  let module Class = Decl_provider.Class in
+  let module Class = Folded_class in
   let sd_enabled =
     TypecheckerOptions.enable_sound_dynamic @@ Provider_context.get_tcopt ctx
   in

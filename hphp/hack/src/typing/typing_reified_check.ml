@@ -12,7 +12,7 @@ open Typing_defs
 module Env = Typing_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Nast = Aast
 
 let validator =

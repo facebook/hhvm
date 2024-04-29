@@ -8,7 +8,7 @@
  *)
 open Hh_prelude
 open Sys_utils
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (*****************************************************************************)
 (* Profiling utilities *)

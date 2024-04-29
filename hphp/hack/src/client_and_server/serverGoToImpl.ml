@@ -62,7 +62,7 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
     let origin_decl = Decl_provider.get_class ctx class_elt.ce_origin in
     match origin_decl with
     | Decl_entry.Found origin_decl ->
-      let origin_kind = Decl_provider.Class.kind origin_decl in
+      let origin_kind = Folded_class.kind origin_decl in
       if Ast_defs.is_c_trait origin_kind then
         ( method_name,
           Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx )
@@ -82,12 +82,12 @@ let find_positions_of_methods
       let class_decl = Decl_provider.get_class ctx child_class in
       match class_decl with
       | Decl_entry.Found decl ->
-        let method_info = Decl_provider.Class.get_method decl method_name in
+        let method_info = Folded_class.get_method decl method_name in
         (match method_info with
         | Some class_elt ->
           add_if_valid_origin ctx class_elt child_class method_name result
         | None ->
-          let smethod_info = Decl_provider.Class.get_smethod decl method_name in
+          let smethod_info = Folded_class.get_smethod decl method_name in
           (match smethod_info with
           | Some class_elt ->
             add_if_valid_origin ctx class_elt child_class method_name result

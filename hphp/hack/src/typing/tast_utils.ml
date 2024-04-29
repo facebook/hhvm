@@ -13,7 +13,7 @@ open Aast_defs
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 (** Return true if ty definitely does not contain null.  I.e., the

@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 open Typing_const_reifiable
 
 let handler =

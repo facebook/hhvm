@@ -201,7 +201,7 @@ type typeconst_type = {
           [Pos_or_decl.none].
 
           To manage the difference between legacy and shallow decl, use
-          [Typing_classes_heap.Api.get_typeconst_enforceability] rather than
+          [Folded_class.get_typeconst_enforceability] rather than
           accessing this field directly. *)
   ttc_reifiable: Pos_or_decl.t option;
   ttc_concretized: bool;

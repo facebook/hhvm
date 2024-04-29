@@ -11,7 +11,7 @@ open Utils
 open Typing_defs
 open Typing_kinding_defs
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module KindDefs = Typing_kinding_defs
 module TGenConstraint = Typing_generic_constraint
 module TUtils = Typing_utils

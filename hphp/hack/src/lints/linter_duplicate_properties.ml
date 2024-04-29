@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* efficient check for List.length l > 1 *)
 let more_than_one l =
@@ -48,7 +48,7 @@ let is_trait_name ctx (type_name : string) : bool =
 let all_ancestor_names ctx (type_name : string) : string list =
   let decl = Decl_provider.get_class ctx type_name in
   match decl with
-  | Decl_entry.Found decl -> Decl_provider.Class.all_ancestor_names decl
+  | Decl_entry.Found decl -> Folded_class.all_ancestor_names decl
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     []

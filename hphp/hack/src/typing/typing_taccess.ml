@@ -15,7 +15,7 @@ module Env = Typing_env
 module Log = Typing_log
 module Phase = Typing_phase
 module TySet = Typing_set
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module MakeType = Typing_make_type
 
 (* A guiding principle when expanding a type access C::T is that if C <: D and

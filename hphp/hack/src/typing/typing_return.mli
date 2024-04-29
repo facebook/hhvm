@@ -30,7 +30,7 @@ val implicit_return :
 
 val make_return_type :
   ety_env:Typing_defs.expand_env ->
-  this_class:Decl_provider.Class.t option ->
+  this_class:Folded_class.t option ->
   ?is_toplevel:bool ->
   (* Wrap return type with supportdyn, used when checking SDT functions and methods *)
   supportdyn:bool ->

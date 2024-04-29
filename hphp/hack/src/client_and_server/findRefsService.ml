@@ -12,7 +12,7 @@ open Option.Monad_infix
 open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 type member_class =
   | Class_set of SSet.t

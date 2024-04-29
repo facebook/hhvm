@@ -11,7 +11,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let get_name dty =
   match get_node dty with

@@ -11,7 +11,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)

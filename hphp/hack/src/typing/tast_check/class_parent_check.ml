@@ -10,7 +10,7 @@
 open Aast
 open Base
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let check_is_class env ~require_class_check (p, h) =
   match h with

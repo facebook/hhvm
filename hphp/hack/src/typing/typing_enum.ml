@@ -17,7 +17,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Phase = Typing_phase
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module MakeType = Typing_make_type
 
 let member_type env member_ce =

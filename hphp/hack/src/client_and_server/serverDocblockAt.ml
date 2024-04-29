@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let get_all_ancestors ctx class_name =
   let rec helper classes_to_check cinfos seen_classes =

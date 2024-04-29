@@ -16,13 +16,9 @@ type gconst_key = string
 
 type module_key = string
 
-module Class : sig
-  include module type of Typing_classes_heap.Api
-end
-
 type fun_decl = Typing_defs.fun_elt
 
-type class_decl = Class.t
+type class_decl = Folded_class.t
 
 type typedef_decl = Typing_defs.typedef_type
 

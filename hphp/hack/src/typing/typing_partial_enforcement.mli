@@ -8,6 +8,6 @@
 
 val get_enforced_type :
   Typing_env_types.env ->
-  Decl_provider.Class.t option ->
+  Folded_class.t option ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty

@@ -14,7 +14,7 @@ module SN = Naming_special_names
 
 type class_t = Typing_class_types.class_t [@@deriving show]
 
-let make_class_t x = x
+let make x = x
 
 module ApiShallow = struct
   let abstract (decl, t, _ctx) =
@@ -414,29 +414,26 @@ module ApiEager = struct
     >>= Decl_inherit.find_overridden_method ~get_method
 end
 
-module Api = struct
-  type t =
-    (Decl_counters.decl option[@opaque])
-    * class_t
-    * (Provider_context.t[@opaque]) option
-  [@@deriving show]
+type t =
+  (Decl_counters.decl option[@opaque])
+  * class_t
+  * (Provider_context.t[@opaque]) option
+[@@deriving show]
 
-  include ApiShallow
-  include ApiLazy
-  include ApiEager
+include ApiShallow
+include ApiLazy
+include ApiEager
 
-  let deferred_init_members (decl, t, _ctx) =
-    Decl_counters.count_subdecl decl Decl_counters.Deferred_init_members
-    @@ fun () ->
-    let (c, _) = t in
-    c.Decl_defs.dc_deferred_init_members
+let deferred_init_members (decl, t, _ctx) =
+  Decl_counters.count_subdecl decl Decl_counters.Deferred_init_members
+  @@ fun () ->
+  let (c, _) = t in
+  c.Decl_defs.dc_deferred_init_members
 
-  let valid_newable_class cls =
-    if Ast_defs.is_c_class (kind cls) then
-      final cls
-      || not (equal_consistent_kind (snd (construct cls)) Inconsistent)
-    (* There is currently a bug with interfaces that allows constructors to change
-     * their signature, so they are not considered here. TODO: T41093452 *)
-    else
-      false
-end
+let valid_newable_class cls =
+  if Ast_defs.is_c_class (kind cls) then
+    final cls || not (equal_consistent_kind (snd (construct cls)) Inconsistent)
+  (* There is currently a bug with interfaces that allows constructors to change
+   * their signature, so they are not considered here. TODO: T41093452 *)
+  else
+    false

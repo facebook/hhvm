@@ -17,7 +17,7 @@ open SearchTypes
 include AutocompleteTypes
 open Tast
 module Phase = Typing_phase
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Syntax = Full_fidelity_positioned_syntax
 module Trivia = Full_fidelity_positioned_trivia
 

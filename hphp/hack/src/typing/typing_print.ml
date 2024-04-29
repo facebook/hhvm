@@ -19,7 +19,7 @@ open Typing_logic
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Nast = Aast
 module ITySet = Internal_type_set
 

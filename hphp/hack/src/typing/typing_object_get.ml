@@ -21,7 +21,7 @@ module SN = Naming_special_names
 module TVis = Typing_visibility
 module Phase = Typing_phase
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 type ty_mismatch = (locl_ty, locl_ty * locl_ty) result
 

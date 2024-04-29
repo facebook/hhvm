@@ -12,7 +12,7 @@ open Typing_reason
 open Typing_env_types
 module SN = Naming_special_names
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 type attribute_interface_name = string
 

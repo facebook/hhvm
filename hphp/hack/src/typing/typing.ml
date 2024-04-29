@@ -43,7 +43,7 @@ module CMap = C.Map
 module Try = Typing_try
 module FL = FeatureLogging
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
 module ITySet = Internal_type_set
@@ -8308,7 +8308,7 @@ and Lambda : sig
     env * Tast.stmt list
 
   val check_function_dynamically_callable :
-    this_class:Decl_provider.Class.t option ->
+    this_class:Folded_class.t option ->
     Typing_env_types.env ->
     Aast_defs.sid option ->
     Nast.fun_ ->

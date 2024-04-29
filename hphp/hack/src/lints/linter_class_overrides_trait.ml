@@ -12,7 +12,7 @@
 
 open Hh_prelude
 open Aast
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let trait_name_from_hint th =
   match th with

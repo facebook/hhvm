@@ -20,7 +20,7 @@ module TUtils = Typing_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module SN = Naming_special_names
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module MakeType = Typing_make_type
 module TCO = TypecheckerOptions
 

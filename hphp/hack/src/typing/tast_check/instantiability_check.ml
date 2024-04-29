@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 module SN = Naming_special_names
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* This TAST check raises an error when an abstract final
    class or a trait appears outside of classname<_>. *)

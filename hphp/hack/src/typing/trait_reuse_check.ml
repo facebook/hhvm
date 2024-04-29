@@ -9,7 +9,7 @@
 (** Ban reuse of traits that have final methods. *)
 
 open Hh_prelude
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Typing_env
 
 let strip_ns = Utils.strip_ns

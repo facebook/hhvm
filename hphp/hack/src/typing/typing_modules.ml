@@ -9,7 +9,7 @@
 open Hh_prelude
 open Typing_defs
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* If no module name is declared, treat as a default module *)
 let declared_module_name_with_default module_opt =

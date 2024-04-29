@@ -9,7 +9,7 @@
 open Typing_env_types
 open Decl_provider
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module TPEnv = Type_parameter_env
 
 type 'a class_or_typedef_result =
@@ -135,9 +135,7 @@ val get_fun :
 val get_typedef : env -> type_key -> typedef_decl Decl_entry.t
 
 val get_class_or_typedef :
-  env ->
-  type_key ->
-  Typing_classes_heap.Api.t class_or_typedef_result Decl_entry.t
+  env -> type_key -> Folded_class.t class_or_typedef_result Decl_entry.t
 
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option

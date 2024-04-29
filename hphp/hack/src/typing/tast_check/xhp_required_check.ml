@@ -10,7 +10,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Tast_env
 
 let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =

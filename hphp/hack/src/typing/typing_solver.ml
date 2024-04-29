@@ -18,7 +18,7 @@ module ITySet = Internal_type_set
 module TL = Typing_logic
 module TUtils = Typing_utils
 module Utils = Typing_solver_utils
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 

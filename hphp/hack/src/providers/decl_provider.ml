@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Class = Typing_classes_heap.Api
+module Class = Folded_class
 
 type fun_key = string
 
@@ -19,7 +19,7 @@ type module_key = string
 
 type fun_decl = Typing_defs.fun_elt
 
-type class_decl = Typing_classes_heap.Api.t
+type class_decl = Folded_class.t
 
 type typedef_decl = Typing_defs.typedef_type
 
@@ -137,7 +137,7 @@ let get_class
   | Provider_backend.Pessimised_shared_memory _ -> begin
     (* No pessimisation needs to be done here directly. All pessimisation is
      * done on the shallow classes within [Shallow_classes_provider] that the
-     * [Typing_classes_heap.Api.t] returned here is constructed from
+     * [Folded_class.t] returned here is constructed from
      * Crucially, we do not use the [Cache] here, which would contain
      * outdated member types once we update its members during
      * pessimisation. *)
@@ -170,7 +170,7 @@ let get_class
     | None -> Decl_entry.DoesNotExist
     | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end)
-  |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Typing_classes_heap.make_class_t)
+  |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Folded_class.make)
 
 let maybe_pessimise_fun_decl ctx fun_decl =
   if Provider_context.implicit_sdt_for_fun ctx fun_decl then

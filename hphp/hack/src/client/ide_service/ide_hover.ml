@@ -45,7 +45,7 @@ let typedef_docs_url ctx name : string option =
 let classish_docs_url ctx classish_name : string option =
   let docs_url name =
     match Decl_provider.get_class ctx name with
-    | Decl_entry.Found decl -> Decl_provider.Class.get_docs_url decl
+    | Decl_entry.Found decl -> Folded_class.get_docs_url decl
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
       None
@@ -54,7 +54,7 @@ let classish_docs_url ctx classish_name : string option =
   let qualified_name = "\\" ^ classish_name in
   let ancestors =
     match Decl_provider.get_class ctx qualified_name with
-    | Decl_entry.Found decl -> Decl_provider.Class.all_ancestor_names decl
+    | Decl_entry.Found decl -> Folded_class.all_ancestor_names decl
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
       []
@@ -116,7 +116,7 @@ let callee_def_pos ctx recv : Pos_or_decl.t option =
       Option.map f ~f:(fun fe -> fe.Typing_defs.fe_pos)
     | MethodReceiver { cls_name; _ } ->
       let c = Decl_provider.get_class ctx cls_name |> Decl_entry.to_option in
-      Option.map c ~f:Decl_provider.Class.pos)
+      Option.map c ~f:Folded_class.pos)
 
 (* Return the name of the [n]th parameter in [params], handling
    variadics correctly. *)
@@ -440,7 +440,7 @@ let make_hover_info under_dynamic_result ctx env_and_ty entry occurrence def_opt
             Option.Monad_infix.(
               Decl_provider.get_class ctx classname |> Decl_entry.to_option
               >>= fun c ->
-              fst (Decl_provider.Class.construct c) >>| fun elt ->
+              fst (Folded_class.construct c) >>| fun elt ->
               let ty = Lazy.force_val elt.ce_type in
               Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)
           in

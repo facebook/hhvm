@@ -9,7 +9,7 @@
 
 (* Typing code concerned with disposable types. *)
 
-val is_disposable_class : Typing_env_types.env -> Decl_provider.Class.t -> bool
+val is_disposable_class : Typing_env_types.env -> Folded_class.t -> bool
 
 val is_disposable_visitor :
   Typing_env_types.env -> string option Type_visitor.locl_type_visitor

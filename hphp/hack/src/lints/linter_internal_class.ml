@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let check_internal_classname pos ci env =

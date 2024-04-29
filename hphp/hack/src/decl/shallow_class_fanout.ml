@@ -283,21 +283,21 @@ let get_added_parent_fanout
         (List.map members ~f:(fun m -> (fst m, Added)) |> SMap.of_list)
     in
     let consts =
-      Decl_provider.Class.consts cls
+      Folded_class.consts cls
       |> List.filter ~f:(fun (name, _) ->
              not @@ String.equal name Naming_special_names.Members.mClass)
     in
     let to_recheck =
       to_recheck
-      |> acc_fanouts Dep.Member.method_ (Decl_provider.Class.methods cls)
-      |> acc_fanouts Dep.Member.smethod (Decl_provider.Class.smethods cls)
-      |> acc_fanouts Dep.Member.prop (Decl_provider.Class.props cls)
-      |> acc_fanouts Dep.Member.sprop (Decl_provider.Class.sprops cls)
+      |> acc_fanouts Dep.Member.method_ (Folded_class.methods cls)
+      |> acc_fanouts Dep.Member.smethod (Folded_class.smethods cls)
+      |> acc_fanouts Dep.Member.prop (Folded_class.props cls)
+      |> acc_fanouts Dep.Member.sprop (Folded_class.sprops cls)
       |> acc_fanouts Dep.Member.const consts
-      |> acc_fanouts Dep.Member.const (Decl_provider.Class.typeconsts cls)
+      |> acc_fanouts Dep.Member.const (Folded_class.typeconsts cls)
     in
     let to_recheck =
-      let (construct, _consistent_kind) = Decl_provider.Class.construct cls in
+      let (construct, _consistent_kind) = Folded_class.construct cls in
       Option.fold construct ~init:to_recheck ~f:(fun to_recheck _construct ->
           acc_fanout Dep.Member.constructor to_recheck)
     in

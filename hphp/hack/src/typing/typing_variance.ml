@@ -11,7 +11,7 @@ open Hh_prelude
 open Typing_defs
 open Utils
 module SN = Naming_special_names
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).

@@ -15,7 +15,7 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 module SN = Naming_special_names
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let strip_awaitable fun_kind env ty =
   if not Ast_defs.(equal_fun_kind fun_kind FAsync) then

@@ -13,7 +13,7 @@ module Reason = Typing_reason
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 module Typing = Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel =
   (* Enum class label === only consider the label name. No type information

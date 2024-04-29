@@ -11,7 +11,7 @@ open Aast
 open Base
 open Typing_defs
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let error_inherited_base
     env member_type base_name parent_name base_elt parent_elt : unit =

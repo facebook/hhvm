@@ -17,7 +17,7 @@ module Inf = Typing_inference_env
 module LID = Local_id
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Fake = Typing_fake_members
 module ITySet = Internal_type_set
 module TPEnv = Type_parameter_env
@@ -746,7 +746,8 @@ let add_parent_dep env ~skip_constructor_dep ~is_req name : unit =
   let _ = get_parent env ~skip_constructor_dep ~is_req name in
   ()
 
-let get_class_or_typedef env x =
+let get_class_or_typedef env x :
+    Folded_class.t class_or_typedef_result Decl_entry.t =
   if is_typedef env x then
     Decl_entry.map (get_typedef env x) ~f:(fun td -> TypedefResult td)
   else

@@ -24,5 +24,5 @@ val check_implements_extends_uses :
   Typing_env_types.env ->
   implements:Typing_defs.decl_ty list ->
   parents:(Aast.hint * Typing_defs.decl_ty) list ->
-  Nast.class_ * Decl_provider.Class.t ->
+  Nast.class_ * Folded_class.t ->
   Typing_env_types.env

@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Typing_env
 module MakeType = Typing_make_type
 

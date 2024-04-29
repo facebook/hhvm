@@ -74,7 +74,7 @@ class virtual type_validator :
 
     method on_typeconst :
       validation_state ->
-      Decl_provider.Class.t ->
+      Folded_class.t ->
       Typing_defs.typeconst_type ->
       validation_state
 

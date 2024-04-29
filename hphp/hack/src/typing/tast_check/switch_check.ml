@@ -12,7 +12,7 @@ open Aast
 open Typing_defs
 open Utils
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason

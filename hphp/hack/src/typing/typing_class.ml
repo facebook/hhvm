@@ -21,7 +21,7 @@ module Subst = Decl_subst
 module EnvFromDef = Typing_env_from_def
 module TUtils = Typing_utils
 module TCO = TypecheckerOptions
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 

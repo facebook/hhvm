@@ -42,14 +42,14 @@ module EnumInfo = struct
 
   let of_decl ?(filter = (fun _ -> true)) decl ~name =
     decl
-    |> Decl_provider.Class.consts
+    |> Folded_class.consts
     |> List.filter_map ~f:(fun ((name, _) as elem) ->
            if String.(name <> "class") && filter elem then
              Some (Utils.strip_ns name)
            else
              None)
     |> EnumConstSet.of_list
-    |> fun consts -> { name; decl_pos = Decl_provider.Class.pos decl; consts }
+    |> fun consts -> { name; decl_pos = Folded_class.pos decl; consts }
 
   let of_env env name =
     Decl_entry.to_option (Tast_env.get_enum env name)

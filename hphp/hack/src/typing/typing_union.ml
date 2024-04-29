@@ -16,7 +16,7 @@ module TySet = Typing_set
 module Utils = Typing_utils
 module MakeType = Typing_make_type
 module Nast = Aast
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 exception Dont_simplify
 

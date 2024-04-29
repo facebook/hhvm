@@ -8,7 +8,7 @@
  *)
 open Hh_prelude
 open Aast
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason

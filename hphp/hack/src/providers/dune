@@ -82,7 +82,7 @@
   rust_provider_backend_stubs
   shallow_decl_defs
   decl_provider_internals
-  typing_heap)
+  folded_class)
  (preprocess
   (pps ppx_deriving.std)))
 

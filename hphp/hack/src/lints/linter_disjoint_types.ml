@@ -10,7 +10,7 @@
 open Common
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Tast_env
 module SN = Naming_special_names
 

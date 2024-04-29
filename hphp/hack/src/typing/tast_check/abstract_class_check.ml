@@ -10,7 +10,7 @@
 open Aast
 open Hh_prelude
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let check_expr env (_, pos, e) =

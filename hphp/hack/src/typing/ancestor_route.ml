@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Typing_env
 
 (* Find dependency routes between classish types.

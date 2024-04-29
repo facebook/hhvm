@@ -10,7 +10,7 @@
 open Hh_prelude
 module TUtils = Typing_utils
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)

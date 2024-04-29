@@ -15,7 +15,7 @@ val make_depend_on_fun :
   Typing_env_types.env -> string -> Typing_defs.fun_elt Decl_entry.t -> unit
 
 val make_depend_on_class :
-  Typing_env_types.env -> string -> Decl_provider.Class.t Decl_entry.t -> unit
+  Typing_env_types.env -> string -> Folded_class.t Decl_entry.t -> unit
 
 val make_depend_on_module :
   Typing_env_types.env -> string -> Typing_defs.module_def_type option -> unit
@@ -28,17 +28,16 @@ val make_depend_on_typedef :
   Typing_defs.typedef_type Decl_entry.t ->
   unit
 
-val make_depend_on_constructor :
-  Typing_env_types.env -> Decl_provider.Class.t -> unit
+val make_depend_on_constructor : Typing_env_types.env -> Folded_class.t -> unit
 
 val make_depend_on_class_const :
-  Typing_env_types.env -> Decl_provider.Class.t -> string -> unit
+  Typing_env_types.env -> Folded_class.t -> string -> unit
 
 val add_member_dep :
   is_method:bool ->
   is_static:bool ->
   Typing_env_types.env ->
-  Decl_provider.Class.t ->
+  Folded_class.t ->
   string ->
   Typing_defs.class_elt option ->
   unit
@@ -48,7 +47,7 @@ val make_depend_on_parent :
   skip_constructor_dep:bool ->
   is_req:bool ->
   string ->
-  Decl_provider.Class.t Decl_entry.t ->
+  Folded_class.t Decl_entry.t ->
   unit
 
 val add_not_subtype_dep : Typing_env_types.env -> string -> unit

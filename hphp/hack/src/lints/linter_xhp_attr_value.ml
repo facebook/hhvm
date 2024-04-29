@@ -8,7 +8,7 @@
 
 open Hh_prelude
 open Aast
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (** If [attr_name] is an enum attribute on [cls], return the list of allowed values. *)
 let xhp_enum_attr_values env (cls : Cls.t) (attr_name : string) :

@@ -110,11 +110,11 @@ let get_occurrence_info
         |> Decl_entry.to_option
         |> Option.bind ~f:(fun cls ->
                if String.equal methodname "__construct" then
-                 Decl_provider.Class.construct cls |> fst
+                 Folded_class.construct cls |> fst
                else
                  Option.first_some
-                   (Decl_provider.Class.get_method cls methodname)
-                   (Decl_provider.Class.get_smethod cls methodname))
+                   (Folded_class.get_method cls methodname)
+                   (Folded_class.get_smethod cls methodname))
         |> Option.map ~f:(fun class_elt ->
                (* We'll convert class_elt to fun_decl here solely as a lazy
                   convenience, so that the "display" code below can display

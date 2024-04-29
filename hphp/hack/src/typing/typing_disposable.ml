@@ -11,7 +11,7 @@
 
 open Hh_prelude
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let is_disposable_class env cls =
   let name = Cls.name cls in

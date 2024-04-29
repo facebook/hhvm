@@ -10,7 +10,7 @@
 open Hh_prelude
 open ServerCommandTypes.Method_jumps
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let string_filter_to_method_jump_filter = function
   | "No_filter" -> Some No_filter

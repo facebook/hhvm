@@ -10,7 +10,7 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Typing_env
 
 module FoldedContextAccess :

@@ -26,7 +26,7 @@ open Hh_prelude
 open Aast
 module MakeType = Typing_make_type
 module Reason = Typing_reason
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
 module GlobalAccessCheck = Error_codes.GlobalAccessCheck

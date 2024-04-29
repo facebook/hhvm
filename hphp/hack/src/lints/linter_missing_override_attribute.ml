@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let has_override_attribute m =

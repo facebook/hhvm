@@ -16,7 +16,7 @@ module Phase = Typing_phase
 module Reason = Typing_reason
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let raise_xhp_required env pos ureason ty =

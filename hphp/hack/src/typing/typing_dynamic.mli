@@ -18,7 +18,7 @@ val check_property_sound_for_dynamic_read :
   Typing_error.t option
 
 val check_property_sound_for_dynamic_write :
-  this_class:Decl_provider.Class.t option ->
+  this_class:Folded_class.t option ->
   on_error:('a -> string -> string -> Pos_or_decl.t * string -> Typing_error.t) ->
   Typing_env_types.env ->
   string ->
@@ -31,7 +31,7 @@ val check_property_sound_for_dynamic_write :
  * i.e. (1) present, and (2) fully-enforced, or `dynamic`.
  *)
 val function_parameters_safe_for_dynamic :
-  this_class:Decl_provider.Class.t option ->
+  this_class:Folded_class.t option ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option list ->
   bool
@@ -41,14 +41,14 @@ val function_parameters_safe_for_dynamic :
    coerced to dynamic *)
 
 val sound_dynamic_interface_check :
-  this_class:Decl_provider.Class.t option ->
+  this_class:Folded_class.t option ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->
   bool
 
 val sound_dynamic_interface_check_from_fun_ty :
-  this_class:Decl_provider.Class.t option ->
+  this_class:Folded_class.t option ->
   Typing_env_types.env ->
   Typing_defs.decl_ty Typing_defs.fun_type ->
   bool

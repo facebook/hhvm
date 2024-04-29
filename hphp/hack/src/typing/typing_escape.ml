@@ -10,7 +10,7 @@
 open Hh_prelude
 open Common
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Typing_env
 module ITySet = Internal_type_set
 module Reason = Typing_reason

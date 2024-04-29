@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b08d45e342feb031f7cceeb2fa66525b>>
+// @generated SignedSource<<dc608979932e44b8c44860c21514af21>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -435,7 +435,7 @@ pub struct TypeconstType {
     /// [Pos_or_decl.none].
     ///
     /// To manage the difference between legacy and shallow decl, use
-    /// [Typing_classes_heap.Api.get_typeconst_enforceability] rather than
+    /// [Folded_class.get_typeconst_enforceability] rather than
     /// accessing this field directly.
     pub enforceable: (pos_or_decl::PosOrDecl, bool),
     pub reifiable: Option<pos_or_decl::PosOrDecl>,

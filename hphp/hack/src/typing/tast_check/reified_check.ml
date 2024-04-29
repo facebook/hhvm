@@ -14,7 +14,7 @@ open Typing_reified_check (* validator *)
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Nast = Aast
 
 let is_reified tparam = not (equal_reify_kind tparam.tp_reified Erased)

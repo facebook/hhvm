@@ -13,7 +13,7 @@ open Common
 module Env = Typing_env
 module SN = Naming_special_names
 module Reason = Typing_reason
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* Add `supportdyn<mixed>` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
  * Just add the upper bound to others. *)

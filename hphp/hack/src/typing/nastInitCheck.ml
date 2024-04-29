@@ -258,7 +258,7 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
   | Decl_entry.NotYetAvailable ->
     Pos_or_decl.none
   | Decl_entry.Found decl ->
-    (match Decl_provider.Class.get_prop decl prop_name with
+    (match Folded_class.get_prop decl prop_name with
     | None -> Pos_or_decl.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in

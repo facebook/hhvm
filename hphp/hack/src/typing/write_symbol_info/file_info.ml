@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Class = Typing_classes_heap.Api
+module Class = Folded_class
 
 type symbol = {
   occ: Relative_path.t SymbolOccurrence.t;

@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Dep = Typing_deps.Dep
 
 let get_current_decl env =

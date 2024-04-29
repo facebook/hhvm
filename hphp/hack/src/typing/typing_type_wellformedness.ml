@@ -17,7 +17,7 @@ module FunUtils = Decl_fun_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module Subst = Decl_subst
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (** This module checks well-formedness of type hints. See .mli file for more. *)
 

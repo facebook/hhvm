@@ -15,7 +15,7 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Provider_context.PositionedSyntaxTree
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 open Aast
 
 (* Element type, class name, element name. Class name refers to "origin" class,

@@ -60,7 +60,7 @@ val smember_not_found :
   is_const:bool ->
   is_method:bool ->
   is_function_pointer:bool ->
-  Decl_provider.Class.t ->
+  Folded_class.t ->
   string ->
   Typing_error.Callback.t ->
   Typing_error.t

@@ -123,9 +123,9 @@
   (pps ppx_deriving.std)))
 
 (library
- (name typing_heap)
+ (name folded_class)
  (wrapped false)
- (modules typing_classes_heap)
+ (modules folded_class)
  (libraries
   core_kernel
   decl
@@ -186,7 +186,7 @@
   typing_defs
   typing_env
   typing_algebra
-  typing_heap
+  folded_class
   global_config)
  (preprocess
   (pps ppx_deriving.std)))

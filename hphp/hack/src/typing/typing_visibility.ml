@@ -13,7 +13,7 @@ open Utils
 open Typing_error.Primary.Modules
 module Env = Typing_env
 module TUtils = Typing_utils
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?

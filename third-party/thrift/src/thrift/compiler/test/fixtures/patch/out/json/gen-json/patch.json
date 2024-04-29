@@ -22,35 +22,38 @@
     },
     "hack" : {
       "path" : "thrift/annotation/hack.thrift"
+    },
+    "python" : {
+      "path" : "thrift/annotation/python.thrift"
     }
   },
   "typedefs" : {
     "FieldId" : {
-      "lineno" : 46,
+      "lineno" : 50,
       "type_enum" : "TYPEDEF",
       "spec_args" : "id.FieldId",
       "source_range" : {
         "begin" : {
-          "line" : 46,
+          "line" : 50,
           "column" : 1
         },
         "end" : {
-          "line" : 46,
+          "line" : 50,
           "column" : 27
         }
       }
     },
     "FieldIdList" : {
-      "lineno" : 275,
+      "lineno" : 279,
       "type_enum" : "LIST",
       "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
       "source_range" : {
         "begin" : {
-          "line" : 275,
+          "line" : 279,
           "column" : 1
         },
         "end" : {
-          "line" : 276,
+          "line" : 280,
           "column" : 30
         }
       }
@@ -58,7 +61,7 @@
   },
   "structs" : {
     "GeneratePatch" : {
-      "lineno" : 54,
+      "lineno" : 58,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -66,17 +69,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 54,
+          "line" : 58,
           "column" : 1
         },
         "end" : {
-          "line" : 56,
+          "line" : 60,
           "column" : 24
         }
       }
     },
     "GeneratePatchNew" : {
-      "lineno" : 63,
+      "lineno" : 67,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -84,17 +87,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 63,
+          "line" : 67,
           "column" : 1
         },
         "end" : {
-          "line" : 64,
+          "line" : 68,
           "column" : 27
         }
       }
     },
     "AssignOnlyPatch" : {
-      "lineno" : 66,
+      "lineno" : 70,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -102,17 +105,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 66,
+          "line" : 70,
           "column" : 1
         },
         "end" : {
-          "line" : 68,
+          "line" : 72,
           "column" : 26
         }
       }
     },
     "BoolPatch" : {
-      "lineno" : 71,
+      "lineno" : 75,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -122,11 +125,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 83,
+              "line" : 87,
               "column" : 3
             },
             "end" : {
-              "line" : 83,
+              "line" : 87,
               "column" : 27
             }
           }
@@ -137,11 +140,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 86,
+              "line" : 90,
               "column" : 3
             },
             "end" : {
-              "line" : 86,
+              "line" : 90,
               "column" : 17
             }
           }
@@ -152,11 +155,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 89,
+              "line" : 93,
               "column" : 3
             },
             "end" : {
-              "line" : 89,
+              "line" : 93,
               "column" : 18
             }
           }
@@ -164,17 +167,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 71,
+          "line" : 75,
           "column" : 1
         },
         "end" : {
-          "line" : 90,
+          "line" : 94,
           "column" : 2
         }
       }
     },
     "BytePatch" : {
-      "lineno" : 93,
+      "lineno" : 97,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -184,11 +187,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 105,
+              "line" : 109,
               "column" : 3
             },
             "end" : {
-              "line" : 105,
+              "line" : 109,
               "column" : 27
             }
           }
@@ -199,11 +202,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 108,
+              "line" : 112,
               "column" : 3
             },
             "end" : {
-              "line" : 108,
+              "line" : 112,
               "column" : 17
             }
           }
@@ -214,11 +217,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 111,
+              "line" : 115,
               "column" : 3
             },
             "end" : {
-              "line" : 111,
+              "line" : 115,
               "column" : 15
             }
           }
@@ -226,17 +229,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 93,
+          "line" : 97,
           "column" : 1
         },
         "end" : {
-          "line" : 112,
+          "line" : 116,
           "column" : 2
         }
       }
     },
     "I16Patch" : {
-      "lineno" : 115,
+      "lineno" : 119,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -246,11 +249,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 127,
+              "line" : 131,
               "column" : 3
             },
             "end" : {
-              "line" : 127,
+              "line" : 131,
               "column" : 26
             }
           }
@@ -261,11 +264,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 130,
+              "line" : 134,
               "column" : 3
             },
             "end" : {
-              "line" : 130,
+              "line" : 134,
               "column" : 17
             }
           }
@@ -276,11 +279,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 133,
+              "line" : 137,
               "column" : 3
             },
             "end" : {
-              "line" : 133,
+              "line" : 137,
               "column" : 14
             }
           }
@@ -288,17 +291,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 115,
+          "line" : 119,
           "column" : 1
         },
         "end" : {
-          "line" : 134,
+          "line" : 138,
           "column" : 2
         }
       }
     },
     "I32Patch" : {
-      "lineno" : 137,
+      "lineno" : 141,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -308,11 +311,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 149,
+              "line" : 153,
               "column" : 3
             },
             "end" : {
-              "line" : 149,
+              "line" : 153,
               "column" : 26
             }
           }
@@ -323,11 +326,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 152,
+              "line" : 156,
               "column" : 3
             },
             "end" : {
-              "line" : 152,
+              "line" : 156,
               "column" : 17
             }
           }
@@ -338,11 +341,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 155,
+              "line" : 159,
               "column" : 3
             },
             "end" : {
-              "line" : 155,
+              "line" : 159,
               "column" : 14
             }
           }
@@ -350,17 +353,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 137,
+          "line" : 141,
           "column" : 1
         },
         "end" : {
-          "line" : 156,
+          "line" : 160,
           "column" : 2
         }
       }
     },
     "I64Patch" : {
-      "lineno" : 159,
+      "lineno" : 163,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -370,11 +373,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 171,
+              "line" : 175,
               "column" : 3
             },
             "end" : {
-              "line" : 171,
+              "line" : 175,
               "column" : 26
             }
           }
@@ -385,11 +388,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 174,
+              "line" : 178,
               "column" : 3
             },
             "end" : {
-              "line" : 174,
+              "line" : 178,
               "column" : 17
             }
           }
@@ -400,11 +403,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 177,
+              "line" : 181,
               "column" : 3
             },
             "end" : {
-              "line" : 177,
+              "line" : 181,
               "column" : 14
             }
           }
@@ -412,17 +415,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 159,
+          "line" : 163,
           "column" : 1
         },
         "end" : {
-          "line" : 178,
+          "line" : 182,
           "column" : 2
         }
       }
     },
     "FloatPatch" : {
-      "lineno" : 181,
+      "lineno" : 185,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -432,11 +435,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 193,
+              "line" : 197,
               "column" : 3
             },
             "end" : {
-              "line" : 193,
+              "line" : 197,
               "column" : 28
             }
           }
@@ -447,11 +450,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 196,
+              "line" : 200,
               "column" : 3
             },
             "end" : {
-              "line" : 196,
+              "line" : 200,
               "column" : 17
             }
           }
@@ -462,11 +465,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 199,
+              "line" : 203,
               "column" : 3
             },
             "end" : {
-              "line" : 199,
+              "line" : 203,
               "column" : 16
             }
           }
@@ -474,17 +477,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 181,
+          "line" : 185,
           "column" : 1
         },
         "end" : {
-          "line" : 200,
+          "line" : 204,
           "column" : 2
         }
       }
     },
     "DoublePatch" : {
-      "lineno" : 203,
+      "lineno" : 207,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -494,11 +497,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 215,
+              "line" : 219,
               "column" : 3
             },
             "end" : {
-              "line" : 215,
+              "line" : 219,
               "column" : 29
             }
           }
@@ -509,11 +512,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 218,
+              "line" : 222,
               "column" : 3
             },
             "end" : {
-              "line" : 218,
+              "line" : 222,
               "column" : 17
             }
           }
@@ -524,11 +527,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 221,
+              "line" : 225,
               "column" : 3
             },
             "end" : {
-              "line" : 221,
+              "line" : 225,
               "column" : 17
             }
           }
@@ -536,17 +539,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 203,
+          "line" : 207,
           "column" : 1
         },
         "end" : {
-          "line" : 222,
+          "line" : 226,
           "column" : 2
         }
       }
     },
     "StringPatch" : {
-      "lineno" : 225,
+      "lineno" : 229,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -556,11 +559,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 237,
+              "line" : 241,
               "column" : 3
             },
             "end" : {
-              "line" : 237,
+              "line" : 241,
               "column" : 29
             }
           }
@@ -571,11 +574,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 240,
+              "line" : 244,
               "column" : 3
             },
             "end" : {
-              "line" : 240,
+              "line" : 244,
               "column" : 17
             }
           }
@@ -586,11 +589,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 243,
+              "line" : 247,
               "column" : 3
             },
             "end" : {
-              "line" : 243,
+              "line" : 247,
               "column" : 21
             }
           }
@@ -601,11 +604,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 246,
+              "line" : 250,
               "column" : 3
             },
             "end" : {
-              "line" : 246,
+              "line" : 250,
               "column" : 20
             }
           }
@@ -613,17 +616,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 225,
+          "line" : 229,
           "column" : 1
         },
         "end" : {
-          "line" : 247,
+          "line" : 251,
           "column" : 2
         }
       }
     },
     "BinaryPatch" : {
-      "lineno" : 250,
+      "lineno" : 254,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -633,11 +636,11 @@
           "required" : false,
           "source_range" : {
             "begin" : {
-              "line" : 262,
+              "line" : 266,
               "column" : 3
             },
             "end" : {
-              "line" : 262,
+              "line" : 266,
               "column" : 42
             }
           }
@@ -648,11 +651,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 265,
+              "line" : 269,
               "column" : 3
             },
             "end" : {
-              "line" : 265,
+              "line" : 269,
               "column" : 17
             }
           }
@@ -663,11 +666,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 268,
+              "line" : 272,
               "column" : 3
             },
             "end" : {
-              "line" : 268,
+              "line" : 272,
               "column" : 34
             }
           }
@@ -678,11 +681,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 271,
+              "line" : 275,
               "column" : 3
             },
             "end" : {
-              "line" : 271,
+              "line" : 275,
               "column" : 33
             }
           }
@@ -690,11 +693,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 250,
+          "line" : 254,
           "column" : 1
         },
         "end" : {
-          "line" : 272,
+          "line" : 276,
           "column" : 2
         }
       }

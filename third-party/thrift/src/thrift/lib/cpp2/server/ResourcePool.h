@@ -68,8 +68,17 @@ class ResourcePool : public IResourcePoolAcceptor {
     return std::nullopt;
   }
 
-  // Access tp executor as shared pointer if it exists.
-  std::optional<std::shared_ptr<folly::Executor>> sharedPtrExecutor() {
+  std::optional<folly::Executor::KeepAlive<folly::Executor>>
+  keepAliveExecutor() {
+    if (executor_) {
+      return folly::getKeepAliveToken(*executor_);
+    }
+    return std::nullopt;
+  }
+
+  // Deprecated: use keepAliveExecutor if possible.
+  std::optional<std::shared_ptr<folly::Executor>>
+  sharedPtrExecutor_deprecated() {
     if (executor_) {
       return executor_;
     }

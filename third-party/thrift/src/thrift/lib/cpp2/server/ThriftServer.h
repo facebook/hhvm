@@ -669,7 +669,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         !resourcePoolSet().empty()) {
       return resourcePoolSet()
           .resourcePool(ResourcePoolHandle::defaultAsync())
-          .sharedPtrExecutor()
+          .sharedPtrExecutor_deprecated()
           .value();
     }
     std::shared_lock lock(threadManagerMutex_);
@@ -679,11 +679,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   folly::Executor::KeepAlive<> getHandlerExecutorKeepAlive() const override {
     if (!runtimeServerActions_.userSuppliedThreadManager &&
         !resourcePoolSet().empty()) {
-      return resourcePoolSet()
-          .resourcePool(ResourcePoolHandle::defaultAsync())
-          .sharedPtrExecutor()
-          .value()
-          .get();
+      return *resourcePoolSet()
+                  .resourcePool(ResourcePoolHandle::defaultAsync())
+                  .keepAliveExecutor();
     }
     std::shared_lock lock(threadManagerMutex_);
     return threadManager_.get();

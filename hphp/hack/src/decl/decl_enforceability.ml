@@ -25,80 +25,6 @@ type 'a class_or_typedef_result =
   | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
-let get_class_or_typedef ctx x =
-  if is_typedef ctx x then
-    match
-      Decl_provider_internals.get_typedef_without_pessimise ctx x
-      |> Decl_entry.to_option
-    with
-    | None -> None
-    | Some td -> Some (TypedefResult td)
-  else
-    match Decl_provider_internals.get_shallow_class ctx x with
-    | None -> None
-    | Some cd -> Some (ClassResult cd)
-
-let get_typeconst_type ctx c id =
-  let open Shallow_decl_defs in
-  (* Look for id directly defined in the given shallow class. Assume there is
-     only one, since it is an error to have multiple definitions. *)
-  let find_locally c =
-    List.find_map
-      ~f:(fun stc ->
-        if String.equal id (snd stc.stc_name) then
-          Some stc.stc_kind
-        else
-          None)
-      c.sc_typeconsts
-  in
-  let class_type_to_shallow_class cty =
-    match get_node cty with
-    | Tapply ((_, class_name), _) ->
-      Decl_provider_internals.get_shallow_class ctx class_name
-    | _ -> None
-  in
-  (* Find the first concrete definition of id in the list. If there is none, return
-     the first abstract one, kept in found_abstract *)
-  let rec find_in_list visited found_abstract ctys =
-    match ctys with
-    | [] -> found_abstract
-    | cty :: ctys ->
-      let c = class_type_to_shallow_class cty in
-      (match c with
-      | None -> find_in_list visited found_abstract ctys
-      | Some c ->
-        (match find_in_class visited c with
-        | None -> find_in_list visited found_abstract ctys
-        | Some (TCAbstract _) as new_abstract ->
-          (match found_abstract with
-          | None -> find_in_list visited new_abstract ctys
-          | _ -> find_in_list visited found_abstract ctys)
-        | Some (TCConcrete _ as res) -> Some res))
-  (* Look for id in c, either locally, or inherited *)
-  and find_in_class visited c =
-    if SSet.mem (snd c.sc_name) visited then
-      None
-    else
-      match find_locally c with
-      | Some tc -> Some tc
-      | None ->
-        find_in_list
-          (SSet.add (snd c.sc_name) visited)
-          None
-          (List.concat
-             [
-               c.sc_extends;
-               c.sc_implements;
-               c.sc_uses;
-               c.sc_req_extends;
-               c.sc_req_implements;
-             ])
-  in
-  let* tc = find_in_class SSet.empty c in
-  match tc with
-  | TCAbstract abstract -> abstract.atc_as_constraint
-  | TCConcrete concrete -> Some concrete.tc_type
-
 let make_unenforced ty =
   match ty with
   | Enforced ty -> Unenforced (Some ty)
@@ -487,13 +413,79 @@ module ShallowContextAccess :
 
   let get_tcopt = Provider_context.get_tcopt
 
-  let get_class_or_typedef = get_class_or_typedef
-
   let get_typedef = Decl_provider_internals.get_typedef_without_pessimise
 
   let get_class = Decl_provider_internals.get_shallow_class
 
-  let get_typeconst_type = get_typeconst_type
+  let get_class_or_typedef ctx x =
+    if is_typedef ctx x then
+      match get_typedef ctx x |> Decl_entry.to_option with
+      | None -> None
+      | Some td -> Some (TypedefResult td)
+    else
+      match get_class ctx x with
+      | None -> None
+      | Some cd -> Some (ClassResult cd)
+
+  let get_typeconst_type ctx c id =
+    let open Shallow_decl_defs in
+    (* Look for id directly defined in the given shallow class. Assume there is
+       only one, since it is an error to have multiple definitions. *)
+    let find_locally c =
+      List.find_map
+        ~f:(fun stc ->
+          if String.equal id (snd stc.stc_name) then
+            Some stc.stc_kind
+          else
+            None)
+        c.sc_typeconsts
+    in
+    let class_type_to_shallow_class cty =
+      match get_node cty with
+      | Tapply ((_, class_name), _) -> get_class ctx class_name
+      | _ -> None
+    in
+    (* Find the first concrete definition of id in the list. If there is none, return
+       the first abstract one, kept in found_abstract *)
+    let rec find_in_list visited found_abstract ctys =
+      match ctys with
+      | [] -> found_abstract
+      | cty :: ctys ->
+        let c = class_type_to_shallow_class cty in
+        (match c with
+        | None -> find_in_list visited found_abstract ctys
+        | Some c ->
+          (match find_in_class visited c with
+          | None -> find_in_list visited found_abstract ctys
+          | Some (TCAbstract _) as new_abstract ->
+            (match found_abstract with
+            | None -> find_in_list visited new_abstract ctys
+            | _ -> find_in_list visited found_abstract ctys)
+          | Some (TCConcrete _ as res) -> Some res))
+    (* Look for id in c, either locally, or inherited *)
+    and find_in_class visited c =
+      if SSet.mem (snd c.sc_name) visited then
+        None
+      else
+        match find_locally c with
+        | Some tc -> Some tc
+        | None ->
+          find_in_list
+            (SSet.add (snd c.sc_name) visited)
+            None
+            (List.concat
+               [
+                 c.sc_extends;
+                 c.sc_implements;
+                 c.sc_uses;
+                 c.sc_req_extends;
+                 c.sc_req_implements;
+               ])
+    in
+    let* tc = find_in_class SSet.empty c in
+    match tc with
+    | TCAbstract abstract -> abstract.atc_as_constraint
+    | TCConcrete concrete -> Some concrete.tc_type
 
   let get_tparams sc = sc.Shallow_decl_defs.sc_tparams
 

@@ -93,6 +93,7 @@
   decl_fun_utils
   decl_init_check
   decl_instantiate
+  decl_members
   decl_pos_utils
   decl_store
   decl_utils
@@ -118,12 +119,20 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name decl_members)
+ (modules decl_members)
+ (libraries
+  decl_defs
+  decl_enforceability
+  typing_defs))
+
+(library
  (name decl_class)
  (modules decl_class)
  (libraries
    decl_defs
-   decl_folded_class
    decl_instantiate
+   decl_members
    decl_store
    decl_subst
    typing_defs)
@@ -164,7 +173,10 @@
 (library
   (name decl_enforceability)
   (modules decl_enforceability)
-  (libraries decl_env decl_provider_internals naming_provider))
+  (libraries
+   decl_env
+   decl_provider_internals
+   naming_provider))
 
 (library
  (name decl_enum)

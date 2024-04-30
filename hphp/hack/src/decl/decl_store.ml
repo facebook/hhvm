@@ -46,6 +46,13 @@ type decl_store = {
   pop_local_changes: unit -> unit;
 }
 
+type ('k, 'v) kind =
+  | Constructor : (string, Typing_defs.fun_elt) kind
+  | Method : (ClassEltKey.t, Typing_defs.fun_elt) kind
+  | Static_method : (ClassEltKey.t, Typing_defs.fun_elt) kind
+  | Property : (ClassEltKey.t, Typing_defs.decl_ty) kind
+  | Static_property : (ClassEltKey.t, Typing_defs.decl_ty) kind
+
 let push_local_changes () : unit =
   Decl_heap.Funs.LocalChanges.push_stack ();
   Decl_heap.Constructors.LocalChanges.push_stack ();
@@ -99,6 +106,36 @@ let shared_memory_store =
   }
 
 let store = ref shared_memory_store
+
+let get (type k v) (kind : (k, v) kind) : k -> v option =
+  match kind with
+  | Constructor -> !store.get_constructor
+  | Method -> !store.get_method
+  | Static_method -> !store.get_static_method
+  | Property -> !store.get_prop
+  | Static_property -> !store.get_static_prop
+
+let add (type k v) (kind : (k, v) kind) : k -> v -> unit =
+  match kind with
+  | Constructor -> !store.add_constructor
+  | Method -> !store.add_method
+  | Static_method -> !store.add_static_method
+  | Property -> !store.add_prop
+  | Static_property -> !store.add_static_prop
+
+let lookup_or kind key f =
+  match get kind key with
+  | Some x -> x
+  | None ->
+    let x = f key in
+    add kind key x;
+    x
+
+let lookup_or ~bypass kind key f =
+  if bypass then
+    f key
+  else
+    lookup_or kind key f
 
 let set s = store := s
 

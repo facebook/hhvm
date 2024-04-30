@@ -26,11 +26,6 @@ module SN = Naming_special_names
 
 type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
 
-type lazy_member_lookup_error =
-  | LMLEShallowClassNotFound
-  | LMLEMemberNotFound
-[@@deriving show]
-
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -334,21 +329,8 @@ let visibility
 let build_constructor_fun_elt
     ~(ctx : Provider_context.t)
     ~(elt_origin : string)
-    ~(method_ : Shallow_decl_defs.shallow_method) =
-  let pos = fst method_.sm_name in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = method_.sm_deprecated;
-      fe_type = method_.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = false;
-      fe_no_auto_dynamic = false;
-      fe_no_auto_likes = false;
-    }
-  in
+    ~(method_ : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
+  let fe = Decl_members.build_constructor method_ in
   (if member_heaps_enabled ctx then
     Decl_store.((get ()).add_constructor elt_origin fe));
   fe
@@ -418,17 +400,6 @@ let constructor_decl_eager
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
-let constructor_decl_lazy
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
-    (Typing_defs.fun_elt, lazy_member_lookup_error) result =
-  let SharedMem.Uses = sh in
-  match Decl_provider_internals.get_shallow_class ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match class_.sc_constructor with
-    | None -> Error LMLEMemberNotFound
-    | Some method_ -> Ok (build_constructor_fun_elt ~ctx ~elt_origin ~method_))
-
 let class_const_fold
     (c : Shallow_decl_defs.shallow_class)
     (acc : Typing_defs.class_const SMap.t)
@@ -471,25 +442,13 @@ let build_prop_sprop_ty
     ~(is_static : bool)
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
-  let (_sp_pos, sp_name) = sp.sp_name in
-  let is_xhp_attr = is_some sp.sp_xhp_attr in
-  let no_auto_likes = PropFlags.get_no_auto_likes sp.sp_flags in
-  let ty =
-    if no_auto_likes then
-      sp.sp_type
-    else
-      Decl_enforceability.maybe_pessimise_type
-        ~reason:(Reason.Rpessimised_prop (get_pos sp.sp_type))
-        ~is_xhp_attr
-        ~this_class
-        ctx
-        sp.sp_type
-  in
+  let ty = Decl_members.build_property ~ctx ~this_class sp in
   (if member_heaps_enabled ctx then
+    let (_pos, name) = sp.sp_name in
     if is_static then
-      Decl_store.((get ()).add_static_prop (elt_origin, sp_name) ty)
+      Decl_store.((get ()).add_static_prop (elt_origin, name) ty)
     else
-      Decl_store.((get ()).add_prop (elt_origin, sp_name) ty));
+      Decl_store.((get ()).add_prop (elt_origin, name) ty));
   ty
 
 let prop_decl_eager
@@ -534,30 +493,6 @@ let prop_decl_eager
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
 
-let prop_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(elt_origin : string)
-    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Decl_provider_internals.get_shallow_class ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match
-       List.find class_.sc_props ~f:(fun prop ->
-           String.equal (snd prop.sp_name) sp_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sp ->
-      Ok
-        (build_prop_sprop_ty
-           ~ctx
-           ~this_class:(Some class_)
-           ~is_static:false
-           ~elt_origin
-           sp))
-
 let static_prop_decl_eager
     ~(ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
@@ -594,30 +529,6 @@ let static_prop_decl_eager
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
-
-let static_prop_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(elt_origin : string)
-    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Decl_provider_internals.get_shallow_class ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match
-       List.find class_.sc_sprops ~f:(fun prop ->
-           String.equal (snd prop.sp_name) sp_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sp ->
-      Ok
-        (build_prop_sprop_ty
-           ~ctx
-           ~this_class:(Some class_)
-           ~is_static:true
-           ~elt_origin
-           sp))
 
 (* each concrete type constant T = <sometype> implicitly defines a
    class constant with the same name which is TypeStructure<sometype> *)
@@ -725,50 +636,9 @@ let build_method_fun_elt
     ~(is_static : bool)
     ~(elt_origin : string)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
-  let (pos, id) = m.sm_name in
-  let support_dynamic_type = sm_support_dynamic_type m in
-  let fe_no_auto_dynamic =
-    Typing_defs.Attributes.mem
-      Naming_special_names.UserAttributes.uaNoAutoDynamic
-      m.Shallow_decl_defs.sm_attributes
-  in
-  let fe_no_auto_likes =
-    Typing_defs.Attributes.mem
-      Naming_special_names.UserAttributes.uaNoAutoLikes
-      m.Shallow_decl_defs.sm_attributes
-  in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = None;
-      fe_type =
-        (if
-         (not fe_no_auto_dynamic)
-         && Provider_context.implicit_sdt_for_class ctx this_class
-        then
-          Decl_enforceability.(
-            pessimise_fun_type
-              ~fun_kind:
-                (if MethodFlags.get_abstract m.sm_flags then
-                  Abstract_method
-                else
-                  Concrete_method)
-              ~this_class
-              ~no_auto_likes:fe_no_auto_likes
-              ctx
-              pos
-              m.sm_type)
-        else
-          m.sm_type);
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = support_dynamic_type;
-      fe_no_auto_dynamic;
-      fe_no_auto_likes;
-    }
-  in
+  let fe = Decl_members.build_method ~ctx ~this_class m in
   (if member_heaps_enabled ctx then
+    let (_pos, id) = m.sm_name in
     if is_static then
       Decl_store.((get ()).add_static_method (elt_origin, id) fe)
     else
@@ -839,36 +709,6 @@ let method_decl_eager
   in
   let acc = SMap.add id (elt, Some fe) acc in
   acc
-
-let method_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(is_static : bool)
-    ~(elt_origin : string)
-    ~(sm_name : string) : (Typing_defs.fun_elt, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Decl_provider_internals.get_shallow_class ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    let methods =
-      if is_static then
-        class_.sc_static_methods
-      else
-        class_.sc_methods
-    in
-    (match
-       List.find methods ~f:(fun m -> String.equal (snd m.sm_name) sm_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sm ->
-      Ok
-        (build_method_fun_elt
-           ~this_class:(Some class_)
-           ~ctx
-           ~is_static
-           ~elt_origin
-           sm))
 
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)

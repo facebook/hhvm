@@ -48,8 +48,17 @@ type decl_store = {
   pop_local_changes: unit -> unit;
 }
 
+type ('k, 'v) kind =
+  | Constructor : (string, Typing_defs.fun_elt) kind
+  | Method : (ClassEltKey.t, Typing_defs.fun_elt) kind
+  | Static_method : (ClassEltKey.t, Typing_defs.fun_elt) kind
+  | Property : (ClassEltKey.t, Typing_defs.decl_ty) kind
+  | Static_property : (ClassEltKey.t, Typing_defs.decl_ty) kind
+
 val get : unit -> decl_store
 
 val set : decl_store -> unit
 
 val shared_memory_store : decl_store
+
+val lookup_or : bypass:bool -> ('k, 'v) kind -> 'k -> ('k -> 'v) -> 'v

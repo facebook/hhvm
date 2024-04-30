@@ -21,13 +21,12 @@ use async_trait::async_trait;
 use clap::Parser;
 use futures::StreamExt;
 use rpc_services::rpc::RPCConformanceService;
-use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Debug, Parser)]
 #[clap(name = "Conformance Server")]
 struct Arguments {
-    #[clap(short, long, default_value = "9001")]
+    #[clap(short, long, default_value = "0")]
     port: u16,
     #[clap(short, long, default_value = "info", use_value_delimiter = true)]
     log: Vec<tracing_subscriber::filter::Directive>,
@@ -48,6 +47,7 @@ fn main(fb: fbinit::FacebookInit) -> anyhow::Result<()> {
     };
     let thrift_server = srserver::ThriftServerBuilder::new(fb)
         .with_port(args.port)
+        .with_allow_plaintext_on_loopback()
         .with_metadata(RPCConformanceService_metadata_sys::create_metadata())
         .with_factory(runtime.handle().clone(), move || service)
         .build();
@@ -59,15 +59,16 @@ fn main(fb: fbinit::FacebookInit) -> anyhow::Result<()> {
     svc_framework.add_module(srserver::service_framework::ThriftStatsModule)?;
     svc_framework.add_module(srserver::service_framework::Fb303Module)?;
 
-    info!(args.port, "Starting \"RPCConformance Server\" ...");
     let thrift_service_handle = runtime.spawn(async move {
         use signal_hook::consts::signal::SIGINT;
         use signal_hook::consts::signal::SIGTERM;
 
         svc_framework.serve_background()?;
+        println!("{:#?}", svc_framework.get_address()?.get_port()?);
+
         let mut signals = signal_hook_tokio::Signals::new([SIGTERM, SIGINT])?;
         signals.next().await;
-        info!("Shutting down \"RPCConformance Server\"...");
+
         svc_framework.stop();
         signals.handle().close();
 
@@ -135,7 +136,7 @@ use rpc_services::rpc::BasicInteraction;
 
 #[async_trait]
 impl RPCConformanceService for RPCConformanceServiceImpl {
-    async fn sendTestCase(&self, _testCase: RpcTestCase) -> Result<(), SendTestCaseExn> {
+    async fn sendTestCase(&self, _test_case: RpcTestCase) -> Result<(), SendTestCaseExn> {
         Err(SendTestCaseExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
                 "RPCConformanceService",
@@ -371,7 +372,7 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
 
     async fn basicInteractionFactoryFunction(
         &self,
-        _initialSum: i32,
+        _initial_sum: i32,
     ) -> Result<Box<dyn BasicInteraction>, BasicInteractionFactoryFunctionExn> {
         Err(BasicInteractionFactoryFunctionExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(

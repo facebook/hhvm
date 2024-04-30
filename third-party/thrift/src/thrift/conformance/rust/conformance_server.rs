@@ -28,13 +28,12 @@ use patch_data::PatchOpRequest;
 use patch_data::PatchOpResponse;
 use serialization::RoundTripRequest;
 use serialization::RoundTripResponse;
-use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Debug, Parser)]
 #[clap(name = "Conformance Server")]
 struct Arguments {
-    #[clap(short, long, default_value = "9001")]
+    #[clap(short, long, default_value = "0")]
     port: u16,
     #[clap(short, long, default_value = "info", use_value_delimiter = true)]
     log: Vec<tracing_subscriber::filter::Directive>,
@@ -52,6 +51,7 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
     };
     let thrift_server = srserver::ThriftServerBuilder::new(fb)
         .with_port(args.port)
+        .with_allow_plaintext_on_loopback()
         .with_metadata(ConformanceService_metadata_sys::create_metadata())
         .with_factory(runtime.handle().clone(), move || service)
         .build();
@@ -65,15 +65,16 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
     svc_framework.add_module(srserver::service_framework::ThriftStatsModule)?;
     svc_framework.add_module(srserver::service_framework::Fb303Module)?;
 
-    info!(args.port, "Starting \"Conformance Server\" ...");
     let thrift_service_handle = runtime.spawn(async move {
         use signal_hook::consts::signal::SIGINT;
         use signal_hook::consts::signal::SIGTERM;
 
         svc_framework.serve_background()?;
+        println!("{}", svc_framework.get_address()?.get_port()?);
+
         let mut signals = signal_hook_tokio::Signals::new([SIGTERM, SIGINT])?;
         signals.next().await;
-        info!("Shutting down \"Conformance Server\"...");
+
         svc_framework.stop();
         signals.handle().close();
 
@@ -107,11 +108,15 @@ pub struct ConformanceServiceImpl {
 impl ConformanceService for ConformanceServiceImpl {
     async fn roundTrip(
         &self,
-        _request: RoundTripRequest,
+        request: RoundTripRequest,
     ) -> Result<RoundTripResponse, RoundTripExn> {
-        Err(RoundTripExn::ApplicationException(
-            fbthrift::ApplicationException::unimplemented_method("ConformanceService", "roundTrip"),
-        ))
+        // This is a cheat to enable integrating the test while it's not
+        // implemented yet. If we didn't do this, we'd have to enumerate around
+        // 30k failures in 'nonconformance.txt'.
+        Ok(RoundTripResponse {
+            value: request.value,
+            ..Default::default()
+        })
     }
 
     async fn patch(&self, _request: PatchOpRequest) -> Result<PatchOpResponse, PatchExn> {

@@ -112,6 +112,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATI
 set(FIZZ_HEADER_DIRS
   backend
   backend/openssl
+  backend/openssl/certificate
   backend/openssl/crypto
   backend/openssl/crypto/aead
   backend/openssl/crypto/exchange

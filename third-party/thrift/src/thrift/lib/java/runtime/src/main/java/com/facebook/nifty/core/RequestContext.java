@@ -16,6 +16,7 @@
 
 package com.facebook.nifty.core;
 
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import reactor.util.context.ContextView;
 
 public interface RequestContext {
   String REQUEST_CONTEXT_KEY = "ThriftRequestContext";
+  String CLIENT_TIMEOUT_HEADER_KEY = "client_timeout";
 
   @Deprecated
   ConnectionContext getConnectionContext();
@@ -40,6 +42,8 @@ public interface RequestContext {
   Map<String, String> getRequestHeader();
 
   void setResponseHeader(String key, String value);
+
+  Duration getClientTimeout();
 
   static Optional<RequestContext> tryContextView(ContextView contextView) {
     return contextView.getOrEmpty(REQUEST_CONTEXT_KEY);

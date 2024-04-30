@@ -19,12 +19,12 @@ package com.facebook.thrift.util;
 import com.facebook.nifty.core.ConnectionContext;
 import com.facebook.nifty.core.RequestContext;
 import io.netty.util.internal.PlatformDependent;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
-@Deprecated
 public class NettyNiftyRequestContext implements RequestContext {
   private final Map<String, Object> data;
   private final Map<String, String> requestHeaders;
@@ -79,5 +79,11 @@ public class NettyNiftyRequestContext implements RequestContext {
 
   public Map<String, String> getResponseHeaders() {
     return responseHeaders;
+  }
+
+  @Override
+  public Duration getClientTimeout() {
+    String clientTimeout = requestHeaders.get(CLIENT_TIMEOUT_HEADER_KEY);
+    return RequestContextUtil.getDurationFromString(clientTimeout);
   }
 }

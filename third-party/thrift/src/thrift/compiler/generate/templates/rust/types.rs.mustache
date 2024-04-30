@@ -18,6 +18,9 @@
 // This file is probably not the place you want to edit!
 
 
+{{#program:include_docs}}
+#![doc = include_str!("{{.}}")]
+{{/program:include_docs}}
 {{#program:docs?}}
 #![doc = {{program:docs}}]
 {{/program:docs?}}

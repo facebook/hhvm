@@ -81,6 +81,9 @@ struct rust_codegen_options {
   mstch::array clients_include_srcs;
   mstch::array services_include_srcs;
 
+  // Markdown file to include in front of crate-level documentation.
+  std::string include_docs;
+
   // The current program being generated and its Rust module path.
   const t_program* current_program;
   std::string current_crate;
@@ -652,6 +655,7 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_clients_include_srcs},
             {"program:services_include_srcs",
              &rust_mstch_program::rust_services_include_srcs},
+            {"program:include_docs", &rust_mstch_program::rust_include_docs},
             {"program:has_default_tests?",
              &rust_mstch_program::rust_has_default_tests},
             {"program:structs_for_default_test",
@@ -819,6 +823,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_services_include_srcs() {
     return options_.services_include_srcs;
   }
+  mstch::node rust_include_docs() { return options_.include_docs; }
   mstch::node rust_has_default_tests() {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
@@ -2363,6 +2368,10 @@ void t_mstch_rust_generator::generate_program() {
   parse_include_srcs(
       options_.services_include_srcs, get_option("services_include_srcs"));
 
+  if (auto include_docs = get_option("include_docs")) {
+    options_.include_docs = include_docs.value();
+  }
+
   if (options_.multifile_mode) {
     options_.current_crate = "crate::" + multifile_module_name(program_);
   } else {
@@ -2568,6 +2577,7 @@ THRIFT_REGISTER_GENERATOR(
     "    include_prefix=: Set program:include_prefix.\n"
     "    types_include_srcs=, clients_include_srcs=, services_include_srcs=:\n"
     "                     Additional Rust source files to include in each crate, `:` separated\n"
+    "    include_docs=:   Markdown to include in front of crate-level documentation.\n"
     "    cratemap=map:    Mapping file from services to crate names\n"
     "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n");
 } // namespace rust

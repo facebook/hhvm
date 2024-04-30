@@ -64,3 +64,9 @@ import c.types as _c_types
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "s.types_reflection"
+    )
+

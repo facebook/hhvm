@@ -60,5 +60,11 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "apache.thrift.type.id.types_reflection"
+    )
+
 noId = 0
 ExternId = int

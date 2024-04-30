@@ -115,6 +115,12 @@ __SetMetaClass(<PyTypeObject*> Animal, <PyTypeObject*> __AnimalMeta)
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class Color(thrift.py3.types.Struct):
     def __init__(Color self, **kwargs):
@@ -208,11 +214,7 @@ cdef class Color(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Color()
+        return get_types_reflection().get_reflection__Color()
 
     @staticmethod
     def __get_metadata__():
@@ -372,11 +374,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Vehicle()
+        return get_types_reflection().get_reflection__Vehicle()
 
     @staticmethod
     def __get_metadata__():
@@ -599,11 +597,7 @@ cdef class Person(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Person()
+        return get_types_reflection().get_reflection__Person()
 
     @staticmethod
     def __get_metadata__():
@@ -729,11 +723,7 @@ cdef class Set__i64(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Set__i64()
+        return get_types_reflection().get_reflection__Set__i64()
 
 
 Set.register(Set__i64)
@@ -829,11 +819,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Map__Animal_string()
+        return get_types_reflection().get_reflection__Map__Animal_string()
 
 Mapping.register(Map__Animal_string)
 
@@ -909,11 +895,7 @@ cdef class List__Vehicle(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__List__Vehicle()
+        return get_types_reflection().get_reflection__List__Vehicle()
 
 
 Sequence.register(List__Vehicle)

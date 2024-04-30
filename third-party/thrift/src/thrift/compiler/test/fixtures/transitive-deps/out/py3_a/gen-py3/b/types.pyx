@@ -62,6 +62,12 @@ import c.types as _c_types
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "b.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class List__c_C(thrift.py3.types.List):
     def __init__(self, items=None):
@@ -134,11 +140,7 @@ cdef class List__c_C(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "b.types_reflection"
-        )
-        return types_reflection.get_reflection__List__c_C()
+        return get_types_reflection().get_reflection__List__c_C()
 
 
 Sequence.register(List__c_C)

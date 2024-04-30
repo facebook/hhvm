@@ -238,6 +238,12 @@ cdef class __TypeNameType(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __TypeNameType, <PyTypeObject*> __TypeName_Union_TypeMeta)
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "apache.thrift.type.standard.types_reflection"
+    )
+
 
 
 @__cython.auto_pickle(False)
@@ -355,11 +361,7 @@ cdef class TypeUri(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "apache.thrift.type.standard.types_reflection"
-        )
-        return types_reflection.get_reflection__TypeUri()
+        return get_types_reflection().get_reflection__TypeUri()
 
     @staticmethod
     def __get_metadata__():
@@ -780,11 +782,7 @@ cdef class TypeName(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "apache.thrift.type.standard.types_reflection"
-        )
-        return types_reflection.get_reflection__TypeName()
+        return get_types_reflection().get_reflection__TypeName()
 
     @staticmethod
     def __get_metadata__():

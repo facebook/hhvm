@@ -115,6 +115,12 @@ __SetMetaClass(<PyTypeObject*> AnEnum, <PyTypeObject*> __AnEnumMeta)
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "includes.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class AStruct(thrift.py3.types.Struct):
     def __init__(AStruct self, **kwargs):
@@ -181,11 +187,7 @@ cdef class AStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "includes.types_reflection"
-        )
-        return types_reflection.get_reflection__AStruct()
+        return get_types_reflection().get_reflection__AStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -304,11 +306,7 @@ cdef class AStructB(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "includes.types_reflection"
-        )
-        return types_reflection.get_reflection__AStructB()
+        return get_types_reflection().get_reflection__AStructB()
 
     @staticmethod
     def __get_metadata__():

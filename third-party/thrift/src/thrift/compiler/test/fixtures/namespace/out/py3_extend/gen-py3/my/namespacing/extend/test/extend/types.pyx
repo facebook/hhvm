@@ -62,3 +62,9 @@ import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "my.namespacing.extend.test.extend.types_reflection"
+    )
+

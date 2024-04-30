@@ -62,6 +62,12 @@ from folly.coro cimport bridgeCoroTaskWith
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     def __init__(FooStreamEx self, *args, **kwargs):
@@ -110,11 +116,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__FooStreamEx()
+        return get_types_reflection().get_reflection__FooStreamEx()
 
     @staticmethod
     def __get_metadata__():
@@ -212,11 +214,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__FooEx()
+        return get_types_reflection().get_reflection__FooEx()
 
     @staticmethod
     def __get_metadata__():
@@ -314,11 +312,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__FooEx2()
+        return get_types_reflection().get_reflection__FooEx2()
 
     @staticmethod
     def __get_metadata__():

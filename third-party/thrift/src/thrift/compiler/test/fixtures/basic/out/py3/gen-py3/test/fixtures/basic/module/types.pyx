@@ -238,6 +238,12 @@ cdef class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __UnionToBeRenamedType, <PyTypeObject*> __UnionToBeRenamed_Union_TypeMeta)
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "test.fixtures.basic.module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -382,11 +388,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStruct()
+        return get_types_reflection().get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -486,11 +488,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyDataItem()
+        return get_types_reflection().get_reflection__MyDataItem()
 
     @staticmethod
     def __get_metadata__():
@@ -675,11 +673,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyUnion()
+        return get_types_reflection().get_reflection__MyUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -797,11 +791,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__ReservedKeyword()
+        return get_types_reflection().get_reflection__ReservedKeyword()
 
     @staticmethod
     def __get_metadata__():
@@ -942,11 +932,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__UnionToBeRenamed()
+        return get_types_reflection().get_reflection__UnionToBeRenamed()
 
     @staticmethod
     def __get_metadata__():
@@ -1073,11 +1059,7 @@ cdef class Set__float(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.basic.module.types_reflection"
-        )
-        return types_reflection.get_reflection__Set__float()
+        return get_types_reflection().get_reflection__Set__float()
 
 
 Set.register(Set__float)

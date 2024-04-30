@@ -94,6 +94,12 @@ cdef class __NadaType(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __NadaType, <PyTypeObject*> __Nada_Union_TypeMeta)
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class Empty(thrift.py3.types.Struct):
     def __init__(Empty self, **kwargs):
@@ -144,11 +150,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Empty()
+        return get_types_reflection().get_reflection__Empty()
 
     @staticmethod
     def __get_metadata__():
@@ -261,11 +263,7 @@ cdef class Nada(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Nada()
+        return get_types_reflection().get_reflection__Nada()
 
     @staticmethod
     def __get_metadata__():

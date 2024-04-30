@@ -60,6 +60,12 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "c.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class C(thrift.py3.types.Struct):
     def __init__(C self, **kwargs):
@@ -126,11 +132,7 @@ cdef class C(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "c.types_reflection"
-        )
-        return types_reflection.get_reflection__C()
+        return get_types_reflection().get_reflection__C()
 
     @staticmethod
     def __get_metadata__():
@@ -228,11 +230,7 @@ cdef class E(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "c.types_reflection"
-        )
-        return types_reflection.get_reflection__E()
+        return get_types_reflection().get_reflection__E()
 
     @staticmethod
     def __get_metadata__():

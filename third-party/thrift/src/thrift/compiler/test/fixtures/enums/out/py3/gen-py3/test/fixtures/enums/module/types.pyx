@@ -445,6 +445,12 @@ __SetMetaClass(<PyTypeObject*> MyBitmaskEnum2, <PyTypeObject*> __MyBitmaskEnum2M
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "test.fixtures.enums.module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class SomeStruct(thrift.py3.types.Struct):
     def __init__(SomeStruct self, **kwargs):
@@ -546,11 +552,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.enums.module.types_reflection"
-        )
-        return types_reflection.get_reflection__SomeStruct()
+        return get_types_reflection().get_reflection__SomeStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -701,11 +703,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.enums.module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStruct()
+        return get_types_reflection().get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -831,11 +829,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.enums.module.types_reflection"
-        )
-        return types_reflection.get_reflection__Set__i32()
+        return get_types_reflection().get_reflection__Set__i32()
 
 
 Set.register(Set__i32)

@@ -60,6 +60,12 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class Fiery(thrift.py3.exceptions.GeneratedError):
     def __init__(Fiery self, *args, **kwargs):
@@ -120,11 +126,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Fiery()
+        return get_types_reflection().get_reflection__Fiery()
 
     @staticmethod
     def __get_metadata__():
@@ -236,11 +238,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Serious()
+        return get_types_reflection().get_reflection__Serious()
 
     @staticmethod
     def __get_metadata__():
@@ -359,11 +357,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__ComplexFieldNames()
+        return get_types_reflection().get_reflection__ComplexFieldNames()
 
     @staticmethod
     def __get_metadata__():
@@ -482,11 +476,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__CustomFieldNames()
+        return get_types_reflection().get_reflection__CustomFieldNames()
 
     @staticmethod
     def __get_metadata__():
@@ -605,11 +595,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__ExceptionWithPrimitiveField()
+        return get_types_reflection().get_reflection__ExceptionWithPrimitiveField()
 
     @staticmethod
     def __get_metadata__():
@@ -728,11 +714,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__ExceptionWithStructuredAnnotation()
+        return get_types_reflection().get_reflection__ExceptionWithStructuredAnnotation()
 
     @staticmethod
     def __get_metadata__():
@@ -830,11 +812,7 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Banal()
+        return get_types_reflection().get_reflection__Banal()
 
     @staticmethod
     def __get_metadata__():

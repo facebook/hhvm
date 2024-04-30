@@ -60,3 +60,9 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "empty.types_reflection"
+    )
+

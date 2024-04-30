@@ -62,6 +62,12 @@ from folly.coro cimport bridgeCoroTaskWith
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "test.fixtures.interactions.module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     def __init__(CustomException self, *args, **kwargs):
@@ -119,11 +125,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.interactions.module.types_reflection"
-        )
-        return types_reflection.get_reflection__CustomException()
+        return get_types_reflection().get_reflection__CustomException()
 
     @staticmethod
     def __get_metadata__():

@@ -60,6 +60,12 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "apache.thrift.fixtures.types.included.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     def __init__(self, items=None):
@@ -152,11 +158,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "apache.thrift.fixtures.types.included.types_reflection"
-        )
-        return types_reflection.get_reflection__std_unordered_map__Map__i32_string()
+        return get_types_reflection().get_reflection__std_unordered_map__Map__i32_string()
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
@@ -238,11 +240,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "apache.thrift.fixtures.types.included.types_reflection"
-        )
-        return types_reflection.get_reflection__List__std_unordered_map__Map__i32_string()
+        return get_types_reflection().get_reflection__List__std_unordered_map__Map__i32_string()
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)

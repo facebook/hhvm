@@ -60,6 +60,12 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class Mixin1(thrift.py3.types.Struct):
     def __init__(Mixin1 self, **kwargs):
@@ -126,11 +132,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Mixin1()
+        return get_types_reflection().get_reflection__Mixin1()
 
     @staticmethod
     def __get_metadata__():
@@ -267,11 +269,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Mixin2()
+        return get_types_reflection().get_reflection__Mixin2()
 
     @staticmethod
     def __get_metadata__():
@@ -387,11 +385,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Mixin3Base()
+        return get_types_reflection().get_reflection__Mixin3Base()
 
     @staticmethod
     def __get_metadata__():
@@ -565,11 +559,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Foo()
+        return get_types_reflection().get_reflection__Foo()
 
     @staticmethod
     def __get_metadata__():

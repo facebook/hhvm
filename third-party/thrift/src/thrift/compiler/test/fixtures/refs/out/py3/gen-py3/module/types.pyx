@@ -238,6 +238,12 @@ cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __NonTriviallyDestructibleUnionType, <PyTypeObject*> __NonTriviallyDestructibleUnion_Union_TypeMeta)
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 
 
 @__cython.auto_pickle(False)
@@ -353,11 +359,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyUnion()
+        return get_types_reflection().get_reflection__MyUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -503,11 +505,7 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__NonTriviallyDestructibleUnion()
+        return get_types_reflection().get_reflection__NonTriviallyDestructibleUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -724,11 +722,7 @@ cdef class MyField(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyField()
+        return get_types_reflection().get_reflection__MyField()
 
     @staticmethod
     def __get_metadata__():
@@ -871,11 +865,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStruct()
+        return get_types_reflection().get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -1017,11 +1007,7 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithUnion()
+        return get_types_reflection().get_reflection__StructWithUnion()
 
     @staticmethod
     def __get_metadata__():
@@ -1141,11 +1127,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__RecursiveStruct()
+        return get_types_reflection().get_reflection__RecursiveStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -1324,11 +1306,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithContainers()
+        return get_types_reflection().get_reflection__StructWithContainers()
 
     @staticmethod
     def __get_metadata__():
@@ -1471,11 +1449,7 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithSharedConst()
+        return get_types_reflection().get_reflection__StructWithSharedConst()
 
     @staticmethod
     def __get_metadata__():
@@ -1575,11 +1549,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Empty()
+        return get_types_reflection().get_reflection__Empty()
 
     @staticmethod
     def __get_metadata__():
@@ -1722,11 +1692,7 @@ cdef class StructWithRef(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithRef()
+        return get_types_reflection().get_reflection__StructWithRef()
 
     @staticmethod
     def __get_metadata__():
@@ -1870,11 +1836,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithBox()
+        return get_types_reflection().get_reflection__StructWithBox()
 
     @staticmethod
     def __get_metadata__():
@@ -2003,11 +1965,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithInternBox()
+        return get_types_reflection().get_reflection__StructWithInternBox()
 
     @staticmethod
     def __get_metadata__():
@@ -2134,11 +2092,7 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithTerseInternBox()
+        return get_types_reflection().get_reflection__StructWithTerseInternBox()
 
     @staticmethod
     def __get_metadata__():
@@ -2267,11 +2221,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__AdaptedStructWithInternBox()
+        return get_types_reflection().get_reflection__AdaptedStructWithInternBox()
 
     @staticmethod
     def __get_metadata__():
@@ -2398,11 +2348,7 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__AdaptedStructWithTerseInternBox()
+        return get_types_reflection().get_reflection__AdaptedStructWithTerseInternBox()
 
     @staticmethod
     def __get_metadata__():
@@ -2545,11 +2491,7 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithRefTypeUnique()
+        return get_types_reflection().get_reflection__StructWithRefTypeUnique()
 
     @staticmethod
     def __get_metadata__():
@@ -2692,11 +2634,7 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithRefTypeShared()
+        return get_types_reflection().get_reflection__StructWithRefTypeShared()
 
     @staticmethod
     def __get_metadata__():
@@ -2839,11 +2777,7 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithRefTypeSharedConst()
+        return get_types_reflection().get_reflection__StructWithRefTypeSharedConst()
 
     @staticmethod
     def __get_metadata__():
@@ -2962,11 +2896,7 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithRefAndAnnotCppNoexceptMoveCtor()
+        return get_types_reflection().get_reflection__StructWithRefAndAnnotCppNoexceptMoveCtor()
 
     @staticmethod
     def __get_metadata__():
@@ -3133,11 +3063,7 @@ cdef class StructWithString(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__StructWithString()
+        return get_types_reflection().get_reflection__StructWithString()
 
     @staticmethod
     def __get_metadata__():
@@ -3259,11 +3185,7 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__List__RecursiveStruct()
+        return get_types_reflection().get_reflection__List__RecursiveStruct()
 
 
 Sequence.register(List__RecursiveStruct)
@@ -3341,11 +3263,7 @@ cdef class List__i32(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__List__i32()
+        return get_types_reflection().get_reflection__List__i32()
 
 
 Sequence.register(List__i32)
@@ -3426,11 +3344,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Set__i32()
+        return get_types_reflection().get_reflection__Set__i32()
 
 
 Set.register(Set__i32)
@@ -3528,11 +3442,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__Map__i32_i32()
+        return get_types_reflection().get_reflection__Map__i32_i32()
 
 Mapping.register(Map__i32_i32)
 
@@ -3609,11 +3519,7 @@ cdef class List__i64(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__List__i64()
+        return get_types_reflection().get_reflection__List__i64()
 
 
 Sequence.register(List__i64)

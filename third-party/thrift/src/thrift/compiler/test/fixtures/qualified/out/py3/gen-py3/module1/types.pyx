@@ -115,6 +115,12 @@ __SetMetaClass(<PyTypeObject*> Enum, <PyTypeObject*> __EnumMeta)
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module1.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class Struct(thrift.py3.types.Struct):
     def __init__(Struct self, **kwargs):
@@ -190,11 +196,7 @@ cdef class Struct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module1.types_reflection"
-        )
-        return types_reflection.get_reflection__Struct()
+        return get_types_reflection().get_reflection__Struct()
 
     @staticmethod
     def __get_metadata__():
@@ -316,11 +318,7 @@ cdef class List__Enum(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module1.types_reflection"
-        )
-        return types_reflection.get_reflection__List__Enum()
+        return get_types_reflection().get_reflection__List__Enum()
 
 
 Sequence.register(List__Enum)

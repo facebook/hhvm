@@ -62,6 +62,12 @@ import module.types as _module_types
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "matching_struct_names.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -128,11 +134,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStruct()
+        return get_types_reflection().get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -283,11 +285,7 @@ cdef class Combo(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__Combo()
+        return get_types_reflection().get_reflection__Combo()
 
     @staticmethod
     def __get_metadata__():
@@ -409,11 +407,7 @@ cdef class List__MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__List__MyStruct()
+        return get_types_reflection().get_reflection__List__MyStruct()
 
 
 Sequence.register(List__MyStruct)
@@ -496,11 +490,7 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__List__List__MyStruct()
+        return get_types_reflection().get_reflection__List__List__MyStruct()
 
 
 Sequence.register(List__List__MyStruct)
@@ -577,11 +567,7 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__List__module_MyStruct()
+        return get_types_reflection().get_reflection__List__module_MyStruct()
 
 
 Sequence.register(List__module_MyStruct)
@@ -664,11 +650,7 @@ cdef class List__List__module_MyStruct(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "matching_struct_names.types_reflection"
-        )
-        return types_reflection.get_reflection__List__List__module_MyStruct()
+        return get_types_reflection().get_reflection__List__List__module_MyStruct()
 
 
 Sequence.register(List__List__module_MyStruct)

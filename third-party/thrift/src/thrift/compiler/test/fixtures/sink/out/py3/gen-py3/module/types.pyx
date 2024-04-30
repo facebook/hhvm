@@ -60,6 +60,12 @@ import builtins as _builtins
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class InitialResponse(thrift.py3.types.Struct):
     def __init__(InitialResponse self, **kwargs):
@@ -126,11 +132,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__InitialResponse()
+        return get_types_reflection().get_reflection__InitialResponse()
 
     @staticmethod
     def __get_metadata__():
@@ -246,11 +248,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__FinalResponse()
+        return get_types_reflection().get_reflection__FinalResponse()
 
     @staticmethod
     def __get_metadata__():
@@ -366,11 +364,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__SinkPayload()
+        return get_types_reflection().get_reflection__SinkPayload()
 
     @staticmethod
     def __get_metadata__():
@@ -486,11 +480,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__CompatibleWithKeywordSink()
+        return get_types_reflection().get_reflection__CompatibleWithKeywordSink()
 
     @staticmethod
     def __get_metadata__():
@@ -597,11 +587,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__InitialException()
+        return get_types_reflection().get_reflection__InitialException()
 
     @staticmethod
     def __get_metadata__():
@@ -708,11 +694,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__SinkException1()
+        return get_types_reflection().get_reflection__SinkException1()
 
     @staticmethod
     def __get_metadata__():
@@ -819,11 +801,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__SinkException2()
+        return get_types_reflection().get_reflection__SinkException2()
 
     @staticmethod
     def __get_metadata__():

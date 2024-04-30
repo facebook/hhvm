@@ -66,5 +66,11 @@ import transitive.types as _transitive_types
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "service.types_reflection"
+    )
+
 IncludesIncluded = _includes_types.Included
 IncludesTransitiveFoo = _transitive_types.Foo

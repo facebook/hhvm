@@ -115,6 +115,12 @@ __SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     def __init__(MyStructNestedAnnotation self, **kwargs):
@@ -181,11 +187,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStructNestedAnnotation()
+        return get_types_reflection().get_reflection__MyStructNestedAnnotation()
 
     @staticmethod
     def __get_metadata__():
@@ -310,11 +312,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__SecretStruct()
+        return get_types_reflection().get_reflection__SecretStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -438,11 +436,7 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "module.types_reflection"
-        )
-        return types_reflection.get_reflection__std_deque_std_string__List__string()
+        return get_types_reflection().get_reflection__std_deque_std_string__List__string()
 
 
 Sequence.register(std_deque_std_string__List__string)

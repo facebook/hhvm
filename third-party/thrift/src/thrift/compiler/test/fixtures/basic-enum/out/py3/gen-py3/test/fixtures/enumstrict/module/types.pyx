@@ -225,6 +225,12 @@ __SetMetaClass(<PyTypeObject*> MyBigEnum, <PyTypeObject*> __MyBigEnumMeta)
 
 
 
+cdef object get_types_reflection():
+    import importlib
+    return importlib.import_module(
+        "test.fixtures.enumstrict.module.types_reflection"
+    )
+
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -304,11 +310,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.enumstrict.module.types_reflection"
-        )
-        return types_reflection.get_reflection__MyStruct()
+        return get_types_reflection().get_reflection__MyStruct()
 
     @staticmethod
     def __get_metadata__():
@@ -449,11 +451,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        import importlib
-        types_reflection = importlib.import_module(
-            "test.fixtures.enumstrict.module.types_reflection"
-        )
-        return types_reflection.get_reflection__Map__MyEnum_string()
+        return get_types_reflection().get_reflection__Map__MyEnum_string()
 
 Mapping.register(Map__MyEnum_string)
 

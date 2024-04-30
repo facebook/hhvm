@@ -1,0 +1,66 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+from libc.stdint cimport uint32_t, int16_t
+from libcpp.memory cimport unique_ptr
+from folly.iobuf cimport IOBuf
+
+from thrift.python.protocol cimport Protocol
+
+cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
+    cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
+        pass
+    cdef struct cStructInfo "::apache::thrift::detail::StructInfo":
+        pass
+    cpdef enum class FieldQualifier "::apache::thrift::detail::FieldQualifier":
+        Unqualified
+        Optional
+        Terse
+
+cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
+    cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
+        cDynamicStructInfo(const char* name, int16_t numFields, bint isUnion)
+        const cStructInfo& getStructInfo()
+        void addFieldInfo(int16_t id, FieldQualifier qualifier, const char* name, const cTypeInfo* typeInfo) except+
+        void addFieldValue(int16_t index, object fieldValue) except+
+        bint isUnion()
+
+    cdef object createStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createStructTupleWithNones(const cStructInfo& structInfo)
+    cdef void populateStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
+    cdef void resetFieldToStandardDefault(object, const cStructInfo& structInfo, int index) except+
+    cdef void setStructIsset(object, int index, bint set) except+
+
+cdef class MutableStructOrUnion:
+    cdef tuple _fbthrift_data
+    cdef IOBuf _serialize(MutableStructOrUnion self, Protocol proto)
+    cdef uint32_t _deserialize(MutableStructOrUnion self, IOBuf buf, Protocol proto) except? 0
+    cdef _fbthrift_get_field_value(self, int16_t index)
+
+cdef class MutableStruct(MutableStructOrUnion):
+    cdef IOBuf _serialize(MutableStruct self, Protocol proto)
+    cdef uint32_t _deserialize(MutableStruct self, IOBuf buf, Protocol proto) except? 0
+    cdef _fbthrift_get_field_value(MutableStruct self, int16_t index)
+    cdef _initStructTupleWithValues(MutableStruct self, object kwargs) except *
+    cdef _fbthrift_set_field_value(self, int16_t index, object value) except *
+    cdef _fbthrift_reset_field_to_standard_default(self, int16_t index) except *
+
+cdef class MutableStructInfo:
+    cdef unique_ptr[cDynamicStructInfo] cpp_obj
+    cdef tuple type_infos
+    cdef tuple fields
+    cdef dict name_to_index
+    cdef void fill(self) except *
+    cdef void store_field_values(self) except *

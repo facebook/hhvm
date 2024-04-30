@@ -320,6 +320,38 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
   }
 }
 
+void resetFieldToStandardDefault(
+    PyObject* tuple, const detail::StructInfo& structInfo, int index) {
+  if (tuple == nullptr) {
+    throw std::runtime_error(fmt::format(
+        "Received null tuple while resetting struct:`{}`, field-index:'{}'",
+        structInfo.name,
+        index));
+  }
+
+  DCHECK(PyTuple_Check(tuple));
+  DCHECK(index < structInfo.numFields);
+
+  const auto& defaultValues =
+      *static_cast<const FieldValueMap*>(structInfo.customExt);
+  const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[index];
+  PyObject* oldValue = PyTuple_GET_ITEM(tuple, index + 1);
+  if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
+    PyTuple_SET_ITEM(tuple, index + 1, Py_None);
+    Py_INCREF(Py_None);
+  } else {
+    // getDefaultValue calls `Py_INCREF`
+    PyTuple_SET_ITEM(
+        tuple,
+        index + 1,
+        getDefaultValue(fieldInfo.typeInfo, defaultValues, index).release());
+  }
+  Py_DECREF(oldValue);
+  // DO_BEFORE(alperyoney,20240515): Figure out whether isset flag should be
+  // cleared for non-optional fields.
+  setStructIsset(tuple, index, false);
+}
+
 void clearUnion(void* object) {
   PyObject* pyObj = toPyObject(object);
   PyObject* oldType = PyTuple_GET_ITEM(pyObj, 0);

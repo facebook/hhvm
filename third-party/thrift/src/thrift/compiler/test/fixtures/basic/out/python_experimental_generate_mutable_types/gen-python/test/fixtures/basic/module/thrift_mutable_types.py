@@ -14,6 +14,7 @@ from __future__ import annotations
 import dataclasses
 
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
+import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import thrift.python.types as _fbthrift_python_types
 
 
@@ -41,7 +42,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyDataField",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -172,3 +173,10 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
         return immutable_types.ReservedKeyword(**dataclasses.asdict(self))
 
+
+_fbthrift_all_structs = [
+    MyStruct,
+    MyDataItem,
+    ReservedKeyword,
+]
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)

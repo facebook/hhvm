@@ -18,18 +18,32 @@ import types
 import typing
 import unittest
 
-from thrift.python.mutable_types import MutableStruct, MutableStructOrUnion
+from parameterized import parameterized
+
+from thrift.python.mutable_types import (
+    MutableStruct,
+    MutableStructMeta,
+    MutableStructOrUnion,
+)
 from thrift.python.types import StructMeta
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
+    TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
+    TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
+    TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
 )
+
+max_byte = 2**7 - 1
+max_i16 = 2**15 - 1
+max_i32 = 2**31 - 1
+max_i64 = 2**63 - 1
 
 
 class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
@@ -177,33 +191,19 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertIsInstance(w_mutable, MutableStruct)
         self.assertIsInstance(w_mutable, MutableStructOrUnion)
 
-        self.assertEqual(w_mutable.unqualified_string, None)
+        self.assertEqual(w_mutable.unqualified_string, "")
         w_mutable.unqualified_string = "hello, world!"
         self.assertEqual(w_mutable.unqualified_string, "hello, world!")
 
     def test_default_values(self) -> None:
-        # Custom default values:
-        # DO_BEFORE(aristidis,20240505): Add support for custom default values
-        # to mutable thrift-python types (similar to immutable types).
-        self.assertEqual(
-            TestStructWithDefaultValuesMutable(),
-            TestStructWithDefaultValuesMutable(
-                unqualified_integer=None,
-                optional_integer=None,
-                unqualified_struct=None,
-                optional_struct=None,
-            ),
-        )
-
         # Intrinsic default values:
         # optional struct field is None
         self.assertIsNone(
             TestStructWithDefaultValuesMutable().optional_struct_intrinsic_default
         )
 
-        # DO_BEFORE(aristidis,20240506): unqualified struct field should be
-        # default-initialized.
-        self.assertIsNone(
+        self.assertEqual(
+            TestStructMutable(),
             TestStructWithDefaultValuesMutable().unqualified_struct_intrinsic_default,
         )
 
@@ -279,21 +279,14 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             w_mutable._to_immutable()
 
     def test_type(self) -> None:
-        # Contrary to immutable struct, the type of the generated clas
-        # is not MutableStructMeta, but 'type' (because it is a dataclass type)
-        self.assertEqual(type(TestStructMutable), type)
+        self.assertEqual(type(TestStructMutable), MutableStructMeta)
         self.assertEqual(type(TestStructMutable()), TestStructMutable)
 
     def test_iteration(self) -> None:
-        # Contrary to immutable types, the dataclass-based mutable type is not
-        # iterable (mostly because we do not control the metaclass of
-        # dataclasses).
-        with self.assertRaisesRegex(TypeError, "'type' object is not iterable"):
-            iter(TestStructMutable)
-
+        # Iterating over the class yields tuples of (field_name, None).
         self.assertSetEqual(
-            {field.name for field in dataclasses.fields(TestStructMutable)},
-            {"unqualified_string", "optional_string"},
+            set(TestStructMutable),
+            {("unqualified_string", None), ("optional_string", None)},
         )
 
         # Iterating over an instance yields (field_name, field_value) tuples.
@@ -303,38 +296,199 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         )
 
     def test_del_attribute(self) -> None:
-        w = TestStructMutable(unqualified_string="hello, world!")
-        self.assertEqual(w.unqualified_string, "hello, world!")
+        w = TestStructMutable(unqualified_string="hello", optional_string="world")
 
-        # Deleting an attribute on a (mutable) thrift-python instance should
-        # reset it to its standard default value (see
-        # thrift/doc/idl/index.md#default-values).
+        # Deleting an attribute on a (mutable) thrift-python instance raises
+        # `AttributeError`
+        with self.assertRaises(AttributeError):
+            del w.unqualified_string
 
-        # NOTE: this is not currently implemented: deleting the attribute
-        # removes it from the instance altogether:
-        del w.unqualified_string
-        # DO_BEFORE(aristidis, 20240508): Support deleting attribute of mutable
-        # thrift-python struct instance.
-        with self.assertRaisesRegex(
-            AttributeError, "'TestStruct' object has no attribute 'unqualified_string'"
-        ):
-            self.assertEqual(w.unqualified_string, "")
+        with self.assertRaises(AttributeError):
+            del w.optional_string
 
-        w_default_values = TestStructWithDefaultValuesMutable(unqualified_integer=123)
-        self.assertEqual(w_default_values.unqualified_integer, 123)
-        del w_default_values.unqualified_integer
-        # DO_BEFORE(aristidis, 20240508): Support deleting attribute of mutable
-        # thrift-python struct instance.
-        with self.assertRaisesRegex(
-            AttributeError,
-            "'TestStructWithDefaultValues' object has no attribute 'unqualified_integer'",
-        ):
-            self.assertEqual(w_default_values.unqualified_integer, 42)
+        self.assertEqual(w.unqualified_string, "hello")
+        self.assertEqual(w.optional_string, "world")
+
+        with self.assertRaises(AttributeError):
+            del w.unqualified_string
+
+        with self.assertRaises(AttributeError):
+            del w.optional_string
 
     def test_type_hints(self) -> None:
-        # DO_BEFORE(aristidis, 20240601): Fix type hints for mutable
-        # thrift-python types (should not be `typing.Any`).
-        self.assertEqual(
-            typing.get_type_hints(TestStructMutable),
-            {"unqualified_string": typing.Any, "optional_string": typing.Any},
+        # Similar to thrift-python immutable structs, mutable structs do not
+        # include type hints directly
+        self.assertEqual(typing.get_type_hints(TestStructMutable), {})
+
+    def _assert_field_behavior(
+        self,
+        struct,
+        field_name: str,
+        expected_default_value,
+        value,
+        invalid_value,
+        overflow_value=None,
+    ):
+        """
+        This function is a helper function used to assert the behavior of a
+        specific field in a structure.
+            field_name (str): The name of the field to be tested.
+            expected_default_value: The expected default value of the field.
+            value: The value to be set for the field.
+            invalid_value: A value of an incorrect type that, when set,
+                should raise a TypeError.
+            overflow_value (optional): A value that, when set, should raise
+                an `OverflowError`. This is typically used for integral types.
+        """
+        # Check for the `expected_default_value`. The unqualified field should
+        # never be `None`
+        if expected_default_value is not None:
+            self.assertIsNotNone(getattr(struct, field_name))
+            self.assertEqual(expected_default_value, getattr(struct, field_name))
+        else:  # OPTIONAL
+            self.assertIsNone(getattr(struct, field_name))
+
+        # Set the `value`, read it back
+        setattr(struct, field_name, value)
+        self.assertEqual(value, getattr(struct, field_name))
+
+        # TODO: How to reset field to standard default value?
+        struct._do_not_use_resetFieldToStandardDefault(field_name)
+        if expected_default_value is not None:
+            self.assertIsNotNone(getattr(struct, field_name))
+            self.assertEqual(expected_default_value, getattr(struct, field_name))
+        else:  # OPTIONAL
+            self.assertIsNone(getattr(struct, field_name))
+
+        # `del struct.field_name` raises a `AttributeError`
+        with self.assertRaises(AttributeError):
+            delattr(struct, field_name)
+
+        # Assigning `None` raises a `TypeError`
+        with self.assertRaises(TypeError):
+            setattr(struct, field_name, None)
+
+        # Value with wrong type raises `TypeError`
+        with self.assertRaises(TypeError):
+            setattr(struct, field_name, invalid_value)
+
+        # For integral types check `OverflowError`
+        if overflow_value is not None:
+            with self.assertRaises(OverflowError):
+                setattr(struct, field_name, overflow_value)
+
+    @parameterized.expand(
+        [
+            # (field_name, expected_default_value, value, invalid_value, overflow_value")
+            ("unqualified_bool", False, True, "Not Bool", None),
+            ("optional_bool", None, True, "Not Bool", None),
+            ("unqualified_byte", 0, max_byte, "Not Byte", max_byte + 1),
+            ("optional_byte", None, max_byte, "Not Byte", max_byte + 1),
+            ("unqualified_i16", 0, max_i16, "Not i16", max_i16 + 1),
+            ("optional_i16", None, max_i16, "Not i16", max_i16 + 1),
+            ("unqualified_i32", 0, max_i32, "Not i32", max_i32 + 1),
+            ("optional_i32", None, max_i32, "Not i32", max_i32 + 1),
+            ("unqualified_i64", 0, max_i64, "Not i64", max_i64 + 1),
+            ("optional_i64", None, max_i64, "Not i64", max_i64 + 1),
+            ("unqualified_float", 0.0, 1.0, "Not float", None),
+            ("optional_float", None, 1.0, "Not float", None),
+            ("unqualified_double", 0.0, 99.12, "Not double", None),
+            ("optional_double", None, 99.12, "Not double", None),
+            ("unqualified_string", "", "str-value", 999, None),
+            ("optional_string", None, "str-value", 999, None),
+        ]
+    )
+    def test_create_and_assign_for_all_primitive_types(
+        self, field_name, expected_default_value, value, invalid_value, overflow_value
+    ):
+        s = TestStructAllThriftPrimitiveTypesMutable()
+        self._assert_field_behavior(
+            s,
+            field_name=field_name,
+            expected_default_value=expected_default_value,
+            value=value,
+            invalid_value=invalid_value,
+            overflow_value=overflow_value,
         )
+
+    @parameterized.expand(
+        [
+            # (field_name, expected_default_value, value, invalid_value, overflow_value")
+            # `expected_default_value` is from IDL
+            ("unqualified_bool", True, True, "Not Bool", None),
+            ("unqualified_byte", 32, max_byte, "Not Byte", max_byte + 1),
+            ("unqualified_i16", 512, max_i16, "Not i16", max_i16 + 1),
+            ("unqualified_i32", 2048, max_i32, "Not i32", max_i32 + 1),
+            ("unqualified_i64", 999, max_i64, "Not i64", max_i64 + 1),
+            ("unqualified_float", 1.0, 1.0, "Not float", None),
+            ("unqualified_double", 1.231, 99.12, "Not double", None),
+            ("unqualified_string", "thrift-python", "str-value", 999, None),
+        ]
+    )
+    def test_create_and_assign_for_all_primitive_types_with_default_values(
+        self, field_name, expected_default_value, value, invalid_value, overflow_value
+    ):
+        s = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
+        self._assert_field_behavior(
+            s,
+            field_name=field_name,
+            expected_default_value=expected_default_value,
+            value=value,
+            invalid_value=invalid_value,
+            overflow_value=overflow_value,
+        )
+
+    def test_create_and_assign_for_i32(self) -> None:
+        # This is the singular version of `test_create_and_assign_for_all_types`
+        # for the i32 type. It's more readable since it doesn't use the
+        # `verify_{qualified,optional}_helper` functions.
+        s = TestStructAllThriftPrimitiveTypesMutable(unqualified_i32=11)
+
+        # Check the value assigned during initialization
+        self.assertEqual(11, s.unqualified_i32)
+
+        # Set the value and read it back
+        s.unqualified_i32 = 23
+        self.assertEqual(23, s.unqualified_i32)
+
+        # `del struct.field_name` raises a `AttributeError`
+        with self.assertRaises(AttributeError):
+            del s.unqualified_i32
+
+        # Assigning `None` raises a `TypeError`
+        with self.assertRaises(TypeError):
+            s.unqualified_i32 = None
+
+        # Assigning a value of the wrong type raises a `TypeError`
+        with self.assertRaises(TypeError):
+            s.unqualified_i32 = "This is not an integer"
+
+        # Boundary check for integral types
+        with self.assertRaises(OverflowError):
+            s.unqualified_i32 = 2**31
+
+        s = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
+        # from IDL: i32 unqualified_i32 = 2048;
+
+        # Check the value from IDL during initialization
+        self.assertEqual(2048, s.unqualified_i32)
+
+        # Set the value and read it back
+        s.unqualified_i32 = 32
+        self.assertEqual(32, s.unqualified_i32)
+
+        # `del struct.field_name` raises a `AttributeError`
+        with self.assertRaises(AttributeError):
+            del s.unqualified_i32
+
+        # Assigning `None` raises a `TypeError`
+        with self.assertRaises(TypeError):
+            s.unqualified_i32 = None
+
+        # Assigning a value of the wrong type raises a `TypeError`
+        with self.assertRaises(TypeError):
+            s.unqualified_i32 = "This is not an integer"
+
+        # Boundary check for integral types
+        with self.assertRaises(OverflowError):
+            s.unqualified_i32 = -(2**31 + 1)

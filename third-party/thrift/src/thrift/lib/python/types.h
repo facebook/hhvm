@@ -164,6 +164,14 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
 void populateStructTupleUnsetFieldsWithDefaultValues(
     PyObject* object, const detail::StructInfo& structInfo);
 
+/**
+ * Resets the field at `index` of the "struct tuple" with the default value.
+ *
+ * Throws on error
+ */
+void resetFieldToStandardDefault(
+    PyObject* tuple, const detail::StructInfo& structInfo, int index);
+
 struct PyObjectDeleter {
   void operator()(PyObject* p) { Py_XDECREF(p); }
 };

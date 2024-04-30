@@ -9,6 +9,7 @@ use serde::Serialize;
 use crate::opcodes::Opcode;
 use crate::BytesId;
 use crate::FCallArgsFlags;
+use crate::IterArgsFlags;
 use crate::PropName;
 use crate::ReadonlyOp;
 use crate::SrcLoc;
@@ -217,6 +218,7 @@ pub struct IterArgs {
     pub iter_id: IterId,
     pub key_id: Local,
     pub val_id: Local,
+    pub flags: IterArgsFlags,
 }
 
 impl std::default::Default for IterArgs {
@@ -225,6 +227,7 @@ impl std::default::Default for IterArgs {
             iter_id: Default::default(),
             key_id: Local::INVALID,
             val_id: Local::INVALID,
+            flags: IterArgsFlags::None,
         }
     }
 }

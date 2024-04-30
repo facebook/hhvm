@@ -4470,7 +4470,7 @@ OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
                                 TypedValue* base, PC targetpc) {
-  auto const op = ita.flags & IterArgs::Flags::BaseConst
+  auto const op = has_flag(ita.flags, IterArgs::Flags::BaseConst)
     ? IterTypeOp::LocalBaseConst
     : IterTypeOp::LocalBaseMutable;
   implIterInit<true>(pc, ita, base, targetpc, op);

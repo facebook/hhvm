@@ -383,6 +383,7 @@ pub fn emit_impl_locals(input: TokenStream, opcodes: &[OpcodeData]) -> Result<To
                         iter_id: _,
                         key_id: #key,
                         val_id: #val,
+                        flags: _,
                     });
                     match_parts.push(quote!(#mstr));
                 }

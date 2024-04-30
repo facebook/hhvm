@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <folly/Hash.h>
+#include <folly/Utility.h>
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -586,7 +587,8 @@ struct hasher_impl {
   }
 
   static size_t hash(IterArgs ita) {
-    auto hash = HPHP::hash_int64_pair(ita.flags, ita.iterId);
+    auto hash =
+      HPHP::hash_int64_pair(folly::to_underlying(ita.flags), ita.iterId);
     hash = HPHP::hash_int64_pair(hash, ita.keyId);
     return HPHP::hash_int64_pair(hash, ita.valId);
   }

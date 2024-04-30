@@ -15,6 +15,7 @@ use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::IsTypeOp;
 use hhbc::IterArgs;
+use hhbc::IterArgsFlags;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::MOpMode;
@@ -1224,6 +1225,7 @@ fn emit_foreach_impl<'a, 'd>(
             iter_id,
             key_id: key_id.unwrap_or(Local::INVALID),
             val_id,
+            flags: IterArgsFlags::None, // TODO: we didn't infer if the base is const
         };
         let body = env.do_in_loop_body(
             e,

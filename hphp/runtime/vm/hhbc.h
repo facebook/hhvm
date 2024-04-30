@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
 #include "hphp/runtime/vm/hhbc-shared.h"
+#include "hphp/runtime/vm/iter-args-flags.h"
 #include "hphp/runtime/vm/member-key.h"
 #include "hphp/runtime/vm/opcodes.h"
 #include "hphp/util/compact-vector.h"
@@ -64,11 +65,7 @@ struct LocalRange {
  * currently only do in HHBBC.
  */
 struct IterArgs {
-  enum Flags : uint8_t {
-    None      = 0,
-    // The base is stored in a local, and that local is unmodified in the loop.
-    BaseConst = (1 << 0),
-  };
+  using Flags = IterArgsFlags;
 
   static constexpr int32_t kNoKey = -1;
 

@@ -107,7 +107,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
 
     auto const op = [&]{
       if (!isLInit) return IterTypeOp::NonLocal;
-      auto const flag = extra->flags & IterArgs::Flags::BaseConst;
+      auto const flag = has_flag(extra->flags, IterArgs::Flags::BaseConst);
       return flag ? IterTypeOp::LocalBaseConst : IterTypeOp::LocalBaseMutable;
     }();
     auto const target = isInitK

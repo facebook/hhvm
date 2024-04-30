@@ -1184,15 +1184,17 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
 }
 
 fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
-    // Ignore LocId, ValueIds and LocalIds - those are checked elsewhere.
+    // Ignore IterArgsFlags, LocId, ValueIds and LocalIds - those are checked elsewhere.
     let IteratorArgs {
         iter_id: a_iter_id,
+        flags: _,
         locals: _,
         targets: _,
         loc: _,
     } = a;
     let IteratorArgs {
         iter_id: b_iter_id,
+        flags: _,
         locals: _,
         targets: _,
         loc: _,

@@ -440,7 +440,8 @@ std::unique_ptr<Accessor> getAccessor(
   if (!layout.vanilla()) {
     return std::make_unique<BespokeAccessor>(type, layout);
   }
-  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
+  auto const baseConst =
+    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
   switch (type.baseType()) {
     case BT::Vec: {
       return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
@@ -602,7 +603,8 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
-  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
+  auto const baseConst =
+    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const ty = IterTypeData(
     data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, StIterBase, id, fp(env), local ? cns(env, nullptr) : arr);
@@ -653,7 +655,8 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          uint32_t baseLocalId) {
   auto const exit = makeExitSlow(env);
   auto const local = baseLocalId != kInvalidId;
-  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
+  auto const baseConst =
+    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const type = IterTypeData(
     data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, CheckIter, exit, type, fp(env));

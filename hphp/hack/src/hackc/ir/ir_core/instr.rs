@@ -26,6 +26,7 @@ use crate::IncDecOp;
 use crate::InitPropOp;
 use crate::IsLogAsDynamicCallOp;
 use crate::IsTypeOp;
+use crate::IterArgsFlags;
 use crate::IterId;
 use crate::LocId;
 use crate::MOpMode;
@@ -1048,6 +1049,7 @@ pub enum Predicate {
 #[derive(Clone, Debug, HasLoc, PartialEq, Eq)]
 pub struct IteratorArgs {
     pub iter_id: IterId,
+    pub flags: IterArgsFlags,
     // Stored as [ValueLid, KeyLid]
     pub locals: SmallVec<[LocalId; 2]>,
     pub targets: [BlockId; 2],
@@ -1057,6 +1059,7 @@ pub struct IteratorArgs {
 impl IteratorArgs {
     pub fn new(
         iter_id: IterId,
+        flags: IterArgsFlags,
         key_lid: Option<LocalId>,
         value_lid: LocalId,
         done_bid: BlockId,
@@ -1070,6 +1073,7 @@ impl IteratorArgs {
         }
         IteratorArgs {
             iter_id,
+            flags,
             locals,
             targets: [done_bid, next_bid],
             loc,

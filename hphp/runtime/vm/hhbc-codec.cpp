@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "folly/Utility.h"
+
 namespace HPHP {
 
 namespace {
@@ -115,7 +117,7 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeIterArgs(FuncEmitter& fe, const IterArgs& args) {
-  fe.emitByte(args.flags);
+  fe.emitByte(folly::to_underlying(args.flags));
   fe.emitIVA(args.iterId);
   fe.emitIVA(args.keyId - IterArgs::kNoKey);
   fe.emitIVA(args.valId);

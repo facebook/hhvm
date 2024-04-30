@@ -13,27 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #pragma once
 
-#include "hphp/runtime/vm/as-base.h"
-#include "hphp/runtime/vm/fcall-args-flags.h"
-#include "hphp/runtime/vm/hhbc-shared.h"
-#include "hphp/runtime/vm/iter-args-flags.h"
-
-#include "rust/cxx.h"
+#include <folly/Utility.h>
+#include <stdint.h>
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+enum class IterArgsFlags : uint8_t {
+  None      = 0,
+  // The base is stored in a local, and that local is unmodified in the loop.
+  BaseConst = (1 << 0),
+};
 
-/*
- * This header contains routines linked into HackC.
- */
+constexpr IterArgsFlags operator&(IterArgsFlags a, IterArgsFlags b) {
+  return IterArgsFlags(folly::to_underlying(a) & folly::to_underlying(b));
+}
 
-//////////////////////////////////////////////////////////////////////
+constexpr IterArgsFlags operator|(IterArgsFlags a, IterArgsFlags b) {
+  return IterArgsFlags(folly::to_underlying(a) | folly::to_underlying(b));
+}
 
-/*
- * Convert an fcall flag `to a string of space-separated flag names.
- */
-rust::String fcall_flags_to_string_ffi(FCallArgsFlags);
-} // namespace HPHP
+constexpr bool has_flag(IterArgsFlags flags, IterArgsFlags flag) {
+  return (flags & flag) != IterArgsFlags::None;
+}
+
+}

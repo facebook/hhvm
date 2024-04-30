@@ -875,6 +875,7 @@ impl<'b> InstrEmitter<'b> {
                         .key_lid()
                         .map_or(hhbc::Local::INVALID, |lid| self.lookup_local(lid)),
                     val_id: self.lookup_local(ir_args.value_lid()),
+                    flags: ir_args.flags,
                 };
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
                 self.push_opcode(Opcode::IterInit(args, label));
@@ -887,6 +888,7 @@ impl<'b> InstrEmitter<'b> {
                         .key_lid()
                         .map_or(hhbc::Local::INVALID, |lid| self.lookup_local(lid)),
                     val_id: self.lookup_local(ir_args.value_lid()),
+                    flags: ir_args.flags,
                 };
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
                 self.push_opcode(Opcode::IterNext(args, label));

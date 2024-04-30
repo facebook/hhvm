@@ -691,6 +691,7 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
                 iter_id,
                 ref key_id,
                 ref val_id,
+                flags,
             } = *args;
             let key_lid = key_id.is_valid().then(|| convert_local(ctx, key_id));
             let value_lid = convert_local(ctx, val_id);
@@ -699,8 +700,9 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
             let next_bid = ctx.builder.alloc_bid();
             let done_bid = ctx.target_from_label(label, stack_size);
 
-            let args =
-                instr::IteratorArgs::new(iter_id, key_lid, value_lid, done_bid, next_bid, ctx.loc);
+            let args = instr::IteratorArgs::new(
+                iter_id, flags, key_lid, value_lid, done_bid, next_bid, ctx.loc,
+            );
             ctx.emit(Instr::Terminator(Terminator::IterInit(args, base_iid)));
             ctx.builder.start_block(next_bid);
             ctx.unspill_stack(stack_size);
@@ -710,6 +712,7 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
                 iter_id,
                 ref key_id,
                 ref val_id,
+                flags,
             } = *args;
             let key_lid = key_id.is_valid().then(|| convert_local(ctx, key_id));
             let value_lid = convert_local(ctx, val_id);
@@ -717,8 +720,9 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
             let next_bid = ctx.builder.alloc_bid();
             let done_bid = ctx.target_from_label(label, stack_size);
 
-            let args =
-                instr::IteratorArgs::new(iter_id, key_lid, value_lid, done_bid, next_bid, ctx.loc);
+            let args = instr::IteratorArgs::new(
+                iter_id, flags, key_lid, value_lid, done_bid, next_bid, ctx.loc,
+            );
             ctx.emit(Instr::Terminator(Terminator::IterNext(args)));
             ctx.builder.start_block(next_bid);
             ctx.unspill_stack(stack_size);

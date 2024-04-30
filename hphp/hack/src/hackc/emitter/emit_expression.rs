@@ -35,6 +35,7 @@ use hhbc::Instruct;
 use hhbc::IsLogAsDynamicCallOp;
 use hhbc::IsTypeOp;
 use hhbc::IterArgs;
+use hhbc::IterArgsFlags;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::MOpMode;
@@ -1063,6 +1064,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
             iter_id,
             key_id,
             val_id,
+            flags: IterArgsFlags::None, // base is being modified
         };
         let iter_init = InstrSeq::gather(vec![instr::l_iter_init(
             iter_args.clone(),

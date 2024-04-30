@@ -289,10 +289,12 @@ impl AssembleImm<hhbc::IterArgs> for Lexer<'_> {
         self.expect(Token::is_colon)?;
         let iter_id = hhbc::IterId::new(idx);
         let val_id = self.assemble_imm(decl_map, adata)?;
+        let flags = hhbc::IterArgsFlags::None; // TODO: implement string serialization
         Ok(hhbc::IterArgs {
             iter_id,
             key_id,
             val_id,
+            flags,
         })
     }
 }

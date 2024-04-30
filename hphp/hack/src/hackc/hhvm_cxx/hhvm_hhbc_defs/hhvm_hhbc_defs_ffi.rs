@@ -57,6 +57,14 @@ pub mod ffi {
         Class,
     }
 
+    // Defined in iter-args-flags.h.
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
+    enum IterArgsFlags {
+        None = 0x0,
+        BaseConst = 0x1,
+    }
+
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum FatalOp {
@@ -245,6 +253,7 @@ pub mod ffi {
         type InitPropOp;
         type IsLogAsDynamicCallOp;
         type IsTypeOp;
+        type IterArgsFlags;
         type MOpMode;
         type ObjMethodOp;
         type OODeclExistsOp;

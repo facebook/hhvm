@@ -1149,7 +1149,9 @@ ImmVector getImmVector(PC opcode) {
 std::string show(const IterArgs& ita, PrintLocal print_local) {
   auto const flags = [&]{
     auto parts = std::vector<std::string>{};
-    if (ita.flags & IterArgs::Flags::BaseConst) parts.push_back("BaseConst");
+    if (has_flag(ita.flags, IterArgs::Flags::BaseConst)) {
+      parts.push_back("BaseConst");
+    }
     if (parts.empty()) return std::string{};
     return folly::sformat("<{}> ", folly::join(' ', parts));
   }();

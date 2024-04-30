@@ -29,9 +29,3 @@
 // one may specify rocket_strategy_parser and rocket_allocating_strategy_parser
 // to be both true and it is ambiguous which one to use.
 THRIFT_FLAG_DEFINE_string(rocket_frame_parser, "legacy");
-
-// Add a flag to enable strategy based parser. Default strategy right now uses.
-THRIFT_FLAG_DEFINE_bool(rocket_strategy_parser, false);
-
-// Add a flag to enable allocating strategy based parser.
-THRIFT_FLAG_DEFINE_bool(rocket_allocating_strategy_parser, false);

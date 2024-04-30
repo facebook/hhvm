@@ -112,9 +112,9 @@ void Parser<T>::readDataAvailableOld(size_t nbytes) {
 template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   blockResize_ = true;
-  if (useStrategyParser_) {
+  if (mode_ == ParserMode::STRATEGY) {
     frameLengthParser_->getReadBuffer(bufout, lenout);
-  } else if (useAllocatingStrategyParser_) {
+  } else if (mode_ == ParserMode::ALLOCATING) {
     allocatingParser_->getReadBuffer(bufout, lenout);
   } else {
     getReadBufferOld(bufout, lenout);
@@ -126,9 +126,9 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   blockResize_ = false;
   try {
-    if (useStrategyParser_) {
+    if (mode_ == ParserMode::STRATEGY) {
       frameLengthParser_->readDataAvailable(nbytes);
-    } else if (useAllocatingStrategyParser_) {
+    } else if (mode_ == ParserMode::ALLOCATING) {
       allocatingParser_->readDataAvailable(nbytes);
     } else {
       readDataAvailableOld(nbytes);
@@ -171,9 +171,9 @@ void Parser<T>::readBufferAvailable(
     std::unique_ptr<folly::IOBuf> buf) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
-    if (useStrategyParser_) {
+    if (mode_ == ParserMode::STRATEGY) {
       frameLengthParser_->readBufferAvailable(std::move(buf));
-    } else if (useAllocatingStrategyParser_) {
+    } else if (mode_ == ParserMode::ALLOCATING) {
       // Will throw not implemented runtime exception
       allocatingParser_->readBufferAvailable(std::move(buf));
     } else {

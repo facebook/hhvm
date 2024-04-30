@@ -181,6 +181,7 @@ bool EvaluateCommand::executeImpl(
 
   const std::string evalContext = tryGetString(args, "context", "");
   bool evalSilent = evalContext == "watch" || evalContext == "hover";
+  bool debuggerNotebook = evalContext == "repl-debugger-notebook";
 
   auto executor = EvaluatePHPExecutor{
     m_debugger,
@@ -209,7 +210,8 @@ bool EvaluateCommand::executeImpl(
       StructuredLog::enabled()) {
     logToScuba(rawExpression, !result.failed, result.error,
                session->getClientUser(),
-               session->getClientId(),
+               debuggerNotebook ? "debugger-notebook" :
+                                  session->getClientId(),
                session->getSessionId(),
                before, after, dummyRI->m_firstBpHit);
   }

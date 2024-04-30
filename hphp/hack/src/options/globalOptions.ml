@@ -200,6 +200,7 @@ type t = {
   po_stack_size: int;
   tco_extended_reasons: bool;
   hack_warnings: bool;
+  tco_strict_switch: bool;
 }
 [@@deriving eq, show]
 
@@ -334,6 +335,7 @@ let default =
     (* The largest stack size we can use without requiring sudo *)
     tco_extended_reasons = false;
     hack_warnings = false;
+    tco_strict_switch = false;
   }
 
 let set
@@ -465,6 +467,7 @@ let set
     ?po_stack_size
     ?tco_extended_reasons
     ?hack_warnings
+    ?tco_strict_switch
     options =
   let setting setting option =
     match setting with
@@ -804,6 +807,7 @@ let set
     tco_extended_reasons =
       setting tco_extended_reasons options.tco_extended_reasons;
     hack_warnings = setting hack_warnings options.hack_warnings;
+    tco_strict_switch = setting tco_strict_switch options.tco_strict_switch;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

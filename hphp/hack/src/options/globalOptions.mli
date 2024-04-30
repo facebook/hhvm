@@ -307,6 +307,8 @@ type t = {
   tco_extended_reasons: bool;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
   hack_warnings: bool;  (** turn on hack warnings *)
+  tco_strict_switch: bool;
+      (** Enable strict case checking in switch statements *)
 }
 [@@deriving eq, show]
 
@@ -439,6 +441,7 @@ val set :
   ?po_stack_size:int ->
   ?tco_extended_reasons:bool ->
   ?hack_warnings:bool ->
+  ?tco_strict_switch:bool ->
   t ->
   t
 

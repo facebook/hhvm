@@ -380,6 +380,7 @@ impl HhConfig {
             po_stack_size: default.po_stack_size,
             tco_extended_reasons:  default.tco_extended_reasons,
             hack_warnings: hhconfig.get_bool_or("hack_warnings", default.hack_warnings)?,
+            tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
         };
         let mut c = Self {
             local_config,

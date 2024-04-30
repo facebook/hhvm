@@ -399,6 +399,7 @@ let load_config config options =
       (bool_opt "disallow_direct_superglobals_refs" config)
     ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
     ?hack_warnings:(bool_opt "hack_warnings" config)
+    ?tco_strict_switch:(bool_opt "strict_switch" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

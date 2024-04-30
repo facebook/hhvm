@@ -166,6 +166,7 @@ impl Default for GlobalOptions {
             po_stack_size: 32 * 1024 * 1024, // 32 MiB is the largest stack size we can use without requiring sudo
             tco_extended_reasons: false,
             hack_warnings: false,
+            tco_strict_switch: false,
         }
     }
 }

@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include <folly/VirtualExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/MeteredExecutor.h>
 #include <folly/executors/ThreadPoolExecutor.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 
@@ -83,6 +84,14 @@ void ResourcePool::stop() {
     } else if (
         auto virtualExecutor =
             dynamic_cast<folly::VirtualExecutor*>(executor_.get())) {
+      // since we're dealing with an executor wrapper it's sufficient to just
+      // release the pointer
+      executor_.reset();
+    } else if (
+        auto meteredExecutor =
+            dynamic_cast<folly::MeteredExecutor*>(executor_.get())) {
+      // since we're dealing with an executor wrapper it's sufficient to just
+      // release the pointer
       executor_.reset();
     } else if (
         auto threadManager =

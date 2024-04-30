@@ -2356,10 +2356,6 @@ void t_mstch_rust_generator::generate_program() {
     assert(options_.serde);
   }
 
-  if (auto include_prefix_flag = get_option("include_prefix")) {
-    program_->set_include_prefix(*include_prefix_flag);
-  }
-
   parse_include_srcs(
       options_.types_include_srcs, get_option("types_include_srcs"));
   parse_include_srcs(

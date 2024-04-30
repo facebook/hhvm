@@ -7,6 +7,7 @@
 #
 
 from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
+from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-python-capi/b/thrift_types_capi.h":
     pass

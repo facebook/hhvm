@@ -7,12 +7,13 @@
 #
 
 from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
+from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-python-capi/emptyns/thrift_types_capi.h":
     pass
 
 cdef cFoo Foo_convert_to_cpp(object inst) except *:
-    return python_to_cpp[cFoo](inst)
+    return cmove(python_to_cpp[cFoo](inst))
 
 cdef object Foo_from_cpp(const cFoo& c_struct):
     return cpp_to_python[cFoo](c_struct)

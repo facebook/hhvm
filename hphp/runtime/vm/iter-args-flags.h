@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <folly/Utility.h>
 #include <stdint.h>
 
 namespace HPHP {
@@ -28,11 +27,11 @@ enum class IterArgsFlags : uint8_t {
 };
 
 constexpr IterArgsFlags operator&(IterArgsFlags a, IterArgsFlags b) {
-  return IterArgsFlags(folly::to_underlying(a) & folly::to_underlying(b));
+  return IterArgsFlags(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 }
 
 constexpr IterArgsFlags operator|(IterArgsFlags a, IterArgsFlags b) {
-  return IterArgsFlags(folly::to_underlying(a) | folly::to_underlying(b));
+  return IterArgsFlags(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
 }
 
 constexpr bool has_flag(IterArgsFlags flags, IterArgsFlags flag) {

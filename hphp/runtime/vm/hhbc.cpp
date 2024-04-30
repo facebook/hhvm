@@ -1152,15 +1152,14 @@ std::string show(const IterArgs& ita, PrintLocal print_local) {
     if (has_flag(ita.flags, IterArgs::Flags::BaseConst)) {
       parts.push_back("BaseConst");
     }
-    if (parts.empty()) return std::string{};
-    return folly::sformat("<{}> ", folly::join(' ', parts));
+    return folly::sformat("<{}>", folly::join(' ', parts));
   }();
 
   auto const key = ita.hasKey()
     ? folly::to<std::string>("K:", print_local(ita.keyId))
     : folly::to<std::string>("NK");
   auto const val = "V:" + print_local(ita.valId);
-  return folly::sformat("{}{} {} {}", flags, ita.iterId, key, val);
+  return folly::sformat("{} {} {} {}", flags, ita.iterId, key, val);
 }
 
 std::string show(const LocalRange& range) {

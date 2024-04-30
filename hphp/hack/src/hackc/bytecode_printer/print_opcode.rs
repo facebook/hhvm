@@ -56,6 +56,7 @@ use print_opcode::PrintOpcode;
 use print_opcode::PrintOpcodeTypes;
 
 use crate::print;
+use crate::write::angle;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
@@ -228,6 +229,11 @@ fn print_iter_args(
     iter_args: &IterArgs,
     local_names: &[StringId],
 ) -> Result<()> {
+    angle(w, |w| {
+        let flags = hhvm_hhbc_defs_ffi::ffi::iter_args_flags_to_string_ffi(iter_args.flags);
+        write!(w, "{}", flags)
+    })?;
+    w.write_all(b" ")?;
     print_iterator_id(w, &iter_args.iter_id)?;
     if iter_args.key_id.is_valid() {
         w.write_all(b" K:")?;

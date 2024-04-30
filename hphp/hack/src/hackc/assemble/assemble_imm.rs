@@ -275,6 +275,7 @@ impl AssembleImm<hhbc::IterArgs> for Lexer<'_> {
     fn assemble_imm(&mut self, decl_map: &DeclMap, adata: &AdataMap) -> Result<hhbc::IterArgs> {
         // IterArg { iter_id: IterId (~u32), key_id: Local, val_id: Local}
         // Ex: 0 NK V:$v
+        let flags = assemble::assemble_iterargsflags(self)?;
         let idx: usize = self.expect_and_get_number()?;
         let tok = self.expect_token()?;
         let key_id: hhbc::Local = match tok.into_identifier()? {
@@ -289,7 +290,6 @@ impl AssembleImm<hhbc::IterArgs> for Lexer<'_> {
         self.expect(Token::is_colon)?;
         let iter_id = hhbc::IterId::new(idx);
         let val_id = self.assemble_imm(decl_map, adata)?;
-        let flags = hhbc::IterArgsFlags::None; // TODO: implement string serialization
         Ok(hhbc::IterArgs {
             iter_id,
             key_id,

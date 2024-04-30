@@ -1933,10 +1933,13 @@ fn print_terminator(
             write!(w, "fatal {}, {}", op, FmtVid(func, *vid, verbose))?
         }
         Terminator::IterInit(args, vid) => {
+            write!(w, "iterator ^{} init", args.iter_id)?;
+            if args.flags.contains(IterArgsFlags::BaseConst) {
+                write!(w, " base_const")?;
+            }
             write!(
                 w,
-                "iterator ^{} init from {} jmp to {} else {} with {}",
-                args.iter_id,
+                " from {} jmp to {} else {} with {}",
                 FmtVid(func, *vid, verbose),
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
@@ -1944,10 +1947,13 @@ fn print_terminator(
             )?;
         }
         Terminator::IterNext(args) => {
+            write!(w, "iterator ^{} next", args.iter_id)?;
+            if args.flags.contains(IterArgsFlags::BaseConst) {
+                write!(w, " base_const")?;
+            }
             write!(
                 w,
-                "iterator ^{} next jmp to {} else {} with {}",
-                args.iter_id,
+                " jmp to {} else {} with {}",
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
                 FmtOptKeyValue(args.key_lid(), args.value_lid())

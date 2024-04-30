@@ -83,4 +83,15 @@ std::string fcall_flags_to_string(FCallArgsFlags flags) {
   return join_with_spaces(vec);
 }
 
+std::string iter_args_flags_to_string(IterArgsFlags flags) {
+  std::vector<std::string> vec;
+
+#define X(flag, str) \
+  if (has_flag(flags, IterArgsFlags::flag)) vec.push_back(str);
+  HHAS_ITER_ARGS_FLAGS
+#undef X
+
+  return join_with_spaces(vec);
+}
+
 }

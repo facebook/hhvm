@@ -1764,6 +1764,21 @@ pub(crate) fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc
     Ok(flags)
 }
 
+/// <(iterargflag)*>
+pub(crate) fn assemble_iterargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::IterArgsFlags> {
+    let mut flags = hhbc::IterArgsFlags::None;
+    token_iter.expect(Token::is_lt)?;
+    while !token_iter.peek_is(Token::is_gt) {
+        let tok = token_iter.expect_token()?;
+        match tok.into_identifier()? {
+            b"BaseConst" => flags |= hhbc::IterArgsFlags::BaseConst,
+            _ => return Err(tok.error("Unrecognized IterArgsFlags")),
+        }
+    }
+    token_iter.expect(Token::is_gt)?;
+    Ok(flags)
+}
+
 /// "(0|1)*"
 pub(crate) fn assemble_inouts_or_readonly(token_iter: &mut Lexer<'_>) -> Result<Vec<bool>> {
     let tok = token_iter.expect_token()?;

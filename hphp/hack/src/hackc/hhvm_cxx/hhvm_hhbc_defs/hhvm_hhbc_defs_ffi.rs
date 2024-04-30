@@ -268,10 +268,12 @@ pub mod ffi {
         type TypeStructEnforceKind;
         type AsTypeStructExceptionKind;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
+        fn iter_args_flags_to_string_ffi(flags: IterArgsFlags) -> String;
     }
 }
 
 use ffi::FCallArgsFlags;
+use ffi::IterArgsFlags;
 
 impl FCallArgsFlags {
     pub fn add(&mut self, flag: Self) {
@@ -314,5 +316,33 @@ impl BitAnd for FCallArgsFlags {
 impl Default for FCallArgsFlags {
     fn default() -> Self {
         Self::FCANone
+    }
+}
+
+impl IterArgsFlags {
+    pub fn contains(&self, flag: Self) -> bool {
+        (*self & flag) != 0
+    }
+}
+
+impl BitOr for IterArgsFlags {
+    type Output = u8;
+
+    fn bitor(self, other: Self) -> u8 {
+        self.repr | other.repr
+    }
+}
+
+impl BitOrAssign for IterArgsFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.repr |= rhs.repr;
+    }
+}
+
+impl BitAnd for IterArgsFlags {
+    type Output = u8;
+
+    fn bitand(self, other: Self) -> u8 {
+        self.repr & other.repr
     }
 }

@@ -15,7 +15,7 @@
 
          # Loop over array and jump to each label.
          CGetL $arr
-         IterInit 0 NK V:$foo endfor
+         IterInit <> 0 NK V:$foo endfor
          .try {
 loop:      CGetL $foo
            SSwitch <"label_0":label_0
@@ -39,7 +39,7 @@ default:   String "default\n"
 
 printer:   Print
            PopC
-           IterNext 0 NK V:$foo loop
+           IterNext <> 0 NK V:$foo loop
            Jmp endfor
          } .catch {
            IterFree 0

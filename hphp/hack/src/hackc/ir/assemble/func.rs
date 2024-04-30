@@ -684,11 +684,11 @@ impl FunctionParser<'_> {
     fn parse_iterator(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
         parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "lfree":"lfree"; "next":"next"; "init":"init"]>);
         let iter_id = IterId::new(iter_id);
-        let flags = IterArgsFlags::None; // TODO: implement string serialization
         Ok(match op.identifier() {
             "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
             "lfree" => Instr::Hhbc(Hhbc::LIterFree(iter_id, loc)),
             "init" => {
+                let flags = self.parse_iterator_flags(tokenizer)?;
                 parse!(tokenizer, "from" <vid:self.vid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
                 Instr::Terminator(Terminator::IterInit(
                     instr::IteratorArgs::new(
@@ -698,6 +698,7 @@ impl FunctionParser<'_> {
                 ))
             }
             "next" => {
+                let flags = self.parse_iterator_flags(tokenizer)?;
                 parse!(tokenizer, "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
                 Instr::Terminator(Terminator::IterNext(instr::IteratorArgs::new(
                     iter_id, flags, locals.0, locals.1, target0, target1, loc,
@@ -705,6 +706,22 @@ impl FunctionParser<'_> {
             }
             _ => unreachable!(),
         })
+    }
+
+    fn parse_iterator_flags(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<IterArgsFlags> {
+        fn convert_iter_args_flag(id: &str) -> Option<IterArgsFlags> {
+            Some(match id {
+                "base_const" => IterArgsFlags::BaseConst,
+                _ => return None,
+            })
+        }
+
+        let mut flags = IterArgsFlags::None;
+        while let Some(flag) = parse_opt_enum(tokenizer, convert_iter_args_flag)? {
+            flags |= flag;
+        }
+
+        Ok(flags)
     }
 
     fn parse_jmp(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {

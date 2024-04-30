@@ -101,6 +101,9 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(LockWhileUnwinding,   "LockWhileUnwinding");       \
   X(EnforceMutableReturn, "EnforceMutableReturn")      \
   X(EnforceReadonlyThis,  "EnforceReadonlyThis")
+
+  #define HHAS_ITER_ARGS_FLAGS                         \
+  X(BaseConst,            "BaseConst");
 }
 
 }

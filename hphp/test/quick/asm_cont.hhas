@@ -24,7 +24,7 @@
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "R"
-  IterInit 0 NK V:$i L0
+  IterInit <> 0 NK V:$i L0
   .try {
   L1:
     String "\n"
@@ -32,7 +32,7 @@
     Concat
     Print
     PopC
-    IterNext 0 NK V:$i L1
+    IterNext <> 0 NK V:$i L1
     Jmp L0
   } .catch {
     IterFree 0

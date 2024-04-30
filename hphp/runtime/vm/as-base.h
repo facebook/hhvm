@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
+#include "hphp/runtime/vm/iter-args-flags.h"
 #include "hphp/runtime/vm/type-constraint-flags.h"
 
 namespace HPHP {
@@ -66,7 +67,12 @@ std::string attrs_to_string(AttrContext, Attr);
 std::string type_flags_to_string(TypeConstraintFlags flags);
 
 /*
- * Convert an fcall flag `to a string of space-separated flag names.
+ * Convert an fcall flags to a string of space-separated flag names.
  */
 std::string fcall_flags_to_string(FCallArgsFlags flags);
+
+/*
+ * Convert an iter args flags to a string of space-separated flag names.
+ */
+std::string iter_args_flags_to_string(IterArgsFlags flags);
 }

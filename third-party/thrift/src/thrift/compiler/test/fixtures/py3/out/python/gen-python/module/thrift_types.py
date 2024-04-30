@@ -50,10 +50,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SimpleException, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -101,10 +98,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.OptionalRefStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -215,10 +209,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SimpleStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -284,10 +275,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.HiddenTypeFieldsStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -335,10 +323,7 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.AdaptedUnion, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -386,10 +371,7 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.HiddenException, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -509,10 +491,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.ComplexStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -560,10 +539,7 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.BinaryUnion, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -611,10 +587,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.BinaryUnionStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib

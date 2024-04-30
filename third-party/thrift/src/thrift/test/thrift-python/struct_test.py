@@ -18,6 +18,10 @@ import types
 import typing
 import unittest
 
+import thrift.python.mutable_serializer as mutable_serializer
+
+import thrift.python.serializer as immutable_serializer
+
 from parameterized import parameterized
 
 from thrift.python.mutable_types import (
@@ -25,7 +29,7 @@ from thrift.python.mutable_types import (
     MutableStructMeta,
     MutableStructOrUnion,
 )
-from thrift.python.types import StructMeta
+from thrift.python.types import StructMeta, StructOrUnion
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
@@ -37,6 +41,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
+    TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
 )
 
@@ -44,6 +49,18 @@ max_byte = 2**7 - 1
 max_i16 = 2**15 - 1
 max_i32 = 2**31 - 1
 max_i64 = 2**63 - 1
+
+
+def _thrift_serialization_round_trip(
+    test, module, control: typing.Union[MutableStructOrUnion, StructOrUnion]
+) -> None:
+    for proto in module.Protocol:
+        encoded = module.serialize(control, protocol=proto)
+        test.assertIsInstance(encoded, bytes)
+
+        decoded = module.deserialize(type(control), encoded, protocol=proto)
+        test.assertIsInstance(decoded, type(control))
+        test.assertEqual(control, decoded)
 
 
 class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
@@ -179,6 +196,22 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         # (although a separate .pyi interface is generated to allow tooling to
         # do static type checking)
         self.assertEqual(typing.get_type_hints(TestStructImmutable), {})
+
+    def test_serialization_round_trip(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesImmutable(
+            unqualified_string="Hello world!",
+            optional_string="Hello optional!",
+            unqualified_i32=19,
+            optional_i32=23,
+            unqualified_double=2.1,
+            optional_double=1.3,
+            unqualified_bool=True,
+            optional_bool=False,
+        )
+        _thrift_serialization_round_trip(self, immutable_serializer, s)
+
+        s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable()
+        _thrift_serialization_round_trip(self, immutable_serializer, s_default_value)
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
@@ -492,3 +525,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Boundary check for integral types
         with self.assertRaises(OverflowError):
             s.unqualified_i32 = -(2**31 + 1)
+
+    def test_serialization_round_trip(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesMutable()
+        s.unqualified_string = "Hello world!"
+        s.optional_string = "Hello optional!"
+        s.unqualified_i32 = 19
+        s.optional_i32 = 23
+        s.unqualified_double = 2.1
+        s.optional_double = 1.3
+        s.unqualified_bool = True
+        s.optional_bool = False
+        _thrift_serialization_round_trip(self, mutable_serializer, s)
+
+        s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
+        _thrift_serialization_round_trip(self, mutable_serializer, s_default_value)

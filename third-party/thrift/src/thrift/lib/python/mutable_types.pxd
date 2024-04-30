@@ -45,13 +45,13 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
 
 cdef class MutableStructOrUnion:
     cdef tuple _fbthrift_data
-    cdef IOBuf _serialize(MutableStructOrUnion self, Protocol proto)
-    cdef uint32_t _deserialize(MutableStructOrUnion self, IOBuf buf, Protocol proto) except? 0
+    cdef IOBuf _fbthrift_serialize(MutableStructOrUnion self, Protocol proto)
+    cdef uint32_t _fbthrift_deserialize(MutableStructOrUnion self, IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(self, int16_t index)
 
 cdef class MutableStruct(MutableStructOrUnion):
-    cdef IOBuf _serialize(MutableStruct self, Protocol proto)
-    cdef uint32_t _deserialize(MutableStruct self, IOBuf buf, Protocol proto) except? 0
+    cdef IOBuf _fbthrift_serialize(MutableStruct self, Protocol proto)
+    cdef uint32_t _fbthrift_deserialize(MutableStruct self, IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(MutableStruct self, int16_t index)
     cdef _initStructTupleWithValues(MutableStruct self, object kwargs) except *
     cdef _fbthrift_set_field_value(self, int16_t index, object value) except *

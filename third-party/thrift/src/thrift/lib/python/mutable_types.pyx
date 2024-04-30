@@ -21,6 +21,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM
 from cpython.unicode cimport PyUnicode_AsUTF8String
 
+from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.types cimport (
     AdaptedTypeInfo,
     TypeInfoBase,
@@ -81,9 +82,9 @@ class _MutableStructField:
 
 
 cdef class MutableStructOrUnion:
-    cdef IOBuf _serialize(self, Protocol proto):
+    cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
-    cdef uint32_t _deserialize(self, IOBuf buf, Protocol proto) except? 0:
+    cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
     cdef _fbthrift_get_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
@@ -194,6 +195,17 @@ cdef class MutableStruct(MutableStructOrUnion):
             mutable_struct_info.cpp_obj.get().getStructInfo(),
             index,
         )
+
+    cdef IOBuf _fbthrift_serialize(self, Protocol proto):
+        cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
+        return from_unique_ptr(
+            std_move(cserialize(deref(info.cpp_obj), self._fbthrift_data, proto))
+        )
+
+    cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
+        cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
+        cdef uint32_t lenght = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        return lenght
 
     def _do_not_use_resetFieldToStandardDefault(self, field_name: str):
         """

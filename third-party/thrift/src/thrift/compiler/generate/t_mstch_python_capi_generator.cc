@@ -653,6 +653,8 @@ void t_mstch_python_capi_generator::generate_types() {
   generate_file("thrift_types_capi.pyx", generate_root_path_);
   generate_file("thrift_types_capi.h", "");
   generate_file("thrift_types_capi.cpp", "");
+  generate_file("converter.pxd", generate_root_path_);
+  generate_file("converter.pyx", generate_root_path_);
 }
 
 } // namespace

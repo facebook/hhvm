@@ -34,8 +34,8 @@ namespace proxygen {
 QPACKHeaderTable::QPACKHeaderTable(uint32_t capacityVal, bool trackReferences)
     : HeaderTable(capacityVal) {
   if (trackReferences) {
-    refCount_ = std::make_unique<std::vector<uint16_t>>(table_.size(), 0);
     minFree_ = getMinFree(capacityVal);
+    trackReferences_ = true;
   } else {
     minFree_ = 0;
     disableNamesIndex();
@@ -49,12 +49,9 @@ bool QPACKHeaderTable::add(HPACKHeader header) {
     return false;
   }
 
-  DVLOG(6) << "Adding header=" << header;
+  DVLOG(6) << "Adding header=" << header << " absIndex=" << insertCount_ + 1;
   if (!HeaderTable::add(std::move(header))) {
     return false;
-  }
-  if (refCount_) {
-    (*refCount_)[head_] = 0;
   }
   DCHECK_EQ(internalToAbsolute(head_), insertCount_);
   // Increase minUsable_ until the free space + drainedBytes is >= minFree.
@@ -74,7 +71,7 @@ bool QPACKHeaderTable::setCapacity(uint32_t capacity) {
   if (!HeaderTable::setCapacity(capacity)) {
     return false;
   }
-  if (refCount_) {
+  if (trackReferences_) {
     minFree_ = getMinFree(capacity);
   } // else minFree is always 0
   return true;
@@ -135,8 +132,9 @@ const HPACKHeader& QPACKHeaderTable::getHeader(uint32_t index,
 
 uint32_t QPACKHeaderTable::removeLast() {
   auto idx = tail();
-  if (refCount_) {
-    CHECK_EQ((*refCount_)[idx], 0) << "Removed header with nonzero references";
+  if (trackReferences_) {
+    CHECK_LT(internalToAbsolute(idx), minInUseIndex_)
+        << "Removed in use header";
   }
   auto removedBytes = HeaderTable::removeLast();
   // Only non-zero when minUsable_ > insertCount_ - size_.
@@ -165,24 +163,6 @@ void QPACKHeaderTable::increaseTableLengthTo(uint32_t newLength) {
   }
 }
 
-void QPACKHeaderTable::resizeTable(uint32_t newLength) {
-  HeaderTable::resizeTable(newLength);
-  if (refCount_) {
-    refCount_->resize(newLength);
-  }
-}
-
-void QPACKHeaderTable::updateResizedTable(uint32_t oldTail,
-                                          uint32_t oldLength,
-                                          uint32_t newLength) {
-  HeaderTable::updateResizedTable(oldTail, oldLength, newLength);
-  if (refCount_) {
-    std::move_backward(refCount_->begin() + oldTail,
-                       refCount_->begin() + oldLength,
-                       refCount_->begin() + newLength);
-  }
-}
-
 uint32_t QPACKHeaderTable::evict(uint32_t needed, uint32_t desiredCapacity) {
   if (bytes_ + needed < desiredCapacity ||
       !canEvict(bytes_ + needed - desiredCapacity)) {
@@ -192,21 +172,22 @@ uint32_t QPACKHeaderTable::evict(uint32_t needed, uint32_t desiredCapacity) {
 }
 
 bool QPACKHeaderTable::canEvict(uint32_t needed) {
-  if (size_ == 0 || !refCount_) {
+  if (size_ == 0 || !trackReferences_) {
     return needed <= capacity_;
   }
   uint32_t freeable = 0;
   uint32_t i = tail();
   uint32_t nChecked = 0;
   while (nChecked++ < size() && freeable < needed &&
-         ((*refCount_)[i] == 0) && // don't evict referenced or unacked headers
+         internalToAbsolute(i) < minInUseIndex_ && // don't evict referenced or
+                                                   // unacked headers
          internalToAbsolute(i) <= ackedInsertCount_) {
     freeable += table_[i].bytes();
     i = next(i);
   }
   if (freeable < needed) {
     DVLOG(5) << "header=" << table_[i].name << ":" << table_[i].value
-             << " blocked eviction, recount=" << (*refCount_)[i];
+             << " blocked eviction, minInUseIndex_=" << minInUseIndex_;
     return false;
   }
   return true;
@@ -251,20 +232,6 @@ std::pair<bool, uint32_t> QPACKHeaderTable::maybeDuplicate(
     }
   }
   return {false, absIndex};
-}
-
-void QPACKHeaderTable::addRef(uint32_t absIndex) {
-  // refCount is 16 bits.  It should really never get this big in practice,
-  // unless a decoder is not sending HEADER_ACK in a timely way.
-  CHECK(refCount_);
-  (*refCount_)[absoluteToInternal(absIndex)]++;
-}
-
-void QPACKHeaderTable::subRef(uint32_t absIndex) {
-  CHECK(refCount_);
-  uint32_t index = absoluteToInternal(absIndex);
-  CHECK_GT((*refCount_)[index], 0);
-  (*refCount_)[index]--;
 }
 
 // Converts an array index in [0..table_.size() - 1] to an absolute

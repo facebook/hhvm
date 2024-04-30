@@ -84,9 +84,10 @@ std::unique_ptr<folly::IOBuf> QPACKEncoder::completeEncode(
     streamBuffer->prependChain(std::move(streamBlock));
   }
 
-  // curOutstanding_.references could be empty, if the block encodes only static
-  // headers and/or literals.  If so we don't track anything.
-  if (!curOutstanding_.references.empty()) {
+  // curOutstanding_.minInUseIndex could be max, if the block encodes only
+  // static headers and/or literals.  If so we don't track anything.
+  if (curOutstanding_.minInUseIndex != std::numeric_limits<uint32_t>::max()) {
+    outstandingMins_.push_back(curOutstanding_.minInUseIndex);
     if (curOutstanding_.vulnerable) {
       DCHECK(allowVulnerable());
       numVulnerable_++;
@@ -94,6 +95,8 @@ std::unique_ptr<folly::IOBuf> QPACKEncoder::completeEncode(
     numOutstandingBlocks_++;
     outstanding_[streamId].emplace_back(std::move(curOutstanding_));
     curOutstanding_.vulnerable = false;
+    curOutstanding_.minInUseIndex = std::numeric_limits<uint32_t>::max();
+    curOutstanding_.maxInUseIndex = 0;
   }
 
   controlBuffer_.setWriteBuf(nullptr);
@@ -275,14 +278,17 @@ void QPACKEncoder::trackReference(uint32_t absoluteIndex,
   CHECK_NE(absoluteIndex, 0);
   if (absoluteIndex > requiredInsertCount) {
     requiredInsertCount = absoluteIndex;
+    curOutstanding_.maxInUseIndex = requiredInsertCount;
     if (table_.isVulnerable(absoluteIndex)) {
       curOutstanding_.vulnerable = true;
     }
   }
-  auto res = curOutstanding_.references.insert(absoluteIndex);
-  if (res.second) {
-    VLOG(5) << "Bumping refcount for absoluteIndex=" << absoluteIndex;
-    table_.addRef(absoluteIndex);
+  if (absoluteIndex < curOutstanding_.minInUseIndex) {
+    curOutstanding_.minInUseIndex = absoluteIndex;
+    minOutstandingMin_ =
+        std::min(minOutstandingMin_, curOutstanding_.minInUseIndex);
+    // Update table min here to prevent new encodes from evicting reference
+    table_.setMinInUseIndex(minOutstandingMin_);
   }
 }
 
@@ -437,15 +443,12 @@ HPACK::DecodeError QPACKEncoder::onHeaderAck(uint64_t streamId, bool all) {
   VLOG(5) << ((all) ? "onCancelStream" : "onHeaderAck")
           << " streamId=" << streamId;
   if (all) {
-    // Happens when a stream is reset
+    // Happens when a stream is reset (should be rare)
     for (auto& block : it->second) {
-      for (auto i : block.references) {
-        VLOG(5) << "Decrementing refcount for absoluteIndex=" << i;
-        table_.subRef(i);
-      }
       if (block.vulnerable) {
         numVulnerable_--;
       }
+      removeFromMinOutstanding(block.minInUseIndex);
     }
     numOutstandingBlocks_ -= it->second.size();
     it->second.clear();
@@ -453,26 +456,45 @@ HPACK::DecodeError QPACKEncoder::onHeaderAck(uint64_t streamId, bool all) {
     auto block = std::move(it->second.front());
     numOutstandingBlocks_--;
     it->second.pop_front();
-    // a different stream, sub all the references
-    for (auto i : block.references) {
-      VLOG(5) << "Decrementing refcount for absoluteIndex=" << i;
-      table_.subRef(i);
-    }
     if (block.vulnerable) {
       numVulnerable_--;
     }
-    // requiredInsertCount is implicitly acknowledged
-    if (!block.references.empty()) {
-      auto requiredInsertCount = *block.references.rbegin();
-      VLOG(5) << "Implicitly acknowledging requiredInsertCount="
-              << requiredInsertCount;
-      table_.setAcknowledgedInsertCount(requiredInsertCount);
-    }
+    CHECK_NE(block.minInUseIndex, std::numeric_limits<uint32_t>::max());
+    removeFromMinOutstanding(block.minInUseIndex);
+    // Up through maxInUseIndex is implicitly acknowledged
+    VLOG(5) << "Implicitly acknowledging requiredInsertCount="
+            << block.maxInUseIndex;
+    table_.setAcknowledgedInsertCount(block.maxInUseIndex);
   }
   if (it->second.empty()) {
     outstanding_.erase(it);
   }
+  VLOG(6) << "New min use index=" << minOutstandingMin_;
+  table_.setMinInUseIndex(minOutstandingMin_);
   return HPACK::DecodeError::NONE;
+}
+
+void QPACKEncoder::removeFromMinOutstanding(uint32_t valToRemove) {
+  CHECK(!outstandingMins_.empty());
+  VLOG(10) << "mins remove val=" << valToRemove;
+  bool recomputeMin = (valToRemove == minOutstandingMin_);
+  uint32_t newMin = std::numeric_limits<uint32_t>::max();
+  size_t i = 0;
+  for (; i < outstandingMins_.size(); i++) {
+    auto value = outstandingMins_.at(i);
+    if (value == valToRemove) {
+      outstandingMins_.at(i) = outstandingMins_.back();
+      outstandingMins_.pop_back();
+      break;
+    }
+    newMin = std::min(newMin, value);
+  }
+  if (recomputeMin) {
+    for (; i < outstandingMins_.size(); i++) {
+      newMin = std::min(newMin, outstandingMins_.at(i));
+    }
+    minOutstandingMin_ = newMin;
+  }
 }
 
 void QPACKEncoder::setMaxNumOutstandingBlocks(uint32_t value) {

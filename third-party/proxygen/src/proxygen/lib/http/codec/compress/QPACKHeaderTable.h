@@ -161,16 +161,10 @@ class QPACKHeaderTable : public HeaderTable {
     return insertCount_ - absIndex + 1;
   }
 
-  /**
-   * Add a reference for the given index.  Entries with non-zero references
-   * cannot be evicted
-   */
-  void addRef(uint32_t absIndex);
-
-  /**
-   * Subtract a reference for the given index
-   */
-  void subRef(uint32_t absIndex);
+  void setMinInUseIndex(
+      uint32_t minInUseIndex = std::numeric_limits<uint32_t>::max()) {
+    minInUseIndex_ = minInUseIndex;
+  }
 
  private:
   /*
@@ -186,11 +180,6 @@ class QPACKHeaderTable : public HeaderTable {
    */
   void increaseTableLengthTo(uint32_t newLength) override;
 
-  void resizeTable(uint32_t newLength) override;
-
-  void updateResizedTable(uint32_t oldTail,
-                          uint32_t oldLength,
-                          uint32_t newLength) override;
   /**
    * Removes one header entry from the beginning of the header table.
    */
@@ -218,7 +207,8 @@ class QPACKHeaderTable : public HeaderTable {
   uint32_t minUsable_{1};
   uint32_t ackedInsertCount_{0};
   uint32_t minFree_{0};
-  std::unique_ptr<std::vector<uint16_t>> refCount_;
+  bool trackReferences_{false};
+  uint32_t minInUseIndex_{std::numeric_limits<uint32_t>::max()};
 };
 
 } // namespace proxygen

@@ -484,6 +484,27 @@ TEST(QPACKContextTests, TestAcks) {
   EXPECT_EQ(encoder.onInsertCountIncrement(0), HPACK::DecodeError::INVALID_ACK);
 }
 
+TEST(QPACKContextTests, TestEncodeBlocksSelfEviction) {
+  // The references already made in an encode prevent eviction even before
+  // finishing the encode.
+  QPACKEncoder encoder(false, 192); // min free 48
+  QPACKDecoder decoder(192);
+
+  vector<HPACKHeader> req;
+  req.emplace_back("aaaa", "xxxxxxxxxxxx"); // 48
+  auto result = encoder.encode(req, 0, 1);
+  verifyDecode(decoder, std::move(result), req);
+  EXPECT_EQ(encoder.onHeaderAck(1, false), HPACK::DecodeError::NONE);
+
+  req.emplace_back("bbbb", "xxxxxxxxxxxx");  // 48
+  req.emplace_back("cccc", "xxxxxxxxxxxxx"); // 49, drains A
+  req.emplace_back("dddd", "xxxxxxxxxxxxx"); // 48, not enough space
+  result = encoder.encode(req, 0, 1);
+  EXPECT_FALSE(stringInOutput(result.stream.get(), "aaaa"));
+  EXPECT_TRUE(stringInOutput(result.stream.get(), "dddd"));
+  verifyDecode(decoder, std::move(result), req);
+}
+
 TEST(QPACKContextTests, TestImplicitAcks) {
   QPACKEncoder encoder(false, 1024);
   QPACKDecoder decoder(1024);

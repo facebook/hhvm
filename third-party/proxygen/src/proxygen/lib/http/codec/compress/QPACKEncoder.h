@@ -170,14 +170,18 @@ class QPACKEncoder
     return maxEncoderStreamBytes_ >= 0;
   }
 
+  void removeFromMinOutstanding(uint32_t val);
+
   HPACKEncodeBuffer controlBuffer_;
-  using BlockReferences = std::set<uint32_t>;
   struct OutstandingBlock {
-    BlockReferences references;
+    uint32_t minInUseIndex{std::numeric_limits<uint32_t>::max()};
+    uint32_t maxInUseIndex{0};
     bool vulnerable{false};
   };
   // Map streamID -> list of table index references for each outstanding block;
   std::unordered_map<uint64_t, std::list<OutstandingBlock>> outstanding_;
+  std::vector<uint32_t> outstandingMins_;
+  uint32_t minOutstandingMin_{std::numeric_limits<uint32_t>::max()};
   OutstandingBlock curOutstanding_;
   uint32_t maxDepends_{0};
   uint32_t maxVulnerable_{HPACK::kDefaultBlocking};

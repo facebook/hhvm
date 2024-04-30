@@ -50,19 +50,12 @@ TEST_F(QPACKHeaderTableTests, Eviction) {
   for (auto i = 0; i < max; i++) {
     EXPECT_TRUE(table_.add(accept.copy()));
   }
-  for (auto i = 1; i <= max; i++) {
-    table_.addRef(i);
-  }
+  table_.setMinInUseIndex(1);
   table_.setAcknowledgedInsertCount(max);
   EXPECT_FALSE(table_.canIndex(accept.name, accept.value));
   EXPECT_FALSE(table_.add(accept.copy()));
-  table_.subRef(1);
-  EXPECT_TRUE(table_.canIndex(accept.name, accept.value));
-  EXPECT_TRUE(table_.add(accept.copy()));
 
-  table_.subRef(3);
-  EXPECT_FALSE(table_.canIndex(accept.name, accept.value));
-  table_.subRef(2);
+  table_.setMinInUseIndex(std::numeric_limits<uint32_t>::max());
   EXPECT_TRUE(table_.canIndex(accept.name, accept.value));
 }
 
@@ -82,11 +75,11 @@ TEST_F(QPACKHeaderTableTests, BadEviction) {
 
   // Ack all headers but mark the first as in use
   table_.setAcknowledgedInsertCount(max);
-  table_.addRef(1);
+  table_.setMinInUseIndex(1);
   EXPECT_FALSE(table_.setCapacity(capacity / 2));
 
   // Clear all refs
-  table_.subRef(1);
+  table_.setMinInUseIndex(std::numeric_limits<uint32_t>::max());
   EXPECT_TRUE(table_.setCapacity(capacity / 2));
   EXPECT_EQ(table_.size(), max / 2);
 }
@@ -167,7 +160,7 @@ TEST_F(QPACKHeaderTableTests, Duplication) {
 
   // Hold a ref to oldest entry, prevents eviction
   auto oldestAbsolute = table_.getInsertCount() - table_.size() + 1;
-  table_.addRef(oldestAbsolute);
+  table_.setMinInUseIndex(oldestAbsolute);
 
   // Table should be full
   EXPECT_FALSE(table_.canIndex(accept.name, accept.value));
@@ -186,7 +179,7 @@ TEST_F(QPACKHeaderTableTests, CanEvictWithRoom) {
   table_.setAcknowledgedInsertCount(table_.getInsertCount());
   // abs index = 1 is evictable, but index = 2 is referenced, so we can
   // insert up to (320 - 8 * 39) + 39 = 47
-  table_.addRef(2);
+  table_.setMinInUseIndex(2);
   EXPECT_TRUE(table_.canIndex(fortySevenBytes.name, fortySevenBytes.value));
   EXPECT_TRUE(table_.add(fortySevenBytes.copy()));
 }

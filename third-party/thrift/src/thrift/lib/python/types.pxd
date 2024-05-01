@@ -241,3 +241,4 @@ cdef class ServiceInterface:
     pass
 
 cdef const cTypeInfo* getCTypeInfo(type_info)
+cdef list_compare(object first, object second, int op)

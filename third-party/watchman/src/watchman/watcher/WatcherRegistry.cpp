@@ -10,6 +10,7 @@
 #include "watchman/watcher/WatcherRegistry.h"
 
 #include "watchman/CommandRegistry.h"
+#include "watchman/Errors.h"
 #include "watchman/Logging.h"
 #include "watchman/QueryableView.h"
 #include "watchman/WatchmanConfig.h"
@@ -131,6 +132,18 @@ std::shared_ptr<watchman::QueryableView> WatcherRegistry::initWatcher(
       // Don't continue our attempt to use other registered watchers
       // in this case
       break;
+    } catch (const RootNotConnectedError& rre) {
+      // When Eden watcher is detected, but fails to resolve, we do
+      // not attempt to use other registered watchers. Rather, we
+      // fail gracefully by throwing  RootNotConnectedError.
+      watchman::log(
+          watchman::DBG,
+          "failed to use watcher ",
+          watcher->getName(),
+          ": ",
+          rre.what(),
+          ".\n");
+      throw;
     } catch (const std::exception& e) {
       watchman::log(
           watchman::ERR,

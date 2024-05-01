@@ -142,11 +142,23 @@ std::string resolveSocketPath(w_string_piece rootPath) {
 
   return *config->get_qualified_as<std::string>("Config.socket");
 #else
-  auto path = fmt::format("{}/.eden/socket", rootPath);
-  // It is important to resolve the link because the path in the eden mount
-  // may exceed the maximum permitted unix domain socket path length.
-  // This is actually how things our in our integration test environment.
-  return readSymbolicLink(path.c_str()).string();
+  try {
+    auto path = fmt::format("{}/.eden/socket", rootPath);
+    // It is important to resolve the link because the path in the eden mount
+    // may exceed the maximum permitted unix domain socket path length.
+    // This is actually how things our in our integration test environment.
+    return readSymbolicLink(path.c_str()).string();
+  } catch (const std::system_error& e) {
+    // When Eden fails during graceful takeover, the mount can exist, but it
+    // is disconnected. In this case, we can't use the eden watcher. Log this
+    // error and throw.
+    log(DBG, "Failed to read EdenFS root when mount exists: ", e.what());
+    RootNotConnectedError::throwf(
+        "{} appears to be a disconnected EdenFS mount. "
+        "Try running `eden doctor` to bring it back online and "
+        "then retry your watch",
+        rootPath);
+  }
 #endif
 }
 
@@ -1483,11 +1495,11 @@ std::shared_ptr<QueryableView> detectEden(
     // is disconnected. In this case, we can't use the eden watcher. Log this
     // error and throw.
     log(DBG, "Failed to read EdenFS root when mount exists: ", e.what());
-    throw TerminalWatcherError(fmt::format(
+    RootNotConnectedError::throwf(
         "{} appears to be a disconnected EdenFS mount. "
         "Try running `eden doctor` to bring it back online and "
         "then retry your watch",
-        root_path));
+        root_path);
   }
 
 #endif

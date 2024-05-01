@@ -503,8 +503,7 @@ struct OptimizeIterState {
         );
       }
 
-      auto const fixupForInit = [&] {
-        auto const base = topStkLocal(state);
+      auto const fixupForInit = [&] (LocalId base) {
         if (base == NoLocalId && eligible[bid]) {
           FTRACE(2, "   - blk:{} ineligible\n", bid);
           eligible[bid] = false;
@@ -535,10 +534,17 @@ struct OptimizeIterState {
       switch (op.op) {
         case Op::IterInit:
           assertx(opIdx == blk->hhbcs.size() - 1);
-          fixupForInit();
+          fixupForInit(topStkLocal(state));
+          break;
+        case Op::LIterInit:
+          assertx(opIdx == blk->hhbcs.size() - 1);
+          fixupForInit(findIterBaseLoc(state, func, op.LIterInit.loc2));
           break;
         case Op::IterNext:
           fixupFromState(op.IterNext.ita.iterId);
+          break;
+        case Op::LIterNext:
+          fixupFromState(op.LIterNext.ita.iterId);
           break;
         case Op::IterFree:
           fixupFromState(op.IterFree.iter1);
@@ -625,9 +631,29 @@ void optimize_iterators(VisitContext& visit) {
         };
         break;
       }
+      case Op::LIterInit: {
+        auto args = op.LIterInit.ita;
+        if (args.flags == flags && op.LIterInit.loc2 == fixup.base) continue;
+        auto const target = op.LIterInit.target3;
+        args.flags = flags;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
+        };
+        break;
+      }
       case Op::IterNext: {
         auto args = op.IterNext.ita;
         auto const target = op.IterNext.target2;
+        args.flags = flags;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),
+        };
+        break;
+      }
+      case Op::LIterNext: {
+        auto args = op.LIterNext.ita;
+        if (args.flags == flags && op.LIterNext.loc2 == fixup.base) continue;
+        auto const target = op.LIterNext.target3;
         args.flags = flags;
         newOps = {
           bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),

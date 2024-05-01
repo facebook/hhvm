@@ -559,11 +559,27 @@ void mayReadLocal(ISS& env, uint32_t id) {
 }
 
 // Find a local which is equivalent to the given local
+LocalId findLocEquiv(State& state, const php::Func* func, LocalId l) {
+  if (l >= state.equivLocals.size()) return NoLocalId;
+  assertx(state.equivLocals[l] == NoLocalId || !is_volatile_local(func, l));
+  return state.equivLocals[l];
+}
 LocalId findLocEquiv(ISS& env, LocalId l) {
-  if (l >= env.state.equivLocals.size()) return NoLocalId;
-  assertx(env.state.equivLocals[l] == NoLocalId ||
-         !is_volatile_local(env.ctx.func, l));
-  return env.state.equivLocals[l];
+  return findLocEquiv(env.state, env.ctx.func, l);
+}
+
+// Given an iterator base local, find an equivalent local that is possibly
+// better. LIterInit/LIterNext often uses an unnamed local that came from
+// a regular local, which would be a better choice if that local was not
+// manipulated in an unsafe way. Regular locals have lower ids.
+LocalId findIterBaseLoc(State& state, const php::Func* func, LocalId l) {
+  assertx(l != NoLocalId);
+  auto const locEquiv = findLocEquiv(state, func, l);
+  if (locEquiv == NoLocalId) return l;
+  return std::min(l, locEquiv);
+}
+LocalId findIterBaseLoc(ISS& env, LocalId l) {
+  return findIterBaseLoc(env.state, env.ctx.func, l);
 }
 
 // Find an equivalent local with minimum id

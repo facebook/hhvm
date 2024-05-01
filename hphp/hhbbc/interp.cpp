@@ -4833,7 +4833,15 @@ namespace {
 // baseLoc is NoLocalId for non-local iterators.
 void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
   auto const local = baseLoc != NoLocalId;
-  auto const sourceLoc = local ? baseLoc : topStkLocal(env);
+  auto const sourceLoc = [&] {
+    if (!local) return topStkLocal(env);
+    auto const loc = findIterBaseLoc(env, baseLoc);
+    if (loc == baseLoc && has_flag(ita.flags, IterArgsFlags::BaseConst)) {
+      // Can't improve this iterator further.
+      return NoLocalId;
+    }
+    return loc;
+  }();
   auto const base = local ? locAsCell(env, baseLoc) : topC(env);
   auto ity = iter_types(base);
 

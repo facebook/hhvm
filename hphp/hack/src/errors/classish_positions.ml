@@ -10,6 +10,27 @@ open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 include Classish_positions_types
 
+let classish_body_elements_positions_for ~(to_pos : int -> int -> Pos.t) s :
+    Pos.t list =
+  let open Syntax in
+  let range_for_body_element e =
+    let open Option.Let_syntax in
+    let* leading_token = leading_token e in
+    let* trailing_token = trailing_token e in
+    let offset_start =
+      leading_token.Token.offset + leading_token.Token.leading_width
+    in
+    let offset_end =
+      trailing_token.Token.offset
+      + trailing_token.Token.leading_width
+      + trailing_token.Token.width
+    in
+    Some (to_pos offset_start offset_end)
+  in
+  match s.syntax with
+  | SyntaxList elements -> List.filter_map elements ~f:range_for_body_element
+  | _ -> []
+
 let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
     Pos.t classish_positions option =
   let open Syntax in
@@ -41,6 +62,9 @@ let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
       map_brace_token cb.classish_body_right_brace @@ fun t ->
       t.Token.offset + t.Token.leading_width + t.Token.width
     in
+    let classish_body_elements =
+      classish_body_elements_positions_for ~to_pos cb.classish_body_elements
+    in
     Some
       {
         classish_start_of_body =
@@ -51,6 +75,7 @@ let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
           to_pos
             classish_just_before_closing_brace_offset
             classish_just_after_closing_brace_offset;
+        classish_body_elements;
       }
   | _ -> None
 
@@ -116,13 +141,19 @@ let classish_positions_of_syntax ~(to_pos : int -> int -> Pos.t) (s : Syntax.t)
 let empty = SMap.empty
 
 let map_classish_positions ~f (classish_positions : 'pos classish_positions) =
-  let { classish_start_of_body; classish_end_of_body; classish_closing_brace } =
+  let {
+    classish_start_of_body;
+    classish_end_of_body;
+    classish_closing_brace;
+    classish_body_elements;
+  } =
     classish_positions
   in
   {
     classish_start_of_body = f classish_start_of_body;
     classish_end_of_body = f classish_end_of_body;
     classish_closing_brace = f classish_closing_brace;
+    classish_body_elements = List.map ~f classish_body_elements;
   }
 
 let map ~f (t : _ t) = SMap.map (map_classish_positions ~f) t

@@ -57,6 +57,24 @@
   utils_exit
   utils_multifile))
 
+
+(library
+ (name classish_positions_cli_lib)
+ (wrapped true)
+ (modules classish_positions_cli_lib)
+ (libraries
+  full_fidelity
+  file_provider
+  lsp
+  pos
+  provider_context
+  provider_utils
+  ide_diagnostics
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+
 (library
  (name errors)
  (wrapped false)

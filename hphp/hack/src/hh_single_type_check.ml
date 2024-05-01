@@ -70,6 +70,7 @@ type mode =
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
   | Map_reduce_mode
+  | Dump_classish_positions
 
 type options = {
   files: string list;
@@ -431,6 +432,9 @@ let parse_options () =
         Arg.Unit (set_mode Ide_diagnostics),
         " Compute where IDE diagnostics (squiggles and dotted lines) will be displayed."
       );
+      ( "--dump-classish-positions",
+        Arg.Unit (set_mode Dump_classish_positions),
+        " Dump certain positional information calculated for the given file." );
       ( "--identify-symbol",
         (let line = ref 0 in
          Arg.Tuple
@@ -1952,6 +1956,10 @@ let handle_mode
       compute_tasts_expand_types ctx files_info files_contents
     in
     Ide_diagnostics_cli_lib.run ctx entry errors
+  | Dump_classish_positions ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    Classish_positions_cli_lib.dump ctx entry path
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

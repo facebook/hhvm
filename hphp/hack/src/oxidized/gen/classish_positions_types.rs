@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed68765ce15494f23be0a36d7e64c7a6>>
+// @generated SignedSource<<7079bbdb8c330490b2f0279611650026>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,9 +73,17 @@ pub enum Pos<P> {
 #[rust_to_ocaml(prefix = "classish_")]
 #[repr(C)]
 pub struct ClassishPositions<P> {
+    /// Zero-length position indicating the start of the class body
+    /// (should be right after the opening brace)
     pub start_of_body: P,
+    /// Zero-length position indicating the end of the class body
+    /// (should be right before the trivia before the closing brace)
     pub end_of_body: P,
+    /// The actual range for the closing brace of the class body (length 1)
     pub closing_brace: P,
+    /// A list of ranges for each class-body element. Positions outside these
+    /// ranges indicate white-space between methods, properties, etc.
+    pub body_elements: Vec<P>,
 }
 
 /// Positional information for a collection of classes

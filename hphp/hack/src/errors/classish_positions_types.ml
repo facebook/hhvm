@@ -24,8 +24,16 @@ type 'p pos =
 (** Positional information for a single class *)
 type 'p classish_positions = {
   classish_start_of_body: 'p;
+      (** Zero-length position indicating the start of the class body
+          (should be right after the opening brace) *)
   classish_end_of_body: 'p;
+      (** Zero-length position indicating the end of the class body
+          (should be right before the trivia before the closing brace) *)
   classish_closing_brace: 'p;
+      (** The actual range for the closing brace of the class body (length 1) *)
+  classish_body_elements: 'p list;
+      (** A list of ranges for each class-body element. Positions outside these
+          ranges indicate white-space between methods, properties, etc. *)
 }
 
 (** Positional information for a collection of classes *)

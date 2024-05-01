@@ -51,47 +51,21 @@ void ensureImportOrThrow() {
   }
 }
 
+using GetStandardDefaultValueFunc =
+    std::tuple<UniquePyObjectPtr, bool>(const detail::TypeInfo&);
+
 /**
- * Returns the appropriate default value for a thrift field of the given type.
+ * Returns the appropriate standard immutable default value for the given
+ * `typeInfo` and a boolean indicating whether it should be added to cache or
+ * not.
  *
- * The returned value will either be the one provided by the user (in the Thrift
- * IDL), or the standard default value for the given `typeInfo`.
- *
- * @param `index` of the field in `userDefaultValues`, i.e. insertion order (NOT
- *        field ID).
- *
- * @throws if the thrift python types module could not be imported.
+ * @throws if there is no standard default value
  */
-UniquePyObjectPtr getDefaultValue(
-    const detail::TypeInfo* typeInfo,
-    const FieldValueMap& userDefaultValues,
-    int16_t index) {
-  ensureImportOrThrow();
-
-  // 1. If the user explicitly provided a default value, use it.
-  auto userDefaultValueIt = userDefaultValues.find(index);
-  if (userDefaultValueIt != userDefaultValues.end()) {
-    PyObject* value = userDefaultValueIt->second;
-    Py_INCREF(value);
-    return UniquePyObjectPtr(value);
-  }
-
-  // 2. Check local cache for an existing default value.
-  static folly::Indestructible<
-      std::unordered_map<const detail::TypeInfo*, PyObject*>>
-      defaultValueCache;
-  auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
-  if (cachedDefaultValueIt != defaultValueCache->end()) {
-    UniquePyObjectPtr value(UniquePyObjectPtr(cachedDefaultValueIt->second));
-    Py_INCREF(value.get());
-    return value;
-  }
-
-  // 3. No cached value found. Determine the default value, and update cache (if
-  // applicable).
-  UniquePyObjectPtr value;
+std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
+    const detail::TypeInfo& typeInfo) {
+  UniquePyObjectPtr value = nullptr;
   bool addValueToCache = true;
-  switch (typeInfo->type) {
+  switch (typeInfo.type) {
     case protocol::TType::T_BYTE:
     case protocol::TType::T_I16:
     case protocol::TType::T_I32:
@@ -112,7 +86,7 @@ UniquePyObjectPtr getDefaultValue(
     case protocol::TType::T_STRING:
       // For strings, the default value is the empty string (or, if `IOBuf`s are
       // used, an empty `IOBuf`).
-      switch (*static_cast<const detail::StringFieldType*>(typeInfo->typeExt)) {
+      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
         case detail::StringFieldType::String:
         case detail::StringFieldType::StringView:
         case detail::StringFieldType::Binary:
@@ -141,7 +115,7 @@ UniquePyObjectPtr getDefaultValue(
       // For struct and unions, the default value is a (recursively)
       // default-initialized instance.
       auto structInfo =
-          static_cast<const detail::StructInfo*>(typeInfo->typeExt);
+          static_cast<const detail::StructInfo*>(typeInfo.typeExt);
       value = UniquePyObjectPtr(
           structInfo->unionExt != nullptr
               ? createUnionTuple()
@@ -149,17 +123,59 @@ UniquePyObjectPtr getDefaultValue(
       break;
     }
     default:
-      LOG(FATAL) << "invalid typeInfo TType " << typeInfo->type;
+      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
   }
   if (value == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
+  return std::tuple(std::move(value), addValueToCache);
+}
 
+/**
+ * Returns the appropriate default value for a thrift field of the given type.
+ *
+ * The returned value will either be the one provided by the user (in the Thrift
+ * IDL), or the standard default value for the given `typeInfo`.
+ *
+ * @param `index` of the field in `userDefaultValues`, i.e. insertion order (NOT
+ *        field ID).
+ *
+ * @throws if the thrift python types module could not be imported.
+ */
+UniquePyObjectPtr getDefaultValueForField(
+    const detail::TypeInfo* typeInfo,
+    const FieldValueMap& userDefaultValues,
+    int16_t index,
+    GetStandardDefaultValueFunc getStandardDefaultValueFunc) {
+  ensureImportOrThrow();
+
+  // 1. If the user explicitly provided a default value, use it.
+  auto userDefaultValueIt = userDefaultValues.find(index);
+  if (userDefaultValueIt != userDefaultValues.end()) {
+    PyObject* value = userDefaultValueIt->second;
+    Py_INCREF(value);
+    return UniquePyObjectPtr(value);
+  }
+
+  // 2. Check local cache for an existing default value.
+  static folly::Indestructible<
+      std::unordered_map<const detail::TypeInfo*, PyObject*>>
+      defaultValueCache;
+  auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
+  if (cachedDefaultValueIt != defaultValueCache->end()) {
+    UniquePyObjectPtr value(cachedDefaultValueIt->second);
+    Py_INCREF(value.get());
+    return value;
+  }
+
+  // 3. No cached value found. Determine the default value, and update cache (if
+  // applicable).
+  auto [value, addValueToCache] = getStandardDefaultValueFunc(*typeInfo);
   if (addValueToCache) {
     defaultValueCache->emplace(typeInfo, value.get());
     Py_INCREF(value.get());
   }
-  return value;
+  return std::move(value);
 }
 
 const char* getIssetFlags(const void* object) {
@@ -231,7 +247,11 @@ PyObject* createStructTupleWithDefaultValues(
       PyTuple_SET_ITEM(
           tuple.get(),
           fieldIndex + 1,
-          getDefaultValue(fieldInfo.typeInfo, defaultValues, fieldIndex)
+          getDefaultValueForField(
+              fieldInfo.typeInfo,
+              defaultValues,
+              fieldIndex,
+              getStandardImmutableDefaultValueForType)
               .release());
     }
   }
@@ -310,11 +330,16 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
       PyTuple_SET_ITEM(tuple, i + 1, Py_None);
       Py_INCREF(Py_None);
     } else {
-      // getDefaultValue calls `Py_INCREF`
+      // getDefaultValueForField calls `Py_INCREF`
       PyTuple_SET_ITEM(
           tuple,
           i + 1,
-          getDefaultValue(fieldInfo.typeInfo, defaultValues, i).release());
+          getDefaultValueForField(
+              fieldInfo.typeInfo,
+              defaultValues,
+              i,
+              getStandardImmutableDefaultValueForType)
+              .release());
     }
     Py_DECREF(oldValue);
   }
@@ -340,11 +365,16 @@ void resetFieldToStandardDefault(
     PyTuple_SET_ITEM(tuple, index + 1, Py_None);
     Py_INCREF(Py_None);
   } else {
-    // getDefaultValue calls `Py_INCREF`
+    // getDefaultValueForField calls `Py_INCREF`
     PyTuple_SET_ITEM(
         tuple,
         index + 1,
-        getDefaultValue(fieldInfo.typeInfo, defaultValues, index).release());
+        getDefaultValueForField(
+            fieldInfo.typeInfo,
+            defaultValues,
+            index,
+            getStandardImmutableDefaultValueForType)
+            .release());
   }
   Py_DECREF(oldValue);
   // DO_BEFORE(alperyoney,20240515): Figure out whether isset flag should be

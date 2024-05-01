@@ -1181,42 +1181,59 @@ fn emit_foreach_<'a, 'd>(
 ) -> Result<InstrSeq> {
     let liter_local = check_l_iter(e, env, pos, collection, iterator, block)?;
     if let Some(loc) = liter_local {
+        // TODO: infer whether the base is const
+        let flags = IterArgsFlags::None;
         let liter_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
         Ok(InstrSeq::gather(vec![
             instr::c_get_quiet_l(loc),
             instr::is_type_c(IsTypeOp::ArrLike),
             instr::jmp_nz(liter_label),
-            emit_foreach_impl(e, env, pos, collection, iterator, block, None)?,
+            emit_foreach_non_local(e, env, pos, collection, iterator, block)?,
             instr::jmp(done_label),
             instr::label(liter_label),
-            emit_foreach_impl(e, env, pos, collection, iterator, block, liter_local)?,
+            emit_pos(&collection.1),
+            emit_foreach_local(e, env, pos, iterator, block, loc, flags)?,
             instr::label(done_label),
         ]))
     } else {
-        emit_foreach_impl(e, env, pos, collection, iterator, block, None)
+        emit_foreach_non_local(e, env, pos, collection, iterator, block)
     }
 }
 
-fn emit_foreach_impl<'a, 'd>(
+fn emit_foreach_non_local<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
-    liter_local: Option<Local>,
 ) -> Result<InstrSeq> {
-    let collection_instrs = if liter_local.is_none() {
-        emit_expr::emit_expr(e, env, collection)?
-    } else {
-        instr::empty()
-    };
+    Ok(InstrSeq::gather(vec![
+        emit_expr::emit_expr(e, env, collection)?,
+        emit_pos(&collection.1),
+        instr::iter_base(),
+        scope::with_unnamed_local(e, |e, local| {
+            let before = instr::pop_l(local);
+            let flags = IterArgsFlags::BaseConst;
+            let inner = emit_foreach_local(e, env, pos, iterator, block, local, flags)?;
+            let after = instr::unset_l(local);
+            Ok((before, inner, after))
+        })?,
+    ]))
+}
+
+fn emit_foreach_local<'a, 'd>(
+    e: &mut Emitter<'d>,
+    env: &mut Env<'a>,
+    pos: &Pos,
+    iterator: &ast::AsExpr,
+    block: &[ast::Stmt],
+    local: Local,
+    flags: IterArgsFlags,
+) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = match liter_local {
-            None => e.iterator_mut().gen_iter(),
-            Some(_) => e.iterator_mut().gen_liter(),
-        };
+        let iter_id = e.iterator_mut().gen_liter();
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
@@ -1225,7 +1242,7 @@ fn emit_foreach_impl<'a, 'd>(
             iter_id,
             key_id: key_id.unwrap_or(Local::INVALID),
             val_id,
-            flags: IterArgsFlags::None, // TODO: we didn't infer if the base is const
+            flags,
         };
         let body = env.do_in_loop_body(
             e,
@@ -1235,30 +1252,14 @@ fn emit_foreach_impl<'a, 'd>(
             block,
             emit_block,
         )?;
-        let iter_init = if let Some(loc) = liter_local {
-            InstrSeq::gather(vec![
-                emit_pos(&collection.1),
-                instr::l_iter_init(iter_args.clone(), loc, loop_break_label),
-            ])
-        } else {
-            InstrSeq::gather(vec![
-                collection_instrs,
-                emit_pos(&collection.1),
-                instr::iter_base(),
-                instr::iter_init(iter_args.clone(), loop_break_label),
-            ])
-        };
+        let iter_init = instr::l_iter_init(iter_args.clone(), local, loop_break_label);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
             preamble,
             body,
             instr::label(loop_continue_label),
             emit_pos(pos),
-            if let Some(loc) = liter_local {
-                instr::l_iter_next(iter_args, loc, loop_head_label)
-            } else {
-                instr::iter_next(iter_args, loop_head_label)
-            },
+            instr::l_iter_next(iter_args, local, loop_head_label),
         ]);
         let iter_done = instr::label(loop_break_label);
         Ok((iter_init, iterate, iter_done))

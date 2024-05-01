@@ -791,6 +791,11 @@ impl TransformInstr for LowerInstrs<'_> {
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
                 builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
             }
+            Instr::Hhbc(Hhbc::LIterFree(id, loc)) => {
+                let lid = iter_var_name(id);
+                let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
+                builder.hhbc_builtin(hack::Hhbc::LIterFree, &[value], loc)
+            }
             Instr::Hhbc(Hhbc::ClassHasReifiedGenerics(..) | Hhbc::HasReifiedParent(..)) => {
                 // Reified generics generate a lot of IR that is opaque to the analysis and actually
                 // negatively affects the precision. Lowering these checks to a constant value

@@ -16,39 +16,39 @@ function test() {
   }
 
   foreach ($z as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     $z[] = 12;
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($q as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     $q[$k + 1] = 12;
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($r as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     $r[5] = 12;
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($s as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     unset($s);
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($t as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     unset($t[$k]);
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($u as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     unset($u[$k]);
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($a as $k => $v) {
@@ -58,9 +58,9 @@ function test() {
   }
 
   foreach ($b as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     bar(inout $b);
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($c as $k => $v) {
@@ -70,35 +70,35 @@ function test() {
   }
 
   foreach ($d as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     bar(inout $d[5]);
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($f as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     foreach ($v as $k => $m) {
     }
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($g as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     foreach ($v as $kk => $g) {
     }
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($h as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     $h->one();
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 
   foreach ($i as $k => $v) {
-    // CHECK: IterInit <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterInit <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
     $i = 5;
-    // CHECK: IterNext <> 0 K:$k V:$v {{L[0-9]+}}
+    // CHECK: LIterNext <BaseConst> 0 K:$k V:$v {{_[0-9]+}} {{L[0-9]+}}
   }
 }
 

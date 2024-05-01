@@ -340,7 +340,7 @@ pub mod instr {
     pub fn iter_break(label: Label, iters: Vec<IterId>) -> InstrSeq {
         let mut vec: Vec<Instruct> = iters
             .into_iter()
-            .map(|i| Instruct::Opcode(Opcode::IterFree(i)))
+            .map(|i| Instruct::Opcode(Opcode::LIterFree(i)))
             .collect();
         vec.push(Instruct::Opcode(Opcode::Jmp(label)));
         instrs(vec)

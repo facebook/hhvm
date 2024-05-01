@@ -9,32 +9,36 @@
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3: *HackMixed = load &$x
 // CHECK:   n4 = $builtins.hhbc_iter_base(n3)
-// CHECK:   n5 = $builtins.hhbc_iter_init(&iter0, null, &$index, n4)
-// CHECK:   jmp b1, b6
+// CHECK:   store &$0 <- n4: *HackMixed
+// CHECK:   jmp b1
 // CHECK: #b1:
-// CHECK:   prune $builtins.hack_is_true(n5)
-// CHECK:   jmp b2
+// CHECK:   n5: *HackMixed = load &$0
+// CHECK:   n6 = $builtins.hhbc_iter_init(&iter0, null, &$index, n5)
+// CHECK:   jmp b2, b7
 // CHECK: #b2:
-// CHECK:   n6: *HackMixed = load &$index
-// CHECK:   n7 = $builtins.hhbc_print(n6)
-// CHECK:   n8: *HackMixed = load &iter0
-// CHECK:   n9 = $builtins.hhbc_iter_next(n8, null, &$index)
-// CHECK:   jmp b4, b5
-// CHECK:   .handlers b3
-// CHECK: #b3(n10: *HackMixed):
-// CHECK:   n11: *HackMixed = load &iter0
-// CHECK:   n12 = $builtins.hhbc_iter_free(n11)
-// CHECK:   throw n10
-// CHECK: #b4:
-// CHECK:   prune $builtins.hack_is_true(n9)
-// CHECK:   jmp b7
+// CHECK:   prune $builtins.hack_is_true(n6)
+// CHECK:   jmp b3
+// CHECK: #b3:
+// CHECK:   n7: *HackMixed = load &$index
+// CHECK:   n8 = $builtins.hhbc_print(n7)
+// CHECK:   n9: *HackMixed = load &iter0
+// CHECK:   n10 = $builtins.hhbc_iter_next(n9, null, &$index)
+// CHECK:   jmp b5, b6
+// CHECK:   .handlers b4
+// CHECK: #b4(n11: *HackMixed):
+// CHECK:   n12: *HackMixed = load &iter0
+// CHECK:   n13 = $builtins.hhbc_liter_free(n12)
+// CHECK:   throw n11
 // CHECK: #b5:
-// CHECK:   prune ! $builtins.hack_is_true(n9)
-// CHECK:   jmp b2
+// CHECK:   prune $builtins.hack_is_true(n10)
+// CHECK:   jmp b8
 // CHECK: #b6:
-// CHECK:   prune ! $builtins.hack_is_true(n5)
-// CHECK:   jmp b7
+// CHECK:   prune ! $builtins.hack_is_true(n10)
+// CHECK:   jmp b3
 // CHECK: #b7:
+// CHECK:   prune ! $builtins.hack_is_true(n6)
+// CHECK:   jmp b8
+// CHECK: #b8:
 // CHECK:   ret null
 // CHECK: }
 function check_foreach(vec<string> $x): void {

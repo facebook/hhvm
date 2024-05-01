@@ -113,7 +113,7 @@ pub(super) fn emit_return<'a>(
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(instr::iter_free)
+                    .map(instr::l_iter_free)
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);

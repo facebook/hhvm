@@ -123,7 +123,7 @@
  (modules decl_members)
  (libraries
   decl_defs
-  decl_enforceability
+  decl_enforceability_shallow
   typing_defs))
 
 (library
@@ -133,6 +133,7 @@
    decl_defs
    decl_instantiate
    decl_members
+   decl_provider_internals
    decl_store
    decl_subst
    typing_defs)
@@ -174,7 +175,14 @@
   (name decl_enforceability)
   (modules decl_enforceability)
   (libraries
-   decl_env
+   decl_entry
+   decl_env))
+
+(library
+  (name decl_enforceability_shallow)
+  (modules decl_enforceability_shallow)
+  (libraries
+   decl_enforceability
    decl_provider_internals
    naming_provider))
 

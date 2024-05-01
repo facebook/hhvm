@@ -179,7 +179,7 @@ let maybe_pessimise_fun_decl ctx fun_decl =
       {
         fun_decl with
         fe_type =
-          Decl_enforceability.(
+          Decl_enforceability_shallow.(
             pessimise_fun_type
               ~fun_kind:Function
               ~this_class:None

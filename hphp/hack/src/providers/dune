@@ -70,7 +70,9 @@
 
 (library
  (name decl_provider)
- (modules decl_provider decl_provider_prefetch)
+ (modules
+  decl_provider
+  decl_provider_prefetch)
  (libraries
   counters
   decl_counters
@@ -201,13 +203,19 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name decl_entry)
+ (wrapped false)
+ (modules
+  decl_entry))
+
+(library
  (name decl_provider_internals)
  (wrapped false)
  (modules
-   decl_entry
    decl_provider_internals)
  (libraries
   decl_counters
+  decl_entry
   decl_nast
   direct_decl_utils
   provider_context

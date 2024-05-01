@@ -22,7 +22,7 @@ let build_property
   if no_auto_likes then
     sp_type
   else
-    Decl_enforceability.maybe_pessimise_type
+    Decl_enforceability_shallow.maybe_pessimise_type
       ~reason:(Typing_reason.Rpessimised_prop (Typing_defs.get_pos sp_type))
       ~is_xhp_attr
       ~this_class
@@ -89,7 +89,7 @@ let build_method
        (not fe_no_auto_dynamic)
        && Provider_context.implicit_sdt_for_class ctx this_class
       then
-        Decl_enforceability.(
+        Decl_enforceability_shallow.(
           pessimise_fun_type
             ~fun_kind:
               (if Shallow_decl_defs.MethodFlags.get_abstract sm_flags then

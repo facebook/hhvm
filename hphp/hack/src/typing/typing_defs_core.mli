@@ -467,11 +467,14 @@ module Flags : sig
     accept_disposable:bool ->
     has_default:bool ->
     readonly:bool ->
+    ignore_readonly_error:bool ->
     Typing_defs_flags.FunParam.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool
 
   val get_fp_has_default : 'a fun_param -> bool
+
+  val get_fp_ignore_readonly_error : 'a fun_param -> bool
 
   val get_fp_mode : 'a fun_param -> param_mode
 end

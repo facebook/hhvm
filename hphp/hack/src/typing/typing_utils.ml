@@ -41,6 +41,7 @@ type sub_type =
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
+  ?ignore_readonly:bool ->
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->
@@ -654,7 +655,8 @@ let default_fun_param ~readonly ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~mode:FPnormal
         ~accept_disposable:false
         ~has_default:false
-        ~readonly;
+        ~readonly
+        ~ignore_readonly_error:false;
     fp_def_value = None;
   }
 

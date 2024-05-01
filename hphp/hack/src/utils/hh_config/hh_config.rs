@@ -346,6 +346,7 @@ impl HhConfig {
             tco_allow_all_files_for_module_declarations: default
                 .tco_allow_all_files_for_module_declarations,
             tco_allowed_files_for_module_declarations: hhconfig.get_str("allowed_files_for_module_declarations").map_or(default.tco_allowed_files_for_module_declarations, parse_svec),
+            tco_allowed_files_for_ignore_readonly: hhconfig.get_str("allowed_files_for_ignore_readonly").map_or(default.tco_allowed_files_for_ignore_readonly, parse_svec),
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_use_type_alias_heap: default.tco_use_type_alias_heap,

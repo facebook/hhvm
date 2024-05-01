@@ -74,13 +74,15 @@
                  fp_type = (Rhint ([11:29-32]), (Tprim Tint));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None };
                 { fp_pos = [11:46-51]; fp_name = (Some "$arg2");
                   fp_type = (Rhint ([11:40-45]), (Tprim Tfloat));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
-                    inout = false; has_default = false; readonly = false };
+                    inout = false; has_default = false; readonly = false;
+                    ignore_readonly_error = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [11:10-28]) };
@@ -118,7 +120,8 @@
                   (Tapply (([14:43-50], "\\Typedef"), [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [14:10-42]) };
@@ -154,7 +157,8 @@
                  fp_type = (Rhint ([18:30-31]), (Tgeneric ("T", [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
@@ -195,13 +199,15 @@
                  fp_type = (Rhint ([23:3-5]), (Tgeneric ("T1", [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None };
                 { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
                   fp_type = (Rhint ([24:3-5]), (Tgeneric ("T2", [])));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
-                    inout = false; has_default = false; readonly = false };
+                    inout = false; has_default = false; readonly = false;
+                    ignore_readonly_error = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
@@ -256,7 +262,8 @@
                   (Toption (Rhint ([33:26-29]), (Tprim Tint))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [33:10-24]) };
@@ -285,7 +292,8 @@
                  fp_type = (Rhint ([35:23-26]), (Tprim Tint));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = true; has_default = false; readonly = false };
+                   inout = true; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [35:10-16]) };
@@ -320,7 +328,8 @@
                  fp_type = (Rhint ([38:3-5]), (Tgeneric ("Tu", [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None };
                 { fp_pos = [39:24-31]; fp_name = (Some "$unused");
                   fp_type =
@@ -334,7 +343,8 @@
                            fp_flags =
                            { Typing_defs_flags.FunParam.accept_disposable =
                              false; inout = false; has_default = false;
-                             readonly = false };
+                             readonly = false; ignore_readonly_error = false
+                             };
                            fp_def_value = None }
                           ];
                         ft_implicit_params =
@@ -351,7 +361,8 @@
                         ft_cross_package = None }));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
-                    inout = false; has_default = false; readonly = false };
+                    inout = false; has_default = false; readonly = false;
+                    ignore_readonly_error = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [37:10-37]) };
@@ -372,7 +383,8 @@
                                 fp_flags =
                                 { Typing_defs_flags.FunParam.accept_disposable =
                                   false; inout = false; has_default = false;
-                                  readonly = false };
+                                  readonly = false;
+                                  ignore_readonly_error = false };
                                 fp_def_value = None }
                                ];
                              ft_implicit_params =
@@ -390,8 +402,8 @@
                              ft_cross_package = None }));
                        fp_flags =
                        { Typing_defs_flags.FunParam.accept_disposable = false;
-                         inout = false; has_default = false; readonly = false
-                         };
+                         inout = false; has_default = false;
+                         readonly = false; ignore_readonly_error = false };
                        fp_def_value = None }
                       ];
                     ft_implicit_params =
@@ -434,7 +446,8 @@
                      )));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [46:10-28]) };
@@ -491,7 +504,8 @@
                   (Toption (Rhint ([52:40-41]), (Tgeneric ("T", [])))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [52:10-24]) };
@@ -520,7 +534,8 @@
                  fp_type = (Rhint ([56:29-37]), (Tprim Tresource));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [56:10-28]) };
@@ -570,7 +585,8 @@
                  fp_type = (Rvar_param_from_decl ([65:37-42]), Tmixed);
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [65:10-27]) };

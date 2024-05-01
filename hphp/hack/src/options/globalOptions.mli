@@ -309,6 +309,7 @@ type t = {
   hack_warnings: bool;  (** turn on hack warnings *)
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
+  tco_allowed_files_for_ignore_readonly: string list;
 }
 [@@deriving eq, show]
 
@@ -442,6 +443,7 @@ val set :
   ?tco_extended_reasons:bool ->
   ?hack_warnings:bool ->
   ?tco_strict_switch:bool ->
+  ?tco_allowed_files_for_ignore_readonly:string list ->
   t ->
   t
 

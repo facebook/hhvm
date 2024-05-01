@@ -22,6 +22,7 @@ type sub_type =
   Typing_env_types.env ->
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
+  ?ignore_readonly:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Reasons_callback.t option ->

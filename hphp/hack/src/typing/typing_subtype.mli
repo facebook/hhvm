@@ -37,6 +37,7 @@ val sub_type :
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
+  ?ignore_readonly:bool ->
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->

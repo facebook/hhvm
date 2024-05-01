@@ -45,6 +45,7 @@ open Typing_env_types
 let coerce_type_impl
     ~coerce_for_op
     ~coerce
+    ~ignore_readonly
     env
     ty_have
     ty_expect
@@ -60,18 +61,32 @@ let coerce_type_impl
           (Reason.Rdynamic_coercion (get_reason ty_expect))
           ty_expect
       in
-      Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
+      Typing_utils.sub_type
+        ~coerce:None
+        ~ignore_readonly
+        env
+        ty_have
+        tunion
+        on_error
     else
       let (env, ety_expect) = Typing_env.expand_type env ty_expect in
       match get_node ety_expect with
       | Tdynamic ->
         Typing_utils.sub_type
           ~coerce:(Some Typing_logic.CoerceToDynamic)
+          ~ignore_readonly
           env
           ty_have
           ty_expect
           on_error
-      | _ -> Typing_utils.sub_type ~coerce env ty_have ty_expect on_error
+      | _ ->
+        Typing_utils.sub_type
+          ~coerce
+          ~ignore_readonly
+          env
+          ty_have
+          ty_expect
+          on_error
   else
     let (env, ety_expect) = Typing_env.expand_type env ty_expect in
     let (env, ety_have) = Typing_env.expand_type env ty_have in
@@ -89,6 +104,7 @@ let coerce_type_impl
 let coerce_type
     ?(coerce_for_op = false)
     ?(coerce = None)
+    ?(ignore_readonly = false)
     p
     ur
     env
@@ -112,6 +128,7 @@ let coerce_type
   coerce_type_impl
     ~coerce_for_op
     ~coerce
+    ~ignore_readonly
     env
     ty_have
     ty_expect
@@ -127,6 +144,7 @@ let coerce_type_like_strip
     coerce_type_impl
       ~coerce_for_op:false
       ~coerce:None
+      ~ignore_readonly:false
       env
       ty_have
       ty_expect
@@ -184,6 +202,7 @@ let try_coerce ?(coerce = None) env ty_have ty_expect =
     coerce_type_impl
       ~coerce
       ~coerce_for_op:false
+      ~ignore_readonly:false
       env
       ty_have
       ty_expect

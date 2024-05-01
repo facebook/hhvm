@@ -1154,6 +1154,7 @@ struct Attributes<'a> {
     override_: bool,
     enforceable: Option<&'a Pos<'a>>,
     accept_disposable: bool,
+    ignore_readonly_error: bool,
     dynamically_callable: bool,
     returns_disposable: bool,
     php_std_lib: bool,
@@ -1619,6 +1620,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             override_: false,
             enforceable: None,
             accept_disposable: false,
+            ignore_readonly_error: false,
             dynamically_callable: false,
             returns_disposable: false,
             php_std_lib: false,
@@ -1669,6 +1671,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__AcceptDisposable" => {
                         attributes.accept_disposable = true;
+                    }
+                    "__IgnoreReadonlyError" => {
+                        attributes.ignore_readonly_error = true;
                     }
                     "__DynamicallyCallable" => {
                         attributes.dynamically_callable = true;
@@ -1989,6 +1994,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let mut flags = FunParamFlags::empty();
                             if attributes.accept_disposable {
                                 flags |= FunParamFlags::ACCEPT_DISPOSABLE
+                            }
+                            if attributes.ignore_readonly_error {
+                                flags |= FunParamFlags::IGNORE_READONLY_ERROR
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY

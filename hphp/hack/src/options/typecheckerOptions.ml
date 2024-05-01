@@ -270,6 +270,9 @@ let allow_all_files_for_module_declarations t =
 let allowed_files_for_module_declarations t =
   t.GlobalOptions.tco_allowed_files_for_module_declarations
 
+let allowed_files_for_ignore_readonly t =
+  t.GlobalOptions.tco_allowed_files_for_ignore_readonly
+
 let record_fine_grained_dependencies t =
   t.GlobalOptions.tco_record_fine_grained_dependencies
 

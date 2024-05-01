@@ -395,6 +395,7 @@ module Full = struct
       inout;
       has_default;
       readonly;
+      ignore_readonly_error = _;
     } =
       Typing_defs_flags.FunParam.as_record fp_flags
     in
@@ -2105,7 +2106,8 @@ module Json = struct
                         ~mode:callconv
                         ~accept_disposable:false
                         ~has_default:optional
-                        ~readonly:false;
+                        ~readonly:false
+                        ~ignore_readonly_error:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;
                     fp_name = None;

@@ -464,6 +464,7 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
         NamingError::HKTAliasWithImplicitConstraints { .. } => todo!(),
         NamingError::ExplicitConsistentConstructor { .. } => todo!(),
         NamingError::ModuleDeclarationOutsideAllowedFiles(_) => todo!(),
+        NamingError::AttributeOutsideAllowedFiles(_) => todo!(),
         NamingError::InternalModuleLevelTrait(_) => todo!(),
         NamingError::DynamicMethodAccess(_) => todo!(),
         NamingError::DeprecatedUse { .. } => todo!(),

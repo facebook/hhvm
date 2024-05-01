@@ -201,6 +201,7 @@ type t = {
   tco_extended_reasons: bool;
   hack_warnings: bool;
   tco_strict_switch: bool;
+  tco_allowed_files_for_ignore_readonly: string list;
 }
 [@@deriving eq, show]
 
@@ -336,6 +337,7 @@ let default =
     tco_extended_reasons = false;
     hack_warnings = false;
     tco_strict_switch = false;
+    tco_allowed_files_for_ignore_readonly = [];
   }
 
 let set
@@ -468,6 +470,7 @@ let set
     ?tco_extended_reasons
     ?hack_warnings
     ?tco_strict_switch
+    ?tco_allowed_files_for_ignore_readonly
     options =
   let setting setting option =
     match setting with
@@ -808,6 +811,10 @@ let set
       setting tco_extended_reasons options.tco_extended_reasons;
     hack_warnings = setting hack_warnings options.hack_warnings;
     tco_strict_switch = setting tco_strict_switch options.tco_strict_switch;
+    tco_allowed_files_for_ignore_readonly =
+      setting
+        tco_allowed_files_for_ignore_readonly
+        options.tco_allowed_files_for_ignore_readonly;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

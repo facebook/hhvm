@@ -36,7 +36,8 @@ bitflags! {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
         const HAS_DEFAULT            = 1 << 2;
-        const READONLY       = 1 << 8;
+        const READONLY               = 1 << 8;
+        const IGNORE_READONLY_ERROR  = 1 << 3;
     }
 }
 

@@ -1590,6 +1590,7 @@ let check_argument_type_against_parameter_type_helper
   in
   Typing_coercion.coerce_type
     ~coerce:None
+    ~ignore_readonly:(Typing_defs.get_fp_ignore_readonly_error param)
     pos
     Reason.URparam
     env

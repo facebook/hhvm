@@ -237,6 +237,8 @@ pub mod user_attributes {
 
     pub const ACCEPT_DISPOSABLE: &str = "__AcceptDisposable";
 
+    pub const IGNORE_READONLY_ERROR: &str = "__IgnoreReadonlyError";
+
     pub const RETURN_DISPOSABLE: &str = "__ReturnDisposable";
 
     pub const LSB: &str = "__LSB";

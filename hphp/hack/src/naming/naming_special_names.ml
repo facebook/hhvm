@@ -278,6 +278,8 @@ module UserAttributes = struct
 
   let uaReturnDisposable = "__ReturnDisposable"
 
+  let uaIgnoreReadonlyError = "__IgnoreReadonlyError"
+
   let uaLSB = "__LSB"
 
   let uaSealed = "__Sealed"
@@ -487,6 +489,13 @@ module UserAttributes = struct
                 "Allows passing values that implement `IDisposable` or `IAsyncDisposable`."
                 ^ " Normally these values cannot be passed to functions."
                 ^ "\n\nYou cannot save references to `__AcceptDisposable` parameters, to ensure they are disposed at the end of their using block.";
+            } );
+          ( uaIgnoreReadonlyError,
+            {
+              contexts = [parameter];
+              autocomplete = false;
+              doc =
+                "Allows passing function values that are non-readonly even if a readonly function is expected.";
             } );
           ( uaReturnDisposable,
             {

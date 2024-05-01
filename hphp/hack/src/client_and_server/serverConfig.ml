@@ -400,6 +400,8 @@ let load_config config options =
     ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
     ?hack_warnings:(bool_opt "hack_warnings" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)
+    ?tco_allowed_files_for_ignore_readonly:
+      (string_list_opt "allowed_files_for_ignore_readonly" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

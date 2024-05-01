@@ -509,17 +509,26 @@ module Flags = struct
 
   let get_fp_readonly fp = FunParam.readonly fp.fp_flags
 
-  let make_fp_flags ~mode ~accept_disposable ~has_default ~readonly =
+  let make_fp_flags
+      ~mode ~accept_disposable ~has_default ~readonly ~ignore_readonly_error =
     let inout =
       match mode with
       | FPinout -> true
       | FPnormal -> false
     in
-    FunParam.make ~inout ~accept_disposable ~has_default ~readonly
+    FunParam.make
+      ~inout
+      ~accept_disposable
+      ~has_default
+      ~readonly
+      ~ignore_readonly_error
 
   let get_fp_accept_disposable fp = FunParam.accept_disposable fp.fp_flags
 
   let get_fp_has_default fp = FunParam.has_default fp.fp_flags
+
+  let get_fp_ignore_readonly_error fp =
+    FunParam.ignore_readonly_error fp.fp_flags
 
   let get_fp_mode fp =
     if FunParam.inout fp.fp_flags then

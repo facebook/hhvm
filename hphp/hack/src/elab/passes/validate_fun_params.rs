@@ -25,7 +25,25 @@ impl Pass for ValidateFunParamsPass {
 impl ValidateFunParamsPass {
     fn validate_fun_params(&self, env: &Env, params: &Vec<FunParam>) -> ControlFlow<()> {
         let mut seen = std::collections::BTreeSet::<&String>::new();
-        for FunParam { name, pos, .. } in params {
+        for FunParam {
+            name,
+            pos,
+            user_attributes,
+            ..
+        } in params
+        {
+            if !env.allow_ignore_readonly() {
+                let attr_pos_opt = user_attributes
+                    .iter()
+                    .find(|ua| ua.name.name() == sn::user_attributes::IGNORE_READONLY_ERROR)
+                    .map(|ua| ua.name.pos());
+                match attr_pos_opt {
+                    Some(pos) => {
+                        env.emit_error(NamingError::AttributeOutsideAllowedFiles(pos.clone()))
+                    }
+                    _ => (),
+                }
+            }
             if name == sn::special_idents::PLACEHOLDER {
                 continue;
             } else if seen.contains(name) {

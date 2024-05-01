@@ -38,6 +38,7 @@ mod prelude {
     pub use crate::transform::Transform;
 }
 
+use std::path::Path;
 use std::sync::Arc;
 
 use env::Env;
@@ -215,25 +216,30 @@ fn ns_env(tco: &TypecheckerOptions) -> Arc<namespace_env::Env> {
     ))
 }
 
+fn filename_in_allowed(allowed_files: &[String], path: &Path) -> bool {
+    allowed_files.iter().any(|spec| {
+        !spec.is_empty()
+            && (spec.ends_with('*') && path.starts_with(&spec[..spec.len() - 1])
+                || path == std::path::Path::new(spec))
+    })
+}
+
 fn make_env(tco: &TypecheckerOptions, rel_path: &RelativePath) -> Env {
     let is_hhi = rel_path.is_hhi();
     let path = rel_path.path();
 
     let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
-        || tco
-            .tco_allowed_files_for_module_declarations
-            .iter()
-            .any(|spec| {
-                !spec.is_empty()
-                    && (spec.ends_with('*') && path.starts_with(&spec[..spec.len() - 1])
-                        || path == std::path::Path::new(spec))
-            });
+        || filename_in_allowed(&tco.tco_allowed_files_for_module_declarations, path);
+
+    let allow_ignore_readonly =
+        filename_in_allowed(&tco.tco_allowed_files_for_ignore_readonly, path);
 
     Env::new(
         tco,
         &ProgramSpecificOptions {
             is_hhi,
             allow_module_declarations,
+            allow_ignore_readonly,
         },
     )
 }

@@ -158,6 +158,7 @@ type t = {
   is_systemlib: bool;
   is_hhi: bool;
   allow_module_def: bool;
+  allow_ignore_readonly: bool;
 }
 
 let empty =
@@ -183,4 +184,5 @@ let empty =
     is_systemlib = false;
     is_hhi = false;
     allow_module_def = false;
+    allow_ignore_readonly = false;
   }

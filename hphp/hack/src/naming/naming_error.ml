@@ -297,6 +297,7 @@ type t =
       def_pos: Pos.t;
     }
   | Toplevel_statement of Pos.t
+  | Attribute_outside_allowed_files of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -833,6 +834,15 @@ let toplevel_statement pos =
     "Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead"
   in
   User_error.make_err Error_code.(to_enum ToplevelStatement) (pos, msg) []
+
+let attribute_outside_allowed_files pos =
+  User_error.make_err
+    Error_code.(to_enum AttributeOutsideAllowedFiles)
+    ( pos,
+      "This attribute exists in an unapproved file. "
+      ^ "The set of approved files is in .hhconfig. Please talk to someone from the Hack team before changing this."
+    )
+    []
 
 let nonstatic_property_with_lsb pos =
   User_error.make_err
@@ -1437,3 +1447,4 @@ let to_user_error = function
   | Illegal_typed_local { join; id_pos; id_name; def_pos } ->
     illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
   | Toplevel_statement pos -> toplevel_statement pos
+  | Attribute_outside_allowed_files pos -> attribute_outside_allowed_files pos

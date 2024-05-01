@@ -76,13 +76,15 @@
                        ft_cross_package = None }));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None };
                 { fp_pos = [9:5-7]; fp_name = (Some "$v");
                   fp_type = (Rhint ([9:5-7]), (Tgeneric ("T/$v", [])));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
-                    inout = false; has_default = false; readonly = false };
+                    inout = false; has_default = false; readonly = false;
+                    ignore_readonly_error = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params =
@@ -137,7 +139,8 @@
                  fp_type = (Rhint ([14:14-16]), (Tgeneric ("T/$v", [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params =
@@ -213,7 +216,8 @@
                            ft_cross_package = None }))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false };
+                   inout = false; has_default = false; readonly = false;
+                   ignore_readonly_error = false };
                  fp_def_value = None };
                 { fp_pos = [20:6-8]; fp_name = (Some "$v");
                   fp_type =
@@ -221,7 +225,8 @@
                    (Toption (Rhint ([20:6-8]), (Tgeneric ("T/$v", [])))));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
-                    inout = false; has_default = false; readonly = false };
+                    inout = false; has_default = false; readonly = false;
+                    ignore_readonly_error = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params =

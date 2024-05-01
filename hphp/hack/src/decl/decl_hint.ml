@@ -161,7 +161,8 @@ and hint_ p env = function
             ~mode:kind
             ~accept_disposable:false
             ~has_default
-            ~readonly;
+            ~readonly
+            ~ignore_readonly_error:false;
         fp_def_value = None;
       }
     in

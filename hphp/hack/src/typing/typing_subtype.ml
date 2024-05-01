@@ -278,6 +278,12 @@ module Subtype_env = struct
           meaning that the original constraint must imply the simplified one.
           If set, we also finish as soon as we see a goal of the form T <: t or
           t <: T for generic parameter T *)
+    ignore_readonly: bool;
+        (** If set, do not apply readonly subtyping through function types i.e. the
+         * readonly qualifier on function types and the readonly qualifier on
+         * function parameters. This flag is triggered by the <<__IgnoreReadonlyError>>
+         * on parameters.
+         *)
     visited: VisitedGoals.t;
         (** If above is not set, maintain a visited goal set *)
     no_top_bottom: bool;
@@ -321,6 +327,7 @@ module Subtype_env = struct
   let create
       ?(require_soundness = true)
       ?(require_completeness = false)
+      ?(ignore_readonly = false)
       ?(no_top_bottom = false)
       ?(coerce = None)
       ?(is_coeffect = false)
@@ -330,6 +337,7 @@ module Subtype_env = struct
     {
       require_soundness;
       require_completeness;
+      ignore_readonly;
       visited = VisitedGoals.empty;
       no_top_bottom;
       coerce;
@@ -759,6 +767,7 @@ end = struct
         ^ flag
             " require_completeness"
             subtype_env.Subtype_env.require_completeness
+        ^ flag " ignore_readonly" subtype_env.Subtype_env.ignore_readonly
         ^ flag
             " in_transitive_closure"
             subtype_env.Subtype_env.in_transitive_closure)
@@ -1510,10 +1519,11 @@ end = struct
     let { fp_pos = pos1; _ } = fn_param_super in
     let { fp_pos = pos2; _ } = fn_param_sub in
     if
-      not
-        (readonly_subtype
-           (get_fp_readonly fn_param_super)
-           (get_fp_readonly fn_param_sub))
+      (not subtype_env.Subtype_env.ignore_readonly)
+      && not
+           (readonly_subtype
+              (get_fp_readonly fn_param_super)
+              (get_fp_readonly fn_param_sub))
     then
       invalid
         ~fail:
@@ -1569,10 +1579,11 @@ end = struct
     (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
     let readonly_this_err =
       if
-        not
-          (readonly_subtype
-             (get_ft_readonly_this ft_super)
-             (get_ft_readonly_this ft_sub))
+        (not subtype_env.Subtype_env.ignore_readonly)
+        && not
+             (readonly_subtype
+                (get_ft_readonly_this ft_super)
+                (get_ft_readonly_this ft_sub))
       then
         Error
           (Option.map
@@ -1596,10 +1607,11 @@ end = struct
       (* Readonly return is covariant, so check ft_sub <: ft_super *)
     and readonly_ret_err =
       if
-        not
-          (readonly_subtype
-             (get_ft_returns_readonly ft_sub)
-             (get_ft_returns_readonly ft_super))
+        (not subtype_env.Subtype_env.ignore_readonly)
+        && not
+             (readonly_subtype
+                (get_ft_returns_readonly ft_sub)
+                (get_ft_returns_readonly ft_super))
       then
         Error
           (Option.map
@@ -7157,12 +7169,14 @@ let sub_type
     env
     ?(coerce = None)
     ?(is_coeffect = false)
+    ?(ignore_readonly = false)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     on_error =
   let subtype_env =
     Subtype_env.create ~log_level:2 ~is_coeffect ~coerce on_error
   in
+  let subtype_env = Subtype_env.{ subtype_env with ignore_readonly } in
   let old_env = env in
   let (env, ty_err_opt) =
     Subtype_tell.sub_type_inner

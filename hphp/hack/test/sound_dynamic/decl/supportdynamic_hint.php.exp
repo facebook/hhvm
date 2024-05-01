@@ -14,7 +14,8 @@
                     [(Rhint ([3:23-30]), Tnonnull)])));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false };
+                  inout = false; has_default = false; readonly = false;
+                  ignore_readonly_error = false };
                 fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };

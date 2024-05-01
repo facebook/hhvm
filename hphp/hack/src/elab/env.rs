@@ -13,6 +13,7 @@ use oxidized::typechecker_options::TypecheckerOptions;
 pub struct ProgramSpecificOptions {
     pub is_hhi: bool,
     pub allow_module_declarations: bool,
+    pub allow_ignore_readonly: bool,
 }
 
 bitflags! {
@@ -31,6 +32,7 @@ bitflags! {
         const EVERYTHING_SDT = 1 << 11;
         const SUPPORTDYNAMIC_TYPE_HINT_ENABLED = 1 << 12;
         const NO_AUTO_DYNAMIC_ENABLED = 1 << 13;
+        const ALLOW_IGNORE_READONLY = 1 << 14;
     }
 }
 
@@ -65,6 +67,7 @@ impl Flags {
             Self::ALLOW_MODULE_DECLARATIONS,
             pso.allow_module_declarations,
         );
+        flags.set(Self::ALLOW_IGNORE_READONLY, pso.allow_ignore_readonly);
 
         flags.set(
             Self::INFER_FLOWS,
@@ -123,6 +126,10 @@ impl Env {
 
     pub fn allow_module_declarations(&self) -> bool {
         self.flags.contains(Flags::ALLOW_MODULE_DECLARATIONS)
+    }
+
+    pub fn allow_ignore_readonly(&self) -> bool {
+        self.flags.contains(Flags::ALLOW_IGNORE_READONLY)
     }
 
     pub fn hkt_enabled(&self) -> bool {

@@ -140,6 +140,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     dump_tasts: vec![],
     po_disallow_direct_superglobals_refs: false,
     hack_warnings: false,
+    tco_allowed_files_for_module_declarations: vec![],
 };
 
 impl GlobalOptions<'static> {

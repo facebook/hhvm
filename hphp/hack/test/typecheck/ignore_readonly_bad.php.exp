@@ -1,0 +1,2 @@
+ERROR: File "ignore_readonly_bad.php", line 5, characters 16-36:
+This attribute exists in an unapproved file. The set of approved files is in .hhconfig. Please talk to someone from the Hack team before changing this. (Naming[2130])

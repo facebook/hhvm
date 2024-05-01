@@ -168,6 +168,7 @@ module Naming = struct
     | InternalModuleLevelTrait [@value 2127]
     | ToplevelStatement [@value 2128]
     | InvalidTypeAccessInWhere [@value 2129]
+    | AttributeOutsideAllowedFiles [@value 2130]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

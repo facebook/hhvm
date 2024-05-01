@@ -44,7 +44,8 @@ let rec strip_ty ty =
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
               ~has_default:false
-              ~readonly:false;
+              ~readonly:false
+              ~ignore_readonly_error:false;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos_or_decl.none;
           fp_name = None;

@@ -15,6 +15,9 @@ module SN = Naming_special_names
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
 
+let has_ignore_readonly_error_attribute user_attributes =
+  Naming_attributes.mem SN.UserAttributes.uaIgnoreReadonlyError user_attributes
+
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
@@ -62,7 +65,9 @@ let make_param_ty env param =
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
         ~has_default:(Option.is_some param.param_expr)
-        ~readonly:(Option.is_some param.param_readonly);
+        ~readonly:(Option.is_some param.param_readonly)
+        ~ignore_readonly_error:
+          (has_ignore_readonly_error_attribute param.param_user_attributes);
     fp_def_value = None;
   }
 

@@ -52,6 +52,12 @@ function applyFunRef(
 }
 function expectAK(arraykey $_): void {}
 
+class MockFunction<Tfun> {
+  public function __construct(public HH\FunctionRef<Tfun> $fun) { }
+  public function mock(<<__IgnoreReadonlyError>> Tfun $mock):void { }
+  public function mockStrict(Tfun $mock):void { }
+}
+
 <<__EntryPoint>>
 function testit(): void {
   $tf = top<>;
@@ -92,4 +98,8 @@ function testit(): void {
   acceptMeth($gm);
   // Should be rejected, because generic
   acceptMethRef($gm);
+
+  $mf = new MockFunction(top<>);
+  $mf->mock((arraykey $x) ==> $x);
+  $mf->mockStrict((arraykey $x) ==> $x);
 }

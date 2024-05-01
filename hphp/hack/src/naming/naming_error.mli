@@ -293,5 +293,6 @@ type t =
       def_pos: Pos.t;
     }
   | Toplevel_statement of Pos.t
+  | Attribute_outside_allowed_files of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

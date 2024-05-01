@@ -167,6 +167,7 @@ impl Default for GlobalOptions {
             tco_extended_reasons: false,
             hack_warnings: false,
             tco_strict_switch: false,
+            tco_allowed_files_for_ignore_readonly: vec![],
         }
     }
 }

@@ -30,26 +30,33 @@ let (on_error, reset_errors, get_errors) =
 
 let invalid_expr_ = Naming_phase_error.invalid_expr_
 
+let filename_in_allowed filename allowed =
+  List.exists
+    ~f:(fun allowed_file ->
+      let len = String.length allowed_file in
+      if len > 0 then
+        match allowed_file.[len - 1] with
+        | '*' ->
+          let allowed_dir = String.sub allowed_file ~pos:0 ~len:(len - 1) in
+          String.is_prefix filename ~prefix:allowed_dir
+        | _ -> String.equal allowed_file filename
+      else
+        false)
+    allowed
+
 let mk_env filename tcopt =
   let file_str = Relative_path.suffix filename in
   let is_hhi = String.is_suffix (Relative_path.suffix filename) ~suffix:".hhi"
   and is_systemlib = TypecheckerOptions.is_systemlib tcopt
   and allow_module_def =
     TypecheckerOptions.allow_all_files_for_module_declarations tcopt
-    || List.exists
-         ~f:(fun allowed_file ->
-           let len = String.length allowed_file in
-           if len > 0 then
-             match allowed_file.[len - 1] with
-             | '*' ->
-               let allowed_dir =
-                 String.sub allowed_file ~pos:0 ~len:(len - 1)
-               in
-               String.is_prefix file_str ~prefix:allowed_dir
-             | _ -> String.equal allowed_file file_str
-           else
-             false)
+    || filename_in_allowed
+         file_str
          (TypecheckerOptions.allowed_files_for_module_declarations tcopt)
+  and allow_ignore_readonly =
+    filename_in_allowed
+      file_str
+      (TypecheckerOptions.allowed_files_for_ignore_readonly tcopt)
   and everything_sdt = TypecheckerOptions.everything_sdt tcopt
   and supportdynamic_type_hint_enabled =
     TypecheckerOptions.experimental_feature_enabled
@@ -73,6 +80,7 @@ let mk_env filename tcopt =
       hkt_enabled;
       like_type_hints_enabled;
       soft_as_like;
+      allow_ignore_readonly;
     }
 
 let passes =

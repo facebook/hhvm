@@ -9,12 +9,33 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-let validate_fun_params params =
+let allow_ignore_readonly Naming_phase_env.{ allow_ignore_readonly; _ } =
+  allow_ignore_readonly
+
+let validate_fun_params ~ctx params =
   snd
   @@ List.fold_left
        params
        ~init:(SSet.empty, [])
-       ~f:(fun (seen, errs) Aast.{ param_name; param_pos; _ } ->
+       ~f:(fun
+            (seen, errs)
+            Aast.{ param_name; param_pos; param_user_attributes; _ }
+          ->
+         let errs =
+           match
+             ( Naming_attributes.mem_pos
+                 SN.UserAttributes.uaIgnoreReadonlyError
+                 param_user_attributes,
+               allow_ignore_readonly ctx )
+           with
+           | (Some attr_pos, false) ->
+             let err =
+               Err.naming
+               @@ Naming_error.Attribute_outside_allowed_files attr_pos
+             in
+             err :: errs
+           | _ -> errs
+         in
          if String.equal SN.SpecialIdents.placeholder param_name then
            (seen, errs)
          else if SSet.mem param_name seen then
@@ -33,11 +54,11 @@ let validate_fun_params params =
            (SSet.add param_name seen, errs))
 
 let on_method_ on_error m ~ctx =
-  List.iter ~f:on_error @@ validate_fun_params m.Aast.m_params;
+  List.iter ~f:on_error @@ (validate_fun_params ~ctx) m.Aast.m_params;
   (ctx, Ok m)
 
 let on_fun_ on_error f ~ctx =
-  List.iter ~f:on_error @@ validate_fun_params f.Aast.f_params;
+  List.iter ~f:on_error @@ (validate_fun_params ~ctx) f.Aast.f_params;
   (ctx, Ok f)
 
 let pass on_error =

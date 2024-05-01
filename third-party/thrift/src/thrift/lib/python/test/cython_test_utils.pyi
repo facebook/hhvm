@@ -16,4 +16,5 @@ import typing
 
 from thrift.python.mutable_containers import MutableList
 
+# pyre-fixme[2]: Parameter must be annotated.
 def create_MutableList(typeinfo) -> MutableList: ...

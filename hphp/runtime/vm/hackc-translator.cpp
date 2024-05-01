@@ -709,8 +709,8 @@ void handleBA(TranslationState& ts, const T& labels) {
 }
 
 void handleITA(TranslationState& ts, const hhbc::IterArgs& ita) {
-    HPHP::IterArgs ia(
-    HPHP::IterArgs::Flags::None,
+  HPHP::IterArgs ia(
+    ita.flags,
     ita.iter_id.idx,
     ita.key_id.idx,
     ita.val_id.idx

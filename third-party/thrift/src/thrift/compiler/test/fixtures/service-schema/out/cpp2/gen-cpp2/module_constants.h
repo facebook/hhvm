@@ -14,8 +14,6 @@ namespace cpp2 {
 
 struct module_constants {
 
-  static ::apache::thrift::type::Schema const& schemaPrimitivesService();
-
 };
 
 } // namespace cpp2

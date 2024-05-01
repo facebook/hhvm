@@ -21,7 +21,7 @@ apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::CreateMethodMetadataR
 
 #if defined(THRIFT_SCHEMA_AVAILABLE)
 std::optional<std::vector<apache::thrift::type::Schema>> apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::getServiceMetadataV1() {
-  return apache::thrift::detail::si::schemaAsOptionalVector(::cpp2::module_constants::schemaPrimitivesService());
+  return {};
 }
 #endif
 

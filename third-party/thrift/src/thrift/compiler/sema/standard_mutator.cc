@@ -346,55 +346,6 @@ void normalize_return_type(
   }
 }
 
-template <typename Nde>
-void generate_runtime_schema(
-    diagnostic_context& ctx,
-    mutator_context&,
-    bool annotation_required,
-    std::string schemaTypeUri,
-    Nde node,
-    std::function<std::unique_ptr<apache::thrift::compiler::t_const_value>()>
-        generator) {
-  const t_const* annotation =
-      node.find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
-  if (annotation_required && !annotation) {
-    return;
-  }
-
-  std::string name;
-  if (auto nameOverride = annotation
-          ? annotation->get_value_from_structured_annotation_or_null("name")
-          : nullptr) {
-    name = nameOverride->get_string();
-  } else {
-    name = fmt::format("schema{}", node.name());
-  }
-
-  auto program = const_cast<t_program*>(node.program());
-  auto schemaType =
-      dynamic_cast<const t_type*>(program->scope()->find_by_uri(schemaTypeUri));
-  if (!schemaType) {
-    ctx.error("Must include thrift/lib/thrift/schema.thrift");
-    return;
-  }
-
-  std::unique_ptr<apache::thrift::compiler::t_const_value> schema = generator();
-
-  auto schemaConst = std::make_unique<t_const>(
-      program, schemaType, std::move(name), std::move(schema));
-  schemaConst->set_generated();
-  schemaConst->set_src_range(node.src_range());
-  program->add_definition(std::move(schemaConst));
-}
-
-void generate_service_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
-  generate_runtime_schema<t_service&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Schema", node, [&]() {
-        return schematizer(mCtx.bundle).gen_full_schema(node);
-      });
-}
-
 template <typename Node>
 void lower_type_annotations(
     diagnostic_context&, mutator_context& mCtx, Node& node) {
@@ -469,7 +420,6 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);
-    main.add_service_visitor(&generate_service_schema);
     main.add_const_visitor(&match_const_type_with_value);
     main.add_field_visitor(&match_field_type_with_default_value);
     main.add_definition_visitor(&match_annotation_types_with_const_values);

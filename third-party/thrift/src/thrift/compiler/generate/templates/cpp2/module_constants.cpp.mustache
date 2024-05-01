@@ -55,8 +55,8 @@ const ::apache::thrift::type::AnyValue& {{program:name}}_constants::getValue(::a
   if (vid == ::apache::thrift::type::ValueId{}) {
     throw std::out_of_range("Invalid ValueId");
   }
-  auto pos = ::apache::thrift::type::toPosition(static_cast<::apache::thrift::type::Ordinal>(vid), {{program:num_interned_values}});
   {{#program:interned_values?}}
+  auto pos = ::apache::thrift::type::toPosition(static_cast<::apache::thrift::type::Ordinal>(vid), {{program:num_interned_values}});
 
   static const folly::Indestructible<::std::array<::apache::thrift::type::AnyValue, {{program:num_interned_values}}>> values { { {
   {{#program:interned_values}}
@@ -69,6 +69,9 @@ const ::apache::thrift::type::AnyValue& {{program:name}}_constants::getValue(::a
   }}};
 
   return (*values)[pos];
+  {{/program:interned_values?}}
+  {{^program:interned_values?}}
+    throw std::out_of_range("Invalid ValueId");
   {{/program:interned_values?}}
 }
 

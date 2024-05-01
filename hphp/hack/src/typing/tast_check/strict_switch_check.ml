@@ -23,23 +23,6 @@ module EnumInfo = struct
   }
   [@@deriving ord, sexp, hash]
 
-  let to_json { name; consts; decl_pos } =
-    let rec take n = function
-      | [] -> []
-      | x :: xs ->
-        if n <= 0 then
-          ["..."]
-        else
-          x :: take (n - 1) xs
-    in
-    Hh_json.JSON_Object
-      [
-        ("enum", Hh_json.string_ @@ Utils.strip_ns name);
-        ( "values",
-          consts |> Set.to_list |> take 10 |> Hh_json.array_ Hh_json.string_ );
-        ("decl_pos", Pos_or_decl.json decl_pos);
-      ]
-
   let of_decl ?(filter = (fun _ -> true)) decl ~name =
     decl
     |> Folded_class.consts
@@ -90,16 +73,6 @@ module Value = struct
     | Enum _
     | Dynamic ->
       true
-
-  let to_json = function
-    | Unsupported -> Hh_json.string_ "unsupported"
-    | Null -> Hh_json.string_ "null"
-    | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
-    | Int -> Hh_json.string_ "int"
-    | String -> Hh_json.string_ "string"
-    | AllEnums -> Hh_json.string_ "enum"
-    | Enum info -> EnumInfo.to_json info
-    | Dynamic -> Hh_json.string_ "dynamic"
 
   let if_missing : t -> _ option = function
     | Null -> Some `Null
@@ -558,27 +531,9 @@ let check_cases_against_values env pos expected values cases opt_default_case =
   let needs_default = not (List.is_empty missing_cases) in
   check_default typing_env pos opt_default_case needs_default missing_cases
 
-let add_fields json ~fields =
-  match json with
-  | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
-  | _ -> Hh_json.JSON_Object (("warning_expected_object", json) :: fields)
-
 let check_exhaustiveness env pos ty cases opt_default =
   let values = symbolic_dnf_values env ty in
-  check_cases_against_values env pos ty values cases opt_default;
-  let tcopt = env |> Tast_env.get_decl_env |> Decl_env.tcopt in
-  if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
-    let fields =
-      [
-        ("values", values |> Set.to_list |> Hh_json.array_ Value.to_json);
-        ("switch_pos", Pos.(pos |> to_absolute |> json));
-      ]
-    in
-    ty
-    |> Tast_env.ty_to_json env ~show_like_ty:true
-    |> add_fields ~fields
-    |> Hh_json.json_to_string
-    |> Hh_logger.log "[hh_tco_enable_strict_switch] %s"
+  check_cases_against_values env pos ty values cases opt_default
 
 let handler =
   object

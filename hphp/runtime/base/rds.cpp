@@ -487,8 +487,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                     type_scan::Index tsi, const void* init_val) {
   Handle c = kUninitHandle;
   if (handle.compare_exchange_strong(c, kBeingBound,
-                                     std::memory_order_relaxed,
-                                     std::memory_order_relaxed)) {
+                                     std::memory_order_acq_rel)) {
     // we flipped it from kUninitHandle, so we get to fill in the value.
     auto const h = allocUnlocked(mode, size, align, tsi, &sym);
     recordRds(h, size, sym);
@@ -518,13 +517,12 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
   // Someone else beat us to it, so wait until they've filled it in.
   if (c == kBeingBound) {
     handle.compare_exchange_strong(c, kBeingBoundWithWaiters,
-                                   std::memory_order_relaxed,
-                                   std::memory_order_relaxed);
+                                   std::memory_order_acq_rel);
   }
   while (handle.load(std::memory_order_acquire) == kBeingBoundWithWaiters) {
     futex_wait(&handle, kBeingBoundWithWaiters);
   }
-  assertx(isHandleBound(handle.load(std::memory_order_relaxed)));
+  assertx(isHandleBound(handle.load(std::memory_order_acquire)));
 }
 
 }

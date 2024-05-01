@@ -372,7 +372,7 @@ private:
 
   void checkSanity();
 
-  Handle raw() const { return m_handle.load(std::memory_order_relaxed); }
+  Handle raw() const { return m_handle.load(std::memory_order_acquire); }
   std::atomic<Handle> m_handle;
 };
 

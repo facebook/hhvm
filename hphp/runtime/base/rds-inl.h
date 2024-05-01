@@ -157,11 +157,11 @@ template<class T, Mode M>
 Link<T,M>& Link<T,M>::operator=(const Link<T,M>& l) {
   if (debug) {
     auto const DEBUG_ONLY old =
-      m_handle.exchange(l.raw(), std::memory_order_relaxed);
+      m_handle.exchange(l.raw(), std::memory_order_acq_rel);
     assertx(raw() != kBeingBound && raw() != kBeingBoundWithWaiters &&
             old != kBeingBound && old != kBeingBoundWithWaiters);
   } else {
-    m_handle.store(l.raw(), std::memory_order_relaxed);
+    m_handle.store(l.raw(), std::memory_order_release);
   }
   return *this;
 }
@@ -172,11 +172,11 @@ typename std::enable_if<in<M>(OM),Link<T,M>>::type&
 Link<T,M>::operator=(const Link<T,OM>& l) {
   if (debug) {
     auto const DEBUG_ONLY old =
-      m_handle.exchange(l.raw(), std::memory_order_relaxed);
+      m_handle.exchange(l.raw(), std::memory_order_acq_rel);
     assertx(raw() != kBeingBound && raw() != kBeingBoundWithWaiters &&
             old != kBeingBound && old != kBeingBoundWithWaiters);
   } else {
-    m_handle.store(l.raw(), std::memory_order_relaxed);
+    m_handle.store(l.raw(), std::memory_order_release);
   }
   return *this;
 }

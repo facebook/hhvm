@@ -6276,7 +6276,7 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsNotSupported) {
   CertificateEntry entry1;
   entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
   SignatureAlgorithms algos;
-  entry1.extensions.push_back(encodeExtension(std::move(algos)));
+  entry1.extensions.push_back(encodeExtension(algos));
   certificate.certificate_list.push_back(std::move(entry1));
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
@@ -6305,7 +6305,7 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   CertificateEntry entry1;
   entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
   SignatureAlgorithms algos;
-  entry1.extensions.push_back(encodeExtension(std::move(algos)));
+  entry1.extensions.push_back(encodeExtension(algos));
   certificate.certificate_list.push_back(std::move(entry1));
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");

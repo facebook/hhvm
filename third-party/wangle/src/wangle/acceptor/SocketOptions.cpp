@@ -25,7 +25,7 @@ folly::SocketOptionMap filterIPSocketOptions(
     const folly::SocketOptionMap& allOptions,
     const int addrFamily) {
   folly::SocketOptionMap opts;
-  int exclude;
+  int exclude = 0;
   if (addrFamily == AF_INET) {
     exclude = IPPROTO_IPV6;
   } else if (addrFamily == AF_INET6) {

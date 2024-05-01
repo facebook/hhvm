@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace wangle {
 
 class SSLStats {
  public:
-  virtual ~SSLStats() noexcept {}
+  virtual ~SSLStats() noexcept = default;
 
   // downstream
   virtual void recordSSLAcceptLatency(int64_t latency) noexcept = 0;

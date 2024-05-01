@@ -17,9 +17,7 @@
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/GTest.h>
 #include <wangle/client/ssl/SSLSessionCallbacks.h>
-#include <wangle/client/ssl/test/TestUtil.h>
 #include <map>
-#include <vector>
 
 using namespace wangle;
 

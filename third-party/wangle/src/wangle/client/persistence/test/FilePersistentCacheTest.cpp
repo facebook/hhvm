@@ -167,7 +167,7 @@ void testValidFile(
           .build());
   EXPECT_EQ(cache.size(), keys.size());
   for (size_t i = 0; i < keys.size(); ++i) {
-    EXPECT_EQ(cache.get(keys[i]).value(), values[i]);
+    EXPECT_EQ(cache.get(keys[i]).value(), values.at(i));
   }
   EXPECT_TRUE(folly::closeNoInt(fd) != -1);
   EXPECT_TRUE(unlink(filename.c_str()) != -1);
@@ -329,7 +329,7 @@ TYPED_TEST(FilePersistentCacheTest, threadstress) {
     threads.push_back(std::thread(threadFunc, sharedCache.get(), i));
   }
   for (int i = 0; i < numThreads; ++i) {
-    threads[i].join();
+    threads.at(i).join();
   }
   EXPECT_EQ(sharedCache->size(), numThreads);
   for (auto i = 0; i < numThreads; ++i) {

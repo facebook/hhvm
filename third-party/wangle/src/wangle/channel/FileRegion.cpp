@@ -128,7 +128,7 @@ void FileRegion::FileWriteRequest::start() {
             "writeFile unsupported on glibc < 2.9"));
     return;
 #else
-    int pipeFds[2];
+    int pipeFds[2] = {0};
     if (::pipe2(pipeFds, O_NONBLOCK) == -1) {
       fail(
           __func__,

@@ -52,7 +52,7 @@ std::unique_ptr<std::string> SSLUtil::getCommonName(const X509* cert) {
   if (!subject) {
     return nullptr;
   }
-  char cn[ub_common_name + 1];
+  char cn[ub_common_name + 1] = {0};
   int res =
       X509_NAME_get_text_by_NID(subject, NID_commonName, cn, ub_common_name);
   if (res <= 0) {
@@ -122,7 +122,7 @@ std::string SSLUtil::decrypt(
   // Plaintext will be at most the same length as ciphertext
   std::unique_ptr<unsigned char[]> plaintext(
       new unsigned char[ciphertext.size() + EVP_CIPHER_block_size(cipher)]());
-  int offset1, offset2;
+  int offset1 = 0, offset2 = 0;
 
   /* Initialize the decryption operation. IMPORTANT - ensure you use a key
    * and IV size appropriate for your cipher. The IV size for *most* modes is

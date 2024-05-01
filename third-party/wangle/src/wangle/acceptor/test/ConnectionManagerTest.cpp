@@ -158,10 +158,10 @@ TEST_F(ConnectionManagerTest, testRemoveDrainIterator) {
   cm_->onActivated(*conns_.front());
   EXPECT_EQ(cm_->getNumActiveConnections(), 66);
   for (size_t i = 0; i < conns_.size() - 1; i++) {
-    EXPECT_CALL(*conns_[i], notifyPendingShutdown());
+    EXPECT_CALL(*conns_.at(i), notifyPendingShutdown());
   }
-  auto conn65 = conns_[conns_.size() - 2].get();
-  auto conn66 = conns_[conns_.size() - 1].get();
+  auto conn65 = conns_.at(conns_.size() - 2).get();
+  auto conn66 = conns_.at(conns_.size() - 1).get();
   eventBase_.runInLoop([&] {
     // deactivate the drain iterator
     cm_->onDeactivated(*conn65);
@@ -175,7 +175,7 @@ TEST_F(ConnectionManagerTest, testRemoveDrainIterator) {
   // iterator
   eventBase_.loopOnce();
   for (size_t i = 0; i < conns_.size() - 1; i++) {
-    EXPECT_CALL(*conns_[i], closeWhenIdle());
+    EXPECT_CALL(*conns_.at(i), closeWhenIdle());
   }
 
   eventBase_.loop();
@@ -257,7 +257,7 @@ TEST_F(ConnectionManagerTest, testDropEstablishedVerifyOrder) {
   // identifiers vector, meaning everything will be sorted in increasing order
   ASSERT_TRUE(identifiers.size() >= 2);
   for (int i = 1; i < identifiers.size(); i++) {
-    ASSERT_TRUE(identifiers[i] > identifiers[i - 1]);
+    ASSERT_TRUE(identifiers[i] > identifiers.at(i - 1));
   }
 }
 
@@ -430,7 +430,7 @@ TEST_F(ConnectionManagerTest, testDrainAllAfterPct) {
   for (size_t i = 0;
        i < conns_.size() - static_cast<size_t>(conns_.size() * drain_pct);
        ++i) {
-    EXPECT_CALL(*conns_[i], notifyPendingShutdown());
+    EXPECT_CALL(*conns_.at(i), notifyPendingShutdown());
   }
 
   cm_->initiateGracefulShutdown(std::chrono::milliseconds(50));
@@ -454,7 +454,7 @@ TEST_F(ConnectionManagerTest, testDropIdle) {
   // Mark the first half of the connections idle
   for (size_t i = 0; i < conns_.size() / 2; i++) {
     EXPECT_EQ(cm_->getNumIdleConnections(), idleCount_);
-    cm_->onDeactivated(*conns_[i]);
+    cm_->onDeactivated(*conns_.at(i));
     idleCount_++;
   }
   EXPECT_EQ(
@@ -472,9 +472,9 @@ TEST_F(ConnectionManagerTest, testDropIdle) {
 
   // Expect the remaining idle conns to drop
   for (size_t i = 2; i < conns_.size() / 2; i++) {
-    EXPECT_CALL(*conns_[i], dropConnection(_))
+    EXPECT_CALL(*conns_.at(i), dropConnection(_))
         .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_[i].get());
+          cm_->removeConnection(conns_.at(i).get());
         }));
   }
 
@@ -547,7 +547,7 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
 
   // Mark the first half of the connections idle
   for (size_t i = 0; i < conns_.size() / 2; i++) {
-    cm_->onDeactivated(*conns_[i]);
+    cm_->onDeactivated(*conns_.at(i));
   }
   // reactivate conn 0
   cm_->onActivated(*conns_[0]);
@@ -558,9 +558,9 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
 
   // Expect the remaining idle conns to drop
   for (size_t i = 2; i < conns_.size() / 2; i++) {
-    EXPECT_CALL(*conns_[i], dropConnection(_))
+    EXPECT_CALL(*conns_.at(i), dropConnection(_))
         .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_[i].get());
+          cm_->removeConnection(conns_.at(i).get());
         }));
   }
 
@@ -583,7 +583,7 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeEarlyStop) {
 
   for (size_t i = 0; i < halfConnectionsSize; i++) {
     // Set everyone to be idle for 100ms
-    EXPECT_CALL(*conns_[i], getIdleTime())
+    EXPECT_CALL(*conns_.at(i), getIdleTime())
         .WillRepeatedly(Return(std::chrono::milliseconds(100)));
   }
 
@@ -596,9 +596,9 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeEarlyStop) {
 
   // Expect the remaining idle conns to drop
   for (size_t i = 0; i < halfConnectionsSize; i++) {
-    EXPECT_CALL(*conns_[i], dropConnection(_))
+    EXPECT_CALL(*conns_.at(i), dropConnection(_))
         .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_[i].get());
+          cm_->removeConnection(conns_.at(i).get());
         }));
   }
 

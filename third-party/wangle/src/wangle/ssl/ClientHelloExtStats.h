@@ -22,7 +22,7 @@ namespace wangle {
 
 class ClientHelloExtStats {
  public:
-  virtual ~ClientHelloExtStats() noexcept {}
+  virtual ~ClientHelloExtStats() noexcept = default;
 
   // client hello
   virtual void recordAbsentHostname() noexcept = 0;

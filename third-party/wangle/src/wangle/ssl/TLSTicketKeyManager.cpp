@@ -19,7 +19,6 @@
 #include <folly/GLog.h>
 #include <folly/Random.h>
 #include <folly/String.h>
-#include <folly/io/async/AsyncTimeout.h>
 #include <folly/portability/OpenSSL.h>
 #include <openssl/aes.h>
 #include <wangle/ssl/SSLStats.h>
@@ -51,7 +50,7 @@ void populateRandom(unsigned char* field, uint32_t len) {
 }
 
 std::string generateRandomTicketSeed() {
-  uint8_t seed[32];
+  uint8_t seed[32] = {0};
   folly::Random::secureRandom(seed, sizeof(seed));
   return std::string((char*)seed, sizeof(seed));
 }
@@ -80,7 +79,7 @@ TLSTicketKeyManager::TLSTicketKey::TLSTicketKey(
  * store a salt for the encryption key.
  */
 const std::string TLSTicketKeyManager::TLSTicketKey::computeName() const {
-  unsigned char tmp[SHA256_DIGEST_LENGTH];
+  unsigned char tmp[SHA256_DIGEST_LENGTH] = {0};
   const int32_t n = 1;
 
   SHA256_CTX ctx;
@@ -105,7 +104,7 @@ TLSTicketKeyManager::TLSTicketKeyManager()
           generateRandomTicketSeed(),
           TLSTicketSeedType::SEED_CURRENT} {}
 
-TLSTicketKeyManager::~TLSTicketKeyManager() {}
+TLSTicketKeyManager::~TLSTicketKeyManager() = default;
 
 int TLSTicketKeyManager::ticketCallback(
     SSL*,
@@ -165,7 +164,7 @@ int TLSTicketKeyManager::encryptCallback(
 
   // Create the unique keys by hashing with the salt. Take the first 16 bytes
   // of output as the hmac key, and the second 16 bytes as the aes key.
-  uint8_t output[SHA256_DIGEST_LENGTH];
+  uint8_t output[SHA256_DIGEST_LENGTH] = {0};
   saltKey(key->value(), TLSTicketKey::VALUE_LENGTH, salt, output);
   uint8_t* hmacKey = output;
   uint8_t* aesKey = output + SHA256_DIGEST_LENGTH / 2;
@@ -196,7 +195,7 @@ int TLSTicketKeyManager::decryptCallback(
 
   // Reconstruct the unique key via the salt
   uint8_t* saltptr = keyName + kTLSTicketKeyNameLen;
-  uint8_t output[SHA256_DIGEST_LENGTH];
+  uint8_t output[SHA256_DIGEST_LENGTH] = {0};
   saltKey(key->value(), TLSTicketKey::VALUE_LENGTH, saltptr, output);
   uint8_t* hmacKey = output;
   uint8_t* aesKey = output + SHA256_DIGEST_LENGTH / 2;

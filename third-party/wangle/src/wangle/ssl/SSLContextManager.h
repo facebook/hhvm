@@ -113,7 +113,7 @@ class SSLContextManager {
     // to the context, without altering the callback itself.
     virtual void attachSSLContext(
         const std::shared_ptr<folly::SSLContext>& sslCtx) const = 0;
-    virtual ~ClientCertVerifyCallback() {}
+    virtual ~ClientCertVerifyCallback() = default;
   };
 
   SSLContextManager(

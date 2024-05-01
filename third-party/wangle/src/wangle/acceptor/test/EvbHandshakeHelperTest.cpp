@@ -156,7 +156,7 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnection) {
     barrier.post();
   }));
 
-  AsyncTransport* transport;
+  AsyncTransport* transport = nullptr;
   EXPECT_CALL(mockCb_, connectionError_(_, _, _))
       .WillOnce(SaveArg<0>(&transport));
 

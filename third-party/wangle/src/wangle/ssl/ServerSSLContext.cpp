@@ -16,7 +16,6 @@
 
 #include <wangle/ssl/ServerSSLContext.h>
 
-#include <folly/Memory.h>
 #include <wangle/ssl/SSLCacheOptions.h>
 #include <wangle/ssl/SSLContextConfig.h>
 #include <wangle/ssl/SSLSessionCacheManager.h>

@@ -20,7 +20,7 @@
 
 namespace {
 std::string generateRandomSeed() {
-  uint8_t seed[32];
+  uint8_t seed[32] = {0};
   folly::Random::secureRandom(seed, sizeof(seed));
   return wangle::SSLUtil::hexlify(std::string((char*)seed, sizeof(seed)));
 }

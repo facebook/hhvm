@@ -18,7 +18,6 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <thread>
 
 using namespace wangle;
 using namespace testing;

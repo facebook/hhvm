@@ -34,8 +34,6 @@
 #include <wangle/acceptor/SecurityProtocolContextManager.h>
 #include <wangle/ssl/SSLContextManager.h>
 
-#include <fstream>
-
 using folly::AsyncServerSocket;
 using folly::AsyncSocket;
 using folly::AsyncSSLSocket;

@@ -91,7 +91,7 @@ uint64_t LengthFieldBasedFrameDecoder::getUnadjustedFrameLength(
     int length,
     bool networkByteOrder) {
   folly::io::Cursor c(buf.front());
-  uint64_t frameLength;
+  uint64_t frameLength = 0;
 
   c.skip(offset);
 

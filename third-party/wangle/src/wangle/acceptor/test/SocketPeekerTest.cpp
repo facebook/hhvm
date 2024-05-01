@@ -18,7 +18,6 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <thread>
 
 #include <folly/io/async/test/MockAsyncSocket.h>
 

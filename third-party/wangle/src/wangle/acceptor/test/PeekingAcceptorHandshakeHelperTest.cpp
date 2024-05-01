@@ -16,8 +16,6 @@
 
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
 
-#include <thread>
-
 #include <folly/io/async/test/MockAsyncSSLSocket.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -130,7 +128,7 @@ TEST_F(PeekingAcceptorHandshakeHelperTest, TestPeek2ndSuccess) {
 }
 
 TEST_F(PeekingAcceptorHandshakeHelperTest, TestEOFDuringPeek) {
-  AsyncTransport::ReadCallback* rcb;
+  AsyncTransport::ReadCallback* rcb = nullptr;
   EXPECT_CALL(*sslSock_, setReadCB(_)).WillOnce(SaveArg<0>(&rcb));
   EXPECT_CALL(*sslSock_, setReadCB(nullptr));
   EXPECT_CALL(callback_, connectionError_(_, _, _));

@@ -382,7 +382,7 @@ std::vector<std::pair<SSL_SESSION*, size_t>> getSessions() {
     sessions.emplace_back(s, kSessionDataLen);
 
     // Make sure the same session compares same to itself.
-    CHECK(isSameSession(sessions[i], sessions[i]));
+    CHECK(isSameSession(sessions.at(i), sessions.at(i)));
   }
   // Make sure all sessions are different from each other
   CHECK(!isSameSession(sessions[0], sessions[1]));

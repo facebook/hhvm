@@ -58,7 +58,7 @@ class CustomConfig {
 struct ServerSocketConfig {
   ServerSocketConfig() {
     // generate a single random current seed
-    uint8_t seed[32];
+    uint8_t seed[32] = {0};
     folly::Random::secureRandom(seed, sizeof(seed));
     initialTicketSeeds.currentSeeds.push_back(
         SSLUtil::hexlify(std::string((char*)seed, sizeof(seed))));

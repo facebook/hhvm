@@ -422,7 +422,7 @@ template <typename F>
 void ServerWorkerPool::forRandomWorker(F&& f) const {
   std::shared_lock holder(workersMutex_);
   DCHECK(workers_->size());
-  f((*workers_)[folly::Random::rand32(workers_->size())].second.get());
+  f((*workers_).at(folly::Random::rand32(workers_->size())).second.get());
 }
 
 class DefaultAcceptPipelineFactory : public AcceptPipelineFactory {

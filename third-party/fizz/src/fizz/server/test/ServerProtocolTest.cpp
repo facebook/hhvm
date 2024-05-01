@@ -6198,9 +6198,9 @@ TEST_F(ServerProtocolTest, TestCertificate) {
   auto clientLeafPtr = clientLeafCert.get();
   auto clientIntPtr = clientIntCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(std::move(clientLeafCert)));
+      .WillOnce(Return(ByMove(std::move(clientLeafCert))));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(std::move(clientIntCert)));
+      .WillOnce(Return(ByMove(std::move(clientIntCert))));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;
@@ -6297,9 +6297,9 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   auto clientIntCert = std::make_unique<MockPeerCert>();
   auto clientIntPtr = clientIntCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(std::move(clientLeafCert)));
+      .WillOnce(Return(ByMove(std::move(clientLeafCert))));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(std::move(clientIntCert)));
+      .WillOnce(Return(ByMove(std::move(clientIntCert))));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;

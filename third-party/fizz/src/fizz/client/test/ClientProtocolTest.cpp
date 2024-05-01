@@ -3744,9 +3744,9 @@ TEST_F(ClientProtocolTest, TestCertificateFlow) {
   auto mockLeafPtr = mockLeafCert.get();
   auto mockIntermediatePtr = mockIntermediateCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(std::move(mockLeafCert)));
+      .WillOnce(Return(ByMove(std::move(mockLeafCert))));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(std::move(mockIntermediateCert)));
+      .WillOnce(Return(ByMove(std::move(mockIntermediateCert))));
 
   auto certificate = TestMessages::certificate();
   CertificateEntry entry1;
@@ -3887,9 +3887,9 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateFlow) {
   auto mockLeafPtr = mockLeafCert.get();
   auto mockIntermediatePtr = mockIntermediateCert.get();
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert1"), true))
-      .WillOnce(Return(std::move(mockLeafCert)));
+      .WillOnce(Return(ByMove(std::move(mockLeafCert))));
   EXPECT_CALL(*factory_, _makePeerCert(CertEntryBufMatches("cert2"), false))
-      .WillOnce(Return(std::move(mockIntermediateCert)));
+      .WillOnce(Return(ByMove(std::move(mockIntermediateCert))));
 
   auto decompressor = std::make_shared<MockCertificateDecompressor>();
   decompressor->setDefaults();

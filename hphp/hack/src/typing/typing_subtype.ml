@@ -54,16 +54,16 @@ module Nast = Aast
  * represents a set of goals
  *   T <: u1, ..., t <: un , t1 <: T, ..., tn <: T
  *)
-module VisitedGoals : sig
+module VisitedGoalsFunctor (Tset : Stdlib.Set.S) : sig
   type t
 
   val empty : t
 
-  val try_add_visited_generic_sub : t -> string -> locl_ty -> t option
+  val try_add_visited_generic_sub : t -> string -> Tset.elt -> t option
 
-  val try_add_visited_generic_super : t -> locl_ty -> string -> t option
+  val try_add_visited_generic_super : t -> Tset.elt -> string -> t option
 end = struct
-  type t = (Typing_set.t * Typing_set.t) SMap.t
+  type t = (Tset.t * Tset.t) SMap.t
 
   let empty : t = SMap.empty
 
@@ -72,25 +72,28 @@ end = struct
    *)
   let try_add_visited_generic_sub v name ty =
     match SMap.find_opt name v with
-    | None -> Some (SMap.add name (Typing_set.empty, Typing_set.singleton ty) v)
+    | None -> Some (SMap.add name (Tset.empty, Tset.singleton ty) v)
     | Some (lower, upper) ->
-      if Typing_set.mem ty upper then
+      if Tset.mem ty upper then
         None
       else
-        Some (SMap.add name (lower, Typing_set.add ty upper) v)
+        Some (SMap.add name (lower, Tset.add ty upper) v)
 
   (* Return None if (ty <: name) is already present, otherwise return Some v'
    * where v' has the pair added
    *)
   let try_add_visited_generic_super v ty name =
     match SMap.find_opt name v with
-    | None -> Some (SMap.add name (Typing_set.singleton ty, Typing_set.empty) v)
+    | None -> Some (SMap.add name (Tset.singleton ty, Tset.empty) v)
     | Some (lower, upper) ->
-      if Typing_set.mem ty lower then
+      if Tset.mem ty lower then
         None
       else
-        Some (SMap.add name (Typing_set.add ty lower, upper) v)
+        Some (SMap.add name (Tset.add ty lower, upper) v)
 end
+
+module VisitedGoals = VisitedGoalsFunctor (Typing_set)
+module VisitedGoalsInternal = VisitedGoalsFunctor (Internal_type_set)
 
 module Pretty : sig
   val describe_ty_default :
@@ -285,7 +288,8 @@ module Subtype_env = struct
          * on parameters.
          *)
     visited: VisitedGoals.t;
-        (** If above is not set, maintain a visited goal set *)
+        (** If require_completeness is not set, maintain a visited goal set *)
+    visited_internal: VisitedGoalsInternal.t;
     no_top_bottom: bool;
     coerce: TL.coercion_direction option;
         (** Coerce indicates whether subtyping should allow
@@ -311,6 +315,8 @@ module Subtype_env = struct
   let set_on_error t on_error = { t with on_error }
 
   let set_visited t visited = { t with visited }
+
+  let set_visited_internal t visited_internal = { t with visited_internal }
 
   let coercing_from_dynamic se =
     match se.coerce with
@@ -339,6 +345,7 @@ module Subtype_env = struct
       require_completeness;
       ignore_readonly;
       visited = VisitedGoals.empty;
+      visited_internal = VisitedGoalsInternal.empty;
       no_top_bottom;
       coerce;
       is_coeffect;
@@ -5418,15 +5425,26 @@ end = struct
         rhs
         env
     | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
-      Common.simplify_generic_l
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~mk_prop:simplify
-        (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
-        rhs
-        rhs
-        env
+      (match
+         VisitedGoalsInternal.try_add_visited_generic_sub
+           subtype_env.Subtype_env.visited_internal
+           generic_nm
+           htmty
+       with
+      | None -> invalid ~fail env
+      | Some new_visited ->
+        let subtype_env =
+          Subtype_env.set_visited_internal subtype_env new_visited
+        in
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+          rhs
+          rhs
+          env)
     | ( _,
         ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
         | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _

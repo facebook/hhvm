@@ -56,30 +56,20 @@ if os.name == "nt":
 elif platform.system() == "Darwin":
     import ctypes.util
 
-    F_GETPATH = 50
     libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
-    getpath_fcntl = libc.fcntl
-    getpath_fcntl.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
-    getpath_fcntl.restype = ctypes.c_int
+    realpath = libc.realpath
+    realpath.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    realpath.restype = ctypes.c_char_p
 
     def get_canonical_filesystem_path(name):
-        fd = os.open(name, os.O_RDONLY, 0)
-        try:
-            numchars = 1024  # MAXPATHLEN
-            # The kernel caps this routine to MAXPATHLEN, so there is no
-            # point in over-allocating or trying again with a larger buffer
-            buf = ctypes.create_string_buffer(numchars)
-            ctypes.set_errno(0)
-            result = getpath_fcntl(fd, F_GETPATH, buf)
-            if result != 0:
-                raise OSError(ctypes.get_errno())
-            # buf is a bytes buffer, so normalize it if necessary
-            ret = buf.value
-            if isinstance(name, str):
-                ret = os.fsdecode(ret)
-            return ret
-        finally:
-            os.close(fd)
+        numchars = 1024  # MAXPATHLEN
+        # The kernel caps this routine to MAXPATHLEN, so there is no
+        # point in over-allocating or trying again with a larger buffer
+        buffer = ctypes.create_string_buffer(numchars)
+        result = realpath(name.encode("utf-8"), buffer)
+        if result is None:
+            raise OSError(ctypes.get_errno())
+        return result.decode("utf-8")
 
 else:
 

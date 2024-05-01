@@ -76,8 +76,6 @@ struct LiveIter {
   BlockId initBlock       = NoBlockId;
   // Set whenever we see any mutation, even "safe" ones that don't affect keys.
   bool baseUpdated        = false;
-  // Set whenever the base of the iterator cannot be an iterator
-  bool baseCannotBeObject = false;
 };
 using Iter = boost::variant<DeadIter, LiveIter>;
 

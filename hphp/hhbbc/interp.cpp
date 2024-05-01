@@ -4838,9 +4838,8 @@ void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
   auto ity = iter_types(base);
 
   auto const fallthrough = [&] {
-    auto const baseCannotBeObject = !base.couldBe(BObj);
     setIter(env, ita.iterId, LiveIter { ity, sourceLoc, NoLocalId, env.bid,
-                                        false, baseCannotBeObject });
+                                        false });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, ita.valId, std::move(ity.value));

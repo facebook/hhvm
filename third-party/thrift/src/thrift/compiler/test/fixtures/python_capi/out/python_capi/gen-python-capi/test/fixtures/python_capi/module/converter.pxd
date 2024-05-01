@@ -59,6 +59,11 @@ cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_type
     cdef cppclass cMyDataItemSafePatch "::test::fixtures::python_capi::MyDataItemSafePatch":
         cMyDataItemSafePatch()
 
+cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h":
+    cdef cppclass cMyEnum "::test::fixtures::python_capi::MyEnum":
+        pass
+    cdef cppclass cAnnoyingEnum "::test::fixtures::python_capi::NormalDecentEnum":
+        pass
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except*
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct)
 

@@ -19,6 +19,11 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h":
     cdef cppclass cUnionToBeRenamed "::test::fixtures::basic::UnionToBeRenamed":
         cUnionToBeRenamed()
 
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h":
+    cdef cppclass cMyEnum "::test::fixtures::basic::MyEnum":
+        pass
+    cdef cppclass cHackEnum "::test::fixtures::basic::HackEnum":
+        pass
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except*
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct)
 

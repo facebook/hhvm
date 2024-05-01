@@ -79,6 +79,13 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h":
     cdef cppclass cStructWithDoubleUnderscores "::apache::thrift::fixtures::types::StructWithDoubleUnderscores":
         cStructWithDoubleUnderscores()
 
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h":
+    cdef cppclass chas_bitwise_ops "::apache::thrift::fixtures::types::has_bitwise_ops":
+        pass
+    cdef cppclass cis_unscoped "::apache::thrift::fixtures::types::is_unscoped":
+        pass
+    cdef cppclass cMyForwardRefEnum "::apache::thrift::fixtures::types::MyForwardRefEnum":
+        pass
 cdef cempty_struct empty_struct_convert_to_cpp(object inst) except*
 cdef object empty_struct_from_cpp(const cempty_struct& c_struct)
 

@@ -39,6 +39,9 @@ cdef extern from "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_t
     cdef cppclass ccomplexException "::cpp2::complexException":
         ccomplexException()
 
+cdef extern from "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_types.h":
+    cdef cppclass cMyEnum "::cpp2::MyEnum":
+        pass
 cdef cMyStructFloatFieldThrowExp MyStructFloatFieldThrowExp_convert_to_cpp(object inst) except*
 cdef object MyStructFloatFieldThrowExp_from_cpp(const cMyStructFloatFieldThrowExp& c_struct)
 

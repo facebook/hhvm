@@ -13,6 +13,21 @@ cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h":
     cdef cppclass cMyStruct "::test::fixtures::enums::MyStruct":
         cMyStruct()
 
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h":
+    cdef cppclass cMetasyntactic "::test::fixtures::enums::Metasyntactic":
+        pass
+    cdef cppclass cMyEnum1 "::test::fixtures::enums::MyEnum1":
+        pass
+    cdef cppclass cMyEnum2 "::test::fixtures::enums::MyEnum2":
+        pass
+    cdef cppclass cMyEnum3 "::test::fixtures::enums::MyEnum3":
+        pass
+    cdef cppclass cMyEnum4 "::test::fixtures::enums::MyEnum4":
+        pass
+    cdef cppclass cMyBitmaskEnum1 "::test::fixtures::enums::MyBitmaskEnum1":
+        pass
+    cdef cppclass cMyBitmaskEnum2 "::test::fixtures::enums::MyBitmaskEnum2":
+        pass
 cdef cSomeStruct SomeStruct_convert_to_cpp(object inst) except*
 cdef object SomeStruct_from_cpp(const cSomeStruct& c_struct)
 

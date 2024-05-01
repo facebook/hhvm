@@ -125,6 +125,9 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
     cdef cppclass cRefFieldsSafePatch "::test::fixtures::patch::RefFieldsSafePatch":
         cRefFieldsSafePatch()
 
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
+    cdef cppclass cMyEnum "::test::fixtures::patch::MyEnum":
+        pass
 cdef cMyData MyData_convert_to_cpp(object inst) except*
 cdef object MyData_from_cpp(const cMyData& c_struct)
 

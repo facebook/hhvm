@@ -25,6 +25,13 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.
     cdef cppclass cunion2 "::cpp2::union2":
         cunion2()
 
+cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.h":
+    cdef cppclass cEmptyEnum "::cpp2::EmptyEnum":
+        pass
+    cdef cppclass cCity "::cpp2::City":
+        pass
+    cdef cppclass cCompany "::cpp2::Company":
+        pass
 cdef cInternship Internship_convert_to_cpp(object inst) except*
 cdef object Internship_from_cpp(const cInternship& c_struct)
 

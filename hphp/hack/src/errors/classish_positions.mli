@@ -30,3 +30,7 @@ val map_pos : f:('pos -> 'qos) -> 'pos pos -> 'qos pos
 
 (** Find a position in the map. *)
 val find : 'pos pos -> 'pos t -> 'pos option
+
+(** Return a map, mapping class-names to all the ranges in-between body
+elements (i.e. methods, properties, ...) in that class *)
+val inbetween_body_element_positions : Pos.t t -> Pos.t list SMap.t

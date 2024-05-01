@@ -29,6 +29,20 @@ let add_suffix s t =
   let suffix = Option.value ~default:"" t.suffix ^ s in
   { t with suffix = Some suffix }
 
+let strip_suffix s t =
+  let suffix =
+    Option.map t.suffix ~f:(fun suffix ->
+        if String.is_suffix ~suffix:s suffix then
+          String.sub suffix ~pos:0 ~len:(String.length suffix - String.length s)
+        else
+          suffix)
+  in
+  { t with suffix }
+
+let add_prefix s t =
+  let prefix = s ^ t.prefix in
+  { t with prefix }
+
 let cursor_after_insert pos { prefix; suffix = _ } =
   Pos.advance_string prefix pos |> Pos.shrink_to_end
 

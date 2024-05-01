@@ -187,3 +187,31 @@ let find pos t =
     map_class class_name @@ fun c -> c.classish_end_of_body
   | Classish_closing_brace class_name ->
     map_class class_name @@ fun c -> c.classish_closing_brace
+
+let inbetween_body_element_positions t : Pos.t list SMap.t =
+  let inbetween_positions_for (cp : 'a Pos.pos classish_positions) :
+      'a Pos.pos list =
+    let classish_body_elements =
+      List.sort
+        ~compare:(Pos.compare_pos (fun _ _ -> 0))
+        cp.classish_body_elements
+    in
+    let (current_pos, posl) =
+      List.fold_left
+        classish_body_elements
+        ~init:(cp.classish_start_of_body, [])
+        ~f:(fun (current_pos, acc) next_pos ->
+          let whitespace =
+            Pos.btw
+              (Pos.shrink_to_end current_pos)
+              (Pos.shrink_to_start next_pos)
+          in
+          (next_pos, whitespace :: acc))
+    in
+    List.rev
+      (Pos.btw
+         (Pos.shrink_to_end current_pos)
+         (Pos.shrink_to_start cp.classish_end_of_body)
+      :: posl)
+  in
+  SMap.map inbetween_positions_for t

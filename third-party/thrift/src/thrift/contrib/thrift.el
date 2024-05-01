@@ -3,6 +3,8 @@
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "24"))
 
+;; Copyright (c) Meta Platforms, Inc. and affiliates.
+;;
 ;; Licensed to the Apache Software Foundation (ASF) under one
 ;; or more contributor license agreements. See the NOTICE file
 ;; distributed with this work for additional information
@@ -46,7 +48,7 @@
     ;; Treat < and > as paired delimiters.
     (modify-syntax-entry ?< "(<" table)
     (modify-syntax-entry ?> ")>" table)
-    
+
     ;; Comments can start with //, /* or # characters.
     (modify-syntax-entry ?/ ". 124" table)
     (modify-syntax-entry ?* ". 23b" table)
@@ -84,7 +86,7 @@ This is intended to be used with `font-lock-keywords'."
               (re-search-forward pattern limit t))
         ;; Set match data to the @foo we found, before we call `looking-at'.
         (setq match-data (match-data))
-        
+
         (let* ((ppss (syntax-ppss))
                (in-comment-p (nth 4 ppss))
                (comment-start (nth 8 ppss))
@@ -264,7 +266,7 @@ This is intended to be used with `font-lock-keywords'."
            (+ (or (syntax word) (syntax symbol))))
           symbol-end)
      1 font-lock-type-face)
-    
+
     ;; Highlight struct indexes.
     (,(rx symbol-start
           (group (+ digit))
@@ -352,7 +354,7 @@ Preserves point position in the line where possible."
      ;; Indent according to the amount of nesting.
      (t
       (indent-line-to (* thrift-indent-level paren-depth))))
-    
+
     ;; Point is now at the beginning of indentation, restore it
     ;; to its original position (relative to indentation).
     (when (>= point-offset 0)
@@ -366,7 +368,7 @@ Preserves point position in the line where possible."
   "Major mode for editing Thrift files."
   (setq-local font-lock-defaults '(thrift-font-lock-keywords))
   (setq-local indent-line-function 'thrift-indent-line)
-  
+
   (setq-local comment-start "// "))
 
 (provide 'thrift)

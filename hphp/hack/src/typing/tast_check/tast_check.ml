@@ -55,7 +55,14 @@ let visitor ctx =
           Some Tautology_check.handler;
           Some Enforceable_hint_check.handler;
           Some Const_write_check.handler;
-          Some Switch_check.handler;
+          (if tcopt.GlobalOptions.tco_strict_switch then
+            Some Strict_switch_check.handler
+          else
+            Some Switch_check.handler);
+          (if tcopt.GlobalOptions.tco_strict_switch then
+            Some Strict_switch_int_literal_check.handler
+          else
+            None);
           Some Void_return_check.handler;
           Some Rvalue_check.handler;
           Some Callconv_check.handler;

@@ -2,6 +2,10 @@ ERROR: File "int_format.php", line 34, characters 10-20:
 Redundant `case` statement (Typing[4021])
   File "int_format.php", line 30, characters 10-20:
   `709138457` already handled here
+ERROR: File "int_format.php", line 8, characters 10-12:
+This int literal is in `binary`, but was expecting it to be in `decimal` (Typing[4023])
+  File "int_format.php", line 6, characters 10-10:
+  All int literals in this switch must be written in the same base as the first one
 ERROR: File "int_format.php", line 20, characters 10-12:
 This int literal is in `hexadecimal`, but was expecting it to be in `decimal` (Typing[4023])
   File "int_format.php", line 18, characters 10-10:

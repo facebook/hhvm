@@ -23,6 +23,7 @@ from thrift.python.types cimport (
     SetTypeInfo,
     MapTypeInfo,
     EnumTypeInfo,
+    FieldInfo,
     BadEnum,
 )
 cimport thrift.py3.types as py3_types
@@ -40,8 +41,8 @@ cdef object _to_python_struct(object cls, object obj):
     if issubclass(cls, Struct):
         return cls(
             **{
-                field[2]: _to_python_field(
-                    _get_src_field(obj, field), field[3]
+                field.py_name: _to_python_field(
+                    _get_src_field(obj, field), field.type_info
                 )
                 for field in (<StructInfo>cls._fbthrift_struct_info).fields
             }
@@ -50,8 +51,8 @@ cdef object _to_python_struct(object cls, object obj):
         for field in (<UnionInfo>cls._fbthrift_struct_info).fields:
             try:
                 src = _get_src_union_field(obj, field)
-                val = _to_python_field(src, field[3])
-                return cls(**{field[2]: val})
+                val = _to_python_field(src, field.type_info)
+                return cls(**{field.py_name: val})
             except (AssertionError, AttributeError):
                 pass
         return cls()
@@ -59,22 +60,22 @@ cdef object _to_python_struct(object cls, object obj):
         raise TypeError(f"{cls} not a Struct nor an Union")
 
 
-cdef object _get_src_field(object obj, tuple field):
+cdef object _get_src_field(object obj, FieldInfo field):
     if isinstance(obj, py3_types.Struct):
-        return getattr(obj, field[2], None)
+        return getattr(obj, field.py_name, None)
     for spec in obj.thrift_spec:
-        if spec and spec[0] == field[0]:
+        if spec and spec[0] == field.id:
             return getattr(obj, spec[2], None)
     return None
 
 
-cdef object _get_src_union_field(object obj, tuple field):
+cdef object _get_src_union_field(object obj, FieldInfo field):
     if isinstance(obj, py3_types.Union):
-        return getattr(obj, field[2])
+        return getattr(obj, field.py_name)
     for spec in obj.thrift_spec:
-        if spec and spec[0] == field[0]:
+        if spec and spec[0] == field.id:
             return getattr(obj, f"get_{spec[2]}")()
-    raise AttributeError(f"{obj} doesn't have field with id {field[0]} or name {field[2]}")
+    raise AttributeError(f"{obj} doesn't have field with id {field.id} or name {field.py_name}")
 
 
 cdef object _to_python_field(object obj, object type_info):

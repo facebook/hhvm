@@ -201,7 +201,7 @@ class GeneratedErrorMeta(type):
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(name, fields)
         for i, f in enumerate(fields):
-            dct[f[2]] = make_fget_error(i)
+            dct[f.py_name] = make_fget_error(i)
         return super().__new__(cls, name, (GeneratedError,), dct)
 
     def _fbthrift_fill_spec(cls):

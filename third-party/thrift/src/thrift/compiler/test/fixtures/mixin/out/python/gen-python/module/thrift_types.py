@@ -15,10 +15,11 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field1",  # name
+            "field1",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -60,19 +61,21 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
 
 class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "m1",  # name
+            "m1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin1),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "field2",  # name
+            "field2",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -114,10 +117,11 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
 
 class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field3",  # name
+            "field3",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -159,28 +163,31 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
 
 class Foo(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field4",  # name
+            "field4",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "m2",  # name
+            "m2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin2),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "m3",  # name
+            "m3",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin3Base),  # typeinfo
             None,  # default value
             None,  # adapter info

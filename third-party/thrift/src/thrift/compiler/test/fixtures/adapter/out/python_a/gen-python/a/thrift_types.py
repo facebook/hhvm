@@ -22,28 +22,31 @@ import one
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "a",  # name
+            "a",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(b.thrift_types._fbthrift_unadapted_B), one.AdapterOne, lambda: None),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "b",  # name
+            "b",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(c.thrift_types._fbthrift_unadapted_C1), three.AdapterThree, lambda: None),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "c",  # name
+            "c",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(c.thrift_types.C2), two.AdapterTwo, lambda: None),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -106,10 +109,11 @@ class _fbthrift_MyService_adapted_return_args(metaclass=_fbthrift_python_types.S
 
 class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
+            "success", # name
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(b.thrift_types._fbthrift_unadapted_B), one.AdapterOne, lambda: None),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -120,10 +124,11 @@ class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_types
 
 class _fbthrift_MyService_adapted_param_args(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "param",  # name
+            "param",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(c.thrift_types.C2), two.AdapterTwo, lambda: None),  # typeinfo
             None,  # default value
             None,  # adapter info

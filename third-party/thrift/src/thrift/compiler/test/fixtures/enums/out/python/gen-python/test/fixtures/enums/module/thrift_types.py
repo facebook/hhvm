@@ -15,37 +15,41 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "reasonable",  # name
+            "reasonable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.FOO,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "fine",  # name
+            "fine",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.BAR,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "questionable",  # name
+            "questionable",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(Metasyntactic, -1),  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             4,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "tags",  # name
+            "tags",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             lambda: _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, ()),  # default value
             None,  # adapter info
@@ -87,37 +91,41 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "me2_3",  # name
+            "me2_3",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum2),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum2, 3),  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "me3_n3",  # name
+            "me3_n3",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum3),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum3, -3),  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             4,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "me1_t1",  # name
+            "me1_t1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             6,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "me1_t2",  # name
+            "me1_t2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info

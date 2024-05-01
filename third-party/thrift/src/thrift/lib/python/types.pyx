@@ -219,6 +219,52 @@ typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
 
 StructOrError = cython.fused_type(Struct, GeneratedError)
 
+cdef class FieldInfo:
+    def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive):
+        self.id = id
+        self.qualifier = qualifier
+        self.name = name
+        self.py_name = py_name
+        self.type_info = type_info
+        self.default_value = default_value
+        self.adapter_info = adapter_info
+        self.is_primitive = is_primitive
+
+    @property
+    def id(self):
+        return self.id
+
+    @property
+    def qualifier(self):
+        return self.qualifier
+
+    @property
+    def name(self):
+        return self.name
+
+    @property
+    def py_name(self):
+        return self.py_name
+
+    @property
+    def type_info(self):
+        return self.type_info
+
+    @type_info.setter
+    def type_info(self, type_info):
+        self.type_info = type_info
+
+    @property
+    def default_value(self):
+        return self.default_value
+
+    @property
+    def adapter_info(self):
+        return self.adapter_info
+
+    @property
+    def is_primitive(self):
+        return self.is_primitive
 
 cdef class StructInfo:
     """
@@ -300,23 +346,25 @@ cdef class StructInfo:
 
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         type_infos = self.type_infos
-        for idx, (id, qualifier, name, type_info, *_) in enumerate(self.fields):
+        for idx, field_info in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order, see class docstring above.
-            if PyCallable_Check(type_info):
-                type_info = type_info()
+            field_type_info = field_info.type_info
+            if PyCallable_Check(field_info.type_info):
+                field_type_info = field_info.type_info()
 
             # The rest of the code assumes that all the `TypeInfo` classes extend
             # from `TypeInfoBase`. Instances are typecast to `TypeInfoBase` before
             # the `to_internal_data()` and `to_python_value()` methods are called.
-            if not isinstance(type_info, TypeInfoBase):
-                raise TypeError(f"{type(type_info).__name__} is not subclass of TypeInfoBase.")
+            if not isinstance(field_type_info, TypeInfoBase):
+                raise TypeError(f"{type(field_type_info).__name__} is not subclass of TypeInfoBase.")
 
-            Py_INCREF(type_info)
-            PyTuple_SET_ITEM(type_infos, idx, type_info)
-            self.name_to_index[name] = idx
+            Py_INCREF(field_type_info)
+            PyTuple_SET_ITEM(type_infos, idx, field_type_info)
+            field_info.type_info = field_type_info
+            self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
-                id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
+                field_info.id, field_info.qualifier, PyUnicode_AsUTF8(field_info.name), getCTypeInfo(field_type_info)
             )
 
     cdef void store_field_values(self) except *:
@@ -328,7 +376,7 @@ cdef class StructInfo:
         """
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         for idx, field in enumerate(self.fields):
-            default_value = field[4]
+            default_value = field.default_value
             if default_value is None:
                 continue
             if callable(default_value):
@@ -354,16 +402,16 @@ cdef class UnionInfo:
 
     cdef void fill(self) except *:
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
-        for idx, (id, qualifier, name, type_info, _, adapter_info, _) in enumerate(self.fields):
+        for idx, field_info in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order
-            if callable(type_info):
-                type_info = type_info()
-            self.type_infos[id] = type_info
-            self.id_to_adapter_info[id] = adapter_info
-            self.name_to_index[name] = idx
+            if callable(field_info.type_info):
+                field_info.type_info = field_info.type_info()
+            self.type_infos[field_info.id] = field_info.type_info
+            self.id_to_adapter_info[field_info.id] = field_info.adapter_info
+            self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
-                id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
+                field_info.id, field_info.qualifier, PyUnicode_AsUTF8(field_info.name), getCTypeInfo(field_info.type_info)
             )
 
 
@@ -749,10 +797,10 @@ cdef class Struct(StructOrUnion):
                 value_to_copy = self._fbthrift_data[field_index + 1]
             else:  # new assigned value
                 field_spec = struct_info.fields[field_index]
-                adapter_info = field_spec[5]
+                adapter_info = field_spec.adapter_info
                 if adapter_info:
                     adapter_class, transitive_annotation = adapter_info
-                    field_id = field_spec[0]
+                    field_id = field_spec.id
                     value = adapter_class.to_thrift_field(
                         value,
                         field_id,
@@ -838,8 +886,8 @@ cdef class Struct(StructOrUnion):
 
         cdef StructInfo struct_info = self._fbthrift_struct_info
         field_info = struct_info.fields[index]
-        field_id = field_info[0]
-        adapter_info = field_info[5]
+        field_id = field_info.id
+        adapter_info = field_info.adapter_info
         data = self._fbthrift_data[index + 1]
         if data is not None:
             py_value = (<TypeInfoBase>struct_info.type_infos[index]).to_python_value(data)
@@ -912,10 +960,10 @@ cdef class Struct(StructOrUnion):
             field_spec = struct_info.fields[field_index]
 
             # Handle field w/ adapter
-            adapter_info = field_spec[5]
+            adapter_info = field_spec.adapter_info
             if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
-                field_id = field_spec[0]
+                field_id = field_spec.id
                 value = adapter_class.to_thrift_field(
                             value,
                             field_id,
@@ -1185,14 +1233,14 @@ class StructMeta(type):
         non_primitive_types = []
 
         slots = []
-        for i, (id, qualifier, name, type_info, default_value, adapter_info, is_primitive) in enumerate(fields):
-            slots.append(name)
+        for i, field_info in enumerate(fields):
+            slots.append(field_info.py_name)
 
             # if field has an adapter or is not primitive type, consider as "non-primitive"
-            if adapter_info is not None or not is_primitive:
-                non_primitive_types.append((i, name))
+            if field_info.adapter_info is not None or not field_info.is_primitive:
+                non_primitive_types.append((i, field_info.py_name))
             else:
-                primitive_types.append((i, name, type_info))
+                primitive_types.append((i, field_info.py_name, field_info.type_info))
 
         dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
@@ -1248,7 +1296,7 @@ class StructMeta(type):
 def gen_enum(fields):
     yield ("EMPTY", 0)
     for f in fields:
-        yield (f[2], f[0])
+        yield (f.py_name, f.id)
 
 
 class UnionMeta(type):
@@ -1258,7 +1306,7 @@ class UnionMeta(type):
         dct["_fbthrift_struct_info"] = UnionInfo(name, fields)
         dct["Type"] = enum.Enum(name, gen_enum(fields))
         for f in fields:
-            dct[f[2]] = make_fget_union(f[0], f[5])
+            dct[f.py_name] = make_fget_union(f.id, f.adapter_info)
         return super().__new__(cls, name, (Union,), dct)
 
     def __dir__(cls):

@@ -43,12 +43,12 @@ cdef object _to_py_struct(object cls, object obj):
             pass
     elif isinstance(obj, python_types.Struct):
         field_id_to_name = {
-            spec[0]: spec[2]
+            spec.id: spec.py_name
             for spec in (<python_types.StructInfo>obj._fbthrift_struct_info).fields
         }
     elif isinstance(obj, python_types.Union):
         field_id_to_name = {
-            spec[0]: spec[2]
+            spec.id: spec.py_name
             for spec in (<python_types.UnionInfo>obj._fbthrift_struct_info).fields
         }
 

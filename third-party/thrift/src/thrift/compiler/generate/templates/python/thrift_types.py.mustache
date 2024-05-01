@@ -43,10 +43,11 @@ class {{> structs/unadapted_name}}(metaclass={{!
         }}):
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}
-        (
+        _fbthrift_python_types.FieldInfo(
             {{field:key}},  # id
             _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
-            "{{field:py_name}}",  # name
+            "{{field:name}}",  # name
+            "{{field:py_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             {{#field:user_default_value}}{{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{/field:type}}{{> types/constant_value }}{{/field:user_default_value}}{{!
             }}{{^field:user_default_value}}None{{/field:user_default_value}},  # default value

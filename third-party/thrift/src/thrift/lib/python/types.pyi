@@ -51,8 +51,28 @@ typeinfo_binary: TypeInfo
 StructOrError = typing.Union[Struct, GeneratedError]
 
 AnyTypeInfo = typing.Union[
-    StructTypeInfo, ListTypeInfo, SetTypeInfo, MapTypeInfo, EnumTypeInfo
+    StructTypeInfo,
+    ListTypeInfo,
+    SetTypeInfo,
+    MapTypeInfo,
+    EnumTypeInfo,
+    TypeInfo,
+    IntegerTypeInfo,
+    StringTypeInfo,
 ]
+
+class FieldInfo:
+    def __init__(
+        self,
+        id: int,
+        qualifier: FieldQualifier,
+        name: str,
+        py_name: str,
+        type_info: AnyTypeInfo | typing.Callable[[], AnyTypeInfo],
+        default_value: object,
+        adapter_info: typing.Optional[tuple[object, Struct]],
+        is_primitive: bool,
+    ) -> None: ...
 
 class ListTypeInfo:
     def __init__(self, val_info: AnyTypeInfo) -> None: ...

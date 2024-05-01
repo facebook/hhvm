@@ -17,10 +17,11 @@ import foo.thrift_types
 
 class Fields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             100,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -62,10 +63,11 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             -1100,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -107,19 +109,21 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             -1100,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "string_field",  # name
+            "string_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -161,37 +165,41 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             -1102,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "injected_unstructured_annotation_field",  # name
+            "injected_unstructured_annotation_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             -1101,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "injected_structured_annotation_field",  # name
+            "injected_structured_annotation_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             -1100,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "string_field",  # name
+            "string_field",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info

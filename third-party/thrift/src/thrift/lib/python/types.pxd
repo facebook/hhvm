@@ -113,10 +113,21 @@ cdef class IOBufTypeInfo(TypeInfoBase):
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)
 
+# TODO(ffrancet): Refactor this to a c class and update all of its accesses to c functions
+cdef class FieldInfo:
+    cdef int id
+    cdef FieldQualifier qualifier
+    cdef str name
+    cdef str py_name
+    cdef object type_info
+    cdef object default_value
+    cdef object adapter_info
+    cdef bint is_primitive
+
 cdef class StructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj
     cdef tuple type_infos
-    cdef tuple fields
+    cdef tuple[FieldInfo] fields
     cdef dict name_to_index
     cdef void fill(self) except *
     cdef void store_field_values(self) except *

@@ -59,7 +59,6 @@ class t_json_experimental_generator : public t_mstch_generator {
   using t_mstch_generator::t_mstch_generator;
 
   std::string template_prefix() const override { return "json"; }
-  bool convert_delimiter() const override { return true; }
 
   void generate_program() override;
 

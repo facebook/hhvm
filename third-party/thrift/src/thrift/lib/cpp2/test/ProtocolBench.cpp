@@ -175,6 +175,9 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X2(Prefix, proto, UnorderedSetInt)    \
   X2(Prefix, proto, SortedVecSetInt)    \
   X2(Prefix, proto, LargeMapInt)        \
+  X2(Prefix, proto, LargeMapMixed)        \
+  X2(Prefix, proto, LargeUnorderedMapMixed)        \
+  X2(Prefix, proto, LargeSortedVecMapMixed)        \
   X2(Prefix, proto, UnorderedMapInt)    \
   X2(Prefix, proto, NestedMap)          \
   X2(Prefix, proto, SortedVecNestedMap) \
@@ -197,6 +200,9 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   OpEncodeX2(Prefix, proto, UnorderedSetInt)    \
   OpEncodeX2(Prefix, proto, SortedVecSetInt)    \
   OpEncodeX2(Prefix, proto, LargeMapInt)        \
+  OpEncodeX2(Prefix, proto, LargeMapMixed)        \
+  OpEncodeX2(Prefix, proto, LargeUnorderedMapMixed)        \
+  OpEncodeX2(Prefix, proto, LargeSortedVecMapMixed)        \
   OpEncodeX2(Prefix, proto, UnorderedMapInt)    \
   OpEncodeX2(Prefix, proto, NestedMap)          \
   OpEncodeX2(Prefix, proto, SortedVecNestedMap) \

@@ -90,6 +90,20 @@ struct LargeMapInt {
   1: map<i32, i32> m;
 }
 
+struct LargeMapMixed {
+  1: map<i32, Mixed> m;
+}
+
+struct LargeUnorderedMapMixed {
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i32, Mixed> m;
+}
+
+struct LargeSortedVecMapMixed {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, Mixed> m;
+}
+
 struct NestedMapRaw {
   1: map<i32, map<i32, map<i32, map<i32, map<i32, i32>>>>> m;
 }
@@ -367,6 +381,23 @@ struct OpSortedVecSetInt {
 @cpp.UseOpEncode
 struct OpLargeMapInt {
   1: map<i32, i32> m;
+}
+
+@cpp.UseOpEncode
+struct OpLargeMapMixed {
+  1: map<i32, OpMixed> m;
+}
+
+@cpp.UseOpEncode
+struct OpLargeUnorderedMapMixed {
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i32, OpMixed> m;
+}
+
+@cpp.UseOpEncode
+struct OpLargeSortedVecMapMixed {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, OpMixed> m;
 }
 
 @cpp.UseOpEncode

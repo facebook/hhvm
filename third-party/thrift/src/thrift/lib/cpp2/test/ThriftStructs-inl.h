@@ -258,6 +258,15 @@ inline T createMap(int size) {
   return d;
 }
 
+template <class T>
+inline T createMapMixed(int size) {
+  T d;
+  for (int i = 0; i < size; i++) {
+    d.m()[i] = create<typename decltype(d.m())::value_type::mapped_type>();
+  }
+  return d;
+}
+
 template <>
 inline thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
   return createMap<thrift::benchmark::LargeMapInt>(1000000);
@@ -267,6 +276,42 @@ template <>
 inline thrift::benchmark::OpLargeMapInt
 create<thrift::benchmark::OpLargeMapInt>() {
   return createMap<thrift::benchmark::OpLargeMapInt>(1000000);
+}
+
+template <>
+inline thrift::benchmark::LargeMapMixed
+create<thrift::benchmark::LargeMapMixed>() {
+  return createMapMixed<thrift::benchmark::LargeMapMixed>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpLargeMapMixed
+create<thrift::benchmark::OpLargeMapMixed>() {
+  return createMapMixed<thrift::benchmark::OpLargeMapMixed>(1000000);
+}
+
+template <>
+inline thrift::benchmark::LargeUnorderedMapMixed
+create<thrift::benchmark::LargeUnorderedMapMixed>() {
+  return createMapMixed<thrift::benchmark::LargeUnorderedMapMixed>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpLargeUnorderedMapMixed
+create<thrift::benchmark::OpLargeUnorderedMapMixed>() {
+  return createMapMixed<thrift::benchmark::OpLargeUnorderedMapMixed>(1000000);
+}
+
+template <>
+inline thrift::benchmark::LargeSortedVecMapMixed
+create<thrift::benchmark::LargeSortedVecMapMixed>() {
+  return createMapMixed<thrift::benchmark::LargeSortedVecMapMixed>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpLargeSortedVecMapMixed
+create<thrift::benchmark::OpLargeSortedVecMapMixed>() {
+  return createMapMixed<thrift::benchmark::OpLargeSortedVecMapMixed>(1000000);
 }
 
 template <>

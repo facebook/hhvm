@@ -2743,31 +2743,49 @@ end = struct
           | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _ | Taccess _
           | Tnewtype _ | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _
             ) ),
-        (_r_super, Tvar _var_super) ) -> begin
-      match subtype_env.Subtype_env.coerce with
-      | Some cd ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:(Some cd)
+        (_r_super, Tvar var_super_id) ) -> begin
+      let (env, simplified_sub_ty) =
+        Typing_solver_utils.remove_tyvar_from_lower_bound
           env
+          var_super_id
           (LoclType ty_sub)
-          (LoclType ty_super)
-      | None ->
-        if super_like then
-          let (env, ty_sub) = Typing_dynamic.strip_covariant_like env ty_sub in
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            env
-        else
+      in
+      match simplified_sub_ty with
+      | LoclType simplified_sub_ty
+      (* Better than checking nothing like this might be to change
+         remove_tyvar_from_lower_bound to return an Option to distinguish
+         whether a simplification was actually done.
+         And then we can recursively do a subtype check to check this.
+      *)
+        when ty_equal simplified_sub_ty (MakeType.nothing Reason.none) ->
+        valid env
+      | _ ->
+        (match subtype_env.Subtype_env.coerce with
+        | Some cd ->
           mk_issubtype_prop
             ~sub_supportdyn
-            ~coerce:subtype_env.Subtype_env.coerce
+            ~coerce:(Some cd)
             env
             (LoclType ty_sub)
             (LoclType ty_super)
+        | None ->
+          if super_like then
+            let (env, ty_sub) =
+              Typing_dynamic.strip_covariant_like env ty_sub
+            in
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+              env
+          else
+            mk_issubtype_prop
+              ~sub_supportdyn
+              ~coerce:subtype_env.Subtype_env.coerce
+              env
+              (LoclType ty_sub)
+              (LoclType ty_super))
     end
     (* -- C-Inter-R --------------------------------------------------------- *)
     | ((r_sub, Tunion ty_subs), (_r_super, Tintersection _)) ->

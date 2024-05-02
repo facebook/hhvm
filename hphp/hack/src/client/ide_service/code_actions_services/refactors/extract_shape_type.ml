@@ -157,6 +157,7 @@ let to_refactor source_text ~path candidate =
       edits;
       kind = `Refactor;
       selection = None;
+      trigger_inline_suggest = false;
     }
 
 let find ~entry selection ctx =

@@ -70,22 +70,37 @@ let workspace_edit_of_code_action_edits
   in
   Lsp.WorkspaceEdit.{ changes }
 
-let to_action Code_action_types.{ title; edits; kind; selection } =
+let to_action
+    Code_action_types.{ title; edits; kind; selection; trigger_inline_suggest }
+    =
   let workspace_edit = Lazy.map edits ~f:workspace_edit_of_code_action_edits in
-  let action =
+  let trigger_inline_suggest_command =
+    if trigger_inline_suggest then
+      Some Lsp_extra_commands.trigger_inline_suggest
+    else
+      None
+  in
+  let set_selection_command =
     match selection with
-    | None -> lazy (Lsp.CodeAction.EditOnly (Lazy.force workspace_edit))
+    | None -> None
     | Some selection ->
+      let range =
+        Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal selection
+      in
+      Some
+        (Lsp_extra_commands.set_selection
+           range
+           ~command:trigger_inline_suggest_command)
+  in
+  let command =
+    Option.first_some set_selection_command trigger_inline_suggest_command
+  in
+  let action =
+    match command with
+    | None -> lazy (Lsp.CodeAction.EditOnly (Lazy.force workspace_edit))
+    | Some command ->
       lazy
-        begin
-          let range =
-            Lsp_helpers.hack_pos_to_lsp_range
-              ~equal:Relative_path.equal
-              selection
-          in
-          let command = Lsp_extra_commands.set_selection range ~command:None in
-          Lsp.CodeAction.BothEditThenCommand (Lazy.force workspace_edit, command)
-        end
+        (Lsp.CodeAction.BothEditThenCommand (Lazy.force workspace_edit, command))
   in
   let lsp_kind =
     match kind with

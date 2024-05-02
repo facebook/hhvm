@@ -375,7 +375,13 @@ let refactor_of_candidate ctx entry candidate =
          (edits_of_candidate ctx entry candidate))
   in
   Code_action_types.
-    { title = "await expression"; edits; kind = `Refactor; selection = None }
+    {
+      title = "await expression";
+      edits;
+      kind = `Refactor;
+      selection = None;
+      trigger_inline_suggest = false;
+    }
 
 let find ~entry selection ctx =
   if Pos.length selection <> 0 then

@@ -22,6 +22,9 @@ type +'kind t = {
   selection: Pos.t option;
       (** Text that will be selected after the edits are applied. If [None]
           the cursor is not updated after applying the edits. *)
+  trigger_inline_suggest: bool;
+      (** Whether or not to trigger the inline-suggest functionality in VSCode
+          after inserting the edits and (optionally) changing the selection. *)
   kind: [< `Refactor | `Quickfix ] as 'kind;
 }
 

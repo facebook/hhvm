@@ -46,6 +46,7 @@ let convert_quickfix
       edits;
       kind = `Quickfix;
       selection = None;
+      trigger_inline_suggest = false;
     }
 
 let quickfix_positions_for_error

@@ -139,4 +139,10 @@ let edits_of_candidate ~source_text ~path candidate : Code_action_types.edits =
 let to_refactor ~source_text ~path candidate =
   let edits = lazy (edits_of_candidate ~source_text ~path candidate) in
   Code_action_types.
-    { title = "Inline method"; edits; kind = `Refactor; selection = None }
+    {
+      title = "Inline method";
+      edits;
+      kind = `Refactor;
+      selection = None;
+      trigger_inline_suggest = false;
+    }

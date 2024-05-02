@@ -213,6 +213,7 @@ let refactor_of_candidate ctx entry path candidate =
       edits;
       kind = `Refactor;
       selection = None;
+      trigger_inline_suggest = false;
     }
 
 let find ~entry selection ctx =

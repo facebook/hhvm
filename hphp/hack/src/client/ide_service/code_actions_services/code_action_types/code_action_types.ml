@@ -18,6 +18,7 @@ type +'kind t = {
   title: string;
   edits: edits Lazy.t;
   selection: Pos.t option;
+  trigger_inline_suggest: bool;
   kind: [< `Refactor | `Quickfix ] as 'kind;
 }
 

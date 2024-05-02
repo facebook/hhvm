@@ -2,26 +2,27 @@
 
 <<__Memoize>>
 function memo_normal() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo quoted_printable_encode($hash) . "\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  echo var_dump($hash) . "\n";
 }
 
 <<__Memoize(#KeyedByIC)>>
 function memo_keyed() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo quoted_printable_encode($hash) . "\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
+  echo var_dump($str_hash) . "\n";
 }
 
 <<__Memoize(#MakeICInaccessible)>>
 function memo_ic_inaccessible() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo quoted_printable_encode($hash) . "\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  echo var_dump($hash) . "\n";
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
 function memo_soft_ic_inaccessible() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo quoted_printable_encode($hash) . "\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  echo var_dump($hash) . "\n";
 }
 
 function f(bool $has_ctx) :mixed{

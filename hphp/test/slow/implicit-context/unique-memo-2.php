@@ -6,8 +6,9 @@ function memo()[zoned] :mixed{
 }
 
 function f()[zoned] :mixed{
-  $key = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo quoted_printable_encode($key) . "\n";
+  $key = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  $str_hash = HH\Lib\Str\join($key, ', '); // can't do var_dump due to keyedByIC
+  echo $str_hash . "\n";
   memo();
 }
 

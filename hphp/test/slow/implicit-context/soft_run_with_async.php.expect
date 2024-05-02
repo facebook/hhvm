@@ -1,1 +1,5 @@
-Hash: %SoftSet%%=E3=04main
+Hash:
+vec(2) {
+  string(9) "%SoftSet%"
+  string(4) "main"
+}

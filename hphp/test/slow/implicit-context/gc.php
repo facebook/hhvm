@@ -14,7 +14,7 @@ function bar() :mixed{
 function foo() :mixed{
   bar();
   gc_collect_cycles();
-  var_dump(HH\ImplicitContext\_Private\get_implicit_context_memo_key());
+  var_dump(HH\ImplicitContext\_Private\get_implicit_context_debug_info());
 }
 
 <<__EntryPoint>>

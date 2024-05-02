@@ -1,2 +1,5 @@
-string(15) "%SoftSet%%ãabc"
+vec(2) {
+  string(9) "%SoftSet%"
+  string(3) "abc"
+}
 string(4) "done"

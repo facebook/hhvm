@@ -4,11 +4,10 @@ class Foo {
   public static Foo $x;
   <<__Memoize(#KeyedByIC)>>
   readonly function memo<reify T>($a, $b)[zoned] :mixed{
-    $hash = quoted_printable_encode(
-      HH\ImplicitContext\_Private\get_implicit_context_memo_key()
-    );
+    $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
     $kind = HH\ReifiedGenerics\get_type_structure<T>()['kind'];
-    echo "args: $a, $b hash: $hash, kind: $kind\n";
+    $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
+    echo "args: $a, $b hash: $str_hash, kind: $kind\n";
   }
 }
 

@@ -4,10 +4,9 @@ class Foo {
   public static Foo $x;
   <<__Memoize(#KeyedByIC)>>
   readonly function memo($a, $b)[zoned] :mixed{
-    $hash = quoted_printable_encode(
-      HH\ImplicitContext\_Private\get_implicit_context_memo_key()
-    );
-    echo "args: $a, $b hash: $hash\n";
+    $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+    $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
+    echo "args: $a, $b hash: $str_hash\n";
   }
 }
 

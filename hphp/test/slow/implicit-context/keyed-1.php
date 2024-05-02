@@ -9,8 +9,9 @@ function dump_ctx_data() :mixed{
 }
 
 function dump_hash() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
-  echo "Hash: " . quoted_printable_encode($hash) . "\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  echo "Hash:\n";
+  echo var_dump($hash);
 }
 
 class Counter {
@@ -40,14 +41,14 @@ function f() :mixed{
     tuple('memoWithArg', () ==> memoWithArg(1)),
   ];
   foreach ($v as list($name, $f)) {
-    echo "  Before: "; dump_ctx_data();
+    echo "  Before:"; dump_ctx_data();
     try {
       $f();
       echo $name . " passed\n";
     } catch (Exception $e) {
       echo $name . " failed with: " . $e->getMessage() . "\n";
     }
-    echo "  After: "; dump_ctx_data();
+    echo "  After:"; dump_ctx_data();
     echo "------------------------\n";
   }
 }

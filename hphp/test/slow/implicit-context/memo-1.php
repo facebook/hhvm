@@ -2,10 +2,10 @@
 
 <<__Memoize(#KeyedByIC)>>
 function memo($a, $b)[zoned] :mixed{
-  $hash = quoted_printable_encode(
-    HH\ImplicitContext\_Private\get_implicit_context_memo_key()
-  );
-  echo "args: $a, $b hash: $hash\n";
+  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
+  echo "args: $a, $b hash:\n";
+  echo HH\Lib\Str\join($hash, ", "); // we do Str\join here as zoned context won't allow var_dump
+  echo "\n";
 }
 
 function g()[zoned] :mixed{

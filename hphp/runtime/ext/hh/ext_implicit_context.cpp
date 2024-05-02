@@ -171,6 +171,53 @@ String HHVM_FUNCTION(get_implicit_context_memo_key) {
   return String{context->m_memokey};
 }
 
+/*
+* Returns a human readable memo key for the current IC
+* Only to be used for testing
+*/
+Array HHVM_FUNCTION(get_implicit_context_debug_info) {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return Array{};
+  auto const context = Native::data<ImplicitContext>(obj);
+
+  if (context->m_state == ImplicitContext::State::Inaccessible) {
+    VecInit ret{1};
+    ret.append(s_ICInaccessibleMemoKey.data());
+    return ret.toArray();
+  }
+  if (context->m_state == ImplicitContext::State::SoftSet ||
+      context->m_state == ImplicitContext::State::SoftInaccessible) {
+    VecInit ret{context->m_blameFromSoftInaccessible.size() +
+                context->m_blameFromSoftSet.size() + 1}; // extra 1 for the memokey name
+    if (context->m_state == ImplicitContext::State::SoftInaccessible) {
+      ret.append(s_ICSoftInaccessibleMemoKey.data());
+    } else {
+      ret.append(s_ICSoftSetMemoKey.data());
+    }
+
+    for (auto const& s : context->m_blameFromSoftInaccessible) {
+      ret.append(s->data());
+    }
+
+    for (auto const& s : context->m_blameFromSoftSet) {
+      ret.append(s->data());
+    }
+    return ret.toArray();
+  }
+
+  if (context->m_state == ImplicitContext::State::Value) {
+    VecInit ret{context->m_map.size() * 2}; // key and value
+    for (auto const& p : context->m_map) {
+      auto const key = String(p.first->data());
+      auto const value = HHVM_FN(serialize_memoize_param)(p.second.first);
+      ret.append(key);
+      ret.append(value);
+    }
+    return ret.toArray();
+  }
+  return Array{};
+}
+
 Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
                                               TypedValue data) {
   auto const key = keyarg.get();
@@ -355,6 +402,8 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(create_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
+                  HHVM_FN(get_implicit_context_debug_info));
 
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
                   HHVM_FN(enter_zoned_with));

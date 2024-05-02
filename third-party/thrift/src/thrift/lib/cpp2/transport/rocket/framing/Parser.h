@@ -104,21 +104,18 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
  private:
   enum class ParserMode { LEGACY, STRATEGY, ALLOCATING };
 
-  ParserMode stringToMode(const std::string& modeStr) noexcept {
-    /* library-local */ const static std::map<std::string, ParserMode> modeMap =
-        {
-            {"legacy", ParserMode::LEGACY},
-            {"strategy", ParserMode::STRATEGY},
-            {"allocating", ParserMode::ALLOCATING},
-        };
-    auto it = modeMap.find(modeStr);
-    if (it != modeMap.end()) {
-      return it->second;
-    } else {
-      LOG(WARNING) << "Invalid parser mode: '" << modeStr
-                   << ", default to ParserMode::LEGACY";
+  static ParserMode stringToMode(const std::string& modeStr) noexcept {
+    if (modeStr == "allocating") {
+      return ParserMode::ALLOCATING;
+    } else if (modeStr == "strategy") {
+      return ParserMode::STRATEGY;
+    } else if (modeStr == "legacy") {
       return ParserMode::LEGACY;
     }
+
+    LOG(WARNING) << "Invalid parser mode: '" << modeStr
+                 << ", default to ParserMode::LEGACY";
+    return ParserMode::LEGACY;
   }
 
   void getReadBufferOld(void** bufout, size_t* lenout);

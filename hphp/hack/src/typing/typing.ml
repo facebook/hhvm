@@ -10484,6 +10484,20 @@ and Assign : sig
 end = struct
   let assign_simple pos ur env e1 ty2 =
     let (env, te1, ty1) = Expr.lvalue env e1 in
+    (* Since we return the typed expression _and_ the type, we have to first
+       modify the types reason if extended-reasons is set and do the same
+       with typed expression's annotation since these types are not necessarily
+       the same for certain special functions*)
+    let ty1 =
+      Prov.(update ty1 ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+    in
+    let te1 =
+      let (ty, pos, e) = te1 in
+      let ty =
+        Prov.(update ty ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+      in
+      (ty, pos, e)
+    in
     let (env, ty_err_opt) =
       Typing_coercion.coerce_type
         pos
@@ -10518,12 +10532,23 @@ end = struct
       in
       (match e1 with
       | (_, _, Lvar ((_, x) as id)) ->
-        let env = set_valid_rvalue ~is_defined:true p env x None ty2 in
         let (_, p1, _) = e1 in
-        let (env, te, ty) = make_result env p1 (Aast.Lvar id) ty2 in
+        (* Since the lvar will be given the type [ty2] we need to update it
+           to indicate it flows _into_ an local *)
+        let ty =
+          Prov.(
+            update ty2 ~env ~f:(fun from ->
+                flow ~from ~into:(Reason.Rwitness p1)))
+        in
+        let env = set_valid_rvalue ~is_defined:true p env x None ty in
+        let (env, te, ty) = make_result env p1 (Aast.Lvar id) ty in
         (env, te, ty, None)
       | (_, _, Lplaceholder id) ->
-        let placeholder_ty = MakeType.void (Reason.Rplaceholder p) in
+        let placeholder_ty =
+          let ty = MakeType.void (Reason.Rplaceholder p) in
+          Prov.(
+            update ty ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+        in
         let (_, p1, _) = e1 in
         let (env, te, ty) =
           make_result env p1 (Aast.Lplaceholder id) placeholder_ty

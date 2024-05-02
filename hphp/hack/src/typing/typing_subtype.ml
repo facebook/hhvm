@@ -4825,18 +4825,23 @@ end = struct
         ts_required
         d_required
         ~init:(env, TL.valid)
-        ~f:(fun res ty ty_dest ->
+        ~f:(fun res ty_from ty_into ->
+          let ty_from =
+            Prov.(
+              update ty_from ~env ~f:(fun from ->
+                  flow ~from ~into:(get_reason ty_into)))
+          in
           res
           &&& Subtype.(
                 simplify
                   ~subtype_env
                   ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty }
+                  ~lhs:{ sub_supportdyn; ty_sub = ty_from }
                   ~rhs:
                     {
                       super_like = false;
                       super_supportdyn = false;
-                      ty_super = ty_dest;
+                      ty_super = ty_into;
                     }))
       &&& fun env ->
       let len_ts_opt = List.length ts_optional in
@@ -4850,34 +4855,43 @@ end = struct
         ts_optional
         d_optional_part
         ~init:(env, TL.valid)
-        ~f:(fun res ty ty_dest ->
+        ~f:(fun res ty_from ty_into ->
+          let ty_from =
+            Prov.(
+              update ty_from ~env ~f:(fun from ->
+                  flow ~from ~into:(get_reason ty_into)))
+          in
           res
           &&& Subtype.(
                 simplify
                   ~subtype_env
                   ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty }
+                  ~lhs:{ sub_supportdyn; ty_sub = ty_from }
                   ~rhs:
                     {
                       super_like = false;
                       super_supportdyn = false;
-                      ty_super = ty_dest;
+                      ty_super = ty_into;
                     }))
       &&& fun env ->
       match (ts_variadic, d_variadic) with
-      | (vars, Some vty) ->
-        List.fold vars ~init:(env, TL.valid) ~f:(fun res ty ->
+      | (vars, Some ty_into) ->
+        let into = get_reason ty_into in
+        List.fold vars ~init:(env, TL.valid) ~f:(fun res ty_from ->
             res
             &&& Subtype.(
+                  let ty_from =
+                    Prov.(update ty_from ~env ~f:(fun from -> flow ~from ~into))
+                  in
                   simplify
                     ~subtype_env
                     ~this_ty
-                    ~lhs:{ sub_supportdyn; ty_sub = ty }
+                    ~lhs:{ sub_supportdyn; ty_sub = ty_from }
                     ~rhs:
                       {
                         super_like = false;
                         super_supportdyn = false;
-                        ty_super = vty;
+                        ty_super = ty_into;
                       }))
       | ([], None) -> valid env
       | (_, None) ->

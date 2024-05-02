@@ -1,0 +1,260 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+  }
+] [3]
+
+assign_local.php:10:7
+     4 | class Sub extends Super {}
+     5 | 
+[2]  6 | function foo(Sub $_): void {}
+     7 | 
+[3]  8 | function bar_1(Super $f): void {
+     9 |   $g = $f;
+[1] 10 |   foo($g);
+    11 | }
+    12 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+            },
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":3,"char_end":4}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":15,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+            },
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":3,"char_end":4}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":15,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":15,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+  }
+] [3]
+
+assign_local.php:16:7
+     4 | class Sub extends Super {}
+     5 | 
+[2]  6 | function foo(Sub $_): void {}
+     7 | 
+     8 | function bar_1(Super $f): void {
+       :
+    11 | }
+    12 | 
+[3] 13 | function bar_2(Super $f): void {
+    14 |   $g = $f;
+    15 |   $h = $g;
+[1] 16 |   foo($h);
+    17 | }
+    18 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                },
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":21,"char_start":3,"char_end":4}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":22,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                },
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":21,"char_start":3,"char_end":4}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"assign_local.php","line":22,"char_start":3,"char_end":4}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":21,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":22,"char_start":3,"char_end":4}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
+  }
+] [3]
+
+assign_local.php:23:7
+     4 | class Sub extends Super {}
+     5 | 
+[2]  6 | function foo(Sub $_): void {}
+     7 | 
+     8 | function bar_1(Super $f): void {
+       :
+    17 | }
+    18 | 
+[3] 19 | function bar_3(Super $f): void {
+    20 |   $g = $f;
+    21 |   $h = $g;
+    22 |   $i = $h;
+[1] 23 |   foo($i);
+    24 | }
+
+3 errors found.

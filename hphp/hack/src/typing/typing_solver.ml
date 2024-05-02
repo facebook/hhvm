@@ -752,11 +752,21 @@ let expand_type_and_solve
       in
       (res, default_ty)
     | None ->
+      (* Under extended-reasons, we have to follow the path to determine if
+         it went through a type introduced because of an error *)
+      let rec is_tyvar_error r =
+        match r with
+        | Reason.Rtype_variable_error _ -> true
+        | Reason.Rprj (_, r) -> is_tyvar_error r
+        | Reason.Rflow (r_from, r_into) ->
+          is_tyvar_error r_from || is_tyvar_error r_into
+        | _ -> false
+      in
       let env =
         List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-            match r with
-            | Reason.Rtype_variable_error _ -> env
-            | _ ->
+            if is_tyvar_error r then
+              env
+            else
               let ty_err =
                 Typing_error.(
                   primary

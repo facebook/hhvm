@@ -302,6 +302,9 @@ let is_tyvar_error env ty =
     | Reason.Rtype_variable_error _ -> true
     | Reason.Rtype_access (r, _) -> is_tyvar_error_reason r
     | Reason.Rtypeconst (r, _, _, _) -> is_tyvar_error_reason r
+    | Reason.Rprj (_, r) -> is_tyvar_error_reason r
+    | Reason.Rflow (r_from, r_into) ->
+      is_tyvar_error_reason r_from || is_tyvar_error_reason r_into
     | _ -> false
   in
   match deref ty with

@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/compiler/test/fixtures/python_capi/src/thrift_dep.thrift"
 include "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift"
@@ -84,6 +85,7 @@ struct StringPair {
 }
 
 @cpp.Name{value = "VapidStruct"}
+@python.Name{name = "VapidStruct"}
 struct EmptyStruct {}
 
 typedef byte signed_byte

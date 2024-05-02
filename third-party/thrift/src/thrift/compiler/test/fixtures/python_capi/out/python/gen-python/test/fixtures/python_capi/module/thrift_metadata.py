@@ -185,6 +185,7 @@ def _fbthrift_gen_metadata_struct_EmptyStruct(metadata_struct: _fbthrift_metadat
         is_union=False,
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Name"), fields= { "value": _fbthrift_metadata.ThriftConstValue(cv_string="VapidStruct"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="VapidStruct"),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 

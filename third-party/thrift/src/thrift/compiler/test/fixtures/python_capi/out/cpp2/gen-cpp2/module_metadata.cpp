@@ -169,6 +169,7 @@ StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& 
   module_EmptyStruct.name() = "module.EmptyStruct";
   module_EmptyStruct.is_union() = false;
   module_EmptyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("VapidStruct") } }).cv_struct_ref());
+  module_EmptyStruct.structured_annotations()->push_back(*cvStruct("python.Name", { {"name", cvString("VapidStruct") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

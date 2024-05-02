@@ -1129,6 +1129,82 @@ let rec to_json : type a. a t_ -> Hh_json.json =
   | Rprj (prj, r) ->
     Hh_json.(JSON_Object [("Rprj", JSON_Array [prj_to_json prj; to_json r])])
 
+type direction =
+  | Fwd
+  | Bwd
+
+let direction_to_json = function
+  | Fwd -> Hh_json.(JSON_Object [("Fwd", JSON_Array [])])
+  | Bwd -> Hh_json.(JSON_Object [("Bwd", JSON_Array [])])
+
+let reverse_direction = function
+  | Fwd -> Bwd
+  | Bwd -> Fwd
+
+type path_elem =
+  | Direction of direction
+  | Projection of prj
+  | Witness of locl_phase t_
+
+let path_elem_to_json = function
+  | Direction direction -> direction_to_json direction
+  | Projection prj -> prj_to_json prj
+  | Witness r -> to_json r
+
+let path_to_json path = Hh_json.JSON_Array (List.map ~f:path_elem_to_json path)
+
+let project prj dir =
+  match prj with
+  (* Covariant projections preserve data flow direction *)
+  | Prj_union
+  | Prj_inter
+  | Prj_neg
+  | Prj_tuple _
+  | Prj_shape _
+  | Prj_fn_ret
+  | Prj_access
+  | Prj_class (_, _, Ast_defs.Covariant)
+  | Prj_newtype (_, _, Ast_defs.Covariant)
+  | Prj_fn_arg (_, _, Ast_defs.Covariant) ->
+    dir (* Contravariant projections reverse data flow direction *)
+  | Prj_class (_, _, Ast_defs.Contravariant)
+  | Prj_newtype (_, _, Ast_defs.Contravariant)
+  | Prj_fn_arg (_, _, Ast_defs.Contravariant) ->
+    reverse_direction dir
+  (* We shouldn't see an invariant projections since we construct both the co- and contravariant propositions in these cases *)
+  | Prj_class (_, _, Ast_defs.Invariant)
+  | Prj_newtype (_, _, Ast_defs.Invariant)
+  | Prj_fn_arg (_, _, Ast_defs.Invariant) ->
+    failwith "expected a normalized reason"
+
+let to_path t =
+  let rec aux t ~dir ~k =
+    match t with
+    | Rflow (t1, t2) ->
+      aux t1 ~dir ~k:(fun p1 ->
+          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Direction dir :: p2)))
+    | Rprj (prj, t) ->
+      let dir = project prj dir in
+      aux t ~dir ~k:(fun t -> k @@ (Projection prj :: t) @ [Projection prj])
+    | Rrev _ -> failwith "expected a normalized reason"
+    | _ -> k @@ [Witness t]
+  in
+  aux t ~dir:Fwd ~k:(fun x -> x)
+
+let debug t =
+  let pos = to_raw_pos t in
+  let norm_t = normalize t in
+  let unnorm = Hh_json.json_to_string ~pretty:true @@ to_json t
+  and norm = Hh_json.json_to_string ~pretty:true @@ to_json norm_t
+  and path =
+    Hh_json.json_to_string ~pretty:true @@ path_to_json @@ to_path norm_t
+  in
+  [
+    (pos, "Unnormalized reason:\n" ^ unnorm);
+    (pos, "Normalized reason:\n" ^ norm);
+    (pos, "Path:\n" ^ path);
+  ]
+
 type t = locl_phase t_
 
 let pp : type ph. _ -> ph t_ -> unit = (fun fmt r -> pp_t_ fmt r)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e44b816852cc4fa651845e3d90d3df43>>
+// @generated SignedSource<<d9e7c57dfec420f2b441f50a8aed18de>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -373,6 +373,53 @@ pub enum T_ {
     Rflow(Box<T_>, Box<T_>),
     Rrev(Box<T_>),
     Rprj(Prj, Box<T_>),
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(u8)]
+pub enum Direction {
+    Fwd,
+    Bwd,
+}
+impl TrivialDrop for Direction {}
+arena_deserializer::impl_deserialize_in_arena!(Direction);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum PathElem {
+    Direction(Direction),
+    Projection(Prj),
+    Witness(T_),
 }
 
 pub type Reason = T_;

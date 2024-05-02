@@ -106,6 +106,8 @@ oxidized::typing_defs_core::TypePredicate
 oxidized::typing_defs_core::ValKind
 oxidized::typing_reason::ArgPosition
 oxidized::typing_reason::BlameSource
+oxidized::typing_reason::Direction
+oxidized::typing_reason::PathElem
 oxidized::user_error::Severity
 oxidized::xhp_attribute::Tag
 oxidized::xhp_attribute::XhpAttribute

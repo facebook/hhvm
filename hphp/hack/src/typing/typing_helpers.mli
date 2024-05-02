@@ -58,3 +58,24 @@ val hint_fun_decl :
   ret:Nast.type_hint ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option * Typing_defs.decl_ty option list
+
+module Prov : sig
+  val update :
+    Typing_defs.locl_ty ->
+    f:(Typing_reason.t -> Typing_reason.t) ->
+    env:Typing_env_types.env ->
+    Typing_defs.locl_ty
+
+  val flow : from:Typing_reason.t -> into:Typing_reason.t -> Typing_reason.t
+
+  val rev : Typing_reason.t -> Typing_reason.t
+
+  val prj_fn_arg :
+    Typing_reason.t ->
+    idx_sub:int ->
+    idx_super:int ->
+    var:Ast_defs.variance ->
+    Typing_reason.t
+
+  val prj_fn_ret : Typing_reason.t -> Typing_reason.t
+end

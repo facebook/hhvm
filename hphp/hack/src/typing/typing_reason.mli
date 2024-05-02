@@ -200,6 +200,8 @@ type t = locl_phase t_ [@@deriving show]
 
 val to_json : 'a t_ -> Hh_json.json
 
+val debug : t -> (Pos_or_decl.t * string) list
+
 type decl_t = decl_phase t_
 
 val is_none : t -> bool

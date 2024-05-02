@@ -24,6 +24,7 @@ module Cls = Folded_class
 module ITySet = Internal_type_set
 module MakeType = Typing_make_type
 module Nast = Aast
+module Prov = Typing_helpers.Prov
 
 (* We maintain a "visited" set for subtype goals. We do this only
  * for goals of the form T <: t or t <: T where T is a generic parameter,
@@ -734,10 +735,8 @@ module rec Subtype : sig
     check_return:bool ->
     for_override:bool ->
     super_like:bool ->
-    Reason.t ->
-    Typing_defs.locl_fun_type ->
-    Reason.t ->
-    Typing_defs.locl_fun_type ->
+    Reason.t * Typing_defs.locl_fun_type ->
+    Reason.t * Typing_defs.locl_fun_type ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
@@ -884,8 +883,7 @@ end = struct
       lower_bounds
       (SSet.empty, Typing_set.empty)
 
-  (* If it's clear from the syntax of the type that null isn't in ty, return true.
- *)
+  (** If it's clear from the syntax of the type that null isn't in ty, return true. *)
   let rec null_not_subtype ty =
     match get_node ty with
     | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
@@ -1368,23 +1366,39 @@ end = struct
 
   (* == Function subtyping ================================================== *)
   and simplify_subtype_params_with_variadic
-      ~(subtype_env : Subtype_env.t)
-      (fn_param_supers : locl_fun_param list)
-      (ty_sub : locl_ty)
+      ~subtype_env
+      (r_super, idx_super, fn_param_supers)
+      (r_sub, idx_sub, ty_sub)
       env =
-    let simplify_subtype_params_with_variadic_help =
-      simplify_subtype_params_with_variadic ~subtype_env
-    in
     match fn_param_supers with
     | [] -> valid env
     | { fp_type = ty_super; _ } :: fn_param_supers ->
-      simplify
-        ~subtype_env
-        ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
-        env
-      &&& simplify_subtype_params_with_variadic_help fn_param_supers ty_sub
+      let param_prop =
+        let ty_super =
+          Prov.(
+            update ty_super ~env ~f:(fun from ->
+                flow
+                  ~from
+                  ~into:
+                    (prj_fn_arg
+                       ~idx_sub:idx_super
+                       ~idx_super:idx_sub
+                       ~var:Ast_defs.Contravariant
+                    @@ flow ~from:r_super ~into:(rev r_sub))))
+        in
+
+        simplify
+          ~subtype_env
+          ~this_ty:None
+          ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+          ~rhs:
+            { super_like = false; super_supportdyn = false; ty_super = ty_sub }
+      in
+      param_prop env
+      &&& simplify_subtype_params_with_variadic
+            ~subtype_env
+            (r_super, idx_super + 1, fn_param_supers)
+            (r_sub, idx_sub, ty_sub)
 
   and simplify_subtype_implicit_params
       ~subtype_env { capability = sub_cap } { capability = super_cap } env =
@@ -1435,20 +1449,39 @@ end = struct
       valid env
 
   and simplify_supertype_params_with_variadic
-      ~(subtype_env : Subtype_env.t) fn_param_subs ty_super env =
-    let simplify_supertype_params_with_variadic_help =
-      simplify_supertype_params_with_variadic ~subtype_env
-    in
+      ~subtype_env
+      (r_sub, idx_sub, fn_param_subs)
+      (r_super, idx_super, ty_super)
+      env =
     match fn_param_subs with
     | [] -> valid env
     | { fp_type = ty_sub; _ } :: fn_param_subs ->
-      simplify
-        ~subtype_env
-        ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
-        env
-      &&& simplify_supertype_params_with_variadic_help fn_param_subs ty_super
+      let param_prop =
+        let ty_super =
+          Prov.(
+            update ty_super ~env ~f:(fun from ->
+                flow
+                  ~from
+                  ~into:
+                    (prj_fn_arg
+                       ~idx_sub:idx_super
+                       ~idx_super:idx_sub
+                       ~var:Ast_defs.Contravariant
+                    @@ flow ~from:r_super ~into:(rev r_sub))))
+        in
+
+        simplify
+          ~subtype_env
+          ~this_ty:None
+          ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+          ~rhs:
+            { super_like = false; super_supportdyn = false; ty_super = ty_sub }
+      in
+      param_prop env
+      &&& simplify_supertype_params_with_variadic
+            ~subtype_env
+            (r_sub, idx_sub + 1, fn_param_subs)
+            (r_super, idx_super, ty_super)
 
   and simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super env =
     let { fp_pos = pos1; _ } = fn_param_super in
@@ -1807,20 +1840,9 @@ end = struct
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
       ~for_override
-      (fn_params_sub : locl_fun_param list)
-      (fn_params_super : locl_fun_param list)
-      (variadic_sub_ty : bool)
-      (variadic_super_ty : bool)
+      (r_sub, idx_sub, fn_params_sub, variadic_sub_ty)
+      (r_super, idx_super, fn_params_super, variadic_super_ty)
       env =
-    let simplify_subtype_params_help =
-      simplify_subtype_params ~subtype_env ~for_override
-    in
-    let simplify_subtype_params_with_variadic_help =
-      simplify_subtype_params_with_variadic ~subtype_env
-    in
-    let simplify_supertype_params_with_variadic_help =
-      simplify_supertype_params_with_variadic ~subtype_env
-    in
     match (fn_params_sub, fn_params_super) with
     (* When either list runs out, we still have to typecheck that
        the remaining portion sub/super types with the other's variadic.
@@ -1848,34 +1870,95 @@ end = struct
        It should also check that string is a subtype of mixed.
     *)
     | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
-      simplify_subtype_params_with_variadic_help fn_params_super ty_sub env
+      simplify_subtype_params_with_variadic
+        ~subtype_env
+        (r_super, idx_super, fn_params_super)
+        (r_sub, idx_sub, ty_sub)
+        env
     | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
-      simplify_supertype_params_with_variadic_help fn_params_sub ty_super env
+      simplify_supertype_params_with_variadic
+        ~subtype_env
+        (r_sub, idx_sub, fn_params_sub)
+        (r_super, idx_super, ty_super)
+        env
     | ([], _) -> valid env
     | (_, []) -> valid env
     | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
       let { fp_type = ty_sub; _ } = fn_param_sub
       and { fp_type = ty_super; _ } = fn_param_super in
-      let subtype_env_for_param =
-        (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
-         * subtype of the dynamic type itself
-         *)
-        match get_node ty_sub with
-        | Tdynamic
-          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-               && for_override ->
-          Subtype_env.set_coercing_to_dynamic subtype_env
-        | _ -> subtype_env
+
+      (* Construct the subtype proposition for the two parameters; function
+         paramaters are contravariant unless they are marked with `inout`
+         in which case they are typed as invariant *)
+      let subty_prop =
+        let subtype_env_for_param =
+          (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
+           * subtype of the dynamic type itself
+           *)
+          match get_node ty_sub with
+          | Tdynamic
+            when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+                 && for_override ->
+            Subtype_env.set_coercing_to_dynamic subtype_env
+          | _ -> subtype_env
+        in
+        (* Construct the contravariant subtype proposition *)
+        let subty_prop_contra =
+          (* Update the provenance on the super type:
+             i) Reverse the direction of flow for the containing function-type reasons
+             ii) Record the projection into the ith function arg, treated as contravariant, of that function-type
+             iii) Record the flow from the supertype into that arg *)
+          let ty_super =
+            Prov.(
+              update ty_super ~env ~f:(fun from ->
+                  flow
+                    ~from
+                    ~into:
+                      (prj_fn_arg
+                         ~idx_sub:idx_super
+                         ~idx_super:idx_sub
+                         ~var:Ast_defs.Contravariant
+                      @@ flow ~from:r_super ~into:(rev r_sub))))
+          in
+          simplify
+            ~subtype_env:subtype_env_for_param
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = ty_sub;
+              }
+        in
+        (* For parameters with the `inout` calling convention also construct
+           the covariant subtype proposition *)
+        match (get_fp_mode fn_param_sub, get_fp_mode fn_param_super) with
+        | (FPinout, FPinout) ->
+          let subty_prop_co =
+            (* Update the provenance for the subtype:
+               i) Record the flow from the parent function types
+               ii) Record the projection in the ith arg, treated as covariant, of that function
+               iii) Record the flow from the subtype into that arg *)
+            let ty_sub =
+              Prov.(
+                update ty_sub ~env ~f:(fun from ->
+                    flow
+                      ~from
+                      ~into:
+                        (prj_fn_arg ~idx_sub ~idx_super ~var:Ast_defs.Covariant
+                        @@ flow ~from:r_sub ~into:r_super)))
+            in
+            simplify
+              ~subtype_env:subtype_env_for_param
+              ~this_ty:None
+              ~lhs:{ sub_supportdyn = None; ty_sub }
+              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          in
+          (fun env -> subty_prop_contra env &&& subty_prop_co)
+        | _ -> subty_prop_contra
       in
-      let simplify_subtype_for_param ty_sub ty_super env =
-        simplify
-          ~subtype_env:subtype_env_for_param
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
-          ~rhs:
-            { super_like = false; super_supportdyn = false; ty_super = ty_sub }
-          env
-      in
+
       (* Check that the calling conventions of the params are compatible. *)
       env
       |> simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super
@@ -1884,32 +1967,21 @@ end = struct
             ~subtype_env
             ~fn_param_sub
             ~fn_param_super
-      &&& begin
-            fun env ->
-              match (get_fp_mode fn_param_sub, get_fp_mode fn_param_super) with
-              | (FPinout, FPinout) ->
-                (* Inout parameters are invariant wrt subtyping for function types. *)
-                env
-                |> simplify_subtype_for_param ty_sub ty_super
-                &&& simplify_subtype_for_param ty_super ty_sub
-              | _ -> env |> simplify_subtype_for_param ty_sub ty_super
-          end
-      &&& simplify_subtype_params_help
-            fn_params_sub
-            fn_params_super
-            variadic_sub_ty
-            variadic_super_ty
+      &&& subty_prop
+      &&& simplify_subtype_params
+            ~subtype_env
+            ~for_override
+            (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
+            (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
 
   and simplify_funs
-      ~(subtype_env : Subtype_env.t)
-      ~(check_return : bool)
-      ~(for_override : bool)
+      ~subtype_env
+      ~check_return
+      ~for_override
       ~super_like
-      (r_sub : Reason.t)
-      (ft_sub : locl_fun_type)
-      (r_super : Reason.t)
-      (ft_super : locl_fun_type)
-      env : env * TL.subtype_prop =
+      (r_sub, ft_sub)
+      (r_super, ft_super)
+      env =
     (* First apply checks on attributes and variadic arity *)
     let simplify_subtype_implicit_params_help =
       simplify_subtype_implicit_params ~subtype_env
@@ -1924,10 +1996,8 @@ end = struct
       simplify_subtype_params
         ~subtype_env
         ~for_override
-        ft_sub.ft_params
-        ft_super.ft_params
-        (get_ft_variadic ft_sub)
-        (get_ft_variadic ft_super)
+        (r_sub, 0, ft_sub.ft_params, get_ft_variadic ft_sub)
+        (r_super, 0, ft_super.ft_params, get_ft_variadic ft_super)
     end
     &&& simplify_subtype_implicit_params_help
           ft_super.ft_implicit_params
@@ -1935,7 +2005,7 @@ end = struct
     &&&
     (* Finally do covariant subtyping on return type *)
     if check_return then
-      let super_ty = Sd.liken ~super_like env ft_super.ft_ret in
+      let ty_super = Sd.liken ~super_like env ft_super.ft_ret in
       let subtype_env =
         if
           TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
@@ -1945,8 +2015,8 @@ end = struct
            * to override Awaitable<dynamic> and and Awaitable<t> to
            * override ~Awaitable<dynamic>.
            *)
-          let super_ty = TUtils.strip_dynamic env super_ty in
-          match get_node super_ty with
+          let ty_super = TUtils.strip_dynamic env ty_super in
+          match get_node ty_super with
           | Tdynamic -> Subtype_env.set_coercing_to_dynamic subtype_env
           | Tclass ((_, class_name), _, [ty])
             when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty
@@ -1956,12 +2026,20 @@ end = struct
         else
           subtype_env
       in
+      (* Update the provenance for the subtype:
+         i) Record the flow from the parent function types
+         ii) Record the projection on the return type of that function
+         iii) Record the flow from the subtype into that return type *)
+      let ty_sub =
+        Prov.(
+          update ft_sub.ft_ret ~env ~f:(fun from ->
+              flow ~from ~into:(prj_fn_ret @@ flow ~from:r_sub ~into:r_super)))
+      in
       simplify
         ~subtype_env
         ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub = ft_sub.ft_ret }
-        ~rhs:
-          { super_like = false; super_supportdyn = false; ty_super = super_ty }
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
     else
       valid
 
@@ -3525,7 +3603,7 @@ end = struct
             ~lhs:{ sub_supportdyn; ty_sub = ty }
             ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             env
-        | (_, Tfun ft_sub) ->
+        | (r_sub, Tfun ft_sub) ->
           if get_ft_support_dynamic_type ft_sub then
             valid env
           else
@@ -3534,19 +3612,30 @@ end = struct
              *   iff
              *   dynamic <D: ty1 & ... & dynamic <D: tyn & ty <D: dynamic
              *)
-            let ty_dyn_enf = ty_super in
-            env
             (* Contravariant subtyping on parameters *)
-            |> simplify_supertype_params_with_variadic
-                 ~subtype_env
-                 ft_sub.ft_params
-                 ty_dyn_enf
-            &&& (* Finally do covariant subtryping on return type *)
-            simplify
-              ~subtype_env
-              ~this_ty:None
-              ~lhs:{ sub_supportdyn; ty_sub = ft_sub.ft_ret }
-              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            let param_props =
+              simplify_supertype_params_with_variadic
+                ~subtype_env
+                (r_sub, 0, ft_sub.ft_params)
+                (r_dynamic, 0, ty_super)
+            in
+            (* Finally do covariant subtyping on return type *)
+            let ret_prop =
+              let ty_sub =
+                Prov.(
+                  update ft_sub.ft_ret ~env ~f:(fun from ->
+                      flow
+                        ~from
+                        ~into:(prj_fn_ret @@ flow ~from:r_sub ~into:r_dynamic)))
+              in
+
+              simplify
+                ~subtype_env
+                ~this_ty:None
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            in
+            param_props env &&& ret_prop
         | (_, Ttuple tyl) ->
           List.fold_left
             ~init:(env, TL.valid)
@@ -3846,10 +3935,8 @@ end = struct
         ~check_return:true
         ~for_override:false
         ~super_like
-        r_sub
-        ft_sub
-        r_super
-        ft_super
+        (r_sub, ft_sub)
+        (r_super, ft_super)
         env
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
@@ -7486,10 +7573,8 @@ let subtype_funs
       ~check_return
       ~for_override
       ~super_like:false
-      r_sub
-      ft_sub
-      r_super
-      ft_super
+      (r_sub, ft_sub)
+      (r_super, ft_super)
       env
   in
   let (env, ty_err) =

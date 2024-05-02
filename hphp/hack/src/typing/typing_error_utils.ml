@@ -5756,7 +5756,16 @@ end = struct
          Typing_reason.to_string ("Expected " ^ ty_super_descr) r_super
        in
        let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
-       left @ right)
+       let reasons = left @ right in
+       (* If the extended reasons flag is set, we output the debug data  *)
+       if
+         TypecheckerOptions.tco_extended_reasons
+           Typing_env_types.(env.genv.tcopt)
+       then
+         let flow = Typing_reason.(debug @@ Rflow (r_sub, r_super)) in
+         reasons @ flow
+       else
+         reasons)
 
   let subtyping_error is_coeffect stripped_existential ~ty_sub ~ty_sup env =
     ( Error_code.UnifyError,

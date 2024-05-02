@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<68c6e984d901ce3a549425b700dfd136>>
+// @generated SignedSource<<a9d411abddea2a644b828a72e16c53ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -493,6 +493,9 @@ pub enum T_<'a> {
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);
+
+pub use oxidized::typing_reason::Direction;
+pub use oxidized::typing_reason::PathElem;
 
 pub type Reason<'a> = T_<'a>;
 

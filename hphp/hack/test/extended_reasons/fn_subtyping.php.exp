@@ -1,0 +1,485 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
+  }
+] [3]
+
+fn_subtyping.php:8:9
+    4 | class Sub extends Super {}
+    5 | 
+[2] 6 | function foo_0(Sub $_): void {}
+[3] 7 | function bar_0(Super $f): void {
+[1] 8 |   foo_0($f);
+    9 | }
+   10 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":26,"char_end":30}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":16,"char_end":38}]
+                },
+                {
+                  "Rrev":[
+                    {
+                      "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":26,"char_end":28}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":26,"char_end":30}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":16,"char_end":38}]
+                },
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":26,"char_end":28}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":26,"char_end":30}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":16,"char_end":38}]
+  },
+  {"Bwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":26,"char_end":28}]
+  }
+] [3]
+
+fn_subtyping.php:13:9
+     9 | }
+    10 | 
+[3] 11 | function foo_1((function(Super): void) $_): void {}
+[2] 12 | function bar_1((function(Sub): void) $f): void {
+[1] 13 |   foo_1($f);
+    14 | }
+    15 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":36,"char_end":40}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":26,"char_end":48}]
+                },
+                {
+                  "Rrev":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":26,"char_end":46}]
+                        },
+                        {
+                          "Rprj":[
+                            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":16,"char_end":54}]
+                                },
+                                {
+                                  "Rrev":[
+                                    {
+                                      "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":36,"char_end":38}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":36,"char_end":40}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":26,"char_end":48}]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rprj":[
+                        {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                            },
+                            {
+                              "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":16,"char_end":54}]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":26,"char_end":46}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":36,"char_end":38}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":36,"char_end":40}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":26,"char_end":48}]
+  },
+  {"Bwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":16,"char_end":54}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Bwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":26,"char_end":46}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":36,"char_end":38}]
+  }
+] [3]
+
+fn_subtyping.php:18:9
+    14 | }
+    15 | 
+[2] 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+[3] 17 | function bar_2((function((function(Super): void)): void) $f): void {
+[1] 18 |   foo_2($f);
+    19 | }
+    20 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":40,"char_end":44}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":25,"char_end":51}]
+                },
+                {
+                  "Rrev":[
+                    {
+                      "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":35,"char_end":37}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":40,"char_end":44}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":25,"char_end":51}]
+                },
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":35,"char_end":37}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":40,"char_end":44}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":25,"char_end":51}]
+  },
+  {"Bwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+  },
+  {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":35,"char_end":37}]
+  }
+] [3]
+
+fn_subtyping.php:23:18
+    19 | }
+    20 | 
+[3] 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+[2] 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+[1] 23 |   foo_variadic_1($x);
+    24 | }
+    25 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":40,"char_end":44}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":25,"char_end":54}]
+                },
+                {
+                  "Rrev":[
+                    {
+                      "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":35,"char_end":37}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":40,"char_end":44}]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":25,"char_end":54}]
+                },
+                {
+                  "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":35,"char_end":37}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":40,"char_end":44}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":25,"char_end":54}]
+  },
+  {"Bwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+  },
+  {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":35,"char_end":37}]
+  }
+] [3]
+
+fn_subtyping.php:29:18
+    25 | 
+    26 | 
+[3] 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+[2] 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+[1] 29 |   foo_variadic_2($x);
+    30 | }
+
+5 errors found.

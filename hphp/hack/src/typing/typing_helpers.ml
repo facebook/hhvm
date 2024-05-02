@@ -162,3 +162,20 @@ let hint_fun_decl ~params ~ret env =
       params
   in
   (ret_decl_ty, params_decl_ty)
+
+module Prov = struct
+  let update ty ~f ~env =
+    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+      map_reason ty ~f
+    else
+      ty
+
+  let flow ~from ~into = Typing_reason.Rflow (from, into)
+
+  let rev r = Typing_reason.Rrev r
+
+  let prj_fn_arg r ~idx_sub ~idx_super ~var =
+    Typing_reason.(Rprj (Prj_fn_arg (idx_sub, idx_super, var), r))
+
+  let prj_fn_ret r = Typing_reason.(Rprj (Prj_fn_ret, r))
+end

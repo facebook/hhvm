@@ -225,7 +225,6 @@
   typing_exts
   typing_func_terminality
   typing_generic_rules
-  typing_helpers
   typing_lenv
   typing_local_ops
   typing_native
@@ -319,6 +318,7 @@
   typing_enum
   typing_intersection
   typing_generic_constraint
+  typing_helpers
   typing_kinding
   typing_logic_helpers
   typing_object_get

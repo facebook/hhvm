@@ -19,6 +19,7 @@ import unittest
 
 from folly.iobuf import IOBuf
 from testing.types import Color, ComplexUnion, easy, Integers, IOBufUnion, ReservedUnion
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Union
@@ -65,6 +66,7 @@ class UnionTests(unittest.TestCase):
         x = deserialize(Integers, b"{}", Protocol.JSON)
         self.assertEqual(x.type, Integers.Type.EMPTY)
 
+    @brokenInAutoMigrate()
     def test_union_usage(self) -> None:
         value = hash("i64")
         x = Integers(large=value)
@@ -104,6 +106,7 @@ class UnionTests(unittest.TestCase):
         union = Integers.fromValue(large)
         self.assertEqual(union.type, Integers.Type.large)
 
+    @brokenInAutoMigrate()
     def test_complexunion_fromValue(self) -> None:
         tiny = 2**7 - 1
         large = 2**63 - 1
@@ -136,6 +139,7 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(union.type, IOBufUnion.Type.buf)
         self.assertEqual(bytes(union.buf), bytes(abuf))
 
+    @brokenInAutoMigrate()
     def test_reserved_union(self) -> None:
         x = ReservedUnion(from_="foo")
         self.assertIsInstance(x, Union)

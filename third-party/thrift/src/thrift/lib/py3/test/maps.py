@@ -26,6 +26,7 @@ from testing.types import (
     StrStrIntListMapMap,
     StrStrMap,
 )
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
 
@@ -123,6 +124,7 @@ class MapTests(unittest.TestCase):
         self.assertEqual(x, x)
         self.assertEqual(y, y)
 
+    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(LocationMap, Container)
         self.assertIsInstance(StrI32ListMap(), Container)

@@ -20,6 +20,7 @@ import unittest
 from typing import AbstractSet, Sequence, Tuple
 
 from testing.types import SetI32, SetI32Lists, SetSetI32Lists
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
 
@@ -160,6 +161,7 @@ class SetTests(unittest.TestCase):
         for sub_set in z:
             hash(sub_set)
 
+    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(SetI32Lists(), Container)
         self.assertIsInstance(SetSetI32Lists(), Container)

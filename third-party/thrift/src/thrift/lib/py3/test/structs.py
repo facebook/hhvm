@@ -38,12 +38,14 @@ from testing.types import (
     StringBucket,
     UnusedError,
 )
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct
 
 
 class StructTests(unittest.TestCase):
+    @brokenInAutoMigrate()
     def test_isset_Struct(self) -> None:
         serialized = b'{"name":"/dev/null","type":8}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)
@@ -65,6 +67,7 @@ class StructTests(unittest.TestCase):
         #  param but got `File`.
         self.assertFalse(Struct.isset(file).type)
 
+    @brokenInAutoMigrate()
     def test_isset_repr(self) -> None:
         serialized = b'{"name":"/dev/null","type":8}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)
@@ -88,6 +91,7 @@ class StructTests(unittest.TestCase):
             #  1st param but got `Integers`.
             Struct.isset(i).large
 
+    @brokenInAutoMigrate()
     def test_isset_Error(self) -> None:
         e = UnusedError()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
@@ -109,6 +113,7 @@ class StructTests(unittest.TestCase):
     def test_hashability(self) -> None:
         hash(easy())
 
+    @brokenInAutoMigrate()
     def test_str(self) -> None:
         self.assertEqual(
             "easy(name=None, val=0, val_list=i[], an_int=Integers(type=EMPTY, value=None))",
@@ -234,6 +239,7 @@ class StructTests(unittest.TestCase):
         self.assertEqual(x, x2)
         self.assertNotEqual(x, y)
 
+    @brokenInAutoMigrate()
     def test_noncopyable(self) -> None:
         x = NonCopyable(num=123)
         with self.assertRaises(TypeError):
@@ -248,6 +254,7 @@ class StructTests(unittest.TestCase):
             # pyre-ignore[28]: intentionally used a wrong field name "val_lists" for test
             easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
 
+    @brokenInAutoMigrate()
     def test_iterate(self) -> None:
         x = Reserved(
             from_="hello",
@@ -287,17 +294,20 @@ class StructTests(unittest.TestCase):
             ],
         )
 
+    @brokenInAutoMigrate()
     def test_dir(self) -> None:
         expected = ["__iter__", "an_int", "name", "val", "val_list"]
         self.assertEqual(expected, dir(easy()))
         self.assertEqual(expected, dir(easy))
         self.assertEqual(["__iter__"], dir(Struct))
 
+    @brokenInAutoMigrate()
     def test_update_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = Struct.update_nested_field(n, {"a.b.c": easy(val=128)})
         self.assertEqual(n.a.b.c.val, 128)
 
+    @brokenInAutoMigrate()
     def test_update_multiple_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = Struct.update_nested_field(
@@ -310,6 +320,7 @@ class StructTests(unittest.TestCase):
         self.assertEqual(n.a.b.c.name, "bar")
         self.assertEqual(n.a.b.c.val, 256)
 
+    @brokenInAutoMigrate()
     def test_update_invalid_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         with self.assertRaises(ValueError):
@@ -321,6 +332,7 @@ class StructTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Struct.update_nested_field(n, {"a.e.f": 0})
 
+    @brokenInAutoMigrate()
     def test_update_conflicting_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         with self.assertRaises(ValueError):

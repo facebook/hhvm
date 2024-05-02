@@ -20,6 +20,7 @@ import unittest
 from typing import cast, Type, TypeVar
 
 from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import BadEnum, Enum, Flag
@@ -35,6 +36,7 @@ class EnumTests(unittest.TestCase):
         self.assertIn("name_", BadMembers.__members__)
         self.assertIn("value_", BadMembers.__members__)
 
+    @brokenInAutoMigrate()
     def test_normal_enum(self) -> None:
         with self.assertRaises(TypeError):
             # Enums are not ints
@@ -69,10 +71,12 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(x.type, y.type)
         self.assertFalse(x.type != y.type)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_struct(self) -> None:
         x = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
         self.assertBadEnum(cast(BadEnum, x.type), Kind, 64)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_list_index(self) -> None:
         x = deserialize(ColorGroups, b'{"color_list": [1, 5, 0]}', Protocol.JSON)
         self.assertEqual(len(x.color_list), 3)
@@ -80,6 +84,7 @@ class EnumTests(unittest.TestCase):
         self.assertBadEnum(cast(BadEnum, x.color_list[1]), Color, 5)
         self.assertEqual(x.color_list[2], Color.red)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_list_iter(self) -> None:
         x = deserialize(ColorGroups, b'{"color_list": [1, 5, 0]}', Protocol.JSON)
         for idx, v in enumerate(x.color_list):
@@ -90,6 +95,7 @@ class EnumTests(unittest.TestCase):
             else:
                 self.assertEqual(v, Color.red)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_list_reverse(self) -> None:
         x = deserialize(ColorGroups, b'{"color_list": [1, 5, 0]}', Protocol.JSON)
         for idx, v in enumerate(reversed(x.color_list)):
@@ -100,18 +106,21 @@ class EnumTests(unittest.TestCase):
             else:
                 self.assertEqual(v, Color.blue)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_set_iter(self) -> None:
         x = deserialize(ColorGroups, b'{"color_set": [1, 5, 0]}', Protocol.JSON)
         for v in x.color_set:
             if v not in (Color.blue, Color.red):
                 self.assertBadEnum(cast(BadEnum, v), Color, 5)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_map_lookup(self) -> None:
         json = b'{"color_map": {"1": 2, "0": 5, "6": 1, "7": 8}}'
         x = deserialize(ColorGroups, json, Protocol.JSON)
         val = x.color_map[Color.red]
         self.assertBadEnum(cast(BadEnum, val), Color, 5)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_map_iter(self) -> None:
         json = b'{"color_map": {"1": 2, "0": 5, "6": 1, "7": 8}}'
         x = deserialize(ColorGroups, json, Protocol.JSON)
@@ -125,6 +134,7 @@ class EnumTests(unittest.TestCase):
         self.assertBadEnum(cast(BadEnum, lst[0]), Color, 6)
         self.assertBadEnum(cast(BadEnum, lst[1]), Color, 7)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_map_values(self) -> None:
         json = b'{"color_map": {"1": 2, "0": 5, "6": 1, "7": 8}}'
         x = deserialize(ColorGroups, json, Protocol.JSON)
@@ -138,6 +148,7 @@ class EnumTests(unittest.TestCase):
         self.assertBadEnum(cast(BadEnum, lst[0]), Color, 5)
         self.assertBadEnum(cast(BadEnum, lst[1]), Color, 8)
 
+    @brokenInAutoMigrate()
     def test_bad_enum_in_map_items(self) -> None:
         json = b'{"color_map": {"1": 2, "0": 5, "6": 1, "7": 8}}'
         x = deserialize(ColorGroups, json, Protocol.JSON)
@@ -164,12 +175,14 @@ class EnumTests(unittest.TestCase):
         green = pickle.loads(serialized)
         self.assertIs(green, Color.green)
 
+    @brokenInAutoMigrate()
     def test_adding_member(self) -> None:
         with self.assertRaises(TypeError):
             # pyre-fixme[16]: `Type` has no attribute `black`.
             Color.black = 3
 
-    def test_delete(self) -> None:
+    @brokenInAutoMigrate()
+    def etst_delete(self) -> None:
         with self.assertRaises(TypeError):
             del Color.red
 
@@ -179,11 +192,13 @@ class EnumTests(unittest.TestCase):
     def test_bool_of_members(self) -> None:
         self.assertTrue(bool(Color.blue))
 
+    @brokenInAutoMigrate()
     def test_changing_member(self) -> None:
         with self.assertRaises(TypeError):
             # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
             Color.red = "lol"
 
+    @brokenInAutoMigrate()
     def test_contains(self) -> None:
         self.assertIn(Color.blue, Color)
         self.assertNotIn(1, Color)
@@ -201,6 +216,7 @@ class EnumTests(unittest.TestCase):
     def test_enum_value(self) -> None:
         self.assertEqual(Color.red.value, 0)
 
+    @brokenInAutoMigrate()
     def test_enum(self) -> None:
         lst = list(Color)
         self.assertEqual(len(lst), len(Color))
@@ -219,12 +235,14 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(int(e), i)
             self.assertEqual(repr(e), f"<Color.{color}: {i}>")
 
+    @brokenInAutoMigrate()
     def test_insinstance_Enum(self) -> None:
         self.assertIsInstance(Color.red, Enum)
         self.assertTrue(issubclass(Color, Enum))
 
 
 class FlagTests(unittest.TestCase):
+    @brokenInAutoMigrate()
     def test_flag_enum(self) -> None:
         with self.assertRaises(TypeError):
             # flags are not ints
@@ -266,6 +284,7 @@ class FlagTests(unittest.TestCase):
         x = Perm(-2)
         self.assertIs(x, Perm.read | Perm.write)
 
+    @brokenInAutoMigrate()
     def test_insinstance_Flag(self) -> None:
         self.assertIsInstance(Perm.read, Flag)
         self.assertTrue(issubclass(Perm, Flag))

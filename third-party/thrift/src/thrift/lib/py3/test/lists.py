@@ -19,6 +19,7 @@ import itertools
 import unittest
 
 from testing.types import easy, I32List, int_list, StringList, StrList2D, Uint32List
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
 
@@ -49,6 +50,7 @@ class ListTests(unittest.TestCase):
             #  `List[typing.Union[typing.List[None], typing.List[str]]]`.
             StrList2D([a, [None]])
 
+    @brokenInAutoMigrate()
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]
         new_list = int_list + other_list
@@ -138,6 +140,7 @@ class ListTests(unittest.TestCase):
         #  got `List__i32`.
         self.assertGreaterEqual(x, x2)
 
+    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(int_list, Container)
         self.assertIsInstance(I32List([1, 2, 3]), Container)

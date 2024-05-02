@@ -117,8 +117,16 @@ typename Container::reference emplace_back_default(Container& c) {
 
 template <typename Container, typename Map>
 typename Container::reference emplace_back_default_map(Container& c, Map& m) {
-  return c.emplace_back(
-      detail::default_map_key(m), detail::default_map_value(m));
+  constexpr auto pass_alloc =
+      alloc_should_propagate<Map, typename Map::key_type> ||
+      alloc_should_propagate<Map, typename Map::mapped_type>;
+  if constexpr (pass_alloc) {
+    return c.emplace_back(
+        typename Map::key_type(m.get_allocator()),
+        typename Map::mapped_type(m.get_allocator()));
+  } else {
+    return c.emplace_back();
+  }
 }
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>

@@ -37,9 +37,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
 
-    cdef object createImmutableStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createMutableStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
     cdef object createStructTupleWithNones(const cStructInfo& structInfo)
-    cdef void populateImmutableStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
+    cdef void populateMutableStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
     cdef void resetFieldToStandardDefault(object, const cStructInfo& structInfo, int index) except+
     cdef void setStructIsset(object, int index, bint set) except+
 

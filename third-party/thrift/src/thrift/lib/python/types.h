@@ -89,7 +89,8 @@ PyObject* createUnionTuple();
 PyObject* createStructTuple(int16_t numFields);
 
 /**
- * Returns a new "immutable struct tuple" with all its elements initialized.
+ * Returns a new "struct tuple" associated with an immutable Thrift struct,
+ * all elements initialized with default values.
  *
  * As in `createStructTuple()`, the first element of the tuple is a
  * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
@@ -117,6 +118,21 @@ PyObject* createStructTuple(int16_t numFields);
  * `Py_False`.
  */
 PyObject* createImmutableStructTupleWithDefaultValues(
+    const detail::StructInfo& structInfo);
+
+/**
+ * Returns a new "struct tuple" associated with an mutable Thrift struct,
+ * all elements initialized with default values.
+ *
+ * This function is very similar to its immutable counterpart. Please see the
+ * `createImmutableStructTupleWithDefaultValues()` documentation for more
+ * details.
+ *
+ * The following list only highlights the difference for the "standard" value
+ * for the corresponding type:
+ *   * In the mutable version, the standard value for lists is an empty `list`.
+ */
+PyObject* createMutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo);
 
 /**
@@ -151,7 +167,8 @@ void setStructIsset(void* object, int16_t index, bool value);
 PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
 
 /**
- * Populates only unset fields of "immutable struct tuple" with default values.
+ * Populates unset fields of a immutable Thrift struct's "struct tuple" with
+ * default values.
  *
  * The `object` should be a valid `tuple` created by `createStructTuple()`
  *
@@ -162,6 +179,21 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
  *
  */
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
+    PyObject* object, const detail::StructInfo& structInfo);
+
+/**
+ * Populates unset fields of a mutable Thrift struct's "struct tuple" with
+ * default values.
+ *
+ * This function is very similar to its immutable counterpart. Please see the
+ * `populateImmutableStructTupleUnsetFieldsWithDefaultValues()` documentation.
+ * The only difference is the "standard" value for the corresponding type.
+ *
+ * See `getStandard{Mutable,Immutable}DefaultValueForType()` documentation.
+ *
+ * Throws on error
+ */
+void populateMutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* object, const detail::StructInfo& structInfo);
 
 /**

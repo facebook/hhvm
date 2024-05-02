@@ -42,10 +42,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         Args:
             value: should be an instance of `self._mutable_struct_class`, Otherwise, raises `TypeError`.
 
-        Returns: The "mutable struct tuple" of the given value (see `createImmutableStructTupleWithDefaultValues()`).
-            Note: The documentation above refers to the `*Immutable*` function at this stage, as the mutable
-              implementation is incomplete and it uses some of the immutable implementation, this will be
-              corrected in follow-up diffs.
+        Returns: The "mutable struct tuple" of the given value (see `createMutableStructTupleWithDefaultValues()`).
 
         Raises:
             TypeError if `value` is not an instance of `self._mutable_struct_class`

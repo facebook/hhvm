@@ -97,10 +97,7 @@ cdef class MutableStruct(MutableStructOrUnion):
 
     Instance variables:
         _fbthrift_data: "mutable struct tuple" that holds the "isset" flag array and
-            values for all fields. See `createImmutableStructTupleWithDefaultValues()`.
-            Note: The documentation above refers to the `*Immutable*` function at this
-            stage, as the mutable implementation is incomplete and it uses some of the
-            immutable implementation, this will be corrected in follow-up diffs.
+            values for all fields. See `createMutableStructTupleWithDefaultValues()`.
     """
 
     def __cinit__(self, **kwargs):
@@ -123,7 +120,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         # If no keyword arguments are provided, initialize the Struct with
         # default values.
         if not kwargs:
-            self._fbthrift_data = createImmutableStructTupleWithDefaultValues(mutable_struct_info.cpp_obj.get().getStructInfo())
+            self._fbthrift_data = createMutableStructTupleWithDefaultValues(mutable_struct_info.cpp_obj.get().getStructInfo())
             return
 
         # Instantiate a tuple with 'None' values, then assign the provided
@@ -138,7 +135,7 @@ cdef class MutableStruct(MutableStructOrUnion):
 
         # If any fields remain unset, initialize them with their respective
         # default values.
-        populateImmutableStructTupleUnsetFieldsWithDefaultValues(
+        populateMutableStructTupleUnsetFieldsWithDefaultValues(
                 self._fbthrift_data,
                 mutable_struct_info.cpp_obj.get().getStructInfo()
         )

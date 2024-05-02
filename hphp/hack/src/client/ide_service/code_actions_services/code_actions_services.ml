@@ -83,7 +83,7 @@ let to_action Code_action_types.{ title; edits; kind; selection } =
               ~equal:Relative_path.equal
               selection
           in
-          let command = Lsp_extra_commands.set_selection range in
+          let command = Lsp_extra_commands.set_selection range ~command:None in
           Lsp.CodeAction.BothEditThenCommand (Lazy.force workspace_edit, command)
         end
   in

@@ -34,15 +34,30 @@ module Command = struct
 
   let set_selection : t =
     { title = "Set Cursor Selection"; command = "hack.setSelection" }
+
+  let trigger_inline_suggest : t =
+    {
+      title = "Trigger Inline Suggest";
+      command = "editor.action.inlineSuggest.trigger";
+    }
 end
 
-let set_selection (range : Lsp.range) : Lsp.Command.t =
-  Command.to_lsp Command.set_selection [Lsp_fmt.print_range range]
+let set_selection (range : Lsp.range) ~(command : Lsp.Command.t option) :
+    Lsp.Command.t =
+  let command_arg =
+    match command with
+    | None -> []
+    | Some command -> [Lsp_fmt.print_command command]
+  in
+  Command.to_lsp
+    Command.set_selection
+    ([Lsp_fmt.print_range range] @ command_arg)
 
 let parse_set_selection : Lsp.Command.t -> (Lsp.range option, string) Result.t =
   Command.from_lsp Command.set_selection @@ fun args ->
   match args with
-  | [range] -> begin
+  | [range]
+  | [range; _ (* command *)] -> begin
     try Ok (Lsp_fmt.parse_range_exn (Some range)) with
     | Hh_json_helpers.Jget.Parse error ->
       Error (Printf.sprintf "parse_range_exn: Jget: %s" error)
@@ -50,5 +65,7 @@ let parse_set_selection : Lsp.Command.t -> (Lsp.range option, string) Result.t =
   | xs ->
     Error
       (Printf.sprintf
-         "expected exactly one argument, but got %d"
+         "expected one or two arguments, but got %d"
          (List.length xs))
+
+let trigger_inline_suggest = Command.to_lsp Command.trigger_inline_suggest []

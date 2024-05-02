@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+    Note these functions are considered INTERNAL and no longer recommended for end use.
+    Please use the python_capi converter cython module, imported like:
+        from cimport <py3_namespace>.<module_name>.converter cimport (
+            <TypePythonName>_convert_to_cpp,
+            <TypePythonName>_from_cpp,
+        )
+    Using the converter module requires only a single import cython dep:
+        "//path/to/package:<thrift_module_name>-python_capi-types-converter"
+"""
+
 
 cdef extern from "thrift/lib/python/capi/cpp_converter.h" namespace "apache::thrift::python::capi":
     # raises python error on failure

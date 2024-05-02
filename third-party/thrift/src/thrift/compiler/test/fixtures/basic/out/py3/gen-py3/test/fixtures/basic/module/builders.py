@@ -49,9 +49,35 @@ class MyDataItem_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         pass
 
+_fbthrift_struct_type__MyUnion = _test_fixtures_basic_module_types.MyUnion
+class MyUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__MyUnion
+
+    def __init__(self):
+        self.myEnum: _typing.Optional[_test_fixtures_basic_module_types.MyEnum] = None
+        self.myStruct: _typing.Any = None
+        self.myDataItem: _typing.Any = None
+        self.floatSet: _typing.Optional[set] = None
+
+    def __iter__(self):
+        yield "myEnum", self.myEnum
+        yield "myStruct", self.myStruct
+        yield "myDataItem", self.myDataItem
+        yield "floatSet", self.floatSet
+
 _fbthrift_struct_type__ReservedKeyword = _test_fixtures_basic_module_types.ReservedKeyword
 class ReservedKeyword_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__ReservedKeyword
+
+    def __init__(self):
+        self.reserved_field: _typing.Optional[int] = None
+
+    def __iter__(self):
+        yield "reserved_field", self.reserved_field
+
+_fbthrift_struct_type__UnionToBeRenamed = _test_fixtures_basic_module_types.UnionToBeRenamed
+class UnionToBeRenamed_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__UnionToBeRenamed
 
     def __init__(self):
         self.reserved_field: _typing.Optional[int] = None

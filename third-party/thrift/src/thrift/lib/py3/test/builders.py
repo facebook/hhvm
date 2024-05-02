@@ -24,9 +24,10 @@ from testing.builders import (
     easy_Builder,
     File_Builder,
     HardError_Builder,
-    Nested3_Builder,
+    Integers_Builder,
     numerical_Builder,
     Reserved_Builder,
+    ValueOrError_Builder,
 )
 
 
@@ -70,13 +71,14 @@ class BuilderTest(unittest.TestCase):
 
     def test_build_with_builder_fields(self) -> None:
         easy_builder = easy_Builder()
+        integers_builder = Integers_Builder()
         digits_builder = Digits_Builder()
         digits_builder.data = [
             _types.Integers.fromValue(123),
             _types.Integers.fromValue(456),
         ]
-        ints = _types.Integers(digits=digits_builder())
-        easy_builder.an_int = ints
+        integers_builder.digits = digits_builder
+        easy_builder.an_int = integers_builder
         easy_obj = easy_builder()
         self.assertIsInstance(easy_obj, _types.easy)
         an_int_value = easy_obj.an_int.value
@@ -99,10 +101,12 @@ class BuilderTest(unittest.TestCase):
         ]  # OK now as builder doesn't check list element types
         with self.assertRaises(TypeError):
             easy_builder()  # caught at build step
-        nested_builder = Nested3_Builder()
-        nested_builder.c = "wrong!"  # OK now as builder takes any type for struct field
+        value_or_error_builder = ValueOrError_Builder()
+        value_or_error_builder.error = (
+            "wrong!"  # OK now as builder takes any type for struct field
+        )
         with self.assertRaises(TypeError):
-            nested_builder()  # caught at build step
+            value_or_error_builder()  # caught at build step
 
     def test_reserved_names(self) -> None:
         builder = Reserved_Builder()

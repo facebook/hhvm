@@ -13,6 +13,28 @@ import thrift.py3.builder
 import module.types as _module_types
 
 
+_fbthrift_struct_type__MyUnion = _module_types.MyUnion
+class MyUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__MyUnion
+
+    def __init__(self):
+        self.anInteger: _typing.Optional[int] = None
+        self.aString: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "anInteger", self.anInteger
+        yield "aString", self.aString
+
+_fbthrift_struct_type__NonTriviallyDestructibleUnion = _module_types.NonTriviallyDestructibleUnion
+class NonTriviallyDestructibleUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__NonTriviallyDestructibleUnion
+
+    def __init__(self):
+        self.int_field: _typing.Optional[int] = None
+
+    def __iter__(self):
+        yield "int_field", self.int_field
+
 _fbthrift_struct_type__MyField = _module_types.MyField
 class MyField_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__MyField

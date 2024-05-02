@@ -23,3 +23,13 @@ class Empty_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         pass
 
+_fbthrift_struct_type__Nada = _module_types.Nada
+class Nada_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__Nada
+
+    def __init__(self):
+        pass
+
+    def __iter__(self):
+        pass
+

@@ -74,6 +74,82 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "MyCustomField", self.MyCustomField
         yield "MyOptCustomField", self.MyOptCustomField
 
+_fbthrift_struct_type__SimpleUnion = _module_types.SimpleUnion
+class SimpleUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__SimpleUnion
+
+    def __init__(self):
+        self.intValue: _typing.Optional[int] = None
+        self.stringValue: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "intValue", self.intValue
+        yield "stringValue", self.stringValue
+
+_fbthrift_struct_type__ComplexUnion = _module_types.ComplexUnion
+class ComplexUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ComplexUnion
+
+    def __init__(self):
+        self.intValue: _typing.Optional[int] = None
+        self.opt_intValue: _typing.Optional[int] = None
+        self.stringValue: _typing.Optional[str] = None
+        self.opt_stringValue: _typing.Optional[str] = None
+        self.intValue2: _typing.Optional[int] = None
+        self.intValue3: _typing.Optional[int] = None
+        self.doubelValue: _typing.Optional[float] = None
+        self.boolValue: _typing.Optional[bool] = None
+        self.union_list: _typing.Optional[list] = None
+        self.union_set: _typing.Optional[set] = None
+        self.union_map: _typing.Optional[dict] = None
+        self.opt_union_map: _typing.Optional[dict] = None
+        self.enum_field: _typing.Optional[_module_types.MyEnumA] = None
+        self.enum_container: _typing.Optional[list] = None
+        self.a_struct: _typing.Any = None
+        self.a_set_struct: _typing.Optional[set] = None
+        self.a_union: _typing.Any = None
+        self.opt_a_union: _typing.Any = None
+        self.a_union_list: _typing.Optional[list] = None
+        self.a_union_typedef: _typing.Optional[set] = None
+        self.a_union_typedef_list: _typing.Optional[list] = None
+        self.MyBinaryField: _typing.Optional[bytes] = None
+        self.MyBinaryField2: _typing.Optional[bytes] = None
+        self.MyBinaryListField4: _typing.Optional[list] = None
+        self.ref_field: _typing.Any = None
+        self.ref_field2: _typing.Any = None
+        self.excp_field: _typing.Any = None
+        self.MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf] = None
+
+    def __iter__(self):
+        yield "intValue", self.intValue
+        yield "opt_intValue", self.opt_intValue
+        yield "stringValue", self.stringValue
+        yield "opt_stringValue", self.opt_stringValue
+        yield "intValue2", self.intValue2
+        yield "intValue3", self.intValue3
+        yield "doubelValue", self.doubelValue
+        yield "boolValue", self.boolValue
+        yield "union_list", self.union_list
+        yield "union_set", self.union_set
+        yield "union_map", self.union_map
+        yield "opt_union_map", self.opt_union_map
+        yield "enum_field", self.enum_field
+        yield "enum_container", self.enum_container
+        yield "a_struct", self.a_struct
+        yield "a_set_struct", self.a_set_struct
+        yield "a_union", self.a_union
+        yield "opt_a_union", self.opt_a_union
+        yield "a_union_list", self.a_union_list
+        yield "a_union_typedef", self.a_union_typedef
+        yield "a_union_typedef_list", self.a_union_typedef_list
+        yield "MyBinaryField", self.MyBinaryField
+        yield "MyBinaryField2", self.MyBinaryField2
+        yield "MyBinaryListField4", self.MyBinaryListField4
+        yield "ref_field", self.ref_field
+        yield "ref_field2", self.ref_field2
+        yield "excp_field", self.excp_field
+        yield "MyCustomField", self.MyCustomField
+
 _fbthrift_struct_type__AnException = _module_types.AnException
 class AnException_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__AnException
@@ -357,6 +433,18 @@ class FloatStruct_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "floatField", self.floatField
         yield "doubleField", self.doubleField
+
+_fbthrift_struct_type__FloatUnion = _module_types.FloatUnion
+class FloatUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__FloatUnion
+
+    def __init__(self):
+        self.floatSide: _typing.Optional[float] = None
+        self.doubleSide: _typing.Optional[float] = None
+
+    def __iter__(self):
+        yield "floatSide", self.floatSide
+        yield "doubleSide", self.doubleSide
 
 _fbthrift_struct_type__AllRequiredNoExceptMoveCtrStruct = _module_types.AllRequiredNoExceptMoveCtrStruct
 class AllRequiredNoExceptMoveCtrStruct_Builder(thrift.py3.builder.StructBuilder):

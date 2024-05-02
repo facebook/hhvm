@@ -35,7 +35,6 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 
 
 {{#program:filtered_structs}}
-{{^struct:union?}}
 {{! This is a dumb hack to handle leading-__ name classes
 }}_fbthrift_struct_type__{{struct:name}} = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}
 class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
@@ -67,5 +66,4 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
         yield "{{field:py_name}}", self.{{field:py_name}}
         {{/struct:py3_fields}}
 
-{{/struct:union?}}
 {{/program:filtered_structs}}

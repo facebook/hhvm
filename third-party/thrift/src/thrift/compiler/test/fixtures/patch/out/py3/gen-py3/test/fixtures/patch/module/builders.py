@@ -39,6 +39,30 @@ class MyDataWithCustomDefault_Builder(thrift.py3.builder.StructBuilder):
         yield "data1", self.data1
         yield "data2", self.data2
 
+_fbthrift_struct_type__InnerUnion = _test_fixtures_patch_module_types.InnerUnion
+class InnerUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__InnerUnion
+
+    def __init__(self):
+        self.innerOption: _typing.Optional[bytes] = None
+
+    def __iter__(self):
+        yield "innerOption", self.innerOption
+
+_fbthrift_struct_type__MyUnion = _test_fixtures_patch_module_types.MyUnion
+class MyUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__MyUnion
+
+    def __init__(self):
+        self.option1: _typing.Optional[str] = None
+        self.option2: _typing.Optional[int] = None
+        self.option3: _typing.Any = None
+
+    def __iter__(self):
+        yield "option1", self.option1
+        yield "option2", self.option2
+        yield "option3", self.option3
+
 _fbthrift_struct_type__MyStruct = _test_fixtures_patch_module_types.MyStruct
 class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__MyStruct

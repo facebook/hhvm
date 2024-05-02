@@ -91,6 +91,16 @@ class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "cdef_", self.cdef_
         yield "bytes_with_cpp_type", self.bytes_with_cpp_type
 
+_fbthrift_struct_type__BinaryUnion = _module_types.BinaryUnion
+class BinaryUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__BinaryUnion
+
+    def __init__(self):
+        self.iobuf_val: _typing.Optional[_fbthrift_iobuf.IOBuf] = None
+
+    def __iter__(self):
+        yield "iobuf_val", self.iobuf_val
+
 _fbthrift_struct_type__BinaryUnionStruct = _module_types.BinaryUnionStruct
 class BinaryUnionStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__BinaryUnionStruct

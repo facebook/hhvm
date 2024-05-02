@@ -99,3 +99,31 @@ class struct4_Builder(thrift.py3.builder.StructBuilder):
         yield "b", self.b
         yield "c", self.c
 
+_fbthrift_struct_type__union1 = _module_types.union1
+class union1_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__union1
+
+    def __init__(self):
+        self.i: _typing.Optional[int] = None
+        self.d: _typing.Optional[float] = None
+
+    def __iter__(self):
+        yield "i", self.i
+        yield "d", self.d
+
+_fbthrift_struct_type__union2 = _module_types.union2
+class union2_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__union2
+
+    def __init__(self):
+        self.i: _typing.Optional[int] = None
+        self.d: _typing.Optional[float] = None
+        self.s: _typing.Any = None
+        self.u: _typing.Any = None
+
+    def __iter__(self):
+        yield "i", self.i
+        yield "d", self.d
+        yield "s", self.s
+        yield "u", self.u
+

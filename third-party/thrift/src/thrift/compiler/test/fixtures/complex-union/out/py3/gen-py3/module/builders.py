@@ -13,6 +13,50 @@ import thrift.py3.builder
 import module.types as _module_types
 
 
+_fbthrift_struct_type__ComplexUnion = _module_types.ComplexUnion
+class ComplexUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ComplexUnion
+
+    def __init__(self):
+        self.intValue: _typing.Optional[int] = None
+        self.stringValue: _typing.Optional[str] = None
+        self.intListValue: _typing.Optional[list] = None
+        self.stringListValue: _typing.Optional[list] = None
+        self.typedefValue: _typing.Optional[dict] = None
+        self.stringRef: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "intValue", self.intValue
+        yield "stringValue", self.stringValue
+        yield "intListValue", self.intListValue
+        yield "stringListValue", self.stringListValue
+        yield "typedefValue", self.typedefValue
+        yield "stringRef", self.stringRef
+
+_fbthrift_struct_type__ListUnion = _module_types.ListUnion
+class ListUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ListUnion
+
+    def __init__(self):
+        self.intListValue: _typing.Optional[list] = None
+        self.stringListValue: _typing.Optional[list] = None
+
+    def __iter__(self):
+        yield "intListValue", self.intListValue
+        yield "stringListValue", self.stringListValue
+
+_fbthrift_struct_type__DataUnion = _module_types.DataUnion
+class DataUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__DataUnion
+
+    def __init__(self):
+        self.binaryData: _typing.Optional[bytes] = None
+        self.stringData: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "binaryData", self.binaryData
+        yield "stringData", self.stringData
+
 _fbthrift_struct_type__Val = _module_types.Val
 class Val_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__Val
@@ -27,6 +71,30 @@ class Val_Builder(thrift.py3.builder.StructBuilder):
         yield "intVal", self.intVal
         yield "typedefValue", self.typedefValue
 
+_fbthrift_struct_type__ValUnion = _module_types.ValUnion
+class ValUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ValUnion
+
+    def __init__(self):
+        self.v1: _typing.Any = None
+        self.v2: _typing.Any = None
+
+    def __iter__(self):
+        yield "v1", self.v1
+        yield "v2", self.v2
+
+_fbthrift_struct_type__VirtualComplexUnion = _module_types.VirtualComplexUnion
+class VirtualComplexUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__VirtualComplexUnion
+
+    def __init__(self):
+        self.thingOne: _typing.Optional[str] = None
+        self.thingTwo: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "thingOne", self.thingOne
+        yield "thingTwo", self.thingTwo
+
 _fbthrift_struct_type__NonCopyableStruct = _module_types.NonCopyableStruct
 class NonCopyableStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__NonCopyableStruct
@@ -36,4 +104,14 @@ class NonCopyableStruct_Builder(thrift.py3.builder.StructBuilder):
 
     def __iter__(self):
         yield "num", self.num
+
+_fbthrift_struct_type__NonCopyableUnion = _module_types.NonCopyableUnion
+class NonCopyableUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__NonCopyableUnion
+
+    def __init__(self):
+        self.s: _typing.Any = None
+
+    def __iter__(self):
+        yield "s", self.s
 

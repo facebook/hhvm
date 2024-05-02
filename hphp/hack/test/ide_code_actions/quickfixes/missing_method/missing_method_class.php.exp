@@ -11,7 +11,14 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":4,"line":10},"start":{"character":4,"line":10}}],
+    "arguments":[
+      {"end":{"character":4,"line":10},"start":{"character":4,"line":10}},
+      {
+        "arguments":[],
+        "command":"editor.action.inlineSuggest.trigger",
+        "title":"Trigger Inline Suggest"
+      }
+    ],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },
@@ -55,7 +62,14 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":4,"line":10},"start":{"character":4,"line":10}}],
+    "arguments":[
+      {"end":{"character":4,"line":10},"start":{"character":4,"line":10}},
+      {
+        "arguments":[],
+        "command":"editor.action.inlineSuggest.trigger",
+        "title":"Trigger Inline Suggest"
+      }
+    ],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },

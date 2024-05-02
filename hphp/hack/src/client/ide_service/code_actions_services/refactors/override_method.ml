@@ -191,7 +191,7 @@ let refactor_action
       edits;
       kind = `Refactor;
       selection;
-      trigger_inline_suggest = false;
+      trigger_inline_suggest = Option.is_some selection;
     }
 
 let find ~entry pos ctx =

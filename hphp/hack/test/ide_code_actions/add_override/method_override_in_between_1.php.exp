@@ -6,7 +6,14 @@ JSON for selected code action:
 ------------------------------------------
 {
   "command":{
-    "arguments":[{"end":{"character":4,"line":11},"start":{"character":4,"line":11}}],
+    "arguments":[
+      {"end":{"character":4,"line":11},"start":{"character":4,"line":11}},
+      {
+        "arguments":[],
+        "command":"editor.action.inlineSuggest.trigger",
+        "title":"Trigger Inline Suggest"
+      }
+    ],
     "command":"hack.setSelection",
     "title":"Set Cursor Selection"
   },

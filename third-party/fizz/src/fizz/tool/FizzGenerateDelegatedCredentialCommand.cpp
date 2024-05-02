@@ -7,6 +7,7 @@
  */
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/extensions/delegatedcred/DelegatedCredentialPemUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <fizz/util/Parse.h>
@@ -165,6 +166,14 @@ int fizzGenerateDelegatedCredentialCommand(
       }
     }
 
+    folly::ssl::BioUniquePtr bio(BIO_new(BIO_s_mem()));
+    BUF_MEM* bptr = nullptr;
+    if (!PEM_write_bio_X509(bio.get(), cert->getX509().get())) {
+      throw std::runtime_error("Failed to re-encode cert");
+    }
+    BIO_get_mem_ptr(bio.get(), &bptr);
+    auto certPem = std::string(bptr->data, bptr->length);
+
     auto credential = DelegatedCredentialUtils::generateCredential(
         std::move(cert),
         certPrivKey,
@@ -172,12 +181,14 @@ int fizzGenerateDelegatedCredentialCommand(
         *credSignScheme,
         *credVerifScheme,
         validSec);
-    auto encodedCred = fizz::extensions::encodeExtension(credential);
-    auto credData = encodedCred.extension_data->moveToFbString().toStdString();
+
+    auto pem = fizz::extensions::generateDelegatedCredentialPEM(
+        std::move(credential), std::move(certPem), std::move(credKeyData));
+
     if (outPath.empty()) {
-      std::cout << credData;
+      std::cout << pem;
     } else {
-      if (!writeFile(credData, outPath.c_str())) {
+      if (!writeFile(pem, outPath.c_str())) {
         LOG(ERROR) << "Failed to write out credential: " << errnoStr(errno);
         return 1;
       }

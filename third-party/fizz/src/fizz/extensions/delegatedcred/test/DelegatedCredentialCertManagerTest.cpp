@@ -498,6 +498,30 @@ TEST_F(
       DelegatedMode::Extensions({SignatureScheme::rsa_pss_sha512}));
   EXPECT_EQ(res->cert, cert1);
 }
+
+TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchWithDefaultSet) {
+  auto cert1 = getCert("foo.test.com", {}, kRsa);
+  auto cert2 = getCredential("foo.test.com", {}, kRsa);
+  manager_.addCert(cert1, true);
+  manager_.addDelegatedCredential(cert2, true);
+
+  auto res = manager_.getCert(
+      std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());
+  EXPECT_EQ(res->cert, cert2);
+}
+
+TEST_F(
+    DelegatedCredentialCertManagerTest,
+    TestDelegatedNotMatchedWithDefaultNotSet) {
+  auto cert1 = getCert("foo.test.com", {}, kRsa);
+  auto cert2 = getCredential("foo.test.com", {}, kRsa);
+  manager_.addCert(cert1, true);
+  manager_.addDelegatedCredential(cert2, false);
+
+  auto res = manager_.getCert(
+      std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());
+  EXPECT_EQ(res->cert, cert1);
+}
 } // namespace test
 } // namespace extensions
 } // namespace fizz

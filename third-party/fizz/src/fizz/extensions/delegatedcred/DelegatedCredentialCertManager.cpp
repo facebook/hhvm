@@ -26,7 +26,7 @@ CertManager::CertMatch DelegatedCredentialCertManager::getCert(
         supportedSigSchemes,
         credential->supported_signature_algorithms,
         peerExtensions);
-    if (dcRes && dcRes->type == MatchType::Direct) {
+    if (dcRes) {
       return dcRes;
     }
   }
@@ -49,9 +49,10 @@ void DelegatedCredentialCertManager::addCert(
 }
 
 void DelegatedCredentialCertManager::addDelegatedCredential(
-    std::shared_ptr<SelfDelegatedCredential> cred) {
+    std::shared_ptr<SelfDelegatedCredential> cred,
+    bool defaultCert) {
   VLOG(8) << "Adding delegated credential";
-  dcMgr_.addCert(std::move(cred), false);
+  dcMgr_.addCert(std::move(cred), defaultCert);
 }
 
 } // namespace extensions

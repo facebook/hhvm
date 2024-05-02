@@ -1053,6 +1053,12 @@ enum HgImportCause {
   PREFETCH = 3,
 }
 
+enum FetchedSource {
+  LOCAL = 0,
+  REMOTE = 1,
+  UNKNOWN = 2,
+}
+
 struct HgEvent {
   1: TraceEventTimes times;
 
@@ -1068,6 +1074,7 @@ struct HgEvent {
   7: optional RequestInfo requestInfo;
   8: HgImportPriority importPriority;
   9: HgImportCause importCause;
+  10: FetchedSource fetchedSource;
 }
 
 /**

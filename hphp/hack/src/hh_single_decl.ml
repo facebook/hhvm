@@ -16,24 +16,16 @@ let popt
     ~keep_user_attributes
     ~interpret_soft_types_as_like_types
     ~everything_sdt =
-  let po = ParserOptions.default in
-  let po =
-    ParserOptions.with_disable_xhp_element_mangling
-      po
-      disable_xhp_element_mangling
-  in
-  let po = ParserOptions.with_keep_user_attributes po keep_user_attributes in
-  let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
-  let po =
-    ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
-  in
-  let po =
-    ParserOptions.with_interpret_soft_types_as_like_types
-      po
-      interpret_soft_types_as_like_types
-  in
-  let po = ParserOptions.with_everything_sdt po everything_sdt in
-  po
+  GlobalOptions.
+    {
+      ParserOptions.default with
+      po_auto_namespace_map = auto_namespace_map;
+      po_disable_xhp_element_mangling = disable_xhp_element_mangling;
+      po_keep_user_attributes = keep_user_attributes;
+      po_enable_xhp_class_modifier = enable_xhp_class_modifier;
+      po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
+      tco_everything_sdt = everything_sdt;
+    }
 
 let init root popt ~rust_provider_backend : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
@@ -294,7 +286,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
         in
         let ast =
           let { Parser_return.ast; _ } = parsed_file in
-          if ParserOptions.deregister_php_stdlib popt then
+          if popt.GlobalOptions.po_deregister_php_stdlib then
             Nast.deregister_ignored_attributes ast
           else
             ast

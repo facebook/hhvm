@@ -207,7 +207,7 @@ let parse_and_name ctx files_contents =
             in
             let ast =
               let { Parser_return.ast; _ } = parsed_file in
-              if ParserOptions.deregister_php_stdlib popt then
+              if popt.GlobalOptions.po_deregister_php_stdlib then
                 Nast.deregister_ignored_attributes ast
               else
                 ast

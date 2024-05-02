@@ -493,8 +493,7 @@ let elaborate_stmt popt : ((unit, unit) Aast.stmt -> Nast.stmt) Staged.t =
   *)
   let env =
     let ns_ns_uses =
-      popt
-      |> ParserOptions.auto_namespace_map
+      popt.GlobalOptions.po_auto_namespace_map
       |> SMap.of_list
       |> SMap.union Namespace_env.(empty_with_default.ns_ns_uses)
     in

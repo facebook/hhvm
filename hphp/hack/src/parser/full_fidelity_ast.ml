@@ -39,14 +39,14 @@ let make_env
     ?(parser_options = ParserOptions.default)
     ?(is_systemlib = false)
     (file : Relative_path.t) : env =
-  let codegen = Namespace_env.(equal_mode mode ForCodegen) in
-  let parser_options = ParserOptions.with_codegen parser_options codegen in
+  let po_codegen = Namespace_env.(equal_mode mode ForCodegen) in
+  let parser_options = GlobalOptions.{ parser_options with po_codegen } in
   {
     mode;
     php5_compat_mode;
     elaborate_namespaces;
     include_line_comments;
-    quick_mode = (not codegen) && quick_mode;
+    quick_mode = (not po_codegen) && quick_mode;
     show_all_errors;
     parser_options;
     file;

@@ -20,6 +20,6 @@ type t = {
 }
 [@@deriving show]
 
-val default : t
+(*val default : t*)
 
 val from_parser_options : ParserOptions.t -> t

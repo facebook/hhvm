@@ -53,7 +53,7 @@ let compute_file_info_batch_root_relative_paths_only
   in
   batch_index_root_relative_paths_only
     (DeclParserOptions.from_parser_options popt)
-    (ParserOptions.deregister_php_stdlib popt)
+    popt.GlobalOptions.po_deregister_php_stdlib
     (Relative_path.path_of_prefix Relative_path.Root |> Path.make)
     paths
 

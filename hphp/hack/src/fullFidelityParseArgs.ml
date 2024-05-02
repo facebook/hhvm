@@ -386,73 +386,28 @@ No errors are filtered out."
     !disallow_direct_superglobals_refs
 
 let to_parser_options args =
-  let popt = ParserOptions.default in
-  let popt = ParserOptions.with_codegen popt args.codegen in
-  let popt =
-    ParserOptions.with_disable_lval_as_an_expression
-      popt
-      args.disable_lval_as_an_expression
-  in
-  let popt =
+  GlobalOptions.
     {
-      popt with
-      GlobalOptions.po_enable_class_level_where_clauses =
+      ParserOptions.default with
+      po_codegen = args.codegen;
+      po_disable_lval_as_an_expression = args.disable_lval_as_an_expression;
+      po_enable_class_level_where_clauses =
         args.enable_class_level_where_clauses;
+      po_disable_legacy_soft_typehints = args.disable_legacy_soft_typehints;
+      po_disable_legacy_attribute_syntax = args.disable_legacy_attribute_syntax;
+      po_const_default_func_args = args.const_default_func_args;
+      po_const_default_lambda_args = args.const_default_lambda_args;
+      po_const_static_props = args.const_static_props;
+      po_abstract_static_props = args.abstract_static_props;
+      po_disallow_func_ptrs_in_constants = args.disallow_func_ptrs_in_constants;
+      po_disable_xhp_element_mangling = args.disable_xhp_element_mangling;
+      po_allow_unstable_features = args.allow_unstable_features;
+      po_enable_xhp_class_modifier = args.enable_xhp_class_modifier;
+      po_disallow_static_constants_in_default_func_args =
+        args.disallow_static_constants_in_default_func_args;
+      po_disallow_direct_superglobals_refs =
+        args.disallow_direct_superglobals_refs;
     }
-  in
-  let popt =
-    ParserOptions.with_disable_legacy_soft_typehints
-      popt
-      args.disable_legacy_soft_typehints
-  in
-  let popt =
-    ParserOptions.with_disable_legacy_attribute_syntax
-      popt
-      args.disable_legacy_attribute_syntax
-  in
-  let popt =
-    ParserOptions.with_const_default_func_args popt args.const_default_func_args
-  in
-  let popt =
-    ParserOptions.with_const_default_lambda_args
-      popt
-      args.const_default_lambda_args
-  in
-  let popt =
-    ParserOptions.with_const_static_props popt args.const_static_props
-  in
-  let popt =
-    ParserOptions.with_abstract_static_props popt args.abstract_static_props
-  in
-  let popt =
-    ParserOptions.with_disallow_func_ptrs_in_constants
-      popt
-      args.disallow_func_ptrs_in_constants
-  in
-  let popt =
-    ParserOptions.with_disable_xhp_element_mangling
-      popt
-      args.disable_xhp_element_mangling
-  in
-  let popt =
-    ParserOptions.with_allow_unstable_features popt args.allow_unstable_features
-  in
-  let popt =
-    ParserOptions.with_enable_xhp_class_modifier
-      popt
-      args.enable_xhp_class_modifier
-  in
-  let popt =
-    ParserOptions.with_disallow_static_constants_in_default_func_args
-      popt
-      args.disallow_static_constants_in_default_func_args
-  in
-  let popt =
-    ParserOptions.with_disallow_direct_superglobals_refs
-      popt
-      args.disallow_direct_superglobals_refs
-  in
-  popt
 
 let to_parser_env args ~leak_rust_tree ~mode =
   Full_fidelity_parser_env.make

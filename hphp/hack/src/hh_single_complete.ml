@@ -299,7 +299,7 @@ let parse_and_name ctx files_contents =
             in
             let ast =
               let { Parser_return.ast; _ } = parsed_file in
-              if ParserOptions.deregister_php_stdlib popt then
+              if popt.GlobalOptions.po_deregister_php_stdlib then
                 Nast.deregister_ignored_attributes ast
               else
                 ast
@@ -906,7 +906,7 @@ let decl_and_run_mode
 
   (* SYMBOL INDEX PHASE 1: initialize *)
   let glean_reponame = GleanOptions.reponame tcopt in
-  let namespace_map = ParserOptions.auto_namespace_map tcopt in
+  let namespace_map = tcopt.GlobalOptions.po_auto_namespace_map in
   let sienv =
     SymbolIndex.initialize
       ~gleanopt:tcopt

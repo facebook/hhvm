@@ -890,7 +890,7 @@ let write_symbol_info
       | Some s -> s
     in
     let opts = Indexer_options.create env.swriteopt ~out_dir in
-    let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
+    let namespace_map = env.tcopt.po_auto_namespace_map in
     let ctx = Provider_utils.ctx_from_server_env env in
     Entrypoint.go genv.workers ctx opts ~namespace_map ~files;
     (env, t)

@@ -17,31 +17,18 @@ let popt
     ~interpret_soft_types_as_like_types
     ~everything_sdt
     ~enable_strict_const_semantics =
+  let open GlobalOptions in
   let po = ParserOptions.default in
-  let po =
-    ParserOptions.with_disable_xhp_element_mangling
-      po
-      disable_xhp_element_mangling
-  in
-  let po = ParserOptions.with_keep_user_attributes po keep_user_attributes in
-  let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
-  let po =
-    ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
-  in
-  let po =
-    ParserOptions.with_interpret_soft_types_as_like_types
-      po
-      interpret_soft_types_as_like_types
-  in
-  let po = ParserOptions.with_everything_sdt po everything_sdt in
-  let po =
-    {
-      po with
-      GlobalOptions.tco_enable_strict_const_semantics =
-        enable_strict_const_semantics;
-    }
-  in
-  po
+  {
+    po with
+    po_disable_xhp_element_mangling = disable_xhp_element_mangling;
+    po_keep_user_attributes = keep_user_attributes;
+    po_auto_namespace_map = auto_namespace_map;
+    po_enable_xhp_class_modifier = enable_xhp_class_modifier;
+    po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
+    tco_everything_sdt = everything_sdt;
+    tco_enable_strict_const_semantics = enable_strict_const_semantics;
+  }
 
 let init ~enable_strict_const_semantics popt : Provider_context.t =
   let (_handle : SharedMem.handle) =

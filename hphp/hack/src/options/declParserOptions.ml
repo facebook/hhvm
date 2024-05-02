@@ -36,4 +36,4 @@ let from_parser_options popt =
     stack_size = popt.po_stack_size;
   }
 
-let default = from_parser_options ParserOptions.default
+(*let default = from_parser_options ParserOptions.default*)

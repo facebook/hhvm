@@ -37,17 +37,16 @@ let default_const_uses = hh_autoimport_map_of_list Hh_autoimport.consts
 let default_ns_uses = hh_autoimport_map_of_list Hh_autoimport.namespaces
 
 let empty_with_default : env =
+  let open GlobalOptions in
   let popt = ParserOptions.default in
-  let auto_ns_map = ParserOptions.auto_namespace_map popt in
+  let auto_ns_map = popt.po_auto_namespace_map in
   let ns_mode =
-    if ParserOptions.codegen popt then
+    if popt.po_codegen then
       ForCodegen
     else
       ForTypecheck
   in
-  let ns_disable_xhp_element_mangling =
-    ParserOptions.disable_xhp_element_mangling popt
-  in
+  let ns_disable_xhp_element_mangling = popt.po_disable_xhp_element_mangling in
   {
     ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
     ns_class_uses = default_class_uses;

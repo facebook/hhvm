@@ -689,19 +689,16 @@ impl FunctionParser<'_> {
             "lfree" => Instr::Hhbc(Hhbc::LIterFree(iter_id, loc)),
             "init" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;
-                parse!(tokenizer, "from" <vid:self.vid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
-                Instr::Terminator(Terminator::IterInit(
-                    instr::IteratorArgs::new(
-                        iter_id, flags, locals.0, locals.1, target0, target1, loc,
-                    ),
-                    vid,
-                ))
+                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
+                Instr::Terminator(Terminator::IterInit(instr::IteratorArgs::new(
+                    iter_id, flags, lid, locals.0, locals.1, target0, target1, loc,
+                )))
             }
             "next" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;
-                parse!(tokenizer, "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
+                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
                 Instr::Terminator(Terminator::IterNext(instr::IteratorArgs::new(
-                    iter_id, flags, locals.0, locals.1, target0, target1, loc,
+                    iter_id, flags, lid, locals.0, locals.1, target0, target1, loc,
                 )))
             }
             _ => unreachable!(),

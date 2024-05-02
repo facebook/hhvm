@@ -21,19 +21,20 @@
 // CHECK: #b3:
 // CHECK:   n7: *HackMixed = load &$index
 // CHECK:   n8 = $builtins.hhbc_print(n7)
-// CHECK:   n9: *HackMixed = load &iter0
-// CHECK:   n10 = $builtins.hhbc_iter_next(n9, null, &$index)
+// CHECK:   n9: *HackMixed = load &$0
+// CHECK:   n10: *HackMixed = load &iter0
+// CHECK:   n11 = $builtins.hhbc_iter_next(n10, null, &$index, n9)
 // CHECK:   jmp b5, b6
 // CHECK:   .handlers b4
-// CHECK: #b4(n11: *HackMixed):
-// CHECK:   n12: *HackMixed = load &iter0
-// CHECK:   n13 = $builtins.hhbc_liter_free(n12)
-// CHECK:   throw n11
+// CHECK: #b4(n12: *HackMixed):
+// CHECK:   n13: *HackMixed = load &iter0
+// CHECK:   n14 = $builtins.hhbc_liter_free(n13)
+// CHECK:   throw n12
 // CHECK: #b5:
-// CHECK:   prune $builtins.hack_is_true(n10)
+// CHECK:   prune $builtins.hack_is_true(n11)
 // CHECK:   jmp b8
 // CHECK: #b6:
-// CHECK:   prune ! $builtins.hack_is_true(n10)
+// CHECK:   prune ! $builtins.hack_is_true(n11)
 // CHECK:   jmp b3
 // CHECK: #b7:
 // CHECK:   prune ! $builtins.hack_is_true(n6)

@@ -154,7 +154,8 @@ pub enum Terminator {
     Enter(BlockId, LocId),
     Exit(ValueId, LocId),
     Fatal(ValueId, FatalOp, LocId),
-    IterInit(IteratorArgs, ValueId),
+    #[has_operands(none)]
+    IterInit(IteratorArgs),
     #[has_operands(none)]
     IterNext(IteratorArgs),
     #[has_operands(none)]
@@ -240,7 +241,7 @@ impl HasEdges for Terminator {
     fn edges(&self) -> &[BlockId] {
         match self {
             Terminator::CallAsync(_, targets)
-            | Terminator::IterInit(IteratorArgs { targets, .. }, _)
+            | Terminator::IterInit(IteratorArgs { targets, .. })
             | Terminator::IterNext(IteratorArgs { targets, .. })
             | Terminator::JmpOp { targets, .. } => targets,
 
@@ -268,7 +269,7 @@ impl HasEdges for Terminator {
     fn edges_mut(&mut self) -> &mut [BlockId] {
         match self {
             Terminator::CallAsync(_, targets)
-            | Terminator::IterInit(IteratorArgs { targets, .. }, _)
+            | Terminator::IterInit(IteratorArgs { targets, .. })
             | Terminator::IterNext(IteratorArgs { targets, .. })
             | Terminator::JmpOp { targets, .. } => targets,
 
@@ -1050,8 +1051,8 @@ pub enum Predicate {
 pub struct IteratorArgs {
     pub iter_id: IterId,
     pub flags: IterArgsFlags,
-    // Stored as [ValueLid, KeyLid]
-    pub locals: SmallVec<[LocalId; 2]>,
+    // Stored as [BaseLid, ValueLid, KeyLid]
+    pub locals: SmallVec<[LocalId; 3]>,
     pub targets: [BlockId; 2],
     pub loc: LocId,
 }
@@ -1060,6 +1061,7 @@ impl IteratorArgs {
     pub fn new(
         iter_id: IterId,
         flags: IterArgsFlags,
+        base_lid: LocalId,
         key_lid: Option<LocalId>,
         value_lid: LocalId,
         done_bid: BlockId,
@@ -1067,6 +1069,7 @@ impl IteratorArgs {
         loc: LocId,
     ) -> Self {
         let mut locals = SmallVec::new();
+        locals.push(base_lid);
         locals.push(value_lid);
         if let Some(key_lid) = key_lid {
             locals.push(key_lid);
@@ -1080,12 +1083,16 @@ impl IteratorArgs {
         }
     }
 
+    pub fn base_lid(&self) -> LocalId {
+        self.locals[0]
+    }
+
     pub fn key_lid(&self) -> Option<LocalId> {
-        self.locals.get(1).copied()
+        self.locals.get(2).copied()
     }
 
     pub fn value_lid(&self) -> LocalId {
-        self.locals[0]
+        self.locals[1]
     }
 
     pub fn done_bid(&self) -> BlockId {

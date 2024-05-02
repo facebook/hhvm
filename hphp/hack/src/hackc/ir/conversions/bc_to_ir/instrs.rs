@@ -679,41 +679,35 @@ fn convert_local_range(ctx: &mut Context<'_>, range: &hhbc::LocalRange) -> Box<[
 
 fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
     match *opcode {
-        Opcode::LIterInit(_, local, _) => {
-            let lid = convert_local(ctx, &local);
-            ctx.emit_push(Instr::Hhbc(instr::Hhbc::CGetL(lid, ctx.loc)));
-        }
-        _ => {}
-    };
-    match *opcode {
-        Opcode::IterInit(ref args, label) | Opcode::LIterInit(ref args, _, label) => {
+        Opcode::LIterInit(ref args, ref base_id, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
                 ref val_id,
                 flags,
             } = *args;
+            let base_lid = convert_local(ctx, base_id);
             let key_lid = key_id.is_valid().then(|| convert_local(ctx, key_id));
             let value_lid = convert_local(ctx, val_id);
-            let base_iid = ctx.pop();
             let stack_size = ctx.spill_stack();
             let next_bid = ctx.builder.alloc_bid();
             let done_bid = ctx.target_from_label(label, stack_size);
 
             let args = instr::IteratorArgs::new(
-                iter_id, flags, key_lid, value_lid, done_bid, next_bid, ctx.loc,
+                iter_id, flags, base_lid, key_lid, value_lid, done_bid, next_bid, ctx.loc,
             );
-            ctx.emit(Instr::Terminator(Terminator::IterInit(args, base_iid)));
+            ctx.emit(Instr::Terminator(Terminator::IterInit(args)));
             ctx.builder.start_block(next_bid);
             ctx.unspill_stack(stack_size);
         }
-        Opcode::IterNext(ref args, label) | Opcode::LIterNext(ref args, _, label) => {
+        Opcode::LIterNext(ref args, ref base_id, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
                 ref val_id,
                 flags,
             } = *args;
+            let base_lid = convert_local(ctx, base_id);
             let key_lid = key_id.is_valid().then(|| convert_local(ctx, key_id));
             let value_lid = convert_local(ctx, val_id);
             let stack_size = ctx.spill_stack();
@@ -721,7 +715,7 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
             let done_bid = ctx.target_from_label(label, stack_size);
 
             let args = instr::IteratorArgs::new(
-                iter_id, flags, key_lid, value_lid, done_bid, next_bid, ctx.loc,
+                iter_id, flags, base_lid, key_lid, value_lid, done_bid, next_bid, ctx.loc,
             );
             ctx.emit(Instr::Terminator(Terminator::IterNext(args)));
             ctx.builder.start_block(next_bid);
@@ -863,10 +857,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
 
-        Opcode::IterInit(_, _)
-        | Opcode::IterNext(_, _)
-        | Opcode::LIterInit(_, _, _)
-        | Opcode::LIterNext(_, _, _) => {
+        Opcode::LIterInit(_, _, _) | Opcode::LIterNext(_, _, _) => {
             convert_iterator(ctx, opcode);
             Action::None
         }
@@ -1032,6 +1023,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),
         Opcode::IterBase => simple!(Hhbc::IterBase),
+        Opcode::IterInit => todo!(),
+        Opcode::IterNext => todo!(),
         Opcode::IterFree => simple!(Hhbc::IterFree),
         Opcode::LIterFree => simple!(Hhbc::LIterFree),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),

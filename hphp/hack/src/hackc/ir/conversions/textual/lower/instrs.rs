@@ -266,19 +266,16 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
-    fn iter_init(
-        &self,
-        builder: &mut FuncBuilder,
-        args: IteratorArgs,
-        container: ValueId,
-    ) -> Instr {
-        // iterator ^0 init from %0 jmp to b2 else b1 with $index
+    fn iter_init(&self, builder: &mut FuncBuilder, args: IteratorArgs) -> Instr {
+        // iterator ^0 init from $base jmp to b2 else b1 with $index
         // ->
-        // %n = hack::iter_init(&iter0, /* key */ null, &$index, %0)
+        // %n = hack::iter_init(&iter0, /* key */ null, &$index, $base)
         // if %n jmp b1 else b2
 
         let loc = args.loc;
         let iter_lid = iter_var_name(args.iter_id);
+
+        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid(), loc)));
 
         let iter_var = builder.emit(Textual::deref(iter_lid));
 
@@ -292,7 +289,7 @@ impl LowerInstrs<'_> {
 
         let pred = builder.emit_hhbc_builtin(
             hack::Hhbc::IterInit,
-            &[iter_var, key_var, value_var, container],
+            &[iter_var, key_var, value_var, base_var],
             loc,
         );
 
@@ -306,13 +303,15 @@ impl LowerInstrs<'_> {
     }
 
     fn iter_next(&self, builder: &mut FuncBuilder, args: IteratorArgs) -> Instr {
-        // iterator ^0 next jmp to b2 else b1 with $index
+        // iterator ^0 next from $base jmp to b2 else b1 with $index
         // ->
-        // %n = hack::iter_next(&iter0, /* key */ null, &$index)
+        // %n = hack::iter_next(&iter0, /* key */ null, &$index, $base)
         // if %n jmp b1 else b2
 
         let loc = args.loc;
         let iter_lid = iter_var_name(args.iter_id);
+
+        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid(), loc)));
 
         let value_var = builder.emit(Textual::deref(args.value_lid()));
 
@@ -323,8 +322,11 @@ impl LowerInstrs<'_> {
         };
 
         let iter_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
-        let pred =
-            builder.emit_hhbc_builtin(hack::Hhbc::IterNext, &[iter_var, key_var, value_var], loc);
+        let pred = builder.emit_hhbc_builtin(
+            hack::Hhbc::IterNext,
+            &[iter_var, key_var, value_var, base_var],
+            loc,
+        );
 
         Instr::jmp_op(
             pred,
@@ -826,9 +828,7 @@ impl TransformInstr for LowerInstrs<'_> {
                     }
                 }
             }
-            Instr::Terminator(Terminator::IterInit(args, value)) => {
-                self.iter_init(builder, args, value)
-            }
+            Instr::Terminator(Terminator::IterInit(args)) => self.iter_init(builder, args),
             Instr::Terminator(Terminator::IterNext(args)) => self.iter_next(builder, args),
             Instr::Terminator(Terminator::MemoGet(memo)) => self.memo_get(builder, memo),
             Instr::Terminator(Terminator::MemoGetEager(memo)) => self.memo_get_eager(builder, memo),

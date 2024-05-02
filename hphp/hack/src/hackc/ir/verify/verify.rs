@@ -513,9 +513,7 @@ impl<'b> VerifyFunc<'b> {
                 self.verify_block_args(iid, targets[0], 0);
                 self.verify_block_args(iid, targets[1], 0);
             }
-            Instr::Terminator(
-                Terminator::IterInit(ref args, _) | Terminator::IterNext(ref args),
-            ) => {
+            Instr::Terminator(Terminator::IterInit(ref args) | Terminator::IterNext(ref args)) => {
                 self.verify_block_args(iid, args.targets[0], 0);
                 self.verify_block_args(iid, args.targets[1], 0);
             }

@@ -868,7 +868,7 @@ impl<'b> InstrEmitter<'b> {
             Terminator::Fatal(_, op, _) => {
                 self.push_opcode(Opcode::Fatal(op));
             }
-            Terminator::IterInit(ref ir_args, _iid) => {
+            Terminator::IterInit(ref ir_args) => {
                 let args = hhbc::IterArgs {
                     iter_id: ir_args.iter_id,
                     key_id: ir_args
@@ -877,8 +877,9 @@ impl<'b> InstrEmitter<'b> {
                     val_id: self.lookup_local(ir_args.value_lid()),
                     flags: ir_args.flags,
                 };
+                let base_id = self.lookup_local(ir_args.base_lid());
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
-                self.push_opcode(Opcode::IterInit(args, label));
+                self.push_opcode(Opcode::LIterInit(args, base_id, label));
                 self.jump_to(ir_args.next_bid());
             }
             Terminator::IterNext(ref ir_args) => {
@@ -890,8 +891,9 @@ impl<'b> InstrEmitter<'b> {
                     val_id: self.lookup_local(ir_args.value_lid()),
                     flags: ir_args.flags,
                 };
+                let base_id = self.lookup_local(ir_args.base_lid());
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
-                self.push_opcode(Opcode::IterNext(args, label));
+                self.push_opcode(Opcode::LIterNext(args, base_id, label));
                 self.jump_to(ir_args.next_bid());
             }
             Terminator::Jmp(bid, _) | Terminator::JmpArgs(bid, _, _) => {

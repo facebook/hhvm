@@ -53,19 +53,20 @@ function params_and_locals(int $a) : void {
 // CHECK:   prune $builtins.hack_is_true(n6)
 // CHECK:   jmp b3
 // CHECK: #b3:
-// CHECK:   n7: *HackMixed = load &iter0
-// CHECK:   n8 = $builtins.hhbc_iter_next(n7, &$k, &$v)
+// CHECK:   n7: *HackMixed = load &$0
+// CHECK:   n8: *HackMixed = load &iter0
+// CHECK:   n9 = $builtins.hhbc_iter_next(n8, &$k, &$v, n7)
 // CHECK:   jmp b5, b6
 // CHECK:   .handlers b4
-// CHECK: #b4(n9: *HackMixed):
-// CHECK:   n10: *HackMixed = load &iter0
-// CHECK:   n11 = $builtins.hhbc_liter_free(n10)
-// CHECK:   throw n9
+// CHECK: #b4(n10: *HackMixed):
+// CHECK:   n11: *HackMixed = load &iter0
+// CHECK:   n12 = $builtins.hhbc_liter_free(n11)
+// CHECK:   throw n10
 // CHECK: #b5:
-// CHECK:   prune $builtins.hack_is_true(n8)
+// CHECK:   prune $builtins.hack_is_true(n9)
 // CHECK:   jmp b8
 // CHECK: #b6:
-// CHECK:   prune ! $builtins.hack_is_true(n8)
+// CHECK:   prune ! $builtins.hack_is_true(n9)
 // CHECK:   jmp b3
 // CHECK: #b7:
 // CHECK:   prune ! $builtins.hack_is_true(n6)

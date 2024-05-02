@@ -1129,8 +1129,8 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
              Terminator::Fatal(_, b_op, _)) => {
                 cmp_eq(a_op, b_op)?;
             }
-            (Terminator::IterInit(a_iterator, _),
-             Terminator::IterInit(b_iterator, _))
+            (Terminator::IterInit(a_iterator),
+             Terminator::IterInit(b_iterator))
                 | (Terminator::IterNext(a_iterator),
                    Terminator::IterNext(b_iterator)) => {
                     cmp_instr_iterator(a_iterator, b_iterator)?;

@@ -78,7 +78,8 @@ template <typename Sym, typename Ctx>
 bool will_symbol_raise_module_boundary_violation(const Sym* symbol,
                                                  const Ctx* context) {
   assertx(symbol && context);
-  return symbol->isInternal() &&
+  return RO::EvalEnforceModules &&
+         symbol->isInternal() &&
          context->moduleName() != symbol->moduleName();
 }
 
@@ -92,7 +93,8 @@ template bool will_symbol_raise_module_boundary_violation(const Class::SProp*, c
 
 
 bool Module::warningsEnabled(const Func* f) {
-  return f->attrs() & AttrInternalSoft;
+  if (RO::EvalEnforceModules == 0) return false;
+  return RO::EvalEnforceModules == 1 || f->attrs() & AttrInternalSoft;
 }
 
 } // namespace HPHP

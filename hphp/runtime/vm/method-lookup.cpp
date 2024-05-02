@@ -114,7 +114,8 @@ const Func* lookupMethodCtx(const Class* cls,
   bool accessible = true;
 
   // Check module boundary
-  if (raise != MethodLookupErrorOptions::NoErrorOnModule &&
+  if (RO::EvalEnforceModules &&
+      raise != MethodLookupErrorOptions::NoErrorOnModule &&
       will_symbol_raise_module_boundary_violation(method, &callCtx)) {
     if (!shouldRaise(raise)) return nullptr;
     raiseModuleBoundaryViolation(cls, method, callCtx.moduleName());

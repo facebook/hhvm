@@ -888,7 +888,7 @@ Func* Func::load(const StringData* name) {
 
 namespace {
 void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
-  if (!callee || !caller) return;
+  if (!RO::EvalEnforceModules || !callee || !caller) return;
   if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
   }

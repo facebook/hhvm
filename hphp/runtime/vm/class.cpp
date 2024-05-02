@@ -5066,7 +5066,7 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
 
 namespace {
 void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
-  if (!cls || !caller) return;
+  if (!RO::EvalEnforceModules || !cls || !caller) return;
   if (will_symbol_raise_module_boundary_violation(cls, caller)) {
     raiseModuleBoundaryViolation(cls, caller->moduleName());
   }

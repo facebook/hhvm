@@ -5,8 +5,8 @@
 module B;
 
 class C {
-  <<__SoftInternal>> internal function foo() { echo "in ".__METHOD__."\n"; }
-  <<__SoftInternal>> internal static function foo_static() { echo "in ".__METHOD__."\n"; }
+  internal function foo() { echo "in ".__METHOD__."\n"; }
+  internal static function foo_static() { echo "in ".__METHOD__."\n"; }
 }
 
 class D {
@@ -15,6 +15,6 @@ class D {
 }
 
 class E {
-  <<__SoftInternal>> internal function foo() { echo "in ".__METHOD__."\n"; }
-  <<__SoftInternal>> internal static function foo_static() { echo "in ".__METHOD__."\n"; }
+  internal function foo() { echo "in ".__METHOD__."\n"; }
+  internal static function foo_static() { echo "in ".__METHOD__."\n"; }
 }

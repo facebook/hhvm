@@ -5,7 +5,37 @@ error: Typing[4110] Invalid argument [1]
 {
   "Rflow":[
     {
-      "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+            },
+            {
+              "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":9,"char_end":10}]
+            }
+          ]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":3,"char_end":7}]
+                },
+                {
+                  "Rrev":[
+                    {
+                      "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":6,"char_start":10,"char_end":14}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
@@ -16,7 +46,33 @@ error: Typing[4110] Invalid argument [1]
 {
   "Rflow":[
     {
-      "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
+            },
+            {
+              "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":9,"char_end":10}]
+            }
+          ]
+        },
+        {
+          "Rprj":[
+            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":3,"char_end":7}]
+                },
+                {
+                  "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":6,"char_start":10,"char_end":14}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
@@ -28,6 +84,20 @@ error: Typing[4110] Invalid argument [1]
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":7,"char_start":16,"char_end":20}]
   },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":9,"char_end":10}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":8,"char_start":3,"char_end":7}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":6,"char_start":10,"char_end":14}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":6,"char_start":16,"char_end":18}]
@@ -65,7 +135,37 @@ error: Typing[4110] Invalid argument [1]
                 {
                   "Rrev":[
                     {
-                      "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":9,"char_end":10}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rprj":[
+                            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":3,"char_end":7}]
+                                },
+                                {
+                                  "Rrev":[
+                                    {
+                                      "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":11,"char_start":10,"char_end":14}]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -97,7 +197,33 @@ error: Typing[4110] Invalid argument [1]
                   "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":16,"char_end":38}]
                 },
                 {
-                  "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                  "Rflow":[
+                    {
+                      "Rprj":[
+                        {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":11,"char_start":10,"char_end":14}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":3,"char_end":7}]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rflow":[
+                        {
+                          "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":9,"char_end":10}]
+                        },
+                        {
+                          "Rhint":[{"filename":"fn_subtyping.php","line":12,"char_start":16,"char_end":36}]
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -119,6 +245,20 @@ error: Typing[4110] Invalid argument [1]
   {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":11,"char_start":16,"char_end":38}]
+  },
+  {"Bwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":11,"char_start":10,"char_end":14}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":3,"char_end":7}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Bwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":13,"char_start":9,"char_end":10}]
   },
   {"Bwd":[]},
   {
@@ -177,7 +317,37 @@ error: Typing[4110] Invalid argument [1]
                                 {
                                   "Rrev":[
                                     {
-                                      "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                                      "Rflow":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                                            },
+                                            {
+                                              "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":9,"char_end":10}]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "Rprj":[
+                                            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                                            {
+                                              "Rflow":[
+                                                {
+                                                  "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":3,"char_end":7}]
+                                                },
+                                                {
+                                                  "Rrev":[
+                                                    {
+                                                      "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":16,"char_start":10,"char_end":14}]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
@@ -224,7 +394,33 @@ error: Typing[4110] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
+                                    },
+                                    {
+                                      "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":9,"char_end":10}]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rprj":[
+                                    {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":3,"char_end":7}]
+                                        },
+                                        {
+                                          "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":16,"char_start":10,"char_end":14}]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
                             },
                             {
                               "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":16,"char_end":54}]
@@ -264,6 +460,20 @@ error: Typing[4110] Invalid argument [1]
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":17,"char_start":16,"char_end":56}]
   },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":9,"char_end":10}]
+  },
+  {"Fwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":18,"char_start":3,"char_end":7}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":16,"char_start":10,"char_end":14}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":16,"char_start":16,"char_end":54}]
@@ -311,7 +521,37 @@ error: Typing[4110] Invalid argument [1]
                 {
                   "Rrev":[
                     {
-                      "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":18,"char_end":19}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rprj":[
+                            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":3,"char_end":16}]
+                                },
+                                {
+                                  "Rrev":[
+                                    {
+                                      "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":21,"char_start":10,"char_end":23}]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -343,7 +583,33 @@ error: Typing[4110] Invalid argument [1]
                   "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":25,"char_end":51}]
                 },
                 {
-                  "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                  "Rflow":[
+                    {
+                      "Rprj":[
+                        {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":21,"char_start":10,"char_end":23}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":3,"char_end":16}]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rflow":[
+                        {
+                          "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":18,"char_end":19}]
+                        },
+                        {
+                          "Rhint":[{"filename":"fn_subtyping.php","line":22,"char_start":25,"char_end":47}]
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -365,6 +631,20 @@ error: Typing[4110] Invalid argument [1]
   {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":21,"char_start":25,"char_end":51}]
+  },
+  {"Bwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":21,"char_start":10,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":3,"char_end":16}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Bwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":23,"char_start":18,"char_end":19}]
   },
   {"Bwd":[]},
   {
@@ -408,7 +688,37 @@ error: Typing[4110] Invalid argument [1]
                 {
                   "Rrev":[
                     {
-                      "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":18,"char_end":19}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rprj":[
+                            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":3,"char_end":16}]
+                                },
+                                {
+                                  "Rrev":[
+                                    {
+                                      "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":27,"char_start":10,"char_end":23}]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -440,7 +750,33 @@ error: Typing[4110] Invalid argument [1]
                   "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":25,"char_end":54}]
                 },
                 {
-                  "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                  "Rflow":[
+                    {
+                      "Rprj":[
+                        {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":27,"char_start":10,"char_end":23}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":3,"char_end":16}]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rflow":[
+                        {
+                          "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":18,"char_end":19}]
+                        },
+                        {
+                          "Rhint":[{"filename":"fn_subtyping.php","line":28,"char_start":25,"char_end":47}]
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -462,6 +798,20 @@ error: Typing[4110] Invalid argument [1]
   {"Prj_fn_arg":[1,0,{"Contravariant":[]}]},
   {
     "Rhint":[{"filename":"fn_subtyping.php","line":27,"char_start":25,"char_end":54}]
+  },
+  {"Bwd":[]},
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness_from_decl":[{"filename":"fn_subtyping.php","line":27,"char_start":10,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":3,"char_end":16}]
+  },
+  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Bwd":[]},
+  {
+    "Rwitness":[{"filename":"fn_subtyping.php","line":29,"char_start":18,"char_end":19}]
   },
   {"Bwd":[]},
   {

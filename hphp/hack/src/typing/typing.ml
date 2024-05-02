@@ -47,6 +47,7 @@ module Cls = Folded_class
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
 module ITySet = Internal_type_set
+module Prov = Typing_helpers.Prov
 
 type newable_class_info =
   env
@@ -1321,6 +1322,18 @@ let fun_type_of_id env x tal el =
           (Reason.localize (get_reason fd.fe_type))
           ft
       in
+      (* If we used constraint solving for function typing, the
+         inferred type of the function call would be the supertype and the
+         declared function type, instantiated at the calls type arguents, would
+         be the subtype. We would then project on the individual type parameters
+         and create the contravariant constraints with this path reversed so we
+         construct that reversed path here. *)
+      let fty =
+        Prov.(
+          update fty ~env ~f:(fun r_sub ->
+              let r_super = Reason.Rwitness (fst x) in
+              flow ~from:r_super ~into:(rev r_sub)))
+      in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_deprecated ~use_pos ~def_pos env fd.fe_deprecated);
@@ -1482,7 +1495,10 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
  * should not unify with it *)
 let variadic_param env ft =
   if get_ft_variadic ft then
-    (env, List.last ft.ft_params)
+    (* The variadic parameter is always the last positionally so we
+       can determine its index by counting the non-variadic params *)
+    let nparams = List.length ft.ft_params - 1 in
+    (env, Option.map ~f:(fun p -> (nparams, p)) @@ List.last ft.ft_params)
   else
     (env, None)
 
@@ -6488,8 +6504,11 @@ end = struct
           let is_single_argument = List.length el = 1 in
           let get_next_param_info paraml =
             match paraml with
-            | param :: paraml -> (false, Some param, paraml)
-            | [] -> (true, var_param, paraml)
+            | (idx, param) :: paraml -> (idx, (false, Some param, paraml))
+            | [] ->
+              (match var_param with
+              | Some (idx, param) -> (idx, (true, Some param, paraml))
+              | None -> (-1, (true, None, paraml)))
           in
           let rec compute_enum_name env lty =
             match get_node lty with
@@ -6545,7 +6564,13 @@ end = struct
               (env, None)
           in
           let check_arg
-              env param_kind ((_, pos, arg) as e) opt_param ~is_variadic =
+              env
+              param_kind
+              ((_, pos, arg) as e)
+              opt_param
+              ~arg_idx
+              ~param_idx
+              ~is_variadic =
             match opt_param with
             | Some param ->
               (* First check if the parameter is a HH\EnumClass\Label.  *)
@@ -6628,6 +6653,30 @@ end = struct
                     env
                     e
               in
+              (* If we were using our function subtyping code to handle calls
+                 we would have a contravariant function arg projection so
+                 replicate that here *)
+              let update_reason from =
+                Prov.(
+                  flow
+                    ~from:(flow ~from ~into:(Typing_reason.Rwitness pos))
+                    ~into:
+                      (prj_fn_arg
+                         ~idx_sub:arg_idx
+                         ~idx_super:param_idx
+                         ~var:Ast_defs.Contravariant
+                      @@ get_reason fty))
+              in
+              let ty = Prov.update ty ~env ~f:update_reason in
+
+              (* We have to update the type on the expression too rather
+                 than use the type above since it may be different for certain
+                 special functions *)
+              let te =
+                let (ty, pos, e) = te in
+                let ty = Prov.update ty ~env ~f:update_reason in
+                (ty, pos, e)
+              in
               let (env, ty_mismatch_opt, used_dynamic) =
                 check_argument_type_against_parameter_type
                   ~is_single_argument
@@ -6645,6 +6694,30 @@ end = struct
               let (env, te, ty) =
                 expr ~expected:None ~ctxt:Context.default env e
               in
+              (* If we were using our function subtyping code to handle calls
+                 we would have a contravariant function arg projection so
+                 replicate that here *)
+              let update_reason from =
+                Prov.(
+                  flow
+                    ~from:(flow ~from ~into:(Typing_reason.Rwitness pos))
+                    ~into:
+                      (prj_fn_arg
+                         ~idx_sub:arg_idx
+                         ~idx_super:param_idx
+                         ~var:Ast_defs.Contravariant
+                      @@ get_reason fty))
+              in
+              let ty = Prov.update ty ~env ~f:update_reason in
+
+              (* We have to update the type on the expression too rather
+                 than use the type above since it may be different for certain
+                 special functions *)
+              let te =
+                let (ty, pos, e) = te in
+                let ty = Prov.update ty ~env ~f:update_reason in
+                (ty, pos, e)
+              in
               (env, Some (te, ty), false)
           in
           (* For a given pass number, check arguments from left-to-right that correspond
@@ -6653,9 +6726,9 @@ end = struct
           let rec check_args pass env args_with_result paraml used_dynamic acc =
             match args_with_result with
             (* We've got an argument *)
-            | ((param_kind, e), opt_result) :: args_with_result ->
+            | (arg_idx, (param_kind, e), opt_result) :: args_with_result ->
               (* Pick up next parameter type info *)
-              let (is_variadic, opt_param, paraml) =
+              let (param_idx, (is_variadic, opt_param, paraml)) =
                 get_next_param_info paraml
               in
               let (env, one_result, used_dynamic') =
@@ -6666,7 +6739,14 @@ end = struct
                   check_pass_and_set_tyvar_variance pass env e opt_param
                 in
                 if check_on_this_pass then
-                  check_arg env param_kind e opt_param ~is_variadic
+                  check_arg
+                    env
+                    param_kind
+                    e
+                    opt_param
+                    ~arg_idx
+                    ~param_idx
+                    ~is_variadic
                 else
                   (env, opt_result, false)
               in
@@ -6676,21 +6756,23 @@ end = struct
                 args_with_result
                 paraml
                 (used_dynamic || used_dynamic')
-                (((param_kind, e), one_result) :: acc)
+                ((arg_idx, (param_kind, e), one_result) :: acc)
             | [] ->
               let rec collect_results reversed_res tel argtys =
                 match reversed_res with
                 | [] -> (env, tel, argtys, used_dynamic, paraml)
                 (* We've still not finished, so bump pass and iterate *)
-                | (_, None) :: _ ->
+                | (_, _, None) :: _ ->
                   check_args
                     (pass + 1)
                     env
                     (List.rev acc)
-                    non_variadic_ft_params
+                    (List.mapi
+                       ~f:(fun idx param -> (idx, param))
+                       non_variadic_ft_params)
                     used_dynamic
                     []
-                | ((param_kind, _), Some (((_, pos, _) as te), ty))
+                | (_, (param_kind, _), Some (((_, pos, _) as te), ty))
                   :: reversed_res ->
                   collect_results
                     reversed_res
@@ -6748,9 +6830,15 @@ end = struct
           (* Pair argument expressions with the result of checking the expression,
            * initially set to None
            *)
-          let args_with_result = List.map el ~f:(fun e -> (e, None)) in
+          let args_with_result =
+            List.mapi el ~f:(fun idx e -> (idx, e, None))
+          in
           let (env, tel, argtys, used_dynamic1, paraml) =
-            check_args 0 env args_with_result non_variadic_ft_params false []
+            let params =
+              List.mapi non_variadic_ft_params ~f:(fun idx param ->
+                  (idx, param))
+            in
+            check_args 0 env args_with_result params false []
           in
           let (env, ty_err_opt) = check_implicit_args env in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -6824,7 +6912,7 @@ end = struct
                       ~init:(env, [], false)
                       d_required
                       required_params
-                      ~f:(fun (env, errs, used_dynamic_acc) elt param ->
+                      ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
                         let (env, err_opt, used_dynamic) =
                           check_argument_type_against_parameter_type
                             ~dynamic_func
@@ -6841,7 +6929,7 @@ end = struct
                       ~init:(env, err_opts, used_dynamic)
                       d_optional
                       optional_params
-                      ~f:(fun (env, errs, used_dynamic_acc) elt param ->
+                      ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
                         let (env, err_opt, used_dynamic) =
                           check_argument_type_against_parameter_type
                             ~dynamic_func
@@ -6854,7 +6942,7 @@ end = struct
                         (env, err_opt :: errs, used_dynamic_acc || used_dynamic))
                   in
                   let (env, var_err_opt, var_used_dynamic) =
-                    Option.map2 d_variadic var_param ~f:(fun v vp ->
+                    Option.map2 d_variadic var_param ~f:(fun v (_idx, vp) ->
                         check_argument_type_against_parameter_type
                           ~dynamic_func
                           env

@@ -83,7 +83,7 @@ std::vector<SignatureScheme> SelfDelegatedCredentialImpl<T>::getSigSchemes()
 template <openssl::KeyType T>
 CertificateMsg SelfDelegatedCredentialImpl<T>::getCertMessage(
     Buf certificateRequestContext) const {
-  auto msg = selfCertImpl_.getCertMessage();
+  auto msg = selfCertImpl_.getCertMessage(std::move(certificateRequestContext));
   msg.certificate_list.at(0).extensions.push_back(encodeExtension(credential_));
   return msg;
 }

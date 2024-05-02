@@ -175,7 +175,9 @@ module Prov = struct
   let rev r = Typing_reason.Rrev r
 
   let prj_fn_arg r ~idx_sub ~idx_super ~var =
-    Typing_reason.(Rprj (Prj_fn_arg (idx_sub, idx_super, var), r))
+    Typing_reason.(Rprj_symm (Prj_symm_fn_arg (idx_sub, idx_super, var), r))
 
-  let prj_fn_ret r = Typing_reason.(Rprj (Prj_fn_ret, r))
+  let prj_fn_ret r = Typing_reason.(Rprj_symm (Prj_symm_fn_ret, r))
+
+  let prj_union r = Typing_reason.(Rprj_asymm (Prj_asymm_union, r))
 end

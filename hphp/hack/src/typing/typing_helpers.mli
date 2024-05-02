@@ -78,4 +78,6 @@ module Prov : sig
     Typing_reason.t
 
   val prj_fn_ret : Typing_reason.t -> Typing_reason.t
+
+  val prj_union : Typing_reason.t -> Typing_reason.t
 end

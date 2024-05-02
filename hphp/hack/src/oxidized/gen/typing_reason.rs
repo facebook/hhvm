@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9e7c57dfec420f2b441f50a8aed18de>>
+// @generated SignedSource<<ca4dff67f0d3eba24adc20814ab1c5f4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -143,28 +143,54 @@ pub enum Blame {
 )]
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
-pub enum Prj {
-    #[rust_to_ocaml(name = "Prj_union")]
-    PrjUnion,
-    #[rust_to_ocaml(name = "Prj_inter")]
-    PrjInter,
-    #[rust_to_ocaml(name = "Prj_neg")]
-    PrjNeg,
-    #[rust_to_ocaml(name = "Prj_class")]
-    PrjClass(String, isize, ast_defs::Variance),
-    #[rust_to_ocaml(name = "Prj_newtype")]
-    PrjNewtype(String, isize, ast_defs::Variance),
-    #[rust_to_ocaml(name = "Prj_tuple")]
-    PrjTuple(isize),
-    #[rust_to_ocaml(name = "Prj_shape")]
-    PrjShape(String),
-    #[rust_to_ocaml(name = "Prj_fn_arg")]
-    PrjFnArg(isize, isize, ast_defs::Variance),
-    #[rust_to_ocaml(name = "Prj_fn_ret")]
-    PrjFnRet,
-    #[rust_to_ocaml(name = "Prj_access")]
-    PrjAccess,
+pub enum PrjSymm {
+    #[rust_to_ocaml(name = "Prj_symm_neg")]
+    PrjSymmNeg,
+    #[rust_to_ocaml(name = "Prj_symm_class")]
+    PrjSymmClass(String, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_symm_newtype")]
+    PrjSymmNewtype(String, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_symm_tuple")]
+    PrjSymmTuple(isize),
+    #[rust_to_ocaml(name = "Prj_symm_shape")]
+    PrjSymmShape(String),
+    #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
+    PrjSymmFnArg(isize, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
+    PrjSymmFnRet,
+    #[rust_to_ocaml(name = "Prj_symm_access")]
+    PrjSymmAccess,
 }
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(u8)]
+pub enum PrjAsymm {
+    #[rust_to_ocaml(name = "Prj_asymm_union")]
+    PrjAsymmUnion,
+    #[rust_to_ocaml(name = "Prj_asymm_inter")]
+    PrjAsymmInter,
+    #[rust_to_ocaml(name = "Prj_asymm_neg")]
+    PrjAsymmNeg,
+}
+impl TrivialDrop for PrjAsymm {}
+arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
 
 /// The reason why something is expected to have a certain type
 #[derive(
@@ -372,7 +398,10 @@ pub enum T_ {
     Rpattern(pos::Pos),
     Rflow(Box<T_>, Box<T_>),
     Rrev(Box<T_>),
-    Rprj(Prj, Box<T_>),
+    #[rust_to_ocaml(name = "Rprj_symm")]
+    RprjSymm(PrjSymm, Box<T_>),
+    #[rust_to_ocaml(name = "Rprj_asymm")]
+    RprjAsymm(PrjAsymm, Box<T_>),
 }
 
 #[derive(
@@ -418,7 +447,10 @@ arena_deserializer::impl_deserialize_in_arena!(Direction);
 #[repr(C, u8)]
 pub enum PathElem {
     Direction(Direction),
-    Projection(Prj),
+    #[rust_to_ocaml(name = "Symm_projection")]
+    SymmProjection(PrjSymm),
+    #[rust_to_ocaml(name = "Asymm_projection")]
+    AsymmProjection(PrjAsymm),
     Witness(T_),
 }
 

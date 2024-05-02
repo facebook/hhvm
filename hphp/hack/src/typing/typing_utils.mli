@@ -246,6 +246,7 @@ val expand_typeconst :
 
 type union =
   Typing_env_types.env ->
+  ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
@@ -255,6 +256,7 @@ val union_ref : union ref
 
 val union :
   Typing_env_types.env ->
+  ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->

@@ -990,7 +990,7 @@ end = struct
       ~rhs:({ super_like; ty_super; _ } as rhs)
       env =
     match deref lty_sub with
-    | (_, Tunion tyl) ->
+    | (r_sub, Tunion tyl) ->
       let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
@@ -998,6 +998,8 @@ end = struct
         ~subtype_env
         ~this_ty
         ~mk_prop
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -1132,6 +1134,7 @@ end = struct
       lty_sub
       (r_super, lty_supers)
       env =
+    let r_sub = get_reason lty_sub in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
     let default_subtype_help env =
@@ -1354,6 +1357,11 @@ end = struct
         match tys with
         | [] -> invalid_env env
         | ty :: tys ->
+          let lty_sub =
+            Prov.(
+              update lty_sub ~env ~f:(fun from ->
+                  flow ~from ~into:(prj_union r_sub)))
+          in
           simplify
             ~subtype_env
             ~this_ty
@@ -2762,7 +2770,7 @@ end = struct
             (LoclType ty_super)
     end
     (* -- C-Inter-R --------------------------------------------------------- *)
-    | ((_, Tunion ty_subs), (_, Tintersection _)) ->
+    | ((r_sub, Tunion ty_subs), (_r_super, Tintersection _)) ->
       let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
@@ -2770,6 +2778,8 @@ end = struct
         ~subtype_env
         ~this_ty
         ~mk_prop
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -2793,7 +2803,7 @@ end = struct
     (* -- C-Bot-R ----------------------------------------------------------- *)
     (* Empty union encodes the bottom type nothing *)
     | ((_, Tunion []), (_, Tunion [])) -> (env, TL.valid)
-    | ((_, Tunion tyl), (_, Tunion [])) ->
+    | ((r_sub, Tunion tyl), (_r_super, Tunion [])) ->
       let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
@@ -2801,6 +2811,8 @@ end = struct
         ~subtype_env
         ~this_ty
         ~mk_prop
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -2939,7 +2951,7 @@ end = struct
       simplify ~subtype_env ~this_ty ~lhs ~rhs env
     | (_, (r_super, Tunion lty_supers)) -> begin
       match deref ty_sub with
-      | (_, Tunion ty_subs) ->
+      | (r_sub, Tunion ty_subs) ->
         let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
           simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
         in
@@ -2947,6 +2959,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~mk_prop
+          ~update_reason:
+            Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -4957,11 +4971,13 @@ end = struct
           (LoclType ty_sub)
           (ConstraintType
              (mk_constraint_type (r_super, Tdestructure destructure)))
-      | ((_, Tunion ty_subs), _) ->
+      | ((r_sub, Tunion ty_subs), _) ->
         Common.simplify_union_l
           ~subtype_env
           ~this_ty
           ~mk_prop:simplify
+          ~update_reason:
+            Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5233,6 +5249,10 @@ end = struct
           ~subtype_env
           ~this_ty
           ~mk_prop
+          ~update_reason:
+            Prov.(
+              update ~f:(fun from ->
+                  flow ~from ~into:(prj_union @@ get_reason lty_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5508,11 +5528,13 @@ end = struct
         env
         (LoclType ty_sub)
         htmty
-    | (_, Tunion ty_subs) ->
+    | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env
         ~this_ty
         ~mk_prop:simplify
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5719,11 +5741,13 @@ end = struct
         env
         (LoclType ty_sub)
         ity_super
-    | (_, Tunion ty_subs) ->
+    | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env
         ~this_ty
         ~mk_prop:simplify
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5873,6 +5897,10 @@ end = struct
         ~subtype_env
         ~this_ty
         ~mk_prop:simplify
+        ~update_reason:
+          Prov.(
+            update ~f:(fun from ->
+                flow ~from ~into:(prj_union @@ get_reason ty_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5950,6 +5978,7 @@ and Common : sig
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
+    update_reason:(locl_ty -> env:env -> locl_ty) ->
     Reason.t option * locl_phase ty list ->
     'rhs ->
     env ->
@@ -6056,8 +6085,15 @@ end = struct
     | _ -> false
 
   let simplify_union_l
-      ~subtype_env ~this_ty ~mk_prop (sub_supportdyn, ty_subs) rhs env =
+      ~subtype_env
+      ~this_ty
+      ~mk_prop
+      ~update_reason
+      (sub_supportdyn, ty_subs)
+      rhs
+      env =
     let f res ty_sub =
+      let ty_sub = update_reason ty_sub ~env in
       res &&& mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs
     in
     (* Prioritize types that aren't dynamic or intersections with dynamic
@@ -6247,7 +6283,7 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
-    | (_, Tunion ty_subs) ->
+    | (r_sub, Tunion ty_subs) ->
       let mk_prop_union
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
         simplify_disj_r
@@ -6264,6 +6300,8 @@ end = struct
         ~subtype_env
         ~this_ty
         ~mk_prop:mk_prop_union
+        ~update_reason:
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env

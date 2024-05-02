@@ -24,8 +24,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -72,8 +72,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -107,7 +107,7 @@ error: Typing[4110] Invalid argument [1]
     "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":7,"char_end":8}]
   },
   {"Fwd":[]},
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {
     "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":5}]
   },
@@ -115,7 +115,7 @@ error: Typing[4110] Invalid argument [1]
   {
     "Rwitness_from_decl":[{"filename":"assign_local.php","line":6,"char_start":10,"char_end":12}]
   },
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
@@ -166,8 +166,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -221,8 +221,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -260,7 +260,7 @@ error: Typing[4110] Invalid argument [1]
     "Rwitness":[{"filename":"assign_local.php","line":16,"char_start":7,"char_end":8}]
   },
   {"Fwd":[]},
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {
     "Rwitness":[{"filename":"assign_local.php","line":16,"char_start":3,"char_end":5}]
   },
@@ -268,7 +268,7 @@ error: Typing[4110] Invalid argument [1]
   {
     "Rwitness_from_decl":[{"filename":"assign_local.php","line":6,"char_start":10,"char_end":12}]
   },
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]
@@ -331,8 +331,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -393,8 +393,8 @@ error: Typing[4110] Invalid argument [1]
           ]
         },
         {
-          "Rprj":[
-            {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
             {
               "Rflow":[
                 {
@@ -436,7 +436,7 @@ error: Typing[4110] Invalid argument [1]
     "Rwitness":[{"filename":"assign_local.php","line":23,"char_start":7,"char_end":8}]
   },
   {"Fwd":[]},
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {
     "Rwitness":[{"filename":"assign_local.php","line":23,"char_start":3,"char_end":5}]
   },
@@ -444,7 +444,7 @@ error: Typing[4110] Invalid argument [1]
   {
     "Rwitness_from_decl":[{"filename":"assign_local.php","line":6,"char_start":10,"char_end":12}]
   },
-  {"Prj_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"assign_local.php","line":6,"char_start":14,"char_end":16}]

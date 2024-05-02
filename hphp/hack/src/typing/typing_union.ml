@@ -211,7 +211,7 @@ let exact_least_upper_bound e1 e2 =
   | (Exact, Exact) -> Exact
   | (_, _) -> nonexact
 
-let rec union env ?(approx_cancel_neg = false) ty1 ty2 =
+let rec union env ?reason ?(approx_cancel_neg = false) ty1 ty2 =
   let r1 = get_reason ty1 in
   let r2 = get_reason ty2 in
   Log.log_union r2 ty1 ty2
@@ -223,7 +223,11 @@ let rec union env ?(approx_cancel_neg = false) ty1 ty2 =
   else if Utils.is_sub_type_for_union env ty2 ty1 then
     (env, ty1)
   else
-    let r = union_reason r1 r2 in
+    let r =
+      match reason with
+      | Some r -> r
+      | _ -> union_reason r1 r2
+    in
     let (env, non_ty2) =
       Typing_intersection.negate_type env Reason.none ty2 ~approx:Utils.ApproxUp
     in
@@ -315,7 +319,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
       if Int.equal (List.length tyl1) (List.length tyl2) then
         let (env, tyl) =
-          List.map2_env env tyl1 tyl2 ~f:(union ~approx_cancel_neg)
+          List.map2_env env tyl1 tyl2 ~f:(union ?reason:None ~approx_cancel_neg)
         in
         (env, Some (mk (r, Ttuple tyl)))
       else
@@ -842,7 +846,7 @@ let fold_union env ?(approx_cancel_neg = false) r tyl =
     env
     tyl
     ~init:(MakeType.nothing r)
-    ~f:(union ~approx_cancel_neg)
+    ~f:(union ?reason:None ~approx_cancel_neg)
 
 (* See documentation in mli file *)
 let simplify_unions env ?(approx_cancel_neg = false) ?on_tyvar ty =

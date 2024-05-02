@@ -249,7 +249,8 @@ pub trait Reason:
                 OR::Rpattern(pos) => RI::Rpattern(pos.into()),
                 OR::Rflow(_) => RI::Rnone,
                 OR::Rrev(_) => RI::Rnone,
-                OR::Rprj(_) => RI::Rnone,
+                OR::RprjAsymm(_) => RI::Rnone,
+                OR::RprjSymm(_) => RI::Rnone,
             }
         })
     }

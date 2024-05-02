@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a9d411abddea2a644b828a72e16c53ad>>
+// @generated SignedSource<<7235775b066628ee243a2a6d043747c3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -103,37 +103,35 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
 )]
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
-pub enum Prj<'a> {
-    #[rust_to_ocaml(name = "Prj_union")]
-    PrjUnion,
-    #[rust_to_ocaml(name = "Prj_inter")]
-    PrjInter,
-    #[rust_to_ocaml(name = "Prj_neg")]
-    PrjNeg,
+pub enum PrjSymm<'a> {
+    #[rust_to_ocaml(name = "Prj_symm_neg")]
+    PrjSymmNeg,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_class")]
+    #[rust_to_ocaml(name = "Prj_symm_class")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjClass(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    PrjSymmClass(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_newtype")]
+    #[rust_to_ocaml(name = "Prj_symm_newtype")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjNewtype(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
-    #[rust_to_ocaml(name = "Prj_tuple")]
-    PrjTuple(isize),
+    PrjSymmNewtype(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    #[rust_to_ocaml(name = "Prj_symm_tuple")]
+    PrjSymmTuple(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_shape")]
-    PrjShape(&'a str),
+    #[rust_to_ocaml(name = "Prj_symm_shape")]
+    PrjSymmShape(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_fn_arg")]
+    #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjFnArg(&'a (isize, isize, oxidized::ast_defs::Variance)),
-    #[rust_to_ocaml(name = "Prj_fn_ret")]
-    PrjFnRet,
-    #[rust_to_ocaml(name = "Prj_access")]
-    PrjAccess,
+    PrjSymmFnArg(&'a (isize, isize, oxidized::ast_defs::Variance)),
+    #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
+    PrjSymmFnRet,
+    #[rust_to_ocaml(name = "Prj_symm_access")]
+    PrjSymmAccess,
 }
-impl<'a> TrivialDrop for Prj<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Prj<'arena>);
+impl<'a> TrivialDrop for PrjSymm<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(PrjSymm<'arena>);
+
+pub use oxidized::typing_reason::PrjAsymm;
 
 /// The reason why something is expected to have a certain type
 #[derive(
@@ -488,8 +486,13 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rrev(&'a T_<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rprj_symm")]
     #[rust_to_ocaml(inline_tuple)]
-    Rprj(&'a (Prj<'a>, T_<'a>)),
+    RprjSymm(&'a (PrjSymm<'a>, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rprj_asymm")]
+    #[rust_to_ocaml(inline_tuple)]
+    RprjAsymm(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

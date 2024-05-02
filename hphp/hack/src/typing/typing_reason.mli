@@ -50,18 +50,22 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
-(** A projection into a type constructor *)
-type prj =
-  | Prj_union
-  | Prj_inter
-  | Prj_neg
-  | Prj_class of string * int * Ast_defs.variance
-  | Prj_newtype of string * int * Ast_defs.variance
-  | Prj_tuple of int
-  | Prj_shape of string
-  | Prj_fn_arg of int * int * Ast_defs.variance
-  | Prj_fn_ret
-  | Prj_access
+(** A symmetric projection into a type constructor *)
+type prj_symm =
+  | Prj_symm_neg
+  | Prj_symm_class of string * int * Ast_defs.variance
+  | Prj_symm_newtype of string * int * Ast_defs.variance
+  | Prj_symm_tuple of int
+  | Prj_symm_shape of string
+  | Prj_symm_fn_arg of int * int * Ast_defs.variance
+  | Prj_symm_fn_ret
+  | Prj_symm_access
+[@@deriving hash]
+
+type prj_asymm =
+  | Prj_asymm_union
+  | Prj_asymm_inter
+  | Prj_asymm_neg
 [@@deriving hash]
 
 (** The reason why something is expected to have a certain type *)
@@ -192,8 +196,10 @@ type _ t_ =
       to concatenate two paths *)
   | Rrev : locl_phase t_ -> locl_phase t_
       (** Paths are reversed with contravariance; we use this constructor to perform reversals lazily *)
-  | Rprj : prj * locl_phase t_ -> locl_phase t_
-      (** Records reasons through type constructors *)
+  | Rprj_symm : prj_symm * locl_phase t_ -> locl_phase t_
+      (** Records reasons through type constructors where both sub- and supertype are projected in the same way *)
+  | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
+      (** Records reasons through type constructors where only one of the sub- or supertype is projected *)
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

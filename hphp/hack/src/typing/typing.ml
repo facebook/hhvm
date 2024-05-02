@@ -7677,6 +7677,20 @@ end = struct
           env
           e
       in
+      let rty =
+        Prov.(
+          update rty ~env ~f:(fun from ->
+              flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
+      in
+      let te =
+        let (ty, pos, e) = te in
+        let ty =
+          Prov.(
+            update ty ~env ~f:(fun from ->
+                flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
+        in
+        (ty, pos, e)
+      in
       (* This is a unify_error rather than a return_type_mismatch because the return
        * statement is the problem, not the return type itself. *)
       let (env, ty_err_opt) =

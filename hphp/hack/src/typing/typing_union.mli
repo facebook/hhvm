@@ -25,7 +25,12 @@ the subsets of a set of types.
 If approx_cancel_neg is true, then some unions with negations are treated over-approximately:
 C<t> | not C simplifies to mixed. *)
 val union :
-  env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
+  env ->
+  ?reason:Typing_reason.t ->
+  ?approx_cancel_neg:bool ->
+  locl_ty ->
+  locl_ty ->
+  env * locl_ty
 
 (** Computes the union of a list of types by unioning types two by two.
 This has quadratic complexity, but in practice we benefit from aggressively

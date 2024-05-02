@@ -147,7 +147,8 @@ struct
     | Rpattern p -> Rpattern (pos p)
     | Rflow (from, into) -> Rflow (reason from, reason into)
     | Rrev t -> Rrev (reason t)
-    | Rprj (prj, t) -> Rprj (prj, reason t)
+    | Rprj_asymm (prj, t) -> Rprj_asymm (prj, reason t)
+    | Rprj_symm (prj, t) -> Rprj_symm (prj, reason t)
 
   let rec ty t =
     let (p, x) = deref t in

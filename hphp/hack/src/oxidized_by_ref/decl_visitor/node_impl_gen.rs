@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<216fd0b13b814fa6b87c4f5530ae0701>>
+// @generated SignedSource<<69166e7b0866536055994ce1590b0135>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1030,22 +1030,20 @@ impl<'a> Node<'a> for Blame<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Prj<'a> {
+impl<'a> Node<'a> for PrjSymm<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_prj(self)
+        v.visit_prj_symm(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Prj::PrjUnion => {}
-            Prj::PrjInter => {}
-            Prj::PrjNeg => {}
-            Prj::PrjClass(ref __binding_0) => __binding_0.accept(v),
-            Prj::PrjNewtype(ref __binding_0) => __binding_0.accept(v),
-            Prj::PrjTuple(ref __binding_0) => __binding_0.accept(v),
-            Prj::PrjShape(ref __binding_0) => __binding_0.accept(v),
-            Prj::PrjFnArg(ref __binding_0) => __binding_0.accept(v),
-            Prj::PrjFnRet => {}
-            Prj::PrjAccess => {}
+            PrjSymm::PrjSymmNeg => {}
+            PrjSymm::PrjSymmClass(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmNewtype(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmTuple(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmShape(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmFnArg(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmFnRet => {}
+            PrjSymm::PrjSymmAccess => {}
         }
     }
 }
@@ -1155,7 +1153,8 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rpattern(ref __binding_0) => __binding_0.accept(v),
             T_::Rflow(ref __binding_0) => __binding_0.accept(v),
             T_::Rrev(ref __binding_0) => __binding_0.accept(v),
-            T_::Rprj(ref __binding_0) => __binding_0.accept(v),
+            T_::RprjSymm(ref __binding_0) => __binding_0.accept(v),
+            T_::RprjAsymm(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1341,6 +1340,18 @@ impl<'a> Node<'a> for BlameSource {
             BlameSource::BSlambda => {}
             BlameSource::BSassignment => {}
             BlameSource::BSoutOfScope => {}
+        }
+    }
+}
+impl<'a> Node<'a> for PrjAsymm {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_prj_asymm(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PrjAsymm::PrjAsymmUnion => {}
+            PrjAsymm::PrjAsymmInter => {}
+            PrjAsymm::PrjAsymmNeg => {}
         }
     }
 }

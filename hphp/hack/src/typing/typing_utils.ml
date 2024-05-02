@@ -139,7 +139,12 @@ let (expand_typeconst_ref : expand_typeconst ref) =
 let expand_typeconst x = !expand_typeconst_ref x
 
 type union =
-  env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
+  env ->
+  ?reason:Typing_reason.t ->
+  ?approx_cancel_neg:bool ->
+  locl_ty ->
+  locl_ty ->
+  env * locl_ty
 
 let (union_ref : union ref) = ref (not_implemented "union")
 

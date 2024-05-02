@@ -44,7 +44,14 @@ let union
         pos = pos2;
         eid = eid2;
       } =
-  let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
+  (* TODO(mjt) Use a more specific reason here provided as an argument *)
+  let reason =
+    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+      Some (Typing_reason.Rwitness join_pos)
+    else
+      None
+  in
+  let (env, ty) = Union.union ?reason ~approx_cancel_neg:true env ty1 ty2 in
   let (env, bound_ty) =
     match (bound_ty1, bound_ty2) with
     | (None, None) -> (env, None)
@@ -61,6 +68,8 @@ let union
       in
       (env, Some ty)
   in
+  (* TODO(mjt) Determin if this need updating to if the change to reasons will
+     be sufficient*)
   let pos =
     if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
       pos1

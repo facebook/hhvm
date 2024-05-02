@@ -33,7 +33,7 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         bint isUnion()
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
-    cdef cTypeInfo createStructTypeInfo(const cDynamicStructInfo& structInfo) except+
+    cdef cTypeInfo createImmutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
 
 from thrift.python.types cimport TypeInfoBase
 

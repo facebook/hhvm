@@ -572,7 +572,7 @@ cdef class StructTypeInfo(TypeInfoBase):
         else:
             self.is_union = False
             c_struct_info = (<StructInfo>py_struct_info).cpp_obj.get()
-        self.cpp_obj = createStructTypeInfo(
+        self.cpp_obj = createImmutableStructTypeInfo(
             deref(c_struct_info)
         )
 
@@ -711,7 +711,7 @@ cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
      the first element of `struct_tuple` is set to 1.
 
      Args:
-        struct_tuple: see `createStructTupleWithDefaultValues()`
+        struct_tuple: see `createImmutableStructTupleWithDefaultValues()`
         index: field index, as defined by its insertion order in the parent
             `StructInfo` (this is not the field id).
         value: new value for this field, in "internal data" represntation (as
@@ -750,7 +750,7 @@ cdef class Struct(StructOrUnion):
 
     Instance variables:
         _fbthrift_data: "struct tuple" that holds the "isset" flag array and
-            values for all fields. See `createStructTupleWithDefaultValues()`.
+            values for all fields. See `createImmutableStructTupleWithDefaultValues()`.
 
         _fbthrift_field_cache: Tuple of length numFields. Each item may contain
             a previously retrieved value for a non-primitive (or adapted) field.
@@ -944,7 +944,7 @@ cdef class Struct(StructOrUnion):
 
         # If no keyword arguments are provided, initialize the Struct with default values.
         if not kwargs:
-            self._fbthrift_data = createStructTupleWithDefaultValues(struct_info.cpp_obj.get().getStructInfo())
+            self._fbthrift_data = createImmutableStructTupleWithDefaultValues(struct_info.cpp_obj.get().getStructInfo())
             return
 
         # Instantiate a tuple with 'None' values, then assign the provided keyword arguments
@@ -978,7 +978,7 @@ cdef class Struct(StructOrUnion):
             )
 
         # If any fields remain unset, initialize them with their respective default values.
-        populateStructTupleUnsetFieldsWithDefaultValues(
+        populateImmutableStructTupleUnsetFieldsWithDefaultValues(
                 self._fbthrift_data,
                 struct_info.cpp_obj.get().getStructInfo()
         )

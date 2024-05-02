@@ -31,6 +31,14 @@ namespace python {
 constexpr const size_t kHeadOffset = sizeof(PyVarObject);
 constexpr const size_t kFieldOffset = sizeof(PyObject*);
 
+/**
+ * In this module, some of the functions have two versions: one for 'Mutable'
+ * and one for "Immutable" in the name. There are slight differences between
+ * these versions. For instance, when dealing with standard default value
+ * related functions, immutable types utilize Python `tuple` for a Thrift list,
+ * whereas mutable types utilize Python `list`.
+ */
+
 namespace {
 
 /***
@@ -51,13 +59,26 @@ void ensureImportOrThrow() {
   }
 }
 
-using GetStandardDefaultValueFunc =
+using GetStandardDefaultValueForTypeFunc =
     std::tuple<UniquePyObjectPtr, bool>(const detail::TypeInfo&);
+
+PyObject* createStructTupleWithDefaultValues(
+    const detail::StructInfo&, GetStandardDefaultValueForTypeFunc);
 
 /**
  * Returns the appropriate standard immutable default value for the given
- * `typeInfo` and a boolean indicating whether it should be added to cache or
- * not.
+ * `typeInfo`, along with a boolean indicating whether it should be added to
+ * the cache.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *   * An empty `tuple` for lists and maps.
+ *   * An empty `frozenset` for sets.
+ *   * A recursively default-initialized instance for structs and unions.
  *
  * @throws if there is no standard default value
  */
@@ -119,7 +140,8 @@ std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
       value = UniquePyObjectPtr(
           structInfo->unionExt != nullptr
               ? createUnionTuple()
-              : createStructTupleWithDefaultValues(*structInfo));
+              : createStructTupleWithDefaultValues(
+                    *structInfo, getStandardImmutableDefaultValueForType));
       break;
     }
     default:
@@ -132,7 +154,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
 }
 
 /**
- * Returns the appropriate default value for a thrift field of the given type.
+ * Returns the standard default value for a thrift field of the given type.
  *
  * The returned value will either be the one provided by the user (in the Thrift
  * IDL), or the standard default value for the given `typeInfo`.
@@ -146,7 +168,7 @@ UniquePyObjectPtr getDefaultValueForField(
     const detail::TypeInfo* typeInfo,
     const FieldValueMap& userDefaultValues,
     int16_t index,
-    GetStandardDefaultValueFunc getStandardDefaultValueFunc) {
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
   ensureImportOrThrow();
 
   // 1. If the user explicitly provided a default value, use it.
@@ -170,7 +192,7 @@ UniquePyObjectPtr getDefaultValueForField(
 
   // 3. No cached value found. Determine the default value, and update cache (if
   // applicable).
-  auto [value, addValueToCache] = getStandardDefaultValueFunc(*typeInfo);
+  auto [value, addValueToCache] = getStandardDefaultValueForTypeFunc(*typeInfo);
   if (addValueToCache) {
     defaultValueCache->emplace(typeInfo, value.get());
     Py_INCREF(value.get());
@@ -186,6 +208,117 @@ const char* getIssetFlags(const void* object) {
     THRIFT_PY3_CHECK_ERROR();
   }
   return issetFlags;
+}
+
+/**
+ * Returns a new "struct tuple" with all its elements initialized.
+ *
+ * As in `createStructTuple()`, the first element of the tuple is a
+ * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
+ *
+ * However, the remaining elements (1 through `numFields + 1`) are initialized
+ * with the appropriate default value for the corresponding field (see below).
+ * The order corresponds to the order of fields in the given `structInfo`
+ * (i.e., the insertion order, NOT the field ids).
+ *
+ * The default value for optional fields is always `Py_None`. For other fields,
+ * the default value is either specified by the user or the "standard" value
+ * for the corresponding type. This is identified by the function parameter
+ * `getStandardDefaultValueForTypeFunc`.
+ *
+ * For more information, see `getStandardImmutableDefaultValueForType()` and
+ * `getStandardMutableDefaultValueType()` functions, which are potential values
+ * for the `getStandardDefaultValueForTypeFunc` parameter.
+ */
+PyObject* createStructTupleWithDefaultValues(
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  const int16_t numFields = structInfo.numFields;
+  UniquePyObjectPtr tuple{createStructTuple(numFields)};
+  if (tuple == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+
+  // Initialize tuple[1:numFields+1] with default field values.
+  const auto& defaultValues =
+      *static_cast<const FieldValueMap*>(structInfo.customExt);
+  for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
+    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
+      PyTuple_SET_ITEM(tuple.get(), fieldIndex + 1, Py_None);
+      Py_INCREF(Py_None);
+    } else {
+      PyTuple_SET_ITEM(
+          tuple.get(),
+          fieldIndex + 1,
+          getDefaultValueForField(
+              fieldInfo.typeInfo,
+              defaultValues,
+              fieldIndex,
+              getStandardDefaultValueForTypeFunc)
+              .release());
+    }
+  }
+  return tuple.release();
+}
+
+/**
+ * Populates only the unset fields of a "struct tuple" with default values.
+ *
+ * The `tuple` parameter should be a valid Python `tuple` object, created by
+ * the `createStructTuple()`.
+ *
+ * Iterates through the elements (from 1 to `numFields + 1`). If a field
+ * is unset, it is populated with the corresponding default value.
+ * The mechanism for determining the default value is the same as in the
+ * `createStructTupleWithDefaultValues()` function. Please see the documentation
+ * of `createStructTupleWithDefaultValues()` for details on how the default
+ * value is identified.
+ *
+ * Throws on error
+ */
+void populateStructTupleUnsetFieldsWithDefaultValues(
+    PyObject* tuple,
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  if (tuple == nullptr) {
+    throw std::runtime_error("null tuple!");
+  }
+
+  DCHECK(PyTuple_Check(tuple));
+  const int16_t numFields = structInfo.numFields;
+  DCHECK(PyTuple_Size(tuple) == numFields + 1);
+
+  const auto& defaultValues =
+      *static_cast<const FieldValueMap*>(structInfo.customExt);
+  const char* issetFlags = getIssetFlags(tuple);
+  for (int i = 0; i < numFields; ++i) {
+    // If the field is already set, this implies that the constructor has
+    // already assigned a value to the field. In this case, we skip it and
+    // avoid overwriting it with the default value.
+    if (issetFlags[i]) {
+      continue;
+    }
+
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
+    PyObject* oldValue = PyTuple_GET_ITEM(tuple, i + 1);
+    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
+      PyTuple_SET_ITEM(tuple, i + 1, Py_None);
+      Py_INCREF(Py_None);
+    } else {
+      // getDefaultValueForField calls `Py_INCREF`
+      PyTuple_SET_ITEM(
+          tuple,
+          i + 1,
+          getDefaultValueForField(
+              fieldInfo.typeInfo,
+              defaultValues,
+              i,
+              getStandardDefaultValueForTypeFunc)
+              .release());
+    }
+    Py_DECREF(oldValue);
+  }
 }
 
 } // namespace
@@ -227,35 +360,10 @@ PyObject* createStructTuple(int16_t numFields) {
   return tuple;
 }
 
-PyObject* createStructTupleWithDefaultValues(
+PyObject* createImmutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo) {
-  const int16_t numFields = structInfo.numFields;
-  UniquePyObjectPtr tuple{createStructTuple(numFields)};
-  if (tuple == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-
-  // Initialize tuple[1:numFields+1] with default field values.
-  const auto& defaultValues =
-      *static_cast<const FieldValueMap*>(structInfo.customExt);
-  for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
-    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
-    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      PyTuple_SET_ITEM(tuple.get(), fieldIndex + 1, Py_None);
-      Py_INCREF(Py_None);
-    } else {
-      PyTuple_SET_ITEM(
-          tuple.get(),
-          fieldIndex + 1,
-          getDefaultValueForField(
-              fieldInfo.typeInfo,
-              defaultValues,
-              fieldIndex,
-              getStandardImmutableDefaultValueForType)
-              .release());
-    }
-  }
-  return tuple.release();
+  return createStructTupleWithDefaultValues(
+      structInfo, getStandardImmutableDefaultValueForType);
 }
 
 PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
@@ -283,11 +391,12 @@ void setStructIsset(void* object, int16_t index, bool value) {
   flags[index] = value;
 }
 
-void* setStruct(void* object, const detail::TypeInfo& typeInfo) {
+void* setImmutableStruct(void* object, const detail::TypeInfo& typeInfo) {
   return setPyObject(
       object,
       UniquePyObjectPtr{createStructTupleWithDefaultValues(
-          *static_cast<const detail::StructInfo*>(typeInfo.typeExt))});
+          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
+          getStandardImmutableDefaultValueForType)});
 }
 
 void* setUnion(void* object, const detail::TypeInfo& /* typeInfo */) {
@@ -303,46 +412,10 @@ void setIsset(void* object, ptrdiff_t offset, bool value) {
   return setStructIsset(object, offset, value);
 }
 
-void populateStructTupleUnsetFieldsWithDefaultValues(
+void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* tuple, const detail::StructInfo& structInfo) {
-  if (tuple == nullptr) {
-    throw std::runtime_error("null tuple!");
-  }
-
-  DCHECK(PyTuple_Check(tuple));
-  const int16_t numFields = structInfo.numFields;
-  DCHECK(PyTuple_Size(tuple) == numFields + 1);
-
-  const auto& defaultValues =
-      *static_cast<const FieldValueMap*>(structInfo.customExt);
-  const char* issetFlags = getIssetFlags(tuple);
-  for (int i = 0; i < numFields; ++i) {
-    // If the field is already set, this implies that the constructor has
-    // already assigned a value to the field. In this case, we skip it and
-    // avoid overwriting it with the default value.
-    if (issetFlags[i]) {
-      continue;
-    }
-
-    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
-    PyObject* oldValue = PyTuple_GET_ITEM(tuple, i + 1);
-    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      PyTuple_SET_ITEM(tuple, i + 1, Py_None);
-      Py_INCREF(Py_None);
-    } else {
-      // getDefaultValueForField calls `Py_INCREF`
-      PyTuple_SET_ITEM(
-          tuple,
-          i + 1,
-          getDefaultValueForField(
-              fieldInfo.typeInfo,
-              defaultValues,
-              i,
-              getStandardImmutableDefaultValueForType)
-              .release());
-    }
-    Py_DECREF(oldValue);
-  }
+  populateStructTupleUnsetFieldsWithDefaultValues(
+      tuple, structInfo, getStandardImmutableDefaultValueForType);
 }
 
 void resetFieldToStandardDefault(
@@ -495,14 +568,14 @@ detail::OptionalThriftValue getStruct(
   return folly::make_optional<detail::ThriftValue>(pyObj);
 }
 
-detail::TypeInfo createStructTypeInfo(
+detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo) {
   return {
       /* .type */ protocol::TType::T_STRUCT,
       /* .get */ getStruct,
       /* .set */
       reinterpret_cast<detail::VoidFuncPtr>(
-          dynamicStructInfo.isUnion() ? setUnion : setStruct),
+          dynamicStructInfo.isUnion() ? setUnion : setImmutableStruct),
       /* .typeExt */ &dynamicStructInfo.getStructInfo(),
   };
 }

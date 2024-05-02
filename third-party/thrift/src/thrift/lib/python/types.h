@@ -89,7 +89,7 @@ PyObject* createUnionTuple();
 PyObject* createStructTuple(int16_t numFields);
 
 /**
- * Returns a new "struct tuple" with all its elements initialized.
+ * Returns a new "immutable struct tuple" with all its elements initialized.
  *
  * As in `createStructTuple()`, the first element of the tuple is a
  * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
@@ -116,7 +116,7 @@ PyObject* createStructTuple(int16_t numFields);
  * various `*TypeInfo` Python classes). For example, `false` is actually
  * `Py_False`.
  */
-PyObject* createStructTupleWithDefaultValues(
+PyObject* createImmutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo);
 
 /**
@@ -151,7 +151,7 @@ void setStructIsset(void* object, int16_t index, bool value);
 PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
 
 /**
- * Populates only unset fields of "struct tuple" with default values.
+ * Populates only unset fields of "immutable struct tuple" with default values.
  *
  * The `object` should be a valid `tuple` created by `createStructTuple()`
  *
@@ -161,7 +161,7 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
  * Throws on error
  *
  */
-void populateStructTupleUnsetFieldsWithDefaultValues(
+void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* object, const detail::StructInfo& structInfo);
 
 /**
@@ -578,7 +578,7 @@ class DynamicStructInfo {
   FieldValueMap fieldValues_;
 };
 
-detail::TypeInfo createStructTypeInfo(
+detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
 namespace capi {

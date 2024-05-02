@@ -29,7 +29,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         self._mutable_struct_class = mutable_struct_class
         cdef MutableStructInfo py_mutable_struct_info = mutable_struct_class._fbthrift_mutable_struct_info
         cdef cDynamicStructInfo* c_struct_info = py_mutable_struct_info.cpp_obj.get()
-        self.cpp_obj = createStructTypeInfo(deref(c_struct_info))
+        self.cpp_obj = createImmutableStructTypeInfo(deref(c_struct_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return &self.cpp_obj
@@ -42,7 +42,10 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         Args:
             value: should be an instance of `self._mutable_struct_class`, Otherwise, raises `TypeError`.
 
-        Returns: the "struct tuple" of the given value (see `createStructTupleWithDefaultValues()`)
+        Returns: The "mutable struct tuple" of the given value (see `createImmutableStructTupleWithDefaultValues()`).
+            Note: The documentation above refers to the `*Immutable*` function at this stage, as the mutable
+              implementation is incomplete and it uses some of the immutable implementation, this will be
+              corrected in follow-up diffs.
 
         Raises:
             TypeError if `value` is not an instance of `self._mutable_struct_class`

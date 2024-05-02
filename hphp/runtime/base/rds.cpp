@@ -160,11 +160,11 @@ static auto local_byte_counter = ServiceData::createCounter("admin.vm-tcspace.RD
 static auto pers_byte_counter = ServiceData::createCounter("admin.vm-tcspace.PersistentRDS");
 
 // Current allocation frontier for the non-persistent region.
-size_t s_normal_frontier = sizeof(Header);
+std::atomic_size_t s_normal_frontier = sizeof(Header);
 
 // Frontier for the "local" part of the persistent region (data not
 // shared between threads, but not zero'd)---downward-growing.
-size_t s_local_frontier = 0;
+std::atomic_size_t s_local_frontier = 0;
 size_t s_local_base = 0;
 
 #if !RDS_FIXED_PERSISTENT_BASE
@@ -320,8 +320,8 @@ Handle alloc(Mode mode, size_t numBytes,
           return handle;
         }
 
-        auto const oldFrontier = s_normal_frontier;
-        s_normal_frontier = roundUp(s_normal_frontier, align);
+        auto const oldFrontier = s_normal_frontier.load(std::memory_order_relaxed);
+        s_normal_frontier.store(roundUp(oldFrontier, align), std::memory_order_release);
 
         addFreeBlock(s_normal_free_lists, oldFrontier,
                      s_normal_frontier - oldFrontier);
@@ -397,7 +397,8 @@ Handle alloc(Mode mode, size_t numBytes,
         align = folly::nextPowTwo(align);
         always_assert(align <= numBytes);
 
-        const auto old_local_frontier = s_local_frontier;
+        const auto old_local_frontier =
+          s_local_frontier.load(std::memory_order_acquire);
         auto& frontier = s_local_frontier;
 
         frontier -= numBytes;

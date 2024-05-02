@@ -42,9 +42,9 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                     Symbol key, Mode mode, size_t size, size_t align,
                     type_scan::Index tsi, const void* init_val);
 
-extern size_t s_normal_frontier;
+extern std::atomic_size_t s_normal_frontier;
 extern size_t s_local_base;
-extern size_t s_local_frontier;
+extern std::atomic_size_t s_local_frontier;
 constexpr size_t size4g = 1ull << 32;
 #if RDS_FIXED_PERSISTENT_BASE
 constexpr uintptr_t s_persistent_base = 0;
@@ -338,12 +338,14 @@ Link<T,M> alloc() {
 
 inline bool isNormalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return handle < safe_cast<uint32_t>(detail::s_normal_frontier);
+  auto const normalFrontier = detail::s_normal_frontier.load(std::memory_order_acquire);
+  return handle < safe_cast<uint32_t>(normalFrontier);
 }
 
 inline bool isLocalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return handle >= safe_cast<uint32_t>(detail::s_local_frontier) &&
+  auto const localFrontier = detail::s_local_frontier.load(std::memory_order_acquire);
+  return handle >= safe_cast<uint32_t>(localFrontier) &&
     handle < safe_cast<uint32_t>(detail::s_local_base);
 }
 

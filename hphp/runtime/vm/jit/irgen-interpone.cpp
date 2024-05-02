@@ -232,9 +232,7 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpIterInit:
     case OpLIterInit:
-    case OpIterNext:
     case OpLIterNext: {
       auto const ita = getImm(sk.pc(),  0).u_ITA;
       setLocType(ita.valId, TCell);

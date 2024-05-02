@@ -522,7 +522,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
         // can produce bytecode which will fail the verifier.
         auto const unsafe = [] (const Bytecode& bc) {
           switch (bc.op) {
-            case Op::IterFree:
             case Op::LIterFree:
             case Op::Silence:
               return true;

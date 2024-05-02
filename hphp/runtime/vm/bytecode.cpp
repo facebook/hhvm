@@ -653,7 +653,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
         os << " ";
       }
       if (checkIterScope(func, offset, i)) {
-        os << frame_iter(fp, i)->toString();
+        os << "I";
       } else {
         os << "I:Undefined";
       }
@@ -4394,12 +4394,18 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-namespace {
+OPTBLD_INLINE void iopIterBase() {
+  TypedValue* base = vmStack().topC();
+  if (LIKELY(isArrayLikeType(type(base)))) return;
+  tvMove(Iter::extractBase(*base, arGetContextClass(vmfp())), base);
+}
 
-template<bool Local>
-void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
-                  PC targetpc, IterTypeOp op) {
-  auto base = Local ? *local : *vmStack().topC();
+
+OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
+                                TypedValue* base, PC targetpc) {
+  auto const op = has_flag(ita.flags, IterArgs::Flags::BaseConst)
+    ? IterTypeOp::LocalBaseConst
+    : IterTypeOp::LocalBaseMutable;
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
@@ -4413,39 +4419,34 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
 
   if (isArrayLikeType(type(base))) {
     handleArrayLike(val(base).parr, op);
-    if (!Local) vmStack().discard();
     return;
   }
 
   // The base is extracted and we already handled ArrayLike.
   assertx(isObjectType(type(base)));
-  if (!new_iter_object<Local>(it, val(base).pobj, value, key)) {
+  if (!new_iter_object(val(base).pobj, value, key)) {
     pc = targetpc;
   }
-
-  if (!Local) vmStack().popC();
 }
 
-void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
+OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
+                                TypedValue* base, PC targetpc) {
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
   auto const more = [&] {
-    if (base != nullptr) {
-      if (isArrayLikeType(type(base))) {
-        auto const arr = val(base).parr;
-        return key
-          ? liter_array_next_key_ind(it, value, key, arr)
-          : liter_array_next_ind(it, value, arr);
-      }
-      assertx(isObjectType(type(base)));
-      auto const obj = val(base).pobj;
+    if (isArrayLikeType(type(base))) {
+      auto const arr = val(base).parr;
       return key
-        ? liter_object_next_key_ind(value, key, obj)
-        : liter_object_next_ind(value, obj);
+        ? liter_array_next_key_ind(it, value, key, arr)
+        : liter_array_next_ind(it, value, arr);
     }
-    return key ? iter_next_key_ind(it, value, key) : iter_next_ind(it, value);
+    assertx(isObjectType(type(base)));
+    auto const obj = val(base).pobj;
+    return key
+      ? liter_object_next_key_ind(value, key, obj)
+      : liter_object_next_ind(value, obj);
   }();
 
   if (more) {
@@ -4453,40 +4454,6 @@ void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
   }
-}
-
-}
-
-OPTBLD_INLINE void iopIterBase() {
-  TypedValue* base = vmStack().topC();
-  if (LIKELY(isArrayLikeType(type(base)))) return;
-  tvMove(Iter::extractBase(*base, arGetContextClass(vmfp())), base);
-}
-
-OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
-  auto const op = IterTypeOp::NonLocal;
-  implIterInit<false>(pc, ita, nullptr, targetpc, op);
-}
-
-OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
-                                TypedValue* base, PC targetpc) {
-  auto const op = has_flag(ita.flags, IterArgs::Flags::BaseConst)
-    ? IterTypeOp::LocalBaseConst
-    : IterTypeOp::LocalBaseMutable;
-  implIterInit<true>(pc, ita, base, targetpc, op);
-}
-
-OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
-  implIterNext(pc, ita, nullptr, targetpc);
-}
-
-OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
-                                TypedValue* base, PC targetpc) {
-  implIterNext(pc, ita, base, targetpc);
-}
-
-OPTBLD_INLINE void iopIterFree(Iter* it) {
-  it->free();
 }
 
 OPTBLD_INLINE void iopLIterFree(Iter* it) {

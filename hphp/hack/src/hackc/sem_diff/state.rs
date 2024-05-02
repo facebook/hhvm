@@ -392,19 +392,12 @@ impl<'a> State<'a> {
                 self.step_memo_get_eager(builder, targets, range)?;
             }
 
-            Instruct::Opcode(Opcode::IterInit(ref iter_args, target)) => {
-                self.step_iter_init(builder, iter_args, None, target)
-            }
             Instruct::Opcode(Opcode::LIterInit(ref iter_args, local, target)) => {
-                self.step_iter_init(builder, iter_args, Some(local), target)
+                self.step_iter_init(builder, iter_args, local, target)
             }
-            Instruct::Opcode(Opcode::IterFree(iter_id))
-            | Instruct::Opcode(Opcode::LIterFree(iter_id)) => self.step_iter_free(iter_id),
-            Instruct::Opcode(Opcode::IterNext(ref iter_args, target)) => {
-                self.step_iter_next(builder, iter_args, None, target)
-            }
+            Instruct::Opcode(Opcode::LIterFree(iter_id)) => self.step_iter_free(iter_id),
             Instruct::Opcode(Opcode::LIterNext(ref iter_args, local, target)) => {
-                self.step_iter_next(builder, iter_args, Some(local), target)
+                self.step_iter_next(builder, iter_args, local, target)
             }
 
             Instruct::Opcode(Opcode::Switch(bounded, base, ref targets)) => {
@@ -935,14 +928,11 @@ impl<'a> State<'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
-        base_local: Option<Local>,
+        base_local: Local,
         target: Label,
     ) {
         // IterArgs { iter_id: IterId, key_id: Local, val_id: Local }
-        let base = match base_local {
-            None => self.stack_pop(),
-            Some(local) => self.local_get(&local),
-        };
+        let base = self.local_get(&base_local);
         let inputs = vec![self.reffy(base)];
 
         self.fork_and_adjust(builder, &[target], |_, _, _| {
@@ -950,7 +940,11 @@ impl<'a> State<'a> {
             // registered our iterator - so we don't have to clear it.
         });
 
-        let instr = NodeInstr::Opcode(Opcode::IterInit(IterArgs::default(), Label::INVALID));
+        let instr = NodeInstr::Opcode(Opcode::LIterInit(
+            IterArgs::default(),
+            Local::INVALID,
+            Label::INVALID,
+        ));
         let key_value = builder.compute_value(&instr, 0, &inputs);
         let value_value = builder.compute_value(&instr, 1, &inputs);
         self.seq_push(builder, instr, inputs);
@@ -972,33 +966,32 @@ impl<'a> State<'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
-        base_local: Option<Local>,
+        base_local: Local,
         target: Label,
     ) {
-        if let Some(iterator) = self.iterators.get(&iter_args.iter_id) {
-            let base = match base_local {
-                None => iterator.base,
-                Some(local) => self.local_get(&local),
-            };
-            let inputs = vec![self.reffy(base)];
+        let base = self.local_get(&base_local);
+        let inputs = vec![self.reffy(base)];
 
-            let instr = NodeInstr::Opcode(Opcode::IterNext(IterArgs::default(), Label::INVALID));
+        let instr = NodeInstr::Opcode(Opcode::LIterNext(
+            IterArgs::default(),
+            Local::INVALID,
+            Label::INVALID,
+        ));
 
-            self.fork_and_adjust(builder, &[target], |fork, builder, _| {
-                if iter_args.key_id != Local::INVALID {
-                    let key_value = builder.compute_value(&instr, 0, &inputs);
-                    fork.local_set(&iter_args.key_id, key_value);
-                }
+        self.fork_and_adjust(builder, &[target], |fork, builder, _| {
+            if iter_args.key_id != Local::INVALID {
+                let key_value = builder.compute_value(&instr, 0, &inputs);
+                fork.local_set(&iter_args.key_id, key_value);
+            }
 
-                let value_value = builder.compute_value(&instr, 1, &inputs);
-                fork.local_set(&iter_args.val_id, value_value);
-            });
+            let value_value = builder.compute_value(&instr, 1, &inputs);
+            fork.local_set(&iter_args.val_id, value_value);
+        });
 
-            self.seq_push(builder, instr, inputs);
+        self.seq_push(builder, instr, inputs);
 
-            // Implicit IterFree...
-            self.iterators.remove(&iter_args.iter_id);
-        }
+        // Implicit IterFree...
+        self.iterators.remove(&iter_args.iter_id);
     }
 
     fn step_memo_get_eager(
@@ -1434,9 +1427,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::InclOnce
             | Opcode::InitProp(..)
             | Opcode::IterBase
-            | Opcode::IterFree(..)
-            | Opcode::IterInit(..)
-            | Opcode::IterNext(..)
             | Opcode::JmpNZ(..)
             | Opcode::JmpZ(..)
             | Opcode::LIterFree(..)
@@ -1707,7 +1697,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::IsTypeC(_)
         | Opcode::IsTypeStructC(_, _)
         | Opcode::ThrowAsTypeStructException(_)
-        | Opcode::IterFree(_)
         | Opcode::LazyClass(_)
         | Opcode::NewCol(_)
         | Opcode::NewDictArray(_)
@@ -1779,8 +1768,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::FCallObjMethodD(_, _, _, _)
         | Opcode::IncDecL(_, _)
         | Opcode::InitProp(_, _)
-        | Opcode::IterInit(_, _)
-        | Opcode::IterNext(_, _)
         | Opcode::LIterFree(_)
         | Opcode::LIterInit(_, _, _)
         | Opcode::LIterNext(_, _, _)

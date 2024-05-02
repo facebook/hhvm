@@ -597,10 +597,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case IterInit:
   case LIterInitArr:
   case LIterInitObj:
-  case IterNext:
   case LIterNextArr:
   case LIterNextObj: {
     auto const& args = inst->extra<IterData>()->args;
@@ -609,10 +607,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case IterInitK:
   case LIterInitArrK:
   case LIterInitObjK:
-  case IterNextK:
   case LIterNextArrK:
   case LIterNextObjK: {
     auto const& args = inst->extra<IterData>()->args;

@@ -948,12 +948,6 @@ To string conversions:
   Map, Set, ImmMap, or ImmSet, and that specific object type must be known at
   compile time.
 
-| LdIterBase<T,iterId>, DParam(ArrLike), S(FramePtr), LA
-
-  Load the base of the iterator with type `T` at `iterId`. `T` must be a valid,
-  DataTypeSpecific-or-better type for the iterator's base; for example, it may
-  be based on an earlier call to CheckIter.
-
 | LdIterPos<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
 
 | LdIterEnd<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
@@ -1825,11 +1819,6 @@ ReqBindJmp and CallFuncEntry.
 
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
-
-| StIterBase<iterId>, ND, S(FramePtr) S(ArrLike,Nullptr), LA
-
-  Sets the base of the iterator at `iterId` to the pointer S1. The array must
-  match the specialized type of the iterator, or be null (for local iterators).
 
 | StIterType<iterId,iterType>, ND, S(FramePtr), NF
 
@@ -2779,10 +2768,6 @@ ReqBindJmp and CallFuncEntry.
     an IteratorAggregate that eventually produces an Iterator
   - a dict of properties of the object otherwise
 
-| IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
-
-| IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
-
 | LIterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
 | LIterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
@@ -2799,7 +2784,9 @@ ReqBindJmp and CallFuncEntry.
   This instruction creates the appropriate iterator for the array or object that
   S0 references, and rewinds the new iterator to its start. S0 points to the
   stack frame containing the iterator and local variables with the indices
-  iterId, keyId and valId.
+  iterId, keyId and valId. Ownership of the base is not taken. Instead, the base
+  is provided on each operation on the iterator, so that we can avoid
+  inc-ref-ing the base.
 
   If the new iterator is at its end (i.e., has no elements to iterate over),
   this instruction decrements the refcount of S0 and returns false; otheriwse,
@@ -2807,17 +2794,6 @@ ReqBindJmp and CallFuncEntry.
   iterator is not at its end, then this instruction stores the iterator's first
   value (and key) into the local variable with index valId (and keyId,
   respectively).
-
-  This instruction has the ConsumesRC property because it either decrements the
-  reference count of S0 or stores a reference to S0 into the new iterator.
-
-  The LIter variations do not take ownership of their base. Instead, the base
-  is provided on each operation on the iterator, so that we can avoid
-  inc-ref-ing the base.
-
-| IterNext<IterData>,   D(Bool), S(FramePtr), NF
-
-| IterNextK<IterData>,  D(Bool), S(FramePtr), NF
 
 | LIterNextArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
@@ -2838,11 +2814,6 @@ ReqBindJmp and CallFuncEntry.
   variable and returns false; otherwise, it returns true. If the iterator has
   not reached its end, then this instruction stores the iterator's next value
   (and key) into the local variable with index valId (and keyId, respectively).
-
-| IterFree<iterId>, ND, S(FramePtr), NF
-
-  Free the iterator variable with id `iterId` in the stack frame of S0.
-  For non-local iterators, this instruction will dec-ref the stored base.
 
 | KillActRec, ND, S(FramePtr), NF
 

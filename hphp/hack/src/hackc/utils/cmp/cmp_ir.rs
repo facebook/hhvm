@@ -672,9 +672,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             cmp_eq(x0, x1).qualified("IsTypeStructC param x")?;
             cmp_eq(y0, y1).qualified("IsTypeStructC param y")?;
         }
-        (Hhbc::IterFree(x0, _), Hhbc::IterFree(x1, _)) => {
-            cmp_eq(x0, x1).qualified("IterFree param x")?;
-        }
         (Hhbc::LIterFree(x0, _), Hhbc::LIterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("LIterFree param x")?;
         }
@@ -863,7 +860,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             | Hhbc::IsTypeC(..)
             | Hhbc::IsTypeL(..)
             | Hhbc::IsTypeStructC(..)
-            | Hhbc::IterFree(..)
             | Hhbc::LIterFree(..)
             | Hhbc::NewDictArray(..)
             | Hhbc::NewObjD(..)

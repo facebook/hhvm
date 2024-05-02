@@ -54,8 +54,7 @@ inline int operator&(ExecMode m1, ExecMode m2) {
 // known target
 constexpr inline bool isBranch(Op opcode) {
   return isConditionalJmp(opcode) ||
-         opcode == OpIterInit || opcode == OpLIterInit ||
-         opcode == OpIterNext || opcode == OpLIterNext;
+         opcode == OpLIterInit || opcode == OpLIterNext;
 }
 
 // simple bytecodes always move pc to the next bytecode.

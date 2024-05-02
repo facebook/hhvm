@@ -254,9 +254,9 @@ bool isInitialized(const State& state) {
 // assumes that this edge may get taken.
 //
 // This list should include instructions that are emitted for gotos or for iter
-// or local scope cleanup blocks. "IterFree", "LIterFree", "UnsetL", "Jmp", and
-// "Silence" are all used in these blocks. The "Ret*" ops are used for returns
-// inside loop bodies, as well. If HHBBC determines that a block is unreachable,
+// or local scope cleanup blocks. "LIterFree", "UnsetL", "Jmp", and "Silence"
+// are all used in these blocks. The "Ret*" ops are used for returns inside
+// loop bodies, as well. If HHBBC determines that a block is unreachable,
 // it will replace its contents with "String ...; Fatal", which we also include.
 //
 // Some of the ops here require justification:
@@ -276,7 +276,6 @@ bool mayTakeExnEdges(Op op) {
     case Op::Enter:
     case Op::Jmp:
     case Op::Fatal:
-    case Op::IterFree:
     case Op::LIterFree:
     case Op::RetC:
     case Op::RetCSuspended:
@@ -1071,7 +1070,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   bool ok = true;
   auto op = peek_op(pc);
   auto const id = getIterId(pc);
-  if (op == Op::IterInit || op == Op::LIterInit) {
+  if (op == Op::LIterInit) {
     if (cur->iters[id]) {
       error("IterInit* <%d> trying to double-initialize\n", id);
       ok = false;
@@ -1081,7 +1080,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
       error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (op == Op::IterFree || op == Op::LIterFree) {
+    if (op == Op::LIterFree) {
       cur->iters[id] = false;
     }
   }
@@ -1798,7 +1797,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     // the fall-through path has the opposite state.
     auto const id = getIterId(b->last);
     auto const last_op = peek_op(b->last);
-    bool taken_state = last_op == OpIterNext || last_op == OpLIterNext;
+    bool taken_state = last_op == OpLIterNext;
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_errmode == kVerbose) {

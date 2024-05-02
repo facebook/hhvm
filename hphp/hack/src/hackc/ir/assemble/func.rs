@@ -682,11 +682,10 @@ impl FunctionParser<'_> {
     }
 
     fn parse_iterator(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
-        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "lfree":"lfree"; "next":"next"; "init":"init"]>);
+        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "next":"next"; "init":"init"]>);
         let iter_id = IterId::new(iter_id);
         Ok(match op.identifier() {
-            "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
-            "lfree" => Instr::Hhbc(Hhbc::LIterFree(iter_id, loc)),
+            "free" => Instr::Hhbc(Hhbc::LIterFree(iter_id, loc)),
             "init" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;
                 parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);

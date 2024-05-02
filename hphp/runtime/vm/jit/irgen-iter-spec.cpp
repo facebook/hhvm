@@ -73,7 +73,7 @@ namespace HPHP::jit::irgen {
  * IterInit and IterNext bytecodes that share that block its "iter group".
  *
  * Some invariants on iter groups enforced at the bytecode level:
- *  - All ops have the same "type" (NonLocal, LocalBaseConst, LocalBaseMutable)
+ *  - All ops have the same "type" (LocalBaseConst, LocalBaseMutable)
  *  - All ops have the same iterId, valLocalId, and keyLocalId
  *
  * And one thing that's not invariant:
@@ -434,14 +434,12 @@ struct BespokeAccessor : public Accessor {
 std::unique_ptr<Accessor> getAccessor(
     IterSpecialization type,
     ArrayLayout layout,
-    const IterArgs& data,
-    bool local
+    const IterArgs& data
 ) {
   if (!layout.vanilla()) {
     return std::make_unique<BespokeAccessor>(type, layout);
   }
-  auto const baseConst =
-    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
+  auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   switch (type.baseType()) {
     case BT::Vec: {
       return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
@@ -458,14 +456,12 @@ std::unique_ptr<Accessor> getAccessor(
 //////////////////////////////////////////////////////////////////////
 // Specialization helpers.
 
-// Load the iterator base, either from the iterator itself or from a local.
+// Load the iterator base from a local.
 // This method may only be called from one of the guarded specialized blocks,
 // so we can assert that the type of the base matches the iterator type.
 SSATmp* iterBase(IRGS& env, const Accessor& accessor,
                  const IterArgs& data, uint32_t baseLocalId) {
   auto const type = accessor.arr_type;
-  auto const local = baseLocalId != kInvalidId;
-  if (!local) return gen(env, LdIterBase, type, IterId(data.iterId), fp(env));
   gen(env, AssertLoc, type, LocalId(baseLocalId), fp(env));
   return gen(env, LdLoc, type, LocalId(baseLocalId), fp(env));
 }
@@ -541,16 +537,8 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
 // In profiling mode, we profile the dec-ref of the iterator output locals
 // before calling the generic native helper, so that if we specialize we'll
 // produce good code for them. `init` is true for *IterInit*, not *IterNext*.
-void profileDecRefs(IRGS& env, const IterArgs& data, SSATmp* base,
-                    const bool local, const bool init) {
+void profileDecRefs(IRGS& env, const IterArgs& data, const bool init) {
   if (env.context.kind != TransKind::Profile) return;
-
-  // We could profile the iterator's base for IterNext here, too, but loading
-  // the value out of the base is tricky and it doesn't affect perf measurably.
-  if (!local) {
-    always_assert(init == (base != nullptr));
-    if (init) gen(env, ProfileDecRef, DecRefData(), base);
-  }
 
   auto const val = gen(env, LdLoc, TCell, LocalId(data.valId), fp(env));
   gen(env, ProfileDecRef, DecRefData(data.valId), val);
@@ -585,29 +573,23 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
 // Specialization implementations: init, header, next, and footer.
 
 void emitSpecializedInit(IRGS& env, const Accessor& accessor,
-                         const IterArgs& data, bool local, Block* header,
+                         const IterArgs& data, Block* header,
                          Block* done, SSATmp* base) {
   auto const arr = accessor.checkBase(env, base, makeExitSlow(env));
   auto const size = gen(env, Count, arr);
-  if (!local) discard(env, 1);
 
   ifThen(env,
     [&](Block* taken) { gen(env, JmpZero, taken, size); },
-    [&]{
-      if (!local) decRef(env, arr);
-      gen(env, Jmp, done);
-    }
+    [&]{ gen(env, Jmp, done); }
   );
 
   iterClear(env, data.valId);
   if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
-  auto const baseConst =
-    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
+  auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const ty = IterTypeData(
     data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
-  gen(env, StIterBase, id, fp(env), local ? cns(env, nullptr) : arr);
   gen(env, StIterType, ty, fp(env));
   gen(env, StIterEnd,  id, fp(env), accessor.getPos(env, arr, size));
   gen(env, Jmp, header, accessor.getPos(env, arr, cns(env, 0)));
@@ -654,9 +636,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
                          uint32_t baseLocalId) {
   auto const exit = makeExitSlow(env);
-  auto const local = baseLocalId != kInvalidId;
-  auto const baseConst =
-    !local || has_flag(data.flags, IterArgs::Flags::BaseConst);
+  auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const type = IterTypeData(
     data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, CheckIter, exit, type, fp(env));
@@ -685,16 +665,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
     [&]{
       auto const next = getBlock(env, nextSrcKey(env));
       env.irb->curBlock()->setProfCount(next->profCount());
-
-      if (local) {
-        gen(env, KillIter, id, fp(env));
-      } else {
-        // Load and dec-ref the base for non-local iters. We don't want to do
-        // this load in the loop, because it's dead there for pointer iters,
-        auto const base = iterBase(env, accessor, data, baseLocalId);
-        gen(env, KillIter, id, fp(env));
-        decRef(env, base);
-      }
+      gen(env, KillIter, id, fp(env));
     }
   );
 }
@@ -718,16 +689,11 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 // Speculatively generate specialized code for this IterInit.
 void specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, uint32_t baseLocalId) {
-  auto const local = baseLocalId != kInvalidId;
-  auto const base = local ? ldLoc(env, baseLocalId, DataTypeSpecific)
-                          : topC(env, BCSPRelOffset{0}, DataTypeSpecific);
-  profileDecRefs(env, data, base, local, /*init=*/true);
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  profileDecRefs(env, data, /*init=*/true);
 
-  // `body` and `done` are at a different stack depth for non-local IterInits.
-  if (!local) env.irb->fs().decBCSPDepth();
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
-  if (!local) env.irb->fs().incBCSPDepth();
   auto const iter = env.iters.contains(body) ? env.iters[body].get() : nullptr;
 
   // We mark this iter group as being despecialized if we fail to specialize.
@@ -762,7 +728,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
   }();
   iter_type.bespoke = layout.bespoke();
-  auto const accessor = getAccessor(iter_type, layout, data, local);
+  auto const accessor = getAccessor(iter_type, layout, data);
 
   // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
@@ -794,7 +760,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   env.irb->appendBlock(init);
   auto const header = iter == nullptr ? env.unit.defBlock(body->profCount())
                                       : iter->header;
-  emitSpecializedInit(env, *accessor, data, local, header, done, base);
+  emitSpecializedInit(env, *accessor, data, header, done, base);
 
   if (iter != nullptr) {
     iter->placeholders.push_back(inst);
@@ -813,20 +779,16 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
 // `baseLocalId` is only valid for local iters. Returns true on specialization.
 bool specializeIterNext(IRGS& env, Offset loopOffset,
                         const IterArgs& data, uint32_t baseLocalId) {
-  auto const local = baseLocalId != kInvalidId;
-  profileDecRefs(env, data, nullptr, local, /*init=*/false);
+  profileDecRefs(env, data, /*init=*/false);
 
   auto const body = getBlock(env, bcOff(env) + loopOffset);
   if (!env.iters.contains(body)) return false;
 
   auto const iter = env.iters[body].get();
   if (!iter->iter_type.specialized) return false;
-  auto const accessor =
-    getAccessor(iter->iter_type, iter->layout, data, local);
-  if (baseLocalId != kInvalidId) {
-    auto const type = env.irb->fs().local(baseLocalId).type;
-    if (!type.maybe(accessor->arr_type)) return false;
-  }
+  auto const accessor = getAccessor(iter->iter_type, iter->layout, data);
+  auto const type = env.irb->fs().local(baseLocalId).type;
+  if (!type.maybe(accessor->arr_type)) return false;
 
   // We're committing to specialization for this loop. Replace the placeholders
   // for the inits with uncondition jumps into the specialized code.

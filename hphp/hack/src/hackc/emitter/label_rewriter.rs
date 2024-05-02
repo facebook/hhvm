@@ -132,8 +132,6 @@ where
         Instruct::Pseudo(Pseudo::Label(label))
         | Instruct::Opcode(
             Opcode::Enter(label)
-            | Opcode::IterInit(_, label)
-            | Opcode::IterNext(_, label)
             | Opcode::Jmp(label)
             | Opcode::JmpNZ(label)
             | Opcode::JmpZ(label)
@@ -287,7 +285,6 @@ where
             | Opcode::IssetL(..)
             | Opcode::IssetS
             | Opcode::IterBase
-            | Opcode::IterFree(..)
             | Opcode::Keyset(..)
             | Opcode::LIterFree(..)
             | Opcode::LateBoundCls

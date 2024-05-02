@@ -63,7 +63,6 @@ inline bool IRInstruction::mayRaiseError() const {
 
 inline bool IRInstruction::mayRaiseErrorWithSources() const {
   if (!mayRaiseError()) return false;
-  if (is(IterInit, IterInitK) && !src(0)->type().maybe(TObj)) return false;
   if (is(SameArrLike, NSameArrLike, EqArrLike, NeqArrLike)) {
     // Keyset comparisons never re-enter or throw
     return !(src(0)->type() <= TKeyset && src(1)->type() <= TKeyset);

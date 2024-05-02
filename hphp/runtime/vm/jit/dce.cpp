@@ -149,7 +149,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdMem:
   case LdContField:
   case LdClsInitElem:
-  case LdIterBase:
   case LdIterPos:
   case LdIterEnd:
   case LdFrameThis:
@@ -467,7 +466,6 @@ bool canDCE(const IRInstruction& inst) {
   case StImplicitContext:
   case StMem:
   case StMemMeta:
-  case StIterBase:
   case StIterType:
   case StIterEnd:
   case StIterPos:
@@ -592,19 +590,14 @@ bool canDCE(const IRInstruction& inst) {
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case IterExtractBase:
-  case IterInit:
-  case IterInitK:
   case LIterInitArr:
   case LIterInitArrK:
   case LIterInitObj:
   case LIterInitObjK:
-  case IterNext:
-  case IterNextK:
   case LIterNextArr:
   case LIterNextArrK:
   case LIterNextObj:
   case LIterNextObjK:
-  case IterFree:
   case KillActRec:
   case KillIter:
   case KillLoc:

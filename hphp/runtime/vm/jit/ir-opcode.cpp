@@ -330,10 +330,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IssetElem:
   case IssetProp:
   case IterExtractBase:
-  case IterInit:
-  case IterInitK:
-  case IterNext:
-  case IterNextK:
   case KeysetGet:
   case LdCls:
   case LdClsCached:
@@ -701,7 +697,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IsTypeMem:
   case IsTypeStructCached:
   case IsWaitHandle:
-  case IterFree:
   case Jmp:
   case JmpExit:
   case JmpNZero:
@@ -762,7 +757,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdImplicitContextMemoKey:
   case LdInitPropAddr:
   case LdInitRDSAddr:
-  case LdIterBase:
   case LdIterEnd:
   case LdIterPos:
   case LdLazyCls:
@@ -912,7 +906,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StFrameFunc:
   case StFrameMeta:
   case StImplicitContext:
-  case StIterBase:
   case StIterEnd:
   case StIterPos:
   case StIterType:

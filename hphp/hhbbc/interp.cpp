@@ -4828,13 +4828,10 @@ void in(ISS& env, const bc::IterBase&) {
   push(env, tOut);
 }
 
-namespace {
-
-// baseLoc is NoLocalId for non-local iterators.
-void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
-  auto const local = baseLoc != NoLocalId;
+void in(ISS& env, const bc::LIterInit& op) {
+  auto const ita = op.ita;
+  auto const baseLoc = op.loc2;
   auto const sourceLoc = [&] {
-    if (!local) return topStkLocal(env);
     auto const loc = findIterBaseLoc(env, baseLoc);
     if (loc == baseLoc && has_flag(ita.flags, IterArgsFlags::BaseConst)) {
       // Can't improve this iterator further.
@@ -4842,7 +4839,7 @@ void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
     }
     return loc;
   }();
-  auto const base = local ? locAsCell(env, baseLoc) : topC(env);
+  auto const base = locAsCell(env, baseLoc);
   auto ity = iter_types(base);
 
   auto const fallthrough = [&] {
@@ -4861,23 +4858,17 @@ void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
 
   if (!ity.mayThrowOnInit) {
     if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
-      if (local) {
-        reduce(env);
-      } else {
-        reduce(env, bc::PopC{});
-      }
-      return jmp_setdest(env, target);
+      reduce(env);
+      return jmp_setdest(env, op.target3);
     }
     nothrow(env);
   }
-
-  if (!local) popC(env);
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
       mayReadLocal(env, ita.valId);
       if (ita.hasKey()) mayReadLocal(env, ita.keyId);
-      jmp_setdest(env, target);
+      jmp_setdest(env, op.target3);
       return;
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
@@ -4888,15 +4879,15 @@ void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
       // Take the branch before setting locals if the iter is already
       // empty, but after popping.  Similar for the other IterInits
       // below.
-      env.propagate(target, &env.state);
+      env.propagate(op.target3, &env.state);
       fallthrough();
       return;
   }
   always_assert(false);
 }
 
-// baseLoc is NoLocalId for non-local iterators.
-void iterNextImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
+void in(ISS& env, const bc::LIterNext& op) {
+  auto const ita = op.ita;
   auto const curVal = peekLocRaw(env, ita.valId);
   auto const curKey = ita.hasKey() ? peekLocRaw(env, ita.keyId) : TBottom;
 
@@ -4931,12 +4922,10 @@ void iterNextImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
 
   if (noTaken && noThrow && will_reduce(env)) {
     auto const iterId = safe_cast<IterId>(ita.iterId);
-    return baseLoc == NoLocalId
-      ? reduce(env, bc::IterFree { iterId })
-      : reduce(env, bc::LIterFree { iterId });
+    reduce(env, bc::LIterFree { iterId });
   }
 
-  mayReadLocal(env, baseLoc);
+  mayReadLocal(env, op.loc2);
   mayReadLocal(env, ita.valId);
   if (ita.hasKey()) mayReadLocal(env, ita.keyId);
 
@@ -4948,48 +4937,11 @@ void iterNextImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
     return;
   }
 
-  env.propagate(target, &env.state);
+  env.propagate(op.target3, &env.state);
 
   freeIter(env, ita.iterId);
   setLocRaw(env, ita.valId, curVal);
   if (ita.hasKey()) setLocRaw(env, ita.keyId, curKey);
-}
-
-}
-
-void in(ISS& env, const bc::IterInit& op) {
-  iterInitImpl(env, op.ita, op.target2, NoLocalId);
-}
-
-void in(ISS& env, const bc::LIterInit& op) {
-  iterInitImpl(env, op.ita, op.target3, op.loc2);
-}
-
-void in(ISS& env, const bc::IterNext& op) {
-  iterNextImpl(env, op.ita, op.target2, NoLocalId);
-}
-
-void in(ISS& env, const bc::LIterNext& op) {
-  iterNextImpl(env, op.ita, op.target3, op.loc2);
-}
-
-void in(ISS& env, const bc::IterFree& op) {
-  // IterFree is used for weak iterators too, so we can't assert !iterIsDead.
-  auto const isNop = match<bool>(
-    env.state.iters[op.iter1],
-    []  (DeadIter) {
-      return true;
-    },
-    [&] (const LiveIter& ti) {
-      if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
-      return false;
-    }
-  );
-
-  if (isNop && will_reduce(env)) return reduce(env);
-
-  nothrow(env);
-  freeIter(env, op.iter1);
 }
 
 void in(ISS& env, const bc::LIterFree& op) {

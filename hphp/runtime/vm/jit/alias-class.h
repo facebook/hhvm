@@ -92,11 +92,10 @@ struct AIter;
 
 namespace detail {
 
-static constexpr uint32_t kSlotsPerAIter = 4;
-static constexpr uint32_t kAIterBaseOffset = 0;
-static constexpr uint32_t kAIterTypeOffset = 1;
-static constexpr uint32_t kAIterPosOffset = 2;
-static constexpr uint32_t kAIterEndOffset = 3;
+static constexpr uint32_t kSlotsPerAIter = 3;
+static constexpr uint32_t kAIterTypeOffset = 0;
+static constexpr uint32_t kAIterPosOffset = 1;
+static constexpr uint32_t kAIterEndOffset = 2;
 
 }
 
@@ -129,10 +128,6 @@ FRAME_RELATIVE(ALocal);
  */
 FRAME_RELATIVE(AIter);
 
-inline AIter aiter_base(SSATmp* fp, uint32_t id) {
-  using namespace detail;
-  return AIter { fp, id * kSlotsPerAIter + kAIterBaseOffset };
-}
 inline AIter aiter_type(SSATmp* fp, uint32_t id) {
   using namespace detail;
   return AIter { fp, id * kSlotsPerAIter + kAIterTypeOffset };

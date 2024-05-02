@@ -1275,7 +1275,6 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     case Op::AKExists:
     case Op::ClassGetTS:
     case Op::ColFromArray:
-    case Op::IterInit:
       return {Location::Stack{soff}};
 
     // Local iterators constrain the local base.

@@ -83,8 +83,6 @@ fn compare_instrs(path: &CodePath<'_>, a: &NodeInstr, b: &NodeInstr) -> Result<(
         | (I::Opcode(O::JmpNZ(_)), I::Opcode(O::JmpNZ(_)))
         | (I::Opcode(O::JmpZ(_)), I::Opcode(O::JmpZ(_))) => Ok(()),
 
-        (I::Opcode(O::IterInit(a0, _)), I::Opcode(O::IterInit(a1, _))) => sem_diff_eq(path, a0, a1),
-        (I::Opcode(O::IterNext(a0, _)), I::Opcode(O::IterNext(a1, _))) => sem_diff_eq(path, a0, a1),
         (I::Opcode(O::LIterInit(a0, b0, _)), I::Opcode(O::LIterInit(a1, b1, _))) => {
             sem_diff_eq(path, &(a0, b0), &(a1, b1))
         }
@@ -403,9 +401,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::InclOnce
             | Opcode::InitProp(..)
             | Opcode::IterBase
-            | Opcode::IterFree(..)
-            | Opcode::IterInit(..)
-            | Opcode::IterNext(..)
             | Opcode::LIterFree(..)
             | Opcode::LIterInit(..)
             | Opcode::LIterNext(..)

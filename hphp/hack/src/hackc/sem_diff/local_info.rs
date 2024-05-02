@@ -167,9 +167,6 @@ impl LocalInfo {
             | Opcode::IssetG
             | Opcode::IssetS
             | Opcode::IterBase
-            | Opcode::IterFree(..)
-            | Opcode::IterInit(..)
-            | Opcode::IterNext(..)
             | Opcode::Jmp(..)
             | Opcode::JmpNZ(..)
             | Opcode::JmpZ(..)

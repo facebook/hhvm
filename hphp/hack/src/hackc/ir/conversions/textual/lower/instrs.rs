@@ -788,11 +788,6 @@ impl TransformInstr for LowerInstrs<'_> {
                 // no-op
                 Instr::tombstone()
             }
-            Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
-                let lid = iter_var_name(id);
-                let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
-                builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
-            }
             Instr::Hhbc(Hhbc::LIterFree(id, loc)) => {
                 let lid = iter_var_name(id);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));

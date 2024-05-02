@@ -20,11 +20,12 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] N main {
   .numiters 1;
-  .declvars $i;
+  .declvars $i $0;
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "R"
-  IterInit <> 0 NK V:$i L0
+  PopL $0
+  LIterInit <> 0 NK V:$i $0 L0
   .try {
   L1:
     String "\n"
@@ -32,10 +33,10 @@
     Concat
     Print
     PopC
-    IterNext <> 0 NK V:$i L1
+    LIterNext <> 0 NK V:$i $0 L1
     Jmp L0
   } .catch {
-    IterFree 0
+    LIterFree 0
     Throw
   }
 L0:

@@ -397,7 +397,7 @@ TEST(AliasClass, IterUnion) {
   }
 
   {
-    AliasClass const iterB0 = aiter_base(FP, 0);
+    AliasClass const iterB0 = aiter_type(FP, 0);
     AliasClass const iterP0 = aiter_pos(FP, 0);
     AliasClass const iterE0 = aiter_end(FP, 0);
     AliasClass const iterP1 = aiter_pos(FP, 1);
@@ -446,9 +446,9 @@ TEST(AliasClass, IterUnion) {
 
   {
     AliasClass const iterP0 = aiter_pos(FP, 0);
-    AliasClass const iterB0 = aiter_base(FP, 0);
+    AliasClass const iterB0 = aiter_type(FP, 0);
     AliasClass const iterP1 = aiter_pos(FP, 1);
-    AliasClass const iterB1 = aiter_base(FP, 1);
+    AliasClass const iterB1 = aiter_type(FP, 1);
 
     EXPECT_FALSE(iterP0.maybe(iterP1));
     EXPECT_FALSE(iterB0.maybe(iterB1));

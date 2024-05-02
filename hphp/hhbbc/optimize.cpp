@@ -434,7 +434,6 @@ void visit_blocks(const char* what, VisitContext& visit, Fun&& fun) {
 
 IterId iterFromInit(const php::WideFunc& func, BlockId initBlock) {
   auto const& op = func.blocks()[initBlock]->hhbcs.back();
-  if (op.op == Op::IterInit)  return op.IterInit.ita.iterId;
   if (op.op == Op::LIterInit) return op.LIterInit.ita.iterId;
   always_assert(false);
 }
@@ -532,22 +531,12 @@ struct OptimizeIterState {
       // ultimately eligible, but we'll check that before actually doing the
       // transformation.
       switch (op.op) {
-        case Op::IterInit:
-          assertx(opIdx == blk->hhbcs.size() - 1);
-          fixupForInit(topStkLocal(state));
-          break;
         case Op::LIterInit:
           assertx(opIdx == blk->hhbcs.size() - 1);
           fixupForInit(findIterBaseLoc(state, func, op.LIterInit.loc2));
           break;
-        case Op::IterNext:
-          fixupFromState(op.IterNext.ita.iterId);
-          break;
         case Op::LIterNext:
           fixupFromState(op.LIterNext.ita.iterId);
-          break;
-        case Op::IterFree:
-          fixupFromState(op.IterFree.iter1);
           break;
         default:
           break;
@@ -621,16 +610,6 @@ void optimize_iterators(VisitContext& visit) {
 
     // Rewrite the iteration op to its liter equivalent:
     switch (op.op) {
-      case Op::IterInit: {
-        auto args = op.IterInit.ita;
-        auto const target = op.IterInit.target2;
-        args.flags = flags;
-        newOps = {
-          bc_with_loc(op.srcLoc, bc::PopC {}),
-          bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
-        };
-        break;
-      }
       case Op::LIterInit: {
         auto args = op.LIterInit.ita;
         if (args.flags == flags && op.LIterInit.loc2 == fixup.base) continue;
@@ -638,15 +617,6 @@ void optimize_iterators(VisitContext& visit) {
         args.flags = flags;
         newOps = {
           bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
-        };
-        break;
-      }
-      case Op::IterNext: {
-        auto args = op.IterNext.ita;
-        auto const target = op.IterNext.target2;
-        args.flags = flags;
-        newOps = {
-          bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),
         };
         break;
       }
@@ -660,14 +630,6 @@ void optimize_iterators(VisitContext& visit) {
         };
         break;
       }
-      case Op::IterFree:
-        newOps = {
-          bc_with_loc(
-            op.srcLoc,
-            bc::LIterFree { op.IterFree.iter1 }
-          )
-        };
-        break;
       default:
         always_assert(false);
     }

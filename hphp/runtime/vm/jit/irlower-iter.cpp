@@ -82,9 +82,7 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const isInitK = inst->is(IterInitK, LIterInitArrK, LIterInitObjK);
-  auto const isLInit = inst->is(LIterInitArr, LIterInitArrK,
-                                LIterInitObj, LIterInitObjK);
+  auto const isInitK = inst->is(LIterInitArrK, LIterInitObjK);
   auto const extra = &inst->extra<IterData>()->args;
 
   auto const src = inst->src(0);
@@ -95,18 +93,16 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
 
-  auto args = argGroup(env, inst)
-    .addr(fp, iterOff)
-    .ssa(0 /* src */);
-
   if (src->isA(TArrLike)) {
-    args.addr(fp, valOff);
+    auto args = argGroup(env, inst)
+      .addr(fp, iterOff)
+      .ssa(0 /* src */)
+      .addr(fp, valOff);
     if (isInitK) {
       args.addr(fp, localOffset(extra->keyId));
     }
 
     auto const op = [&]{
-      if (!isLInit) return IterTypeOp::NonLocal;
       auto const flag = has_flag(extra->flags, IterArgs::Flags::BaseConst);
       return flag ? IterTypeOp::LocalBaseConst : IterTypeOp::LocalBaseMutable;
     }();
@@ -119,37 +115,16 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
 
   always_assert(src->type() <= TObj);
 
-  args.addr(fp, valOff);
+  auto args = argGroup(env, inst)
+    .ssa(0 /* src */)
+    .addr(fp, valOff);
   if (isInitK) {
     args.addr(fp, localOffset(extra->keyId));
   } else {
     args.imm(0);
   }
 
-  auto const target = isLInit
-    ? CallSpec::direct(new_iter_object<true>)
-    : CallSpec::direct(new_iter_object_jit);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void implIterNext(IRLS& env, const IRInstruction* inst) {
-  auto const isNextK = inst->is(IterNextK);
-  auto const extra = &inst->extra<IterData>()->args;
-
-  auto const args = [&] {
-    auto const fp = srcLoc(env, inst, 0).reg();
-
-    auto ret = argGroup(env, inst)
-      .addr(fp, iterOffset(inst->marker(), extra->iterId))
-      .addr(fp, localOffset(extra->valId));
-    if (isNextK) ret.addr(fp, localOffset(extra->keyId));
-
-    return ret;
-  }();
-
-  auto const target = isNextK ? CallSpec::direct(iter_next_key_ind) :
-                                CallSpec::direct(iter_next_ind);
-  auto& v = vmain(env);
+  auto const target = CallSpec::direct(new_iter_object);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
@@ -173,15 +148,6 @@ void implLIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), sync, args);
-}
-
-void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
-  auto const extra = inst->extra<IterId>();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-
-  cgCallHelper(vmain(env), env, meth, kVoidDest, SyncOptions::None,
-               argGroup(env, inst).addr(fp, iterOff));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,14 +220,6 @@ void cgCheckIter(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
-void cgLdIterBase(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::baseSize() == 8, "");
-  always_assert(!inst->typeParam().needsReg());
-  auto const dst  = dstLoc(env, inst, 0).reg();
-  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterBase>());
-  vmain(env) << load{iter + IterImpl::baseOffset(), dst};
-}
-
 void cgLdIterPos(IRLS& env, const IRInstruction* inst) {
   static_assert(IterImpl::posSize() == 8, "");
   auto const dst  = dstLoc(env, inst, 0).reg();
@@ -274,13 +232,6 @@ void cgLdIterEnd(IRLS& env, const IRInstruction* inst) {
   auto const dst  = dstLoc(env, inst, 0).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<LdIterEnd>());
   vmain(env) << load{iter + IterImpl::endOffset(), dst};
-}
-
-void cgStIterBase(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::baseSize() == 8, "");
-  auto const src  = srcLoc(env, inst, 1).reg();
-  auto const iter = iteratorPtr(env, inst, inst->extra<StIterBase>());
-  vmain(env) << store{src, iter + IterImpl::baseOffset()};
 }
 
 void cgStIterType(IRLS& env, const IRInstruction* inst) {
@@ -319,14 +270,6 @@ void cgKillIter(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgIterInit(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
-void cgIterInitK(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
 void cgLIterInitArr(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
@@ -343,14 +286,6 @@ void cgLIterInitObjK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgIterNext(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
-}
-
-void cgIterNextK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
-}
-
 void cgLIterNextArr(IRLS& env, const IRInstruction* inst) {
   implLIterNext(env, inst, CallSpec::direct(liter_array_next_ind));
 }
@@ -365,10 +300,6 @@ void cgLIterNextObj(IRLS& env, const IRInstruction* inst) {
 
 void cgLIterNextObjK(IRLS& env, const IRInstruction* inst) {
   implLIterNext(env, inst, CallSpec::direct(liter_object_next_key_ind));
-}
-
-void cgIterFree(IRLS& env, const IRInstruction* inst) {
-  implIterFree(env, inst, CallSpec::method(&Iter::free));
 }
 
 IMPL_OPCODE_CALL(IterExtractBase)

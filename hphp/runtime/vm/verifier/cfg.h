@@ -105,11 +105,8 @@ inline bool isRet(PC pc) {
 // iterator ID or an IterArgs struct as its first immediate.
 inline bool isIter(PC pc) {
   switch (peek_op(pc)) {
-  case Op::IterInit:
   case Op::LIterInit:
-  case Op::IterNext:
   case Op::LIterNext:
-  case Op::IterFree:
   case Op::LIterFree:
     return true;
   default:
@@ -122,7 +119,7 @@ inline int getIterId(PC pc) {
   assertx(isIter(pc));
   auto const op = peek_op(pc);
   auto const im = getImm(pc, 0);
-  return op == Op::IterFree || op == Op::LIterFree ? im.u_IA : im.u_ITA.iterId;
+  return op == Op::LIterFree ? im.u_IA : im.u_ITA.iterId;
 }
 
 inline int getImmIva(PC pc) {

@@ -34,7 +34,7 @@ namespace HPHP {
 
 struct Iter;
 
-enum class IterTypeOp { NonLocal, LocalBaseConst, LocalBaseMutable };
+enum class IterTypeOp { LocalBaseConst, LocalBaseMutable };
 
 enum class IterNextIndex : uint8_t {
   VanillaVec = 0,
@@ -130,38 +130,16 @@ std::string show(IterSpecialization::BaseType type);
  * a refcount of 1, so that they won't be COWed by the "set the current key"
  * type of mutating operations. Apparently, this pattern is somewhat common...
  */
-struct IterImpl {
+struct alignas(16) IterImpl {
   /*
    * Constructors.  Note that sometimes IterImpl objects are created
    * without running their C++ constructor.  (See new_iter_array.)
    */
   IterImpl() = delete;
 
-  // Destructor
-  ~IterImpl();
-
   // Pass a non-NULL ad to checkInvariants iff this iterator is local.
   // These invariants hold as long as the iterator hasn't yet reached the end.
-  bool checkInvariants(const ArrayData* ad = nullptr) const;
-
-  explicit operator bool() { return !end(); }
-
-  // Returns true if we've reached the end. endHelper is used for iterators
-  // over objects implementing the Iterator interface.
-  bool end() const {
-    if (UNLIKELY(!hasArrayData())) return endHelper();
-    return getArrayData() == nullptr || m_pos == m_end;
-  }
-  bool endHelper() const;
-
-  // Advance the iterator's position. Assumes that end() is false. nextHelper
-  // is used for iterators over objects implementing the Iterator interface.
-  void next() {
-    assertx(checkInvariants());
-    if (UNLIKELY(!hasArrayData())) return nextHelper();
-    m_pos = getArrayData()->iter_advance(m_pos);
-  }
-  void nextHelper();
+  bool checkInvariants(const ArrayData* ad) const;
 
   bool nextLocal(const ArrayData* ad) {
     assertx(checkInvariants(ad));
@@ -169,55 +147,18 @@ struct IterImpl {
     return m_pos == m_end;
   }
 
-  // Return the key at the current position. firstHelper is used for Objects.
-  // This method and its variants inc-ref the key before returning it.
-  Variant first() {
-    if (UNLIKELY(!hasArrayData())) return firstHelper();
-    return getArrayData()->getKey(m_pos);
-  }
-  Variant firstHelper();
-
   // TypedValue versions of first. Used by the JIT iterator helpers.
   // These methods do NOT inc-ref the key before returning it.
-  TypedValue nvFirst() const {
-    return getArrayData()->nvGetKey(m_pos);
-  }
   TypedValue nvFirstLocal(const ArrayData* ad) const {
-    assertx(getArrayData() == nullptr);
     return ad->nvGetKey(m_pos);
   }
 
-  // Return the value at the current position. firstHelper is used for Objects.
-  // This method and its variants inc-ref the value before returning it.
-  Variant second();
-
-  /*
-   * Get the value at the current iterator position, without refcount ops.
-   *
-   * If called when iterating an Iterable object the secondVal() will fatal.
-   */
-  TypedValue secondVal() const;
-
   // TypedValue versions of second. Used by the JIT iterator helpers.
   // These methods do NOT inc-ref the value before returning it.
-  TypedValue nvSecond() const {
-    return getArrayData()->nvGetVal(m_pos);
-  }
   TypedValue nvSecondLocal(const ArrayData* ad) const {
-    assertx(getArrayData() == nullptr);
     return ad->nvGetVal(m_pos);
   }
 
-  // This method returns null for local iterators, and for non-local iterators
-  // with an empty array base. It must be checked in end() for this reason.
-  bool hasArrayData() const {
-    return !((intptr_t)m_data & objectBaseTag());
-  }
-
-  const ArrayData* getArrayData() const {
-    assertx(hasArrayData());
-    return m_data;
-  }
   ssize_t getPos() const {
     return m_pos;
   }
@@ -236,11 +177,6 @@ struct IterImpl {
     return m_nextHelperIdx;
   }
 
-  ObjectData* getObject() const {
-    assertx(!hasArrayData());
-    return (ObjectData*)((intptr_t)m_obj & ~objectBaseTag());
-  }
-
   // Used by native code and by the JIT to pack the m_typeFields components.
   static uint32_t packTypeFields(IterNextIndex index) {
     return static_cast<uint32_t>(index) << 24;
@@ -253,12 +189,6 @@ struct IterImpl {
   }
 
   // JIT helpers used for specializing iterators.
-  static constexpr size_t baseOffset() {
-    return offsetof(IterImpl, m_data);
-  }
-  static constexpr size_t baseSize() {
-    return sizeof(m_data);
-  }
   static constexpr size_t typeOffset() {
     return offsetof(IterImpl, m_typeFields);
   }
@@ -295,7 +225,6 @@ private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
-  template<bool Local>
   friend int64_t new_iter_object(Iter*, ObjectData* obj,
                                  TypedValue* val, TypedValue* key);
   template<bool HasKey, bool Local>
@@ -304,17 +233,6 @@ private:
   template<bool HasKey, bool Local>
   friend int64_t iter_next_mixed_pointer(
     Iter*, TypedValue*, TypedValue*, ArrayData*);
-
-  // Set all IterImpl fields for iteration over an object:
-  //  - m_data is is always the object, with the lowest bit set as a flag.
-  //  - We set the type fields union here.
-  void setObject(ObjectData* obj) {
-    assertx((intptr_t(obj) & objectBaseTag()) == 0);
-    m_obj = (ObjectData*)((intptr_t)obj | objectBaseTag());
-    m_typeFields = packTypeFields(IterNextIndex::Object);
-    assertx(m_nextHelperIdx == IterNextIndex::Object);
-    assertx(!m_specialization.specialized);
-  }
 
   // Set the type fields of an array. These fields are packed so that we
   // can set them with a single mov-immediate to the union.
@@ -325,12 +243,6 @@ private:
   }
 
 public:
-  // The iterator base. Will be null for local iterators. We set the lowest
-  // bit for object iterators to distinguish them from array iterators.
-  union {
-    const ArrayData* m_data;
-    ObjectData* m_obj;
-  };
   // This field is a union so new_iter_array can set it in one instruction.
   union {
     struct {
@@ -340,7 +252,7 @@ public:
     };
     uint32_t m_typeFields;
   };
-  // Current position. Beware that when m_data is null, m_pos is uninitialized.
+  // Current position.
   // For the pointer iteration types, we use the appropriate pointers instead.
   union {
     size_t m_pos;
@@ -353,7 +265,7 @@ public:
     VanillaDictElm* m_mixed_end;
   };
 
-  // These elements are always referenced elsewhere, either in the m_data field
+  // These elements are always referenced via the base local.
   // of this iterator or in a local. (If we weren't using pointer iteration, we
   // would track elements by index, not by pointer, but GC would still work.)
   TYPE_SCAN_IGNORE_FIELD(m_mixed_end);
@@ -397,27 +309,9 @@ struct alignas(16) Iter {
   // Assumes the base is not an array.
   static TypedValue extractBase(TypedValue base, const Class* ctx);
 
-  // Returns true if there are more elems. Only used for non-local iterators.
-  // For local iterators, use liter_*_next_ind / liter_*_next_key_ind below.
-  bool next();
-
-  // Returns true if the iterator is at its end.
-  bool end() const { return m_iter.end(); }
-
-  // Get the current key and value. Assumes that the iter is not at its end.
-  // These methods will inc-ref the key and value before returning it.
-  Variant key() { return m_iter.first(); }
-  Variant value() { return m_iter.second(); }
-
   // It's valid to call end() on a killed iter, but the iter is otherwise dead.
   // In debug builds, this method will overwrite the iterator with garbage.
   void kill() { m_iter.kill(); }
-
-  // Dec-refs the base, for non-local iters. Safe to call for local iters.
-  void free();
-
-  // Debug string, used when printing a frame.
-  std::string toString() const;
 
 private:
   // Used to implement the separate helper functions below. These functions
@@ -440,18 +334,14 @@ private:
 // For the array helpers, first provide an IterTypeOp to get an IterInit helper
 // to call, then call it. This indirection lets us burn the appropriate helper
 // into the JIT (where we know IterTypeOp statically). For objects, we don't
-// need it because the type is always NonLocal.
+// need it because they have reference semantics and do not change identity.
 using IterInitArr    = int64_t(*)(Iter*, ArrayData*, TypedValue*);
 using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
 IterInitArr    new_iter_array_helper(IterTypeOp type);
 IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
 
-template<bool Local>
-int64_t new_iter_object(Iter* dest, ObjectData* obj,
-                        TypedValue* val, TypedValue* key);
-int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
-                            TypedValue* val, TypedValue* key);
+int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
 
 
 // Native helpers for the interpreter + JIT used to implement *IterInit* ops.
@@ -462,8 +352,6 @@ int64_t new_iter_object_jit(Iter* dest, ObjectData* obj,
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-NEVER_INLINE int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
-NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
 NEVER_INLINE int64_t liter_array_next_ind(Iter*, TypedValue*, ArrayData*);
 NEVER_INLINE int64_t liter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
 NEVER_INLINE int64_t liter_object_next_ind(TypedValue*, ObjectData*);

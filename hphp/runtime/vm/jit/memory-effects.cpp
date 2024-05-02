@@ -845,36 +845,27 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterExtractBase:
     return may_load_store(AEmpty, AEmpty);
 
-  case IterInit:
   case LIterInitArr:
   case LIterInitObj:
-  case IterNext:
   case LIterNextArr:
   case LIterNextObj: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(!args.hasKey());
-    auto const fp = inst.src(inst.op() == IterNext ? 0 : 1);
+    auto const fp = inst.src(1);
     AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
     return iter_effects(inst, fp, val);
   }
 
-  case IterInitK:
   case LIterInitArrK:
   case LIterInitObjK:
-  case IterNextK:
   case LIterNextArrK:
   case LIterNextObjK: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(args.hasKey());
-    auto const fp = inst.src(inst.op() == IterNextK ? 0 : 1);
+    auto const fp = inst.src(1);
     AliasClass key = ALocal { fp, safe_cast<uint32_t>(args.keyId) };
     AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
     return iter_effects(inst, fp, key | val);
-  }
-
-  case IterFree: {
-    auto const base = aiter_base(inst.src(0), iterId(inst));
-    return may_load_store(AHeapAny | base, AHeapAny);
   }
 
   case CheckIter: {
@@ -882,17 +873,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(aiter_type(inst.src(0), iter), AEmpty);
   }
 
-  case LdIterBase:
-    return PureLoad { aiter_base(inst.src(0), iterId(inst)) };
-
   case LdIterPos:
     return PureLoad { aiter_pos(inst.src(0), iterId(inst)) };
 
   case LdIterEnd:
     return PureLoad { aiter_end(inst.src(0), iterId(inst)) };
-
-  case StIterBase:
-    return PureStore { aiter_base(inst.src(0), iterId(inst)), inst.src(1) };
 
   case StIterType: {
     auto const iter = inst.extra<StIterType>()->iterId;

@@ -81,12 +81,10 @@ void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result,
 
 // If the iterator base is an empty array-like, this method will generate
 // trivial IR for the loop (just jump directly to done) and return true.
-bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
+bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base) {
   auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
   if (!empty) return false;
 
-  // NOTE: `base` is static, so we can skip the dec-ref for non-local iters.
-  if (!local) discard(env, 1);
   auto const targetOffset = bcOff(env) + doneOffset;
   auto const target = getBlock(env, targetOffset);
   assertx(target != nullptr);
@@ -146,35 +144,11 @@ void emitIterBase(IRGS& env) {
   decRef(env, base);
 }
 
-void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
-  auto const base = topC(env, BCSPRelOffset{0}, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, false)) return;
-  specializeIterInit(env, doneOffset, ita, kInvalidId);
-
-  discard(env, 1);
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  auto const op = ita.hasKey() ? IterInitK : IterInit;
-  auto const data = IterData(ita);
-  auto const result = gen(env, op, data, base, fp(env));
-  implIterInitJmp(env, doneOffset, result, ita.iterId);
-}
-
-void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
-  if (specializeIterNext(env, loopOffset, ita, kInvalidId)) return;
-
-  auto const op = ita.hasKey() ? IterNextK : IterNext;
-  auto const result = gen(env, op, IterData(ita), fp(env));
-  implIterNextJmp(env, loopOffset, result, ita.iterId);
-}
-
 void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, true)) return;
+  if (iterInitEmptyBase(env, doneOffset, base)) return;
   specializeIterInit(env, doneOffset, ita, baseLocalId);
 
   auto const op = base->isA(TArrLike)
@@ -199,11 +173,6 @@ void emitLIterNext(IRGS& env, IterArgs ita,
   auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, loopOffset, result, ita.iterId);
-}
-
-void emitIterFree(IRGS& env, int32_t iterId) {
-  gen(env, IterFree, IterId(iterId), fp(env));
-  gen(env, KillIter, IterId(iterId), fp(env));
 }
 
 void emitLIterFree(IRGS& env, int32_t iterId) {

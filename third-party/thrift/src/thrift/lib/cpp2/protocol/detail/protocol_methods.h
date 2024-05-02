@@ -550,7 +550,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
         // resize is more performant than reserve.
         constexpr auto should_resize =
             folly::is_detected_v<detect_resize, Type, decltype(list_size)> &&
-            std::is_arithmetic_v<elem_type>;
+            std::is_trivially_constructible_v<elem_type>;
         if constexpr (should_resize) {
           out.resize(list_size);
           for (auto&& elem : out) {

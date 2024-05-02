@@ -837,9 +837,24 @@ struct Decode<type::list<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
-      apache::thrift::detail::pm::reserve_if_possible(&list, s);
-      while (s--) {
-        consumeElem();
+      // Do special treatments for lists of primitive types, as we found
+      // resize is more performant than reserve.
+      constexpr auto should_resize =
+          folly::is_detected_v<
+              apache::thrift::detail::pm::detect_resize,
+              ListType,
+              decltype(s)> &&
+          std::is_trivially_constructible_v<typename ListType::value_type>;
+      if constexpr (should_resize) {
+        list.resize(s);
+        for (auto&& elem : list) {
+          Decode<Tag>{}(prot, elem);
+        }
+      } else {
+        apache::thrift::detail::pm::reserve_if_possible(&list, s);
+        while (s--) {
+          consumeElem();
+        }
       }
     } else {
       while (s--) {

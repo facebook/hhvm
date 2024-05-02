@@ -704,6 +704,9 @@ let solve_all_unsolved_tyvars env =
   let ty_err_opt = Typing_error.multiple_opt ty_errs in
   (env, ty_err_opt)
 
+let is_tyvar_error tvid ~env:Typing_env_types.{ inference_env; _ } =
+  Typing_inference_env.is_error inference_env tvid
+
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
  * components of the type suitably "freshened". For example,
@@ -752,19 +755,9 @@ let expand_type_and_solve
       in
       (res, default_ty)
     | None ->
-      (* Under extended-reasons, we have to follow the path to determine if
-         it went through a type introduced because of an error *)
-      let rec is_tyvar_error r =
-        match r with
-        | Reason.Rtype_variable_error _ -> true
-        | Reason.Rprj (_, r) -> is_tyvar_error r
-        | Reason.Rflow (r_from, r_into) ->
-          is_tyvar_error r_from || is_tyvar_error r_into
-        | _ -> false
-      in
       let env =
         List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-            if is_tyvar_error r then
+            if is_tyvar_error v ~env then
               env
             else
               let ty_err =

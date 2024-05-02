@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<321c5f4b89276560c45cf3908d42b20f>>
+// @generated SignedSource<<42c0d811e27b0e64fa2c78c8d3ebe66a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -95,6 +95,7 @@ pub struct TyvarInfo {
     pub tyvar_pos: pos::Pos,
     pub eager_solve_failed: bool,
     pub solving_info: SolvingInfo,
+    pub is_error: bool,
 }
 
 pub type Tvenv = tvid::map::Map<TyvarInfo>;

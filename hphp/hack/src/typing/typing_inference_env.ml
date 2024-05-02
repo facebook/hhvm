@@ -45,6 +45,7 @@ type tyvar_info = {
           new object construction) *)
   eager_solve_failed: bool;
   solving_info: solving_info;
+  is_error: bool;
 }
 
 type tvenv = tyvar_info Tvid.Map.t
@@ -86,12 +87,13 @@ module Log = struct
       variant_as_value "TVIConstraints" (tyvar_constraints_as_value tvcstr)
 
   let tyvar_info_as_value tvinfo =
-    let { tyvar_pos; eager_solve_failed; solving_info } = tvinfo in
+    let { tyvar_pos; eager_solve_failed; solving_info; is_error } = tvinfo in
     make_map
       [
         ("tyvar_pos", pos_as_value tyvar_pos);
         ("eager_solve_failed", bool_as_value eager_solve_failed);
         ("solving_info", solving_info_as_value solving_info);
+        ("is_error", bool_as_value is_error);
       ]
 
   let tvenv_as_value (tvenv : tvenv) =
@@ -156,13 +158,14 @@ module Log = struct
     let open Hh_json in
     match Tvid.Map.find_opt v env.tvenv with
     | None -> JSON_Null
-    | Some { tyvar_pos; eager_solve_failed; solving_info } ->
+    | Some { tyvar_pos; eager_solve_failed; solving_info; is_error } ->
       JSON_Object
         [
           ("tyvar_pos", string_ @@ Pos.string (Pos.to_absolute tyvar_pos));
           ("eager_solve_failed", JSON_Bool eager_solve_failed);
           ( "solving_info",
             solving_info_to_json p_locl_ty p_internal_type solving_info );
+          ("is_error", JSON_Bool is_error);
         ]
 end
 
@@ -190,6 +193,7 @@ let empty_tyvar_info pos =
     tyvar_pos = pos;
     eager_solve_failed = false;
     solving_info = TVIConstraints empty_tyvar_constraints;
+    is_error = false;
   }
 
 let get_tyvar_info_opt env v = Tvid.Map.find_opt v env.tvenv
@@ -330,25 +334,33 @@ let create_tyvar_constraints variance =
   in
   TVIConstraints tyvar_constraints
 
-let fresh_unsolved_tyvar env v ?variance tyvar_pos =
+let fresh_unsolved_tyvar env v ?variance ?(is_error = false) tyvar_pos =
   let solving_info = create_tyvar_constraints variance in
-  let tvinfo = { tyvar_pos; solving_info; eager_solve_failed = false } in
+  let tvinfo =
+    { tyvar_pos; solving_info; eager_solve_failed = false; is_error }
+  in
   set_tyvar_info env v tvinfo
 
-let add_current_tyvar ?variance env p v =
-  let env = fresh_unsolved_tyvar env v ?variance p in
+let add_current_tyvar ?variance ?is_error env p v =
+  let env = fresh_unsolved_tyvar env v ?variance ?is_error p in
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
   | _ -> env
 
-let fresh_type_reason ?variance env id_provider p r =
+let fresh_type_reason ?variance ?is_error env id_provider p r =
   let v = Tvid.make id_provider in
-  let env = add_current_tyvar ?variance env p v in
+  let env = add_current_tyvar ?variance ?is_error env p v in
   (env, mk (r, Tvar v))
 
 let fresh_type ?variance env id_provider p =
-  fresh_type_reason env id_provider p (Reason.Rtype_variable p) ?variance
+  fresh_type_reason
+    env
+    id_provider
+    p
+    (Reason.Rtype_variable p)
+    ?variance
+    ~is_error:false
 
 let fresh_type_invariant = fresh_type ~variance:Ast_defs.Invariant
 
@@ -359,6 +371,7 @@ let wrap_ty_in_var env id_provider r ty =
       tyvar_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
       eager_solve_failed = false;
       solving_info = TVIType ty;
+      is_error = false;
     }
   in
   let env = set_tyvar_info env v tvinfo in
@@ -704,7 +717,9 @@ module Size = struct
       ubound_size + lbound_size + tconst_size
 
   let tyvar_info_size env tvinfo =
-    let { tyvar_pos = _; solving_info; eager_solve_failed = _ } = tvinfo in
+    let { tyvar_pos = _; solving_info; eager_solve_failed = _; is_error = _ } =
+      tvinfo
+    in
     solving_info_size env solving_info
 
   let inference_env_size env =
@@ -769,10 +784,20 @@ let merge_solving_infos sinfo1 sinfo2 =
   TVIConstraints cstr
 
 let merge_tyvar_infos tvinfo1 tvinfo2 =
-  let { tyvar_pos = pos1; eager_solve_failed = esf1; solving_info = sinfo1 } =
+  let {
+    tyvar_pos = pos1;
+    eager_solve_failed = esf1;
+    solving_info = sinfo1;
+    is_error = is_error1;
+  } =
     tvinfo1
   in
-  let { tyvar_pos = pos2; eager_solve_failed = esf2; solving_info = sinfo2 } =
+  let {
+    tyvar_pos = pos2;
+    eager_solve_failed = esf2;
+    solving_info = sinfo2;
+    is_error = is_error2;
+  } =
     tvinfo2
   in
   {
@@ -783,6 +808,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
         pos1);
     eager_solve_failed = esf1 || esf2;
     solving_info = merge_solving_infos sinfo1 sinfo2;
+    is_error = is_error1 || is_error2;
   }
 
 let merge_tyvars env v1 v2 =
@@ -830,6 +856,7 @@ let simple_merge env1 env2 =
             tyvar_pos = tyvar_pos1;
             eager_solve_failed = eager_solve_failed1;
             solving_info = sinfo1;
+            is_error = is_error1;
           } =
             tvinfo1
           in
@@ -837,6 +864,7 @@ let simple_merge env1 env2 =
             tyvar_pos = tyvar_pos2;
             eager_solve_failed = eager_solve_failed2;
             solving_info = sinfo2;
+            is_error = is_error2;
           } =
             tvinfo2
           in
@@ -856,6 +884,7 @@ let simple_merge env1 env2 =
                 | (TVIConstraints _, TVIConstraints _)
                 | (TVIType _, TVIType _) ->
                   sinfo1);
+              is_error = is_error1 || is_error2;
             }
           in
           Some tvinfo)
@@ -905,7 +934,9 @@ let solving_info_carries_information = function
     || (not @@ SMap.is_empty type_constants)
 
 let tyvar_info_carries_information tvinfo =
-  let { tyvar_pos = _; solving_info; eager_solve_failed = _ } = tvinfo in
+  let { tyvar_pos = _; solving_info; eager_solve_failed = _; is_error = _ } =
+    tvinfo
+  in
   solving_info_carries_information solving_info
 
 let compress env =
@@ -1017,17 +1048,9 @@ let force_lazy_values_solving_info (solving_info : solving_info) =
     TVIConstraints (force_lazy_values_tyvar_constraints cstrs)
 
 let force_lazy_values_tyvar_info (tyvar_info : tyvar_info) =
-  let {
-    tyvar_pos : Pos.t;
-    eager_solve_failed : bool;
-    solving_info : solving_info;
-  } =
-    tyvar_info
-  in
   {
-    tyvar_pos;
-    eager_solve_failed;
-    solving_info = force_lazy_values_solving_info solving_info;
+    tyvar_info with
+    solving_info = force_lazy_values_solving_info tyvar_info.solving_info;
   }
 
 let force_lazy_values_tvenv (tvenv : tvenv) =
@@ -1041,3 +1064,7 @@ let force_lazy_values (env : t) =
     subtype_prop = TL.force_lazy_values subtype_prop;
     tyvar_occurrences;
   }
+
+let is_error { tvenv; _ } tvid =
+  Option.value_map ~default:false ~f:(fun { is_error; _ } -> is_error)
+  @@ Tvid.Map.find_opt tvid tvenv

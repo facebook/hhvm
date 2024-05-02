@@ -34,6 +34,7 @@ val fresh_type :
 (** Same as fresh_type but takes a specific reason as parameter. *)
 val fresh_type_reason :
   ?variance:Ast_defs.variance ->
+  ?is_error:bool ->
   t ->
   Tvid.provider ->
   Pos.t ->
@@ -172,3 +173,5 @@ val remove_var :
   t
 
 val force_lazy_values : t -> t
+
+val is_error : t -> Tvid.t -> bool

@@ -295,20 +295,9 @@ let is_opt_tyvar env ty =
   | Toption ty -> is_tyvar env ty
   | _ -> false
 
-let is_tyvar_error env ty =
-  let (_env, ty) = Env.expand_type env ty in
-  let rec is_tyvar_error_reason r =
-    match r with
-    | Reason.Rtype_variable_error _ -> true
-    | Reason.Rtype_access (r, _) -> is_tyvar_error_reason r
-    | Reason.Rtypeconst (r, _, _, _) -> is_tyvar_error_reason r
-    | Reason.Rprj (_, r) -> is_tyvar_error_reason r
-    | Reason.Rflow (r_from, r_into) ->
-      is_tyvar_error_reason r_from || is_tyvar_error_reason r_into
-    | _ -> false
-  in
+let is_tyvar_error Typing_env_types.{ inference_env; _ } ty =
   match deref ty with
-  | (r, Tvar _) -> is_tyvar_error_reason r
+  | (_, Tvar tvid) -> Typing_inference_env.is_error inference_env tvid
   | _ -> false
 
 (** Simplify unions and intersections of constraint

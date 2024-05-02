@@ -123,6 +123,7 @@ let fresh_type_error env p =
   let (inference_env, res) =
     Inf.fresh_type_reason
       ~variance:Ast_defs.Invariant
+      ~is_error:true
       env.inference_env
       env.tvar_id_provider
       p
@@ -136,6 +137,7 @@ let fresh_type_error_contravariant env p =
   let (inference_env, res) =
     Inf.fresh_type_reason
       ~variance:Ast_defs.Contravariant
+      ~is_error:true
       env.inference_env
       env.tvar_id_provider
       p

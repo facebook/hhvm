@@ -1376,7 +1376,7 @@ To string conversions:
 
   Loads implicit context from RDS.
 
-| LdImplicitContextMemoKey, D(Str), S(Obj), NF
+| LdImplicitContextMemoKey, D(Int), S(Obj), NF
 
   Loads memo key from implicit context in S0.
 

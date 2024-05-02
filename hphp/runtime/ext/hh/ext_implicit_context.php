@@ -196,14 +196,15 @@ function create_ic_inaccessible_context()[] {
  * no implicit context is set
  */
 <<__Native("NoRecording")>>
-function get_implicit_context_memo_key()[zoned]: string;
+function get_implicit_context_memo_key()[zoned]: int;
 
 /*
-* Returns the contituents of the current implicit context key
+* Returns the constituents of the current implicit context key
 * Only to be used for tests
 */
 <<__Native("NoRecording")>>
 function get_implicit_context_debug_info()[zoned]: vec<string>;
+
 
 } // namespace ImplicitContext_Private
 

@@ -40,11 +40,8 @@ enum class State : uint8_t {
 // Current state of IC
 State m_state;
 
-// Combination of the instance keys
-StringData* m_memokey;
-
 // HashMap of TypedValues and their instance keys
-req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
+req::fast_map<const StringData*, TypedValue,
               string_data_hash, string_data_same> m_map;
 
 // Blame of when an event happened resulting in state transition
@@ -62,10 +59,6 @@ static std::string stateToString(State);
 static bool isStateSoft(State);
 
 static Variant getBlameVectors();
-
-static constexpr ptrdiff_t memoKeyOffset() {
-  return offsetof(ImplicitContext, m_memokey);
-}
 
 ////////////////////////////////////////////////////////////////////////////
 // RAII wrappers

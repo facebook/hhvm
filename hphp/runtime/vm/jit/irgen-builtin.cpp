@@ -1257,12 +1257,10 @@ SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
       return gen(env, CheckType, TObj, taken, ctx);
     },
     [&] (SSATmp* ctx) {
-      auto const key = gen(env, LdImplicitContextMemoKey, ctx);
-      gen(env, IncRef, key);
-      return key;
+      return gen(env, LdImplicitContextMemoKey, ctx);
     },
     [&] {
-      return cns(env, staticEmptyString());
+      return cns(env, 0);
     }
   );
 }

@@ -6052,9 +6052,7 @@ BlockId speculate(Interp& interp) {
   FTRACE(4, "  Speculate B{}\n", interp.bid);
   for (auto const& bc : interp.blk->hhbcs) {
     assertx(!interp.state.unreachable);
-    auto const numPop = bc.numPop() +
-      (bc.op == Op::CGetL2 ? 1 :
-       bc.op == Op::Dup ? -1 : 0);
+    auto const numPop = bc.numPop() + (bc.op == Op::Dup ? -1 : 0);
     if (interp.state.stack.size() - numPop < low_water) {
       low_water = interp.state.stack.size() - numPop;
     }

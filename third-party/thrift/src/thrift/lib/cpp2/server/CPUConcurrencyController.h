@@ -141,7 +141,7 @@ class CPUConcurrencyController {
   void setEventHandler(std::shared_ptr<EventHandler> eventHandler);
 
   void requestStarted();
-  void requestShed();
+  bool requestShed(std::optional<Method> method = std::nullopt);
 
   int64_t getStableEstimate() const {
     return stableEstimate_.load(std::memory_order_relaxed);
@@ -182,6 +182,7 @@ class CPUConcurrencyController {
 
   folly::Synchronized<std::shared_ptr<const Config>> config_;
   std::atomic<bool> enabled_;
+  std::atomic<Method> method_;
 
   folly::observer::CallbackHandle configSchedulerCallback_;
   folly::observer::SimpleObservable<std::optional<uint32_t>>

@@ -46,6 +46,7 @@ CPUConcurrencyController::CPUConcurrencyController(
     apache::thrift::ThriftServerConfig& thriftServerConfig)
     : config_{(*config).getShared()},
       enabled_{(*config_.rlock())->enabled()},
+      method_{(*config_.rlock())->method},
       serverConfigs_(serverConfigs),
       thriftServerConfig_(thriftServerConfig) {
   scheduler_.setThreadName("CPUConcurrencyController-loop");
@@ -56,6 +57,7 @@ CPUConcurrencyController::CPUConcurrencyController(
         this->config_.withWLock([&newConfig, this](auto& config) {
           config = newConfig;
           this->enabled_.store(config->enabled(), std::memory_order_relaxed);
+          this->method_.store(config->method, std::memory_order_relaxed);
         });
         this->eventHandler_.withRLock([&newConfig](const auto& eventHandler) {
           if (eventHandler) {
@@ -94,12 +96,16 @@ void CPUConcurrencyController::requestStarted() {
   totalRequestCount_ += 1;
 }
 
-void CPUConcurrencyController::requestShed() {
+bool CPUConcurrencyController::requestShed(std::optional<Method> method) {
   if (!enabled_fast()) {
-    return;
+    return false;
+  }
+  if (method && *method != method_.load(std::memory_order_relaxed)) {
+    return false;
   }
 
   recentShedRequest_.store(true);
+  return true;
 }
 
 void CPUConcurrencyController::cycleOnce() {

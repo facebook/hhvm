@@ -34,16 +34,21 @@ let check_string_coercion_point env ~flag pos expr ty =
     if level > 0 then
       match expr with
       | Class_const ((_, _, cid_), (_, cls))
-        when cls = Naming_special_names.Members.mClass ->
-        let check ty =
-          match get_node ty with
-          | Tprim Tstring -> error env level pos (string_of_class_id_ cid_)
-          | _ -> ()
-        in
-        let ty = Typing_utils.strip_dynamic env ty in
-        begin
-          match get_node ty with
-          | Toption ty -> check ty
-          | _ -> check ty
-        end
+        when cls = Naming_special_names.Members.mClass -> begin
+        match cid_ with
+        | CI (_, name) when Typing_env.get_reified env name = Reified ->
+          () (* nameof T is illegal (T187575261) *)
+        | _ ->
+          let check ty =
+            match get_node ty with
+            | Tprim Tstring -> error env level pos (string_of_class_id_ cid_)
+            | _ -> ()
+          in
+          let ty = Typing_utils.strip_dynamic env ty in
+          begin
+            match get_node ty with
+            | Toption ty -> check ty
+            | _ -> check ty
+          end
+      end
       | _ -> ()

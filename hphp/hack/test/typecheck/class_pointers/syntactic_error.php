@@ -14,6 +14,11 @@ function error_cases(): void {
   expect_nstring(C::class);
 }
 
+function skip_reified<reify T as C>(): void {
+  expect_string(T::class);
+  expect_nstring(T::class);
+}
+
 function error_only_syntactic(): void {
   $c = C::class;
   expect_string($c);

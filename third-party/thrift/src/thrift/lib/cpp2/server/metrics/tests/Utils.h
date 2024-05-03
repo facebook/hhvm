@@ -25,8 +25,7 @@ namespace thrift {
 namespace testing {
 
 class MockMetricCollector : public IMetricCollector {
-  MOCK_METHOD(void, requestRejected, (), (override));
-  MOCK_METHOD(void, requestRejectedServerOverloaded, (), (override));
+  MOCK_METHOD(void, requestRejected, (const RequestRejectedScope&), (override));
 };
 
 } // namespace testing

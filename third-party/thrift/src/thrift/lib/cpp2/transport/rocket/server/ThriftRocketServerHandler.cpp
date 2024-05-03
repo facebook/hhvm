@@ -450,7 +450,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
         observer->taskKilled();
       }
       if (metricCollector_) {
-        metricCollector_->requestRejected();
+        metricCollector_->requestRejected({});
       }
       handleRequestWithFdsExtractionFailure(
           makeActiveRequest(
@@ -681,7 +681,7 @@ void ThriftRocketServerHandler::handleRequestWithBadMetadata(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -696,7 +696,7 @@ void ThriftRocketServerHandler::handleRequestWithBadChecksum(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -710,7 +710,7 @@ void ThriftRocketServerHandler::handleDecompressionFailure(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -727,7 +727,8 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
     observer->serverOverloaded();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejectedServerOverloaded();
+    metricCollector_->requestRejected(
+        {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -746,7 +747,7 @@ void ThriftRocketServerHandler::handleQuotaExceededException(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -761,7 +762,7 @@ void ThriftRocketServerHandler::handleAppError(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
 
   folly::variant_match(
@@ -781,7 +782,7 @@ void ThriftRocketServerHandler::handleRequestWithFdsExtractionFailure(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -796,7 +797,7 @@ void ThriftRocketServerHandler::handleServerNotReady(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -810,7 +811,7 @@ void ThriftRocketServerHandler::handleServerShutdown(
     observer->taskKilled();
   }
   if (metricCollector_) {
-    metricCollector_->requestRejected();
+    metricCollector_->requestRejected({});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
@@ -826,7 +827,7 @@ void ThriftRocketServerHandler::handleInjectedFault(
         observer->taskKilled();
       }
       if (metricCollector_) {
-        metricCollector_->requestRejected();
+        metricCollector_->requestRejected({});
       }
       request->sendErrorWrapped(
           folly::make_exception_wrapper<TApplicationException>(

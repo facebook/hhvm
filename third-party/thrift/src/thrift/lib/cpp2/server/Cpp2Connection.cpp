@@ -195,7 +195,7 @@ void Cpp2Connection::stop() {
         observer->taskKilled();
       }
       if (metricCollector_) {
-        metricCollector_->requestRejected();
+        metricCollector_->requestRejected({});
       }
     }
   }
@@ -307,9 +307,10 @@ void Cpp2Connection::killRequest(
   if (metricCollector_) {
     if (reason ==
         TApplicationException::TApplicationExceptionType::LOADSHEDDING) {
-      metricCollector_->requestRejectedServerOverloaded();
+      metricCollector_->requestRejected(
+          {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
     } else {
-      metricCollector_->requestRejected();
+      metricCollector_->requestRejected({});
     }
   }
 

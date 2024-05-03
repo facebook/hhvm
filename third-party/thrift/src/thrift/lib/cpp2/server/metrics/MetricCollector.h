@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+
 #pragma once
 
 namespace apache::thrift {
@@ -22,8 +24,16 @@ class IMetricCollector {
  public:
   virtual ~IMetricCollector() = default;
 
-  virtual void requestRejected() = 0;
-  virtual void requestRejectedServerOverloaded() = 0;
+  struct RequestRejectedScope {
+    enum class Reason : uint8_t {
+      UNKNOWN,
+      SERVER_OVERLOADED,
+    };
+
+    const Reason reason;
+  };
+
+  virtual void requestRejected(const RequestRejectedScope&) = 0;
 };
 
 } // namespace apache::thrift

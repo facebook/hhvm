@@ -8,7 +8,12 @@ error: Typing[4110] Invalid return type [1]
       "Rflow":[
         {
           "Rflow":[
-            {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
+            {
+              "Rflow":[
+                {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
+                {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]}
+              ]
+            },
             {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]}
           ]
         },
@@ -35,7 +40,12 @@ error: Typing[4110] Invalid return type [1]
       "Rflow":[
         {
           "Rflow":[
-            {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
+            {
+              "Rflow":[
+                {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
+                {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]}
+              ]
+            },
             {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]}
           ]
         },
@@ -58,6 +68,8 @@ error: Typing[4110] Invalid return type [1]
 -> Path:
 [
   {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
+  {"Fwd":[]},
+  {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]},
   {"Fwd":[]},
   {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]},
   {"Fwd":[]},

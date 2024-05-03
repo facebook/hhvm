@@ -8526,6 +8526,13 @@ end = struct
         in
         (env, Some te, ty1)
     in
+    (* Update the reason to record the flow from the parameter hint into the parameter *)
+    let ty1 =
+      Prov.(
+        update ty1 ~env ~f:(fun from ->
+            flow ~from ~into:(Typing_reason.Rwitness param.param_pos)))
+    in
+    let param_te = Option.map param_te ~f:(fun (_, pos, e) -> (ty1, pos, e)) in
     let (env, user_attributes) =
       User_attribute.attributes_check_def
         env

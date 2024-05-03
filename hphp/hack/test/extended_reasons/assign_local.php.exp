@@ -11,7 +11,14 @@ error: Typing[4110] Invalid argument [1]
             {
               "Rflow":[
                 {
-                  "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"assign_local.php","line":8,"char_start":22,"char_end":23}]
+                    }
+                  ]
                 },
                 {
                   "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":3,"char_end":4}]
@@ -59,7 +66,14 @@ error: Typing[4110] Invalid argument [1]
             {
               "Rflow":[
                 {
-                  "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"assign_local.php","line":8,"char_start":22,"char_end":23}]
+                    }
+                  ]
                 },
                 {
                   "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":3,"char_end":4}]
@@ -97,6 +111,10 @@ error: Typing[4110] Invalid argument [1]
 [
   {
     "Rhint":[{"filename":"assign_local.php","line":8,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":8,"char_start":22,"char_end":23}]
   },
   {"Fwd":[]},
   {
@@ -148,7 +166,14 @@ error: Typing[4110] Invalid argument [1]
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+                        },
+                        {
+                          "Rwitness":[{"filename":"assign_local.php","line":13,"char_start":22,"char_end":23}]
+                        }
+                      ]
                     },
                     {
                       "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":3,"char_end":4}]
@@ -203,7 +228,14 @@ error: Typing[4110] Invalid argument [1]
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+                        },
+                        {
+                          "Rwitness":[{"filename":"assign_local.php","line":13,"char_start":22,"char_end":23}]
+                        }
+                      ]
                     },
                     {
                       "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":3,"char_end":4}]
@@ -246,6 +278,10 @@ error: Typing[4110] Invalid argument [1]
 [
   {
     "Rhint":[{"filename":"assign_local.php","line":13,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":13,"char_start":22,"char_end":23}]
   },
   {"Fwd":[]},
   {
@@ -308,7 +344,14 @@ error: Typing[4110] Invalid argument [1]
                     {
                       "Rflow":[
                         {
-                          "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"assign_local.php","line":19,"char_start":22,"char_end":23}]
+                            }
+                          ]
                         },
                         {
                           "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
@@ -370,7 +413,14 @@ error: Typing[4110] Invalid argument [1]
                     {
                       "Rflow":[
                         {
-                          "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"assign_local.php","line":19,"char_start":22,"char_end":23}]
+                            }
+                          ]
                         },
                         {
                           "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
@@ -418,6 +468,10 @@ error: Typing[4110] Invalid argument [1]
 [
   {
     "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"assign_local.php","line":19,"char_start":22,"char_end":23}]
   },
   {"Fwd":[]},
   {

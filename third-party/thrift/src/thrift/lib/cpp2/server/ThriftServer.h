@@ -51,7 +51,9 @@
 #include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/lang/Badge.h>
+#include <folly/logging/xlog.h>
 #include <folly/synchronization/CallOnce.h>
+
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
@@ -2651,7 +2653,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     THRIFT_SERVER_EVENT(call.setIsOverloaded).log(*this);
     isOverloaded_ = std::move(isOverloaded);
     runtimeServerActions_.setIsOverloaded = true;
-    LOG(INFO) << "thrift server: isOverloaded() set.";
+    XLOG(INFO) << "thrift server: isOverloaded() set.";
   }
 
   // Do not try to access ThreadManager in this function as
@@ -2664,7 +2666,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     preprocessFunctions_.deprecatedSet(std::move(preprocess));
 
     runtimeServerActions_.setPreprocess = true;
-    LOG(INFO) << "setPreprocess() call";
+    XLOG(INFO) << "setPreprocess() call";
   }
 
   void addPreprocessFunc(const std::string& name, PreprocessFunc preprocess) {
@@ -2674,7 +2676,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
     // TODO(sazonovk): Should there be a separate boolean for addPreprocess?
     runtimeServerActions_.setPreprocess = true;
-    LOG(INFO) << "addPreprocessFunc() call";
+    XLOG(INFO) << "addPreprocessFunc() call";
   }
 
   /**

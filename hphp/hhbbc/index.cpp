@@ -8232,7 +8232,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     return R{ TInitCell, false };
   }
 
-  auto contextType = [&] {
+  auto const contextType = [&] {
     ++data.contextualInterpNestingLevel;
     SCOPE_EXIT { --data.contextualInterpNestingLevel; };
 
@@ -8253,12 +8253,6 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
       fa.effectFree
     };
   }();
-
-  if (!returnType.t.subtypeOf(BUnc)) {
-    // If the context insensitive return type could be non-static, staticness
-    // could be a result of temporary context sensitive bytecode optimizations.
-    contextType.t = loosen_staticness(std::move(contextType.t));
-  }
 
   ITRACE_MOD(
     Trace::hhbbc, 4,

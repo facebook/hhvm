@@ -4428,14 +4428,53 @@ end = struct
             }
           env
     end
-    | (_, (reason_super, Tneg (Neg_predicate predicate))) ->
-      Type_switch.(
-        simplify
+    | (_, (reason_super, Tneg (Neg_predicate predicate))) -> begin
+      match deref ty_sub with
+      | (_, Tvar _) ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          (LoclType ty_super)
+      | (_, Tunion ty_subs) ->
+        Common.simplify_union_l
           ~subtype_env
           ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ reason_super; predicate; ty_super_opt = None; super_like }
-          env)
+          ~mk_prop:simplify
+          ~update_reason:
+            Prov.(
+              update ~f:(fun from ->
+                  flow ~from ~into:(prj_union @@ get_reason ty_sub)))
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      | _ ->
+        (* T < !P iff left < nothing and span & P < nothing
+           However, just do span < nothing since we know that
+           if span is not nothing, it isn't known to be disjoint from P.
+           This also avoids the need to do special handling of dynamic
+           in the union case above to avoid dynamic & P *)
+        let partition = Typing_refinement.partition_ty env ty_sub predicate in
+        let simplify_subtype tyl ty_super env =
+          Subtype.(
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:
+                {
+                  sub_supportdyn;
+                  ty_sub = MakeType.intersection reason_super tyl;
+                }
+              ~rhs:{ super_supportdyn = false; super_like; ty_super }
+              env)
+        in
+        let nothing = MakeType.nothing reason_super in
+        List.fold_left
+          (partition.Typing_refinement.left @ partition.Typing_refinement.span)
+          ~init:(env, TL.valid)
+          ~f:(fun res tyl -> res &&& simplify_subtype tyl nothing)
+    end
     | (_, (r_super, Tneg (Neg_class (pos_super, c_super)))) -> begin
       match deref ty_sub with
       | (_, Tneg (Neg_class (_, c_sub))) ->
@@ -5873,7 +5912,8 @@ and Type_switch : sig
     super_like: bool;
     reason_super: Reason.t;
     predicate: Typing_defs.type_predicate;
-    ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
+    ty_true: locl_ty;
+    ty_false: locl_ty;
   }
 
   include Constraint_handler with type rhs := rhs
@@ -5882,27 +5922,21 @@ end = struct
     super_like: bool;
     reason_super: Reason.t;
     predicate: Typing_defs.type_predicate;
-    ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
+    ty_true: locl_ty;
+    ty_false: locl_ty;
   }
 
   let rec simplify
       ~subtype_env
       ~this_ty
       ~lhs:{ ty_sub; sub_supportdyn }
-      ~rhs:({ super_like; reason_super; predicate; ty_super_opt } as rhs)
+      ~rhs:({ super_like; reason_super; predicate; ty_true; ty_false } as rhs)
       env =
-    let ty_super =
-      match ty_super_opt with
-      | None ->
-        let lty = MakeType.neg reason_super (Neg_predicate predicate) in
-        LoclType lty
-      | Some (ty_true, ty_false) ->
-        let cty =
-          mk_constraint_type
-            (reason_super, Ttype_switch { predicate; ty_true; ty_false })
-        in
-        ConstraintType cty
+    let cty =
+      mk_constraint_type
+        (reason_super, Ttype_switch { predicate; ty_true; ty_false })
     in
+    let ty_super = ConstraintType cty in
     Logging.log_subtype_i
       ~level:2
       ~this_ty
@@ -5973,14 +6007,7 @@ end = struct
                 ~rhs:{ super_supportdyn = false; super_like; ty_super }
                 env)
           in
-          let (ty_true, ty_false_opt) =
-            match ty_super_opt with
-            | None -> (MakeType.nothing reason_super, None)
-            | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
-          in
-          (match ty_false_opt with
-          | None -> (env, TL.valid)
-          | Some ty_false -> simplify_subtype ty_false env)
+          simplify_subtype ty_false env
           &&& simplify_subtype ty_true
           &&& simplify_union_l ty_subs
       end
@@ -6046,12 +6073,6 @@ end = struct
         in
         intersect (neg :: tyl)
       in
-
-      let (ty_true, ty_false_opt) =
-        match ty_super_opt with
-        | None -> (MakeType.nothing reason_super, None)
-        | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
-      in
       let (env, props) =
         simplify_split
           ~refine:refine_true
@@ -6060,15 +6081,12 @@ end = struct
           partition.Typing_refinement.span
           ty_true
       in
-      let f init ty_false =
-        simplify_split
-          ~refine:refine_false
-          ~init
-          partition.Typing_refinement.right
-          partition.Typing_refinement.span
-          ty_false
-      in
-      Option.fold ty_false_opt ~init:(env, props) ~f
+      simplify_split
+        ~refine:refine_false
+        ~init:(env, props)
+        partition.Typing_refinement.right
+        partition.Typing_refinement.span
+        ty_false
 end
 
 and Common : sig
@@ -6589,12 +6607,7 @@ end = struct
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:
-              {
-                reason_super;
-                predicate;
-                ty_super_opt = Some (ty_true, ty_false);
-                super_like = false;
-              }
+              { reason_super; predicate; ty_true; ty_false; super_like = false }
             env))
     | (ConstraintType _, (LoclType _ | ConstraintType _)) ->
       let subtype_env =

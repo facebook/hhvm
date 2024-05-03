@@ -141,7 +141,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 let outer_subst = self;
                 let mut subst = self.subst.clone();
                 for tp in tparams.iter() {
-                    subst.0.remove(tp.name.id_ref());
+                    subst.0.swap_remove(tp.name.id_ref());
                 }
                 let subst = Substitution { subst: &subst };
                 let params = ft

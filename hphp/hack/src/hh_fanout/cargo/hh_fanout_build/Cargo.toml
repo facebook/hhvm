@@ -24,5 +24,5 @@ log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 memmap2 = "0.5.10"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
-rayon = "1.2"
+rayon = "1.9.0"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }

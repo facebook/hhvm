@@ -175,7 +175,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         };
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &mut errors, &shallow_class)?;
-        stack.remove(&name);
+        stack.swap_remove(&name);
         Ok(Some(DeclFolder::decl_class(
             &self.opts,
             &shallow_class,

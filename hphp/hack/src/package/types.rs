@@ -73,6 +73,6 @@ impl Iterator for NameSet {
 }
 impl NameSet {
     pub fn take(&mut self, value: &Spanned<String>) -> Option<Spanned<String>> {
-        self.0.take(value)
+        self.0.swap_take(value)
     }
 }

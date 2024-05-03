@@ -14,6 +14,8 @@ module DataType = Typing_case_types.AtomicDataTypes
 
 module TyPartition = Partition.Make (struct
   type t = locl_ty
+
+  let compare = Typing_defs.compare_locl_ty ~normalize_lists:true
 end)
 
 type dnf_ty = locl_ty list list

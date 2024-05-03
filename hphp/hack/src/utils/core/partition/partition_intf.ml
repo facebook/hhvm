@@ -77,5 +77,7 @@ module type Partition = sig
   (* Constructs a partition representation over the given [AtomicSet] *)
   module Make (M : sig
     type t
+
+    val compare : t -> t -> int
   end) : S with type set := M.t
 end

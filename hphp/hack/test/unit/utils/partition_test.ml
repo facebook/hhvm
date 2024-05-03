@@ -74,6 +74,8 @@ end
 module CharPartition = struct
   include Partition.Make (struct
     type t = Char.Set.t
+
+    let compare = Char.Set.compare
   end)
 
   let rec of_setops ~predicate ops =
@@ -135,4 +137,62 @@ let test_quick _ =
     ~f
     Quickcheck.Generator.(tuple2 non_empty_char_set SetOps.gen)
 
-let () = "partition" >::: ["test_quick" >:: test_quick] |> run_test_tt_main
+let assert_equal_char_set_ll =
+  assert_equal ~cmp:(List.equal (List.equal Char.Set.equal))
+
+let test_meet_singleton _ =
+  let partition_a = CharPartition.mk_span @@ Char.Set.of_list ['X'] in
+  let partition_b = CharPartition.mk_span @@ Char.Set.of_list ['X'] in
+  let meeted = CharPartition.meet partition_a partition_b in
+  assert_equal_char_set_ll
+    ~msg:
+      "Meet of two identical singleton spans should be produce a singleton span"
+    [[Char.Set.singleton 'X']]
+    (CharPartition.span meeted);
+  assert_equal_char_set_ll
+    ~msg:"Meet of two identical singleton spans should not produce a left"
+    []
+    (CharPartition.left meeted);
+  assert_equal_char_set_ll
+    ~msg:"Meet of two identical singleton spans should not produce a right"
+    []
+    (CharPartition.right meeted)
+
+let test_meet_overlapping _ =
+  let open CharPartition in
+  (* I'm only going to check the right so a left doesn't matter *)
+  let s c = mk_span @@ Char.Set.of_list [c] in
+  let r c = mk_right @@ Char.Set.of_list [c] in
+  (* span: A & B; right: A & B *)
+  let partition_a = join (meet (s 'A') (s 'B')) (meet (r 'A') (r 'C')) in
+  (* span: B & C; right: B & A *)
+  let partition_b = join (meet (s 'B') (s 'C')) (meet (r 'B') (r 'A')) in
+  (* naively:
+       span:  A & B & B & C
+       right: A & C & B & A | A & C & B & C | B & A & A & B
+  *)
+  let meeted = meet partition_a partition_b in
+  assert_equal_char_set_ll
+    ~msg:
+      "Meet of overlapping partitions should be have deduplicated dnfs (checking left)"
+    []
+    (left meeted);
+  assert_equal_char_set_ll
+    ~msg:
+      "Meet of overlapping partitions should be have deduplicated dnfs (checking span)"
+    (List.map [['A'; 'B'; 'C']] ~f:(List.map ~f:Char.Set.singleton))
+    (span meeted);
+  assert_equal_char_set_ll
+    ~msg:
+      "Meet of overlapping partitions should be have deduplicated dnfs (checking right)"
+    (List.map [['A'; 'B']; ['A'; 'B'; 'C']] ~f:(List.map ~f:Char.Set.singleton))
+    (right meeted)
+
+let () =
+  "partition"
+  >::: [
+         "test_quick" >:: test_quick;
+         "test_meet_singleton" >:: test_meet_singleton;
+         "test_meet_overlapping" >:: test_meet_overlapping;
+       ]
+  |> run_test_tt_main

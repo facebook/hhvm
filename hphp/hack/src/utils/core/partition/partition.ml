@@ -10,70 +10,67 @@ include Partition_intf
 
 module Make (AtomicSet : sig
   type t
+
+  val compare : t -> t -> int
 end) : S with type set := AtomicSet.t = struct
   type set = AtomicSet.t
 
   type dnf = set list list
 
+  module SetSet = Stdlib.Set.Make (AtomicSet)
+  module ConjunctionSet = Stdlib.Set.Make (SetSet)
+
   (** Represents union and intersection across [set] in
      disjunctive normal form (DNF) *)
   module Lattice = struct
-    type inter = |
-
-    type union = |
-
-    (** We utilize a GADT to ensure construction is done in
-       disjunctive normal form. This forbids disjunctions ([Or]),
-       from being embedded inside of a conjunction ([And]).
-
-       Notable we lack logical negations in our representation *)
-    type _ impl =
-      | And : set list -> inter impl
-      | Or : inter impl list -> union impl
-
-    type t = DNF : _ impl -> t
+    (** Notable we lack logical negations in our representation *)
+    type t =
+      | And of SetSet.t
+      | Or of ConjunctionSet.t
 
     (* The empty disjunction is the bottom type, i.e. "false" *)
-    let bottom = DNF (Or [])
+    let bottom = Or ConjunctionSet.empty
 
     (* The empty conjunction is the top type, i.e. "true" *)
-    let top = DNF (And [])
+    let top = And SetSet.empty
 
     let is_bottom = function
-      | DNF (Or []) -> true
+      | Or ands when ConjunctionSet.is_empty ands -> true
       | _ -> false
 
-    let singleton ty = DNF (And [ty])
+    let singleton ty = And (SetSet.singleton ty)
 
     (** Unions two abstract sets *)
     let join (set1 : t) (set2 : t) : t =
       match (set1, set2) with
       (* Top | A = Top *)
-      | (DNF (And []), DNF (And _))
-      | (DNF (And _), DNF (And [])) ->
+      | (And ss1, And ss2) when SetSet.is_empty ss1 || SetSet.is_empty ss2 ->
         top
-      | (DNF (And set1), DNF (And set2)) -> DNF (Or [And set1; And set2])
+      | (And ss1, And ss2) -> Or (ConjunctionSet.of_list [ss1; ss2])
       (* (A1 | A2) | B = (A1 | A2 | B) *)
-      | (DNF (And conjunction), DNF (Or ands))
-      | (DNF (Or ands), DNF (And conjunction)) ->
-        DNF (Or (And conjunction :: ands))
+      | (And conjunction, Or ands)
+      | (Or ands, And conjunction) ->
+        Or (ConjunctionSet.add conjunction ands)
       (* (A1 | A2) | (B1 | B2) = (A1 | A2 | B1 | B2) *)
-      | (DNF (Or ands1), DNF (Or ands2)) -> DNF (Or (ands1 @ ands2))
+      | (Or ands1, Or ands2) -> Or (ConjunctionSet.union ands1 ands2)
 
     (** Intersects two abstract sets *)
     let meet (set1 : t) (set2 : t) =
-      let meet (set1 : t) (set2 : set list) =
+      let meet (set1 : t) (set2 : SetSet.t) =
         match set1 with
-        | DNF (And set1) -> DNF (And (set1 @ set2))
-        | DNF (Or ands) ->
-          DNF (Or (List.map (fun (And set) -> And (set @ set2)) ands))
+        | And set1 -> And (SetSet.union set1 set2)
+        | Or ands ->
+          Or (ConjunctionSet.map (fun set -> SetSet.union set set2) ands)
       in
       match set1 with
-      | DNF (And set) -> meet set2 set
+      | And set -> meet set2 set
       (* (A1 | A2) & B = (A1 & B) | (A2 & B) *)
-      | DNF (Or ands) ->
-        let conjunctions = List.map (fun (And set) -> meet set2 set) ands in
-        List.fold_left join bottom conjunctions
+      | Or ands ->
+        (* dedupe should occur in join *)
+        ConjunctionSet.fold
+          (fun conj dnf -> join dnf @@ meet set2 conj)
+          ands
+          bottom
 
     module Infix_ops = struct
       let ( ||| ) = join
@@ -82,8 +79,10 @@ end) : S with type set := AtomicSet.t = struct
     end
 
     let to_list : t -> dnf = function
-      | DNF (And list) -> [list]
-      | DNF (Or ands) -> List.map (fun (And list) -> list) ands
+      | And list -> [SetSet.elements list]
+      | Or ands ->
+        List.map (fun list -> SetSet.elements list)
+        @@ ConjunctionSet.elements ands
   end
 
   (* [left] is disjoint from [right], while [span] contains sets

@@ -226,8 +226,22 @@ struct ClassAnalysis {
   PropState privateStatics;
 
   ResolvedPropInits resolvedProps;
+  ResolvedClsTypeConsts resolvedTypeConsts;
 
   ClassAnalysisWork* work{nullptr};
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct UnitAnalysis {
+  explicit UnitAnalysis(const Context& ctx) : ctx{ctx} {}
+
+  UnitAnalysis(UnitAnalysis&&) = default;
+  UnitAnalysis& operator=(UnitAnalysis&&) = default;
+
+  Context ctx;
+
+  ResolvedTypeAliases resolvedTypeAliases;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -299,6 +313,23 @@ FuncAnalysis analyze_func_inline(const IIndex&,
  * and inferring some whole-class information at the same time.
  */
 ClassAnalysis analyze_class(const IIndex&, const Context&);
+
+/*
+ * Perform an analysis of all the class constants for a php::Class
+ * (both declared and inherited).
+ */
+ClassAnalysis analyze_class_constants(const IIndex&, const Context&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Perform an analysis for a php::Unit. This does not analyze any of
+ * the classes or funcs contained within the unit, that must be done
+ * explicitly. It analyzes type-aliases defined within the unit.
+ */
+UnitAnalysis analyze_unit(const AnalysisIndex& index, const Context& ctx);
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Represents the various interp state at some particular instruction

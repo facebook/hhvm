@@ -282,6 +282,11 @@ struct TinyVector {
     while (begin != end) emplace_back(*begin++);
   }
 
+  template <typename I>
+  void eraseTail(I begin) {
+    while (begin != end()) pop_back();
+  }
+
   void pop_back() {
     assertx(!empty());
     location(size() - 1)->~T();

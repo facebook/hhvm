@@ -652,7 +652,7 @@ struct Class : ClassBase {
   /*
    * Constants defined on this class.
    */
-  CompactVector<Const> constants;
+  std::deque<Const> constants;
 
   /*
    * User attributes for this class declaration.
@@ -851,8 +851,6 @@ struct FuncClsUnitHasher {
 };
 
 std::string show(FuncClsUnit);
-
-//////////////////////////////////////////////////////////////////////
 
 }
 

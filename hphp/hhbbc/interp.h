@@ -208,6 +208,12 @@ void default_dispatch(ISS&, const Bytecode&);
  */
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
+/*
+ * Static list of all builtins which can be potentially optimized
+ * specially.
+ */
+const std::vector<SString>& special_builtins();
+
 Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
            const php::Func& phpFunc, bool variadicsPacked);

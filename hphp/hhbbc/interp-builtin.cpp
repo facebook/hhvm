@@ -622,6 +622,15 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
 } // namespace
 
+const std::vector<SString>& special_builtins() {
+  static const std::vector<SString> builtins{{
+#define X(x, y) s_##x.get(),
+    SPECIAL_BUILTINS
+#undef X
+  }};
+  return builtins;
+}
+
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||

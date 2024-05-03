@@ -458,21 +458,8 @@ struct AnalyzeConstantsJob {
                     VU<php::Func> depFuncs,
                     VU<php::Unit> depUnits,
                     AnalysisInput::Meta meta) {
-    // Pre-populate the worklist with everything to begin with.
-    AnalysisWorklist start;
-    for (auto const& c : classes.vals) {
-      if (is_closure(*c)) {
-        assertx(!c->closureContextCls);
-        assertx(c->closureDeclFunc);
-        continue;
-      }
-      start.schedule(c.get());
-    }
-    for (auto const& f : funcs.vals) start.schedule(f.get());
-    // Make a copy of it. We'll need the original list after the index
-    // is frozen.
-    auto worklist = start;
-
+    // AnalysisIndex ctor will initialize the worklist appropriately.
+    AnalysisWorklist worklist;
     AnalysisIndex index{
       worklist,
       std::move(classes.vals),
@@ -494,13 +481,14 @@ struct AnalyzeConstantsJob {
     // gets put on the worklist).
     while (process(index, worklist)) {}
     // Freeze the index. Nothing is allowed to update the index after
-    // this.
+    // this. This will also re-load the worklist with all of the
+    // classes which will end up in the output.
     index.freeze();
     // Now do a pass through the original work items again. Now that
     // the index is frozen, we'll gather up any dependencies from the
     // analysis. Since we already reached a fixed point, this should
     // not cause any updates (and if it does, we'll assert).
-    while (process(index, start)) {}
+    while (process(index, worklist)) {}
     // Everything is analyzed and dependencies are recorded. Turn the
     // index data into AnalysisIndex::Output and return it from this
     // job.
@@ -514,32 +502,34 @@ private:
                       AnalysisWorklist& worklist) {
     auto const w = worklist.next();
     if (auto const c = w.cls()) {
-      auto results = analyze(*c, index);
-      for (auto& r : results) update(std::move(r), index);
+      update(analyze(*c, index), index);
     } else if (auto const f = w.func()) {
       update(analyze(*f, index), index);
+    } else if (auto const u = w.unit()) {
+      update(analyze(*u, index), index);
     } else {
       return false;
     }
     return true;
   }
 
-  static FuncAnalysisResult analyze(const php::Func& f, AnalysisIndex& index) {
+  static FuncAnalysisResult analyze(const php::Func& f,
+                                    const AnalysisIndex& index) {
     auto const wf = php::WideFunc::cns(&f);
     AnalysisContext ctx{ f.unit, wf, f.cls };
     return analyze_func(AnalysisIndexAdaptor{ index }, ctx, CollectionOpts{});
   }
 
-  static std::vector<FuncAnalysisResult> analyze(const php::Class& c,
-                                                 AnalysisIndex& index) {
-    assertx(!is_closure(c));
-    std::vector<FuncAnalysisResult> results;
-    results.reserve(c.methods.size());
-    for (auto const& m : c.methods) {
-      if (!is_86init_func(*m)) continue;
-      results.emplace_back(analyze(*m, index));
-    }
-    return results;
+  static ClassAnalysis analyze(const php::Class& c,
+                               const AnalysisIndex& index) {
+    return analyze_class_constants(
+      AnalysisIndexAdaptor { index },
+      Context { c.unit, nullptr, &c }
+    );
+  }
+
+  static UnitAnalysis analyze(const php::Unit& u, const AnalysisIndex& index) {
+    return analyze_unit(index, Context { u.filename, nullptr, nullptr });
   }
 
   static void update(FuncAnalysisResult fa, AnalysisIndex& index) {
@@ -557,6 +547,31 @@ private:
     index.update_prop_initial_values(fa);
     index.update_bytecode(fa);
   }
+
+  static void update(ClassAnalysis ca, AnalysisIndex& index) {
+    SCOPE_ASSERT_DETAIL("update class") {
+      return "Updating Class: " + show(ca.ctx);
+    };
+
+    {
+      auto const UNUSED bump =
+        trace_bump(ca.ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+      AnalysisIndexAdaptor adaptor{index};
+      ContextPusher _{adaptor, ca.ctx};
+      index.update_type_consts(ca);
+    }
+    for (auto& fa : ca.methods)  update(std::move(fa), index);
+    for (auto& fa : ca.closures) update(std::move(fa), index);
+  }
+
+  static void update(UnitAnalysis ua, AnalysisIndex& index) {
+    SCOPE_ASSERT_DETAIL("update unit") {
+      return "Updating Unit: " + show(ua.ctx);
+    };
+    AnalysisIndexAdaptor adaptor{index};
+    ContextPusher _{adaptor, ua.ctx};
+    index.update_type_aliases(ua);
+  }
 };
 
 Job<AnalyzeConstantsJob> s_analyzeConstantsJob;
@@ -565,6 +580,7 @@ void analyze_constants(Index& index) {
   trace_time tracer{"analyze constants", index.sample()};
 
   constexpr size_t kBucketSize = 2000;
+  constexpr size_t kMaxBucketSize = 30000;
 
   using namespace folly::gen;
 
@@ -576,6 +592,9 @@ void analyze_constants(Index& index) {
   }
   for (auto const func : index.constant_init_funcs()) {
     scheduler.registerFunc(func);
+  }
+  for (auto const unit : index.units_with_type_aliases()) {
+    scheduler.registerUnit(unit);
   }
 
   auto const run = [&] (AnalysisInput input) -> coro::Task<void> {
@@ -662,7 +681,7 @@ void analyze_constants(Index& index) {
         folly::sformat("round {}", round)
       };
       trace2.ignore_client_stats();
-      return scheduler.schedule(kBucketSize);
+      return scheduler.schedule(kBucketSize, kMaxBucketSize);
     }();
     // Work shouldn't be empty because we add non-zero work items this
     // round.

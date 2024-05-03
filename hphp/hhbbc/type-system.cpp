@@ -4906,6 +4906,7 @@ Type union_of(Type a, Type b) {
       auto ret = isObj
         ? subObj(u.front())
         : subCls(u.front(), nonRegA || nonRegB);
+      assertx(!ret.is(BBottom));
       return setctx(reuse(ret), isCtx);
     }
 
@@ -4913,6 +4914,7 @@ Type union_of(Type a, Type b) {
     auto ret = isObj
       ? isectObjInternal(std::move(set))
       : isectClsInternal(std::move(set), nonRegA || nonRegB);
+    assertx(!ret.is(BBottom));
     return setctx(reuse(ret), isCtx);
   };
 

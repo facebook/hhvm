@@ -668,6 +668,58 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
+void resolve_type_constants(const IIndex& index,
+                            const Context& ctx,
+                            ClassAnalysis& analysis) {
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
+  InTypeCns _{index};
+
+  for (auto const& pair :
+         index.lookup_flattened_class_type_constants(*ctx.cls)) {
+    auto const name = pair.first;
+    auto const idx = pair.second;
+
+    if (idx.cls->tsame(ctx.cls->name)) {
+      assertx(idx.idx < ctx.cls->constants.size());
+      auto const& cns = ctx.cls->constants[idx.idx];
+      if (cns.resolvedTypeStructure) continue;
+    }
+
+    SCOPE_ASSERT_DETAIL("resolve-type-constants") {
+      return folly::sformat(
+        "Resolving {}::{} -> {}",
+        idx.cls, name, show(ctx)
+      );
+    };
+    FTRACE(2, "{:-^70}\n-- ({}) {}::{}\n", "Resolve", show(ctx), idx.cls, name);
+
+    auto const lookup = index.lookup_class_type_constant(*ctx.cls, name, idx);
+    auto const ts = lookup.resolution.sarray();
+    if (!ts) {
+      FTRACE(2, "  no resolution\n");
+      continue;
+    }
+
+    FTRACE(
+      2, "  resolved to {}{}\n",
+      staticArrayStreamer(ts),
+      lookup.resolution.contextSensitive ? " (context sensitive)" : ""
+    );
+
+    analysis.resolvedTypeConsts.emplace_back(
+      ResolvedClsTypeConst{
+        ts,
+        !lookup.resolution.contextSensitive,
+        idx
+      }
+    );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -814,6 +866,42 @@ FuncAnalysis analyze_func_inline(const IIndex& index,
                     opts | CollectionOpts::Inlining);
 }
 
+ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
+  assertx(ctx.cls);
+  assertx(!ctx.func);
+  assertx(!is_used_trait(*ctx.cls));
+  assertx(!is_closure(*ctx.cls));
+
+  {
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    FTRACE(
+      2, "{:#^70}\n-- {}\n",
+      index.frozen() ? " Class (Frozen) " : " Class ",
+      ctx.cls->name
+    );
+  }
+
+  ContextPusher _{index, ctx};
+  ClassAnalysis analysis{ctx};
+
+  resolve_type_constants(index, ctx, analysis);
+
+  for (auto const& m : ctx.cls->methods) {
+    if (!is_86init_func(*m)) continue;
+    auto const wf = php::WideFunc::cns(m.get());
+    analysis.methods.emplace_back(
+      analyze_func(
+        index,
+        AnalysisContext { ctx.unit, wf, ctx.cls },
+        CollectionOpts{}
+      )
+    );
+  }
+
+  return analysis;
+}
+
 ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
   assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
@@ -884,18 +972,16 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.userType);
-      if (!cellTy.subtypeOf(hniTy)) {
-        always_assert_flog(
-          false,
-          "hni {}::{} has impossible type. "
-          "The annotation says it is type ({}) "
-          "but the default value is type ({}).\n",
+      always_assert_flog(
+        cellTy.subtypeOf(hniTy),
+        "hni {}::{} has impossible type. "
+        "The annotation says it is type ({}) "
+        "but the default value is type ({}).\n",
           ctx.cls->name,
-          prop.name,
+        prop.name,
           show(hniTy),
-          show(cellTy)
-        );
-      }
+        show(cellTy)
+      );
     }
 
     if (!(prop.attrs & AttrStatic)) {
@@ -1415,6 +1501,55 @@ State locally_propagated_bid_state(const Index& index,
 
   ret.stack.compact();
   return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+UnitAnalysis analyze_unit(const AnalysisIndex& index, const Context& ctx) {
+  assertx(ctx.unit);
+  assertx(!ctx.cls);
+  assertx(!ctx.func);
+
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
+  FTRACE(
+    2, "{:#^70}\n-- {}\n",
+    index.frozen() ? " Unit (Frozen) " : " Unit ",
+    ctx.unit
+  );
+
+  AnalysisIndexAdaptor adaptor{ index };
+  ContextPusher _{adaptor, ctx};
+
+  UnitAnalysis analysis{ctx};
+
+  InTypeCns _2{adaptor};
+
+  auto const& unit = index.lookup_unit(ctx.unit);
+  for (size_t i = 0, size = unit.typeAliases.size(); i < size; ++i) {
+    auto const& ta = *unit.typeAliases[i];
+    if (ta.resolvedTypeStructure) continue;
+
+    SCOPE_ASSERT_DETAIL("resolve-type-alias") {
+      return folly::sformat("Resolving {} {}", show(ctx), ta.name);
+    };
+    FTRACE(2, "{:-^70}\n-- ({}) {}\n", "Resolve", show(ctx), ta.name);
+
+    auto const resolution =
+      resolve_type_structure(AnalysisIndexAdaptor { index }, nullptr, ta);
+    auto const ts = resolution.sarray();
+    assertx(!resolution.contextSensitive);
+    if (!ts) {
+      FTRACE(2, "  no resolution\n");
+      continue;
+    }
+
+    FTRACE(2, "  resolved to {}\n", staticArrayStreamer(ts));
+    analysis.resolvedTypeAliases.emplace_back(ResolvedTypeAlias{i, ts});
+  }
+
+  return analysis;
 }
 
 //////////////////////////////////////////////////////////////////////

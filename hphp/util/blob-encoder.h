@@ -267,6 +267,11 @@ struct BlobEncoder {
     encodeOrderedContainer(vec, extra...);
   }
 
+  template<typename T, typename A, typename... Extra>
+  void encode(const std::deque<T, A>& vec, const Extra&... extra) {
+    encodeOrderedContainer(vec, extra...);
+  }
+
   template<typename K, typename C, typename A>
   void encode(const std::set<K, C, A>& set) {
     encodeOrderedContainer(set);
@@ -298,6 +303,13 @@ struct BlobEncoder {
   void encode(const folly::F14FastSet<T, H, E, A>& set, const C& c,
               const Extra&... extra) {
     encodeUnorderedSet(set, c, extra...);
+  }
+
+  template<typename V,
+           typename C, typename A,
+           typename G, typename C2>
+  void encode(const folly::sorted_vector_set<V, C, A, G, C2>& set) {
+    encodeOrderedContainer(set);
   }
 
   template<typename K, typename V,
@@ -723,6 +735,11 @@ struct BlobDecoder {
     decodeVecContainer(vec, extra...);
   }
 
+  template<typename T, typename A, typename... Extra>
+  void decode(std::deque<T, A>& vec, Extra... extra) {
+    decodeVecContainer(vec, extra...);
+  }
+
   template<typename K, typename C, typename A>
   void decode(std::set<K, C, A>& set) {
     decodeOrderedSetContainer(set);
@@ -754,6 +771,13 @@ struct BlobDecoder {
   void decode(folly::F14FastSet<T, H, E, A>& set, const C&,
               const Extra&... extra) {
     decodeSetContainer(set, extra...);
+  }
+
+  template<typename V,
+           typename C, typename A,
+           typename G, typename C2>
+  void decode(folly::sorted_vector_set<V, C, A, G, C2>& set) {
+    decodeOrderedSetContainer(set);
   }
 
   template<typename K, typename V,

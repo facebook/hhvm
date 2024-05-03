@@ -1219,6 +1219,12 @@ struct ClassGraph {
   // this class does.
   std::vector<ClassGraph> interfaces() const;
 
+  // Walk over all parents of this class, calling the supplied
+  // callable with each parent. If the callable returns true, that
+  // parent's parents will then be visited. If false, then they will
+  // be skipped.
+  template <typename F> void walkParents(const F&) const;
+
   // Retrieve all children of this class (including this class
   // itself). This is only valid to call if hasCompleteChildren() is
   // true. NB: Being on a class' children list does not necessarily
@@ -2380,6 +2386,24 @@ std::vector<ClassGraph> ClassGraph::interfaces() const {
   );
   std::sort(begin(out), end(out));
   return out;
+}
+
+template <typename F>
+void ClassGraph::walkParents(const F& f) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  always_assert(ensure());
+
+  forEachParent(
+    *this_,
+    [&] (Node& p) {
+      return !f(ClassGraph{ &p })
+        ? Action::Skip
+        : Action::Continue;
+    }
+  );
 }
 
 std::vector<ClassGraph> ClassGraph::children() const {
@@ -24664,18 +24688,370 @@ bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
   return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
 }
 
+/*
+ * Given a DCls, return the most specific res::Func for that DCls. For
+ * intersections, this will call process/general on every component of
+ * the intersection and combine the results. process is called to
+ * obtain a res::Func from a ClassInfo. If a ClassInfo isn't
+ * available, general will be called instead.
+ */
+template <typename P, typename G>
+res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
+                                         SString name,
+                                         const P& process,
+                                         const G& general) const {
+  using Func = res::Func;
+  using Class = res::Class;
+
+  /*
+   * Combine together multiple res::Funcs together. Since the DCls
+   * represents a class which is a subtype of every ClassInfo in the
+   * list, every res::Func we get is true.
+   *
+   * The relevant res::Func types in order from most general to more
+   * specific are:
+   *
+   * MethodName -> FuncFamily -> MethodOrMissing -> Method -> Missing
+   *
+   * Since every res::Func in the intersection is true, we take the
+   * res::Func which is most specific. Two different res::Funcs cannot
+   * be contradict. For example, we shouldn't get a Method and a
+   * Missing since one implies there's no func and the other implies
+   * one specific func. Or two different res::Funcs shouldn't resolve
+   * to two different methods.
+   */
+  auto missing = TriBool::Maybe;
+  Func::Isect2 isect;
+  const php::Func* singleMethod = nullptr;
+
+  auto const onFunc = [&] (Func func) {
+    match<void>(
+      func.val,
+      [&] (Func::MethodName)      {},
+      [&] (Func::Method)          { always_assert(false); },
+      [&] (Func::MethodFamily)    { always_assert(false); },
+      [&] (Func::MethodOrMissing) { always_assert(false); },
+      [&] (Func::MissingMethod) {
+        assertx(missing != TriBool::No);
+        singleMethod = nullptr;
+        isect.families.clear();
+        missing = TriBool::Yes;
+      },
+      [&] (Func::FuncName)        { always_assert(false); },
+      [&] (Func::Fun)             { always_assert(false); },
+      [&] (Func::Fun2)            { always_assert(false); },
+      [&] (Func::Method2 m) {
+        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
+        assertx(IMPLIES(singleMethod, isect.families.empty()));
+        assertx(missing != TriBool::Yes);
+        if (!singleMethod) {
+          singleMethod = m.finfo->func;
+          isect.families.clear();
+        }
+        missing = TriBool::No;
+      },
+      [&] (Func::MethodFamily2)   { always_assert(false); },
+      [&] (Func::MethodOrMissing2 m) {
+        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
+        assertx(IMPLIES(singleMethod, isect.families.empty()));
+        if (missing == TriBool::Yes) {
+          assertx(!singleMethod);
+          assertx(isect.families.empty());
+          return;
+        }
+        if (!singleMethod) {
+          singleMethod = m.finfo->func;
+          isect.families.clear();
+        }
+      },
+      [&] (Func::MissingFunc)     { always_assert(false); },
+      [&] (const Func::Isect&)    { always_assert(false); },
+      [&] (const Func::Isect2&)   { always_assert(false); }
+    );
+  };
+
+  auto const onClass = [&] (Class cls, bool isExact) {
+    auto const g = cls.graph();
+    if (!g.ensureCInfo()) {
+      onFunc(general(dcls.containsNonRegular()));
+      return;
+    }
+
+    if (auto const cinfo = g.cinfo2()) {
+      onFunc(process(cinfo, isExact, dcls.containsNonRegular()));
+    } else {
+      // The class doesn't have a ClassInfo present, so we cannot call
+      // process. We can, however, look at any parents that do have a
+      // ClassInfo. This won't result in as good results, but it
+      // preserves monotonicity.
+      onFunc(general(dcls.containsNonRegular()));
+      if (g.isMissing()) return;
+
+      if (!dcls.containsNonRegular() &&
+          !g.mightBeRegular() &&
+          g.hasCompleteChildren()) {
+        if (isExact) {
+          onFunc(
+            Func { Func::MissingMethod { dcls.smallestCls().name(), name } }
+          );
+          return;
+        }
+
+        hphp_fast_set<ClassGraph, ClassGraphHasher> commonParents;
+        auto first = true;
+        for (auto const c : g.children()) {
+          assertx(!c.isMissing());
+          if (!c.mightBeRegular()) continue;
+
+          hphp_fast_set<ClassGraph, ClassGraphHasher> newCommon;
+          c.walkParents(
+            [&] (ClassGraph p) {
+              if (first || commonParents.count(p)) {
+                newCommon.emplace(p);
+              }
+              return true;
+            }
+          );
+          first = false;
+          commonParents = std::move(newCommon);
+        }
+
+        if (first) {
+          onFunc(
+            Func { Func::MissingMethod { dcls.smallestCls().name(), name } }
+          );
+          return;
+        }
+
+        assertx(!commonParents.empty());
+        for (auto const p : commonParents) {
+          if (!p.ensureCInfo()) continue;
+          if (auto const cinfo = p.cinfo2()) {
+            onFunc(process(cinfo, false, false));
+          }
+        }
+        return;
+      }
+
+      g.walkParents(
+        [&] (ClassGraph p) {
+          if (!p.ensureCInfo()) return true;
+          if (auto const cinfo = p.cinfo2()) {
+            onFunc(process(cinfo, false, dcls.containsNonRegular()));
+            return false;
+          }
+          return true;
+        }
+      );
+    }
+  };
+
+  if (dcls.isExact() || dcls.isSub()) {
+    // If this isn't an intersection, there's only one class to
+    // process and we're done.
+    onClass(dcls.cls(), dcls.isExact());
+  } else if (dcls.isIsect()) {
+    for (auto const c : dcls.isect()) onClass(c, false);
+  } else {
+    assertx(dcls.isIsectAndExact());
+    auto const [e, i] = dcls.isectAndExact();
+    onClass(e, true);
+    for (auto const c : *i) onClass(c, false);
+  }
+
+  // If we got a method, that always wins. Again, every res::Func is
+  // true, and method is more specific than a FuncFamily, so it is
+  // preferred.
+  if (singleMethod) {
+    assertx(missing != TriBool::Yes);
+    // If missing is Maybe, then *every* resolution was to a
+    // MethodName or MethodOrMissing, so include that fact here by
+    // using MethodOrMissing.
+    if (missing == TriBool::Maybe) {
+      return Func {
+        Func::MethodOrMissing2 { &func_info(*m_data, *singleMethod) }
+      };
+    }
+    return Func { Func::Method2 { &func_info(*m_data, *singleMethod) } };
+  }
+  // We only got unresolved classes. If missing is TriBool::Yes, the
+  // function doesn't exist. Otherwise be pessimistic.
+  if (isect.families.empty()) {
+    if (missing == TriBool::Yes) {
+      return Func { Func::MissingMethod { dcls.smallestCls().name(), name } };
+    }
+    assertx(missing == TriBool::Maybe);
+    return general(dcls.containsNonRegular());
+  }
+  // Isect case. Isects always might contain missing funcs.
+  assertx(missing == TriBool::Maybe);
+
+  // We could add a FuncFamily multiple times, so remove duplicates.
+  std::sort(begin(isect.families), end(isect.families));
+  isect.families.erase(
+    std::unique(begin(isect.families), end(isect.families)),
+    end(isect.families)
+  );
+  // If everything simplifies down to a single FuncFamily, just use
+  // that.
+  if (isect.families.size() == 1) {
+    return Func {
+      Func::MethodFamily2 { isect.families[0], isect.regularOnly }
+    };
+  }
+  return Func { std::move(isect) };
+}
+
 res::Func AnalysisIndex::resolve_method(const Type& thisType,
                                         SString name) const {
   assertx(thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj));
 
   using Func = res::Func;
 
-  auto const general = [&] (SString maybeCls) {
+  auto const general = [&] (SString maybeCls, bool) {
     assertx(name != s_construct.get());
     return Func { Func::MethodName { maybeCls, name } };
   };
 
-  if (m_data->mode == Mode::Constants) return general(nullptr);
+  if (m_data->mode == Mode::Constants) return general(nullptr, true);
+
+  auto const process = [&] (ClassInfo2* cinfo,
+                            bool isExact,
+                            bool includeNonRegular) {
+    assertx(name != s_construct.get());
+
+    auto const meth = folly::get_ptr(cinfo->methods, name);
+    if (!meth) {
+      // We don't store metadata for special methods, so be pessimistic
+      // (the lack of a method entry does not mean the call might fail
+      // at runtme).
+      if (is_special_method_name(name)) {
+        return Func { Func::MethodName { cinfo->name, name } };
+      }
+      // We're only considering this class, not it's subclasses. Since
+      // it doesn't exist here, the resolution will always fail.
+      if (isExact) {
+        return Func { Func::MissingMethod { cinfo->name, name } };
+      }
+      // The method isn't present on this class, but it might be in the
+      // subclasses. In most cases try a general lookup to get a
+      // slightly better type than nothing.
+      return general(cinfo->name, includeNonRegular);
+    }
+
+    if (!m_data->deps->add(meth->meth())) {
+      return general(cinfo->name, includeNonRegular);
+    }
+    auto const func = func_from_meth_ref(*m_data, meth->meth());
+    if (!func) return general(cinfo->name, includeNonRegular);
+
+    // We don't store method family information about special methods
+    // and they have special inheritance semantics.
+    if (is_special_method_name(name)) {
+      // If we know the class exactly, we can use ftarget.
+      if (isExact) {
+        return Func { Func::Method2 { &func_info(*m_data, *func) } };
+      }
+      // The method isn't overwritten, but they don't inherit, so it
+      // could be missing.
+      if (meth->attrs & AttrNoOverride) {
+        return Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } };
+      }
+      // Otherwise be pessimistic.
+      return Func { Func::MethodName { cinfo->name, name } };
+    }
+
+    // Private method handling: Private methods have special lookup
+    // rules. If we're in the context of a particular class, and that
+    // class defines a private method, an instance of the class will
+    // always call that private method (even if overridden) in that
+    // context.
+    assertx(cinfo->cls);
+    auto const& ctx = current_context(*m_data);
+    if (ctx.cls == cinfo->cls) {
+      // The context matches the current class. If we've looked up a
+      // private method (defined on this class), then that's what
+      // we'll call.
+      if ((meth->attrs & AttrPrivate) && meth->topLevel()) {
+        return Func { Func::Method2 { &func_info(*m_data, *func) } };
+      }
+    } else if ((meth->attrs & AttrPrivate) || meth->hasPrivateAncestor()) {
+      // Otherwise the context doesn't match the current class. If the
+      // looked up method is private, or has a private ancestor,
+      // there's a chance we'll call that method (or
+      // ancestor). Otherwise there's no private method in the
+      // inheritance tree we'll call.
+      auto conservative = false;
+      auto const ancestor = [&] () -> const php::Func* {
+        if (!ctx.cls) return nullptr;
+        if (!m_data->deps->add(AnalysisDeps::Class { ctx.cls->name })) {
+          conservative = true;
+          return nullptr;
+        }
+        // Look up the ClassInfo corresponding to the context.
+        auto const ctxCInfo = ctx.cls->cinfo;
+        if (!ctxCInfo) return nullptr;
+        // Is this context a parent of our class?
+        if (!cinfo->classGraph.isChildOf(ctxCInfo->classGraph)) {
+          return nullptr;
+        }
+        // It is. See if it defines a private method.
+        auto const ctxMeth = folly::get_ptr(ctxCInfo->methods, name);
+        if (!ctxMeth) return nullptr;
+        // If it defines a private method, use it.
+        if ((ctxMeth->attrs & AttrPrivate) && ctxMeth->topLevel()) {
+          if (!m_data->deps->add(ctxMeth->meth())) {
+            conservative = true;
+            return nullptr;
+          }
+          auto const ctxFunc = func_from_meth_ref(*m_data, ctxMeth->meth());
+          if (!ctxFunc) conservative = true;
+          return ctxFunc;
+        }
+        // Otherwise do normal lookup.
+        return nullptr;
+      }();
+      if (ancestor) {
+        return Func { Func::Method2 { &func_info(*m_data, *ancestor) } };
+      } else if (conservative) {
+        return Func { Func::MethodName { cinfo->name, name } };
+      }
+    }
+
+    // If we're only including regular subclasses, and this class
+    // itself isn't regular, the result may not necessarily include
+    // func.
+    if (!includeNonRegular && !is_regular_class(*cinfo->cls)) {
+      // We're not including this base class. If we're exactly this
+      // class, there's no method at all. It will always be missing.
+      if (isExact) {
+        return Func { Func::MissingMethod { cinfo->name, name } };
+      }
+      if (meth->noOverrideRegular()) {
+        // The method isn't overridden in a subclass, but we can't use
+        // the base class either. This leaves two cases. Either the
+        // method isn't overridden because there are no regular
+        // subclasses (in which case there's no resolution at all), or
+        // because there's regular subclasses, but they use the same
+        // method (in which case the result is just func).
+        if (!cinfo->classGraph.mightHaveRegularSubclass()) {
+          return Func { Func::MissingMethod { cinfo->name, name } };
+        }
+        return Func { Func::Method2 { &func_info(*m_data, *func) } };
+      }
+    } else if (isExact ||
+               meth->attrs & AttrNoOverride ||
+               (!includeNonRegular && meth->noOverrideRegular())) {
+      // Either we want all classes, or the base class is regular. If
+      // the method isn't overridden we know it must be just func (the
+      // override bits include it being missing in a subclass, so we
+      // know it cannot be missing either).
+      return Func { Func::Method2 { &func_info(*m_data, *func) } };
+    }
+
+    // Be pessimistic for the rest of cases
+    return general(cinfo->name, includeNonRegular);
+  };
 
   auto const isClass = thisType.subtypeOf(BCls);
   if (name == s_construct.get()) {
@@ -24686,157 +25062,18 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
   }
 
   if (isClass) {
-    if (!is_specialized_cls(thisType)) return general(nullptr);
+    if (!is_specialized_cls(thisType)) return general(nullptr, true);
   } else if (!is_specialized_obj(thisType)) {
-    return general(nullptr);
+    return general(nullptr, false);
   }
 
-  // Be pessimistic for intersections right now
   auto const& dcls = isClass ? dcls_of(thisType) : dobj_of(thisType);
-  if (dcls.isIsect()) return general(dcls.smallestCls().name());
-
-  auto const rcls = [&] {
-    if (dcls.isExact() || dcls.isSub()) return dcls.cls();
-    assertx(dcls.isIsectAndExact());
-    return dcls.isectAndExact().first;
-  }();
-
-  if (!m_data->deps->add(AnalysisDeps::Class { rcls.name() })) {
-    return general(rcls.name());
-  }
-
-  auto const cinfo = rcls.cinfo2();
-  if (!cinfo) return general(rcls.name());
-
-  auto const isExact = dcls.isExact() || dcls.isIsectAndExact();
-
-  auto const meth = folly::get_ptr(cinfo->methods, name);
-  if (!meth) {
-    // We don't store metadata for special methods, so be pessimistic
-    // (the lack of a method entry does not mean the call might fail
-    // at runtme).
-    if (is_special_method_name(name)) {
-      return Func { Func::MethodName { cinfo->name, name } };
-    }
-    // We're only considering this class, not it's subclasses. Since
-    // it doesn't exist here, the resolution will always fail.
-    if (isExact) {
-      return Func { Func::MissingMethod { cinfo->name, name } };
-    }
-    // The method isn't present on this class, but it might be in the
-    // subclasses. In most cases try a general lookup to get a
-    // slightly better type than nothing.
-    return general(cinfo->name);
-  }
-
-  if (!m_data->deps->add(meth->meth())) return general(cinfo->name);
-  auto const func = func_from_meth_ref(*m_data, meth->meth());
-  if (!func) return general(cinfo->name);
-
-  // We don't store method family information about special methods
-  // and they have special inheritance semantics.
-  if (is_special_method_name(name)) {
-    // If we know the class exactly, we can use ftarget.
-    if (isExact) {
-      return Func { Func::Method2 { &func_info(*m_data, *func) } };
-    }
-    // The method isn't overwritten, but they don't inherit, so it
-    // could be missing.
-    if (meth->attrs & AttrNoOverride) {
-      return Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } };
-    }
-    // Otherwise be pessimistic.
-    return Func { Func::MethodName { cinfo->name, name } };
-  }
-
-  // Private method handling: Private methods have special lookup
-  // rules. If we're in the context of a particular class, and that
-  // class defines a private method, an instance of the class will
-  // always call that private method (even if overridden) in that
-  // context.
-  assertx(cinfo->cls);
-  auto const& ctx = current_context(*m_data);
-  if (ctx.cls == cinfo->cls) {
-    // The context matches the current class. If we've looked up a
-    // private method (defined on this class), then that's what
-    // we'll call.
-    if ((meth->attrs & AttrPrivate) && meth->topLevel()) {
-      return Func { Func::Method2 { &func_info(*m_data, *func) } };
-    }
-  } else if ((meth->attrs & AttrPrivate) || meth->hasPrivateAncestor()) {
-    // Otherwise the context doesn't match the current class. If the
-    // looked up method is private, or has a private ancestor, there's
-    // a chance we'll call that method (or ancestor). Otherwise
-    // there's no private method in the inheritance tree we'll call.
-    auto conservative = false;
-    auto const ancestor = [&] () -> const php::Func* {
-      if (!ctx.cls) return nullptr;
-      if (!m_data->deps->add(AnalysisDeps::Class { ctx.cls->name })) {
-        conservative = true;
-        return nullptr;
-      }
-      // Look up the ClassInfo corresponding to the context.
-      auto const ctxCInfo = ctx.cls->cinfo;
-      if (!ctxCInfo) return nullptr;
-      // Is this context a parent of our class?
-      if (!cinfo->classGraph.isChildOf(ctxCInfo->classGraph)) {
-        return nullptr;
-      }
-      // It is. See if it defines a private method.
-      auto const ctxMeth = folly::get_ptr(ctxCInfo->methods, name);
-      if (!ctxMeth) return nullptr;
-      // If it defines a private method, use it.
-      if ((ctxMeth->attrs & AttrPrivate) && ctxMeth->topLevel()) {
-        if (!m_data->deps->add(ctxMeth->meth())) {
-          conservative = true;
-          return nullptr;
-        }
-        auto const ctxFunc = func_from_meth_ref(*m_data, ctxMeth->meth());
-        if (!ctxFunc) conservative = true;
-        return ctxFunc;
-      }
-      // Otherwise do normal lookup.
-      return nullptr;
-    }();
-    if (ancestor) {
-      return Func { Func::Method2 { &func_info(*m_data, *ancestor) } };
-    } else if (conservative) {
-      return Func { Func::MethodName { cinfo->name, name } };
-    }
-  }
-
-  // If we're only including regular subclasses, and this class itself
-  // isn't regular, the result may not necessarily include func.
-  if (!isClass && !is_regular_class(*cinfo->cls)) {
-    // We're not including this base class. If we're exactly this
-    // class, there's no method at all. It will always be missing.
-    if (isExact) {
-      return Func { Func::MissingMethod { cinfo->name, name } };
-    }
-    if (meth->noOverrideRegular()) {
-      // The method isn't overridden in a subclass, but we can't
-      // use the base class either. This leaves two cases. Either
-      // the method isn't overridden because there are no regular
-      // subclasses (in which case there's no resolution at all), or
-      // because there's regular subclasses, but they use the same
-      // method (in which case the result is just func).
-      if (!cinfo->classGraph.mightHaveRegularSubclass()) {
-        return Func { Func::MissingMethod { cinfo->name, name } };
-      }
-      return Func { Func::Method2 { &func_info(*m_data, *func) } };
-    }
-  } else if (isExact ||
-             meth->attrs & AttrNoOverride ||
-             (!isClass && meth->noOverrideRegular())) {
-    // Either we want all classes, or the base class is regular. If
-    // the method isn't overridden we know it must be just func (the
-    // override bits include it being missing in a subclass, so we
-    // know it cannot be missing either).
-    return Func { Func::Method2 { &func_info(*m_data, *func) } };
-  }
-
-  // Be pessimistic for the rest of cases
-  return general(cinfo->name);
+  return rfunc_from_dcls(
+    dcls,
+    name,
+    process,
+    [&] (bool i) { return general(dcls.smallestCls().name(), i); }
+  );
 }
 
 res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
@@ -24854,54 +25091,66 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
   }
 
   auto const& dcls = dobj_of(obj);
-  // Non-exact case not yet implemented.
-  always_assert_flog(
-    dcls.isExact(),
-    "Encountered non-exact class in resolve_ctor: {}",
-    show(obj)
+  return rfunc_from_dcls(
+    dcls,
+    s_construct.get(),
+    [&] (ClassInfo2* cinfo, bool isExact, bool includeNonRegular) {
+      // We're dealing with an object here, which never uses
+      // non-regular classes.
+      assertx(!includeNonRegular);
+
+      // See if this class has a ctor.
+      auto const meth = folly::get_ptr(cinfo->methods, s_construct.get());
+      if (!meth) {
+        // There's no ctor on this class. This doesn't mean the ctor
+        // won't exist at runtime, it might get the default ctor, so
+        // we have to be conservative.
+        return Func { Func::MethodName { cinfo->name, s_construct.get() } };
+      }
+
+      if (!m_data->deps->add(meth->meth())) {
+        return Func {
+          Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+        };
+      }
+
+      // We have a ctor, but it might be overridden in a subclass.
+      assertx(!(meth->attrs & AttrStatic));
+      auto const func = func_from_meth_ref(*m_data, meth->meth());
+      if (!func) {
+        // Relevant function doesn't exist on the AnalysisIndex. Be
+        // conservative.
+        return Func { Func::MethodName { cinfo->name, s_construct.get() } };
+      }
+      assertx(!(func->attrs & AttrStatic));
+
+      // If this class is known exactly, or we know nothing overrides
+      // this ctor, we know this ctor is precisely it.
+      if (isExact || meth->noOverrideRegular()) {
+        // If this class isn't regular, and doesn't have any regular
+        // subclasses (or if it's exact), this resolution will always
+        // fail.
+        if (!is_regular_class(*cinfo->cls) &&
+            (isExact || !cinfo->classGraph.mightHaveRegularSubclass())) {
+          return Func {
+            Func::MissingMethod { cinfo->name, s_construct.get() }
+          };
+        }
+        return Func { Func::Method2 { &func_info(*m_data, *func) } };
+      }
+
+      // Be pessimistic for the rest of cases
+      return Func {
+        Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+      };
+    },
+    [&] (bool includeNonRegular) {
+      assertx(!includeNonRegular);
+      return Func {
+        Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+      };
+    }
   );
-
-  auto const rcls = dcls.cls();
-  if (!m_data->deps->add(AnalysisDeps::Class { rcls.name() })) {
-    return Func {
-      Func::MethodName { rcls.name(), s_construct.get() }
-    };
-  }
-
-  auto const cinfo = rcls.cinfo2();
-  if (!cinfo) {
-    return Func {
-      Func::MethodName { rcls.name(), s_construct.get() }
-    };
-  }
-
-  // See if this class has a ctor.
-  auto const meth = folly::get_ptr(cinfo->methods, s_construct.get());
-  if (!meth) {
-    // There's no ctor on this class. This doesn't mean the ctor won't
-    // exist at runtime, it might get the default ctor, so we have to
-    // be conservative.
-    return Func { Func::MethodName { cinfo->name, s_construct.get() } };
-  }
-  if (!m_data->deps->add(meth->meth())) {
-    return Func { Func::MethodName { cinfo->name, s_construct.get() } };
-  }
-
-  // We have a ctor, but it might be overridden in a subclass.
-  assertx(!(meth->attrs & AttrStatic));
-  auto const func = func_from_meth_ref(*m_data, meth->meth());
-  if (!func) {
-    // Relevant function doesn't exist on the AnalysisIndex. Be
-    // conservative.
-    return Func { Func::MethodName { cinfo->name, s_construct.get() } };
-  }
-  assertx(!(func->attrs & AttrStatic));
-
-  // If this class isn't regular, this resolution will always fail.
-  if (!is_regular_class(*cinfo->cls)) {
-    return Func { Func::MissingMethod { cinfo->name, s_construct.get() } };
-  }
-  return Func { Func::Method2 { &func_info(*m_data, *func) } };
 }
 
 std::pair<const php::TypeAlias*, bool>

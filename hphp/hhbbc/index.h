@@ -2690,6 +2690,9 @@ private:
 
   bool set_in_type_cns(bool);
 
+  template <typename P, typename G>
+  res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
+
   friend struct AnalysisIndexAdaptor;
 };
 

@@ -244,60 +244,30 @@ enum class DataTag : uint8_t {
 struct DCls {
   using IsectSet = std::vector<res::Class>;
 
-  DCls() : DCls{PtrTag::Exact, nullptr} {}
+  DCls() : DCls{TagNone, nullptr} {}
 
   static DCls MakeExact(res::Class cls, bool nonReg);
   static DCls MakeSub(res::Class cls, bool nonReg);
   static DCls MakeIsect(IsectSet isect, bool nonReg);
+  static DCls MakeIsectAndExact(res::Class exact, IsectSet isect, bool nonReg);
 
   // Need to implement these manually so we do proper ref-counting on
   // the IsectWrapper (if available).
   DCls(const DCls&);
   DCls(DCls&& o) noexcept : val{std::move(o.val)}
-  { o.val.set(PtrTag::Exact, nullptr); }
+  { o.val.set(TagNone, nullptr); }
 
   DCls& operator=(const DCls&);
   DCls& operator=(DCls&& o) { val.swap(o.val); return *this; }
 
   ~DCls();
 
-  bool isExact() const {
-    return
-      val.tag() == PtrTag::Exact ||
-      val.tag() == PtrTag::ExactCtx ||
-      val.tag() == PtrTag::ExactNonReg ||
-      val.tag() == PtrTag::ExactCtxNonReg;
-  }
-
-  bool isSub() const {
-    return
-      val.tag() == PtrTag::Sub ||
-      val.tag() == PtrTag::SubCtx ||
-      val.tag() == PtrTag::SubNonReg ||
-      val.tag() == PtrTag::SubCtxNonReg;
-  }
-
+  bool isExact() const { return (val.tag() & (TagExact|TagIsect)) == TagExact; }
+  bool isSub() const { return !(val.tag() & (TagExact|TagIsect)); }
   bool isIsect() const { return tagIsIsect(val.tag()); }
+  bool isIsectAndExact() const { return tagIsIsectAndExact(val.tag()); }
 
-  bool containsNonRegular() const {
-    switch (val.tag()) {
-      case PtrTag::Exact:
-      case PtrTag::Sub:
-      case PtrTag::Isect:
-      case PtrTag::ExactCtx:
-      case PtrTag::SubCtx:
-      case PtrTag::IsectCtx:
-        return false;
-      case PtrTag::ExactNonReg:
-      case PtrTag::SubNonReg:
-      case PtrTag::IsectNonReg:
-      case PtrTag::ExactCtxNonReg:
-      case PtrTag::SubCtxNonReg:
-      case PtrTag::IsectCtxNonReg:
-        return true;
-    }
-    not_reached();
-  }
+  bool containsNonRegular() const { return !(val.tag() & TagReg); }
 
   // Obtain the res::Class this DCls represents. Only valid if
   // !isSect(), as that cannot be completely represented by any single
@@ -314,26 +284,9 @@ struct DCls {
   res::Class smallestCls() const;
 
   const IsectSet& isect() const;
+  std::pair<res::Class, const IsectSet*> isectAndExact() const;
 
-  bool isCtx() const {
-    switch (val.tag()) {
-      case PtrTag::ExactCtx:
-      case PtrTag::SubCtx:
-      case PtrTag::IsectCtx:
-      case PtrTag::ExactCtxNonReg:
-      case PtrTag::SubCtxNonReg:
-      case PtrTag::IsectCtxNonReg:
-        return true;
-      case PtrTag::Exact:
-      case PtrTag::Sub:
-      case PtrTag::Isect:
-      case PtrTag::ExactNonReg:
-      case PtrTag::SubNonReg:
-      case PtrTag::IsectNonReg:
-        return false;
-    }
-    not_reached();
-  }
+  bool isCtx() const { return val.tag() & TagCtx; }
 
   void setCtx(bool ctx) {
     val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
@@ -354,110 +307,34 @@ private:
   // pointer. The tag encodes whether isCtx() is true, and the type of
   // pointer. The pointer will either be a res::Class (in opaque
   // encoding), or to an IsectWrapper.
-  enum class PtrTag : uint8_t {
-    Exact,
-    ExactCtx,
-    ExactNonReg,
-    ExactCtxNonReg,
-    Sub,
-    SubCtx,
-    SubNonReg,
-    SubCtxNonReg,
-    Isect,
-    IsectCtx,
-    IsectNonReg,
-    IsectCtxNonReg
+  enum Tag : uint8_t {
+    TagNone  = 0,
+    TagExact = (1 << 0),
+    TagIsect = (1 << 1),
+    TagReg   = (1 << 2),
+    TagCtx   = (1 << 3)
   };
-  CompactTaggedPtr<void, PtrTag> val;
+  CompactTaggedPtr<void, Tag> val;
 
-  DCls(PtrTag t, void* p) : val{t, p} {}
+  DCls(Tag t, void* p) : val{t, p} {}
 
-  static bool tagIsIsect(PtrTag t) {
-    return
-      t == PtrTag::Isect ||
-      t == PtrTag::IsectCtx ||
-      t == PtrTag::IsectNonReg ||
-      t == PtrTag::IsectCtxNonReg;
+  static bool tagIsIsect(Tag t) {
+    return (t & Tag(TagExact|TagIsect)) == TagIsect;
+  }
+  static bool tagIsIsectAndExact(Tag t) {
+    return (t & Tag(TagExact|TagIsect)) == Tag(TagExact|TagIsect);
   }
 
-  static PtrTag addCtx(PtrTag t) {
-    switch (t) {
-      case PtrTag::Exact:       return PtrTag::ExactCtx;
-      case PtrTag::Sub:         return PtrTag::SubCtx;
-      case PtrTag::Isect:       return PtrTag::IsectCtx;
-      case PtrTag::ExactNonReg: return PtrTag::ExactCtxNonReg;
-      case PtrTag::SubNonReg:   return PtrTag::SubCtxNonReg;
-      case PtrTag::IsectNonReg: return PtrTag::IsectCtxNonReg;
-      case PtrTag::ExactCtx:
-      case PtrTag::SubCtx:
-      case PtrTag::IsectCtx:
-      case PtrTag::ExactCtxNonReg:
-      case PtrTag::SubCtxNonReg:
-      case PtrTag::IsectCtxNonReg:
-        return t;
-    }
-    not_reached();
-  }
-
-  static PtrTag removeCtx(PtrTag t) {
-    switch (t) {
-      case PtrTag::ExactCtx:       return PtrTag::Exact;
-      case PtrTag::SubCtx:         return PtrTag::Sub;
-      case PtrTag::IsectCtx:       return PtrTag::Isect;
-      case PtrTag::ExactCtxNonReg: return PtrTag::ExactNonReg;
-      case PtrTag::SubCtxNonReg:   return PtrTag::SubNonReg;
-      case PtrTag::IsectCtxNonReg: return PtrTag::IsectNonReg;
-      case PtrTag::Exact:
-      case PtrTag::Sub:
-      case PtrTag::Isect:
-      case PtrTag::ExactNonReg:
-      case PtrTag::SubNonReg:
-      case PtrTag::IsectNonReg:
-        return t;
-    }
-    not_reached();
-  }
-
-  static PtrTag addNonReg(PtrTag t) {
-    switch (t) {
-      case PtrTag::Exact:    return PtrTag::ExactNonReg;
-      case PtrTag::Sub:      return PtrTag::SubNonReg;
-      case PtrTag::Isect:    return PtrTag::IsectNonReg;
-      case PtrTag::ExactCtx: return PtrTag::ExactCtxNonReg;
-      case PtrTag::SubCtx:   return PtrTag::SubCtxNonReg;
-      case PtrTag::IsectCtx: return PtrTag::IsectCtxNonReg;
-      case PtrTag::ExactNonReg:
-      case PtrTag::SubNonReg:
-      case PtrTag::IsectNonReg:
-      case PtrTag::ExactCtxNonReg:
-      case PtrTag::SubCtxNonReg:
-      case PtrTag::IsectCtxNonReg:
-        return t;
-    }
-    not_reached();
-  }
-
-  static PtrTag removeNonReg(PtrTag t) {
-    switch (t) {
-      case PtrTag::ExactNonReg:    return PtrTag::Exact;
-      case PtrTag::SubNonReg:      return PtrTag::Sub;
-      case PtrTag::IsectNonReg:    return PtrTag::Isect;
-      case PtrTag::ExactCtxNonReg: return PtrTag::ExactCtx;
-      case PtrTag::SubCtxNonReg:   return PtrTag::SubCtx;
-      case PtrTag::IsectCtxNonReg: return PtrTag::IsectCtx;
-      case PtrTag::Exact:
-      case PtrTag::Sub:
-      case PtrTag::Isect:
-      case PtrTag::ExactCtx:
-      case PtrTag::SubCtx:
-      case PtrTag::IsectCtx:
-        return t;
-    }
-    not_reached();
-  }
+  static Tag addCtx(Tag t)       { return Tag(t | TagCtx); }
+  static Tag removeCtx(Tag t)    { return Tag(t & ~TagCtx); }
+  static Tag addNonReg(Tag t)    { return Tag(t & ~TagReg); }
+  static Tag removeNonReg(Tag t) { return Tag(t | TagReg); }
 
   struct IsectWrapper;
+  struct IsectAndExactWrapper;
+
   IsectWrapper* rawIsect() const;
+  IsectAndExactWrapper* rawIsectAndExact() const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -784,6 +661,8 @@ private:
   // outside of type-system.cpp
   friend Type isectObjInternal(DCls::IsectSet);
   friend Type isectClsInternal(DCls::IsectSet, bool);
+  friend Type isectAndExactObjInternal(res::Class, DCls::IsectSet);
+  friend Type isectAndExactClsInternal(res::Class, DCls::IsectSet, bool);
 
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
@@ -1033,8 +912,8 @@ Type some_keyset_empty();
  */
 Type subObj(res::Class);
 Type objExact(res::Class);
-Type subCls(res::Class, bool nonReg = true);
-Type clsExact(res::Class, bool nonReg = true);
+Type subCls(res::Class, bool nonReg);
+Type clsExact(res::Class, bool nonReg);
 
 /*
  * vec types with known size.

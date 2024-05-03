@@ -1002,7 +1002,7 @@ void in(ISS& env, const bc::ClsCnsD& op) {
     unreachable(env);
     return;
   }
-  clsCnsImpl(env, clsExact(*rcls), sval(op.str1));
+  clsCnsImpl(env, clsExact(*rcls, true), sval(op.str1));
 }
 
 void in(ISS& env, const bc::File&) {
@@ -2342,11 +2342,22 @@ bool module_check_always_passes(ISS& env, const res::Class& rcls) {
 }
 
 bool module_check_always_passes(ISS& env, const DCls& dcls) {
-  if (!dcls.isIsect()) return module_check_always_passes(env, dcls.cls());
-  for (auto const cls : dcls.isect()) {
-    if (module_check_always_passes(env, cls)) return true;
+  if (dcls.isExact() || dcls.isSub()) {
+    return module_check_always_passes(env, dcls.cls());
+  } else if (dcls.isIsect()) {
+    for (auto const cls : dcls.isect()) {
+      if (module_check_always_passes(env, cls)) return true;
+    }
+    return false;
+  } else {
+    assertx(dcls.isIsectAndExact());
+    auto const [e, i] = dcls.isectAndExact();
+    if (module_check_always_passes(env, e)) return true;
+    for (auto const cls : *i) {
+      if (module_check_always_passes(env, cls)) return true;
+    }
+    return false;
   }
-  return false;
 }
 
 } // namespace
@@ -2392,7 +2403,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
           module_check_always_passes(env, *rcls)) {
         effect_free(env);
       }
-      push(env, clsExact(*rcls));
+      push(env, clsExact(*rcls, true));
       return;
     }
     push(env, TBottom);
@@ -4306,7 +4317,7 @@ void in(ISS& env, const bc::ResolveClass& op) {
   if (module_check_always_passes(env, *cls)) {
     effect_free(env);
   }
-  push(env, clsExact(*cls));
+  push(env, clsExact(*cls, true));
 }
 
 void in(ISS& env, const bc::LazyClass& op) {
@@ -4440,7 +4451,7 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
     return;
   }
 
-  auto const clsTy = clsExact(*rcls);
+  auto const clsTy = clsExact(*rcls, true);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str3);
 
   if (op.fca.hasGenerics() && !rfunc.couldHaveReifiedGenerics()) {
@@ -4531,7 +4542,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     if (t.subtypeOf(BObj)) return objcls(t);
     if (auto const clsname = getNameFromType(t)) {
       if (auto const rcls = env.index.resolve_class(clsname)) {
-        return clsExact(*rcls);
+        return clsExact(*rcls, true);
       } else {
         return TBottom;
       }
@@ -4734,7 +4745,16 @@ bool objMightHaveConstProps(const Type& t) {
   auto const& dobj = dobj_of(t);
   if (dobj.isExact()) return dobj.cls().couldHaveConstProp();
   if (dobj.isSub()) return dobj.cls().subCouldHaveConstProp();
-  for (auto const cls : dobj.isect()) {
+  if (dobj.isIsect()) {
+    for (auto const cls : dobj.isect()) {
+      if (!cls.subCouldHaveConstProp()) return false;
+    }
+    return true;
+  }
+  assertx(dobj.isIsectAndExact());
+  auto const [e, i] = dobj.isectAndExact();
+  if (!e.subCouldHaveConstProp()) return false;
+  for (auto const cls : *i) {
     if (!cls.subCouldHaveConstProp()) return false;
   }
   return true;
@@ -5074,8 +5094,17 @@ bool couldBeMocked(const Type& t) {
   // In practice this should not occur since this is used mostly on
   // the result of looked up type constraints.
   if (!dcls) return true;
-  if (!dcls->isIsect()) return dcls->cls().couldBeMocked();
-  for (auto const cls : dcls->isect()) {
+  if (dcls->isExact() || dcls->isSub()) return dcls->cls().couldBeMocked();
+  if (dcls->isIsect()) {
+    for (auto const cls : dcls->isect()) {
+      if (!cls.couldBeMocked()) return false;
+    }
+    return true;
+  }
+  assertx(dcls->isIsectAndExact());
+  auto const [e, i] = dcls->isectAndExact();
+  if (!e.couldBeMocked()) return false;
+  for (auto const cls : *i) {
     if (!cls.couldBeMocked()) return false;
   }
   return true;
@@ -5673,7 +5702,14 @@ void in(ISS& env, const bc::InitProp& op) {
       // If class isn't instantiable, this bytecode isn't reachable
       // anyways.
       if (!rcls) break;
-      mergeStaticProp(env, clsExact(*rcls), sval(op.str1), t, false, true);
+      mergeStaticProp(
+        env,
+        clsExact(*rcls, true),
+        sval(op.str1),
+        t,
+        false,
+        true
+      );
       break;
     }
     case InitPropOp::NonStatic:

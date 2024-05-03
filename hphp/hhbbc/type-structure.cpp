@@ -422,12 +422,12 @@ std::pair<Type, bool> name_to_cls_type(ResolveCtx& ctx, SString name) {
   auto const resolveCls = [&] (const php::Class* cls) {
     auto const rcls = ctx.index->resolve_class(cls->name);
     if (!rcls) return TBottom;
-    return clsExact(*rcls);
+    return clsExact(*rcls, true);
   };
   auto const resolveStr = [&] (const StringData* str) {
     auto const rcls = ctx.index->resolve_class(str);
     if (!rcls) return TBottom;
-    return clsExact(*rcls);
+    return clsExact(*rcls, true);
   };
 
   if (ctx.selfCls) {
@@ -435,7 +435,7 @@ std::pair<Type, bool> name_to_cls_type(ResolveCtx& ctx, SString name) {
       if (ctx.thisCls) return std::make_pair(resolveCls(ctx.thisCls), true);
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
       if (!rcls) return std::make_pair(TBottom, false);
-      return std::make_pair(subCls(*rcls), false);
+      return std::make_pair(subCls(*rcls, true), false);
     }
 
     if (name->tsame(s_self.get())) {
@@ -453,14 +453,14 @@ std::pair<Type, bool> name_to_cls_type(ResolveCtx& ctx, SString name) {
     if (lookup.cls) {
       auto const rcls = ctx.index->resolve_class(*lookup.cls);
       if (!rcls) return std::make_pair(TBottom, false);
-      return std::make_pair(clsExact(*rcls), false);
+      return std::make_pair(clsExact(*rcls, true), false);
     }
     if (!lookup.typeAlias) {
       if (!lookup.maybeExists) return std::make_pair(TBottom, false);
       // It might exist, so treat it as an unresolved class.
       auto const rcls = ctx.index->resolve_class(name);
       if (!rcls) return std::make_pair(TBottom, false);
-      return std::make_pair(clsExact(*rcls), false);
+      return std::make_pair(clsExact(*rcls, true), false);
     }
     auto const typeAlias = lookup.typeAlias;
     assertx(typeAlias->typeStructure);
@@ -714,7 +714,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
       if (!rcls) return Resolution{ TBottom, true };
 
       auto next =
-        resolve_type_access_list(ctx, clsExact(*rcls), accessList, idx+1);
+        resolve_type_access_list(ctx, clsExact(*rcls, true), accessList, idx+1);
       next.mightFail |= (!kindPresent || !clsNamePresent || r.mightFail);
       return next;
     }

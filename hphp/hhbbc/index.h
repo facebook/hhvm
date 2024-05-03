@@ -712,6 +712,11 @@ struct Class {
   void serde(BlobEncoder&) const;
   static Class makeForSerde(BlobDecoder&);
 
+  void makeConservativeForTest();
+#ifndef NDEBUG
+  bool isMissingDebug() const;
+#endif
+
 private:
   ClassGraph graph() const;
   ClassInfo* cinfo() const;
@@ -2402,6 +2407,11 @@ private:
     bool fixed{false};
   };
 
+  // TraceState contains all the state necessary for the scheduling
+  // algorithm. A TraceState can represent multiple DepStates. For
+  // scheduling purposes we might want certain items always be
+  // processed together. This can be accomplished by giving them all
+  // the same TraceState.
   struct TraceState {
     TSStringSet trace;
     TSStringSet deps;

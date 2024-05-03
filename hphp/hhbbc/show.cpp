@@ -627,18 +627,41 @@ std::string show(const Type& t) {
         return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
       };
 
+      auto const eq = [&] (res::Class cls) {
+        return isObj || dcls.containsNonRegular() || cls.hasCompleteChildren()
+          ? "=" : "=-";
+      };
+
       std::string ret;
       if (dcls.isExact()) {
-        folly::toAppend("=", show(dcls.cls()), &ret);
+        folly::toAppend(eq(dcls.cls()), show(dcls.cls()), &ret);
       } else if (dcls.isSub()) {
         folly::toAppend(lt(), show(dcls.cls()), &ret);
-      } else {
+      } else if (dcls.isIsect()) {
         folly::toAppend(
           lt(),
           "{",
           [&] {
             using namespace folly::gen;
             return from(dcls.isect())
+              | map([] (res::Class c) { return show(c); })
+              | unsplit<std::string>("&");
+          }(),
+          "}",
+          &ret
+        );
+      } else {
+        auto const [e, i] = dcls.isectAndExact();
+        folly::toAppend(
+          eq(e),
+          "{",
+          show(e),
+          "}&",
+          lt(),
+          "{",
+          [&, i=i] {
+            using namespace folly::gen;
+            return from(*i)
               | map([] (res::Class c) { return show(c); })
               | unsplit<std::string>("&");
           }(),

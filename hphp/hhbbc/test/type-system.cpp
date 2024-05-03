@@ -240,12 +240,18 @@ const StaticString s_ChildClosure3("Closure$ChildClosure3");
   Y(Foo1)                                       \
   Y(Foo2)                                       \
   Y(Foo3)                                       \
+                                                \
+  Z(U1)                                         \
+  Z(U2)                                         \
 
 #define X(name)                                 \
   const StaticString s_##name(#name);
 #define Y(name)                                 \
   const StaticString s_##name(#name);
+#define Z(name)                                 \
+  const StaticString s_##name(#name);
   TEST_CLASSES
+#undef Z
 #undef Y
 #undef X
 
@@ -639,6 +645,11 @@ Index make_index() {
     .class [abstract] Abs6 extends Abs6_P {
     }
     .class Abs6_C1 extends Abs6 {
+    }
+
+    .class U1 {
+    }
+    .class U2 extends U1 {
     }
 
     .function N test() {
@@ -1565,8 +1576,8 @@ std::vector<Type> specializedClasses(const Index& index) {
   auto const addExactSub = [&] (res::Class c) {
     types.emplace(objExact(c));
     types.emplace(subObj(c));
-    types.emplace(clsExact(c));
-    types.emplace(subCls(c));
+    types.emplace(clsExact(c, true));
+    types.emplace(subCls(c, true));
     types.emplace(clsExact(c, false));
     types.emplace(subCls(c, false));
   };
@@ -1574,16 +1585,25 @@ std::vector<Type> specializedClasses(const Index& index) {
 #define X(name)                                                         \
   {                                                                     \
     auto const cls = index.resolve_class(s_##name.get());               \
-    if (!cls || !cls->isComplete()) ADD_FAILURE();                        \
+    if (!cls || !cls->isComplete()) ADD_FAILURE();                      \
     addExactSub(*cls);                                                  \
   }
 #define Y(name)                                                         \
   {                                                                     \
-    auto const cls = res::Class::getUnresolved(s_##name.get());        \
-    if (cls.isComplete()) ADD_FAILURE();                                  \
+    auto const cls = res::Class::getUnresolved(s_##name.get());         \
+    if (cls.isComplete()) ADD_FAILURE();                                \
     addExactSub(cls);                                                   \
   }
+#define Z(name)                                                         \
+  {                                                                     \
+    auto cls = index.resolve_class(s_##name.get());                     \
+    if (!cls || !cls->isComplete()) ADD_FAILURE();                      \
+    cls->makeConservativeForTest();                                     \
+    if (cls->hasCompleteChildren()) ADD_FAILURE();                      \
+    addExactSub(*cls);                                                  \
+  }
   TEST_CLASSES
+#undef Z
 #undef Y
 #undef X
 
@@ -1843,44 +1863,6 @@ void test_basic_operators(const std::vector<Type>& types) {
     return dcls_of(t1).isCtx() != dcls_of(t2).isCtx();
   };
 
-  auto const matchingData = [] (const Type& t1, const Type& t2, auto const& self) {
-    if (!t1.hasData()) return true;
-    if (is_specialized_array_like(t1)) {
-      return is_specialized_array_like(t2) || !t2.hasData();
-    }
-    if (is_specialized_string(t1)) {
-      return is_specialized_string(t2) || !t2.hasData();
-    }
-    if (is_specialized_int(t1)) {
-      return is_specialized_int(t2) || !t2.hasData();
-    }
-    if (is_specialized_double(t1)) {
-      return is_specialized_double(t2) || !t2.hasData();
-    }
-    if (is_specialized_cls(t1)) {
-      if (!t2.hasData()) return true;
-      if (!is_specialized_cls(t2)) return false;
-      auto const& dcls1 = dcls_of(t1);
-      auto const& dcls2 = dcls_of(t2);
-      return
-        (!dcls1.isExact() || dcls1.cls().isComplete()) &&
-        (!dcls2.isExact() || dcls2.cls().isComplete());
-    }
-    if (is_specialized_wait_handle(t1) && is_specialized_wait_handle(t2)) {
-      return self(wait_handle_inner(t1), wait_handle_inner(t2), self);
-    }
-    if (is_specialized_obj(t1)) {
-      if (!t2.hasData()) return true;
-      if (!is_specialized_obj(t2)) return false;
-      auto const& dcls1 = dobj_of(t1);
-      auto const& dcls2 = dobj_of(t2);
-      return
-        (!dcls1.isExact() || dcls1.cls().isComplete()) &&
-        (!dcls2.isExact() || dcls2.cls().isComplete());
-    }
-    return true;
-  };
-
   for (size_t i1 = 0; i1 < types.size(); ++i1) {
     for (size_t i2 = 0; i2 < types.size(); ++i2) {
       auto const& t1 = types[i1];
@@ -1933,14 +1915,11 @@ void test_basic_operators(const std::vector<Type>& types) {
       EXPECT_EQ(isect, intersection_of(t2, t1));
 
       EXPECT_TRUE(t1.moreRefined(uni));
-      if (matchingData(t1, t2, matchingData)) {
-        EXPECT_TRUE(isect.moreRefined(t1));
-        EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1));
-      } else {
-        EXPECT_TRUE(isect.moreRefined(t1) || isect.moreRefined(t2));
-        EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1) ||
-                    intersection_of(uni, t2).equivalentlyRefined(t2));
-      }
+      EXPECT_TRUE(t2.moreRefined(uni));
+      EXPECT_TRUE(isect.moreRefined(t1));
+      EXPECT_TRUE(isect.moreRefined(t2));
+      EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1));
+      EXPECT_TRUE(intersection_of(uni, t2).equivalentlyRefined(t2));
 
       if (moreRefined) {
         EXPECT_TRUE(uni.equivalentlyRefined(t2));
@@ -2000,44 +1979,6 @@ TEST(Type, SpecializedClasses) {
 
   test_basic_operators(types);
 
-  auto const getDCls = [&] (const Type& t) -> std::pair<bool, const DCls*> {
-    if (is_specialized_obj(t)) return std::make_pair(true, &dobj_of(t));
-    if (is_specialized_cls(t)) return std::make_pair(false, &dcls_of(t));
-    return std::make_pair(false, nullptr);
-  };
-
-  auto const skipIsect = [&] (const Type& t1, const Type& t2) {
-    auto const [isObj1, dcls1] = getDCls(t1);
-    auto const [isObj2, dcls2] = getDCls(t2);
-    if (!dcls1 || !dcls2) return false;
-    if (isObj1 != isObj2) return false;
-    if (dcls1->isExact()) {
-      if (dcls1->cls().hasCompleteChildren()) return false;
-      if (dcls2->isIsect()) {
-        return std::all_of(
-          dcls2->isect().begin(),
-          dcls2->isect().end(),
-          [] (res::Class c) { return !c.hasCompleteChildren(); }
-        );
-      }
-      if (dcls2->isExact()) return false;
-      return !dcls2->cls().hasCompleteChildren();
-    }
-    if (dcls2->isExact()) {
-      if (dcls2->cls().hasCompleteChildren()) return false;
-      if (dcls1->isIsect()) {
-        return std::all_of(
-          dcls1->isect().begin(),
-          dcls1->isect().end(),
-          [] (res::Class c) { return !c.hasCompleteChildren(); }
-        );
-      }
-      if (dcls1->isExact()) return false;
-      return !dcls1->cls().hasCompleteChildren();
-    }
-    return false;
-  };
-
   for (auto const& t1 : types) {
     for (auto const& t2 : types) {
       if (!t2.subtypeOf(t1)) continue;
@@ -2048,7 +1989,6 @@ TEST(Type, SpecializedClasses) {
           if (!t4.subtypeOf(t3)) continue;
           EXPECT_TRUE(union_of(t2, t4).subtypeOf(superU));
           auto const isect = intersection_of(t2, t4);
-          if (skipIsect(t2, t4)) continue;
           EXPECT_TRUE(isect.subtypeOf(superI));
         }
       }
@@ -4587,8 +4527,8 @@ TEST(Type, IndexBased) {
 
   auto const objExactTy = objExact(*cls);
   auto const subObjTy   = subObj(*cls);
-  auto const clsExactTy = clsExact(*cls);
-  auto const subClsTy   = subCls(*cls);
+  auto const clsExactTy = clsExact(*cls, true);
+  auto const subClsTy   = subCls(*cls, true);
   auto const objExactBaseTy = objExact(*clsBase);
   auto const subObjBaseTy   = subObj(*clsBase);
 
@@ -4707,48 +4647,48 @@ TEST(Type, Hierarchies) {
   // make *exact type* and *sub type* types and objects for all loaded classes
   auto const objExactBaseTy = objExact(*clsBase);
   auto const subObjBaseTy   = subObj(*clsBase);
-  auto const clsExactBaseTy = clsExact(*clsBase);
-  auto const subClsBaseTy   = subCls(*clsBase);
+  auto const clsExactBaseTy = clsExact(*clsBase, true);
+  auto const subClsBaseTy   = subCls(*clsBase, true);
 
   auto const objExactATy    = objExact(*clsA);
   auto const subObjATy      = subObj(*clsA);
-  auto const clsExactATy    = clsExact(*clsA);
-  auto const subClsATy      = subCls(*clsA);
+  auto const clsExactATy    = clsExact(*clsA, true);
+  auto const subClsATy      = subCls(*clsA, true);
 
   auto const objExactAATy    = objExact(*clsAA);
   auto const subObjAATy      = subObj(*clsAA);
-  auto const clsExactAATy    = clsExact(*clsAA);
-  auto const subClsAATy      = subCls(*clsAA);
+  auto const clsExactAATy    = clsExact(*clsAA, true);
+  auto const subClsAATy      = subCls(*clsAA, true);
 
   auto const objExactABTy    = objExact(*clsAB);
   auto const subObjABTy      = subObj(*clsAB);
-  auto const clsExactABTy    = clsExact(*clsAB);
-  auto const subClsABTy      = subCls(*clsAB);
+  auto const clsExactABTy    = clsExact(*clsAB, true);
+  auto const subClsABTy      = subCls(*clsAB, true);
 
   auto const objExactBTy    = objExact(*clsB);
   auto const subObjBTy      = subObj(*clsB);
-  auto const clsExactBTy    = clsExact(*clsB);
-  auto const subClsBTy      = subCls(*clsB);
+  auto const clsExactBTy    = clsExact(*clsB, true);
+  auto const subClsBTy      = subCls(*clsB, true);
 
   auto const objExactBATy    = objExact(*clsBA);
   auto const subObjBATy      = subObj(*clsBA);
-  auto const clsExactBATy    = clsExact(*clsBA);
-  auto const subClsBATy      = subCls(*clsBA);
+  auto const clsExactBATy    = clsExact(*clsBA, true);
+  auto const subClsBATy      = subCls(*clsBA, true);
 
   auto const objExactBBTy    = objExact(*clsBB);
   auto const subObjBBTy      = subObj(*clsBB);
-  auto const clsExactBBTy    = clsExact(*clsBB);
-  auto const subClsBBTy      = subCls(*clsBB);
+  auto const clsExactBBTy    = clsExact(*clsBB, true);
+  auto const subClsBBTy      = subCls(*clsBB, true);
 
   auto const objExactBAATy    = objExact(*clsBAA);
   auto const subObjBAATy      = subObj(*clsBAA);
-  auto const clsExactBAATy    = clsExact(*clsBAA);
-  auto const subClsBAATy      = subCls(*clsBAA);
+  auto const clsExactBAATy    = clsExact(*clsBAA, true);
+  auto const subClsBAATy      = subCls(*clsBAA, true);
 
   auto const objExactTestClassTy = objExact(*clsTestClass);
   auto const subObjTestClassTy   = subObj(*clsTestClass);
-  auto const clsExactTestClassTy = clsExact(*clsTestClass);
-  auto const subClsTestClassTy   = subCls(*clsTestClass);
+  auto const clsExactTestClassTy = clsExact(*clsTestClass, true);
+  auto const subClsTestClassTy   = subCls(*clsTestClass, true);
 
   // check that type from object and type are the same (obnoxious test)
   EXPECT_EQ(objcls(objExactBaseTy), clsExactBaseTy);
@@ -5010,15 +4950,15 @@ TEST(Type, Interface) {
 
   // make sometypes and objects
   auto const subObjIATy   = subObj(*clsIA);
-  auto const subClsIATy   = subCls(*clsIA);
+  auto const subClsIATy   = subCls(*clsIA, true);
   auto const subObjIAATy  = subObj(*clsIAA);
-  auto const subClsIAATy  = subCls(*clsIAA);
+  auto const subClsIAATy  = subCls(*clsIAA, true);
   auto const subObjIBTy   = subObj(*clsIB);
   auto const subObjATy    = subObj(*clsA);
-  auto const clsExactATy  = clsExact(*clsA);
-  auto const subClsATy    = subCls(*clsA);
+  auto const clsExactATy  = clsExact(*clsA, true);
+  auto const subClsATy    = subCls(*clsA, true);
   auto const subObjAATy   = subObj(*clsAA);
-  auto const subClsAATy   = subCls(*clsAA);
+  auto const subClsAATy   = subCls(*clsAA, true);
   auto const exactObjATy  = objExact(*clsA);
   auto const exactObjAATy = objExact(*clsAA);
 
@@ -5102,141 +5042,141 @@ TEST(Type, Canonicalization) {
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
   EXPECT_EQ(objExact(*clsICanon1), TBottom);
-  EXPECT_EQ(subCls(*clsICanon1), make_specialized_sub_class(BCls, *clsICanon1, false, false));
-  EXPECT_EQ(clsExact(*clsICanon1), make_specialized_exact_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(subCls(*clsICanon1, true), make_specialized_sub_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(clsExact(*clsICanon1, true), make_specialized_exact_class(BCls, *clsICanon1, false, false));
   EXPECT_EQ(subCls(*clsICanon1, false), TBottom);
   EXPECT_EQ(clsExact(*clsICanon1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon2), TBottom);
   EXPECT_EQ(objExact(*clsICanon2), TBottom);
-  EXPECT_EQ(subCls(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
-  EXPECT_EQ(clsExact(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(subCls(*clsICanon2, true), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(clsExact(*clsICanon2, true), make_specialized_exact_class(BCls, *clsICanon2, false, false));
   EXPECT_EQ(subCls(*clsICanon2, false), TBottom);
   EXPECT_EQ(clsExact(*clsICanon2, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon3), make_specialized_sub_object(BObj, *clsICanon3, false, false));
   EXPECT_EQ(objExact(*clsICanon3), TBottom);
-  EXPECT_EQ(subCls(*clsICanon3), make_specialized_sub_class(BCls, *clsICanon3, false, false));
-  EXPECT_EQ(clsExact(*clsICanon3), make_specialized_exact_class(BCls, *clsICanon3, false, false));
+  EXPECT_EQ(subCls(*clsICanon3, true), make_specialized_sub_class(BCls, *clsICanon3, false, false));
+  EXPECT_EQ(clsExact(*clsICanon3, true), make_specialized_exact_class(BCls, *clsICanon3, false, false));
   EXPECT_EQ(subCls(*clsICanon3, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon3, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon4), make_specialized_sub_object(BObj, *clsICanon3, false, false));
   EXPECT_EQ(objExact(*clsICanon4), TBottom);
-  EXPECT_EQ(subCls(*clsICanon4), make_specialized_sub_class(BCls, *clsICanon4, false, false));
-  EXPECT_EQ(clsExact(*clsICanon4), make_specialized_exact_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(subCls(*clsICanon4, true), make_specialized_sub_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(clsExact(*clsICanon4, true), make_specialized_exact_class(BCls, *clsICanon4, false, false));
   EXPECT_EQ(subCls(*clsICanon4, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon4, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon5), make_specialized_exact_object(BObj, *clsCanon3, false, false));
   EXPECT_EQ(objExact(*clsICanon5), TBottom);
-  EXPECT_EQ(subCls(*clsICanon5), make_specialized_sub_class(BCls, *clsICanon5, false, false));
-  EXPECT_EQ(clsExact(*clsICanon5), make_specialized_exact_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(subCls(*clsICanon5, true), make_specialized_sub_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(clsExact(*clsICanon5, true), make_specialized_exact_class(BCls, *clsICanon5, false, false));
   EXPECT_EQ(subCls(*clsICanon5, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon5, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon6), make_specialized_exact_object(BObj, *clsCanon3, false, false));
   EXPECT_EQ(objExact(*clsICanon6), TBottom);
-  EXPECT_EQ(subCls(*clsICanon6), make_specialized_sub_class(BCls, *clsICanon6, false, false));
-  EXPECT_EQ(clsExact(*clsICanon6), make_specialized_exact_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(subCls(*clsICanon6, true), make_specialized_sub_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(clsExact(*clsICanon6, true), make_specialized_exact_class(BCls, *clsICanon6, false, false));
   EXPECT_EQ(subCls(*clsICanon6, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon6, false), TBottom);
 
   EXPECT_EQ(subObj(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
   EXPECT_EQ(objExact(clsFoo1), make_specialized_exact_object(BObj, clsFoo1, false, false));
-  EXPECT_EQ(subCls(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
-  EXPECT_EQ(clsExact(clsFoo1), make_specialized_exact_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(subCls(clsFoo1, true), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(clsExact(clsFoo1, true), make_specialized_exact_class(BCls, clsFoo1, false, false));
   EXPECT_EQ(subCls(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
   EXPECT_EQ(clsExact(clsFoo1, false), make_specialized_exact_class(BCls, clsFoo1, false, false, false));
 
   EXPECT_EQ(subObj(*clsT1), TBottom);
   EXPECT_EQ(objExact(*clsT1), TBottom);
-  EXPECT_EQ(subCls(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
-  EXPECT_EQ(clsExact(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(subCls(*clsT1, true), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(clsExact(*clsT1, true), make_specialized_exact_class(BCls, *clsT1, false, false));
   EXPECT_EQ(subCls(*clsT1, false), TBottom);
   EXPECT_EQ(clsExact(*clsT1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon7), TBottom);
   EXPECT_EQ(objExact(*clsICanon7), TBottom);
-  EXPECT_EQ(subCls(*clsICanon7), make_specialized_sub_class(BCls, *clsICanon7, false, false));
-  EXPECT_EQ(clsExact(*clsICanon7), make_specialized_exact_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(subCls(*clsICanon7, true), make_specialized_sub_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(clsExact(*clsICanon7, true), make_specialized_exact_class(BCls, *clsICanon7, false, false));
   EXPECT_EQ(subCls(*clsICanon7, false), TBottom);
   EXPECT_EQ(clsExact(*clsICanon7, false), TBottom);
 
   EXPECT_EQ(subObj(*clsAbs1), TBottom);
   EXPECT_EQ(objExact(*clsAbs1), TBottom);
-  EXPECT_EQ(subCls(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
-  EXPECT_EQ(clsExact(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(subCls(*clsAbs1, true), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(clsExact(*clsAbs1, true), make_specialized_exact_class(BCls, *clsAbs1, false, false));
   EXPECT_EQ(subCls(*clsAbs1, false), TBottom);
   EXPECT_EQ(clsExact(*clsAbs1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon8), make_specialized_exact_object(BObj, *clsT4_C1, false, false));
   EXPECT_EQ(objExact(*clsICanon8), TBottom);
-  EXPECT_EQ(subCls(*clsICanon8), make_specialized_sub_class(BCls, *clsICanon8, false, false));
-  EXPECT_EQ(clsExact(*clsICanon8), make_specialized_exact_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(subCls(*clsICanon8, true), make_specialized_sub_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(clsExact(*clsICanon8, true), make_specialized_exact_class(BCls, *clsICanon8, false, false));
   EXPECT_EQ(subCls(*clsICanon8, false), make_specialized_exact_class(BCls, *clsT4_C1, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon8, false), TBottom);
 
   EXPECT_EQ(subObj(*clsAbs3), make_specialized_sub_object(BObj, *clsAbs3_C1, false, false));
   EXPECT_EQ(objExact(*clsAbs3), TBottom);
-  EXPECT_EQ(subCls(*clsAbs3), make_specialized_sub_class(BCls, *clsAbs3, false, false));
-  EXPECT_EQ(clsExact(*clsAbs3), make_specialized_exact_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(subCls(*clsAbs3, true), make_specialized_sub_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(clsExact(*clsAbs3, true), make_specialized_exact_class(BCls, *clsAbs3, false, false));
   EXPECT_EQ(subCls(*clsAbs3, false), make_specialized_sub_class(BCls, *clsAbs3_C1, false, false, false));
   EXPECT_EQ(clsExact(*clsAbs3, false), TBottom);
 
   EXPECT_EQ(subObj(*clsAbs4), make_specialized_sub_object(BObj, *clsAbs4, false, false));
   EXPECT_EQ(objExact(*clsAbs4), TBottom);
-  EXPECT_EQ(subCls(*clsAbs4), make_specialized_sub_class(BCls, *clsAbs4, false, false));
-  EXPECT_EQ(clsExact(*clsAbs4), make_specialized_exact_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(subCls(*clsAbs4, true), make_specialized_sub_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(clsExact(*clsAbs4, true), make_specialized_exact_class(BCls, *clsAbs4, false, false));
   EXPECT_EQ(subCls(*clsAbs4, false), make_specialized_sub_class(BCls, *clsAbs4, false, false, false));
   EXPECT_EQ(clsExact(*clsAbs4, false), TBottom);
 
   EXPECT_EQ(subObj(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
   EXPECT_EQ(objExact(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
-  EXPECT_EQ(subCls(*clsAbs5_P), make_specialized_sub_class(BCls, *clsAbs5_P, false, false));
-  EXPECT_EQ(clsExact(*clsAbs5_P), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs5_P, true), make_specialized_sub_class(BCls, *clsAbs5_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs5_P, true), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
   EXPECT_EQ(subCls(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
   EXPECT_EQ(clsExact(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
 
   EXPECT_EQ(subObj(*clsAbs6_P), make_specialized_sub_object(BObj, *clsAbs6_P, false, false));
   EXPECT_EQ(objExact(*clsAbs6_P), make_specialized_exact_object(BObj, *clsAbs6_P, false, false));
-  EXPECT_EQ(subCls(*clsAbs6_P), make_specialized_sub_class(BCls, *clsAbs6_P, false, false));
-  EXPECT_EQ(clsExact(*clsAbs6_P), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs6_P, true), make_specialized_sub_class(BCls, *clsAbs6_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs6_P, true), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
   EXPECT_EQ(subCls(*clsAbs6_P, false), make_specialized_sub_class(BCls, *clsAbs6_P, false, false, false));
   EXPECT_EQ(clsExact(*clsAbs6_P, false), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
 
   EXPECT_EQ(subObj(*clsICanon9), make_specialized_exact_object(BObj, *clsCanon4, false, false));
   EXPECT_EQ(objExact(*clsICanon9), TBottom);
-  EXPECT_EQ(subCls(*clsICanon9), make_specialized_sub_class(BCls, *clsICanon9, false, false));
-  EXPECT_EQ(clsExact(*clsICanon9), make_specialized_exact_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(subCls(*clsICanon9, true), make_specialized_sub_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(clsExact(*clsICanon9, true), make_specialized_exact_class(BCls, *clsICanon9, false, false));
   EXPECT_EQ(subCls(*clsICanon9, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon9, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon10), make_specialized_exact_object(BObj, *clsCanon4, false, false));
   EXPECT_EQ(objExact(*clsICanon10), TBottom);
-  EXPECT_EQ(subCls(*clsICanon10), make_specialized_sub_class(BCls, *clsICanon10, false, false));
-  EXPECT_EQ(clsExact(*clsICanon10), make_specialized_exact_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(subCls(*clsICanon10, true), make_specialized_sub_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(clsExact(*clsICanon10, true), make_specialized_exact_class(BCls, *clsICanon10, false, false));
   EXPECT_EQ(subCls(*clsICanon10, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon10, false), TBottom);
 
   EXPECT_EQ(subObj(*clsZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
   EXPECT_EQ(objExact(*clsZ1), TBottom);
-  EXPECT_EQ(subCls(*clsZ1), make_specialized_sub_class(BCls, *clsZ1, false, false));
-  EXPECT_EQ(clsExact(*clsZ1), make_specialized_exact_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(subCls(*clsZ1, true), make_specialized_sub_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(clsExact(*clsZ1, true), make_specialized_exact_class(BCls, *clsZ1, false, false));
   EXPECT_EQ(subCls(*clsZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
   EXPECT_EQ(clsExact(*clsZ1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsIZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
   EXPECT_EQ(objExact(*clsIZ1), TBottom);
-  EXPECT_EQ(subCls(*clsIZ1), make_specialized_sub_class(BCls, *clsIZ1, false, false));
-  EXPECT_EQ(clsExact(*clsIZ1), make_specialized_exact_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(subCls(*clsIZ1, true), make_specialized_sub_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(clsExact(*clsIZ1, true), make_specialized_exact_class(BCls, *clsIZ1, false, false));
   EXPECT_EQ(subCls(*clsIZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
   EXPECT_EQ(clsExact(*clsIZ1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsCanon14), make_specialized_sub_object(BObj, *clsCanon14, false, false));
   EXPECT_EQ(objExact(*clsCanon14), TBottom);
-  EXPECT_EQ(subCls(*clsCanon14), make_specialized_sub_class(BCls, *clsCanon14, false, false));
-  EXPECT_EQ(clsExact(*clsCanon14), make_specialized_exact_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(subCls(*clsCanon14, true), make_specialized_sub_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(clsExact(*clsCanon14, true), make_specialized_exact_class(BCls, *clsCanon14, false, false));
   EXPECT_EQ(subCls(*clsCanon14, false), make_specialized_sub_class(BCls, *clsCanon14, false, false, false));
   EXPECT_EQ(clsExact(*clsCanon14, false), TBottom);
 }
@@ -6511,8 +6451,8 @@ TEST(Type, LoosenValues) {
 
   EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
   EXPECT_TRUE(loosen_values(subObj(*cls)) == subObj(*cls));
-  EXPECT_TRUE(loosen_values(clsExact(*cls)) == clsExact(*cls));
-  EXPECT_TRUE(loosen_values(subCls(*cls)) == subCls(*cls));
+  EXPECT_TRUE(loosen_values(clsExact(*cls, true)) == clsExact(*cls, true));
+  EXPECT_TRUE(loosen_values(subCls(*cls, true)) == subCls(*cls, true));
 
   EXPECT_TRUE(loosen_values(opt(objExact(*cls))) == opt(objExact(*cls)));
   EXPECT_TRUE(loosen_values(opt(subObj(*cls))) == opt(subObj(*cls)));
@@ -7073,19 +7013,19 @@ TEST(Type, ContextDependent) {
   auto const thisObjExactBTy    = setctx(objExact(*clsB));
   auto const subObjBTy          = subObj(*clsB);
   auto const thisSubObjBTy      = setctx(subObj(*clsB));
-  auto const clsExactBTy        = clsExact(*clsB);
-  auto const thisClsExactBTy    = setctx(clsExact(*clsB));
-  auto const subClsBTy          = subCls(*clsB);
-  auto const thisSubClsBTy      = setctx(subCls(*clsB));
+  auto const clsExactBTy        = clsExact(*clsB, true);
+  auto const thisClsExactBTy    = setctx(clsExact(*clsB, true));
+  auto const subClsBTy          = subCls(*clsB, true);
+  auto const thisSubClsBTy      = setctx(subCls(*clsB, true));
 
   auto const objExactBBTy       = objExact(*clsBB);
   auto const thisObjExactBBTy   = setctx(objExact(*clsBB));
   auto const subObjBBTy         = subObj(*clsBB);
   auto const thisSubObjBBTy     = setctx(subObj(*clsBB));
-  auto const clsExactBBTy       = clsExact(*clsBB);
-  auto const thisClsExactBBTy   = setctx(clsExact(*clsBB));
-  auto const subClsBBTy         = subCls(*clsBB);
-  auto const thisSubClsBBTy     = setctx(subCls(*clsBB));
+  auto const clsExactBBTy       = clsExact(*clsBB, true);
+  auto const thisClsExactBBTy   = setctx(clsExact(*clsBB, true));
+  auto const subClsBBTy         = subCls(*clsBB, true);
+  auto const thisSubClsBBTy     = setctx(subCls(*clsBB, true));
 
   auto const objExactUnTy       = objExact(*clsUn);
   auto const thisObjExactUnTy   = setctx(objExact(*clsUn));

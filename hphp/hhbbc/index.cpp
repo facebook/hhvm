@@ -1525,9 +1525,9 @@ struct ClassGraph::Node {
 
   // NB: These aren't thread-safe, so don't use them during concurrent
   // deserialization.
-  void setFlags(Flags f) {
+  void setFlags(Flags f, Flags r = FlagNone) {
     CIAndFlags old{ci.load()};
-    old.set((Flags)(old.tag() | f), old.ptr());
+    old.set((Flags)((old.tag() | f) & ~r), old.ptr());
     ci.store(old.getOpaque());
   }
   void setCInfo(ClassInfo& c) {
@@ -2843,6 +2843,7 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
   assertx(!base.isRegular());
 
   if (subclassOf.empty()) return nullptr;
+  if (base.isTrait()) return nullptr;
   if (base.hasCompleteChildren() || base.isConservative()) {
     if (!base.hasRegularSubclass()) return nullptr;
   }
@@ -2850,8 +2851,6 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
     assertx(subclassOf.count(&base));
     return &base;
   }
-  // Traits should be captured by one of the above checks.
-  assertx(!base.isTrait());
 
   // If we recorded an equivalent when deserializing, just use that.
   if (auto const e = folly::get_default(table().regOnlyEquivs, &base)) {
@@ -4907,6 +4906,18 @@ Class Class::getOrCreate(SString name) {
 Class Class::getUnresolved(SString name) {
   return Class{ ClassGraph::getMissing(name) };
 }
+
+void Class::makeConservativeForTest() {
+  auto n = graph().this_;
+  n->setFlags(ClassGraph::FlagConservative, ClassGraph::FlagChildren);
+  n->children.clear();
+}
+
+#ifndef NDEBUG
+bool Class::isMissingDebug() const {
+  return graph().isMissingRaw();
+}
+#endif
 
 void Class::serde(BlobEncoder& sd) const {
   sd(graph(), nullptr);
@@ -15568,7 +15579,7 @@ private:
             if (cls.attrs & AttrTrait) return std::nullopt;
             auto const c = res::Class::get(cls.name);
             assertx(c.isComplete());
-            return subCls(c);
+            return subCls(c, true);
           }
         );
         if (lookup.coerceClassToString == TriBool::Yes) {
@@ -15679,7 +15690,7 @@ private:
               if (ctx.attrs & AttrTrait) return std::nullopt;
               auto const c = res::Class::get(ctx.name);
               assertx(c.isComplete());
-              return subCls(c);
+              return subCls(c, true);
             }
           );
           return unctx(std::move(lookup.lower));
@@ -18100,12 +18111,21 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
                                  SString name,
                                  const P& process,
                                  const G& general) const {
-  if (!dcls.isIsect()) {
+  if (dcls.isExact() || dcls.isSub()) {
     // If this isn't an intersection, there's only one cinfo to
     // process and we're done.
     auto const cinfo = dcls.cls().cinfo();
     if (!cinfo) return general(dcls.containsNonRegular());
     return process(cinfo, dcls.isExact(), dcls.containsNonRegular());
+  }
+
+  if (dcls.isIsectAndExact()) {
+    // Even though this has an intersection list, it always must be
+    // the exact class, so it sufficies to provide that.
+    auto const e = dcls.isectAndExact().first;
+    auto const cinfo = e.cinfo();
+    if (!cinfo) return general(dcls.containsNonRegular());
+    return process(cinfo, true, dcls.containsNonRegular());
   }
 
   /*
@@ -18127,6 +18147,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
    * to two different methods.
    */
 
+  assertx(dcls.isIsect());
   using Func = res::Func;
 
   auto missing = TriBool::Maybe;
@@ -18667,7 +18688,7 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
       }
     );
     return !unresolved;
-  } else {
+  } else if (dcls.isIsect()) {
     auto const& isect = dcls.isect();
     assertx(isect.size() > 1);
 
@@ -18684,6 +18705,17 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
       }
     );
     return !unresolved;
+  } else {
+    // Even though this has an intersection list, it must be the exact
+    // class, so it's sufficient to provide that.
+    assertx(dcls.isIsectAndExact());
+    auto const e = dcls.isectAndExact().first;
+    auto const cinfo = e.cinfo();
+    if (!cinfo) return false;
+    if (dcls.containsNonRegular() || is_regular_class(*cinfo->cls)) {
+      f(cinfo);
+    }
+    return true;
   }
 }
 
@@ -19609,7 +19641,11 @@ PropMergeResult Index::merge_static_type(
 
   auto const& dcls = dcls_of(cls);
   Optional<res::Class> start;
-  if (!dcls.isIsect()) start = dcls.cls();
+  if (dcls.isExact() || dcls.isSub()) {
+    start = dcls.cls();
+  } else if (dcls.isIsectAndExact()) {
+    start = dcls.isectAndExact().first;
+  }
 
   Optional<R> result;
   auto const resolved = visit_every_dcls_cls(
@@ -24659,7 +24695,12 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
   auto const& dcls = isClass ? dcls_of(thisType) : dobj_of(thisType);
   if (dcls.isIsect()) return general(dcls.smallestCls().name());
 
-  auto const rcls = dcls.cls();
+  auto const rcls = [&] {
+    if (dcls.isExact() || dcls.isSub()) return dcls.cls();
+    assertx(dcls.isIsectAndExact());
+    return dcls.isectAndExact().first;
+  }();
+
   if (!m_data->deps->add(AnalysisDeps::Class { rcls.name() })) {
     return general(rcls.name());
   }
@@ -24667,7 +24708,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
   auto const cinfo = rcls.cinfo2();
   if (!cinfo) return general(rcls.name());
 
-  auto const isExact = dcls.isExact();
+  auto const isExact = dcls.isExact() || dcls.isIsectAndExact();
 
   auto const meth = folly::get_ptr(cinfo->methods, name);
   if (!meth) {

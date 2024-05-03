@@ -1836,7 +1836,7 @@ Optional<Type> selfCls(const IIndex& index, const Context& ctx) {
     return std::nullopt;
   }
   if (auto const c = index.resolve_class(ctx.cls->name)) {
-    return subCls(*c);
+    return subCls(*c, true);
   }
   return std::nullopt;
 }
@@ -1846,7 +1846,7 @@ Optional<Type> selfClsExact(const IIndex& index, const Context& ctx) {
     return std::nullopt;
   }
   if (auto const c = index.resolve_class(ctx.cls->name)) {
-    return clsExact(*c);
+    return clsExact(*c, true);
   }
   return std::nullopt;
 }
@@ -1856,7 +1856,7 @@ Optional<Type> parentCls(const IIndex& index, const Context& ctx) {
     return std::nullopt;
   }
   if (auto const c = index.resolve_class(ctx.cls->parentName)) {
-    return subCls(*c);
+    return subCls(*c, true);
   }
   return std::nullopt;
 }
@@ -1866,7 +1866,7 @@ Optional<Type> parentClsExact(const IIndex& index, const Context& ctx) {
     return std::nullopt;
   }
   if (auto const c = index.resolve_class(ctx.cls->parentName)) {
-    return clsExact(*c);
+    return clsExact(*c, true);
   }
   return std::nullopt;
 }

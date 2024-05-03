@@ -417,13 +417,13 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
       auto const str = sval_of(t);
       auto const rcls = env.index.resolve_class(str);
       if (!rcls) return TBottom;
-      return clsExact(*rcls);
+      return clsExact(*rcls, true);
     }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
       auto const rcls = env.index.resolve_class(str);
       if (!rcls) return TBottom;
-      return clsExact(*rcls);
+      return clsExact(*rcls, true);
     }
     throws = TriBool::Maybe;
     return TCls;

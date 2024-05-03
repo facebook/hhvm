@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<69166e7b0866536055994ce1590b0135>>
+// @generated SignedSource<<9351a9f559d40809ce4b2e7b6b43d8aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1315,6 +1315,13 @@ impl<'a> Node<'a> for TypePredicate {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             TypePredicate::IsBool => {}
+            TypePredicate::IsInt => {}
+            TypePredicate::IsString => {}
+            TypePredicate::IsArraykey => {}
+            TypePredicate::IsFloat => {}
+            TypePredicate::IsNum => {}
+            TypePredicate::IsResource => {}
+            TypePredicate::IsNull => {}
         }
     }
 }

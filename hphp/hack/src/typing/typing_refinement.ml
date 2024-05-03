@@ -184,5 +184,23 @@ module TyPredicate = struct
   let of_ty env ty =
     match get_node ty with
     | Tprim Aast.Tbool -> Some (env, IsBool)
+    | Tprim Aast.Tint -> Some (env, IsInt)
+    | Tprim Aast.Tstring -> Some (env, IsString)
+    | Tprim Aast.Tarraykey -> Some (env, IsArraykey)
+    | Tprim Aast.Tfloat -> Some (env, IsFloat)
+    | Tprim Aast.Tnum -> Some (env, IsNum)
+    | Tprim Aast.Tresource -> Some (env, IsResource)
+    | Tprim Aast.Tnull -> Some (env, IsNull)
     | _ -> None
+
+  let to_ty reason predicate =
+    match predicate with
+    | IsBool -> Typing_make_type.bool reason
+    | IsInt -> Typing_make_type.int reason
+    | IsString -> Typing_make_type.string reason
+    | IsArraykey -> Typing_make_type.arraykey reason
+    | IsFloat -> Typing_make_type.float reason
+    | IsNum -> Typing_make_type.num reason
+    | IsResource -> Typing_make_type.resource reason
+    | IsNull -> Typing_make_type.null reason
 end

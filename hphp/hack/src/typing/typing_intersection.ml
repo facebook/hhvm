@@ -28,7 +28,16 @@ let negate_type env r ty ~approx =
   let neg_ty =
     match get_node ty with
     | Tprim Aast.Tnull -> MkType.nonnull r
-    | Tprim tp -> MkType.neg r (Neg_prim tp)
+    | Tprim tp -> begin
+      match Typing_refinement.TyPredicate.of_ty env ty with
+      | Some (_env, predicate) -> MkType.neg r (Neg_predicate predicate)
+      | None -> MkType.neg r (Neg_prim tp)
+      (* only prims that should fall into this case should be void, noreturn
+         which seems like a silly thing to create a predicate for so
+         TODO: do we ever really need to negate void/noreturn? *)
+    end
+    | Tneg (Neg_predicate predicate) ->
+      Typing_refinement.TyPredicate.to_ty r predicate
     | Tneg (Neg_prim tp) -> MkType.prim_type r tp
     | Tneg (Neg_class (_, c)) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
@@ -266,16 +275,25 @@ let rec intersect env ~r ty1 ty2 =
             | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
             | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
               (env, MkType.int r)
-            | ( (_, Tneg (Neg_prim (Aast.Tint | Aast.Tarraykey))),
+            | ( ( _,
+                  Tneg
+                    ( Neg_prim (Aast.Tint | Aast.Tarraykey)
+                    | Neg_predicate (IsInt | IsArraykey) ) ),
                 (_, Tprim Aast.Tnum) )
             | ( (_, Tprim Aast.Tnum),
-                (_, Tneg (Neg_prim (Aast.Tint | Aast.Tarraykey))) ) ->
+                ( _,
+                  Tneg
+                    ( Neg_prim (Aast.Tint | Aast.Tarraykey)
+                    | Neg_predicate (IsInt | IsArraykey) ) ) ) ->
               (env, MkType.float r)
-            | ((_, Tneg (Neg_prim Aast.Tfloat)), (_, Tprim Aast.Tnum))
-            | ((_, Tprim Aast.Tnum), (_, Tneg (Neg_prim Aast.Tfloat))) ->
+            | ( (_, Tneg (Neg_prim Aast.Tfloat | Neg_predicate IsFloat)),
+                (_, Tprim Aast.Tnum) )
+            | ( (_, Tprim Aast.Tnum),
+                (_, Tneg (Neg_prim Aast.Tfloat | Neg_predicate IsFloat)) ) ->
               (env, MkType.int r)
-            | ((_, Tneg (Neg_prim Aast.Tstring)), ty_ak)
-            | (ty_ak, (_, Tneg (Neg_prim Aast.Tstring))) ->
+            | ((_, Tneg (Neg_prim Aast.Tstring | Neg_predicate IsString)), ty_ak)
+            | (ty_ak, (_, Tneg (Neg_prim Aast.Tstring | Neg_predicate IsString)))
+              ->
               if
                 (* Ocaml warns about ambiguous or-pattern variables under guard if this is in a when clause*)
                 Utils.is_sub_type_for_union
@@ -286,8 +304,16 @@ let rec intersect env ~r ty1 ty2 =
                 intersect env ~r (mk ty_ak) (MkType.int r)
               else
                 make_intersection env r [ty1; ty2]
-            | ((_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum))), ty_ak)
-            | (ty_ak, (_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum)))) ->
+            | ( ( _,
+                  Tneg
+                    ( Neg_prim (Aast.Tint | Aast.Tnum)
+                    | Neg_predicate (IsInt | IsNum) ) ),
+                ty_ak )
+            | ( ty_ak,
+                ( _,
+                  Tneg
+                    ( Neg_prim (Aast.Tint | Aast.Tnum)
+                    | Neg_predicate (IsInt | IsNum) ) ) ) ->
               if
                 Utils.is_sub_type_for_union
                   env

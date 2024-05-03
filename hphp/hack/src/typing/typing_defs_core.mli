@@ -183,7 +183,16 @@ type enforcement =
 
     The predicate would be `is Bool`
   *)
-type type_predicate = IsBool [@@deriving eq, ord, hash, show]
+type type_predicate =
+  | IsBool
+  | IsInt
+  | IsString
+  | IsArraykey
+  | IsFloat
+  | IsNum
+  | IsResource
+  | IsNull
+[@@deriving eq, ord, hash, show]
 
 (** Negation types represent the type of values that fail an `is` test
     for either a primitive type, or a class-ish type C<_> *)

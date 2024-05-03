@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb63995bceda13f1b120ebde1b939dcb>>
+// @generated SignedSource<<b8296bdcf834b6fba0a7032ff5c95d7d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -533,6 +533,13 @@ pub struct FunType {
 #[repr(u8)]
 pub enum TypePredicate {
     IsBool,
+    IsInt,
+    IsString,
+    IsArraykey,
+    IsFloat,
+    IsNum,
+    IsResource,
+    IsNull,
 }
 impl TrivialDrop for TypePredicate {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate);

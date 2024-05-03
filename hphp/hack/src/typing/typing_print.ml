@@ -1178,6 +1178,13 @@ module Full = struct
     let predicate_doc =
       match predicate with
       | IsBool -> text "bool"
+      | IsInt -> text "int"
+      | IsString -> text "string"
+      | IsArraykey -> text "arraykey"
+      | IsFloat -> text "float"
+      | IsNum -> text "num"
+      | IsResource -> text "resource"
+      | IsNull -> text "null"
     in
     let doc =
       Concat
@@ -1540,6 +1547,13 @@ module ErrorString = struct
       let str =
         match predicate with
         | IsBool -> "a bool"
+        | IsInt -> "an int"
+        | IsString -> "a string"
+        | IsArraykey -> "an arraykey"
+        | IsFloat -> "a float"
+        | IsNum -> "a num"
+        | IsResource -> "a resource"
+        | IsNull -> "null"
       in
       (fuel, "is not " ^ str)
 
@@ -1727,6 +1741,13 @@ module Json = struct
       let predicate_json =
         match predicate with
         | IsBool -> name "isbool"
+        | IsInt -> name "isint"
+        | IsString -> name "isstring"
+        | IsArraykey -> name "isarraykey"
+        | IsFloat -> name "isfloat"
+        | IsNum -> name "isnum"
+        | IsResource -> name "isresource"
+        | IsNull -> name "isnull"
       in
       obj @@ kind p "negation" @ predicate_json
     | (p, Tclass ((_, cid), e, tys)) ->

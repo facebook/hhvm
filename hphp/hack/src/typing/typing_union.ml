@@ -376,12 +376,16 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     | ((_, Tprim tp1), (_, Tneg (Neg_prim tp2)))
       when Aast_defs.equal_tprim tp1 tp2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_prim Aast.Tnum)), (_, Tprim Aast.Tarraykey))
-    | ((_, Tprim Aast.Tarraykey), (_, Tneg (Neg_prim Aast.Tnum))) ->
-      (env, Some (MakeType.neg r (Neg_prim Aast.Tfloat)))
-    | ((_, Tneg (Neg_prim Aast.Tarraykey)), (_, Tprim Aast.Tnum))
-    | ((_, Tprim Aast.Tnum), (_, Tneg (Neg_prim Aast.Tarraykey))) ->
-      (env, Some (MakeType.neg r (Neg_prim Aast.Tstring)))
+    | ( (_, Tneg (Neg_prim Aast.Tnum | Neg_predicate IsNum)),
+        (_, Tprim Aast.Tarraykey) )
+    | ( (_, Tprim Aast.Tarraykey),
+        (_, Tneg (Neg_prim Aast.Tnum | Neg_predicate IsNum)) ) ->
+      (env, Some (MakeType.neg r (Neg_predicate IsFloat)))
+    | ( (_, Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey)),
+        (_, Tprim Aast.Tnum) )
+    | ( (_, Tprim Aast.Tnum),
+        (_, Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey)) ) ->
+      (env, Some (MakeType.neg r (Neg_predicate IsString)))
     | ((r1, Tintersection tyl1), (r2, Tintersection tyl2)) ->
       (match Typing_algebra.factorize_common_types tyl1 tyl2 with
       | ([], _, _) ->

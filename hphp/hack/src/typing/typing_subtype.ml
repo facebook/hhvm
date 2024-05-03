@@ -576,10 +576,13 @@ module Subtype_negation = struct
     let neg_ty =
       match get_node ty with
       | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_predicate IsArraykey))
+      | Tneg (Neg_predicate IsArraykey)
       | Tneg (Neg_prim Aast.Tarraykey) ->
         Some (MakeType.prim_type r Aast.Tarraykey)
-      | Tnonnull -> Some (MakeType.null r)
+      | Tneg (Neg_predicate IsNull)
+      | Tnonnull ->
+        Some (MakeType.null r)
       | _ -> None
     in
     (env, neg_ty)
@@ -816,8 +819,14 @@ end = struct
     let (env, ty2) = Env.expand_type env ty2 in
     match (deref ty1, deref ty2) with
     | ( ((_, Tvar _) as tv),
-        ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak) )
-    | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak),
+        (( _,
+           ( Tprim Aast.Tarraykey
+           | Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey) ) ) as
+        ak) )
+    | ( (( _,
+           ( Tprim Aast.Tarraykey
+           | Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey) ) ) as
+        ak),
         ((_, Tvar _) as tv) ) ->
       (env, Some (tv, ak))
     | _ -> (env, None)
@@ -5977,6 +5986,25 @@ end = struct
       end
     | _ ->
       let partition = Typing_refinement.partition_ty env ty_sub predicate in
+      Typing_log.(
+        let from_list kind tyll =
+          List.map tyll ~f:(fun tyl ->
+              Log_type (kind, MakeType.intersection Reason.none tyl))
+        in
+        log_with_level env "partition" ~level:1 (fun () ->
+            let structures =
+              Log_type ("ty_sub", ty_sub)
+              :: from_list "left" partition.Typing_refinement.left
+              @ from_list "span" partition.Typing_refinement.span
+              @ from_list "right" partition.Typing_refinement.right
+            in
+            log_types
+              (Reason.to_pos reason_super)
+              env
+              [
+                Log_head
+                  ("partition " ^ show_type_predicate predicate, structures);
+              ]));
       let intersect tyl = MakeType.intersection reason_super tyl in
       let simplify_subtype ~f tyl ty_super env =
         Subtype.(
@@ -6007,11 +6035,16 @@ end = struct
       in
 
       let refine_true tyl =
-        match predicate with
-        | IsBool -> intersect (MakeType.bool reason_super :: tyl)
+        intersect
+          (Typing_refinement.TyPredicate.to_ty reason_super predicate :: tyl)
       in
       let refine_false tyl =
-        intersect (MakeType.neg reason_super (Neg_predicate predicate) :: tyl)
+        let neg =
+          match predicate with
+          | IsNull -> MakeType.nonnull reason_super
+          | _ -> MakeType.neg reason_super (Neg_predicate predicate)
+        in
+        intersect (neg :: tyl)
       in
 
       let (ty_true, ty_false_opt) =
@@ -7887,6 +7920,16 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.prim_type Reason.Rnone tp1)
   | (_, Tneg (Neg_prim tp2)) ->
     is_sub_type_for_union_help env ty1 (MakeType.prim_type Reason.Rnone tp2)
+  | (Tneg (Neg_predicate pred1), _) ->
+    is_sub_type_for_union_help
+      env
+      ty2
+      (Typing_refinement.TyPredicate.to_ty Reason.Rnone pred1)
+  | (_, Tneg (Neg_predicate pred2)) ->
+    is_sub_type_for_union_help
+      env
+      ty1
+      (Typing_refinement.TyPredicate.to_ty Reason.Rnone pred2)
   | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
   | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that

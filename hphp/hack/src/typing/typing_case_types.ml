@@ -501,6 +501,13 @@ module DataType = struct
     let reason = DataTypeReason.(make NoSubreason trail) in
     match predicate with
     | IsBool -> Set.singleton ~reason BoolData
+    | IsInt -> Set.singleton ~reason IntData
+    | IsString -> Set.singleton ~reason StringData
+    | IsArraykey -> Set.of_list ~reason [IntData; StringData]
+    | IsFloat -> Set.singleton ~reason FloatData
+    | IsNum -> Set.of_list ~reason [IntData; FloatData]
+    | IsResource -> Set.singleton ~reason ResourceData
+    | IsNull -> Set.singleton ~reason NullData
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
     let open Tag in
@@ -806,6 +813,13 @@ module AtomicDataTypes = struct
 
   let of_predicate env = function
     | IsBool -> of_ty env (Primitive Aast.Tbool)
+    | IsInt -> of_ty env (Primitive Aast.Tint)
+    | IsString -> of_ty env (Primitive Aast.Tstring)
+    | IsArraykey -> of_ty env (Primitive Aast.Tarraykey)
+    | IsFloat -> of_ty env (Primitive Aast.Tfloat)
+    | IsNum -> of_ty env (Primitive Aast.Tnum)
+    | IsResource -> of_ty env (Primitive Aast.Tresource)
+    | IsNull -> of_ty env (Primitive Aast.Tnull)
 
   let complement dt = DataType.Set.diff mixed dt
 

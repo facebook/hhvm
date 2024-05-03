@@ -242,7 +242,15 @@ type 'ty fun_type = {
 }
 [@@deriving eq, hash, show { with_path = false }]
 
-type type_predicate = IsBool
+type type_predicate =
+  | IsBool
+  | IsInt
+  | IsString
+  | IsArraykey
+  | IsFloat
+  | IsNum
+  | IsResource
+  | IsNull
 [@@deriving eq, ord, hash, show { with_path = false }]
 
 type neg_type =

@@ -5911,17 +5911,70 @@ end = struct
         (LoclType ty_sub)
         ty_super
     | Tunion ty_subs ->
-      Common.simplify_union_l
-        ~subtype_env
-        ~this_ty
-        ~mk_prop:simplify
-        ~update_reason:
-          Prov.(
-            update ~f:(fun from ->
-                flow ~from ~into:(prj_union @@ get_reason ty_sub)))
-        (sub_supportdyn, ty_subs)
-        rhs
-        env
+      let simplify_union_l ty_subs env =
+        Common.simplify_union_l
+          ~subtype_env
+          ~this_ty
+          ~mk_prop:simplify
+          ~update_reason:
+            Prov.(
+              update ~f:(fun from ->
+                  flow ~from ~into:(prj_union @@ get_reason ty_sub)))
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      in
+      (* If we handle dynamic normally, we'll break the union and check
+           dynamic < tysuper
+         which will result in
+           (dynamic & P) < ty_true, (dynamic & !P) < ty_false
+         While these bounds are strictly more informative than just dynamic,
+         the typechecker's handling of dynamic will trip up over intersections
+         with dynamic in some cases.
+         Here, we strip the dynamic from the type, process the stripped type,
+         and then add back dynamic as a lower bound separately.
+
+         For example: suppose we have ty_sub = ~?int, predicate = IsNum
+         If we handle dynamic normally, we'll get:
+           dynamic & num < ty_true
+           int < ty_true
+           dynamic & not num < ty_false
+           null < ty_false
+         but with this change, we'll strip the dynamic and proces ?int and get:
+           int < ty_true
+           null < ty_false
+         and add back the dynamic bounds:
+           dynamic < ty_true
+           dynamic < ty_false
+
+         Notably, because we're only doing this logic for unions, we'll still
+         intersect with a bare dynamic which is desirable if you were to refine
+         something explicitly typed as dynamic
+      *)
+      begin
+        match TUtils.try_strip_dynamic_from_union env ty_subs with
+        | None -> simplify_union_l ty_subs env
+        | Some (dyn, ty_subs) ->
+          let simplify_subtype ty_super env =
+            Subtype.(
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub = dyn }
+                ~rhs:{ super_supportdyn = false; super_like; ty_super }
+                env)
+          in
+          let (ty_true, ty_false_opt) =
+            match ty_super_opt with
+            | None -> (MakeType.nothing reason_super, None)
+            | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
+          in
+          (match ty_false_opt with
+          | None -> (env, TL.valid)
+          | Some ty_false -> simplify_subtype ty_false env)
+          &&& simplify_subtype ty_true
+          &&& simplify_union_l ty_subs
+      end
     | _ ->
       let partition = Typing_refinement.partition_ty env ty_sub predicate in
       let intersect tyl = MakeType.intersection reason_super tyl in

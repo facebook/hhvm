@@ -1143,12 +1143,9 @@ void concatHelper(ISS& env, uint32_t n) {
 
     if (!side_effects) {
       for (auto i = 0; i < n; i++) {
-        auto const tracked = !env.trackedElems.empty() &&
-          env.trackedElems.back().depth + i + 1 == env.state.stack.size();
-        if (tracked) finish_tracked_elems(env, env.trackedElems.back().depth);
         auto const prev = op_from_slot(env, i);
         if (!prev) continue;
-        if ((prev->op == Op::Concat && tracked) || prev->op == Op::ConcatN) {
+        if (prev->op == Op::Concat || prev->op == Op::ConcatN) {
           auto const extra = kill_by_slot(env, i);
           changed = true;
           n += extra;
@@ -1195,12 +1192,6 @@ void concatHelper(ISS& env, uint32_t n) {
 
   if (!changed) {
     discard(env, n);
-    if (n == 2 && !side_effects && will_reduce(env)) {
-      env.trackedElems.emplace_back(
-        env.state.stack.size(),
-        env.unchangedBcs + env.replacedBcs.size()
-      );
-    }
     push(env, TStr);
     return;
   }

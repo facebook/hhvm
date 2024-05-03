@@ -156,6 +156,11 @@ class ConnectionManager : public folly::DelayedDestruction,
   void dropConnections(double pct);
 
   /**
+   * Drop a specific connection with the provided peer address
+   */
+  void dropConnection(folly::SocketAddress& peerAddress);
+
+  /**
    * Similar to dropConnections(double pct)  difference is that here
    * we have a callback which will be called for every connection managed
    * and connection will be dropped only if callback returns true

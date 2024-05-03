@@ -16,6 +16,7 @@
 
 #include <wangle/acceptor/ConnectionManager.h>
 
+#include <folly/SocketAddress.h>
 #include <folly/portability/GFlags.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -24,6 +25,7 @@ using namespace testing;
 using namespace wangle;
 
 namespace {
+folly::SocketAddress dummyAddress("127.0.0.1", 0);
 
 class ConnectionManagerTest;
 
@@ -72,8 +74,6 @@ class MockConnection : public ManagedConnection {
     return dummyAddress;
   }
 
-  folly::SocketAddress dummyAddress;
-
   void setIdle(bool idle) {
     idle_ = idle;
     closeWhenIdleImpl();
@@ -111,6 +111,12 @@ class ConnectionManagerTest : public testing::Test {
         conn.reset();
       }
     }
+  }
+
+  // Set exactly this many connections
+  void setConns(uint64_t n) {
+    conns_.clear();
+    addConns(n);
   }
 
  protected:
@@ -338,12 +344,7 @@ TEST_F(ConnectionManagerTest, testDropPercent) {
   InSequence enforceOrder;
 
   // Make sure we have exactly 100 connections.
-  const size_t numToAdd = 100 - conns_.size();
-  addConns(numToAdd);
-  const size_t numToRemove = conns_.size() - 100;
-  for (size_t i = 0; i < numToRemove; i++) {
-    removeConn(conns_.begin()->get());
-  }
+  setConns(100);
   EXPECT_EQ(100, cm_->getNumConnections());
   EXPECT_EQ(100, cm_->getNumActiveConnections());
 
@@ -377,6 +378,29 @@ TEST_F(ConnectionManagerTest, testDropPercent) {
   EXPECT_EQ(0, numToDrop);
   EXPECT_EQ(40, cm_->getNumConnections());
   EXPECT_EQ(40, cm_->getNumActiveConnections());
+}
+
+TEST_F(ConnectionManagerTest, testDropConnection) {
+  // Just need to ensure 1 connection exists
+  setConns(1);
+  EXPECT_EQ(cm_->getNumActiveConnections(), 1);
+
+  EXPECT_CALL(*conns_[0], dropConnection(_))
+      .WillOnce(Invoke(
+          [&](const std::string&) { cm_->removeConnection(conns_[0].get()); }));
+
+  // Does not match the connection
+  {
+    auto noMatchAddress = folly::SocketAddress("127.0.0.1", 1);
+    cm_->dropConnection(noMatchAddress);
+    EXPECT_EQ(cm_->getNumActiveConnections(), 1);
+  }
+
+  // Matches the connection so it is dropped
+  {
+    cm_->dropConnection(dummyAddress);
+    EXPECT_EQ(cm_->getNumActiveConnections(), 0);
+  }
 }
 
 TEST_F(ConnectionManagerTest, testDrainPercent) {

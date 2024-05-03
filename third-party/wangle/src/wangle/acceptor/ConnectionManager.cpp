@@ -347,6 +347,15 @@ void ConnectionManager::dropConnections(double pct) {
   }
 }
 
+void ConnectionManager::dropConnection(folly::SocketAddress& peerAddress) {
+  for (auto& connection : conns_) {
+    if (connection.getPeerAddress() == peerAddress) {
+      connection.dropConnection();
+      return;
+    }
+  }
+}
+
 void ConnectionManager::dropEstablishedConnections(
     double pct,
     const std::function<bool(ManagedConnection*)>& filter) {

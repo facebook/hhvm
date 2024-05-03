@@ -52,6 +52,53 @@ static bool validateScheme(folly::StringPiece url) {
       scheme.begin(), scheme.end(), [](auto _) { return std::isalpha(_); });
 }
 
+bool ParseURL::isSupportedScheme(const std::string& location) {
+  static const std::vector<std::string> supportedSchemes = {"http", "https"};
+  std::size_t containsScheme = location.find("://");
+  if (containsScheme == std::string::npos) {
+    // Location doesn't contain a scheme, so use the one from the original URL
+    return true;
+  }
+
+  for (const std::string& scheme : supportedSchemes) {
+    // Check to see whether or not it is a supported scheme
+    if (location.compare(0, scheme.length(), scheme) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+folly::Optional<std::string> ParseURL::getRedirectDestination(
+    const std::string& url,
+    const std::string& requestScheme,
+    const std::string& location,
+    const std::string& headerHost) noexcept {
+  auto newUrl = ParseURL::parseURL(location);
+  if (!newUrl) {
+    DLOG(INFO) << "Unparsable location header=" << location;
+    return folly::none;
+  }
+  if (!newUrl->hasHost()) {
+    // New URL is relative
+    folly::Expected<ParseURL, folly::Unit> oldURL = ParseURL::parseURL(url);
+    if (!oldURL || !oldURL->hasHost()) {
+      // Old URL was relative, try host header
+      oldURL = ParseURL::parseURL(headerHost);
+      if (!oldURL || !oldURL->hasHost()) {
+        VLOG(2) << "Cannot determine destination for relative redirect "
+                << "location=" << location << " orig url=" << url
+                << " host=" << headerHost;
+        return folly::none;
+      }
+    } // else oldURL was absolute and has a host
+    return folly::to<std::string>(
+        requestScheme, "://", oldURL->hostAndPort(), location);
+  } else {
+    return newUrl->url().str();
+  }
+}
+
 void ParseURL::parse(bool strict) noexcept {
   if (url_.size() == 1 && url_[0] == '/') {
     path_ = url_;

@@ -47,6 +47,14 @@ class ParseURL {
     return ParseURL(urlVal, strict);
   }
 
+  static bool isSupportedScheme(const std::string& location);
+
+  static folly::Optional<std::string> getRedirectDestination(
+      const std::string& url,
+      const std::string& requestScheme,
+      const std::string& location,
+      const std::string& headerHost) noexcept;
+
   // Deprecated.  Will be removed soon
   explicit ParseURL(folly::StringPiece urlVal, bool strict = true) noexcept {
     init(urlVal, strict);

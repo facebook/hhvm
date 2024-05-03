@@ -252,6 +252,36 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
   ABytecodeSize = rd(ABytecodeSize * targetSize / total);
   GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
+  std::array<uint32_t*, 4> sizes = {
+    &ASize, &AColdSize, &AFrozenSize, &GlobalDataSize
+  };
+  std::sort(sizes.begin(), sizes.end(), [](auto a, auto b) { return *a < *b; });
+
+  uint32_t adj = 0;
+  for (int i = 0; i < sizes.size(); ++i) {
+    if (!*sizes[i]) {
+      adj += 1;
+      *sizes[i] = kRoundUp;
+      continue;
+    }
+    assertx(*sizes[i] >= kRoundUp);
+
+    auto const sub = std::min(
+      adj / (sizes.size() - i), *sizes[i] / kRoundUp - 1
+    );
+    *sizes[i] -= kRoundUp * sub;
+    adj -= sub;
+  }
+
+  always_assert_flog(
+    adj == 0,
+    "Could not adjust total TC size from {} to {}, "
+    "insufficient space for each section to be at least {}",
+    total,
+    targetSize,
+    kRoundUp
+  );
+
   AMaxUsage = maxUsage(ASize);
   AColdMaxUsage = maxUsage(AColdSize);
   AFrozenMaxUsage = maxUsage(AFrozenSize);

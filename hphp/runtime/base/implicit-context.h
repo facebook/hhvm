@@ -41,7 +41,7 @@ enum class State : uint8_t {
 State m_state;
 
 // HashMap of TypedValues and their instance keys
-req::fast_map<const StringData*, TypedValue,
+req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
 
 // Blame of when an event happened resulting in state transition

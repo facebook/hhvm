@@ -206,7 +206,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
     case ImplicitContext::State::Value: {
       auto const it = context->m_map.find(key.get());
       if (it == context->m_map.end()) return make_tv<KindOfNull>();
-      auto const result = it->second;
+      auto const result = it->second.first;
       if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
       return result;
     }
@@ -275,7 +275,7 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
     VecInit ret{context->m_map.size() * 2}; // key and value
     for (auto const& p : context->m_map) {
       auto const key = String(p.first->data());
-      auto const value = HHVM_FN(serialize_memoize_param)(p.second);
+      auto const value = HHVM_FN(serialize_memoize_param)(p.second.first);
       ret.append(key);
       ret.append(value);
     }
@@ -305,7 +305,7 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
   if (prev) {
     auto& existing_m_map = Native::data<ImplicitContext>(prev)->m_map;
     for (auto const& p : existing_m_map) {
-      vec.push_back(std::make_pair(p.first, HHVM_FN(serialize_memoize_param)(p.second)));
+      vec.push_back(std::make_pair(p.first, p.second.second));
     }
   }
   vec.push_back(std::make_pair(key, *memokey.asTypedValue()));
@@ -334,7 +334,7 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
   key->incRefCount();
   if (prev) context->m_map = Native::data<ImplicitContext>(prev)->m_map;
-  context->m_map.insert_or_assign(key, data);
+  context->m_map.insert_or_assign(key, std::make_pair(data, memokey.detach()));
 
   // Store new IC into the map
   auto UNUSED ret = m_to_ic.emplace(std::make_pair(target_memo_key.detach(), Object(obj).detach()));

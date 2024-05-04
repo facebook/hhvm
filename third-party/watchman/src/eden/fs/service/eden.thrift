@@ -1056,7 +1056,15 @@ enum HgImportCause {
 enum FetchedSource {
   LOCAL = 0,
   REMOTE = 1,
+  // The data is fetched. However, the fetch mode was AllowRemote
+  // and on the Eden side the source of the fetch is unknown.
+  // It could be local or remote
   UNKNOWN = 2,
+  // The data is not fetched yet.
+  // We don't know the source on some of the Sapling events. For example,
+  // on the start events: before we fetch the data we don't know where
+  // we will be able to find it
+  NOT_AVAILABLE_YET = 3,
 }
 
 struct HgEvent {

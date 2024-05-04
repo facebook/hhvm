@@ -222,23 +222,6 @@ Type getArrType(IterSpecialization specialization) {
   always_assert(false);
 }
 
-ArrayIterProfile::Result getProfileResult(IRGS& env, const SSATmp* base) {
-  auto const generic = ArrayIterProfile::Result{};
-  assertx(!generic.top_specialization.specialized);
-
-  auto const profile = TargetProfile<ArrayIterProfile>(
-    env.context,
-    makeMarker(env, curSrcKey(env)),
-    s_ArrayIterProfile.get()
-  );
-  if (!profile.optimizing()) return generic;
-  auto const result = profile.data().result();
-  if (result.num_arrays == 0) return generic;
-
-  auto const rate = 1.0 * size_t{result.top_count} / size_t{result.num_arrays};
-  return rate > RO::EvalArrayIterSpecializationRate ? result : generic;
-}
-
 //////////////////////////////////////////////////////////////////////
 // Accessor for different base types.
 
@@ -575,6 +558,8 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
 void emitSpecializedInit(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* header,
                          Block* done, SSATmp* base) {
+  // We don't need to specialize on key type for value-only iterators.
+  // However, we still need to call accessor.check to rule out tombstones.
   auto const arr = accessor.checkBase(env, base, makeExitSlow(env));
   auto const size = gen(env, Count, arr);
 
@@ -688,7 +673,8 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 
 // Speculatively generate specialized code for this IterInit.
 void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterArgs& data, uint32_t baseLocalId) {
+                        const IterArgs& data, uint32_t baseLocalId,
+                        ArrayIterProfile::Result profiledResult) {
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   profileDecRefs(env, data, /*init=*/true);
 
@@ -708,10 +694,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     assertx(!env.iters[body]->iter_type.specialized);
   };
 
-  // We don't need to specialize on key type for value-only iterators.
-  // However, we still need to call accessor.check to rule out tombstones.
-  auto result = getProfileResult(env, base);
-  auto& iter_type = result.top_specialization;
+  auto& iter_type = profiledResult.top_specialization;
 
   if (!iter_type.specialized) {
     FTRACE(2, "Failure to specialize IterInit: no profiled specialization.\n");
@@ -766,7 +749,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     iter->placeholders.push_back(inst);
   } else {
     env.irb->appendBlock(header);
-    auto const& value_type = result.value_type;
+    auto const& value_type = profiledResult.value_type;
     emitSpecializedHeader(env, *accessor, data, value_type, body, baseLocalId);
     auto const def = SpecializedIterator{
         layout, iter_type, {inst}, header, nullptr};

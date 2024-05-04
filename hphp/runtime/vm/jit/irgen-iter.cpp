@@ -33,6 +33,32 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
+
+ArrayIterProfile::Result profileIterInit(IRGS& env, SSATmp* base) {
+  auto const generic = ArrayIterProfile::Result{};
+  if (base->isA(TObj)) return generic;
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset));
+
+  auto const profile = TargetProfile<ArrayIterProfile>(
+    env.context,
+    env.irb->curMarker(),
+    s_ArrayIterProfile.get()
+  );
+
+  if (profile.profiling()) {
+    gen(env, ProfileIterInit, RDSHandleData { profile.handle() }, base);
+  }
+
+  if (!profile.optimizing()) return generic;
+
+  auto const result = profile.data().result();
+  if (result.num_arrays == 0) return generic;
+
+  auto const rate = 1.0 * size_t{result.top_count} / size_t{result.num_arrays};
+  return rate > RO::EvalArrayIterSpecializationRate ? result : generic;
+}
+
 // `doneOffset` is the relative offset to jump to if the base has no elements.
 // `result` is a TBool that is true if the iterator has more items.
 void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result,
@@ -147,9 +173,10 @@ void emitIterBase(IRGS& env) {
 void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base)) return;
-  specializeIterInit(env, doneOffset, ita, baseLocalId);
+  auto const profiledResult = profileIterInit(env, base);
+  specializeIterInit(env, doneOffset, ita, baseLocalId, profiledResult);
 
   auto const op = base->isA(TArrLike)
     ? (ita.hasKey() ? LIterInitArrK : LIterInitArr)
@@ -165,7 +192,7 @@ void emitLIterNext(IRGS& env, IterArgs ita,
   if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterNext);
 
   auto const op = base->isA(TArrLike)
     ? ita.hasKey() ? LIterNextArrK : LIterNextArr

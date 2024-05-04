@@ -1289,6 +1289,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckMissingKeyInArrLike:
   case ProfileDictAccess:
   case ProfileKeysetAccess:
+  case ProfileIterInit:
   case CheckArrayCOW:
   case ProfileArrayCOW:
     return may_load_store(AHeapAny, AEmpty);

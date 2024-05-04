@@ -57,25 +57,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
-
-void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
-  if (!inst->src(0)->isA(TArrLike)) return;
-  auto const profile = TargetProfile<ArrayIterProfile>(
-    env.unit.context(),
-    inst->marker(),
-    s_ArrayIterProfile.get()
-  );
-  if (!profile.profiling()) return;
-
-  auto const args = argGroup(env, inst)
-    .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
-    .ssa(0)
-    .imm(isInitK);
-  cgCallHelper(vmain(env), env, CallSpec::method(&ArrayIterProfile::update),
-               kVoidDest, SyncOptions::None, args);
-}
-
 int iterOffset(const BCMarker& marker, uint32_t id) {
   auto const func = marker.func();
   return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
@@ -89,7 +70,6 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
   auto const valOff = localOffset(extra->valId);
-  profileIterInit(env, inst, isInitK);
 
   auto& v = vmain(env);
 
@@ -269,6 +249,16 @@ void cgKillIter(IRLS& env, const IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void cgProfileIterInit(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TDict, TKeyset));
+  auto const extra = inst->extra<RDSHandleData>();
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .ssa(0);
+  cgCallHelper(vmain(env), env, CallSpec::method(&ArrayIterProfile::update),
+               kVoidDest, SyncOptions::None, args);
+}
 
 void cgLIterInitArr(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);

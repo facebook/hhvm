@@ -875,6 +875,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileGlobal:
   case ProfileInstanceCheck:
   case ProfileIsTypeStruct:
+  case ProfileIterInit:
   case ProfileKeysetAccess:
   case ProfileMethod:
   case ProfileProp:

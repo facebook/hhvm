@@ -52,10 +52,8 @@ struct ArrayIterProfile {
 
   /*
    * Update the profile when we iterate over a given array.
-   *
-   * `is_kviter` will be true for iterators over both keys and values.
    */
-  void update(const ArrayData* arr, bool is_kviter);
+  void update(const ArrayData* arr);
 
   /*
    * Combine `l' and `r', summing across the kind counts.

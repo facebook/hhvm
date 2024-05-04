@@ -616,6 +616,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckMissingKeyInArrLike:
   case CheckArrayCOW:
   case ProfileDictAccess:
+  case ProfileIterInit:
   case CheckDictOffset:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:

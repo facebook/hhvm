@@ -2768,6 +2768,10 @@ ReqBindJmp and CallFuncEntry.
     an IteratorAggregate that eventually produces an Iterator
   - a dict of properties of the object otherwise
 
+| ProfileIterInit<handle>, ND, S(Vec,Dict,Keyset), LA
+
+  Profile iterator initialization from base S0.
+
 | LIterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
 | LIterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA

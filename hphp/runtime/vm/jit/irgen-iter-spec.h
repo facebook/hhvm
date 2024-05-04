@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
@@ -49,7 +50,8 @@ struct SpecializedIterator {
 // `doneOffset` is the relative offset to jump to if the base has no elements.
 // `baseLocalId` is the base ID for local iters, or kInvalidId for non-local.
 void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterArgs& data, uint32_t baseLocalId);
+                        const IterArgs& data, uint32_t baseLocalId,
+                        ArrayIterProfile::Result profiledResult);
 
 // Returns true on specialization. If it returns true, then we no longer need
 // to emit generic code for this IterNext.

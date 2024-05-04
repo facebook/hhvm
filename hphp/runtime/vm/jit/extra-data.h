@@ -3119,6 +3119,7 @@ X(CheckKeysetOffset,            IndexData);
 X(ProfileArrayCOW,              RDSHandleData);
 X(ProfileDictAccess,            RDSHandlePairData);
 X(ProfileKeysetAccess,          RDSHandlePairData);
+X(ProfileIterInit,              RDSHandleData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);

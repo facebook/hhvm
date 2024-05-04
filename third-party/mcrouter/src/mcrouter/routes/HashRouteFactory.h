@@ -38,9 +38,10 @@ HashSelector<HashFunc> createHashSelector(std::string salt, HashFunc func) {
 template <class HashFunc, class RouterInfo>
 BucketHashSelector<HashFunc, RouterInfo> createBucketHashSelector(
     std::string salt,
-    HashFunc func) {
+    HashFunc func,
+    bool clientFanout = false) {
   return BucketHashSelector<HashFunc, RouterInfo>(
-      std::move(salt), std::move(func));
+      std::move(salt), std::move(func), clientFanout);
 }
 
 template <class RouterInfo, class HashFunc>
@@ -50,10 +51,16 @@ typename std::
         std::vector<typename RouterInfo::RouteHandlePtr> rh,
         std::string salt,
         HashFunc func,
-        bool bucketized = false) {
+        bool bucketized = false,
+        bool clientFanout = false) {
   checkLogic(
       !bucketized,
       "Bucketization not implemented for router info: {}",
+      RouterInfo::name);
+
+  checkLogic(
+      !clientFanout,
+      "Fanout not implemented for router info: {}",
       RouterInfo::name);
 
   return createSelectionRoute<RouterInfo, HashSelector<HashFunc>>(
@@ -68,7 +75,8 @@ typename std::
         std::vector<typename RouterInfo::RouteHandlePtr> rh,
         std::string salt,
         HashFunc func,
-        bool bucketized = false) {
+        bool bucketized = false,
+        bool clientFanout = false) {
   if (folly::IsOneOf<HashFunc, WeightedCh3HashFunc>::value) {
     if (bucketized) {
       return createSelectionRoute<
@@ -76,13 +84,19 @@ typename std::
           BucketHashSelector<HashFunc, RouterInfo>>(
           std::move(rh),
           createBucketHashSelector<HashFunc, RouterInfo>(
-              std::move(salt), std::move(func)));
+              std::move(salt), std::move(func), clientFanout));
     }
   }
   checkLogic(
       !bucketized,
       "Bucketization not implemented for this ch type: {}",
       HashFunc::type());
+
+  checkLogic(
+      !clientFanout,
+      "Fanout not implemented for this ch type: {}",
+      HashFunc::type());
+
   return createSelectionRoute<RouterInfo, HashSelector<HashFunc>>(
       std::move(rh),
       createHashSelector<HashFunc>(std::move(salt), std::move(func)));
@@ -96,6 +110,7 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
   std::string salt;
   folly::StringPiece funcType = Ch3HashFunc::type();
   auto bucketize = false;
+  auto clientFanout = false;
   if (json.isObject()) {
     if (auto jsalt = json.get_ptr("salt")) {
       checkLogic(jsalt->isString(), "HashRoute: salt is not a string");
@@ -107,6 +122,12 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
     }
     if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
       bucketize = parseBool(*jNeedBucketization, "bucketize");
+    }
+    // client_fanout is only supported with bucketization
+    if (bucketize) {
+      if (auto* jClientFanout = json.get_ptr("client_fanout")) {
+        clientFanout = parseBool(*jClientFanout, "client_fanout");
+      }
     }
   }
 
@@ -139,7 +160,11 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
   } else if (funcType == WeightedCh3HashFunc::type()) {
     WeightedCh3HashFunc func{json, n};
     return createHashRoute<RouterInfo, WeightedCh3HashFunc>(
-        std::move(rh), std::move(salt), std::move(func), bucketize);
+        std::move(rh),
+        std::move(salt),
+        std::move(func),
+        bucketize,
+        clientFanout);
   } else if (funcType == WeightedCh4HashFunc::type()) {
     WeightedCh4HashFunc func{json, n};
     return createHashRoute<RouterInfo, WeightedCh4HashFunc>(

@@ -83,8 +83,9 @@ class HashSelector : public HashSelectorBase<HashFunc> {
 template <class HashFunc, class RouterInfo>
 class BucketHashSelector : public HashSelectorBase<HashFunc> {
  public:
-  BucketHashSelector(std::string salt, HashFunc hashFunc)
-      : HashSelectorBase<HashFunc>(std::move(salt), std::move(hashFunc)) {}
+  BucketHashSelector(std::string salt, HashFunc hashFunc, bool clientFanout)
+      : HashSelectorBase<HashFunc>(std::move(salt), std::move(hashFunc)),
+        clientFanout_(clientFanout) {}
 
   template <class Request>
   size_t select(const Request& /*req*/, size_t size) const {
@@ -93,11 +94,17 @@ class BucketHashSelector : public HashSelectorBase<HashFunc> {
         bucketId.has_value(),
         "The context doesn't contain bucket id. You must use McBucketRoute in front of bucketized PoolRoute");
     // Hash functions can be stack-intensive, so jump back to the main context
+    auto key = folly::to<std::string>(*bucketId);
+    if (this->clientFanout_) {
+      auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
+      key += ctx->userIpAddress();
+    }
     return folly::fibers::runInMainContext(
-        [this, size, bucketId = folly::to<std::string>(*bucketId)]() {
-          return this->selectInternal(bucketId, size);
-        });
+        [this, size, key]() { return this->selectInternal(key, size); });
   }
+
+ private:
+  bool clientFanout_{false};
 };
 
 } // namespace memcache

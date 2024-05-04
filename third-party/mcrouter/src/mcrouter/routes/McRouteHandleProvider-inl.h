@@ -667,6 +667,9 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
           jhashWithWeights["bucketize"] = true;
         }
       }
+      if (auto jAdditionalFanout = poolJson.json.get_ptr("additional_fanout")) {
+        jhashWithWeights["client_fanout"] = (jAdditionalFanout->getInt() > 0);
+      }
       // When setting useBucketHashSelector, the PoolRoute is constructed with
       // BucketHashSelector but skip init McBucketRoute as direct parent. This
       // allow shadow PoolRoute to use the McBucketRoute from the associated

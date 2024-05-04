@@ -1523,7 +1523,7 @@ void HQSession::applySettings(const SettingsList& settings) {
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
           hasWT = setting.value;
-          LOG(INFO) << "Peer sent ENABLE_WEBTRANSPORT: " << uint32_t(hasWT);
+          VLOG(3) << "Peer sent ENABLE_WEBTRANSPORT: " << uint32_t(hasWT);
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
         case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:

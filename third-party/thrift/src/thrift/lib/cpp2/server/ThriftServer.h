@@ -852,10 +852,16 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     customAllocatorForParser_ = std::move(customParserAllocator);
   }
 
+  void enableInfoLogging() { infoLoggingEnabled_ = true; }
+
+  void disableInfoLogging() { infoLoggingEnabled_ = false; }
+
  private:
   friend ThriftServerConfig& detail::getThriftServerConfig(ThriftServer&);
 
   ThriftServerConfig thriftConfig_;
+
+  bool infoLoggingEnabled_{true};
 
   // Cpp2 ProcessorFactory.
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
@@ -2653,7 +2659,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     THRIFT_SERVER_EVENT(call.setIsOverloaded).log(*this);
     isOverloaded_ = std::move(isOverloaded);
     runtimeServerActions_.setIsOverloaded = true;
-    XLOG(INFO) << "thrift server: isOverloaded() set.";
+    XLOG_IF(INFO, infoLoggingEnabled_) << "thrift server: isOverloaded() set.";
   }
 
   // Do not try to access ThreadManager in this function as
@@ -2666,7 +2672,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     preprocessFunctions_.deprecatedSet(std::move(preprocess));
 
     runtimeServerActions_.setPreprocess = true;
-    XLOG(INFO) << "setPreprocess() call";
+    XLOG_IF(INFO, infoLoggingEnabled_) << "setPreprocess() call";
   }
 
   void addPreprocessFunc(const std::string& name, PreprocessFunc preprocess) {
@@ -2676,7 +2682,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
     // TODO(sazonovk): Should there be a separate boolean for addPreprocess?
     runtimeServerActions_.setPreprocess = true;
-    XLOG(INFO) << "addPreprocessFunc() call";
+    XLOG_IF(INFO, infoLoggingEnabled_) << "addPreprocessFunc() call";
   }
 
   /**

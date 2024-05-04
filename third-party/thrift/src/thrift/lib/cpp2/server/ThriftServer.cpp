@@ -825,7 +825,7 @@ void ThriftServer::setupThreadManager() {
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
           FLAGS_thrift_disable_resource_pools);
-      XLOG(INFO)
+      XLOG_IF(INFO, infoLoggingEnabled_)
           << "Using thread manager (resource pools not enabled) on address/port "
           << getAddressAsString() << ": " << explanation;
       if (auto observer = getObserverShared()) {
@@ -926,16 +926,18 @@ void ThriftServer::setupThreadManager() {
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
           FLAGS_thrift_disable_resource_pools);
-      XLOG(INFO) << "Using resource pools on address/port "
-                 << getAddressAsString() << ": " << explanation;
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << "Using resource pools on address/port " << getAddressAsString()
+          << ": " << explanation;
       if (auto observer = getObserverShared()) {
         observer->resourcePoolsEnabled(explanation);
       }
 
-      XLOG(INFO) << "QPS limit will be enforced by "
-                 << (FLAGS_thrift_server_enforces_qps_limit
-                         ? "the thrift server"
-                         : "the concurrency controller");
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << "QPS limit will be enforced by "
+          << (FLAGS_thrift_server_enforces_qps_limit
+                  ? "the thrift server"
+                  : "the concurrency controller");
 
       ensureResourcePools();
 
@@ -1012,8 +1014,9 @@ void ThriftServer::setupThreadManager() {
   resourcePoolSet().lock();
 
   if (!resourcePoolSet().empty()) {
-    XLOG(INFO) << "Resource pools (" << resourcePoolSet().size()
-               << "): " << resourcePoolSet().describe();
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "Resource pools (" << resourcePoolSet().size()
+        << "): " << resourcePoolSet().describe();
 
     auto descriptions = resourcePoolSet().poolsDescriptions();
     if (auto observer = getObserverShared()) {
@@ -1022,13 +1025,16 @@ void ThriftServer::setupThreadManager() {
 
     size_t count{0};
     for (auto description : descriptions) {
-      XLOG(INFO) << fmt::format("Resource pool [{}]: {}", count++, description);
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << fmt::format("Resource pool [{}]: {}", count++, description);
     }
   }
   if (FLAGS_thrift_server_enforces_qps_limit) {
-    XLOG(INFO) << "QPS limit will be enforced by Thrift Server";
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "QPS limit will be enforced by Thrift Server";
   } else {
-    XLOG(INFO) << "QPS limit will be enforced by Resource Pool";
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "QPS limit will be enforced by Resource Pool";
   }
 }
 
@@ -1094,7 +1100,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       FLAGS_thrift_disable_resource_pools;
   if (runtimeDisableResourcePoolsSet()) {
     // No need to check if we've already set this.
-    XLOG(INFO)
+    XLOG_IF(INFO, infoLoggingEnabled_)
         << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
@@ -1102,7 +1108,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   // but note below that it can exit early.
   if (runtimeServerActions_.checkComplete) {
     auto result = !runtimeDisableResourcePoolsSet();
-    XLOG(INFO)
+    XLOG_IF(INFO, infoLoggingEnabled_)
         << "runtimeResourcePoolsChecks() is already completed and result is "
         << result;
     return result;
@@ -1118,7 +1124,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       // setup() and if it calls runtimeDisableResourcePoolsDeprecated() at that
       // time that will become a fatal error which is what we want (that can
       // only be triggered by a requireResourcePools() call in the server code).
-      XLOG(INFO)
+      XLOG_IF(INFO, infoLoggingEnabled_)
           << "It's too early to call runtimeResourcePoolsChecks(), returning True for now";
       return true;
     }
@@ -1142,7 +1148,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
                     UNKNOWN ||
             !metadata.rpcKind || !metadata.priority) {
           // Disable resource pools if there is no service request info
-          XLOG(INFO) << "Resource pools disabled. Incomplete metadata";
+          XLOG_IF(INFO, infoLoggingEnabled_)
+              << "Resource pools disabled. Incomplete metadata";
           runtimeServerActions_.noServiceRequestInfo = true;
           runtimeDisableResourcePoolsDeprecated();
         }
@@ -1153,8 +1160,9 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
           if (!THRIFT_FLAG(enable_resource_pools_for_interaction)) {
             // We've found an interaction in this service. Mark it is
             // incompatible with resource pools
-            XLOG(INFO) << "Resource pools disabled. Interaction on request "
-                       << methodToMetadataPtr.first;
+            XLOG_IF(INFO, infoLoggingEnabled_)
+                << "Resource pools disabled. Interaction on request "
+                << methodToMetadataPtr.first;
             runtimeDisableResourcePoolsDeprecated();
           }
         }
@@ -1175,7 +1183,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       // if a wildcard is not providing valid executor type
       // we should not turn on resource pool for it
       if (!wildcardFlagEnabled || !validExecutor) {
-        XLOG(INFO) << "Resource pools disabled. Wildcard methods";
+        XLOG_IF(INFO, infoLoggingEnabled_)
+            << "Resource pools disabled. Wildcard methods";
         runtimeServerActions_.wildcardMethods = true;
         runtimeDisableResourcePoolsDeprecated();
       }
@@ -1190,22 +1199,24 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   runtimeServerActions_.checkComplete = true;
 
   if (runtimeDisableResourcePoolsSet()) {
-    XLOG(INFO)
+    XLOG_IF(INFO, infoLoggingEnabled_)
         << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
-  XLOG(INFO) << "Resource pools check complete - allowed";
+  XLOG_IF(INFO, infoLoggingEnabled_)
+      << "Resource pools check complete - allowed";
   return true;
 }
 
 void ThriftServer::ensureResourcePools() {
   auto resourcePoolSupplied = !resourcePoolSet().empty();
   if (resourcePoolSupplied) {
-    XLOG(INFO) << "Resource pools supplied: " << resourcePoolSet().size();
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "Resource pools supplied: " << resourcePoolSet().size();
   }
 
   if (!resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultSync())) {
-    XLOG(INFO) << "Creating a default sync pool";
+    XLOG_IF(INFO, infoLoggingEnabled_) << "Creating a default sync pool";
     // Ensure there is a sync resource pool.
     resourcePoolSet().setResourcePool(
         ResourcePoolHandle::defaultSync(),
@@ -1218,7 +1229,7 @@ void ThriftServer::ensureResourcePools() {
   if (resourcePoolSupplied) {
     if (!resourcePoolSet().hasResourcePool(
             ResourcePoolHandle::defaultAsync())) {
-      XLOG(INFO)
+      XLOG_IF(INFO, infoLoggingEnabled_)
           << "Default async pool is NOT supplied, creating a default async pool";
       auto threadFactory = [this]() -> std::shared_ptr<folly::ThreadFactory> {
         auto prefix = getThreadNameForPriority(

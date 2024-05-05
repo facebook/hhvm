@@ -197,7 +197,15 @@ std::atomic<size_t> s_normal_alloc_descs_size;
 std::atomic<size_t> s_local_alloc_descs_size;
 
 /*
- * Round base up to align, which must be a power of two.
+ * Round `base' down to `align', which must be a power of 2.
+ */
+size_t roundDown(size_t base, size_t align) {
+  assertx(folly::isPowTwo(align));
+  return base & ~(align - 1);
+}
+
+/*
+ * Round `base' up to `align', which must be a power of 2.
  */
 size_t roundUp(size_t base, size_t align) {
   assertx(folly::isPowTwo(align));
@@ -638,27 +646,29 @@ void requestExit() {
 
 void flush() {
   if (madvise(tl_base, s_normal_frontier, MADV_DONTNEED) == -1) {
-    Logger::Warning("RDS madvise failure: %s\n",
-                    folly::errnoStr(errno).c_str());
+    Logger::Warning("RDS madvise failure: %s", folly::errnoStr(errno).c_str());
   }
+
   if (jit::mcgen::retranslateAllEnabled() &&
       !jit::mcgen::retranslateAllPending()) {
     // Madvise away everything except the rds-locals. These may lie in
     // the middle of the local section, we have to do it separately
     // for the data before and after (rounding up to page sizes).
-    auto const rdsLocalsBegin =
-      local::detail::RDSLocalNode::s_RDSLocalsBase & ~0xfff;
+    auto const pageSize = sysconf(_SC_PAGESIZE);
+    auto const rdsLocalsBegin = roundDown(
+      local::detail::RDSLocalNode::s_RDSLocalsBase,
+      pageSize
+    );
     auto const rdsLocalsEnd = roundUp(
       local::detail::RDSLocalNode::s_RDSLocalsBase + local::detail::s_usedbytes,
-      4096
+      pageSize
     );
-
     if (s_local_frontier < rdsLocalsBegin) {
-      auto const offset = s_local_frontier & ~0xfff;
+      auto const offset = roundDown(s_local_frontier, pageSize);
       if (madvise(static_cast<char*>(tl_base) + offset,
-                  rdsLocalsBegin - s_local_frontier,
+                  rdsLocalsBegin - offset,
                   MADV_DONTNEED)) {
-        Logger::Warning("RDS local madvise failure: %s\n",
+        Logger::Warning("RDS local madvise failure: %s",
                         folly::errnoStr(errno).c_str());
       }
     }
@@ -666,7 +676,7 @@ void flush() {
       if (madvise(static_cast<char*>(tl_base) + rdsLocalsEnd,
                   s_local_base - rdsLocalsEnd,
                   MADV_DONTNEED)) {
-        Logger::Warning("RDS local madvise failure: %s\n",
+        Logger::Warning("RDS local madvise failure: %s",
                         folly::errnoStr(errno).c_str());
       }
     }

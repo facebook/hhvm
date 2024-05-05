@@ -4527,8 +4527,12 @@ Class::Class(ClassGraph g): opaque{g.this_} {
 }
 
 ClassGraph Class::graph() const {
-  assertx(opaque.p);
-  return ClassGraph{ (ClassGraph::Node*)opaque.p };
+  assertx(opaque.left());
+  return ClassGraph{ (ClassGraph::Node*)opaque.left() };
+}
+
+bool Class::isSerialized() const {
+  return opaque.right();
 }
 
 ClassInfo* Class::cinfo() const {
@@ -4571,7 +4575,14 @@ bool Class::subCouldBe(const Class& o, bool nonRegL, bool nonRegR) const {
   return graph().subCouldBe(o.graph(), nonRegL, nonRegR);
 }
 
-SString Class::name() const { return graph().name(); }
+SString Class::name() const {
+  if (opaque.left()) {
+    return graph().name();
+  } else {
+    assertx(opaque.right());
+    return opaque.right();
+  }
+}
 
 Optional<res::Class> Class::withoutNonRegular() const {
   if (auto const g = graph().withoutNonRegular()) {
@@ -4784,6 +4795,10 @@ Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
 }
 
 std::string show(const Class& c) {
+  if (auto const n = c.opaque.right()) {
+    return folly::sformat("?\"{}\"", n);
+  }
+
   auto const g = c.graph();
   if (g.isMissingRaw()) return folly::sformat("\"{}\"", g.name());
   if (!g.hasCompleteChildrenRaw()) {
@@ -4909,6 +4924,11 @@ bool Class::couldBeIsect(folly::Range<const Class*> classes1,
   return ClassGraph::couldBeIsect(v1, v2, nonRegular1, nonRegular2);
 }
 
+Optional<Class> Class::unserialize(const IIndex& index) const {
+  if (opaque.left()) return *this;
+  return index.resolve_class(opaque.right());
+}
+
 Class Class::get(SString name) {
   return Class{ ClassGraph::get(name) };
 }
@@ -4944,14 +4964,20 @@ bool Class::isMissingDebug() const {
 #endif
 
 void Class::serde(BlobEncoder& sd) const {
-  sd(graph(), nullptr);
+  sd(
+    opaque.left()
+      ? graph()
+      : ClassGraph::get(opaque.right()),
+    nullptr
+  );
 }
 
 Class Class::makeForSerde(BlobDecoder& sd) {
   ClassGraph g;
   sd(g, nullptr);
   assertx(g.this_);
-  return Class{ Opaque { g.this_ } };
+  // Make the class start out as serialized.
+  return Class{ g.name() };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -17810,14 +17836,32 @@ void make_local(IndexData& index) {
     }
   );
 
-  // Canonicalize the initial return types computed from the
-  // InitTypesJob. Since we now have all the class information
-  // available, we can put the types into canonical form.
+  // Ensure that all classes are unserialized since all local
+  // processing requires that.
+
+  trace_time tracer2{"unserialize classes"};
+  tracer2.ignore_client_stats();
+
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      for (auto& [ty, _] : cinfo->clsConstTypes) {
+        ty = unserialize_classes(
+          IndexAdaptor { *index.m_index },
+          std::move(ty)
+        );
+      }
+    }
+  );
+
   parallel::for_each(
     index.funcInfo,
-    [&] (FuncInfo& finfo) {
-      if (!finfo.func) return;
-      finfo.returnTy = unserialize_classes(std::move(finfo.returnTy));
+    [&] (FuncInfo& fi) {
+      if (!fi.func) return;
+      fi.returnTy = unserialize_classes(
+        IndexAdaptor { *index.m_index },
+        std::move(fi.returnTy)
+      );
     }
   );
 }
@@ -20247,6 +20291,10 @@ bool Index::frozen() const {
 void Index::freeze() {
   m_data->frozen = true;
   m_data->ever_frozen = true;
+}
+
+Type AnalysisIndex::unserialize_type(Type t) const {
+  return unserialize_classes(AnalysisIndexAdaptor { *this }, std::move(t));
 }
 
 /*
@@ -24100,7 +24148,7 @@ Type AnalysisIndex::lookup_constant(SString name) const {
     // explicit dependence on the constant, we might not have the init
     // func present.
     if (fit == end(m_data->finfos)) return TInitCell;
-    return unctx(fit->second->returnTy);
+    return unctx(unserialize_type(fit->second->returnTy));
   }
   return m_data->badConstants.count(name) ? TBottom : TInitCell;
 }
@@ -24140,14 +24188,13 @@ AnalysisIndex::lookup_class_constants(const php::Class& cls) const {
     } else if (!cls.cinfo) {
       out.emplace_back(cns.name, ClsConstInfo{ TInitCell, 0 });
     } else {
-      out.emplace_back(
+      auto info = folly::get_default(
+        cls.cinfo->clsConstantInfo,
         cns.name,
-        folly::get_default(
-          cls.cinfo->clsConstantInfo,
-          cns.name,
-          ClsConstInfo{ TInitCell, 0 }
-        )
+        ClsConstInfo{ TInitCell, 0 }
       );
+      info.type = unserialize_type(std::move(info.type));
+      out.emplace_back(cns.name, std::move(info));
     }
   }
   return out;
@@ -24241,7 +24288,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
       auto const info =
         folly::get_ptr(cnsCls->cinfo->clsConstantInfo, cns.name);
       return R{
-        info ? info->type : TInitCell,
+        info ? unserialize_type(info->type) : TInitCell,
         TriBool::Yes,
         true
       };
@@ -24472,7 +24519,10 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     if (!m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType)) {
       return R{ TInitCell, false };
     }
-    return R{ unctx(finfo.returnTy), finfo.effectFree };
+    return R{
+      unctx(unserialize_type(finfo.returnTy)),
+      finfo.effectFree
+    };
   };
 
   return match<R>(
@@ -24501,7 +24551,10 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
       if (!m_data->deps->add(*f.finfo->func, AnalysisDeps::Type::RetType)) {
         return R{ TInitCell, false };
       }
-      return R{ unctx(f.finfo->returnTy), f.finfo->effectFree };
+      return R{
+        unctx(unserialize_type(f.finfo->returnTy)),
+        f.finfo->effectFree
+      };
     },
     [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
     [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
@@ -24577,6 +24630,8 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
   }
 
   auto const& finfo = func_info(*m_data, func);
+  // No need to call unserialize_type here. If it's a scalar, there's
+  // nothing to unserialize anyways.
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
     return R{ finfo.returnTy, finfo.effectFree };
   }
@@ -24652,14 +24707,15 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     );
   };
 
+  auto const insensitive = unserialize_type(finfo.returnTy);
   always_assert_flog(
-    contextualRet->subtypeOf(finfo.returnTy),
+    contextualRet->subtypeOf(insensitive),
     "Context sensitive return type for {} is {} "
     "which not at least as refined as context insensitive "
     "return type {}\n",
     error_context(),
     show(*contextualRet),
-    show(finfo.returnTy)
+    show(insensitive)
   );
   if (!is_scalar(*contextualRet)) return R{ TInitCell, false };
 
@@ -24670,7 +24726,10 @@ std::pair<Index::ReturnType, size_t>
 AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
   auto const& finfo = func_info(*m_data, f);
   return std::make_pair(
-    Index::ReturnType{ finfo.returnTy, finfo.effectFree },
+    Index::ReturnType{
+      unserialize_type(finfo.returnTy),
+      finfo.effectFree
+    },
     finfo.returnRefinements
   );
 }
@@ -25272,11 +25331,12 @@ void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
         ConstIndex { fa.ctx.func->cls->name, c.first }
       );
     } else if (cinfo) {
-      auto const old = folly::get_default(
+      auto old = folly::get_default(
         cinfo->clsConstantInfo,
         cns.name,
         ClsConstInfo{ TInitCell, 0 }
       );
+      old.type = unserialize_type(std::move(old.type));
 
       if (c.second.type.strictlyMoreRefined(old.type)) {
         always_assert(c.second.refinements > old.refinements);
@@ -25349,7 +25409,8 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
     changes |= AnalysisDeps::Type::UnusedParams;
   }
 
-  if (fa.inferredReturn.strictlyMoreRefined(finfo.returnTy)) {
+  auto const oldReturnTy = unserialize_type(finfo.returnTy);
+  if (fa.inferredReturn.strictlyMoreRefined(oldReturnTy)) {
     if (finfo.returnRefinements < options.returnTypeRefineLimit) {
       finfo.returnTy = fa.inferredReturn;
       finfo.returnRefinements += fa.localReturnRefinements + 1;
@@ -25365,12 +25426,12 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
     }
   } else {
     always_assert_flog(
-      fa.inferredReturn.moreRefined(finfo.returnTy),
+      fa.inferredReturn.moreRefined(oldReturnTy),
       "Index return type invariant violated in {}.\n"
       "   {} is not at least as refined as {}\n",
       error_loc(),
       show(fa.inferredReturn),
-      show(finfo.returnTy)
+      show(oldReturnTy)
     );
   }
 

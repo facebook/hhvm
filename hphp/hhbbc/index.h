@@ -615,8 +615,27 @@ struct Class {
    */
   const php::Class* cls() const;
 
+  /*
+   * Returns true if this class has it's full child class information.
+   */
   bool hasCompleteChildren() const;
+  /*
+   * A class is complete if it has full child class information, or if
+   * it's a "conservative" class (a class which has too many child
+   * classes to track completely).
+   */
   bool isComplete() const;
+
+  /*
+   * Classes that come out of the BlobEncoder start out as
+   * "serialized". This means it just wraps a string. Almost nothing
+   * can be done on a serialized class, except call unserialize on
+   * it. Unserialize will produce the "real" class, recording
+   * dependencies as necessary. If unserialize returns std::nullopt
+   * then the class definitely doesn't exist.
+   */
+  bool isSerialized() const;
+  Optional<Class> unserialize(const IIndex&) const;
 
   /*
    * Invoke the given function on every possible subclass of this
@@ -684,8 +703,8 @@ struct Class {
    * something like CompactTaggedPtr. It is not, however, guaranteed
    * to be aligned (lower bits may be set).
    */
-  uintptr_t toOpaque() const { return (uintptr_t)opaque.p; }
-  static Class fromOpaque(uintptr_t o) { return Class{Opaque{(void*)o}}; }
+  uintptr_t toOpaque() const { return opaque.toOpaque(); }
+  static Class fromOpaque(uintptr_t o) { return Class{E::fromOpaque(o)}; }
 
   size_t hash() const { return toOpaque(); }
 
@@ -730,11 +749,11 @@ private:
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::AnalysisIndex;
 
-  struct Opaque { void* p; };
-  Opaque opaque;
+  using E = Either<void*, const StringData*>;
+  E opaque;
 
   explicit Class(ClassGraph);
-  explicit Class(Opaque o): opaque{o} {}
+  explicit Class(E o): opaque{o} {}
 };
 
 /*
@@ -2598,8 +2617,6 @@ struct AnalysisIndex {
   Optional<res::Class> resolve_class(SString) const;
   Optional<res::Class> resolve_class(const php::Class&) const;
 
-  res::Class builtin_class(SString) const;
-
   Type lookup_constant(SString) const;
 
   std::vector<std::pair<SString, ClsConstInfo>>
@@ -2692,6 +2709,8 @@ private:
 
   template <typename P, typename G>
   res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
+
+  Type unserialize_type(Type) const;
 
   friend struct AnalysisIndexAdaptor;
 };

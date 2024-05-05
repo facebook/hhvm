@@ -654,8 +654,8 @@ private:
   friend struct ArrLikeMapNCOWer;
   friend struct ArrLikeMapCOWer;
 
-  friend Type unserialize_classes(Type);
-  friend void unserialize_classes_impl(const Type&, COWer&);
+  friend Type unserialize_classes(const IIndex&, Type);
+  friend void unserialize_classes_impl(const IIndex&, const Type&, COWer&);
 
   // These have to be defined here but are not meant to be used
   // outside of type-system.cpp
@@ -1538,14 +1538,15 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Put the object/class information within a Type into "canonical"
- * form. Types produced from extern-worker jobs may not be canonical
- * because they may not have complete class information. This puts
- * them in that form, assuming we have all class information. It
- * should be called on any Type from an extern-worker job before using
- * it.
+ * Calls res::Class::unserialize on any res::Class' contained within
+ * the given Type. It also puts the Type into a "canonical" form. A
+ * Type that comes from BlobDecoder may not be in a canonical form
+ * (since the extern-worker job which produced it didn't have complete
+ * class information). This makes the Type canonical according to the
+ * class information known in this job (if not in a job it should be
+ * complete).
  */
-Type unserialize_classes(Type);
+Type unserialize_classes(const IIndex&, Type);
 
 //////////////////////////////////////////////////////////////////////
 

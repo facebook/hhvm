@@ -2969,37 +2969,42 @@ bool Type::checkInvariants() const {
     assertx(couldBe(BCls));
     assertx(subtypeOf(BCls | kNonSupportBits));
     if (m_data.dcls.isExact()) {
-      assertx(
-        IMPLIES(
-          m_data.dcls.containsNonRegular(),
-          m_data.dcls.cls().mightBeNonRegular()
-        )
-      );
-      assertx(
-        IMPLIES(
-          !m_data.dcls.containsNonRegular(),
-          m_data.dcls.cls().mightBeRegular()
-        )
-      );
+      if (!m_data.dcls.cls().isSerialized()) {
+        assertx(
+          IMPLIES(
+            m_data.dcls.containsNonRegular(),
+            m_data.dcls.cls().mightBeNonRegular()
+          )
+        );
+        assertx(
+          IMPLIES(
+            !m_data.dcls.containsNonRegular(),
+            m_data.dcls.cls().mightBeRegular()
+          )
+        );
+      }
     } else if (m_data.dcls.isSub()) {
-      assertx(m_data.dcls.cls().couldBeOverridden());
-      assertx(
-        IMPLIES(
-          m_data.dcls.containsNonRegular(),
-          m_data.dcls.cls().mightContainNonRegular()
-        )
-      );
-      assertx(
-        IMPLIES(
-          !m_data.dcls.containsNonRegular(),
-          m_data.dcls.cls().couldBeOverriddenByRegular()
-        )
-      );
+      if (!m_data.dcls.cls().isSerialized()) {
+        assertx(m_data.dcls.cls().couldBeOverridden());
+        assertx(
+          IMPLIES(
+            m_data.dcls.containsNonRegular(),
+            m_data.dcls.cls().mightContainNonRegular()
+          )
+        );
+        assertx(
+          IMPLIES(
+            !m_data.dcls.containsNonRegular(),
+            m_data.dcls.cls().couldBeOverriddenByRegular()
+          )
+        );
+      }
     } else if (m_data.dcls.isIsect()) {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dcls.isect().size() > 1);
       for (auto const DEBUG_ONLY c : m_data.dcls.isect()) {
+        if (c.isSerialized()) continue;
         assertx(
           IMPLIES(
             !m_data.dcls.containsNonRegular(),
@@ -3013,10 +3018,13 @@ bool Type::checkInvariants() const {
       // expensive (and requires the index).
       auto const DEBUG_ONLY [e, i] = m_data.dcls.isectAndExact();
       assertx(!i->empty());
-      assertx(e.isMissingDebug());
-      assertx(IMPLIES(!m_data.dcls.containsNonRegular(),
-                      e.mightBeRegular() || e.couldBeOverriddenByRegular()));
+      if (!e.isSerialized()) {
+        assertx(e.isMissingDebug());
+        assertx(IMPLIES(!m_data.dcls.containsNonRegular(),
+                        e.mightBeRegular() || e.couldBeOverriddenByRegular()));
+      }
       for (auto const DEBUG_ONLY c : *i) {
+        if (c.isSerialized()) continue;
         assertx(!c.same(e));
         assertx(!c.hasCompleteChildren());
         assertx(
@@ -3033,14 +3041,19 @@ bool Type::checkInvariants() const {
     assertx(subtypeOf(BObj | kNonSupportBits));
     assertx(!m_data.dobj.containsNonRegular());
     if (m_data.dobj.isExact()) {
-      assertx(m_data.dobj.cls().mightBeRegular());
+      if (!m_data.dobj.cls().isSerialized()) {
+        assertx(m_data.dobj.cls().mightBeRegular());
+      }
     } else if (m_data.dobj.isSub()) {
-      assertx(m_data.dobj.cls().couldBeOverriddenByRegular());
+      if (!m_data.dobj.cls().isSerialized()) {
+        assertx(m_data.dobj.cls().couldBeOverriddenByRegular());
+      }
     } else if (m_data.dobj.isIsect()) {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dobj.isect().size() > 1);
       for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
+        if (c.isSerialized()) continue;
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
       }
     } else {
@@ -3049,9 +3062,12 @@ bool Type::checkInvariants() const {
       // expensive (and requires the index).
       auto const DEBUG_ONLY [e, i] = m_data.dcls.isectAndExact();
       assertx(!i->empty());
-      assertx(e.isMissingDebug());
-      assertx(e.mightBeRegular() || e.couldBeOverriddenByRegular());
+      if (!e.isSerialized()) {
+        assertx(e.isMissingDebug());
+        assertx(e.mightBeRegular() || e.couldBeOverriddenByRegular());
+      }
       for (auto const DEBUG_ONLY c : *i) {
+        if (c.isSerialized()) continue;
         assertx(!c.same(e));
         assertx(!c.hasCompleteChildren());
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
@@ -3071,7 +3087,8 @@ bool Type::checkInvariants() const {
     assertx(
       m_data.dwh->cls.cls().name()->tsame(s_Awaitable.get())
     );
-    assertx(m_data.dwh->cls.cls().isComplete());
+    assertx(m_data.dwh->cls.cls().isSerialized() ||
+            m_data.dwh->cls.cls().isComplete());
     break;
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
@@ -6400,29 +6417,68 @@ struct TypeCOWer : public COWer {
 
 //////////////////////////////////////////////////////////////////////
 
-void unserialize_classes_impl(const Type& t, COWer& parent) {
+void unserialize_classes_impl(const IIndex& index,
+                              const Type& t,
+                              COWer& parent) {
   SCOPE_EXIT { parent.noCOW().checkInvariants(); };
 
   auto const onDCls = [&] (const DCls& dcls, bool isObj) {
     auto newT = [&] () -> Optional<Type> {
       if (dcls.isIsect()) {
+        auto const& isect = dcls.isect();
+        if (!std::any_of(
+              isect.begin(),
+              isect.end(),
+              [] (res::Class i) { return i.isSerialized(); }
+            )) {
+          return std::nullopt;
+        }
+        auto const nonReg = dcls.containsNonRegular();
+
         auto out = TInitCell;
-        for (auto const& i : dcls.isect()) {
-          out &= isObj
-            ? subObj(i)
-            : subCls(i, dcls.containsNonRegular());
+        for (auto const i : isect) {
+          auto const u = i.unserialize(index);
+          if (!u) return TBottom;
+          out &= isObj ? subObj(*u) : subCls(*u, nonReg);
         }
         return out;
       } else if (dcls.isIsectAndExact()) {
         auto const [e, isect] = dcls.isectAndExact();
-        auto out = isObj ? objExact(e) : clsExact(e, true);
-        for (auto const& i : *isect) {
-          out &= isObj
-            ? subObj(i)
-            : subCls(i, dcls.containsNonRegular());
+        if (!e.isSerialized() &&
+            !std::any_of(
+              isect->begin(),
+              isect->end(),
+              [] (res::Class i) { return i.isSerialized(); }
+            )) {
+          return std::nullopt;
+        }
+        auto const nonReg = dcls.containsNonRegular();
+
+        auto const eu = e.unserialize(index);
+        if (!eu) return TBottom;
+        auto out = isObj ? objExact(*eu) : clsExact(*eu, nonReg);
+        for (auto const i : *isect) {
+          auto const u = i.unserialize(index);
+          if (!u) return TBottom;
+          out &= isObj ? subObj(*u) : subCls(*u, nonReg);
         }
         return out;
       } else {
+        auto const& cls = dcls.cls();
+        if (!cls.isSerialized()) return std::nullopt;
+        auto const u = cls.unserialize(index);
+        if (!u) return TBottom;
+
+        if (dcls.isExact()) {
+          return isObj
+            ? objExact(*u)
+            : clsExact(*u, dcls.containsNonRegular());
+        } else {
+          assertx(dcls.isSub());
+          return isObj
+            ? subObj(*u)
+            : subCls(*u, dcls.containsNonRegular());
+        }
         return std::nullopt;
       }
     }();
@@ -6452,14 +6508,20 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
       break;
     case DataTag::WaitHandle: {
       WaitHandleCOWer next{parent, *t.m_data.dwh};
-      unserialize_classes_impl(next.get().inner, next);
-      assertx(!next.get().cls.isIsect());
+      unserialize_classes_impl(index, next.get().inner, next);
+      auto const& dcls = next.get().cls;
+      if (dcls.cls().isSerialized()) {
+        auto const u = dcls.cls().unserialize(index);
+        assertx(u.has_value());
+        next.getAndCOW().cls.setCls(*u);
+      }
+      assertx(!dcls.isIsect());
       break;
     }
     case DataTag::ArrLikePacked: {
       ArrLikePackedCOWer next{parent, *t.m_data.packed};
       do {
-        unserialize_classes_impl(next.currentElem(), next);
+        unserialize_classes_impl(index, next.currentElem(), next);
         if (next.currentElem().is(BBottom)) {
           auto& p = parent();
           p = remove_bits(std::move(p), BArrLikeN);
@@ -6470,7 +6532,7 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
     }
     case DataTag::ArrLikePackedN: {
       ArrLikePackedNCOWer next{parent, *t.m_data.packedn};
-      unserialize_classes_impl(next.get().type, next);
+      unserialize_classes_impl(index, next.get().type, next);
       if (next.get().type.is(BBottom)) {
         auto& p = parent();
         p = remove_bits(std::move(p), BArrLikeN);
@@ -6481,7 +6543,7 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
       ArrLikeMapCOWer next{parent, *t.m_data.map};
       auto isBottom = false;
       do {
-        unserialize_classes_impl(next.currentElem(), next);
+        unserialize_classes_impl(index, next.currentElem(), next);
         if (next.currentElem().is(BBottom)) {
           auto& p = parent();
           p = remove_bits(std::move(p), BArrLikeN);
@@ -6494,7 +6556,7 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
                 next.optKeyOrValue().subtypeOf(BArrKey));
         assertx(!next.optKeyOrValue().couldBe(BCls | BObj));
         next.toOptVal();
-        unserialize_classes_impl(next.optKeyOrValue(), next);
+        unserialize_classes_impl(index, next.optKeyOrValue(), next);
       }
       break;
     }
@@ -6503,7 +6565,7 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
       assertx(next.keyOrValue().subtypeOf(BArrKey));
       assertx(!next.keyOrValue().couldBe(BCls | BObj));
       next.toValue();
-      unserialize_classes_impl(next.keyOrValue(), next);
+      unserialize_classes_impl(index, next.keyOrValue(), next);
       if (next.keyOrValue().is(BBottom)) {
         auto& p = parent();
         p = remove_bits(std::move(p), BArrLikeN);
@@ -6519,9 +6581,9 @@ void unserialize_classes_impl(const Type& t, COWer& parent) {
   }
 }
 
-Type unserialize_classes(Type t) {
+Type unserialize_classes(const IIndex& index, Type t) {
   TypeCOWer cower{t};
-  unserialize_classes_impl(t, cower);
+  unserialize_classes_impl(index, t, cower);
   return t;
 }
 

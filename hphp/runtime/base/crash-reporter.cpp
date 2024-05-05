@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -83,10 +84,12 @@ static CrashReportStage s_crash_report_stage;
 // using the helper tool `hphp/tools/extract_from_core.sh`.  They start at
 // kDebugAddr and each start is page size aligned.  These static variables
 // should be kept in sync with that utility.
-static uintptr_t s_jitprof_start;
-static uintptr_t s_jitprof_end;
-static uintptr_t s_stacktrace_start;
-static uintptr_t s_stacktrace_end;
+static uintptr_t s_jitprof_start = 0;
+static uintptr_t s_jitprof_end = 0;
+static uintptr_t s_stacktrace_start = 0;
+static uintptr_t s_stacktrace_end = 0;
+static uintptr_t s_perfmap_start = 0;
+static uintptr_t s_perfmap_end = 0;
 
 static const char* s_newIgnorelist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
@@ -345,6 +348,11 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       }
       auto const& stacktraceFile = RuntimeOption::StackTraceFilename;
       mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
+      if (RuntimeOption::EvalPerfPidMap) {
+        if (auto const debugInfo = Debug::DebugInfo::Get()) {
+          mapFileIn(debugInfo->perfMapName(), s_perfmap_start, s_perfmap_end);
+        }
+      }
     }
       [[fallthrough]];
     case CrashReportStage::SendEmail:

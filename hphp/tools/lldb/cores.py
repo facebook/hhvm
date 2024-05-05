@@ -24,7 +24,7 @@ class ExtractCommand(utils.Command):
         parser = cls.default_parser()
         parser.add_argument(
             "type",
-            choices=["jitprof", "stacktrace"],
+            choices=["jitprof", "perfmap", "stacktrace"],
             help="Type of data to extract",
         )
         parser.add_argument(

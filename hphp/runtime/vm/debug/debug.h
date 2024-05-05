@@ -44,6 +44,7 @@ struct DebugInfo {
     pidMapOverlayStart = from;
     pidMapOverlayEnd = to;
   }
+  std::string perfMapName() const { return m_perfMapName; }
 
  private:
   void recordPerfJitTracelet(TCRange range,

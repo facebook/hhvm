@@ -8,9 +8,9 @@
 
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/compression/ZlibCertificateDecompressor.h>
 #include <fizz/compression/ZstdCertificateDecompressor.h>
-#include <fizz/protocol/CertUtils.h>
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/CertManager.h>
 #include <fizz/server/TicketCodec.h>
@@ -152,12 +152,12 @@ FizzServerContextPtr createFizzServerContext(const HQServerParams& params) {
   if (!params.keyFilePath.empty()) {
     folly::readFile(params.keyFilePath.c_str(), keyData);
   }
-  auto cert = fizz::CertUtils::makeSelfCert(certData, keyData);
+  auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   auto certManager = std::make_shared<fizz::server::CertManager>();
   certManager->addCert(std::move(cert), true);
 
-  auto cert2 =
-      fizz::CertUtils::makeSelfCert(kPrime256v1CertData, kPrime256v1KeyData);
+  auto cert2 = fizz::openssl::CertUtils::makeSelfCert(kPrime256v1CertData,
+                                                      kPrime256v1KeyData);
   certManager->addCert(std::move(cert2), false);
 
   auto serverCtx = std::make_shared<fizz::server::FizzServerContext>();
@@ -200,7 +200,7 @@ FizzClientContextPtr createFizzClientContext(const HQBaseParams& params,
   if (!params.keyFilePath.empty()) {
     folly::readFile(params.keyFilePath.c_str(), keyData);
   }
-  auto cert = fizz::CertUtils::makeSelfCert(certData, keyData);
+  auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   ctx->setClientCertificate(std::move(cert));
   ctx->setSupportedAlpns(params.supportedAlpns);
   ctx->setDefaultShares(

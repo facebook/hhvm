@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
@@ -309,7 +309,7 @@ H3DatagramAsyncSocket::createFizzClientContext() {
     folly::readFile(options_.certAndKey_->first.c_str(), certData);
     std::string keyData;
     folly::readFile(options_.certAndKey_->second.c_str(), keyData);
-    auto cert = fizz::CertUtils::makeSelfCert(certData, keyData);
+    auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
     ctx->setClientCertificate(std::move(cert));
   }
 

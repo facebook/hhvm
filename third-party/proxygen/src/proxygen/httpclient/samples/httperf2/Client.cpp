@@ -9,7 +9,7 @@
 #include <proxygen/httpclient/samples/httperf2/Client.h>
 
 #include <boost/cast.hpp>
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/portability/OpenSSL.h>
@@ -153,7 +153,7 @@ void Client::setupFizzContext(std::shared_ptr<fizz::client::PskCache> pskCache,
     if (!key.empty()) {
       folly::readFile(key.c_str(), keyData);
     }
-    auto selfCert = fizz::CertUtils::makeSelfCert(certData, keyData);
+    auto selfCert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
     fizzContext_->setClientCertificate(std::move(selfCert));
   }
 }

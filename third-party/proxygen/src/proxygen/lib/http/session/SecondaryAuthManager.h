@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/Certificate.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <proxygen/lib/http/session/SecondaryAuthManagerBase.h>
 
 namespace proxygen {

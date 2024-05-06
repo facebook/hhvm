@@ -1163,6 +1163,11 @@ bool combine_ts(Block* dstBlk, TrackedStore& dst, TrackedStore src) {
   auto const compat = [](const IRInstruction* i1, const IRInstruction* i2) {
     assertx(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
+    assertx(i1->hasExtra() == i2->hasExtra());
+    if (i1->hasExtra() &&
+        !equalsExtra(i1->op(), i1->rawExtra(), i2->rawExtra())) {
+      return Compat::Bad;
+    }
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
     for (auto i = i1->numSrcs(); i--; ) {
       // Ptr and Lval types are imcompatible, as one requires two register,

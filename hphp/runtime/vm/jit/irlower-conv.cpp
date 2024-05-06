@@ -331,6 +331,20 @@ void cgDblAsBits(IRLS& env, const IRInstruction* inst) {
   v << copy{src, dst};
 }
 
+void cgIntAsPtrToElem(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{src, dst};
+}
+
+void cgPtrToElemAsInt(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{src, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

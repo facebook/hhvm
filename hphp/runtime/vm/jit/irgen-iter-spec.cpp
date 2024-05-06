@@ -230,7 +230,7 @@ Type getArrType(IterSpecialization specialization) {
 // high-level structure of the code.
 struct Accessor {
   Type arr_type;
-  Type pos_type;
+  bool is_ptr_iter;
   IterSpecialization iter_type;
   ArrayLayout layout = ArrayLayout::Top();
 
@@ -273,7 +273,6 @@ struct VecAccessor : public Accessor {
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    pos_type = is_ptr_iter ? TPtrToElem : TInt;
     layout = ArrayLayout::Vanilla();
     iter_type = specialization;
   }
@@ -314,9 +313,6 @@ struct VecAccessor : public Accessor {
       ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
-
-  private:
-    bool is_ptr_iter = false;
 };
 
 struct MixedAccessor : public Accessor {
@@ -326,7 +322,6 @@ struct MixedAccessor : public Accessor {
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    pos_type = is_ptr_iter ? TPtrToElem : TInt;
     key_types = specialization.keyTypes();
     specialization.keyTypes().toJitType(key_jit_type);
     layout = ArrayLayout::Vanilla();
@@ -368,7 +363,6 @@ struct MixedAccessor : public Accessor {
   }
 
 private:
-  bool is_ptr_iter = false;
   ArrayKeyTypes key_types;
   Type key_jit_type;
 };
@@ -376,8 +370,8 @@ private:
 struct BespokeAccessor : public Accessor {
   explicit BespokeAccessor(
       IterSpecialization specialization, ArrayLayout layout) {
+    is_ptr_iter = false;
     arr_type = getArrType(specialization).narrowToLayout(layout);
-    pos_type = TInt;
     iter_type = specialization;
     this->layout = layout;
   }
@@ -488,6 +482,12 @@ void iterStore(IRGS& env, uint32_t local, SSATmp* cell) {
   gen(env, StLoc, LocalId(local), fp(env), cell);
 }
 
+// Convert an iterator position to an integer representation.
+SSATmp* posAsInt(IRGS& env, const Accessor& accessor, SSATmp* pos) {
+  if (!accessor.is_ptr_iter) return pos;
+  return gen(env, PtrToElemAsInt, pos);
+}
+
 // It's important that we dec-ref the old values before the surprise check;
 // refcount-opts may fail to pair incs and decs separated by this check.
 //
@@ -511,7 +511,8 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
       iterStore(env, data.valId, cns(env, TInitNull));
       if (data.hasKey()) iterStore(env, data.keyId, cns(env, TInitNull));
       auto const old = accessor.advancePos(env, pos, -1);
-      gen(env, StIterPos, IterId(data.iterId), fp(env), old);
+      gen(env, StIterPos, IterId(data.iterId), fp(env),
+          posAsInt(env, accessor, old));
       gen(env, Jmp, makeExitSlow(env));
     }
   );
@@ -548,7 +549,7 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
   auto block = env.irb->curBlock();
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const pos = label->dst(0);
-  pos->setType(accessor.pos_type);
+  pos->setType(accessor.is_ptr_iter ? TPtrToElem : TInt);
   return pos;
 }
 
@@ -576,7 +577,8 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   auto const ty = IterTypeData(
     data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, StIterType, ty, fp(env));
-  gen(env, StIterEnd,  id, fp(env), accessor.getPos(env, arr, size));
+  auto const endPos = accessor.getPos(env, arr, size);
+  gen(env, StIterEnd, id, fp(env), posAsInt(env, accessor, endPos));
   gen(env, Jmp, header, accessor.getPos(env, arr, cns(env, 0)));
 }
 
@@ -584,16 +586,17 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
                            const IterArgs& data, const Type& value_type,
                            Block* body, uint32_t baseLocalId) {
   auto const pos = phiIterPos(env, accessor);
-  auto const arr = accessor.pos_type <= TInt
-    ? iterBase(env, accessor, data, baseLocalId)
-    : nullptr;
+  auto const arr = accessor.is_ptr_iter
+    ? nullptr
+    : iterBase(env, accessor, data, baseLocalId);
 
   auto const finish = [&](SSATmp* elm, SSATmp* val) {
     auto const keyed = data.hasKey();
     auto const key = keyed ? accessor.getKey(env, arr, elm) : nullptr;
     iterStore(env, data.valId, val);
     if (keyed) iterStore(env, data.keyId, key);
-    gen(env, StIterPos, IterId(data.iterId), fp(env), pos);
+    gen(env, StIterPos, IterId(data.iterId), fp(env),
+        posAsInt(env, accessor, pos));
     gen(env, IncRef, val);
     if (keyed) gen(env, IncRef, key);
   };
@@ -635,14 +638,19 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
     gen(env, CheckType, exit, accessor.arr_type, base);
   }
 
+  auto const asIterPosType = [&](SSATmp* iterPos) {
+    if (!accessor.is_ptr_iter) return iterPos;
+    return gen(env, IntAsPtrToElem, iterPos);
+  };
+
   auto const id = IterId(data.iterId);
-  auto const old = gen(env, LdIterPos, accessor.pos_type, id, fp(env));
-  auto const end = gen(env, LdIterEnd, accessor.pos_type, id, fp(env));
+  auto const old = asIterPosType(gen(env, LdIterPos, id, fp(env)));
+  auto const end = asIterPosType(gen(env, LdIterEnd, id, fp(env)));
   auto const pos = accessor.advancePos(env, old, 1);
 
   ifThen(env,
     [&](Block* taken) {
-      auto const eq = accessor.pos_type <= TInt ? EqInt : EqPtrIter;
+      auto const eq = accessor.is_ptr_iter ? EqPtrIter : EqInt;
       auto const done = gen(env, eq, pos, end);
       gen(env, JmpNZero, taken, done);
       gen(env, Jmp, footer, pos);

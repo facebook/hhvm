@@ -683,6 +683,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
+  case IntAsPtrToElem:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -881,6 +882,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileProp:
   case ProfileSwitchDest:
   case ProfileType:
+  case PtrToElemAsInt:
   case RBTraceEntry:
   case RBTraceMsg:
   case RecordFuncCall:

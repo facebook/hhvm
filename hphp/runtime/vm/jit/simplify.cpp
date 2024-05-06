@@ -2479,6 +2479,18 @@ SSATmp* simplifyDblAsBits(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyIntAsPtrToElem(State&, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->inst()->is(PtrToElemAsInt)) return src->inst()->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyPtrToElemAsInt(State&, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->inst()->is(IntAsPtrToElem)) return src->inst()->src(0);
+  return nullptr;
+}
+
 SSATmp* roundImpl(State& env, const IRInstruction* inst, double (*op)(double)) {
   auto const src  = inst->src(0);
 
@@ -4054,6 +4066,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(ConvArrLikeToDict)
       X(ConvArrLikeToKeyset)
       X(DblAsBits)
+      X(IntAsPtrToElem)
+      X(PtrToElemAsInt)
       X(Count)
       X(CountVec)
       X(CountDict)

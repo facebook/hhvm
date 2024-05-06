@@ -80,6 +80,8 @@ bool canDCE(const IRInstruction& inst) {
   case ConvDblToStr:
   case ConvIntToStr:
   case DblAsBits:
+  case IntAsPtrToElem:
+  case PtrToElemAsInt:
   case ConvPtrToLval:
   case NewColFromArray:
   case GtInt:

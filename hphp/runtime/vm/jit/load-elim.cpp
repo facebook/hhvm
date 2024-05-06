@@ -314,8 +314,6 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdStk:
     case LdMem:
     case LdMBase:
-    case LdIterPos:
-    case LdIterEnd:
     case LdFrameThis:
     case LdFrameCls:
       assertx(inst.hasTypeParam());
@@ -975,23 +973,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertStk:
     flags = handle_assert(env, inst);
     break;
-  case LdIterPos: {
-    // For pointer iters, the type of the pointee of the pos is a lower bound
-    // on the union of the types of the base's values. The same is true for the
-    // pointee type of the end.
-    //
-    // Since the end is loop-invariant, we can use its type to refine the pos
-    // and so avoid value type-checks. Here, "dropConstVal" drops the precise
-    // value of the end (for static bases) but preserves the pointee type.
-    auto const iter = inst.extra<LdIterPos>()->iterId;
-    auto const end_cls = canonicalize(AliasClass(aiter_end(inst.src(0), iter)));
-    auto const end = find_tracked(env, env.global.ainfo.find(end_cls));
-    if (end != nullptr) {
-      auto const end_type = end->knownType.dropConstVal();
-      if (end_type < inst.typeParam()) return FRefinableLoad { end_type };
-    }
-    break;
-  }
   case StIterType: {
     // StIterType stores an immediate to the iter's type fields. We construct a
     // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)

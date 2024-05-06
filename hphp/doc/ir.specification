@@ -426,6 +426,12 @@ To string conversions:
 
   Reinterpret a double as an integer with the same bit pattern.
 
+| IntAsPtrToElem,              D(PtrToElem), S(Int),                      NF
+
+| PtrToElemAsInt,              D(Int), S(PtrToElem),                      NF
+
+  Reinterpret cast between an integer and a PtrToElem.
+
 | OrdStr,                       D(Int), S(Str),                           NF
 
   Convert the first byte in a string to an unsigned integer.
@@ -948,14 +954,14 @@ To string conversions:
   Map, Set, ImmMap, or ImmSet, and that specific object type must be known at
   compile time.
 
-| LdIterPos<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
+| LdIterPos<iterId>, D(Int), S(FramePtr), NF
 
-| LdIterEnd<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
+| LdIterEnd<iterId>, D(Int), S(FramePtr), NF
 
   Load the specified field of the iterator at `iterId`. These ops should only
-  be generated for iterators known to have a specialized type (via CheckIter).
-  The type param `T` should be compatible with this type - i.e. `T` should be
-  either an int or a pointer based on whether it's an index or pointer iter.
+  be generated for iterators known to have a specialized type (via CheckIter)
+  and the values interpreted accordingly. If the iterator type is pointer based,
+  use IntAsPtrToElem to obtain the pointer.
 
 | LdFrameThis, DParam(Obj), S(FramePtr), NF
 
@@ -1825,12 +1831,14 @@ ReqBindJmp and CallFuncEntry.
   Sets the type of the iterator at `iterId` to `iterType`. This type must be a
   specialized type. Also sets auxiliary fields (like next helper index).
 
-| StIterPos<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
+| StIterPos<iterId>, ND, S(FramePtr) S(Int), NF
 
-| StIterEnd<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
+| StIterEnd<iterId>, ND, S(FramePtr) S(Int), NF
 
-  Store S1 to the given field of the iterator at `iterId`. S1 must be an int if
-  we're doing index iteration and a pointer if we're doing pointer iteration.
+  Store S1 to the given field of the iterator at `iterId`. These ops should only
+  be generated for iterators known to have a specialized type (via CheckIter)
+  and the values interpreted accordingly. If the iterator type is pointer based,
+  use PtrToElemAsInt to convert the pointer to an integer.
 
 | StStk<offset>, ND, S(StkPtr) S(Cell), NF
 

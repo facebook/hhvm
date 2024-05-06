@@ -2036,6 +2036,7 @@ dig_done:
     switch(c = *++s) {
       case '-':
         esign = 1;
+        [[fallthrough]];
       case '+':
         c = *++s;
     }

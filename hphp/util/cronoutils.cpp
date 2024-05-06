@@ -338,6 +338,7 @@ determine_periodicity(char *spec)
 	    case 'R':		/* full time spec (non-standard) */
 		CRONO_DEBUG(("%%%c -> per second", ch));
 		periodicity = PER_SECOND;
+		break;
 
 	    default:		/* ignore anything else */
 		CRONO_DEBUG(("ignoring %%%c\n", ch));

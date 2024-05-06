@@ -269,10 +269,10 @@ Result<typename std::decay<T>::type, Error> makeResult(T&& t) {
 // This is the non-void return type flavor.
 template <typename Func>
 typename std::enable_if<
-    !std::is_same<typename std::result_of<Func()>::type, void>::value,
-    Result<typename std::result_of<Func()>::type>>::type
+    !std::is_same<typename std::invoke_result<Func>::type, void>::value,
+    Result<typename std::invoke_result<Func>::type>>::type
 makeResultWith(Func&& func) {
-  using ResType = typename std::result_of<Func()>::type;
+  using ResType = typename std::invoke_result<Func>::type;
 
   try {
     return Result<ResType>(func());
@@ -286,7 +286,7 @@ makeResultWith(Func&& func) {
 // This is the void return type flavor; it produces Result<Unit>
 template <typename Func>
 typename std::enable_if<
-    std::is_same<typename std::result_of<Func()>::type, void>::value,
+    std::is_same<typename std::invoke_result<Func>::type, void>::value,
     Result<folly::Unit>>::type
 makeResultWith(Func&& func) {
   try {

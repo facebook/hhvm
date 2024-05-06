@@ -62,7 +62,7 @@ Optional<Type> eval_cell(Pred p) {
 }
 
 template<typename Pred>
-Optional<typename std::result_of<Pred()>::type>
+Optional<typename std::invoke_result<Pred>::type>
 eval_cell_value(Pred p) {
   try {
     ThrowAllErrorsSetter taes;

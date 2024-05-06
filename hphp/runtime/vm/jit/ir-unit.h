@@ -58,7 +58,7 @@ struct SSATmp;
  * use IRUnit::clone() to duplicate the instruction in arena memory.
  */
 template<class Func, class... Args>
-typename std::result_of<Func(IRInstruction*)>::type
+typename std::invoke_result<Func, IRInstruction*>::type
 makeInstruction(Func func, Args&&... args);
 
 //////////////////////////////////////////////////////////////////////

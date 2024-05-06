@@ -164,9 +164,9 @@ private:
 }
 
 template<class Func, class... Args>
-typename std::result_of<Func(IRInstruction*)>::type
+typename std::invoke_result<Func, IRInstruction*>::type
 makeInstruction(Func func, Args&&... args) {
-  typedef typename std::result_of<Func(IRInstruction*)>::type Ret;
+  typedef typename std::invoke_result<Func, IRInstruction*>::type Ret;
   return irunit_detail::InstructionBuilder<Ret,Func>(func).go(std::forward<Args>(args)...);
 }
 

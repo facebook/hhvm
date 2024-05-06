@@ -160,8 +160,8 @@ struct Either {
    */
   template<class LF, class RF>
   typename std::common_type<
-    typename std::result_of<LF(L)>::type,
-    typename std::result_of<RF(R)>::type
+    typename std::invoke_result<LF, L>::type,
+    typename std::invoke_result<RF, R>::type
   >::type match(const LF& lf, const RF& rf) const {
     if (auto const l = left()) return lf(l);
     return rf(reinterpret_cast<R>(bits & ~TagBit));

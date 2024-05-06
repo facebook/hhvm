@@ -583,7 +583,7 @@ public:
    */
   template <typename Fn, class... Args> ALWAYS_INLINE
   static typename std::enable_if<
-    std::is_same<typename std::result_of<Fn(Args...)>::type, void>::value,
+    std::is_same<typename std::invoke_result<Fn, Args...>::type, void>::value,
     bool
   >::type call_helper(Fn f, Args&&... args) {
     f(std::forward<Args>(args)...);
@@ -592,7 +592,7 @@ public:
 
   template <typename Fn, class... Args> ALWAYS_INLINE
   static typename std::enable_if<
-    std::is_same<typename std::result_of<Fn(Args...)>::type, bool>::value,
+    std::is_same<typename std::invoke_result<Fn, Args...>::type, bool>::value,
     bool
   >::type call_helper(Fn f, Args&&... args) {
     return f(std::forward<Args>(args)...);

@@ -436,7 +436,7 @@ void walkStackFrom(
 namespace backtrace_detail {
 
 template<typename F>
-using from_ret_t = std::result_of_t<F(const BTFrame&)>;
+using from_ret_t = std::invoke_result_t<F, const BTFrame&>;
 
 }
 

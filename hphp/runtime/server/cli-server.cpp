@@ -299,7 +299,7 @@ namespace {
 
 #ifdef SCM_CREDENTIALS
 
-template<class F, class R = typename std::result_of<F(msghdr*)>::type>
+template<class F, class R = typename std::invoke_result<F, msghdr*>::type>
 R with_ucred_message(int fd, F func) {
   iovec iov;
   int data = 1;

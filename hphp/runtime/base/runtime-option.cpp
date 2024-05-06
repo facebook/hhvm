@@ -2168,7 +2168,7 @@ ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) 
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
   if (str == nullptr) {
-#ifndef INSTRUMENTED_BUILD
+#if !defined(INSTRUMENTED_BUILD) && defined(USE_LOWPTR)
    return 1u << 30;
 #else
    return 1u << 31;

@@ -13,9 +13,9 @@
 
 #include <folly/Format.h>
 #include <folly/ThreadLocal.h>
-#include <folly/experimental/JemallocNodumpAllocator.h>
 #include <folly/io/Cursor.h>
 #include <folly/lang/Bits.h>
+#include <folly/memory/JemallocNodumpAllocator.h>
 #include <glog/logging.h>
 
 #include "mcrouter/lib/Clocks.h"

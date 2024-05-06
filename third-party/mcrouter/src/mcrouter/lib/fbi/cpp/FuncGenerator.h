@@ -37,7 +37,7 @@ struct FuncGenerator {
   struct Functor {
     Functor(Func* f, size_t id) : f_(f), id_(id) {}
 
-    typename std::result_of<Func(size_t)>::type operator()() const {
+    typename std::invoke_result<Func, size_t>::type operator()() const {
       assert(f_);
       return (*f_)(id_);
     }

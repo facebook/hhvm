@@ -518,6 +518,7 @@ void Decoder::DecodeDataProcessing(Instruction* instr) {
             }
             break;
           }
+          break;
         }
         case 1:
         case 3:

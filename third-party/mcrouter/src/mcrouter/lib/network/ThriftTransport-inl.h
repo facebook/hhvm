@@ -130,7 +130,8 @@ auto ThriftTransportBase::sendSyncImpl(F&& sendFunc) {
     return std::move(*tryReply->response);
   }
 
-  return makeError<typename std::result_of_t<F()>::element_type::response_type>(
+  return makeError<
+      typename std::invoke_result_t<F>::element_type::response_type>(
       oldState,
       tryReply.hasException() ? tryReply.exception()
                               : tryReply->response.exception());

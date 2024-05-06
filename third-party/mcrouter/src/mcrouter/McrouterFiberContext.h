@@ -119,7 +119,7 @@ class fiber_local {
    * Clear all locals, run `f`, restore locals
    */
   template <class F>
-  static typename std::result_of<F()>::type runWithoutLocals(F&& f) {
+  static typename std::invoke_result<F>::type runWithoutLocals(F&& f) {
     auto guard = makeGuardHelperReset();
 
     return f();
@@ -129,7 +129,7 @@ class fiber_local {
    * Copy all locals, run `f`, restore locals
    */
   template <class F>
-  static typename std::result_of<F()>::type runWithLocals(F&& f) {
+  static typename std::invoke_result<F>::type runWithLocals(F&& f) {
     auto guard = makeGuardHelperCopy();
 
     return f();

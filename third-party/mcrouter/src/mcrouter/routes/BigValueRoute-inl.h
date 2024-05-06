@@ -52,12 +52,12 @@ uint64_t hashBigValue(const folly::IOBuf& value);
 
 template <class RouterInfo>
 template <class FuncIt>
-std::vector<typename std::result_of<
-    typename std::iterator_traits<FuncIt>::value_type()>::type>
+std::vector<typename std::invoke_result<
+    typename std::iterator_traits<FuncIt>::value_type>::type>
 BigValueRoute<RouterInfo>::collectAllByBatches(FuncIt beginF, FuncIt endF)
     const {
-  using Reply = typename std::result_of<
-      typename std::iterator_traits<FuncIt>::value_type()>::type;
+  using Reply = typename std::invoke_result<
+      typename std::iterator_traits<FuncIt>::value_type>::type;
 
   auto batchSize = options_.batchSize;
   const size_t rangeSize = std::distance(beginF, endF);

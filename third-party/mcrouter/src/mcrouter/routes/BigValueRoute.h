@@ -119,8 +119,8 @@ class BigValueRoute {
       size_t retriesLeft) const;
 
   template <class FuncIt>
-  std::vector<typename std::result_of<
-      typename std::iterator_traits<FuncIt>::value_type()>::type>
+  std::vector<typename std::invoke_result<
+      typename std::iterator_traits<FuncIt>::value_type>::type>
   collectAllByBatches(FuncIt beginF, FuncIt endF) const;
 
   template <class Request>

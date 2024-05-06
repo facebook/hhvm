@@ -25,16 +25,19 @@ Otherwise approximate up or down according to
 return nothing. *)
 let negate_type env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
+  let approximated =
+    if Utils.equal_approx approx Utils.ApproxUp then
+      MkType.mixed r
+    else
+      MkType.nothing r
+  in
   let neg_ty =
     match get_node ty with
     | Tprim Aast.Tnull -> MkType.nonnull r
-    | Tprim tp -> begin
+    | Tprim _ -> begin
       match Typing_refinement.TyPredicate.of_ty env ty with
       | Some (_env, predicate) -> MkType.neg r (Neg_predicate predicate)
-      | None -> MkType.neg r (Neg_prim tp)
-      (* only prims that should fall into this case should be void, noreturn
-         which seems like a silly thing to create a predicate for so
-         TODO: do we ever really need to negate void/noreturn? *)
+      | None -> approximated (* void, noreturn *)
     end
     | Tneg (Neg_predicate predicate) ->
       Typing_refinement.TyPredicate.to_ty r predicate
@@ -43,11 +46,7 @@ let negate_type env r ty ~approx =
       MkType.class_type r c []
     | Tnonnull -> MkType.null r
     | Tclass (c, Nonexact _, _) -> MkType.neg r (Neg_class c)
-    | _ ->
-      if Utils.equal_approx approx Utils.ApproxUp then
-        MkType.mixed r
-      else
-        MkType.nothing r
+    | _ -> approximated
   in
   (env, neg_ty)
 

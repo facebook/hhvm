@@ -143,6 +143,7 @@ struct AutoloadMap {
    */
   virtual Optional<FileResult> getTypeOrTypeAliasFile(const String& typeName) = 0;
   virtual Optional<FileResult> getTypeFile(const String& typeName) = 0;
+  virtual Optional<FileResult> getTypeFileRelative(const String& typeName) = 0;
   virtual Optional<FileResult> getFunctionFile(const String& functionName) = 0;
   virtual Optional<FileResult> getConstantFile(const String& constantName) = 0;
   virtual Optional<FileResult> getTypeAliasFile(const String& aliasName) = 0;
@@ -150,6 +151,7 @@ struct AutoloadMap {
 
   virtual Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getTypeFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeFileRelative(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getFunctionFile(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getConstantFile(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) = 0;

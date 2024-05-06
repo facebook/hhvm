@@ -79,6 +79,13 @@ Optional<AutoloadMap::FileResult> FactsLogger::getTypeFile(const String& name) {
       __func__, name.slice(), [&]() { return m_inner->getTypeFile(name); });
 }
 
+Optional<AutoloadMap::FileResult> FactsLogger::getTypeFileRelative(
+    const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getTypeFileRelative(name);
+  });
+}
+
 Optional<AutoloadMap::FileResult> FactsLogger::getFunctionFile(
     const String& name) {
   return logPerf(
@@ -113,6 +120,12 @@ Optional<std::filesystem::path> FactsLogger::getTypeOrTypeAliasFile(
 Optional<std::filesystem::path> FactsLogger::getTypeFile(
     std::string_view name) {
   return logPerf(__func__, name, [&]() { return m_inner->getTypeFile(name); });
+}
+
+Optional<std::filesystem::path> FactsLogger::getTypeFileRelative(
+    std::string_view name) {
+  return logPerf(
+      __func__, name, [&]() { return m_inner->getTypeFileRelative(name); });
 }
 
 Optional<std::filesystem::path> FactsLogger::getFunctionFile(

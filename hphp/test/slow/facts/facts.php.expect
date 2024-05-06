@@ -55,6 +55,9 @@ Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require ex
 Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
+Getting paths
+AppleThenBanana has relative path: attribute-classes.inc
+
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
 Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
@@ -156,6 +159,9 @@ Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require 
 Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClass"]
 Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
+
+Getting paths
+AppleThenBanana has relative path: attribute-classes.inc
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}

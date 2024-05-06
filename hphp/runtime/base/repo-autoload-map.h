@@ -46,6 +46,7 @@ struct RepoAutoloadMap final : AutoloadMap {
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFileRelative(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
   Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
   Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
@@ -53,6 +54,7 @@ struct RepoAutoloadMap final : AutoloadMap {
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
   Optional<std::filesystem::path> getTypeFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getFunctionFile(std::string_view name) override;
   Optional<std::filesystem::path> getConstantFile(std::string_view name) override;
   Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) override;

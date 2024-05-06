@@ -119,6 +119,11 @@ RepoAutoloadMap::getTypeFile(const String& typeName) {
 }
 
 Optional<AutoloadMap::FileResult>
+RepoAutoloadMap::getTypeFileRelative(const String& typeName) {
+  return getPathFromSymbol(m_types, typeName);
+}
+
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getFunctionFile(const String& funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
@@ -149,6 +154,11 @@ RepoAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
 
 Optional<fs::path>
 RepoAutoloadMap::getTypeFile(std::string_view typeName) {
+  return getPathFromSymbol(m_types, typeName);
+}
+
+Optional<fs::path>
+RepoAutoloadMap::getTypeFileRelative(std::string_view typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 

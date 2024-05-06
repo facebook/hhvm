@@ -598,6 +598,15 @@ Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
   }
 }
 
+Variant HHVM_FUNCTION(facts_type_to_path_relative, const String& typeName) {
+  auto fileRes = Facts::getFactsOrThrow().getTypeFileRelative(typeName);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->m_path};
+  }
+}
+
 Variant HHVM_FUNCTION(
     facts_type_or_type_alias_to_path,
     const String& typeName) {
@@ -812,6 +821,8 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(HH\\Facts\\schema_version, HHVM_FN(facts_schema_version));
   HHVM_NAMED_FE(HH\\Facts\\sync, HHVM_FN(facts_sync));
   HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_to_path_relative, HHVM_FN(facts_type_to_path_relative));
   HHVM_NAMED_FE(
       HH\\Facts\\type_or_type_alias_to_path,
       HHVM_FN(facts_type_or_type_alias_to_path));

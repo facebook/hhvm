@@ -232,6 +232,13 @@ function print_num_symbols(
   print "$path has $num_type_aliases type aliases\n";
 }
 
+function print_type_file_relative_path(
+  string $className,
+): void {
+  $path = HH\Facts\type_to_path_relative($className);
+  print "$className has relative path: $path\n";
+}
+
 <<__EntryPoint>>
 function facts(): void {
     var_dump(HH\Facts\enabled());
@@ -457,6 +464,9 @@ function facts(): void {
     FinalClassUsesTRequireClassB::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
+
+  print "\nGetting paths\n";
+  print_type_file_relative_path(AppleThenBanana::class);
 
   print "\nGetting attributes\n";
 

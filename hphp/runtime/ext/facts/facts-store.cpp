@@ -596,6 +596,13 @@ struct FactsStoreImpl final
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
+  Optional<AutoloadMap::FileResult> getTypeFileRelative(
+      const String& type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
+  }
+
   Optional<AutoloadMap::FileResult> getFunctionFile(
       const String& function) override {
     return getSymbolFile<SymKind::Function>(
@@ -637,6 +644,12 @@ struct FactsStoreImpl final
 
   Optional<fs::path> getTypeFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
+  }
+
+  Optional<fs::path> getTypeFileRelative(std::string_view type) override {
+    return getSymbolFileRelative<SymKind::Type>(
         type,
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
@@ -1255,6 +1268,28 @@ struct FactsStoreImpl final
     fs::path p{fileStr->toCppString()};
     assertx(p.is_relative());
     return m_root / p;
+  }
+
+  template <SymKind K, class T>
+  Optional<AutoloadMap::FileResult> getSymbolFileRelative(
+      const String& symbol,
+      T lambda) {
+    auto path =
+        getSymbolFileRelative<K>(std::string_view{symbol.slice()}, lambda);
+    if (UNLIKELY(!path)) {
+      return {};
+    }
+    return AutoloadMap::FileResult(String{path->native()});
+  }
+
+  template <SymKind K, class T>
+  Optional<fs::path> getSymbolFileRelative(std::string_view symbol, T lambda) {
+    const StringData* fileStr = lambda(m_symbolMap, Symbol<K>{symbol}).get();
+    if (UNLIKELY(!fileStr))
+      return std::nullopt;
+    fs::path p{fileStr->toCppString()};
+    assertx(p.is_relative());
+    return p;
   }
 
   /**

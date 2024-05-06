@@ -116,6 +116,8 @@ function module_to_path(string $module_name)[]: ?string;
 <<__Native>>
 function type_to_path(string $type_name)[]: ?string;
 <<__Native>>
+function type_to_path_relative(string $type_name)[]: ?string;
+<<__Native>>
 function function_to_path(string $function_name)[]: ?string;
 <<__Native>>
 function constant_to_path(string $constant_name)[]: ?string;

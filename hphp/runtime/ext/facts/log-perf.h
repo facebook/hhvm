@@ -44,6 +44,7 @@ struct FactsLogger final : public FactsStore,
 
   Optional<FileResult> getTypeOrTypeAliasFile(const String&) override;
   Optional<FileResult> getTypeFile(const String&) override;
+  Optional<FileResult> getTypeFileRelative(const String&) override;
   Optional<FileResult> getFunctionFile(const String&) override;
   Optional<FileResult> getConstantFile(const String&) override;
   Optional<FileResult> getTypeAliasFile(const String&) override;
@@ -52,6 +53,8 @@ struct FactsLogger final : public FactsStore,
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(
       std::string_view) override;
   Optional<std::filesystem::path> getTypeFile(std::string_view) override;
+  Optional<std::filesystem::path> getTypeFileRelative(
+      std::string_view) override;
   Optional<std::filesystem::path> getFunctionFile(std::string_view) override;
   Optional<std::filesystem::path> getConstantFile(std::string_view) override;
   Optional<std::filesystem::path> getTypeAliasFile(std::string_view) override;

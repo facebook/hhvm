@@ -513,6 +513,20 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(name);
   }
 
+  Optional<FileResult> getTypeFileRelative(const String& typeName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getTypeFileRelative};
+    static const auto wrapper{wrap(m, "getTypeFileRelative1")};
+    return wrapper(typeName);
+  }
+
+  Optional<std::filesystem::path> getTypeFileRelative(std::string_view name) override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getTypeFileRelative};
+    static const auto wrapper{wrap(m, "getTypeFileRelative2")};
+    return wrapper(name);
+  }
+
   Variant getTypeName(const String& type) override {
     static constexpr auto m{&HPHP::FactsStore::getTypeName};
     static const auto wrapper{wrap(m, "getTypeName")};

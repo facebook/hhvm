@@ -631,7 +631,6 @@ module DataType = struct
     | Tneg n ->
       let right =
         match n with
-        | Neg_prim prim -> prim_to_datatypes ~trail prim
         | Neg_class (_, cls) -> Class.to_datatypes ~trail env cls
         | Neg_predicate predicate -> fromPredicate ~trail env predicate
       in

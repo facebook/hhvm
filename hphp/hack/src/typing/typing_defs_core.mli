@@ -197,7 +197,6 @@ type type_predicate =
 (** Negation types represent the type of values that fail an `is` test
     for either a primitive type, or a class-ish type C<_> *)
 type neg_type =
-  | Neg_prim of Aast.tprim  (** The negation of a primitive type *)
   | Neg_class of pos_id
       (** The negation of a class. If we think of types as denoting sets
        of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is

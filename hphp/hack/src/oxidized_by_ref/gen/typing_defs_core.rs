@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a59ef3084e28ec563b211447cab16b4c>>
+// @generated SignedSource<<49b484d8faa77d8808d95f056dbeb6eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -472,9 +472,6 @@ pub use oxidized::typing_defs_core::TypePredicate;
 #[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum NegType<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Neg_prim")]
-    NegPrim(&'a oxidized::ast_defs::Tprim),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Neg_class")]
     NegClass(&'a PosId<'a>),

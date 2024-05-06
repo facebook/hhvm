@@ -298,7 +298,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_neg_type acc r neg_ty =
       match neg_ty with
-      | Neg_prim p -> this#on_tprim acc r p
       | Neg_class c -> this#on_tclass acc r c nonexact []
       | Neg_predicate _p -> acc
 

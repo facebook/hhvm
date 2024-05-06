@@ -260,8 +260,6 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
     | Tnonnull -> ValueSet.universe
     | _ -> Set.add (symbolic_dnf_values env ty) Value.Null
   end
-  | Tneg (Neg_prim prim) ->
-    ValueSet.(symbolic_diff universe (prim_to_values prim))
   | Tneg (Neg_predicate predicate) -> begin
     match
       Typing_defs.get_node

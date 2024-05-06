@@ -63,8 +63,6 @@ let rec split_ty
     | Tshape _ -> partition_f env DataType.(of_ty env Shape) ty
     | Tclass ((_, name), _, _) ->
       partition_f env DataType.(of_ty env @@ Class name) ty
-    | Tneg (Neg_prim prim) ->
-      partition_f env DataType.(complement @@ of_ty env @@ Primitive prim) ty
     | Tneg (Neg_class (_, name)) ->
       partition_f env DataType.(complement @@ of_ty env @@ Class name) ty
     | Tneg (Neg_predicate pred) ->

@@ -254,7 +254,6 @@ type type_predicate =
 [@@deriving eq, ord, hash, show { with_path = false }]
 
 type neg_type =
-  | Neg_prim of Ast_defs.tprim
   | Neg_class of pos_id
   | Neg_predicate of type_predicate
 [@@deriving hash, show { with_path = false }]
@@ -772,15 +771,12 @@ include Pp
 (** Compare two neg_type, ignoring any position information. *)
 let neg_type_compare (neg1 : neg_type) neg2 =
   match (neg1, neg2) with
-  | (Neg_prim tp1, Neg_prim tp2) -> Aast.compare_tprim tp1 tp2
   | (Neg_class c1, Neg_class c2) ->
     (* We ignore positions here *)
     String.compare (snd c1) (snd c2)
   | (Neg_predicate p1, Neg_predicate p2) -> compare_type_predicate p1 p2
-  | (Neg_prim _, Neg_class _) -> -1
-  | (Neg_class _, Neg_prim _) -> 1
-  | (Neg_predicate _, (Neg_prim _ | Neg_class _)) -> -1
-  | ((Neg_prim _ | Neg_class _), Neg_predicate _) -> 1
+  | (Neg_predicate _, Neg_class _) -> -1
+  | (Neg_class _, Neg_predicate _) -> 1
 
 (* Constructor and deconstructor functions for types and constraint types.
  * Abstracting these lets us change the implementation, e.g. hash cons

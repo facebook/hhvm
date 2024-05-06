@@ -934,7 +934,6 @@ module Full = struct
         (fuel, Concat [text "?"; d])
     end
     | Tprim x -> (fuel, tprim x)
-    | Tneg (Neg_prim x) -> (fuel, Concat [text "not "; tprim x])
     | Tneg (Neg_class c) -> (fuel, Concat [text "not "; to_doc (snd c)])
     | Tneg (Neg_predicate predicate) ->
       type_predicate ~fuel ~negate:true predicate
@@ -1541,7 +1540,6 @@ module ErrorString = struct
          prints with a different function (namely Full.locl_ty) *)
       failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> (fuel, "a type constant")
-    | Tneg (Neg_prim p) -> (fuel, "anything but a " ^ tprim p)
     | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
     | Tneg (Neg_predicate predicate) ->
       let str =
@@ -1734,8 +1732,6 @@ module Json = struct
     end
     | (p, Tprim tp) ->
       obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
-    | (p, Tneg (Neg_prim tp)) ->
-      obj @@ kind p "negation" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tneg (Neg_predicate predicate)) ->
       let predicate_json =

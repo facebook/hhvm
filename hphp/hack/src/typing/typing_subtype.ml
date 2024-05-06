@@ -577,8 +577,7 @@ module Subtype_negation = struct
       match get_node ty with
       | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
       | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_predicate IsArraykey))
-      | Tneg (Neg_predicate IsArraykey)
-      | Tneg (Neg_prim Aast.Tarraykey) ->
+      | Tneg (Neg_predicate IsArraykey) ->
         Some (MakeType.prim_type r Aast.Tarraykey)
       | Tneg (Neg_predicate IsNull)
       | Tnonnull ->
@@ -819,14 +818,8 @@ end = struct
     let (env, ty2) = Env.expand_type env ty2 in
     match (deref ty1, deref ty2) with
     | ( ((_, Tvar _) as tv),
-        (( _,
-           ( Tprim Aast.Tarraykey
-           | Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey) ) ) as
-        ak) )
-    | ( (( _,
-           ( Tprim Aast.Tarraykey
-           | Tneg (Neg_prim Aast.Tarraykey | Neg_predicate IsArraykey) ) ) as
-        ak),
+        ((_, (Tprim Aast.Tarraykey | Tneg (Neg_predicate IsArraykey))) as ak) )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_predicate IsArraykey))) as ak),
         ((_, Tvar _) as tv) ) ->
       (env, Some (tv, ak))
     | _ -> (env, None)
@@ -836,7 +829,7 @@ end = struct
     | (env, Some (tv, ak)) -> (env, (tv, ak))
     | _ ->
       failwith
-        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg (Neg_prim Tarraykey)]"
+        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg (Neg_predicate Tarraykey)]"
 
   let expands_to_var_and_arraykey ty1 ty2 ~env =
     match var_and_arraykey_opt ty1 ty2 ~env with
@@ -4378,56 +4371,6 @@ end = struct
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
     (* -- C-Neg-R ----------------------------------------------------------- *)
-    | (_, (r_super, Tneg (Neg_prim prim_super))) -> begin
-      match deref ty_sub with
-      | (r_sub, Tneg (Neg_prim prim_sub)) ->
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~lhs:
-            {
-              sub_supportdyn = None;
-              ty_sub = MakeType.prim_type r_super prim_super;
-            }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = MakeType.prim_type r_sub prim_sub;
-            }
-          env
-      | (_, Tneg (Neg_class _)) ->
-        (* not C contains all primitive types, and so can't be a subtype of
-           not p, which doesn't contain primitive type p *)
-        invalid ~fail env
-      | (_, Tprim tprim_sub) ->
-        if Subtype_negation.is_tprim_disjoint tprim_sub prim_super then
-          valid env
-        else
-          invalid ~fail env
-      | (_, Tclass ((_, cname), ex, _))
-        when String.equal cname SN.Classes.cStringish
-             && is_nonexact ex
-             && Aast.(
-                  equal_tprim prim_super Tstring
-                  || equal_tprim prim_super Tarraykey) ->
-        invalid ~fail env
-      (* All of these are definitely disjoint from primitive types *)
-      | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (Neg_prim prim_super));
-            }
-          env
-    end
     | (_, (reason_super, Tneg (Neg_predicate predicate))) -> begin
       match deref ty_sub with
       | (_, Tvar _) ->
@@ -4482,10 +4425,6 @@ end = struct
           valid env
         else
           invalid ~fail env
-      | (_, Tneg (Neg_prim _)) ->
-        (* not p, for any primitive type p contains all class types, and so
-           can't be a subtype of not c, which doesn't contain class types c *)
-        invalid ~fail env
       | (_, Tclass ((_, c_sub), _, _)) ->
         if Subtype_negation.is_class_disjoint env c_sub c_super then
           valid env
@@ -6066,11 +6005,7 @@ end = struct
           (Typing_refinement.TyPredicate.to_ty reason_super predicate :: tyl)
       in
       let refine_false tyl =
-        let neg =
-          match predicate with
-          | IsNull -> MakeType.nonnull reason_super
-          | _ -> MakeType.neg reason_super (Neg_predicate predicate)
-        in
+        let neg = MakeType.neg reason_super (Neg_predicate predicate) in
         intersect (neg :: tyl)
       in
       let (env, props) =
@@ -7929,10 +7864,6 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.null Reason.Rnone)
   | (_, Tnonnull) ->
     is_sub_type_for_union_help env ty1 (MakeType.null Reason.Rnone)
-  | (Tneg (Neg_prim tp1), _) ->
-    is_sub_type_for_union_help env ty2 (MakeType.prim_type Reason.Rnone tp1)
-  | (_, Tneg (Neg_prim tp2)) ->
-    is_sub_type_for_union_help env ty1 (MakeType.prim_type Reason.Rnone tp2)
   | (Tneg (Neg_predicate pred1), _) ->
     is_sub_type_for_union_help
       env

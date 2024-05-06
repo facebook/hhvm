@@ -15,7 +15,7 @@ namespace facebook {
 namespace memcache {
 
 template <class F>
-typename std::result_of<F(folly::StringPiece)>::type hashWithSalt(
+typename std::invoke_result<F, folly::StringPiece>::type hashWithSalt(
     const folly::StringPiece key,
     const folly::StringPiece salt,
     F&& hashFunc) {

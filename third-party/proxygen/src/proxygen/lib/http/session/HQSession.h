@@ -2062,6 +2062,18 @@ class HQSession
     return const_cast<HTTPSessionObserverContainer*>(
         &sessionObserverContainer_);
   }
+
+  class WriteScheduler : public folly::EventBase::LoopCallback {
+   public:
+    explicit WriteScheduler(HQSession& session) : session_(session) {
+    }
+    ~WriteScheduler() override = default;
+    void runLoopCallback() noexcept override;
+
+   private:
+    HQSession& session_;
+  };
+  WriteScheduler writeScheduler_{*this};
 }; // HQSession
 
 std::ostream& operator<<(std::ostream& os, HQSession::DrainState drainState);

@@ -1117,8 +1117,18 @@ void HQSession::scheduleWrite() {
   }
 
   scheduledWrite_ = true;
-  sock_->notifyPendingWriteOnConnection(this);
+  if (auto* evb = getEventBase()) {
+    evb->runInLoop(&writeScheduler_, /*thisIteration=*/true);
+  } else {
+    sock_->notifyPendingWriteOnConnection(this);
+  }
 }
+
+void HQSession::WriteScheduler::runLoopCallback() noexcept {
+  if (session_.sock_) {
+    session_.sock_->notifyPendingWriteOnConnection(&session_);
+  }
+};
 
 void HQSession::scheduleLoopCallback(bool thisIteration) {
   if (sock_ && sock_->getEventBase()) {

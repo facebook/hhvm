@@ -1386,6 +1386,7 @@ void t_mstch_py3_generator::generate_types() {
 
   std::vector<std::string> cythonFilesNoTypeContext{
       "types_reflection.py",
+      "types_empty.pyx",
       "types_fields.pxd",
       "types_fields.pyx",
       "builders.py",

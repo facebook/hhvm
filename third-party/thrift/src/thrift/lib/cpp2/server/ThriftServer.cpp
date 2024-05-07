@@ -109,6 +109,7 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 
 THRIFT_FLAG_DEFINE_bool(fizz_deprecate_draft_versions, true);
+THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 
 THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 
@@ -1851,6 +1852,9 @@ void ThriftServer::updateCertsToWatch() {
     if (sslContext.clientCAFiles.empty()) {
       certPaths.insert(sslContext.clientCAFile);
     }
+    for (auto& dc : sslContext.delegatedCredentials) {
+      certPaths.insert(dc.combinedCertPath);
+    }
   }
   tlsCredWatcher_.withWLock([this, &certPaths](auto& credWatcher) {
     if (!credWatcher) {
@@ -2285,6 +2289,11 @@ folly::observer::Observer<bool> ThriftServer::enableAegis() {
 
 folly::observer::Observer<bool> ThriftServer::preferPskKe() {
   return THRIFT_FLAG_OBSERVE(server_fizz_prefer_psk_ke);
+}
+
+folly::observer::Observer<bool>
+ThriftServer::enablePresentingDelegatedCredentials() {
+  return THRIFT_FLAG_OBSERVE(server_fizz_enable_presenting_dc);
 }
 
 serverdbginfo::ResourcePoolsDbgInfo ThriftServer::getResourcePoolsDbgInfo()

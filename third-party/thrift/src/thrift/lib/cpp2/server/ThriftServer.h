@@ -2293,13 +2293,15 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
          hybridKexObserver = enableHybridKex(),
          aegisObserver = enableAegis(),
          pskModeObserver = preferPskKe(),
-         dcReceiveObserver = enableReceivingDelegatedCreds()]() {
+         dcReceiveObserver = enableReceivingDelegatedCreds(),
+         dcObserver = enablePresentingDelegatedCredentials()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
           (void)**hybridKexObserver;
           (void)**aegisObserver;
           (void)**pskModeObserver;
           (void)**dcReceiveObserver;
+          (void)**dcObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -2860,6 +2862,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   static folly::observer::Observer<bool> enableAegis();
 
   static folly::observer::Observer<bool> preferPskKe();
+
+  static folly::observer::Observer<bool> enablePresentingDelegatedCredentials();
 
   /**
    * For each request debug stub, a snapshot information can be constructed to

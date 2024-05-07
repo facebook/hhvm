@@ -195,6 +195,11 @@ let to_string
           ""
       in
       Printf.sprintf
+        (* /!\ WARNING!!!!!
+           Changing this might break emacs and vim.
+           These are not officially supported, but breaking will piss off users.
+           Fix Emacs at fbcode/emacs_config/emacs-packages/compile-mode-regexes.el
+           Fix Vim at fbcode/shellconfigs/rc_deprecated/vim/plugin/hack.vim, variable hack_errorformat *)
         "%s: %s\n%s (%s)%s\n"
         (Severity.to_all_caps_string severity)
         (Pos.string pos1)

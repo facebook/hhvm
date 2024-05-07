@@ -1257,16 +1257,22 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
         op::PatchOp::EnsureUnion,
         ensureValuePatch);
 
+    Mask readMask;
+    readMask.includes_ref().emplace()[2] = allMask();
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskViewFromPatch(patchObj), readMask, allMask()));
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskFromPatch(patchObj), readMask, allMask()));
+
     auto obj = applyDynamicPatch(patchObj, sourceValue).as_object();
     EXPECT_TRUE(obj.members()->find(1) == obj.members()->end());
     auto fieldIt = obj.members()->find(2);
     EXPECT_TRUE(fieldIt != obj.members()->end());
     EXPECT_EQ(44, fieldIt->second.as_i32());
 
-    // TODO(dokwon): Handle EnsureUnion for extractMaskFromPatch
-    // Object expectedObj;
-    // expectedObj[FieldId{2}].emplace_i32(44);
-    // testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
+    Object expectedObj;
+    expectedObj[FieldId{2}].emplace_i32(44);
+    testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
   }
   // Ensure member that is already set
   {
@@ -1284,6 +1290,13 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
     Object expectedObj;
     expectedObj[FieldId{1}].emplace_i32(42);
     testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
+
+    Mask readMask;
+    readMask.includes_ref().emplace()[1] = allMask();
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskViewFromPatch(patchObj), readMask, allMask()));
+    EXPECT_TRUE(checkReadWriteMask(
+        extractMaskFromPatch(patchObj), readMask, allMask()));
   }
 
   // Ensure Fail

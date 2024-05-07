@@ -655,7 +655,6 @@ void insertFieldsToMask(
   }
 }
 
-// TODO: Handle EnsureUnion
 ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
   ExtractedMasks masks = {noneMask(), noneMask()};
   // If Assign, it is a write operation
@@ -705,7 +704,7 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
     }
   }
 
-  // If EnsureStruct, add the fields/ keys to mask.
+  // If EnsureStruct, add fields/keys to mask.
   if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
     if (ensureStruct->if_object()) {
       insertEnsureReadFieldsToMask(masks.read, *ensureStruct);
@@ -713,6 +712,13 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
     } else {
       insertFieldsToMask(masks, *ensureStruct, false, view);
     }
+  }
+
+  // If EnsureUnion, add fields to mask for read mask and all mask for write
+  // mask.
+  if (auto* ensureUnion = findOp(patch, PatchOp::EnsureUnion)) {
+    insertEnsureReadFieldsToMask(masks.read, *ensureUnion);
+    masks.write = allMask();
   }
 
   return masks;

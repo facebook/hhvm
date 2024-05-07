@@ -256,6 +256,7 @@ let print_symbolInformation (info : SymbolInformation.t) : json =
         ("name", Some (JSON_String info.name));
         ("kind", Some (print_symbol_kind info.kind));
         ("location", Some (print_location info.location));
+        ("detail", Option.map info.detail ~f:string_);
         ("containerName", Option.map info.containerName ~f:string_);
       ])
 

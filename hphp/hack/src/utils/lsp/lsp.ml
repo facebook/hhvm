@@ -172,6 +172,7 @@ module SymbolInformation = struct
     name: string;
     kind: symbolKind;
     location: Location.t;
+    detail: string option;
     containerName: string option;
   }
 end

@@ -249,6 +249,7 @@ module SymbolInformation : sig
     name: string;
     kind: symbolKind;
     location: Location.t;  (** the span of the symbol including its contents *)
+    detail: string option;
     containerName: string option;  (** the symbol containing this symbol *)
   }
 end

@@ -2488,6 +2488,7 @@ let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
     SymbolInformation.name = Utils.strip_ns symbol.SearchUtils.name;
     kind = hack_to_lsp_kind symbol.SearchUtils.result_type;
     location = hack_pos_to_lsp_location symbol.SearchUtils.pos ~default_path:"";
+    detail = None;
     containerName = None;
   }
 
@@ -2539,6 +2540,7 @@ let rec hack_symbol_tree_to_lsp
           definition
           ~default_path:filename;
       containerName;
+      detail = None;
     }
   in
   match defs with

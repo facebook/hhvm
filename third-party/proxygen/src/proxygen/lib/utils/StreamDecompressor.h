@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 namespace folly {
@@ -16,7 +17,7 @@ class IOBuf;
 
 namespace proxygen {
 
-enum class CompressionType : int { NONE, DEFLATE, GZIP, ZSTD };
+enum class CompressionType : uint8_t { NONE, DEFLATE, GZIP, ZSTD };
 
 /**
  * Abstract base class for stream decompressor implementations.

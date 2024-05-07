@@ -68,6 +68,7 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
@@ -710,6 +711,14 @@ bool callViolatesDeploymentBoundaryHelper(const Func* symbol) {
 
 bool callViolatesDeploymentBoundaryHelper(const Class* symbol) {
   return g_context->getPackageInfo().violatesDeploymentBoundary(*symbol);
+}
+
+static ServiceData::ExportedCounter* s_staticAnalysisErrors =
+  ServiceData::createCounter("vm.static_analysis_errors");
+
+void raiseStaticAnalysisError() {
+  s_staticAnalysisErrors->increment();
+  raise_error("static analysis error: supposedly unreachable code was reached");
 }
 
 namespace MInstrHelpers {

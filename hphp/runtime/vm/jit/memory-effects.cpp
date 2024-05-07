@@ -1904,6 +1904,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseImplicitContextStateInvalid:
     return may_load_store(AEmpty, AEmpty);
 
+  case StaticAnalysisError:
+    if (RO::EvalCrashOnStaticAnalysisError) return IrrelevantEffects{};
+    return may_load_store(AHeapAny, AHeapAny);
+
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
     return may_load_store(

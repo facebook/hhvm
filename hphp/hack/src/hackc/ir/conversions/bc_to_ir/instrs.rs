@@ -1087,6 +1087,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Shl => simple!(Hhbc::Shl),
         Opcode::Shr => simple!(Hhbc::Shr),
         Opcode::Silence => simple!(Hhbc::Silence),
+        Opcode::StaticAnalysisError => todo!(),
         Opcode::Sub => simple!(Hhbc::Sub),
         Opcode::This => simple!(Hhbc::This),
         Opcode::Throw => simple!(Terminator::Throw),

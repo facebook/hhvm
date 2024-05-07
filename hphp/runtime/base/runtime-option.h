@@ -932,6 +932,7 @@ struct RuntimeOption {
      fb_intercept2 */                                                   \
   F(bool, FastMethodIntercept, false)                                   \
   F(bool, LogHttpServerSignalSource, true)                              \
+  F(bool, CrashOnStaticAnalysisError, debug)                            \
   /* */
 
 private:

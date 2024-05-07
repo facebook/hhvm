@@ -407,7 +407,7 @@ void cgLdResolvedTypeCnsNoCheck(IRLS& env, const IRInstruction* inst) {
     v << testqi{0x1, masked, sf};
     unlikelyIfThen(
       v, vcold(env), CC_Z, sf,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
 
@@ -474,7 +474,7 @@ void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
     v << testqi{static_cast<int32_t>(ConstModifiers::Kind::Context), type, sf};
     unlikelyIfThen(
       v, vcold(env), CC_Z, sf,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
     // Lets assert that the upper bits are zero
     auto const shifted = v.makeReg();
@@ -485,7 +485,7 @@ void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
     v << testq{shifted, shifted, sf2};
     unlikelyIfThen(
       v, vcold(env), CC_NZ, sf2,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
 }

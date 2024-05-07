@@ -534,6 +534,7 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
+  case StaticAnalysisError:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case RaiseForbiddenDynCall:

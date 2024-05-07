@@ -1053,6 +1053,10 @@ void Vgen<X64Asm>::emit(const testqim& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
+  if (i.fix.isValid()) {
+    env.meta.trapFixups.emplace_back(a.frontier(), i.fix);
+    env.record_inline_stack(a.frontier());
+  }
   a.ud2();
 }
 

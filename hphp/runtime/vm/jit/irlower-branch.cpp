@@ -263,7 +263,7 @@ void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
   if (Cfg::HHIR::GenerateAsserts) {
     auto const sf = v.makeReg();
     v << testq{src, src, sf};
-    ifThen(v, CC_Z, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+    ifThen(v, CC_Z, sf, [&](Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; });
   }
   v << copy{src, dst};
 }

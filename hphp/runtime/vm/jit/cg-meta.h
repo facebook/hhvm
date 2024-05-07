@@ -68,6 +68,7 @@ struct CGMeta {
    * Pending MCGenerator table entries.
    */
   std::vector<std::pair<TCA,Fixup>> fixups;
+  std::vector<std::pair<TCA,Fixup>> trapFixups;
   std::vector<std::pair<TCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
   std::vector<std::pair<TCA,FuncId>> callFuncIds;

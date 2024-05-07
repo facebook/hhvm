@@ -330,10 +330,8 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
 
     if (state.unreachable) {
       fallthrough = NoBlockId;
-      if (!(instrFlags(op.op) & TF)) {
-        gen(bc::BreakTraceHint {});
-        gen(bc::String { s_unreachable.get() });
-        gen(bc::Fatal { FatalOp::Runtime });
+      if (newBCs.empty() || !(instrFlags(newBCs.back().op) & TF)) {
+        gen(bc::StaticAnalysisError {});
       }
       break;
     }
@@ -383,8 +381,7 @@ BlockId make_fatal_block(php::WideFunc& func, const php::Block* srcBlk,
   auto const blk = func.blocks()[bid].mutate();
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
   blk->hhbcs = {
-    bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-    bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
+    bc_with_loc(srcLoc, bc::StaticAnalysisError {})
   };
   blk->fallthrough = NoBlockId;
   blk->throwExit = NoBlockId;
@@ -839,16 +836,10 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
     auto const removing_fatal = [&] {
       auto const& u = ent.second;
       if (!u.replacedBcs.empty()) return false;
-      if (u.unchangedBcs + 3 != blk->hhbcs.size()) return false;
-      auto const& bc1 = blk->hhbcs[u.unchangedBcs];
-      auto const& bc2 = blk->hhbcs[u.unchangedBcs+1];
-      auto const& bc3 = blk->hhbcs[u.unchangedBcs+2];
-      if (bc1.op != Op::BreakTraceHint) return false;
-      if (bc2.op != Op::String) return false;
-      if (bc3.op != Op::Fatal) return false;
-      if (bc2.String.str1 != s_unreachable.get()) return false;
-      if (bc3.Fatal.subop1 != FatalOp::Runtime) return false;
-      assertx(instrFlags(bc3.op) & TF);
+      if (u.unchangedBcs + 1 != blk->hhbcs.size()) return false;
+      auto const& bc = blk->hhbcs[u.unchangedBcs];
+      if (bc.op != Op::StaticAnalysisError) return false;
+      assertx(instrFlags(bc.op) & TF);
       return true;
     };
 
@@ -902,9 +893,7 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
       if (hasCf) {
         blk->fallthrough = fatal();
       } else {
-        blk->hhbcs.push_back(bc::BreakTraceHint {});
-        blk->hhbcs.push_back(bc::String { s_unreachable.get() });
-        blk->hhbcs.push_back(bc::Fatal { FatalOp::Runtime });
+        blk->hhbcs.push_back(bc::StaticAnalysisError {});
         set_changed();
       }
     }

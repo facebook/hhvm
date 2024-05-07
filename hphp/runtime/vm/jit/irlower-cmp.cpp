@@ -315,7 +315,7 @@ void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
   v << cmplim{(int32_t)func->getFuncId().toInt(), fp[AROFF(m_funcId)], sf};
-  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

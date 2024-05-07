@@ -189,6 +189,8 @@ static const struct {
                                       Stack1,       OutNull         }},
   { OpFatal,       {Stack1|DontGuardAny,
                                       None,         OutNone         }},
+  { OpStaticAnalysisError,
+                   {None,             None,         OutNone         }},
 
   /*** 4. Control flow instructions ***/
 

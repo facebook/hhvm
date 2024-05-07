@@ -358,6 +358,7 @@ where
             | Opcode::Shl
             | Opcode::Shr
             | Opcode::Silence(..)
+            | Opcode::StaticAnalysisError
             | Opcode::String(..)
             | Opcode::Sub
             | Opcode::This

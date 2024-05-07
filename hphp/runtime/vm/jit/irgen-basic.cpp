@@ -591,4 +591,11 @@ void emitResolveClass(IRGS& env, const StringData* name) {
   push(env, cls);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_unreachable("static analysis error: supposedly "
+                                 "unreachable code was reached");
+
+void emitStaticAnalysisError(IRGS& env) { gen(env, StaticAnalysisError); }
+
 }

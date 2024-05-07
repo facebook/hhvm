@@ -988,7 +988,7 @@ struct unwind { Vlabel targets[2]; };
  * Nop and trap.
  */
 struct nop {};
-struct trap { Reason reason; };
+struct trap { Reason reason; Fixup fix; };
 #define TRAP_REASON Reason{__FILE__, __LINE__}
 
 /*

@@ -2799,6 +2799,16 @@ fn emit_special_function<'a, 'd>(
         ("HH\\tag_provenance_here", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
+        ("__hhvm_intrinsics\\static_analysis_error", _)
+            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+            // The typechecker doesn't understand it anyhow.
+            if e.options().hhbc.enable_intrinsics_extension
+                && args.is_empty()
+                && targs.is_empty() =>
+        {
+            Ok(Some(instr::static_analysis_error()))
+        }
         ("HH\\embed_type_decl", _)
             // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
             // a non-production environment?" `embed_type_decl` is *not* fit for production use.

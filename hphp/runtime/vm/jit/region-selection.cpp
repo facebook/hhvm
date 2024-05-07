@@ -975,6 +975,7 @@ bool breaksRegion(SrcKey sk) {
     case Op::Eval:
     case Op::NativeImpl:
     case Op::ThrowNonExhaustiveSwitch:
+    case Op::StaticAnalysisError:
       return true;
 
     case Op::Await:

@@ -70,6 +70,7 @@ enum class CrashReportStage {
   DumpTreadmill,
   ReportCppStack,
   ReportPhpStack,
+  ReportTrapPhpStack,
   ReportApproximatePhpStack,
   DumpTransDB,
   DumpProfileData,
@@ -90,6 +91,8 @@ static uintptr_t s_stacktrace_start = 0;
 static uintptr_t s_stacktrace_end = 0;
 static uintptr_t s_perfmap_start = 0;
 static uintptr_t s_perfmap_end = 0;
+
+static bool s_saw_trap = false;
 
 static const char* s_newIgnorelist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
@@ -225,6 +228,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       if (sig == SIGILL && sig_addr) {
         auto reason = jit::getTrapReason((jit::CTCA)sig_addr);
         if (reason) {
+          s_saw_trap = true;
           dprintf(fd, "Detected jit::trap at %p: from %s:%d\n\n",
                   sig_addr, reason->file, reason->line);
         }
@@ -261,7 +265,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       // flush so if php stack-walking crashes, we still have this output so far
       ::fsync(fd);
 
-      s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
+      s_crash_report_stage = CrashReportStage::ReportTrapPhpStack;
       // Don't attempt to determine function arguments in the PHP backtrace, as
       // that might involve re-entering the VM.
       auto done = true;
@@ -283,6 +287,28 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
         s_crash_report_stage = CrashReportStage::DumpTransDB;
       }
     }
+      [[fallthrough]];
+    case CrashReportStage::ReportTrapPhpStack:
+      if (s_crash_report_stage == CrashReportStage::ReportTrapPhpStack) {
+        s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
+
+        if (s_saw_trap) {
+          // We would need to walk the stack to find the previous cfa, but trap
+          // fixups should always be direct so we shouldn't need one.
+          jit::VMFrame frame {(ActRec*)sig_rbp, (jit::TCA)sig_addr, 0};
+
+          if (jit::FixupMap::processFixupForVMFrame(frame)) {
+            regState() = VMRegState::CLEAN;
+            dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+                    debug_string_backtrace(
+                        /*skip*/false,
+                        /*ignore_args*/true
+                    ).data());
+            ::close(fd);
+            s_crash_report_stage = CrashReportStage::DumpTransDB;
+          }
+        }
+      }
       [[fallthrough]];
     case CrashReportStage::ReportApproximatePhpStack:
       if (s_crash_report_stage == CrashReportStage::ReportApproximatePhpStack) {

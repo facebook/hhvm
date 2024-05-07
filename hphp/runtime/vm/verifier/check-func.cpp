@@ -283,6 +283,7 @@ bool mayTakeExnEdges(Op op) {
     case Op::Silence:
     case Op::String:
     case Op::UnsetL:
+    case Op::StaticAnalysisError:
       return false;
     default:
       return true;
@@ -1405,6 +1406,11 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       // fatals don't do exception handling, and the silence state is reset
       // by the runtime.
       cur->silences.clear();
+      break;
+
+    case Op::StaticAnalysisError:
+      cur->silences.clear();
+      cur->mbr_live = false;
       break;
 
     case Op::NewVec:

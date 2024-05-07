@@ -282,11 +282,11 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   auto const join = next_phi.target;
   ++npreds[join];
   if (!--npreds[next]) {
-    unit.blocks[next].code[0] = trap{TRAP_REASON};
+    unit.blocks[next].code[0] = trap{TRAP_REASON, Fixup::none()};
     --npreds[join];
   }
   if (!--npreds[taken]) {
-    unit.blocks[taken].code[0] = trap{TRAP_REASON};
+    unit.blocks[taken].code[0] = trap{TRAP_REASON, Fixup::none()};
     --npreds[join];
   }
 

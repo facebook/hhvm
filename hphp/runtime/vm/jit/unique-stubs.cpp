@@ -1177,7 +1177,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
       arg_regs(0) | cross_jit,
       &us.endCatchHelperPast
     };
-    v << trap{TRAP_REASON};
+    v << trap{TRAP_REASON, Fixup::none()};
   });
   meta.process(nullptr);
 

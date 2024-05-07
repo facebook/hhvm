@@ -1715,6 +1715,7 @@ void in(ISS& env, const bc::Clone& /*op*/) {
 
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
 void in(ISS& env, const bc::Fatal&) { popC(env); }
+void in(ISS& env, const bc::StaticAnalysisError&) {}
 
 void in(ISS& env, const bc::Enter& op) {
   always_assert(op.target1 == env.ctx.func->mainEntry);

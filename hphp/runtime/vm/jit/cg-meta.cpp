@@ -227,6 +227,12 @@ void CGMeta::process_only(
 ) {
   tc::assertOwnsMetadataLock();
 
+  for (auto const& pair : trapFixups) {
+    assertx(tc::isValidCodeAddress(pair.first));
+    FixupMap::recordFixup(pair.first, pair.second);
+  }
+  trapFixups.clear();
+
   for (auto const& pair : fixups) {
     assertx(tc::isValidCodeAddress(pair.first));
     FixupMap::recordFixup(pair.first, pair.second);

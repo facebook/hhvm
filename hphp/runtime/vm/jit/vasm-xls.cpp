@@ -591,7 +591,7 @@ Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
 void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
                   const jit::vector<Vinstr>& src, unsigned pos) {
   auto const irctx = dst[j].irctx();
-  dst.insert(dst.begin() + j, src.size(), trap{TRAP_REASON});
+  dst.insert(dst.begin() + j, src.size(), trap{TRAP_REASON, Fixup::none()});
   for (auto const& inst : src) {
     dst[j] = inst;
     dst[j].set_irctx(irctx);

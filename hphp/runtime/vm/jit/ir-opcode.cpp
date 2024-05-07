@@ -246,34 +246,36 @@ bool opcodeMayRaise(Opcode opc) {
            Cfg::Eval::IsVecNotices ||
            RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 
-  case AddNewElemKeyset:
+  case StaticAnalysisError:
+    return !RO::EvalCrashOnStaticAnalysisError;
+
   case AFWHPrepareChild:
   case AKExistsObj:
+  case AddNewElemKeyset:
   case AllocObj:
-  case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
-  case ArrayUnmarkLegacyShallow:
+  case ArrayMarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
+  case ArrayUnmarkLegacyShallow:
   case BaseG:
   case BespokeAppend:
   case BespokeElem:
   case BespokeGetThrow:
   case BespokeSet:
   case BespokeUnset:
-  case Call:
-  case CallBuiltin:
-  case CallFuncEntry:
   case CGetElem:
   case CGetProp:
   case CGetPropQ:
+  case Call:
+  case CallBuiltin:
+  case CallFuncEntry:
   case CheckClsMethFunc:
-  case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:
+  case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case CheckStackOverflow:
-  case HandleSurpriseEnter:
   case Clone:
   case CmpArrLike:
   case CmpObj:
@@ -288,10 +290,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrLikeToDict:
   case ConvArrLikeToKeyset:
   case ConvArrLikeToVec:
-  case ConvTVToBool:
-  case ConvTVToDbl:
-  case ConvTVToInt:
-  case ConvTVToStr:
   case ConvObjToBool:
   case ConvObjToDbl:
   case ConvObjToDict:
@@ -299,26 +297,31 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvObjToKeyset:
   case ConvObjToStr:
   case ConvObjToVec:
+  case ConvTVToBool:
+  case ConvTVToDbl:
+  case ConvTVToInt:
+  case ConvTVToStr:
   case Count:
   case CreateCCWH:
   case DictGet:
   case DictSet:
+  case ElemDX:
   case ElemDictD:
   case ElemDictU:
-  case ElemDX:
   case ElemUX:
   case ElemX:
   case EqArrLike:
   case EqObj:
-  case GetMemoKey:
   case GetClsRGProp:
+  case GetMemoKey:
   case GtArrLike:
+  case GtObj:
+  case GtRes:
   case GteArrLike:
   case GteObj:
   case GteRes:
-  case GtObj:
-  case GtRes:
   case HandleRequestSurprise:
+  case HandleSurpriseEnter:
   case IncDecElem:
   case IncDecProp:
   case InitClsCns:
@@ -358,18 +361,18 @@ bool opcodeMayRaise(Opcode opc) {
   case LookupCnsE:
   case LookupFuncCached:
   case LtArrLike:
+  case LtObj:
+  case LtRes:
   case LteArrLike:
   case LteObj:
   case LteRes:
-  case LtObj:
-  case LtRes:
   case MapGet:
   case MapSet:
+  case NSameArrLike:
   case NativeImpl:
   case NeqArrLike:
   case NeqObj:
   case NewKeysetArray:
-  case NSameArrLike:
   case OODeclExists:
   case OrdStrIdx:
   case OutlineSetOp:
@@ -397,8 +400,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
-  case ThrowUndefPropException:
-  case ThrowUninitLoc:
   case RaiseWarning:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
@@ -409,9 +410,9 @@ bool opcodeMayRaise(Opcode opc) {
   case SetNewElemDict:
   case SetNewElemKeyset:
   case SetNewElemVec:
-  case SetOpTV:
   case SetOpElem:
   case SetOpProp:
+  case SetOpTV:
   case SetProp:
   case SetRange:
   case SetRangeRev:
@@ -421,28 +422,30 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-  case ThrowAsTypeStructException:
-  case ThrowAsTypeStructError:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
+  case ThrowAsTypeStructError:
+  case ThrowAsTypeStructException:
   case ThrowCallReifiedFunctionWithoutGenerics:
+  case ThrowCannotModifyReadonlyCollection:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowInOutMismatch:
-  case ThrowReadonlyMismatch:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
+  case ThrowLocalMustBeValueTypeException:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowCannotModifyReadonlyCollection:
-  case ThrowLocalMustBeValueTypeException:
   case ThrowMustBeEnclosedInReadonly:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
+  case ThrowReadonlyMismatch:
+  case ThrowUndefPropException:
+  case ThrowUninitLoc:
   case UnsetElem:
   case UnsetProp:
   case VectorSet:
@@ -469,6 +472,10 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetFailHard:
     return true;
 
+  case AFWHBlockOn:
+  case AFWHPushTailFrame:
+  case AKExistsDict:
+  case AKExistsKeyset:
   case AbsDbl:
   case AddDbl:
   case AddInt:
@@ -476,10 +483,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AddOffset:
   case AdvanceDictPtrIter:
   case AdvanceVecPtrIter:
-  case AFWHBlockOn:
-  case AFWHPushTailFrame:
-  case AKExistsDict:
-  case AKExistsKeyset:
   case AllocBespokeStructDict:
   case AllocInitROM:
   case AllocStructDict:
@@ -500,11 +503,11 @@ bool opcodeMayRaise(Opcode opc) {
   case BeginInlining:
   case BespokeEscalateToVanilla:
   case BespokeGet:
-  case BespokeIterFirstPos:
-  case BespokeIterLastPos:
   case BespokeIterEnd:
+  case BespokeIterFirstPos:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case BespokeIterLastPos:
   case CallViolatesDeploymentBoundary:
   case CallViolatesModuleBoundary:
   case Ceil:
@@ -519,12 +522,12 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
-  case CheckMissingKeyInArrLike:
   case CheckMROProp:
+  case CheckMissingKeyInArrLike:
   case CheckNonNull:
   case CheckNullptr:
-  case CheckRange:
   case CheckRDSInitialized:
+  case CheckRange:
   case CheckSmashableClass:
   case CheckStk:
   case CheckSubClsCns:
@@ -572,11 +575,11 @@ bool opcodeMayRaise(Opcode opc) {
   case CountVec:
   case CountWHNotDone:
   case CreateAFWH:
-  case CreateAGen:
   case CreateAGWH:
+  case CreateAGen:
   case CreateGen:
-  case CreateSpecialImplicitContext:
   case CreateSSWH:
+  case CreateSpecialImplicitContext:
   case DbgAssertFunc:
   case DbgAssertRefCount:
   case DbgCheckLocalsDecRefd:
@@ -587,9 +590,8 @@ bool opcodeMayRaise(Opcode opc) {
   case DblAsBits:
   case DebugBacktrace:
   case DecRef:
-  case ReleaseShallow:
-  case DecReleaseCheck:
   case DecRefNZ:
+  case DecReleaseCheck:
   case DefConst:
   case DefFP:
   case DefFrameRelSP:
@@ -616,10 +618,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DirFromFilepath:
   case DivDbl:
   case DivInt:
-  case StVMFP:
-  case StVMSP:
-  case StVMPC:
-  case StVMReturnAddr:
   case ElemDictK:
   case EndBlock:
   case EndCatch:
@@ -633,10 +631,10 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
-  case EqLazyCls:
   case EqDbl:
   case EqFunc:
   case EqInt:
+  case EqLazyCls:
   case EqPtrIter:
   case EqRes:
   case EqStr:
@@ -649,7 +647,6 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncHasAttr:
   case FuncHasReifiedGenerics:
   case GenericRetDecRefs:
-  case LoadBCSP:
   case GetDictPtrIter:
   case GetMemoKeyScalar:
   case GetTime:
@@ -657,12 +654,12 @@ bool opcodeMayRaise(Opcode opc) {
   case GetVecPtrIter:
   case GtBool:
   case GtDbl:
+  case GtInt:
+  case GtStr:
   case GteBool:
   case GteDbl:
   case GteInt:
   case GteStr:
-  case GtInt:
-  case GtStr:
   case HasReifiedParent:
   case HasToString:
   case IncCallCounter:
@@ -691,9 +688,9 @@ bool opcodeMayRaise(Opcode opc) {
   case InterpOneCF:
   case IsCol:
   case IsFunReifiedGenericsMatched:
+  case IsLegacyArrLike:
   case IsNType:
   case IsNTypeMem:
-  case IsLegacyArrLike:
   case IsType:
   case IsTypeMem:
   case IsTypeStructCached:
@@ -714,6 +711,7 @@ bool opcodeMayRaise(Opcode opc) {
   case KillLoc:
   case LdAFWHActRec:
   case LdARFlags:
+  case LdARFunc:
   case LdBindAddr:
   case LdClosureCls:
   case LdClosureThis:
@@ -742,7 +740,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFrameCls:
   case LdFrameThis:
   case LdFuncCls:
-  case LdARFunc:
   case LdFuncFromClsMeth:
   case LdFuncFromRClsMeth:
   case LdFuncFromRFunc:
@@ -766,9 +763,13 @@ bool opcodeMayRaise(Opcode opc) {
   case LdLocAddr:
   case LdLocForeign:
   case LdMBase:
+  case LdMIStateTempBaseAddr:
   case LdMem:
   case LdMethCallerName:
-  case LdMIStateTempBaseAddr:
+  case LdMonotypeDictKey:
+  case LdMonotypeDictTombstones:
+  case LdMonotypeDictVal:
+  case LdMonotypeVecElem:
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:
@@ -781,24 +782,22 @@ bool opcodeMayRaise(Opcode opc) {
   case LdResolvedTypeCnsClsName:
   case LdResolvedTypeCnsNoCheck:
   case LdRetVal:
+  case LdSSwitchDest:
   case LdSmashable:
   case LdSmashableFunc:
-  case LdSwitchDest:
-  case LdSSwitchDest:
   case LdStk:
   case LdStkAddr:
   case LdStrLen:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case LdSubClsCns:
+  case LdSwitchDest:
   case LdTVAux:
   case LdTVFromRDS:
-  case LdUnitPerRequestFilepath:
-  case LdUnwinderValue:
-  case LdMonotypeDictTombstones:
-  case LdMonotypeDictKey:
-  case LdMonotypeDictVal:
-  case LdMonotypeVecElem:
   case LdTypeStructureVal:
   case LdTypeStructureValCns:
+  case LdUnitPerRequestFilepath:
+  case LdUnwinderValue:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:
@@ -809,6 +808,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterInitArrK:
   case LIterNextArr:
   case LIterNextArrK:
+  case LoadBCSP:
   case LockObj:
   case LogArrayReach:
   case LogGuardFailure:
@@ -817,58 +817,58 @@ bool opcodeMayRaise(Opcode opc) {
   case Lshr:
   case LtBool:
   case LtDbl:
+  case LtInt:
+  case LtStr:
   case LteBool:
   case LteDbl:
   case LteInt:
   case LteStr:
-  case LtInt:
-  case LtStr:
   case MapIsset:
   case MarkRDSAccess:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:
   case MemoGetInstanceValue:
-  case MemoGetStaticCache:
-  case MemoGetStaticValue:
   case MemoGetLSBCache:
   case MemoGetLSBValue:
+  case MemoGetStaticCache:
+  case MemoGetStaticValue:
   case MemoSetInstanceCache:
   case MemoSetInstanceValue:
-  case MemoSetStaticCache:
-  case MemoSetStaticValue:
   case MemoSetLSBCache:
   case MemoSetLSBValue:
+  case MemoSetStaticCache:
+  case MemoSetStaticValue:
   case MethodExists:
   case Mod:
   case Mov:
   case MulDbl:
   case MulInt:
   case MulIntO:
+  case NInstanceOfBitmask:
+  case NSameObj:
+  case NSameStr:
   case NeqBool:
   case NeqDbl:
   case NeqInt:
   case NeqRes:
   case NeqStr:
+  case NewBespokeStructDict:
   case NewClsMeth:
-  case NewRClsMeth:
   case NewCol:
   case NewColFromArray:
   case NewDictArray:
   case NewInstanceRaw:
   case NewLoggingArray:
   case NewPair:
+  case NewRClsMeth:
   case NewRFunc:
   case NewStructDict:
-  case NewBespokeStructDict:
-  case NInstanceOfBitmask:
   case Nop:
-  case NSameObj:
-  case NSameStr:
-  case OrdStr:
   case OrInt:
+  case OrdStr:
   case PairIsset:
-  case ProfileArrayCOW:
   case ProfileArrLikeProps:
+  case ProfileArrayCOW:
   case ProfileCall:
   case ProfileCoeffectFunParam:
   case ProfileDecRef:
@@ -886,6 +886,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RBTraceEntry:
   case RBTraceMsg:
   case RecordFuncCall:
+  case ReleaseShallow:
   case ReqBindJmp:
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:
@@ -900,8 +901,8 @@ bool opcodeMayRaise(Opcode opc) {
   case Shr:
   case Sqrt:
   case StArResumeAddr:
-  case StClsInitElem:
   case StClosureArg:
+  case StClsInitElem:
   case StContArKey:
   case StContArState:
   case StContArValue:
@@ -916,27 +917,29 @@ bool opcodeMayRaise(Opcode opc) {
   case StLocMeta:
   case StLocRange:
   case StMBase:
+  case StMROProp:
   case StMem:
   case StMemMeta:
   case StOutValue:
+  case StPtrAt:
+  case StStk:
+  case StStkMeta:
+  case StStkRange:
+  case StTVInRDS:
+  case StTypeAt:
+  case StVMFP:
+  case StVMPC:
+  case StVMRegState:
+  case StVMReturnAddr:
+  case StVMSP:
   case StrictlyIntegerConv:
   case StringIsset:
   case StructDictAddNextSlot:
   case StructDictElemAddr:
   case StructDictSlot:
+  case StructDictSlotInPos:
   case StructDictTypeBoundCheck:
   case StructDictUnset:
-  case StructDictSlotInPos:
-  case LdStructDictKey:
-  case LdStructDictVal:
-  case StMROProp:
-  case StPtrAt:
-  case StTypeAt:
-  case StStk:
-  case StStkMeta:
-  case StStkRange:
-  case StVMRegState:
-  case StTVInRDS:
   case SubDbl:
   case SubInt:
   case Unreachable:

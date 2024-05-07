@@ -1191,6 +1191,11 @@ Fatal <fatal subop>  [C]  ->  []
   will throw a parse fatal error with a full backtrace. Setting %1 to 2 will
   throw a runtime fatal error with the backtrace omitting the top frame.
 
+StaticAnalysisError [] -> []
+
+  Produces either a request level Fatal or a process level assertion indicating
+  that code believed to be unreachable during static analysis has been executed.
+
 
 4. Control flow instructions
 ----------------------------

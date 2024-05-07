@@ -3673,6 +3673,12 @@ fields of that struct for holding intermediate values.
   when we know that S0's m_type and m_aux were both materialized into the same
   64-bit register.
 
+| StaticAnalysisError, ND, NA, T
+
+  Produces a fatal or fails an assertion depending on the value of
+  Eval.CrashOnStaticAnalysisError to indicate that code presumed to be
+  unreachable during static analysis has been executed.
+
 /* Local Variables: */
 /* fill-column: 79 */
 /* End: */

@@ -39,6 +39,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::RetCSuspended:
     case Op::Exit:
     case Op::Fatal:
+    case Op::StaticAnalysisError:
     case Op::LIterInit: // May branch to fail case.
     case Op::LIterNext: // Ditto
     case Op::Throw:

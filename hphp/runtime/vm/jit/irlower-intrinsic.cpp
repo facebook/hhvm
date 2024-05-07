@@ -181,12 +181,12 @@ void cgMov(IRLS& env, const IRInstruction* inst) {
 
 void cgUnreachable(IRLS& env, const IRInstruction* inst) {
   auto reason = inst->extra<AssertReason>()->reason;
-  vmain(env) << trap{reason};
+  vmain(env) << trap{reason, Fixup::none()};
 }
 
 void cgEndBlock(IRLS& env, const IRInstruction* inst) {
   auto reason = inst->extra<AssertReason>()->reason;
-  vmain(env) << trap{reason};
+  vmain(env) << trap{reason, Fixup::none()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1030,7 +1030,7 @@ void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
     auto const sf = checkRDSHandleInitialized(v, handle);
     unlikelyIfThen(
       v, vcold(env), CC_NE, sf,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
   emitLdLowPtr(v, rvmtl()[handle], dst, sizeof(LowStringPtr));
@@ -1070,6 +1070,25 @@ void cgCreateSpecialImplicitContext(IRLS& env, const IRInstruction* inst) {
     callDestTV(env, inst),
     SyncOptions::None,
     args
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgStaticAnalysisError(IRLS& env, const IRInstruction* inst) {
+  if (RO::EvalCrashOnStaticAnalysisError) {
+    auto& v = vmain(env);
+    v << trap{TRAP_REASON, makeFixup(inst->marker(), SyncOptions::Sync)};
+    return;
+  }
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(raiseStaticAnalysisError),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
   );
 }
 

@@ -1488,6 +1488,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Shl
             | Opcode::Shr
             | Opcode::Silence(..)
+            | Opcode::StaticAnalysisError
             | Opcode::Sub
             | Opcode::Switch(..)
             | Opcode::Throw
@@ -1645,6 +1646,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::SetImplicitContextByValue
         | Opcode::Shl
         | Opcode::Shr
+        | Opcode::StaticAnalysisError
         | Opcode::Sub
         | Opcode::This
         | Opcode::Throw

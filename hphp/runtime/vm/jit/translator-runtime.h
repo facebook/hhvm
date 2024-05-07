@@ -208,6 +208,8 @@ void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
 bool callViolatesDeploymentBoundaryHelper(const Func*);
 bool callViolatesDeploymentBoundaryHelper(const Class*);
 
+[[noreturn]] void raiseStaticAnalysisError();
+
 namespace MInstrHelpers {
 TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);

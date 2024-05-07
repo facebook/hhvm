@@ -206,6 +206,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& r : meta.trapFixups) {
+    if (auto const adjusted = rel.adjustedAddressAfter(r.first)) {
+      r.first = adjusted;
+    }
+  }
+
   for (auto& it : meta.interceptTCAs) {
     if (auto const adjusted = rel.adjustedAddressAfter(it.second)) {
       it.second = adjusted;

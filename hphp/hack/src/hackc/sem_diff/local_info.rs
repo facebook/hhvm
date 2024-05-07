@@ -237,6 +237,7 @@ impl LocalInfo {
             | Opcode::SetS(..)
             | Opcode::Shl
             | Opcode::Shr
+            | Opcode::StaticAnalysisError
             | Opcode::String(..)
             | Opcode::Sub
             | Opcode::Switch(..)

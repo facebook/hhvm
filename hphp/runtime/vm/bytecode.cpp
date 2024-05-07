@@ -1878,6 +1878,12 @@ OPTBLD_INLINE void iopFatal(FatalOp kind_char) {
   }
 }
 
+OPTBLD_INLINE void iopStaticAnalysisError() {
+  always_assert(!RO::EvalCrashOnStaticAnalysisError);
+
+  jit::raiseStaticAnalysisError();
+}
+
 OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
     auto const flags = handle_request_surprise();

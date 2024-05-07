@@ -194,7 +194,7 @@ void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
   v << andbi{1 << ActRec::LocalsDecRefd, callOffAndFlags, check, v.makeReg()};
   v << testb{check, check, sf};
   ifThen(v, CC_NZ, sf, [&](Vout& v) {
-    v << trap{TRAP_REASON};
+    v << trap{TRAP_REASON, Fixup::none()};
   });
 }
 

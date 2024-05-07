@@ -1677,6 +1677,7 @@ void dce(Env& env, const bc::Silence& op) {
   no_dce(env, op);
 }
 void dce(Env& env, const bc::SSwitch& op) { no_dce(env, op); }
+void dce(Env& env, const bc::StaticAnalysisError& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Switch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::This& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ThrowAsTypeStructException& op) {
@@ -2356,8 +2357,8 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
           auto const& bc = b->hhbcs[p];
 
           // Sometimes parts of a minstr will be unreachable, hhbbc marks these
-          // with a fatal.
-          if (bc.op == OpFatal) break;
+          // with a StaticAnalysisError.
+          if (bc.op == OpStaticAnalysisError) break;
 
           assertx(p + 1 < b->hhbcs.size() || isMemberFinalOp(bc.op));
           adjust_member_key(b->hhbcs[p], 1);

@@ -84,7 +84,7 @@ void cgInst(IRLS& env, const IRInstruction* inst){
     if (auto const next = inst->next()) {
       v << jmp{label(env, next)};
     } else {
-      v << trap{TRAP_REASON}; // or end?
+      v << trap{TRAP_REASON, Fixup::none()}; // or end?
     }
   }
 }

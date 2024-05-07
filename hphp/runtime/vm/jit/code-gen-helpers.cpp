@@ -58,7 +58,7 @@ namespace {
 
 void assertSFNonNegative(Vout& v, Vreg sf, Reason reason) {
   if (!Cfg::HHIR::GenerateAsserts) return;
-  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason}; });
+  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason, Fixup::none()}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,7 +337,7 @@ void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
 
   ifThen(v, CC_NLE, sf, [&] (Vout& v) {
     auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason}; });
+    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason, Fixup::none()}; });
   });
 }
 

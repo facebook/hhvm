@@ -135,6 +135,12 @@ std::string pathString(const ObjprofStack& stack, const char* sep) {
   return os.str();
 }
 
+bool cycleExists(ObjprofState& env, const void* ptr) {
+  auto ptr_begin = env.val_stack.begin();
+  auto ptr_end = env.val_stack.end();
+  return std::find(ptr_begin, ptr_end, ptr) != ptr_end;
+}
+
 void issueWarnings(std::vector<std::string>& deferred_warnings) {
   for (auto const& warning : deferred_warnings) {
     raise_warning(warning);
@@ -178,9 +184,7 @@ std::pair<int, double> sizeOfArray(
   const ArrayData* ad, ObjprofState& env, Class* cls,
   hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
 ) {
-  auto ptr_begin = env.val_stack.begin();
-  auto ptr_end = env.val_stack.end();
-  if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
+  if (cycleExists(env, ad)) {
     FTRACE(3, "Cycle found for ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
   }
@@ -479,9 +483,7 @@ std::pair<int, double> getObjSize(
 ) {
   Class* cls = obj->getVMClass();
 
-  auto ptr_begin = env.val_stack.begin();
-  auto ptr_end = env.val_stack.end();
-  if (std::find(ptr_begin, ptr_end, obj) != ptr_end) {
+  if (cycleExists(env, obj)) {
     FTRACE(3, "Cycle found for {}*({})\n", obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }

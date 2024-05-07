@@ -181,7 +181,26 @@ let summarize_param param =
     detail = None;
   }
 
-let summarize_method class_name m =
+let detail_of_fun
+    ~(source_text : string)
+    ~(fun_pos : Pos.t)
+    (sid : sid)
+    (body : (_, _) func_body) : string =
+  let pos =
+    let start = Pos.shrink_to_end (fst sid) in
+    let end_ =
+      match List.hd body.fb_ast with
+      | Some (stmt_pos, _) when not Pos.(equal none stmt_pos) ->
+        Pos.shrink_to_start stmt_pos
+      | _ -> Pos.shrink_to_end fun_pos
+    in
+    Pos.btw start end_
+  in
+  "function" ^ Pos.get_text_from_pos ~content:source_text pos
+  |> String.rstrip ~drop:(fun ch ->
+         Char.is_whitespace ch || Char.equal ch '{' || Char.equal ch '}')
+
+let summarize_method ~(source_text : string option) class_name m =
   let modifiers = modifier_of_fun_kind [] m.m_fun_kind in
   let modifiers =
     modifiers_to_list
@@ -196,6 +215,10 @@ let summarize_method class_name m =
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
+  let detail =
+    Option.map source_text ~f:(fun source_text ->
+        detail_of_fun ~source_text ~fun_pos:m.m_span m.m_name m.m_body)
+  in
   {
     kind;
     name;
@@ -208,7 +231,7 @@ let summarize_method class_name m =
     children = None;
     params;
     docblock = None;
-    detail = None;
+    detail;
   }
 
 (* Parser synthesizes AST nodes for implicit properties (defined in constructor
@@ -227,7 +250,7 @@ let class_implicit_fields class_ =
       else
         [])
 
-let summarize_class class_ ~no_children =
+let summarize_class ~(source_text : string option) class_ ~no_children =
   let class_name = Utils.strip_ns (snd class_.c_name) in
   let class_name_pos = fst class_.c_name in
   let c_span = class_.c_span in
@@ -290,7 +313,7 @@ let summarize_class class_ ~no_children =
         (* Summarized methods *)
         List.fold_left
           ~init:acc
-          ~f:(fun acc m -> summarize_method class_name m :: acc)
+          ~f:(fun acc m -> summarize_method ~source_text class_name m :: acc)
           class_.c_methods
       in
       let sort_by_line summaries =
@@ -349,7 +372,7 @@ let summarize_typedef tdef =
     detail = None;
   }
 
-let summarize_fun fd =
+let summarize_fun ~(source_text : string option) fd =
   let f = fd.fd_fun in
   let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
   let params = Some (List.map f.f_params ~f:summarize_param) in
@@ -357,6 +380,10 @@ let summarize_fun fd =
   let name = Utils.strip_ns (snd fd.fd_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
+  let detail =
+    Option.map source_text ~f:(fun source_text ->
+        detail_of_fun ~source_text ~fun_pos:f.f_span fd.fd_name f.f_body)
+  in
   {
     kind;
     name;
@@ -369,7 +396,7 @@ let summarize_fun fd =
     children = None;
     params;
     docblock = None;
-    detail = None;
+    detail;
   }
 
 let summarize_gconst cst =
@@ -441,11 +468,11 @@ let summarize_module_def md =
     detail = None;
   }
 
-let outline_ast ast =
+let outline_ast ast ~(source_text : string option) =
   let outline =
     List.filter_map ast ~f:(function
-        | Fun f -> Some (summarize_fun f)
-        | Class c -> Some (summarize_class c ~no_children:false)
+        | Fun f -> Some (summarize_fun ~source_text f)
+        | Class c -> Some (summarize_class ~source_text c ~no_children:false)
         | _ -> None)
   in
   List.map outline ~f:SymbolDefinition.to_absolute
@@ -505,14 +532,14 @@ let add_docblocks defs comments =
   in
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
-let outline popt content =
+let outline popt source_text =
   let { Parser_return.ast; comments; _ } =
     let ast =
       Errors.ignore_ (fun () ->
           if Ide_parser_cache.is_enabled () then
             Ide_parser_cache.(
               with_ide_cache @@ fun () ->
-              get_ast popt Relative_path.default content)
+              get_ast popt Relative_path.default source_text)
           else
             let env =
               Parser.make_env
@@ -520,17 +547,18 @@ let outline popt content =
                 ~include_line_comments:true
                 Relative_path.default
             in
-            Parser.from_text_with_legacy env content)
+            Parser.from_text_with_legacy env source_text)
     in
     ast
   in
-  let result = outline_ast ast in
+  let result = outline_ast ast ~source_text:(Some source_text) in
   add_docblocks result comments
 
 let outline_entry_no_comments
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
     string SymbolDefinition.t list =
-  Ast_provider.compute_ast ~popt ~entry |> outline_ast
+  let source_text = Provider_context.get_file_contents_if_present entry in
+  Ast_provider.compute_ast ~popt ~entry |> outline_ast ~source_text
 
 let rec print_def ~short_pos indent def =
   let {
@@ -545,7 +573,7 @@ let rec print_def ~short_pos indent def =
     docblock;
     full_name = _;
     class_name = _;
-    detail = _;
+    detail;
   } =
     def
   in
@@ -563,6 +591,7 @@ let rec print_def ~short_pos indent def =
   Printf.printf "%s  modifiers: " indent;
   List.iter modifiers ~f:(fun x -> Printf.printf "%s " (string_of_modifier x));
   Printf.printf "\n";
+  Option.iter detail ~f:(Printf.printf "%s  detail: %s\n" indent);
   Option.iter params ~f:(fun x ->
       Printf.printf "%s  params:\n" indent;
       print ~short_pos (indent ^ "    ") x);
@@ -578,3 +607,18 @@ and print ~short_pos indent defs =
 let print_def ?(short_pos = false) = print_def ~short_pos
 
 let print ?(short_pos = false) = print ~short_pos ""
+
+let summarize_method :
+    string -> ('a, 'b) Aast.method_ -> Relative_path.t SymbolDefinition.t =
+ (fun s meth -> summarize_method ~source_text:None s meth)
+
+let summarize_class :
+    ('a, 'b) Aast.class_ ->
+    no_children:bool ->
+    Relative_path.t SymbolDefinition.t =
+ fun class_ ~no_children ->
+  summarize_class ~source_text:None class_ ~no_children
+
+let summarize_fun : ('a, 'b) Aast.fun_def -> Relative_path.t SymbolDefinition.t
+    =
+ (fun fd -> summarize_fun ~source_text:None fd)

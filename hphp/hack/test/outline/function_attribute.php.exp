@@ -4,5 +4,7 @@ foo
   position: line 4, characters 10-12
   span: line 3, character 1 - line 7, character 1
   modifiers: 
+  detail: function() {
+  // multiline function
   params:
 

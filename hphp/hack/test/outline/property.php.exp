@@ -39,6 +39,9 @@ C
     position: line 12, characters 19-29
     span: line 12, character 3 - line 17, character 3
     modifiers: public 
+    detail: function(
+    $not_a_property,
+    public string
     params:
       $not_a_property
         kind: param

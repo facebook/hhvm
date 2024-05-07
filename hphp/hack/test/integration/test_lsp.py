@@ -2664,7 +2664,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "First",
                         "kind": 14,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 50, "character": 18},
                                 "end": {"line": 50, "character": 47},
@@ -2676,7 +2676,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "MyEnumClass",
                         "kind": 10,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 49, "character": 0},
                                 "end": {"line": 52, "character": 1},
@@ -2687,18 +2687,19 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "testClassMemberInsideConstructorInvocation",
                         "kind": 12,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 44, "character": 0},
                                 "end": {"line": 46, "character": 1},
                             },
                         },
+                        "detail": "function(): void",
                     },
                     {
                         "name": "MyString",
                         "kind": 14,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 41, "character": 8},
                                 "end": {"line": 41, "character": 29},
@@ -2710,7 +2711,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "HasString",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 40, "character": 0},
                                 "end": {"line": 42, "character": 1},
@@ -2721,19 +2722,20 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "__construct",
                         "kind": 6,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 37, "character": 2},
                                 "end": {"line": 37, "character": 43},
                             },
                         },
+                        "detail": "function(string $s)",
                         "containerName": "TakesString",
                     },
                     {
                         "name": "TakesString",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 36, "character": 0},
                                 "end": {"line": 38, "character": 1},
@@ -2744,7 +2746,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "FF",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 26, "character": 0},
                                 "end": {"line": 26, "character": 11},
@@ -2755,19 +2757,20 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "__construct",
                         "kind": 6,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 21, "character": 2},
                                 "end": {"line": 23, "character": 3},
                             },
                         },
+                        "detail": "function()",
                         "containerName": "EE",
                     },
                     {
                         "name": "EE",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 20, "character": 0},
                                 "end": {"line": 24, "character": 1},
@@ -2778,7 +2781,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "CC",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 14, "character": 0},
                                 "end": {"line": 15, "character": 1},
@@ -2789,19 +2792,20 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "__construct",
                         "kind": 6,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 11, "character": 2},
                                 "end": {"line": 11, "character": 40},
                             },
                         },
+                        "detail": "function(int $i)",
                         "containerName": "BB",
                     },
                     {
                         "name": "BB",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 10, "character": 0},
                                 "end": {"line": 12, "character": 1},
@@ -2812,29 +2816,31 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "a_definition",
                         "kind": 12,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 2, "character": 0},
                                 "end": {"line": 4, "character": 1},
                             },
                         },
+                        "detail": "function(): int",
                     },
                     {
                         "name": "b_definition",
                         "kind": 12,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 6, "character": 0},
                                 "end": {"line": 8, "character": 1},
                             },
                         },
+                        "detail": "function(): int",
                     },
                     {
                         "name": "DD",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 17, "character": 0},
                                 "end": {"line": 18, "character": 1},
@@ -2845,18 +2851,19 @@ class TestLsp(TestCase[LspTestDriver]):
                         "name": "test",
                         "kind": 12,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 28, "character": 0},
                                 "end": {"line": 34, "character": 1},
                             },
                         },
+                        "detail": "function(): void",
                     },
                     {
                         "name": "MyEnumClassKind",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
                                 "start": {"line": 48, "character": 0},
                                 "end": {"line": 48, "character": 24},
@@ -6747,6 +6754,7 @@ function aaa(): string {
                                 "end": {"line": 3, "character": 1},
                             },
                         },
+                        "detail": "function(): void",
                     }
                 ],
                 powered_by="serverless_ide",
@@ -7619,6 +7627,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 13, "character": 1},
                             },
                         },
+                        "detail": "function<T>(readonly T $x): readonly T",
                     },
                     {
                         "name": "bar",
@@ -7630,6 +7639,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 8, "character": 56},
                             },
                         },
+                        "detail": "function(): Awaitable<void>",
                         "containerName": "CC",
                     },
                     {
@@ -7689,6 +7699,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 7, "character": 3},
                             },
                         },
+                        "detail": "function(inout arraykey $x)",
                         "containerName": "CC",
                     },
                 ],

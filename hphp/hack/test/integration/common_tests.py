@@ -879,6 +879,7 @@ class CommonTests(BarebonesTests):
                 '  position: File "", line 1, characters 15-17:',
                 '  span: File "", line 1, character 6 - line 1, character 22:',
                 "  modifiers: ",
+                "  detail: function()",
                 "  params:",
                 "",
             ],

@@ -1016,14 +1016,18 @@ cdef class Union(StructOrUnion):
         if not kwargs:
             self._fbthrift_load_cache()
             return
-        if len(kwargs) != 1:
+        # recommend calling with 1 kwarg.
+        # ok to call with one not None kwarg and extra None kwargs.
+        if len(kwargs) != 1 and sum(val is not None for val in kwargs.values()) != 1:
             raise TypeError("__init__() of a union may only take one keyword argument")
         for name, value in kwargs.items():
+            if value is None:
+                continue
+            try:
+                tpe = self.Type[name]
+            except KeyError:
+                raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
             break
-        try:
-            tpe = self.Type[name]
-        except KeyError:
-            raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
         self._fbthrift_update_type_value(
             tpe.value,
             self._fbthrift_to_internal_data(tpe.value, value),

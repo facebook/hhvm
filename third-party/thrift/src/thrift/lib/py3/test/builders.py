@@ -29,6 +29,7 @@ from testing.builders import (
     Reserved_Builder,
     ValueOrError_Builder,
 )
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 
 
 class BuilderTest(unittest.TestCase):
@@ -108,6 +109,7 @@ class BuilderTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             value_or_error_builder()  # caught at build step
 
+    @brokenInAutoMigrate()
     def test_reserved_names(self) -> None:
         builder = Reserved_Builder()
         builder.from_ = "from"

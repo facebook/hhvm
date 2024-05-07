@@ -80,14 +80,3 @@ struct TestStructAllThriftPrimitiveTypesWithDefaultValues {
 
   8: string unqualified_string = "thrift-python";
 }
-
-struct TestStructAllThriftContainerTypes {
-  1: list<i32> unqualified_list_i32;
-  2: optional list<i32> optional_list_i32;
-
-  3: set<string> unqualified_set_string;
-  4: optional set<string> optional_set_string;
-
-  5: map<string, i32> unqualified_map_string_i32;
-  6: optional map<string, i32> optional_map_string_i32;
-}

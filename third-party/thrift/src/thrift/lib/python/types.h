@@ -383,22 +383,6 @@ inline void* setFrozenSet(void* object) {
   return object;
 }
 
-/**
- * Sets the Python object pointed to by `object` to an empty Python `list`
- * (Releases a strong reference to the previous object, if there was one).
- *
- * @param object A double pointer to a `PyObject` (i.e., `PyObject**`).
- *
- * @return The newly set Python object pointer that points to an empty Python
- * `list`.
- */
-inline void* setList(void* object) {
-  if (!setPyObject(object, UniquePyObjectPtr{PyList_New(0)})) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  return object;
-}
-
 class ListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
@@ -437,59 +421,6 @@ class ListTypeInfo {
             reinterpret_cast<detail::VoidFuncPtr>(setContainer),
             &ext_,
         } {}
-  inline const detail::TypeInfo* get() const { return &typeinfo_; }
-
- private:
-  const detail::ListFieldExt ext_;
-  const detail::TypeInfo typeinfo_;
-};
-
-/**
- * `MutableListTypeInfo` is a counterpart to `ListTypeInfo`, specifically
- * tailored for mutable Thrift struct. They differ in their internal data
- * representation. `MutableListTypeInfo` uses a Python `list` for mutability,
- * whereas its counterpart, `ListTypeInfo`, uses a Python `tuple`.
- */
-class MutableListTypeInfo {
- public:
-  static std::uint32_t size(const void* object) {
-    return PyList_GET_SIZE(toPyObject(object));
-  }
-
-  static void clear(void* object) { setList(object); }
-
-  static void read(
-      const void* context,
-      void* object,
-      std::uint32_t listSize,
-      void (*reader)(const void* /*context*/, void* /*val*/));
-
-  static size_t write(
-      const void* context,
-      const void* object,
-      size_t (*writer)(const void* /*context*/, const void* /*val*/));
-
-  static void consumeElem(
-      const void* context,
-      void* object,
-      void (*reader)(const void* /*context*/, void* /*val*/));
-
-  explicit MutableListTypeInfo(const detail::TypeInfo* valInfo)
-      : ext_{
-            /* .valInfo */ valInfo,
-            /* .size */ size,
-            /* .clear */ clear,
-            /* .consumeElem */ consumeElem,
-            /* .readList */ read,
-            /* .writeList */ write,
-        },
-        typeinfo_{
-            protocol::TType::T_LIST,
-            getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setList),
-            &ext_,
-        } {}
-
   inline const detail::TypeInfo* get() const { return &typeinfo_; }
 
  private:

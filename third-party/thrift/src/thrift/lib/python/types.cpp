@@ -730,51 +730,6 @@ void ListTypeInfo::consumeElem(
   PyTuple_SET_ITEM(*pyObjPtr, currentSize, elem);
 }
 
-void MutableListTypeInfo::read(
-    const void* context,
-    void* object,
-    std::uint32_t listSize,
-    void (*reader)(const void* /*context*/, void* /*val*/)) {
-  // use a PyList to represent a list field
-  UniquePyObjectPtr list{PyList_New(listSize)};
-  if (list == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  for (std::uint32_t i = 0; i < listSize; ++i) {
-    PyObject* elem = nullptr;
-    reader(context, &elem);
-    PyList_SET_ITEM(list.get(), i, elem);
-  }
-  setPyObject(object, std::move(list));
-}
-
-size_t MutableListTypeInfo::write(
-    const void* context,
-    const void* object,
-    size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
-  const PyObject* list = toPyObject(object);
-  const Py_ssize_t size = PyList_GET_SIZE(list);
-  size_t written = 0;
-  for (Py_ssize_t i = 0; i < size; i++) {
-    PyObject* elem = PyList_GET_ITEM(list, i);
-    written += writer(context, &elem);
-  }
-  return written;
-}
-
-void MutableListTypeInfo::consumeElem(
-    const void* context,
-    void* object,
-    void (*reader)(const void* /*context*/, void* /*val*/)) {
-  PyObject* elem = nullptr;
-  reader(context, &elem);
-  DCHECK_NOTNULL(elem);
-  PyObject** pyObjPtr = toPyObjectPtr(object);
-  if (PyList_Append(*pyObjPtr, elem) == -1) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-}
-
 void SetTypeInfo::read(
     const void* context,
     void* object,

@@ -13,7 +13,7 @@ val summarize_property :
 val summarize_class_const :
   string -> ('a, 'b) Aast.class_const -> Relative_path.t SymbolDefinition.t
 
-val summarize_typeconst :
+val summarize_class_typeconst :
   string ->
   ('a, 'b) Aast.class_typeconst_def ->
   Relative_path.t SymbolDefinition.t

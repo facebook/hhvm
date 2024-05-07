@@ -118,7 +118,7 @@ let modifier_of_param_kind acc = function
   | Ast_defs.Pinout _ -> Inout :: acc
   | Ast_defs.Pnormal -> acc
 
-let summarize_typeconst class_name t =
+let summarize_class_typeconst class_name t =
   let (pos, name) = t.c_tconst_name in
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
@@ -306,7 +306,7 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
         (* Summarized type consts *)
         List.fold_left
           ~init:acc
-          ~f:(fun acc tc -> summarize_typeconst class_name tc :: acc)
+          ~f:(fun acc tc -> summarize_class_typeconst class_name tc :: acc)
           class_.c_typeconsts
       in
       let acc =
@@ -349,7 +349,7 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
     detail = None;
   }
 
-let summarize_typedef tdef =
+let summarize_typedef (tdef : _ typedef) : Relative_path.t SymbolDefinition.t =
   let kind = SymbolDefinition.Typedef in
   let name = Utils.strip_ns (snd tdef.t_name) in
   let id = get_symbol_id kind None name in
@@ -399,7 +399,7 @@ let summarize_fun ~(source_text : string option) fd =
     detail;
   }
 
-let summarize_gconst cst =
+let summarize_gconst (cst : _ gconst) : Relative_path.t SymbolDefinition.t =
   let pos = fst cst.cst_name in
   let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
   let (_, gconst_end, _) = cst.cst_value in
@@ -473,8 +473,18 @@ let outline_ast ast ~(source_text : string option) =
     List.filter_map ast ~f:(function
         | Fun f -> Some (summarize_fun ~source_text f)
         | Class c -> Some (summarize_class ~source_text c ~no_children:false)
-        | _ -> None)
+        | Typedef t -> Some (summarize_typedef t)
+        | Constant c -> Some (summarize_gconst c)
+        | Namespace _
+        | NamespaceUse _
+        | SetNamespaceEnv _
+        | FileAttributes _
+        | Stmt _
+        | Module _
+        | SetModule _ ->
+          None)
   in
+
   List.map outline ~f:SymbolDefinition.to_absolute
 
 let should_add_docblock = function

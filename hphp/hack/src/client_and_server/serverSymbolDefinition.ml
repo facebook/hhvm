@@ -90,7 +90,7 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
     let tconsts = c.c_typeconsts in
     List.find tconsts ~f:(fun t ->
         String.equal (snd t.c_tconst_name) member_name)
-    >>= fun t -> Some (FileOutline.summarize_typeconst member_origin t)
+    >>= fun t -> Some (FileOutline.summarize_class_typeconst member_origin t)
 
 let get_local_var_def ast name p =
   let (line, char, _) = Pos.info_pos p in

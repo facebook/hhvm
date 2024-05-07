@@ -349,7 +349,8 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
     detail = None;
   }
 
-let summarize_typedef (tdef : _ typedef) : Relative_path.t SymbolDefinition.t =
+let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
+    Relative_path.t SymbolDefinition.t =
   let kind = SymbolDefinition.Typedef in
   let name = Utils.strip_ns (snd tdef.t_name) in
   let id = get_symbol_id kind None name in
@@ -357,6 +358,10 @@ let summarize_typedef (tdef : _ typedef) : Relative_path.t SymbolDefinition.t =
   let pos = fst tdef.t_name in
   let kind_pos = fst tdef.t_kind in
   let span = Pos.btw pos kind_pos in
+  let detail =
+    Option.map source_text ~f:(fun source_text ->
+        Pos.get_text_from_pos ~content:source_text span)
+  in
   {
     kind;
     name;
@@ -369,7 +374,7 @@ let summarize_typedef (tdef : _ typedef) : Relative_path.t SymbolDefinition.t =
     children = None;
     params = None;
     docblock = None;
-    detail = None;
+    detail;
   }
 
 let summarize_fun ~(source_text : string option) fd =
@@ -399,7 +404,8 @@ let summarize_fun ~(source_text : string option) fd =
     detail;
   }
 
-let summarize_gconst (cst : _ gconst) : Relative_path.t SymbolDefinition.t =
+let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
+    Relative_path.t SymbolDefinition.t =
   let pos = fst cst.cst_name in
   let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
   let (_, gconst_end, _) = cst.cst_value in
@@ -407,6 +413,11 @@ let summarize_gconst (cst : _ gconst) : Relative_path.t SymbolDefinition.t =
   let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
+  let span = Pos.btw gconst_start gconst_end in
+  let detail =
+    Option.map source_text ~f:(fun source_text ->
+        Pos.get_text_from_pos ~content:source_text span)
+  in
   {
     kind;
     name;
@@ -414,12 +425,12 @@ let summarize_gconst (cst : _ gconst) : Relative_path.t SymbolDefinition.t =
     class_name = None;
     id;
     pos;
-    span = Pos.btw gconst_start gconst_end;
+    span;
     modifiers = [];
     children = None;
     params = None;
     docblock = None;
-    detail = None;
+    detail;
   }
 
 let summarize_local name span =
@@ -473,8 +484,8 @@ let outline_ast ast ~(source_text : string option) =
     List.filter_map ast ~f:(function
         | Fun f -> Some (summarize_fun ~source_text f)
         | Class c -> Some (summarize_class ~source_text c ~no_children:false)
-        | Typedef t -> Some (summarize_typedef t)
-        | Constant c -> Some (summarize_gconst c)
+        | Typedef t -> Some (summarize_typedef ~source_text t)
+        | Constant c -> Some (summarize_gconst ~source_text c)
         | Namespace _
         | NamespaceUse _
         | SetNamespaceEnv _
@@ -632,3 +643,9 @@ let summarize_class :
 let summarize_fun : ('a, 'b) Aast.fun_def -> Relative_path.t SymbolDefinition.t
     =
  (fun fd -> summarize_fun ~source_text:None fd)
+
+let summarize_gconst (cst : _ gconst) : Relative_path.t SymbolDefinition.t =
+  summarize_gconst ~source_text:None cst
+
+let summarize_typedef (tdef : _ typedef) : Relative_path.t SymbolDefinition.t =
+  summarize_typedef ~source_text:None tdef

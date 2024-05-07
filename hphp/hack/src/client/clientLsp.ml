@@ -2540,7 +2540,7 @@ let rec hack_symbol_tree_to_lsp
           definition
           ~default_path:filename;
       containerName;
-      detail = None;
+      detail = definition.detail;
     }
   in
   match defs with

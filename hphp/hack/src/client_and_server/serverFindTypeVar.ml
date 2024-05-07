@@ -51,6 +51,7 @@ let sym_def_of_tparam (tp : ('a, 'b) Aast.tparam) :
       children = None;
       params = None;
       docblock;
+      detail = None;
     }
 
 (** Find the type param definition corresponding to the type variable

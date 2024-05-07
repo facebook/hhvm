@@ -1354,7 +1354,7 @@ module Full = struct
     let prefix =
       SymbolDefinition.(
         let print_mod m = text (string_of_modifier m) ^^ Space in
-        match (definition_opt, occurrence.type_) with
+        match (definition_opt, occurrence.SymbolOccurrence.type_) with
         | (None, _) -> Nothing
         | (_, XhpLiteralAttr _) -> Nothing
         | (Some def, _) -> begin

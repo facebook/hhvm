@@ -53,6 +53,7 @@ type 'a t = {
   children: 'a t list option;
   params: 'a t list option;
   docblock: string option;
+  detail: string option;
 }
 [@@deriving ord, show]
 

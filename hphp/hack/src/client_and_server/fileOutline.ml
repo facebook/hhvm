@@ -72,6 +72,7 @@ let summarize_property class_name var =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let maybe_summarize_property class_name ~skip var =
@@ -104,6 +105,7 @@ let summarize_class_const class_name cc =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let modifier_of_fun_kind acc = function
@@ -138,6 +140,7 @@ let summarize_typeconst class_name t =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_param param =
@@ -175,6 +178,7 @@ let summarize_param param =
     modifiers;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_method class_name m =
@@ -204,6 +208,7 @@ let summarize_method class_name m =
     children = None;
     params;
     docblock = None;
+    detail = None;
   }
 
 (* Parser synthesizes AST nodes for implicit properties (defined in constructor
@@ -318,6 +323,7 @@ let summarize_class class_ ~no_children =
     children;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_typedef tdef =
@@ -340,6 +346,7 @@ let summarize_typedef tdef =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_fun fd =
@@ -362,6 +369,7 @@ let summarize_fun fd =
     children = None;
     params;
     docblock = None;
+    detail = None;
   }
 
 let summarize_gconst cst =
@@ -384,6 +392,7 @@ let summarize_gconst cst =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_local name span =
@@ -402,6 +411,7 @@ let summarize_local name span =
     children = None;
     params = None;
     docblock = None;
+    detail = None;
   }
 
 let summarize_module_def md =
@@ -428,6 +438,7 @@ let summarize_module_def md =
     children = None;
     params = None;
     docblock;
+    detail = None;
   }
 
 let outline_ast ast =
@@ -534,6 +545,7 @@ let rec print_def ~short_pos indent def =
     docblock;
     full_name = _;
     class_name = _;
+    detail = _;
   } =
     def
   in

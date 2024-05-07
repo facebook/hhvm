@@ -50,7 +50,16 @@ type 'a t = {
   modifiers: modifier list;
   children: 'a t list option;
   params: 'a t list option;
+      (** Only provided on some code paths,
+      * such as FileOutline.outline (but not FileOutline.outline_entry_no_comments)
+      *)
   docblock: string option;
+      (** misc. unstructured information about the symbol.
+      * For functions, we include function signature with param names added.
+      * Current use case is providing additional context for AI coding assistants.
+      * Only provided on some code paths: File_outline.outline*
+      *)
+  detail: string option;
 }
 [@@deriving ord, show]
 

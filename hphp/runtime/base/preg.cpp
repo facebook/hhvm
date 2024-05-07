@@ -141,6 +141,7 @@ public:
       switch (m_kind) {
         case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
+          [[fallthrough]];
         case Kind::Empty:
         case Kind::Ptr:
           m_kind = Kind::SmartPtr;
@@ -159,6 +160,7 @@ public:
       switch (m_kind) {
         case Kind::SmartPtr:
           m_u.smart_ptr.~EntryPtr();
+          [[fallthrough]];
         case Kind::Empty:
         case Kind::Ptr:
           m_kind = Kind::AccessorKind;

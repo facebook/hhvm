@@ -160,6 +160,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         auto const value = new APCClsMeth(meth->getCls(), meth->getFunc());
         return {value->getHandle(), sizeof(APCClsMeth)};
       }
+      [[fallthrough]];
 
     case KindOfRClsMeth:
       return APCRClsMeth::Construct(val(cell).prclsmeth);

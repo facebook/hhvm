@@ -1199,6 +1199,7 @@ void VariableSerializer::writeArrayKey(
       write(StrNR(keyCell->m_data.pstr).asString());
       return;
     }
+    [[fallthrough]];
 
   case Type::Serialize:
   case Type::Internal:
@@ -1570,6 +1571,7 @@ void VariableSerializer::serializeFunc(const Func* func) {
           VarNR{s_invalidMethCallerAPC.get()}
         );
       }
+      [[fallthrough]];
     case Type::Serialize:
       if (func->isMethCaller()) {
         SystemLib::throwInvalidOperationExceptionObject(
@@ -1605,7 +1607,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
         write(StrNR(cls->name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebugDump:
       indent();
       m_buf->append("class(");
@@ -1617,7 +1619,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
         write(StrNR(cls->name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(cls->name());
@@ -1657,7 +1659,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
         write(StrNR(lcls.name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebugDump:
       indent();
       m_buf->append("class(");
@@ -1669,7 +1671,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
         write(StrNR(lcls.name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(lcls.name());

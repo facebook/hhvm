@@ -636,6 +636,7 @@ void Variant::setEvalScalar() {
 
     case KindOfString:
       m_type = KindOfPersistentString;
+      [[fallthrough]];
     case KindOfPersistentString: {
       auto pstr = m_data.pstr;
       if (!pstr->isStatic()) {
@@ -649,18 +650,21 @@ void Variant::setEvalScalar() {
 
     case KindOfVec:
       m_type = KindOfPersistentVec;
+      [[fallthrough]];
     case KindOfPersistentVec:
       do_array();
       return;
 
     case KindOfDict:
       m_type = KindOfPersistentDict;
+      [[fallthrough]];
     case KindOfPersistentDict:
       do_array();
       return;
 
     case KindOfKeyset:
       m_type = KindOfPersistentKeyset;
+      [[fallthrough]];
     case KindOfPersistentKeyset:
       do_array();
       return;

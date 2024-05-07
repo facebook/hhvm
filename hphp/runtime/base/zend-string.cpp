@@ -746,8 +746,10 @@ String string_strip_tags(const char *s, const int len,
         state=2;
         break;
       }
+      [[fallthrough]];
 
     case 'E':
+      [[fallthrough]];
     case 'e':
       /* !DOCTYPE exception */
       if (state==3 && p > s+6
@@ -760,7 +762,7 @@ String string_strip_tags(const char *s, const int len,
         state = 1;
         break;
       }
-      /* fall-through */
+      [[fallthrough]];
 
     case 'l':
 
@@ -773,7 +775,7 @@ String string_strip_tags(const char *s, const int len,
         break;
       }
 
-      /* fall-through */
+      [[fallthrough]];
     default:
     reg_char:
       if (state == 0) {
@@ -965,7 +967,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
         fnum = num;
         mode = 1;
       }
-      /* fall-through */
+      [[fallthrough]];
     case 1: /* Float */
       fnum = fnum * base + c;
     }
@@ -1298,6 +1300,7 @@ ssize_t php_base64_decode(const char *str, int length, bool strict,
       return -1;
     case 2:
       k++;
+      [[fallthrough]];
     case 3:
       result[k] = 0;
     }
@@ -1372,7 +1375,7 @@ String string_escape_shell_arg(const char *str) {
       cmd[y++] = '\'';
       cmd[y++] = '\\';
       cmd[y++] = '\'';
-      /* fall-through */
+      [[fallthrough]];
     default:
       cmd[y++] = str[x];
     }
@@ -1426,7 +1429,7 @@ String string_escape_shell_cmd(const char *str) {
     case '\x0A': /* excluding these two */
     case '\xFF':
       cmd[y++] = '\\';
-      /* fall-through */
+      [[fallthrough]];
     default:
       cmd[y++] = str[x];
     }

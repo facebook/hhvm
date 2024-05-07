@@ -754,7 +754,7 @@ static const char *lookup_trailing_spaces(const char *ptr, int len) {
       if (len > 1 && *(ptr - 2) == '\r') {
         return ptr - 2;
       }
-      /* break is omitted intentionally */
+      [[fallthrough]];
     case '\r':
       return ptr - 1;
     }
@@ -848,7 +848,7 @@ Array File::readCSV(int64_t length /* = 0 */,
             memcpy(tptr, hunk_begin, bptr - hunk_begin);
             tptr += (bptr - hunk_begin);
             hunk_begin = bptr;
-            /* break is omitted intentionally */
+            [[fallthrough]];
           case 0:
             {
               if (hunk_begin != line_end) {

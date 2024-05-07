@@ -508,7 +508,7 @@ void tvBitNot(TypedValue& cell) {
       break;
 
     case KindOfClass:
-      // Fall-through
+      [[fallthrough]];
     case KindOfLazyClass:
       {
         auto const o = "increment op";
@@ -519,9 +519,10 @@ void tvBitNot(TypedValue& cell) {
                                                           o));
       }
       cell.m_type = KindOfString;
-      // Fall-through
+      [[fallthrough]];
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
+      [[fallthrough]];
     case KindOfPersistentString:
         auto const sl = cell.m_data.pstr->slice();
         FOLLY_SDT(hhvm, hhvm_cow_bitnot, sl.size());

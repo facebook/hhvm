@@ -300,18 +300,18 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   auto const base = [&] {
     using T = RepoAuthType::Tag;
 
-    #define O(type, check)                         \
-      case T::Opt##type: if (isNull) return true;  \
-      case T::type:      return check(tv.m_type);  \
+    #define O(type, check)                                         \
+      case T::Opt##type: if (isNull) return true; [[fallthrough]]; \
+      case T::type:      return check(tv.m_type);                  \
 
     #define U(type, check)                                       \
       case T::Uninit##type: return isUninit || check(tv.m_type); \
       O(type, check)                                             \
 
     #define S(type, check, ptr)                                                 \
-      case T::Opt##type:  if (isNull) return true;                              \
+      case T::Opt##type:  if (isNull) return true; [[fallthrough]];             \
       case T::type:       return check(tv.m_type);                              \
-      case T::OptS##type: if (isNull) return true;                              \
+      case T::OptS##type: if (isNull) return true; [[fallthrough]];             \
       case T::S##type:    return check(tv.m_type) && tv.m_data.ptr->isStatic(); \
 
     #define N(type, check)                    \
@@ -332,7 +332,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
 
     #define OU(type, check1, check2)                                    \
       O(type, check1)                                                   \
-      case T::OptUnc##type: if (isNull) return true;                    \
+      case T::OptUnc##type: if (isNull) return true; [[fallthrough]];   \
       case T::Unc##type:    return check1(tv.m_type) && !check2(tv);    \
 
     #define A(type, check, ptr)               \

@@ -164,7 +164,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 
       case KindOfBoolean:
         assertx(val(tv).num == 0LL || val(tv).num == 1LL);
-        // fallthru
+        [[fallthrough]];
       case KindOfInt64:
         d = (double)(val(tv).num);
         continue;
@@ -246,11 +246,11 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
       case KindOfUninit:
       case KindOfNull:
         val(tv).num = 0LL;
-        // fallthru
+        [[fallthrough]];
       case KindOfBoolean:
         assertx(val(tv).num == 0LL || val(tv).num == 1LL);
         type(tv) = KindOfInt64;
-        // fallthru
+        [[fallthrough]];
       case KindOfInt64:
         return;
 
@@ -336,7 +336,7 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfBoolean:
       assertx(tv.m_data.num == 0LL || tv.m_data.num == 1LL);
-      // fallthru
+      [[fallthrough]];
     case KindOfInt64:
       return (double)(tv.m_data.num);
 

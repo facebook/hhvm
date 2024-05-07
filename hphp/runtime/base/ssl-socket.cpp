@@ -344,7 +344,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
       }
       break;
     }
-    /* fall through */
+    [[fallthrough]];
   default:
     /* some other error */
     ecode = ERR_get_error();
@@ -585,6 +585,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
       break;
     }
     /* not allowed, so fall through */
+    [[fallthrough]];
   default:
     raise_warning("Could not verify peer: code:%d %s", err,
                   X509_verify_cert_error_string(err));

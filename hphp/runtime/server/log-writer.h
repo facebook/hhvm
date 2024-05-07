@@ -77,7 +77,7 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
   switch (field) {
   case 'b':
     if (responseSize == 0) return false;
-    // Fall through
+    [[fallthrough]];
   case 'B':
     out = folly::to<T>(responseSize);
     break;

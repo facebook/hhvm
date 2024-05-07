@@ -758,11 +758,11 @@ Variant ObjectData::o_invoke_few_args(const String& s,
   TypedValue args[5];
   switch(count) {
     default: not_implemented();
-    case  5: tvCopy(*a4.asTypedValue(), args[4]);
-    case  4: tvCopy(*a3.asTypedValue(), args[3]);
-    case  3: tvCopy(*a2.asTypedValue(), args[2]);
-    case  2: tvCopy(*a1.asTypedValue(), args[1]);
-    case  1: tvCopy(*a0.asTypedValue(), args[0]);
+    case  5: tvCopy(*a4.asTypedValue(), args[4]); [[fallthrough]];
+    case  4: tvCopy(*a3.asTypedValue(), args[3]); [[fallthrough]];
+    case  3: tvCopy(*a2.asTypedValue(), args[2]); [[fallthrough]];
+    case  2: tvCopy(*a1.asTypedValue(), args[1]); [[fallthrough]];
+    case  1: tvCopy(*a0.asTypedValue(), args[0]); [[fallthrough]];
     case  0: break;
   }
 

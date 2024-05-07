@@ -740,7 +740,8 @@ String DateTime::rfcFormat(const String& format) const {
 #endif
     case 'I': s.append(!utc() && m_tz->dst(toTimeStamp(error)) ? 1 : 0);
       break;
-    case 'P': rfc_colon = true; /* break intentionally missing */
+    case 'P': rfc_colon = true;
+      [[fallthrough]];
     case 'O':
       if (utc()) {
         s.printf("+00%s00", rfc_colon ? ":" : "");
@@ -823,7 +824,8 @@ String DateTime::rfcFormat(const String& format) const {
       break;
     case 'U': s.printf("%" PRId64, toTimeStamp(error)); break;
     case '\\':
-      if (i < format.size()) i++; /* break intentionally missing */
+      if (i < format.size()) i++;
+      [[fallthrough]];
     default:
       s.append(format[i]);
       break;

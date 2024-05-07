@@ -144,6 +144,23 @@ class PatchTest : public testing::Test {
     return value;
   }
 
+  static void testDynamicPatch(
+      Object patch, Object obj, const Object& expected) {
+    // Perform a roundtrip serialization/deserialization to make sure it works
+    // with string/binary fields.
+    auto buffer = serializeObject<CompactProtocolWriter>(patch);
+    Object patchObj = parseObject<CompactProtocolReader>(*buffer);
+    auto sobj = serializeObject<CompactProtocolWriter>(obj);
+
+    applyPatch(patchObj, obj);
+    EXPECT_EQ(obj, expected);
+
+    // Test applyPatchToSerializedData.
+    auto spatched = applyPatchToSerializedData<type::StandardProtocol::Compact>(
+        patch, *sobj);
+    EXPECT_EQ(parseObject<CompactProtocolReader>(*spatched), expected);
+  }
+
   static bool isBinaryEqual(Value& value, std::string_view expected) {
     const auto buf =
         folly::IOBuf::wrapBufferAsValue(expected.data(), expected.size());
@@ -912,8 +929,7 @@ TEST_F(PatchTest, Struct) {
   auto patchValue = asValueStruct<type::struct_c>(patchObject);
 
   auto expectNoop = [&](auto&& patchObj) {
-    EXPECT_EQ(
-        value.as_object(), applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), value.as_object());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -926,8 +942,7 @@ TEST_F(PatchTest, Struct) {
   // Assign
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
-    EXPECT_EQ(
-        patchValue.as_object(), applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), patchValue.as_object());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -935,8 +950,7 @@ TEST_F(PatchTest, Struct) {
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_TRUE(
-        applyDynamicPatch(patchObj, value).as_object().members()->empty());
+    testDynamicPatch(patchObj, value.as_object(), {});
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -947,17 +961,17 @@ TEST_F(PatchTest, Struct) {
 
   // PatchPrior
   auto applyFieldPatchTest = [&](auto op, auto expected) {
+    Object expectedObj;
+    expectedObj[FieldId{1}] = expected;
+
     Value fieldPatchValue;
     fieldPatchValue.emplace_object(
         makePatch(op, asValueStruct<type::list<type::i32_t>>({3, 2, 1})));
     Value fieldPatch;
     fieldPatch.ensure_object()[FieldId{1}] = fieldPatchValue;
     Object patchObj = makePatch(op::PatchOp::PatchPrior, fieldPatch);
-    EXPECT_EQ(
-        expected,
-        applyDynamicPatch(patchObj, value)
-            .objectValue_ref()
-            .ensure()[FieldId{1}]);
+
+    testDynamicPatch(patchObj, value.as_object(), expectedObj);
 
     Mask mask;
     mask.includes_ref().emplace()[1] = allMask();
@@ -993,11 +1007,10 @@ TEST_F(PatchTest, Struct) {
         op::PatchOp::EnsureStruct,
         ensureValuePatch);
 
-    EXPECT_EQ(
-        asValueStruct<type::list<type::i32_t>>({42}),
-        applyDynamicPatch(patchObj, sourceValue)
-            .objectValue_ref()
-            .ensure()[FieldId{1}]);
+    Object expectedObj;
+    expectedObj[FieldId{1}] = asValueStruct<type::list<type::i32_t>>({42});
+
+    testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
 
     Mask mask;
     mask.includes_ref().emplace()[1] = allMask();
@@ -1025,8 +1038,7 @@ TEST_F(PatchTest, Struct) {
   {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({1}));
-    EXPECT_EQ(
-        protocol::Object{}, applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), {});
 
     // For read, we don't need to read anything.
     // For write, we only need to write the field that is removed.
@@ -1048,8 +1060,7 @@ TEST_F(PatchTest, Struct) {
   {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({1}));
-    EXPECT_EQ(
-        protocol::Object{}, applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), {});
     {
       auto masks = extractMaskViewFromPatch(patchObj);
       EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
@@ -1194,8 +1205,7 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   auto patchValue = asValueStruct<type::union_c>(patchObject);
 
   auto expectNoop = [&](auto&& patchObj) {
-    EXPECT_EQ(
-        value.as_object(), applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), value.as_object());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -1208,8 +1218,7 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   // Assign
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
-    EXPECT_EQ(
-        patchValue.as_object(), applyDynamicPatch(patchObj, value).as_object());
+    testDynamicPatch(patchObj, value.as_object(), patchValue.as_object());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -1217,8 +1226,7 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_TRUE(
-        applyDynamicPatch(patchObj, value).as_object().members()->empty());
+    testDynamicPatch(patchObj, value.as_object(), {});
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -1254,6 +1262,11 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
     auto fieldIt = obj.members()->find(2);
     EXPECT_TRUE(fieldIt != obj.members()->end());
     EXPECT_EQ(44, fieldIt->second.as_i32());
+
+    // TODO(dokwon): Handle EnsureUnion for extractMaskFromPatch
+    // Object expectedObj;
+    // expectedObj[FieldId{2}].emplace_i32(44);
+    // testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
   }
   // Ensure member that is already set
   {
@@ -1268,11 +1281,9 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
 
     Object patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
 
-    auto obj = applyDynamicPatch(patchObj, sourceValue).as_object();
-    auto fieldIt = obj.members()->find(1);
-    EXPECT_TRUE(obj.members()->find(2) == obj.members()->end());
-    EXPECT_TRUE(fieldIt != obj.members()->end());
-    EXPECT_EQ(42, fieldIt->second.as_i32());
+    Object expectedObj;
+    expectedObj[FieldId{1}].emplace_i32(42);
+    testDynamicPatch(patchObj, sourceValue.as_object(), expectedObj);
   }
 
   // Ensure Fail

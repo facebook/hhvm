@@ -803,6 +803,15 @@ void ConnectOperation::timeoutHandler(
     parts.push_back(threadOverloadMessage(cbDelayUs));
   }
   parts.push_back(fmt::format("(TcpTimeout:{})", (isTcpTimeout ? 1 : 0)));
+  parts.push_back(fmt::format(
+      "(Attempts:{}/{})",
+      (attempts_made_ + 1),
+      conn_options_.getConnectAttempts()));
+  parts.push_back(fmt::format(
+      "(TotalTimeout:{})",
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          conn_options_.getTotalTimeout())
+          .count()));
 
   setAsyncClientError(CR_SERVER_LOST, folly::join(" ", parts));
   attemptFailed(OperationResult::TimedOut);

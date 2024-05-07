@@ -261,10 +261,12 @@ void ApplyPatch::operator()(const Object& patch, folly::IOBuf& value) const {
 
 void ApplyPatch::operator()(
     const Object& patch, std::vector<Value>& value) const {
+  DCHECK(
+      !findOp(patch, PatchOp::Add)); // Make sure no one relies on List::prepend
   checkOps(
       patch,
       Value::Type::listValue,
-      {PatchOp::Assign, PatchOp::Clear, PatchOp::Add, PatchOp::Put});
+      {PatchOp::Assign, PatchOp::Clear, PatchOp::Put});
   if (applyAssign<type::list_c>(patch, value)) {
     return; // Ignore all other ops.
   }
@@ -272,23 +274,6 @@ void ApplyPatch::operator()(
   if (auto* clear = findOp(patch, PatchOp::Clear)) {
     if (argAs<type::bool_t>(*clear)) {
       value.clear();
-    }
-  }
-
-  if (auto* add = findOp(patch, PatchOp::Add)) {
-    if (const auto* to_add = add->if_set()) {
-      for (const auto& element : *to_add) {
-        if (std::find(value.begin(), value.end(), element) == value.end()) {
-          value.insert(value.begin(), element);
-        }
-      }
-    } else {
-      const auto* prependVector = add->if_list();
-      if (!prependVector) {
-        throw std::runtime_error(
-            "list add patch should contain a set or a list");
-      }
-      value.insert(value.begin(), prependVector->begin(), prependVector->end());
     }
   }
 

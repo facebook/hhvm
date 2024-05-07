@@ -392,20 +392,6 @@ TEST_F(PatchTest, List) {
     expectNoop(patchObj);
   }
 
-  // Prepend
-  {
-    auto expected = patchValue.as_list();
-    expected.insert(
-        expected.end(), value.as_list().begin(), value.as_list().end());
-    Object patchObj = makePatch(op::PatchOp::Add, patchValue);
-    EXPECT_EQ(expected, applyDynamicPatch(patchObj, value).as_list());
-    EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
-  }
-  {
-    Object patchObj = makePatch(op::PatchOp::Add, emptyValue);
-    expectNoop(patchObj);
-  }
-
   // Append
   {
     auto expected = value.as_list();
@@ -419,29 +405,6 @@ TEST_F(PatchTest, List) {
   }
   {
     Object patchObj = makePatch(op::PatchOp::Put, emptyValue);
-    expectNoop(patchObj);
-  }
-
-  // Add
-  {
-    Object patchObj = makePatch(
-        op::PatchOp::Add,
-        asValueStruct<type::set<type::binary_t>>(std::set{"test"}));
-    EXPECT_EQ(value.as_list(), applyDynamicPatch(patchObj, value).as_list())
-        << "Should insert nothing";
-    EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
-  }
-  {
-    auto expected = value.as_list();
-    expected.insert(expected.begin(), asValueStruct<type::binary_t>("best"));
-    Object patchObj = makePatch(
-        op::PatchOp::Add,
-        asValueStruct<type::set<type::binary_t>>(std::set{"best"}));
-    EXPECT_EQ(expected, applyDynamicPatch(patchObj, value).as_list());
-    EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
-  }
-  {
-    Object patchObj = makePatch(op::PatchOp::Add, emptySet);
     expectNoop(patchObj);
   }
 }

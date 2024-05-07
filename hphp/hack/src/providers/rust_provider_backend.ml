@@ -327,7 +327,7 @@ module Decl = struct
     set_decl_store t;
     with_ctx_proxy_opt t ctx @@ fun () -> Modules.get t name
 
-  let get_folded_class t ctx name =
+  let get_folded_class t ctx name : FoldedClasses.value option =
     set_decl_store t;
     with_ctx_proxy_opt t ctx @@ fun () -> FoldedClasses.get t name
 

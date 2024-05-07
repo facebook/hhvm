@@ -7558,3 +7558,151 @@ $i + 3;                 // Error, expected num but got bool
             )
         )
         self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])
+
+    def test_file_outline_detail(self) -> None:
+        """
+        Test that file outline symbols contain [the `detail` field](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#documentSymbol), where applicable.
+        Afaict this field isn't user-visible in VSCode. Our use case is to provide additional context to AI code assist tooling.
+        The key piece of information not already provided is the type hints from the definition site, but we also include additional information that may help tooling,
+        such as parameter names of functions and methods.
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "file_outline.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+class CC {
+  public static abstract final readonly int $prop;
+  const type T = int;
+  const vec<int> NUMBERS = vec[1, 2, 3];
+  public readonly function foo(inout arraykey $x) {
+    $x = 1;
+  }
+  public static async function bar(): Awaitable<void> {}
+}
+
+function baz<T>(readonly T $x): readonly T {
+  return $x;
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/documentSymbol",
+                params={"textDocument": {"uri": "${php_file_uri}"}},
+                result=[
+                    {
+                        "name": "baz",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 11, "character": 0},
+                                "end": {"line": 13, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "bar",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 8, "character": 2},
+                                "end": {"line": 8, "character": 56},
+                            },
+                        },
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "NUMBERS",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 4, "character": 17},
+                                "end": {"line": 4, "character": 39},
+                            },
+                        },
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "prop",
+                        "kind": 7,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 2, "character": 44},
+                                "end": {"line": 2, "character": 49},
+                            },
+                        },
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "CC",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 9, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "T",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 3, "character": 2},
+                                "end": {"line": 3, "character": 21},
+                            },
+                        },
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "foo",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 5, "character": 2},
+                                "end": {"line": 7, "character": 3},
+                            },
+                        },
+                        "containerName": "CC",
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="shutdown",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    }
+                },
+                result=None,
+            )
+        )
+        self.run_spec(spec, variables)

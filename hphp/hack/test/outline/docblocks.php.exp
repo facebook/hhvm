@@ -67,6 +67,7 @@ C
     position: line 25, characters 17-18
     span: line 25, character 17 - line 25, character 18
     modifiers: public 
+    detail: string $x
     docblock:
 /* Property */
 

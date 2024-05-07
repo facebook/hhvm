@@ -2705,6 +2705,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                 "end": {"line": 41, "character": 29},
                             },
                         },
+                        "detail": 'MyString = "myString"',
                         "containerName": "HasString",
                     },
                     {
@@ -7652,6 +7653,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 4, "character": 39},
                             },
                         },
+                        "detail": "vec<int> NUMBERS = vec[1, 2, 3]",
                         "containerName": "CC",
                     },
                     {
@@ -7664,6 +7666,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 2, "character": 49},
                             },
                         },
+                        "detail": "readonly int $prop",
                         "containerName": "CC",
                     },
                     {
@@ -7687,6 +7690,7 @@ function baz<T>(readonly T $x): readonly T {
                                 "end": {"line": 3, "character": 21},
                             },
                         },
+                        "detail": "const type T = int;",
                         "containerName": "CC",
                     },
                     {

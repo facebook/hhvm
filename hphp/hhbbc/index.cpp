@@ -22169,7 +22169,7 @@ template <typename F>
 void AnalysisScheduler::onTransitiveDep(SString name,
                                         const DepState& state,
                                         const F& f) const {
-  if (state.deps.empty()) return;
+  if (state.deps.empty() || workItems() >= 4000000) return;
   auto const& d = state.deps;
   auto const& i = *index.m_data;
 

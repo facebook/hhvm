@@ -20,82 +20,91 @@ import thrift.python.types as _fbthrift_python_types
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyIntField",  # name
+            "MyIntField", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyStringField",  # name
+            "MyStringField", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyDataField",  # name
+            "MyDataField", # python name (from @python.Name annotation)
             lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             4,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "myEnum",  # name
+            "myEnum", # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             5,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "oneway",  # name
+            "oneway", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             6,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "readonly",  # name
+            "readonly", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             7,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "idempotent",  # name
+            "idempotent", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "floatSet",  # name
+            "floatSet", # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
         ),
-        (
+        _fbthrift_python_types.FieldInfo(
             9,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "no_hack_codegen_field",  # name
+            "no_hack_codegen_field", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -145,10 +154,11 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
-        (
+        _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "reserved_field",  # name
+            "reserved_field", # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info

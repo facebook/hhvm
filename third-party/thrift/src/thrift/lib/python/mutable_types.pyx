@@ -25,6 +25,7 @@ from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.mutable_typeinfos cimport MutableListTypeInfo
 from thrift.python.types cimport (
     AdaptedTypeInfo,
+    FieldInfo,
     TypeInfoBase,
     getCTypeInfo,
     set_struct_field,
@@ -187,11 +188,11 @@ cdef class MutableStruct(MutableStructOrUnion):
         field_spec = mutable_struct_info.fields[index]
 
         # Handle field w/ adapter
-        adapter_info = field_spec[5]
+        adapter_info = field_spec.adapter_info
         if adapter_info is not None:
             # DO_BEFORE(alperyoney,20240515): Implement adapters for mutable types
             raise NotImplementedError(
-              f"Field ({self.__class__.__name__}.{field_spec[2]}) with "
+              f"Field ({self.__class__.__name__}.{field_spec.py_name} with "
               "adapters has not been implemented for mutable types")
 
         set_struct_field(
@@ -205,7 +206,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         cdef TypeInfoBase field_type_info = mutable_struct_info.type_infos[index]
         field_spec = mutable_struct_info.fields[index]
 
-        adapter_info = field_spec[5]
+        adapter_info = field_spec.adapter_info
         if adapter_info is not None:
             raise NotImplementedError("The field with adapters has not been implemented yet.")
 
@@ -274,32 +275,7 @@ cdef class MutableStructInfo:
     Stores information for a specific Thrift Struct class.
 
     Instance Variables:
-        fields: Set containing the specifications of each field in this Thrift
-            struct. Each field is represented as a tuple with the following
-            structure:
-
-            (
-                id (int): The field ID specified in the IDL.
-
-                qualifier (FieldQualifier enum): Unqualified, Optional, ...
-
-                name (str); The name of the Thrift struct, as specified in the
-                    IDL.
-
-                type_info: Type information object corresponding to this field
-                    (eg. typeinfo_string, ListTypeInfo, SetTypeInfo, etc.), OR
-                    a callable (eg. lambda) that returns such an object (useful
-                        to handle types with dependencies in arbitrary order).
-
-                default_value: custom default value specified in the IDL, or
-                    None. If present, this can also be a callable which will be
-                    called (exactly once) to obtain the default value.
-
-                adapter_info: if the field has an adapter, or None.
-
-                is_primitive (bool): Whether the field has a "orimitive" type,
-                    such as: bool, byte, i16, i32, i62, double, float.
-            )
+        fields: tuple[FieldInfo, ...] (from `_fbthrift_SPEC`).
 
         cpp_obj: cDynamicStructInfo for this struct.
 
@@ -310,7 +286,7 @@ cdef class MutableStructInfo:
             Initialized by calling `fill()`.
     """
 
-    def __cinit__(self, name: str, fields):
+    def __cinit__(self, name: str, fields: tuple[FieldInfo, ...]):
         """
         Stores information for a Thrift Struct class with the given name.
 
@@ -345,23 +321,27 @@ cdef class MutableStructInfo:
 
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         type_infos = self.type_infos
-        for idx, (field_id, qualifier, name, type_info, *_) in enumerate(self.fields):
-            # type_info can be a lambda function so types with dependencies
+        for idx, field_info in enumerate(self.fields):
+            # field_type_info can be a lambda function so types with dependencies
             # won't need to be defined in order, see class docstring above.
-            if PyCallable_Check(type_info):
-                type_info = type_info()
+            field_type_info = field_info.type_info
+            if PyCallable_Check(field_type_info):
+                field_type_info = field_type_info()
 
             # The rest of the code assumes that all the `TypeInfo` classes extend
             # from `TypeInfoBase`. Instances are typecast to `TypeInfoBase` before
             # the `to_internal_data()` and `to_python_value()` methods are called.
-            if not isinstance(type_info, TypeInfoBase):
-                raise TypeError(f"{type(type_info).__name__} is not subclass of TypeInfoBase.")
+            if not isinstance(field_type_info, TypeInfoBase):
+                raise TypeError(f"{type(field_type_info).__name__} is not subclass of TypeInfoBase.")
 
-            Py_INCREF(type_info)
-            PyTuple_SET_ITEM(type_infos, idx, type_info)
-            self.name_to_index[name] = idx
+            Py_INCREF(field_type_info)
+            PyTuple_SET_ITEM(type_infos, idx, field_type_info)
+            self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
-                field_id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
+                field_info.id,
+                field_info.qualifier,
+                PyUnicode_AsUTF8(field_info.name),
+                getCTypeInfo(field_type_info),
             )
 
     cdef void store_field_values(self) except *:
@@ -373,7 +353,7 @@ cdef class MutableStructInfo:
         """
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         for idx, field in enumerate(self.fields):
-            default_value = field[4]
+            default_value = field.default_value
             if default_value is None:
                 continue
             if callable(default_value):
@@ -427,15 +407,15 @@ class MutableStructMeta(type):
         non_primitive_types = []
 
         slots = ['_fbthrift_field_cache']
-        for field_index, (_, _, name, type_info, _, adapter_info, is_primitive) in enumerate(fields):
-            slots.append(name)
+        for field_index, field_info in enumerate(fields):
+            slots.append(field_info.py_name)
 
             # if field has an adapter or is not primitive type, consider
             # as "non-primitive"
-            if adapter_info is not None or not is_primitive:
-                non_primitive_types.append((field_index, name, type_info))
+            if field_info.adapter_info is not None or not field_info.is_primitive:
+                non_primitive_types.append((field_index, field_info.py_name, field_info.type_info))
             else:
-                primitive_types.append((field_index, name))
+                primitive_types.append((field_index, field_info.py_name))
 
         dct["__slots__"] = slots
         klass = super().__new__(cls, cls_name, (MutableStruct,), dct)

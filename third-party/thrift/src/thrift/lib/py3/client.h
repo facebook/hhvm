@@ -33,10 +33,7 @@
 
 namespace thrift {
 namespace py3 {
-typedef std::unique_ptr<
-    apache::thrift::RequestChannel,
-    folly::DelayedDestruction::Destructor>
-    RequestChannel_ptr;
+using RequestChannel_ptr = apache::thrift::RequestChannel::Ptr;
 
 typedef std::unique_ptr<
     apache::thrift::HeaderClientChannel,

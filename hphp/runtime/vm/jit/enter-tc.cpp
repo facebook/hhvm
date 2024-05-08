@@ -63,8 +63,9 @@ ALWAYS_INLINE void preEnter(JitResumeAddr start) {
 
 ALWAYS_INLINE void postExit() {
   regState() = VMRegState::CLEAN;
-  assertx(isValidVMStackAddress(vmsp()));
-
+  assert_flog(isValidVMStackAddress(vmsp()),
+              "vmsp() = {} ; getStackLowAddress() = {} ; getStackHighAddress() = {}\n",
+              vmsp(), vmStack().getStackLowAddress(), vmStack().getStackHighAddress());
   vmfp() = nullptr;
   vmpc() = nullptr;
 }

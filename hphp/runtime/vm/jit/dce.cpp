@@ -680,7 +680,6 @@ bool canDCE(const IRInstruction& inst) {
   case EnterPrologue:
   case ExitPrologue:
   case EnterTranslation:
-  case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:

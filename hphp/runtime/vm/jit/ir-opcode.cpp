@@ -698,7 +698,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Jmp:
   case JmpExit:
   case JmpNZero:
-  case JmpPlaceholder:
   case JmpZero:
   case KeysetFirst:
   case KeysetGetK:

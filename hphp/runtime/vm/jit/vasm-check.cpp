@@ -402,7 +402,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadzbl_.d),Vreg32>::value,
                   "loadzbl should write a long\n");
-                  break;
+              break;
             case Vinstr::loadzbq:
               static_assert(
                   std::is_same<decltype(inst.loadzbq_.s),Vptr8>::value,
@@ -410,7 +410,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadzbq_.d),Vreg64>::value,
                   "loadzbq should write a quad\n");
-                  break;
+              break;
             case Vinstr::loadzwq:
               static_assert(
                   std::is_same<decltype(inst.loadzwq_.s),Vptr16>::value,
@@ -418,7 +418,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadzwq_.d),Vreg64>::value,
                   "loadzwq should write a quad\n");
-                  break;
+              break;
             case Vinstr::loadzlq:
               static_assert(
                   std::is_same<decltype(inst.loadzlq_.s),Vptr32>::value,
@@ -426,6 +426,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadzlq_.d),Vreg64>::value,
                   "loadzlq should write a quad\n");
+              break;
             case Vinstr::loadtqb:
               static_assert(
                   std::is_same<decltype(inst.loadtqb_.s),Vptr64>::value,
@@ -433,7 +434,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadtqb_.d),Vreg8>::value,
                   "loadtqb should write a byte\n");
-                  break;
+              break;
             case Vinstr::loadtql:
               static_assert(
                   std::is_same<decltype(inst.loadtql_.s),Vptr64>::value,
@@ -441,7 +442,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
               static_assert(
                   std::is_same<decltype(inst.loadtql_.d),Vreg32>::value,
                   "loadtql should write a long\n");
-                  break;
+              break;
             default:
               VisitOp vo;
               visitOperands(inst, vo);

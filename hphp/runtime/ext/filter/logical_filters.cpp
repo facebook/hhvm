@@ -57,6 +57,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len,
       [[fallthrough]];
     case '+':
       str++;
+      break;
     default:
       break;
   }

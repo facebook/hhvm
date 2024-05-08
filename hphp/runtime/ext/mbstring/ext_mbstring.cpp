@@ -4190,7 +4190,7 @@ static int _php_mbstr_parse_mail_headers(Array &ht, const char *str,
           state = 3;
           break;
         }
-        /* break is missing intentionally */
+        [[fallthrough]];
 
       case 3:
         if (crlf_state == -1) {

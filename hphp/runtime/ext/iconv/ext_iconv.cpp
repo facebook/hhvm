@@ -1134,6 +1134,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
       } else {
         break;
       }
+      [[fallthrough]];
 
     case 9: /* choice point, seeing what to do next.*/
       switch (*p1) {
@@ -1158,7 +1159,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
             break;
           }
         }
-        /* break is omitted intentionally */
+        [[fallthrough]];
 
       case '\r': case '\n': case ' ': case '\t': {
         String decoded;
@@ -1312,7 +1313,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
           scan_stat = 1;
           break;
         }
-        /* break is omitted intentionally */
+        [[fallthrough]];
 
       default:
         _php_iconv_appendc(retval, *p1, cd_pl);

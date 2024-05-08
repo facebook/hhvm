@@ -214,7 +214,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
       throw_implicit_context_exception("Implicit context is set to inaccessible");
     case ImplicitContext::State::SoftInaccessible:
       raise_implicit_context_warning("Implicit context is set to soft inaccessible");
-      // fallthru
+      [[fallthrough]];
     case ImplicitContext::State::SoftSet:
       return make_tv<KindOfNull>();
   }

@@ -222,17 +222,17 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     subarray.set(s_type, s_MX);
     GETSHORT(n, cp);
     subarray.set(s_pri, n);
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_CNAME:
     if (type == DNS_T_CNAME) {
       subarray.set(s_type, s_CNAME);
     }
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_NS:
     if (type == DNS_T_NS) {
       subarray.set(s_type, s_NS);
     }
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_PTR:
     if (type == DNS_T_PTR) {
       subarray.set(s_type, s_PTR);

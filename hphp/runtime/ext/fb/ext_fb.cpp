@@ -548,6 +548,7 @@ static int fb_compact_serialize_variant(
           VarNR{s_invalidMethCallerSerde.get()}
         );
       }
+      [[fallthrough]];
     case KindOfPersistentString:
     case KindOfString:
     case KindOfClass:
@@ -605,6 +606,7 @@ static int fb_compact_serialize_variant(
         }
         break;
       }
+      [[fallthrough]];
     case KindOfResource:
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(

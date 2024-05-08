@@ -652,6 +652,7 @@ static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
                            "PDOStatement::fetchAll()");
       return false;
     }
+    [[fallthrough]];
 
   default:
     if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
@@ -670,7 +671,7 @@ static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
       pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode");
       return false;
     }
-    /* no break; */
+    [[fallthrough]];
 
   case PDO_FETCH_CLASS:
     break;
@@ -2499,7 +2500,7 @@ safe:
 
               case KindOfBoolean:
                 param->parameter = param->parameter.toInt64();
-                // fallthru
+                [[fallthrough]];
               case KindOfPersistentString:
               case KindOfString:
               case KindOfPersistentVec:

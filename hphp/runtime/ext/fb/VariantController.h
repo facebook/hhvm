@@ -89,6 +89,7 @@ struct VariantControllerImpl {
         if (obj.toFuncVal()->isMethCaller()) {
           throw HPHP::serialize::MethCallerSerializeError();
         }
+        [[fallthrough]];
       case KindOfClass:
       case KindOfLazyClass:
       case KindOfPersistentString:

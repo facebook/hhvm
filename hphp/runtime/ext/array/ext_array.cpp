@@ -785,6 +785,7 @@ DOUBLE:
       DT_UNCOUNTED_CASE:
       case KindOfString:
         d *= tvCastToDouble(tv);
+        continue;
 
       case KindOfVec:
       case KindOfDict:
@@ -1063,6 +1064,7 @@ DOUBLE:
       DT_UNCOUNTED_CASE:
       case KindOfString:
         d += tvCastToDouble(tv);
+        continue;
 
       case KindOfVec:
       case KindOfDict:

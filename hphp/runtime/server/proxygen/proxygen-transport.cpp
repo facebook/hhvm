@@ -735,7 +735,8 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
       txn->sendHeaders(*msg);
       if (!message.m_chunk && !message.m_eom) {
         break;
-      } // else fall through
+      }
+      [[fallthrough]];
     case ResponseMessage::Type::BODY:
       if (message.m_chunk && m_method != Transport::Method::HEAD) {
         // TODO: experiment with disabling this chunked flag and letting
@@ -750,7 +751,8 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
       }
       if (!message.m_eom) {
         break;
-      } // else fall through
+      }
+      [[fallthrough]];
     case ResponseMessage::Type::EOM:
       txn->sendEOM();
       break;

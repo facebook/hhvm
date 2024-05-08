@@ -1797,6 +1797,7 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
   }
   case XSD_CONTENT_GROUP:
     model_to_string(model->u_group->model, buf, level);
+    break;
   default:
     break;
   }

@@ -53,7 +53,7 @@
         fsize, &flags, elf_getu16(swap, elfhdr.e_shnum))
         == -1)
       return -1;
-    /*FALLTHROUGH*/
+    [[fallthrough]];
   case ET_REL:
     if (doshn(ms, clazz, swap, fd,
         (off_t)elf_getu(swap, elfhdr.e_shoff),

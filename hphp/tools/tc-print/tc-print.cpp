@@ -277,6 +277,7 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'S':
         sortBySize = true;
+        [[fallthrough]];
       case 'T':
         if (sscanf(optarg, "%u", &nTopFuncs) != 1) {
           usage();
@@ -342,6 +343,8 @@ void parseOptions(int argc, char *argv[]) {
         if (optopt == 'd' || optopt == 'c' || optopt == 'p' || optopt == 't') {
           fprintf (stderr, "Error: -%c expects an argument\n\n", optopt);
         }
+        usage();
+        exit(1);
       case 'o':
         hostOpcodes = true;
         break;

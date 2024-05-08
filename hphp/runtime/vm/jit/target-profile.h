@@ -264,8 +264,8 @@ private:
       if (isValidTransID(profTransID)) {
         return rds::attach<T, rds::Mode::Local>(rdsKey);
       }
+      [[fallthrough]];
 
-      // fallthrough
     case TransKind::Anchor:
     case TransKind::Interp:
     case TransKind::Live:
@@ -328,4 +328,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

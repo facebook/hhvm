@@ -1171,7 +1171,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
             return false;
           }
         }
-        /* fall through */
+        [[fallthrough]];
 
       default:
         ;

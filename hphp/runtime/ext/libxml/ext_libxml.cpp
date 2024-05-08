@@ -406,6 +406,7 @@ void php_libxml_node_free(xmlNodePtr node, bool force) {
         node->ns = NULL;
       }
       node->type = XML_ELEMENT_NODE;
+      [[fallthrough]];
     default:
       xmlFreeNode(node);
     }

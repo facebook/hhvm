@@ -661,6 +661,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Pair:
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
+      [[fallthrough]];
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }

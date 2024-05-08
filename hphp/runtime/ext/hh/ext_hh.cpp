@@ -783,9 +783,9 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
     switch (u.second.flags) {
     case FileLoadFlags::kDup:     break;
     case FileLoadFlags::kHitMem:  break;
-    case FileLoadFlags::kWaited:  if (kind < 2) break;
-    case FileLoadFlags::kHitDisk: if (kind < 1) break;
-    case FileLoadFlags::kCompiled:if (kind < 0) break;
+    case FileLoadFlags::kWaited:  if (kind < 2) break; [[fallthrough]];
+    case FileLoadFlags::kHitDisk: if (kind < 1) break; [[fallthrough]];
+    case FileLoadFlags::kCompiled:if (kind < 0) break; [[fallthrough]];
     case FileLoadFlags::kEvicted:
       init.add(const_cast<StringData*>(u.first));
     }

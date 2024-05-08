@@ -1016,6 +1016,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
             addCompletion("<?hh");
             break;
           }
+          [[fallthrough]];
         case '@':
         case '=':
         case '$': {
@@ -1736,6 +1737,7 @@ bool DebuggerClient::process() {
         processTakeCode();
         return true;
       }
+      break;
     }
     case '?': {
       if (match("?")) {

@@ -1742,6 +1742,7 @@ static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
       php_libxml_node_free_resource((xmlNodePtr) nodep->children);
       nodep->children = nullptr;
     }
+    [[fallthrough]];
   case XML_TEXT_NODE:
   case XML_COMMENT_NODE:
   case XML_CDATA_SECTION_NODE:

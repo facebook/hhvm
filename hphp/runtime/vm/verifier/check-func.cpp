@@ -1198,6 +1198,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto new_pc = pc;
       decode_op(new_pc);
       if (decode_oa<BareThisOp>(new_pc) != BareThisOp::NeverNull) break;
+      [[fallthrough]];
     }
     case Op::BaseH: {
       // In HHBBC we can track the $this across loads into locals and pushes
@@ -1317,6 +1318,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         return false;
       }
       if (op == Op::AssertRATL) break;
+      [[fallthrough]];
     }
     case Op::BaseGC:
     case Op::BaseC: {
@@ -1370,7 +1372,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         ferror("{} must have a non-empty local range\n", opcodeToName(op));
         return false;
       }
-      // Fall-through
+      [[fallthrough]];
     }
     case Op::Await: {
       if (!m_func->isAsync) {

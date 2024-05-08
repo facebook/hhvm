@@ -200,7 +200,7 @@ String HHVM_FUNCTION(addslashes,
         case '\"':
         case '\'':
           ret.append('\\');
-        /* fall through */
+          [[fallthrough]];
         default:
           ret.append(*src);
       }
@@ -322,7 +322,7 @@ String HHVM_FUNCTION(nl2br,
             ret.append(*src);
             ++src;
           }
-        /* fall through */
+        [[fallthrough]];
         default: ret.append(*src);
       }
     });
@@ -350,7 +350,7 @@ String HHVM_FUNCTION(quotemeta,
         case '(':
         case ')':
           ret.append('\\');
-        /* fall through */
+          [[fallthrough]];
         default:
           ret.append(*src);
       }
@@ -2521,7 +2521,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
         }
       }
     }
-    /* fall thru */
+    [[fallthrough]];
   }
   case k_HTML_SPECIALCHARS:
     const auto& basic_table = get_basic_table(all, doctype);

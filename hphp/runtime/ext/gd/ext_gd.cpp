@@ -2062,6 +2062,7 @@ static bool _php_image_output_ctx(const OptResource& image, const String& filena
       raise_warning("Invalid threshold value '%d'. "
                       "It must be between 0 and 255", q);
     }
+    [[fallthrough]];
   case PHP_GDIMG_TYPE_JPG:
     ((void(*)(gdImagePtr, gdIOCtx *, int))(func_p))(im, ctx, q);
     break;
@@ -3104,6 +3105,7 @@ Variant HHVM_FUNCTION(imagecropauto,
   switch (mode) {
     case -1:
       mode = GD_CROP_DEFAULT;
+      [[fallthrough]];
     case GD_CROP_DEFAULT:
     case GD_CROP_TRANSPARENT:
     case GD_CROP_BLACK:
@@ -5733,12 +5735,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
      * return;
      */
     info_data->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+    [[fallthrough]];
   case TAG_FMT_SBYTE:
   case TAG_FMT_BYTE:
     /* in contrast to strings bytes do not need to allocate buffer for
        nullptr if length==0 */
     if (!length)
       break;
+    [[fallthrough]];
   case TAG_FMT_UNDEFINED:
     if (value) {
       /* do not recompute length here */
@@ -5806,6 +5810,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
 
       case TAG_FMT_SINGLE:
         info_value->f = *(float *)value;
+        break;
 
       case TAG_FMT_DOUBLE:
         info_value->d = *(double *)value;
@@ -7490,6 +7495,7 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
            buffer for nullptr if length==0 */
         if (image_info->info_list[section_index].list[i].length<1)
           break;
+        [[fallthrough]];
       default:
       case TAG_FMT_UNDEFINED:
       case TAG_FMT_STRING:
@@ -7846,6 +7852,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
                 }
                 break;
               }
+              [[fallthrough]];
             case TAG_FMT_USHORT:
             case TAG_FMT_ULONG:
               if (l==1) {
@@ -7874,6 +7881,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
                 }
                 break;
               }
+              [[fallthrough]];
             case TAG_FMT_SSHORT:
             case TAG_FMT_SLONG:
               if (l==1) {

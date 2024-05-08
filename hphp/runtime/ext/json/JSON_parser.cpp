@@ -1546,7 +1546,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             state = 9;
             break;
           }
-          /* fall through if not KindOfString */
+          [[fallthrough]];
         default:
           s_json_parser->error_code = JSON_ERROR_SYNTAX;
           return false;
@@ -1614,6 +1614,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           break;
         }
         /*</fb>*/
+        [[fallthrough]];
 
         /*
           :
@@ -1623,6 +1624,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           state = 28;
           break;
         }
+        [[fallthrough]];
         /*
           syntax error
         */

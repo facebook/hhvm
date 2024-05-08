@@ -167,7 +167,7 @@ void fixupVmfpUses(Vunit& unit) {
         always_assert(it != regchain.end());
         fp = it->second.first;
         regchain.erase(it);
-        // fallthru
+        [[fallthrough]];
       }
       default:
         FpVisit visit{unit, curFp, regchain};

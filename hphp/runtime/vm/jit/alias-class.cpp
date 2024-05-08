@@ -837,6 +837,7 @@ std::string show(AliasClass acls) {
   case A::STag::Iter:
     folly::format(&ret, "It {}:{}", acls.m_iter.frameIdx,
                   show(acls.m_iter.ids));
+    break;
   case A::STag::FrameAll:
     break;
   case A::STag::Prop:

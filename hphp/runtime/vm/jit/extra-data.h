@@ -651,32 +651,40 @@ struct IterData : IRExtraData {
 struct IterTypeData : IRExtraData {
   IterTypeData(
     uint32_t iterId,
+    DataType baseType,
     IterSpecialization type,
     ArrayLayout layout,
     bool baseConst,
     bool outputKey
   )
     : iterId{iterId}
+    , baseType{baseType}
     , type{type}
     , layout{layout}
     , baseConst{baseConst}
     , outputKey{outputKey}
   {
+    always_assert(
+      baseType == KindOfVec ||
+      baseType == KindOfDict ||
+      baseType == KindOfKeyset
+    );
     always_assert(type.specialized);
   }
 
   std::string show() const {
-    auto const type_str = HPHP::show(type);
-    auto const layout_str = layout.describe();
+    auto const typeStr = HPHP::show(type);
+    auto const layoutStr = layout.describe();
     return folly::format(
-      "{}::{}::{}::{}::{}",
-      iterId, type_str, layout_str, baseConst, outputKey
+      "{}::{}::{}::{}::{}::{}",
+      iterId, baseType, typeStr, layoutStr, baseConst, outputKey
     ).str();
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<uint32_t>()(iterId),
+      std::hash<DataType>()(baseType),
       std::hash<uint8_t>()(type.as_byte),
       std::hash<uint16_t>()(layout.toUint16()),
       std::hash<bool>()(baseConst),
@@ -685,12 +693,13 @@ struct IterTypeData : IRExtraData {
   }
 
   bool equals(const IterTypeData& o) const {
-    return iterId == o.iterId && type.as_byte == o.type.as_byte &&
-           layout == o.layout && baseConst == o.baseConst &&
-           outputKey == o.outputKey;
+    return iterId == o.iterId && baseType == o.baseType &&
+           type.as_byte == o.type.as_byte && layout == o.layout &&
+           baseConst == o.baseConst && outputKey == o.outputKey;
   }
 
   uint32_t iterId;
+  DataType baseType;
   IterSpecialization type;
   ArrayLayout layout;
   bool baseConst;

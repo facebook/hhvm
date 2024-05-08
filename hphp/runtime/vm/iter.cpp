@@ -77,21 +77,7 @@ bool isStructDict(const BespokeArray* bad) {
 
 std::string show(IterSpecialization type) {
   if (!type.specialized) return "Unspecialized";
-  return folly::sformat(
-    "{}::{}",
-    show(type.baseType()),
-    type.keyTypes().show()
-  );
-}
-
-std::string show(IterSpecialization::BaseType type) {
-  using BT = IterSpecialization::BaseType;
-  switch (type) {
-    case BT::Vec:           return "Vec";
-    case BT::Dict:          return "Dict";
-    case BT::kNumBaseTypes: always_assert(false);
-  }
-  always_assert(false);
+  return type.keyTypes().show();
 }
 
 //////////////////////////////////////////////////////////////////////

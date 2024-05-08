@@ -206,21 +206,7 @@ namespace HPHP::jit::irgen {
 
 namespace {
 
-using BT = IterSpecialization::BaseType;
-
 const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
-
-//////////////////////////////////////////////////////////////////////
-// Simple getters for IterSpecialization.
-
-Type getArrType(IterSpecialization specialization) {
-  switch (specialization.baseType()) {
-    case BT::Vec:           return TVec;
-    case BT::Dict:          return TDict;
-    case BT::kNumBaseTypes: always_assert(false);
-  }
-  always_assert(false);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Accessor for different base types.
@@ -269,7 +255,7 @@ struct VecAccessor : public Accessor {
   ) {
     is_ptr_iter =
       baseConst && !outputKey && VanillaVec::stores_unaligned_typed_values;
-    arr_type = getArrType(specialization);
+    arr_type = TVec;
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
@@ -315,10 +301,10 @@ struct VecAccessor : public Accessor {
   }
 };
 
-struct MixedAccessor : public Accessor {
-  explicit MixedAccessor(IterSpecialization specialization, bool baseConst) {
+struct DictAccessor : public Accessor {
+  explicit DictAccessor(IterSpecialization specialization, bool baseConst) {
     is_ptr_iter = baseConst;
-    arr_type = getArrType(specialization);
+    arr_type = TDict;
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
@@ -369,11 +355,11 @@ private:
 
 struct BespokeAccessor : public Accessor {
   explicit BespokeAccessor(
-      IterSpecialization specialization, ArrayLayout layout) {
+      IterSpecialization specialization, Type baseType) {
     is_ptr_iter = false;
-    arr_type = getArrType(specialization).narrowToLayout(layout);
+    arr_type = baseType;
+    layout = baseType.arrSpec().layout();
     iter_type = specialization;
-    this->layout = layout;
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
@@ -409,23 +395,21 @@ struct BespokeAccessor : public Accessor {
 };
 
 std::unique_ptr<Accessor> getAccessor(
+    DataType baseDT,
     IterSpecialization type,
     ArrayLayout layout,
     const IterArgs& data
 ) {
   if (!layout.vanilla()) {
-    return std::make_unique<BespokeAccessor>(type, layout);
+    auto const baseType = Type(baseDT).narrowToLayout(layout);
+    return std::make_unique<BespokeAccessor>(type, baseType);
   }
+
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
-  switch (type.baseType()) {
-    case BT::Vec: {
-      return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
-    }
-    case BT::Dict: {
-      return std::make_unique<MixedAccessor>(type, baseConst);
-    }
-    case BT::kNumBaseTypes:
-      always_assert(false);
+  if (baseDT == KindOfVec) {
+    return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
+  } else if (baseDT == KindOfDict) {
+    return std::make_unique<DictAccessor>(type, baseConst);
   }
   always_assert(false);
 }
@@ -572,10 +556,12 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   iterClear(env, data.valId);
   if (data.hasKey()) iterClear(env, data.keyId);
 
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const id = IterId(data.iterId);
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const ty = IterTypeData(
-    data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
+    data.iterId, baseDT, accessor.iter_type, accessor.layout, baseConst,
+    data.hasKey());
   gen(env, StIterType, ty, fp(env));
   auto const endPos = accessor.getPos(env, arr, size);
   gen(env, StIterEnd, id, fp(env), posAsInt(env, accessor, endPos));
@@ -622,19 +608,18 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
-                         uint32_t baseLocalId) {
+                         SSATmp* base) {
   auto const exit = makeExitSlow(env);
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   auto const type = IterTypeData(
-    data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
+    data.iterId, baseDT, accessor.iter_type, accessor.layout, baseConst,
+    data.hasKey());
   gen(env, CheckIter, exit, type, fp(env));
 
   // For LocalBaseMutable iterators specialized on bespoke array-like bases,
   // we unfortunately need to check the layout again at each IterNext.
   if (!baseConst && type.type.bespoke) {
-    auto const dt = accessor.arr_type.unspecialize();
-    gen(env, AssertLoc, dt, LocalId(baseLocalId), fp(env));
-    auto const base = gen(env, LdLoc, dt, LocalId(baseLocalId), fp(env));
     gen(env, CheckType, exit, accessor.arr_type, base);
   }
 
@@ -681,45 +666,51 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 
 // Speculatively generate specialized code for this IterInit.
 void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterArgs& data, uint32_t baseLocalId,
+                        const IterArgs& data, SSATmp* base,
+                        uint32_t baseLocalId,
                         ArrayIterProfile::Result profiledResult) {
-  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   profileDecRefs(env, data, /*init=*/true);
 
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
-  auto const iter = env.iters.contains(body) ? env.iters[body].get() : nullptr;
+  auto const iterKey = std::make_pair(body, baseDT);
+  auto const iter = env.iters.contains(iterKey)
+    ? env.iters[iterKey].get()
+    : nullptr;
 
   // We mark this iter group as being despecialized if we fail to specialize.
   auto const despecialize = [&]{
     if (iter == nullptr) {
       auto const def = SpecializedIterator{
           ArrayLayout::Top(), IterSpecialization::generic()};
-      env.iters[body] = std::make_unique<SpecializedIterator>(def);
+      env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
     } else {
       iter->iter_type = IterSpecialization::generic();
     }
-    assertx(!env.iters[body]->iter_type.specialized);
+    assertx(!env.iters[iterKey]->iter_type.specialized);
   };
 
-  auto& iter_type = profiledResult.top_specialization;
-
-  if (!iter_type.specialized) {
-    FTRACE(2, "Failure to specialize IterInit: no profiled specialization.\n");
+  if (profiledResult.key_types.mayIncludeTombstone()) {
+    FTRACE(2, "Failure to specialize IterInit: may include tombstones.\n");
     return despecialize();
   }
+
+  auto iter_type = IterSpecialization::generic();
+  iter_type.specialized = true;
+  iter_type.setKeyTypes(profiledResult.key_types);
 
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
-    auto const dt = getArrType(iter_type).toDataType();
+    auto const dt = base->type().toDataType();
     if (!arrayTypeCouldBeBespoke(dt)) return ArrayLayout::Vanilla();
     auto const sl = bespoke::layoutsForSink(env.profTransIDs, curSrcKey(env));
     assertx(sl.layouts.size() == 1);
     return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
   }();
   iter_type.bespoke = layout.bespoke();
-  auto const accessor = getAccessor(iter_type, layout, data);
+  auto const accessor = getAccessor(baseDT, iter_type, layout, data);
 
   // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
@@ -761,7 +752,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     emitSpecializedHeader(env, *accessor, data, value_type, body, baseLocalId);
     auto const def = SpecializedIterator{
         layout, iter_type, {inst}, header, nullptr};
-    env.iters[body] = std::make_unique<SpecializedIterator>(def);
+    env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
   }
 
   env.irb->appendBlock(main);
@@ -769,17 +760,20 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
 
 // `baseLocalId` is only valid for local iters. Returns true on specialization.
 bool specializeIterNext(IRGS& env, Offset loopOffset,
-                        const IterArgs& data, uint32_t baseLocalId) {
+                        const IterArgs& data, SSATmp* base,
+                        uint32_t baseLocalId) {
   profileDecRefs(env, data, /*init=*/false);
 
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, bcOff(env) + loopOffset);
-  if (!env.iters.contains(body)) return false;
+  auto const iterKey = std::make_pair(body, baseDT);
+  if (!env.iters.contains(iterKey)) return false;
 
-  auto const iter = env.iters[body].get();
+  auto const iter = env.iters[iterKey].get();
   if (!iter->iter_type.specialized) return false;
-  auto const accessor = getAccessor(iter->iter_type, iter->layout, data);
-  auto const type = env.irb->fs().local(baseLocalId).type;
-  if (!type.maybe(accessor->arr_type)) return false;
+  auto const accessor =
+    getAccessor(baseDT, iter->iter_type, iter->layout, data);
+  if (!base->type().maybe(accessor->arr_type)) return false;
 
   // We're committing to specialization for this loop. Replace the placeholders
   // for the inits with uncondition jumps into the specialized code.
@@ -793,7 +787,7 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   auto const footer = iter->footer == nullptr
     ? env.unit.defBlock(env.irb->curBlock()->profCount())
     : iter->footer;
-  emitSpecializedNext(env, *accessor, data, footer, baseLocalId);
+  emitSpecializedNext(env, *accessor, data, footer, base);
   if (iter->footer == nullptr) {
     BlockPusher pushBlock{*env.irb, env.irb->curMarker(), footer};
     emitSpecializedFooter(env, *accessor, data, iter->header);

@@ -555,10 +555,6 @@ struct RuntimeOption {
   F(bool, EmitDebuggerIntrCheck,       true)                            \
   /* Log the profile used to optimize array-like gets and sets. */      \
   F(bool, LogArrayAccessProfile,      false)                            \
-  /* We use PGO to target specialization for "foreach" iterator loops.  \
-   * We specialize if the chosen specialization covers this fraction    \
-   * of profiled loops. If the value is > 1.0, we won't specialize. */  \
-  F(double, ArrayIterSpecializationRate, 0.99)                          \
   F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \

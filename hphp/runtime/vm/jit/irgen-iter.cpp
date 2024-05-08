@@ -51,12 +51,8 @@ ArrayIterProfile::Result profileIterInit(IRGS& env, SSATmp* base) {
   }
 
   if (!profile.optimizing()) return generic;
-
   auto const result = profile.data().result();
-  if (result.num_arrays == 0) return generic;
-
-  auto const rate = 1.0 * size_t{result.top_count} / size_t{result.num_arrays};
-  return rate > RO::EvalArrayIterSpecializationRate ? result : generic;
+  return result.value_type == TBottom ? generic : result;
 }
 
 // `doneOffset` is the relative offset to jump to if the base has no elements.
@@ -176,7 +172,7 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base)) return;
   auto const profiledResult = profileIterInit(env, base);
-  specializeIterInit(env, doneOffset, ita, baseLocalId, profiledResult);
+  specializeIterInit(env, doneOffset, ita, base, baseLocalId, profiledResult);
 
   auto const op = base->isA(TArrLike)
     ? (ita.hasKey() ? LIterInitArrK : LIterInitArr)
@@ -189,10 +185,10 @@ void emitLIterInit(IRGS& env, IterArgs ita,
 
 void emitLIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
-  if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
-
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterNext);
+
+  if (specializeIterNext(env, loopOffset, ita, base, baseLocalId)) return;
 
   auto const op = base->isA(TArrLike)
     ? ita.hasKey() ? LIterNextArrK : LIterNextArr

@@ -87,6 +87,9 @@ struct ArrayKeyTypes {
   static constexpr ArrayKeyTypes Strs() {
     return FromBits(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
   }
+  static constexpr ArrayKeyTypes Any() {
+    return FromBits(kAnyKey);
+  }
 
   static constexpr ArrayKeyTypes FromBits(uint8_t bits) {
     auto result = ArrayKeyTypes{};
@@ -155,6 +158,7 @@ private:
   static constexpr uint8_t kStaticStrKey    = 0b0010;
   static constexpr uint8_t kIntKey          = 0b0100;
   static constexpr uint8_t kTombstoneKey    = 0b1000;
+  static constexpr uint8_t kAnyKey          = 0b1111;
 
   uint8_t m_bits;
 };

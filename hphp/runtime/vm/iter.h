@@ -62,23 +62,12 @@ enum class IterNextIndex : uint8_t {
 // This byte should be 0 for unspecialized iterators, as created by calling the
 // normal IterImpl constructor instead of using a specialized initializer.
 struct IterSpecialization {
-  enum class BaseType : uint8_t { Vec = 0, Dict, kNumBaseTypes };
-
   // Returns a generic (unspecialized) IterSpecialization value.
   static IterSpecialization generic() {
     IterSpecialization result;
     result.as_byte = 0;
     assertx(!result.specialized);
     return result;
-  }
-
-  BaseType baseType() const {
-    assertx(specialized);
-    return static_cast<BaseType>(base_type);
-  }
-  void setBaseType(BaseType baseType) {
-    assertx(specialized);
-    base_type = static_cast<uint8_t>(baseType);
   }
 
   ArrayKeyTypes keyTypes() const {
@@ -93,23 +82,20 @@ struct IterSpecialization {
   union {
     uint8_t as_byte;
     struct {
-      // `base_type` and `key_types` are bit encodings of the enums above.
-      uint8_t base_type: 1;  // bit encoding of BaseType
       uint8_t key_types: 4;  // bit encoding of ArrayKeyTypes
 
       // When we JIT a specialized iterator, we set `specialized` to true,
       bool specialized: 1;
       bool bespoke: 1;
 
-      // 1 free bit. Maybe we'll need a 2-bit enum for the layout?
-      bool padding: 1;
+      // 2 free bits
+      bool padding: 2;
     };
   };
 };
 
 // Debugging output.
 std::string show(IterSpecialization type);
-std::string show(IterSpecialization::BaseType type);
 
 /*
  * Iterator over an array, a collection, or an object implementing the Hack

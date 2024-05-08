@@ -119,7 +119,10 @@ struct IRGS {
    * Used to reuse blocks of code between specialized IterInits and IterNexts.
    * See irgen-iter-spec for details.
    */
-  jit::fast_map<Block*, std::unique_ptr<SpecializedIterator>> iters;
+  jit::fast_map<
+    std::pair<Block*, DataType>,
+    std::unique_ptr<SpecializedIterator>
+  > iters;
 
   /*
    * Func entry inputs:

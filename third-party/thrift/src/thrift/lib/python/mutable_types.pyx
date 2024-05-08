@@ -22,6 +22,7 @@ from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM
 from cpython.unicode cimport PyUnicode_AsUTF8String
 
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
+from thrift.python.mutable_typeinfos cimport MutableListTypeInfo
 from thrift.python.types cimport (
     AdaptedTypeInfo,
     TypeInfoBase,
@@ -81,6 +82,35 @@ class _MutableStructField:
         (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
 
 
+cdef is_mutable_container(object type_info):
+    if PyCallable_Check(type_info):
+        type_info = type_info()
+
+    return isinstance(type_info, MutableListTypeInfo)
+
+
+class _MutableStructContainerField:
+    __slots__ = ('_field_index')
+
+    def __init__(self, field_id):
+        self._field_index = field_id
+
+    def __get__(self, obj, objtype):
+        cached = obj._fbthrift_field_cache[self._field_index]
+        if cached is not None:
+            return cached
+
+        value = (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
+        obj._fbthrift_field_cache[self._field_index] = value
+        return value
+
+    def __set__(self, obj, value):
+        raise TypeError(
+                "Thrift container types do not support direct assignment."
+                " However, you can add, remove or update items within the"
+                " container")
+
+
 cdef class MutableStructOrUnion:
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
@@ -98,6 +128,16 @@ cdef class MutableStruct(MutableStructOrUnion):
     Instance variables:
         _fbthrift_data: "mutable struct tuple" that holds the "isset" flag array and
             values for all fields. See `createMutableStructTupleWithDefaultValues()`.
+
+        _fbthrift_field_cache: This is a list that stores instances of a field's
+            Python value. It is especially useful when creating a Python value is
+            relatively expensive, such as when calling the `TypeInfo.to_python_value()`
+            method. For example, in the case of adapted types, we store the Python
+            value in this list to avoid repeated calls to the adapter class.
+            This list also stores instances when we want to return the same instance
+            multiple times. For instance, if a struct field is a Thrift `list`, we store
+            the `MutableList` instance in this list. This allows us to return the same
+            `MutableList` instance for all attribute accesses.
     """
 
     def __cinit__(self, **kwargs):
@@ -110,6 +150,8 @@ cdef class MutableStruct(MutableStructOrUnion):
                  representation (see `*TypeInfo` classes).
         """
         self._initStructTupleWithValues(kwargs)
+        cdef MutableStructInfo mutable_struct_info = type(self)._fbthrift_mutable_struct_info
+        self._fbthrift_field_cache = [None] * len(mutable_struct_info.fields)
 
     def __init__(self, **kwargs):
         pass
@@ -218,6 +260,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         if field_index is None:
             raise TypeError(f"got an unexpected field_name: '{field_name}'")
         self._fbthrift_reset_field_to_standard_default(field_index)
+        self._fbthrift_field_cache[field_index] = None
 
     @classmethod
     def _fbthrift_create(cls, data):
@@ -383,7 +426,7 @@ class MutableStructMeta(type):
         primitive_types = []
         non_primitive_types = []
 
-        slots = []
+        slots = ['_fbthrift_field_cache']
         for field_index, (_, _, name, type_info, _, adapter_info, is_primitive) in enumerate(fields):
             slots.append(name)
 
@@ -406,13 +449,16 @@ class MutableStructMeta(type):
 
         # DO_BEFORE(alperyoney,20240515): Implement descriptor for non-primitive
         # mutable types.
-        # For now, handle non-primitive-types similar to primitive types and
-        # use the `_MutableStructField` descriptor
+        # For now, handle non-primitive-types similarly to primitive types and
+        # use the `_MutableStructField` descriptor for all types, except for
+        # `list`. For `list`, use `_MutableStructContainerField` descriptor.
         for field_index, field_name, type_info in non_primitive_types:
             type.__setattr__(
                 klass,
                 field_name,
-                _MutableStructField(field_index),
+                _MutableStructContainerField(field_index)
+                if is_mutable_container(type_info)
+                else _MutableStructField(field_index),
             )
 
         return klass

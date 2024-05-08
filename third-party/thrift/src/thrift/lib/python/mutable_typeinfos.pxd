@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from libc.stdint cimport int16_t
+from libcpp.memory cimport unique_ptr
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
     cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
@@ -32,6 +33,10 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
 
+    cdef cppclass cMutableListTypeInfo "::apache::thrift::python::MutableListTypeInfo":
+        cMutableListTypeInfo(cTypeInfo& valInfo)
+        const cTypeInfo* get()
+
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef cTypeInfo createImmutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
 
@@ -40,6 +45,13 @@ from thrift.python.types cimport TypeInfoBase
 cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj
     cdef object _mutable_struct_class
+    cdef const cTypeInfo* get_cTypeInfo(self)
+    cdef to_internal_data(self, object)
+    cdef to_python_value(self, object)
+
+cdef class MutableListTypeInfo(TypeInfoBase):
+    cdef object val_info
+    cdef unique_ptr[cMutableListTypeInfo] cpp_obj
     cdef const cTypeInfo* get_cTypeInfo(self)
     cdef to_internal_data(self, object)
     cdef to_python_value(self, object)

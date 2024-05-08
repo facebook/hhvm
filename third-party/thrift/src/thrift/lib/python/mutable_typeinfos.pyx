@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from folly.iobuf cimport IOBuf
+from libcpp.memory cimport make_unique
+
+from cpython.list cimport PyList_New, PyList_SET_ITEM
+from cpython.ref cimport Py_INCREF
 
 from cython.operator cimport dereference as deref
 
+from thrift.python.mutable_containers cimport MutableList
 from thrift.python.mutable_types cimport MutableStruct, MutableStructInfo
 from thrift.python.exceptions cimport GeneratedError
+from thrift.python.types cimport getCTypeInfo
+
 
 cdef class MutableStructTypeInfo(TypeInfoBase):
     """
@@ -61,3 +67,56 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef to_python_value(self, object struct_tuple):
         return self._mutable_struct_class._fbthrift_create(struct_tuple)
 
+
+cdef class MutableListTypeInfo(TypeInfoBase):
+    """
+    `MutableListTypeInfo` is similar to `ListTypeInfo`. However, the main
+    difference is that `MutableListTypeInfo` uses a Python `list` for internal
+    data representation, whereas `ListTypeInfo` uses a Python `tuple` for
+    internal data representation. In addition, `MutableListTypeInfo` returns
+    a `MutableList` from the `to_python_value()` method, rather than a `List`.
+    """
+    def __cinit__(self, val_info):
+        self.val_info = val_info
+        self.cpp_obj = make_unique[cMutableListTypeInfo](getCTypeInfo(val_info))
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj.get().get()
+
+    cdef to_internal_data(self, object values):
+        """
+        Validates the `values` and converts them into an internal data representation.
+
+        Args:
+            values (iterable): An iterable object. Each value in the iteration should
+            be of a valid value type as verified by in `self._val_info`.
+
+        Returns a Python list with converted values, representing the internal data
+        """
+        cdef TypeInfoBase val_type_info = self.val_info
+        cdef int idx = 0
+        cdef list lst = PyList_New(len(values))
+        for idx, value in enumerate(values):
+            internal_data = val_type_info.to_internal_data(value)
+            Py_INCREF(internal_data)
+            PyList_SET_ITEM(lst, idx, internal_data)
+
+        return lst
+
+    cdef to_python_value(self, object value):
+        """
+        Converts the given internal data (`value`) into a `MutableList` The resulting
+        `MutableList` is capable of converting the internal data to Python values
+        for its elements.
+
+        Args:
+            value (object): A Python list, very likely returned by the
+            `MutableListInfo.to_internal_data()` method.
+
+        Returns a `MutableList` instance with the internal data (`value`) and
+            the type info (`self.val_info`) attached.
+        """
+        cdef MutableList inst = MutableList.__new__(MutableList)
+        inst._val_typeinfo = self.val_info
+        inst._list_data = value
+        return inst

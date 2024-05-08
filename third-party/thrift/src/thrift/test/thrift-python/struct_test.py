@@ -23,6 +23,7 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized
+from thrift.python.mutable_containers import MutableList
 
 from thrift.python.mutable_types import (
     MutableStruct,
@@ -37,6 +38,7 @@ from thrift.python.types import (
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
+    TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
@@ -603,3 +605,96 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
         _thrift_serialization_round_trip(self, mutable_serializer, s_default_value)
+
+    def test_create_and_assign_for_list(self) -> None:
+        s = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+
+        self.assertEqual(3, len(s.unqualified_list_i32))
+        self.assertEqual([1, 2, 3], s.unqualified_list_i32)
+
+        with self.assertRaisesRegex(
+            TypeError, "Thrift container types do not support direct assignment."
+        ):
+            s.unqualified_list_i32 = [1, 2, 3]
+
+        s.unqualified_list_i32[0] = 2
+        self.assertEqual([2, 2, 3], s.unqualified_list_i32)
+
+        with self.assertRaisesRegex(IndexError, "list index out of range"):
+            s.unqualified_list_i32[4]
+
+        with self.assertRaisesRegex(IndexError, "list assignment index out of range"):
+            s.unqualified_list_i32[4] = 2
+
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            s.unqualified_list_i32[4] = "Not integer"
+
+        self.assertEqual([2, 2, 3], s.unqualified_list_i32)
+
+        lst1 = s.unqualified_list_i32
+        lst2 = s.unqualified_list_i32
+
+        # lists are instance of thrift.python.mutable_containers.MutableList
+        self.assertTrue(isinstance(lst1, MutableList))
+        self.assertTrue(isinstance(lst2, MutableList))
+
+        # lst1 and lst2 are the same instances
+        self.assertTrue(lst1 is lst2)
+
+        # Update on any variable is reflected on others
+        self.assertEqual([2, 2, 3], s.unqualified_list_i32)
+        self.assertEqual([2, 2, 3], lst1)
+        self.assertEqual([2, 2, 3], lst2)
+
+        lst2[1] = 10
+
+        self.assertEqual([2, 10, 3], s.unqualified_list_i32)
+        self.assertEqual([2, 10, 3], lst1)
+        self.assertEqual([2, 10, 3], lst2)
+
+        lst1.append(101)
+
+        self.assertEqual([2, 10, 3, 101], s.unqualified_list_i32)
+        self.assertEqual([2, 10, 3, 101], lst1)
+        self.assertEqual([2, 10, 3, 101], lst2)
+
+        self.assertEqual(101, s.unqualified_list_i32.pop())
+
+        self.assertEqual([2, 10, 3], s.unqualified_list_i32)
+        self.assertEqual([2, 10, 3], lst1)
+        self.assertEqual([2, 10, 3], lst2)
+
+        lst2.clear()
+
+        self.assertEqual([], s.unqualified_list_i32)
+        self.assertEqual([], lst1)
+        self.assertEqual([], lst2)
+
+        lst1.extend([11, 12, 13])
+
+        self.assertEqual([11, 12, 13], s.unqualified_list_i32)
+        self.assertEqual([11, 12, 13], lst1)
+        self.assertEqual([11, 12, 13], lst2)
+
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            lst2.extend([14, 15, "16", 17])
+
+        # basic exception safety
+        self.assertEqual([11, 12, 13, 14, 15], s.unqualified_list_i32)
+        self.assertEqual([11, 12, 13, 14, 15], lst1)
+        self.assertEqual([11, 12, 13, 14, 15], lst2)
+
+    @parameterized.expand(
+        [
+            (MutableTestStructAllThriftContainerTypes(),),
+            (MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3]),),
+            (MutableTestStructAllThriftContainerTypes(optional_list_i32=[11, 22, 33]),),
+            (
+                MutableTestStructAllThriftContainerTypes(
+                    unqualified_list_i32=[1, 2], optional_list_i32=[3]
+                ),
+            ),
+        ]
+    )
+    def test_container_serialization_round_trip(self, struct) -> None:
+        _thrift_serialization_round_trip(self, mutable_serializer, struct)

@@ -23,9 +23,12 @@ cpp_include "thrift/lib/cpp2/protocol/FieldMask.h"
 
 package "apache.org/thrift/test"
 
+struct Empty {}
+
 struct Foo {
   1: i32 field1;
   3: i32 field2;
+  11: map<string, Empty> field3;
 }
 
 struct Bar {

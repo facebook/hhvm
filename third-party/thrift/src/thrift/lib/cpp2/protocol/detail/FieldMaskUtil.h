@@ -51,36 +51,6 @@ bool validate_mask(MaskRef ref) {
   return true;
 }
 
-// Validates the fields in the Struct with the MaskRef.
-template <typename Struct>
-bool validate_fields(MaskRef ref) {
-  if (!validate_mask<Struct>(ref)) {
-    return false;
-  }
-  // Validates each field in the struct.
-  bool isValid = true;
-  op::for_each_ordinal<Struct>([&](auto ord) {
-    if (!isValid) { // short circuit
-      return;
-    }
-    using Ord = decltype(ord);
-    MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
-    if (next.isAllMask() || next.isNoneMask()) {
-      return;
-    }
-    // Check if the field is a thrift struct type. It uses native_type
-    // as we don't support adapted struct fields in field mask.
-    using FieldType = op::get_native_type<Struct, Ord>;
-    if constexpr (is_thrift_struct_v<FieldType>) {
-      // Need to validate the struct type.
-      isValid &= validate_fields<FieldType>(next);
-      return;
-    }
-    isValid = false;
-  });
-  return isValid;
-}
-
 template <typename Tag>
 bool is_compatible_with(const Mask&);
 
@@ -91,7 +61,25 @@ bool is_compatible_with_impl(Tag, const Mask&) {
 
 template <typename T>
 bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
-  return validate_fields<T>({mask});
+  MaskRef ref{mask};
+  if (!validate_mask<T>(ref)) {
+    return false;
+  }
+  // Validates each field in the struct.
+  bool isValid = true;
+  op::for_each_ordinal<T>([&](auto ord) {
+    if (!isValid) { // short circuit
+      return;
+    }
+    using Ord = decltype(ord);
+    MaskRef next = ref.get(op::get_field_id<T, Ord>());
+    if (next.isAllMask() || next.isNoneMask()) {
+      return;
+    }
+    // Recursively check if the mask is compatible for struct and map fields.
+    isValid &= is_compatible_with<op::get_type_tag<T, Ord>>(next.mask);
+  });
+  return isValid;
 }
 
 template <typename Key, typename Value>

@@ -3259,4 +3259,24 @@ TEST(FieldMaskTest, MaskBuilderMaskNotCompatible) {
       builder.includes_map_element<ident::foo>("1", mask), std::runtime_error);
 }
 
+TEST(FieldMaskTest, NestedMap) {
+  MaskBuilder<Foo> fooMaskBuilder(noneMask());
+  fooMaskBuilder.includes_map_element<ident::field3>("1");
+
+  MaskBuilder<HasMap> hasMapMaskBuilder(noneMask());
+  hasMapMaskBuilder.includes_map_element<ident::foos>(
+      1, fooMaskBuilder.toThrift());
+  Mask mask = hasMapMaskBuilder.toThrift();
+  EXPECT_EQ(
+      mask.includes_ref()
+          .value()[1]
+          .includes_map_ref()
+          .value()[1]
+          .includes_ref()
+          .value()[11]
+          .includes_string_map_ref()
+          .value()["1"],
+      allMask());
+}
+
 } // namespace apache::thrift::test

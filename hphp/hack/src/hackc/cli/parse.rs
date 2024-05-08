@@ -24,7 +24,6 @@ use relative_path::Prefix;
 use relative_path::RelativePath;
 use strum::Display;
 use strum::EnumString;
-use strum::EnumVariantNames;
 use strum::VariantNames;
 
 #[derive(Args, Clone, Debug)]
@@ -33,7 +32,7 @@ pub struct BenchOpts {
     parser: ParserKind,
 }
 
-#[derive(Clone, Copy, Debug, Display, EnumString, EnumVariantNames)]
+#[derive(Clone, Copy, Debug, Display, EnumString, VariantNames)]
 enum ParserKind {
     Aast,
     Positioned,

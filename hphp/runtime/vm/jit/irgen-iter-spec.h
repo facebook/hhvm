@@ -38,19 +38,17 @@ struct IRGS;
 struct SpecializedIterator {
   ArrayLayout layout;
   IterSpecialization iter_type;
-  std::vector<IRInstruction*> placeholders;
   Block* header;
   Block* footer;
 };
 
-// If this method gens specialized code for an IterInit, it will hide it behind
-// a placeholder, which we'll replace with a Jmp if we see a matching IterNext.
-// Thus, we always need to emit generic code for IterInit as well.
+// Generate specialized code for an IterInit. Returns true iff succeeded, which
+// means we no longer need to emit the generic code.
 //
 // `doneOffset` is the relative offset to jump to if the base has no elements.
 // `base` is the array base value
 // `baseLocalId` is the local ID the `base` came from
-void specializeIterInit(IRGS& env, Offset doneOffset,
+bool specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId,
                         ArrayIterProfile::Result profiledResult);

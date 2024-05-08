@@ -172,7 +172,9 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base)) return;
   auto const profiledResult = profileIterInit(env, base);
-  specializeIterInit(env, doneOffset, ita, base, baseLocalId, profiledResult);
+  auto const done =
+    specializeIterInit(env, doneOffset, ita, base, baseLocalId, profiledResult);
+  if (done) return;
 
   auto const op = base->isA(TArrLike)
     ? (ita.hasKey() ? LIterInitArrK : LIterInitArr)

@@ -664,8 +664,8 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 //////////////////////////////////////////////////////////////////////
 // The public API for iterator specialization.
 
-// Speculatively generate specialized code for this IterInit.
-void specializeIterInit(IRGS& env, Offset doneOffset,
+// Generate specialized code for this IterInit. Returns true on success.
+bool specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId,
                         ArrayIterProfile::Result profiledResult) {
@@ -674,26 +674,10 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
-  auto const iterKey = std::make_pair(body, baseDT);
-  auto const iter = env.iters.contains(iterKey)
-    ? env.iters[iterKey].get()
-    : nullptr;
-
-  // We mark this iter group as being despecialized if we fail to specialize.
-  auto const despecialize = [&]{
-    if (iter == nullptr) {
-      auto const def = SpecializedIterator{
-          ArrayLayout::Top(), IterSpecialization::generic()};
-      env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
-    } else {
-      iter->iter_type = IterSpecialization::generic();
-    }
-    assertx(!env.iters[iterKey]->iter_type.specialized);
-  };
 
   if (profiledResult.key_types.mayIncludeTombstone()) {
     FTRACE(2, "Failure to specialize IterInit: may include tombstones.\n");
-    return despecialize();
+    return false;
   }
 
   auto iter_type = IterSpecialization::generic();
@@ -703,8 +687,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
-    auto const dt = base->type().toDataType();
-    if (!arrayTypeCouldBeBespoke(dt)) return ArrayLayout::Vanilla();
+    if (!arrayTypeCouldBeBespoke(baseDT)) return ArrayLayout::Vanilla();
     auto const sl = bespoke::layoutsForSink(env.profTransIDs, curSrcKey(env));
     assertx(sl.layouts.size() == 1);
     return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
@@ -717,45 +700,42 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
          show(iter_type), layout.describe());
   if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
     FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
-    return despecialize();
-  } else if (iter && iter->iter_type.as_byte != iter_type.as_byte) {
-    FTRACE(2, "Failure: specialization mismatch: {}\n", show(iter->iter_type));
-    return despecialize();
-  } else if (iter && iter->layout != layout) {
-    FTRACE(2, "Failure: layout mismatch: {}\n", layout.describe());
-    return despecialize();
+    return false;
   } else if (!base->type().maybe(accessor->arr_type)) {
     FTRACE(2, "Failure: incoming type mismatch: {}\n", base->type());
-    return despecialize();
+    return false;
   }
+
+  // We're committing to the specialization.
   TRACE(2, "Success! Generating specialized code.\n");
 
-  // We're committing to the specialization. Hide the specialized code behind
-  // a placeholder so that we won't use it unless we also specialize the next.
-  auto const main = env.unit.defBlock(env.irb->curBlock()->profCount());
-  auto const init = env.unit.defBlock(env.irb->curBlock()->profCount());
-  gen(env, JmpPlaceholder, init);
-  auto const inst = &env.irb->curBlock()->back();
-  always_assert(inst->is(JmpPlaceholder));
-  gen(env, Jmp, main);
+  auto const iterKey = std::make_pair(body, baseDT);
+  auto const iter = env.iters.contains(iterKey)
+    ? env.iters[iterKey].get()
+    : nullptr;
+  auto const compat =
+    iter &&
+    iter->iter_type.as_byte == iter_type.as_byte &&
+    iter->layout == layout;
 
-  env.irb->appendBlock(init);
-  auto const header = iter == nullptr ? env.unit.defBlock(body->profCount())
-                                      : iter->header;
+  auto const header = compat
+    ? iter->header
+    : env.unit.defBlock(body->profCount());
   emitSpecializedInit(env, *accessor, data, header, done, base);
 
-  if (iter != nullptr) {
-    iter->placeholders.push_back(inst);
-  } else {
+  if (!compat) {
     env.irb->appendBlock(header);
     auto const& value_type = profiledResult.value_type;
     emitSpecializedHeader(env, *accessor, data, value_type, body, baseLocalId);
-    auto const def = SpecializedIterator{
-        layout, iter_type, {inst}, header, nullptr};
-    env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
+
+    if (!iter) {
+      // The first emitted specialization is likely the best one.
+      auto const def = SpecializedIterator{layout, iter_type, header, nullptr};
+      env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
+    }
   }
 
-  env.irb->appendBlock(main);
+  return true;
 }
 
 // `baseLocalId` is only valid for local iters. Returns true on specialization.
@@ -774,14 +754,6 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   auto const accessor =
     getAccessor(baseDT, iter->iter_type, iter->layout, data);
   if (!base->type().maybe(accessor->arr_type)) return false;
-
-  // We're committing to specialization for this loop. Replace the placeholders
-  // for the inits with uncondition jumps into the specialized code.
-  for (auto inst : iter->placeholders) {
-    assertx(inst->is(JmpPlaceholder));
-    env.unit.replace(inst, Jmp, inst->taken());
-  }
-  iter->placeholders.clear();
 
   assertx(iter->header != nullptr);
   auto const footer = iter->footer == nullptr

@@ -7,9 +7,9 @@
 
 #include "FizzContextProvider.h"
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/client/SynchronizedLruPskCache.h>
-#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TicketCodec.h>
@@ -43,8 +43,8 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   // Thrift's Rocket transport requires an ALPN
   ctx->setSupportedAlpns({"rs"});
   if (!certData.empty() && !keyData.empty()) {
-    auto cert =
-        fizz::CertUtils::makeSelfCert(std::move(certData), std::move(keyData));
+    auto cert = fizz::openssl::CertUtils::makeSelfCert(
+        std::move(certData), std::move(keyData));
     ctx->setClientCertificate(std::move(cert));
   }
   std::shared_ptr<fizz::DefaultCertificateVerifier> verifier;
@@ -78,7 +78,7 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
   auto certMgr = std::make_shared<fizz::server::CertManager>();
   try {
     auto selfCert =
-        fizz::CertUtils::makeSelfCert(certData.str(), keyData.str());
+        fizz::openssl::CertUtils::makeSelfCert(certData.str(), keyData.str());
     // add the default cert
     certMgr->addCert(std::move(selfCert), true);
   } catch (const std::exception& ex) {

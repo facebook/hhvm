@@ -243,6 +243,7 @@ set(FIZZ_SOURCES
   client/FizzClientContext.cpp
   client/State.cpp
   client/ClientProtocol.cpp
+  client/CertManager.cpp
   client/PskSerializationUtils.cpp
   client/SynchronizedLruPskCache.cpp
   client/EarlyDataRejectionPolicy.cpp
@@ -433,6 +434,7 @@ if(BUILD_TESTS)
   add_gtest(client/test/SynchronizedLruPskCacheTest.cpp SyncronizedLruPskCacheTest)
   add_gtest(client/test/AsyncFizzClientTest.cpp AsyncFizzClientTest)
   add_gtest(client/test/ClientProtocolTest.cpp ClientProtocolTest)
+  add_gtest(client/test/CertManagerTest.cpp CertManagerTest)
   add_gtest(client/test/FizzClientTest.cpp FizzClientTest)
   add_gtest(compression/test/CertDecompressionManagerTest.cpp CertDecompressionManagerTest)
   add_gtest(compression/test/ZlibCertificateCompressorTest.cpp ZlibCertificateCompressorTest)

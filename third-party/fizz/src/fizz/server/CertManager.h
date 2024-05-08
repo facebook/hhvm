@@ -11,34 +11,24 @@
 #include <map>
 #include <unordered_map>
 
-#include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/CertManagerBase.h>
 
 namespace fizz {
 namespace server {
 
-class CertManager {
+class CertManager : public CertManagerBase {
  public:
-  enum class MatchType { Direct, Default };
-  struct CertMatchStruct {
-    std::shared_ptr<SelfCert> cert;
-    SignatureScheme scheme;
-    MatchType type;
-  };
-  using CertMatch = folly::Optional<CertMatchStruct>;
-
-  virtual ~CertManager() = default;
-
   /**
    * Select a cert given a client supplied SNI value, server
    * supportedSigSchemes, client peerSigSchemes, and client peerExtensions
    *
    * Will ignore peerSigSchemes if no matching certificate is found.
    */
-  virtual CertMatch getCert(
+  CertMatch getCert(
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const std::vector<Extension>& peerExtensions) const;
+      const std::vector<Extension>& peerExtensions) const override;
 
   /**
    * Return a certificate with the a primary identity exactly matching identity.
@@ -62,7 +52,6 @@ class CertManager {
 
   static std::string getKeyFromIdent(const std::string& ident);
 
-  using SigSchemeMap = std::map<SignatureScheme, std::shared_ptr<SelfCert>>;
   std::unordered_map<std::string, SigSchemeMap> certs_;
   std::unordered_map<std::string, std::shared_ptr<SelfCert>> identMap_;
   std::string default_;

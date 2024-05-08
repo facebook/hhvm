@@ -407,7 +407,11 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
              property_state_string(collect.props));
       ++interp_counter;
 
-      auto propagate = [&] (BlockId target, const State* st) {
+      // Vector for consistent iteration order.
+      hphp_vector_map<BlockId, State> rollbackStates;
+      hphp_fast_set<BlockId> scheduled;
+
+      auto const propagate = [&] (BlockId target, const State* st) {
         if (!st) {
           FTRACE(2, "     Force reprocess: {}\n", target);
           incompleteQ.push(rpoId(ai, target));
@@ -418,23 +422,43 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
           totalVisits[target] >= options.analyzeFuncWideningLimit;
 
         FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target);
-        FTRACE(4, "target old {}",
+        FTRACE(4, "\ntarget old {}\n",
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+
+        // Save the before start of the target (if we don't have one
+        // already). If we need to rollback this block, we'll restore
+        // all targets back to their original state.
+        rollbackStates.try_emplace(target, ai.bdata[target].stateIn);
 
         auto const changed =
           needsWiden ? widen_into(ai.bdata[target].stateIn, *st)
                      : merge_into(ai.bdata[target].stateIn, *st);
-        if (changed) {
-          incompleteQ.push(rpoId(ai, target));
-        }
+        if (changed) scheduled.emplace(target);
         FTRACE(4, "target new {}",
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+        if (changed) FTRACE(2, "    changed: {}\n", target);
+      };
+
+      auto const rollback = [&] {
+        for (auto& [b, st] : rollbackStates) {
+          FTRACE(4, "\nrollback block #{}:\n", b);
+          FTRACE(4, "target old {}\n",
+                 state_string(*ctx.func, ai.bdata[b].stateIn, collect));
+          ai.bdata[b].stateIn.copy_from(std::move(st));
+          FTRACE(4, "target new {}\n",
+                 state_string(*ctx.func, ai.bdata[b].stateIn, collect));
+        }
+        rollbackStates.clear();
+        scheduled.clear();
       };
 
       auto const blk = ctx.func.blocks()[bid].get();
       auto stateOut = ai.bdata[bid].stateIn;
       auto interp   = Interp { index, ctx, collect, bid, blk, stateOut };
-      auto flags    = run(interp, ai.bdata[bid].stateIn, propagate);
+      auto flags    = run(interp, ai.bdata[bid].stateIn, propagate, rollback);
+
+      for (auto const target : scheduled) incompleteQ.push(rpoId(ai, target));
+
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
         break;
@@ -1497,7 +1521,7 @@ State locally_propagated_bid_state(const Index& index,
   auto const propagate = [&] (BlockId target, const State* st) {
     if (target == targetBid) merge_into(ret, *st);
   };
-  run(interp, originalState, propagate);
+  run(interp, originalState, propagate, []{});
 
   ret.stack.compact();
   return ret;

@@ -153,6 +153,7 @@ uint32_t numPush(const Bytecode& bc) {
 }
 
 void reprocess(ISS& env) {
+  FTRACE(2, "    reprocess\n");
   env.reprocess = true;
 }
 
@@ -6194,9 +6195,11 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
 
 //////////////////////////////////////////////////////////////////////
 
-RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
+RunFlags run(Interp& interp, const State& in,
+             const PropagateFn& propagate,
+             const RollbackFn& rollback) {
   SCOPE_EXIT {
-    FTRACE(2, "out {}{}\n",
+    FTRACE(2, "\nout {}{}\n",
            state_string(*interp.ctx.func, interp.state, interp.collect),
            property_state_string(interp.collect.props));
   };
@@ -6229,9 +6232,11 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       env.state.copy_from(in);
       env.reprocess = false;
       env.replacedBcs.clear();
+      env.stateBefore.reset();
       size = retryOffset + retryBcs.size();
       idx = 0;
       ret.usedParams.reset();
+      rollback();
       continue;
     }
 
@@ -6307,8 +6312,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {
-  auto noop    = [] (BlockId, const State*) {};
-  ISS env { interp, noop };
+  ISS env { interp, [] (BlockId, const State*) {} };
   env.analyzeDepth++;
   default_dispatch(env, op);
   if (env.state.unreachable) {

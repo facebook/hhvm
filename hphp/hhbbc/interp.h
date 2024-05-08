@@ -195,9 +195,13 @@ StepFlags step(Interp&, const Bytecode& op);
  *
  * If the PropagateFn is called with a nullptr State, it means that
  * the given block should be re-processed.
+ *
+ * If the block needs to be reprocessed, RollbackFn will be called to
+ * "roll-back" any states propagated to other blocks.
  */
 using PropagateFn = std::function<void (BlockId, const State*)>;
-RunFlags run(Interp&, const State& in, PropagateFn);
+using RollbackFn = std::function<void()>;
+RunFlags run(Interp&, const State& in, const PropagateFn&, const RollbackFn&);
 
 /*
  * Dispatch a bytecode to the default interpreter.

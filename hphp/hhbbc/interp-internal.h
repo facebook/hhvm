@@ -60,8 +60,7 @@ struct TrackedElemInfo {
  * in that header and interp.h.
  */
 struct ISS {
-  explicit ISS(Interp& bag,
-               PropagateFn propagate)
+  ISS(Interp& bag, PropagateFn propagate)
     : index(bag.index)
     , ctx(bag.ctx)
     , collect(bag.collect)
@@ -69,7 +68,7 @@ struct ISS {
     , blk(*bag.blk)
     , state(bag.state)
     , undo(bag.undo)
-    , propagate(propagate)
+    , propagate(std::move(propagate))
     , analyzeDepth(0)
   {}
 

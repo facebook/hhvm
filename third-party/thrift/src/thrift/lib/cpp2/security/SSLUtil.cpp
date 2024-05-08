@@ -20,10 +20,10 @@
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/experimental/util/CertExtraction.h>
 #include <fizz/protocol/Exporter.h>
-#include <fizz/protocol/OpenSSLFactory.h>
 #include <fizz/server/AsyncFizzServer.h>
 
 namespace apache {
@@ -96,7 +96,7 @@ class StopTLSSocket : public Parent {
     if (exportedMasterSecret_ == nullptr) {
       return nullptr;
     }
-    auto factory = fizz::OpenSSLFactory();
+    auto factory = fizz::openssl::OpenSSLFactory();
     return fizz::Exporter::getExportedKeyingMaterial(
         factory,
         origCipherSuite_,

@@ -26,8 +26,8 @@
 #include <boost/thread.hpp>
 #include <fmt/core.h>
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
-#include <fizz/protocol/CertUtils.h>
 #include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
@@ -3397,7 +3397,7 @@ static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
     folly::readFile(find_resource(folly::test::kTestKey).c_str(), keyData);
 
     if (!certData.empty() && !keyData.empty()) {
-      auto cert = fizz::CertUtils::makeSelfCert(
+      auto cert = fizz::openssl::CertUtils::makeSelfCert(
           std::move(certData), std::move(keyData));
       ctx->setClientCertificate(std::move(cert));
     }

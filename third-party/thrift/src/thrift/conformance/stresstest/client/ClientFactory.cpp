@@ -16,8 +16,8 @@
 
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
-#include <fizz/protocol/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <folly/experimental/io/AsyncIoUringSocket.h>
 #include <folly/experimental/io/IoUringBackend.h>
@@ -93,7 +93,7 @@ std::shared_ptr<fizz::client::FizzClientContext> getFizzContext(
       std::string cert, key;
       folly::readFile(cfg.certPath.c_str(), cert);
       folly::readFile(cfg.keyPath.c_str(), key);
-      auto selfCert = fizz::CertUtils::makeSelfCert(cert, key);
+      auto selfCert = fizz::openssl::CertUtils::makeSelfCert(cert, key);
       ctx->setClientCertificate(std::move(selfCert));
     }
     return ctx;

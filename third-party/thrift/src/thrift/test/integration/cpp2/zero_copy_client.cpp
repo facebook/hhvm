@@ -28,7 +28,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
-#include <fizz/protocol/CertUtils.h>
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyServiceAsyncClient.h>
 
 enum ChannelType {
@@ -77,8 +77,8 @@ class Client {
         const char* keypath =
             FLAGS_key.size() > 0 ? FLAGS_key.c_str() : FLAGS_cert.c_str();
         CHECK(folly::readFile(keypath, key));
-        context->setClientCertificate(
-            fizz::CertUtils::makeSelfCert(std::move(cert), std::move(key)));
+        context->setClientCertificate(fizz::openssl::CertUtils::makeSelfCert(
+            std::move(cert), std::move(key)));
       }
       auto* fizzClient =
           new fizz::client::AsyncFizzClient(&evb_, std::move(context));

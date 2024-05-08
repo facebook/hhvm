@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/client/CertManager.h>
 #include <fizz/client/ECHPolicy.h>
 #include <fizz/client/PskCache.h>
 #include <fizz/compression/CertDecompressionManager.h>
@@ -110,14 +111,53 @@ class FizzClientContext {
   }
 
   /**
-   * Sets the certificate to use if the server requests client authentication
+   * This is a legacy api, prefer setClientCertManager.
+   * Sets the certificate to use if the server requests client authentication.
+   * This api is meant to be used when you expect
+   * to only be presenting one possible cert. This will overwrite any
+   * pre-existing configuration.
    */
-  void setClientCertificate(std::shared_ptr<const SelfCert> cert) {
-    clientCert_ = std::move(cert);
+  [[deprecated("Use FizzClientContext::setClientCertManager")]]
+  void setClientCertificate(std::shared_ptr<SelfCert> cert) {
+    // Blow away any existing certs on the context.
+    if (cert != nullptr) {
+      auto certMgr = std::make_shared<CertManager>();
+      clientCert_ = cert;
+      certMgr->addCert(std::move(cert));
+      certManager_ = std::move(certMgr);
+    } else {
+      certManager_ = nullptr;
+    }
   }
 
-  const auto& getClientCertificate() const {
-    return clientCert_;
+  /*
+   * Sets the certificate manager to select a cert if the server requests client
+   * auth
+   */
+  void setClientCertManager(std::shared_ptr<CertManager> manager) {
+    certManager_ = std::move(manager);
+  }
+
+  std::shared_ptr<CertManager> getCertManager() const {
+    return certManager_;
+  }
+
+  /*
+   * Retrieves the default client cert used for the ctx. This is a legacy api,
+   * do not use.
+   */
+  [[deprecated(
+      "FizzClientContext will no longer allow access to the client certificate. The application is responsible for keeping track of the client certificate installed")]]
+  std::shared_ptr<SelfCert> getClientCertificate() const {
+    if (clientCert_) {
+      return clientCert_;
+    }
+    if (certManager_) {
+      auto result = certManager_->getCert(
+          folly::none, supportedSigSchemes_, supportedSigSchemes_, {});
+      return result ? result->cert : nullptr;
+    }
+    return nullptr;
   }
 
   void setECHPolicy(std::shared_ptr<ECHPolicy> echPolicy) {
@@ -330,7 +370,9 @@ class FizzClientContext {
 
   std::shared_ptr<ECHPolicy> echPolicy_;
   std::shared_ptr<PskCache> pskCache_;
-  std::shared_ptr<const SelfCert> clientCert_;
+  // Legacy to support non cert mgr api.
+  std::shared_ptr<SelfCert> clientCert_{nullptr};
+  std::shared_ptr<CertManager> certManager_{nullptr};
   std::shared_ptr<CertDecompressionManager> certDecompressionManager_;
   std::shared_ptr<Clock> clock_;
 

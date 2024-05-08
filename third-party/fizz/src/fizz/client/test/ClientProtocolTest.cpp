@@ -4166,6 +4166,12 @@ TEST_F(ClientProtocolTest, TestCertificateRequestDuplicated) {
 }
 
 TEST_F(ClientProtocolTest, TestCertificateRequestAlgosMismatch) {
+  // Note we must call this before setting up the cert req request, since our
+  // cert manager will store certs based on sig schemes
+  EXPECT_CALL(*mockClientCert_, getSigSchemes())
+      .WillOnce(Return(
+          std::vector<SignatureScheme>(1, SignatureScheme::rsa_pss_sha256)));
+
   setupExpectingCertificateRequest();
   auto certificateRequest = TestMessages::certificateRequest();
 
@@ -4176,10 +4182,6 @@ TEST_F(ClientProtocolTest, TestCertificateRequestAlgosMismatch) {
   certificateRequest.extensions.emplace_back(
       encodeExtension(std::move(sigAlgs)));
 
-  EXPECT_CALL(*mockClientCert_, getSigSchemes())
-      .WillOnce(Return(
-          std::vector<SignatureScheme>(1, SignatureScheme::rsa_pss_sha256)));
-
   auto actions = detail::processEvent(state_, std::move(certificateRequest));
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -4189,6 +4191,12 @@ TEST_F(ClientProtocolTest, TestCertificateRequestAlgosMismatch) {
 }
 
 TEST_F(ClientProtocolTest, TestCertificateRequestContextAlgosUnsupported) {
+  // Note we must call this before setting up the cert req request, since our
+  // cert manager will store certs based on sig schemes
+  EXPECT_CALL(*mockClientCert_, getSigSchemes())
+      .WillOnce(Return(
+          std::vector<SignatureScheme>(1, SignatureScheme::rsa_pss_sha256)));
+
   setupExpectingCertificateRequest();
   context_->setSupportedSigSchemes({SignatureScheme::rsa_pss_sha512});
   auto certificateRequest = TestMessages::certificateRequest();
@@ -4200,10 +4208,6 @@ TEST_F(ClientProtocolTest, TestCertificateRequestContextAlgosUnsupported) {
   certificateRequest.extensions.emplace_back(
       encodeExtension(std::move(sigAlgs)));
 
-  EXPECT_CALL(*mockClientCert_, getSigSchemes())
-      .WillOnce(Return(
-          std::vector<SignatureScheme>(1, SignatureScheme::rsa_pss_sha256)));
-
   auto actions = detail::processEvent(state_, std::move(certificateRequest));
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -4213,6 +4217,12 @@ TEST_F(ClientProtocolTest, TestCertificateRequestContextAlgosUnsupported) {
 }
 
 TEST_F(ClientProtocolTest, TestCertificateRequestPrefersContextOrder) {
+  EXPECT_CALL(*mockClientCert_, getSigSchemes())
+      .WillOnce(Return(std::vector<SignatureScheme>(
+          {SignatureScheme::ed25519,
+           SignatureScheme::ecdsa_secp521r1_sha512,
+           SignatureScheme::rsa_pss_sha512})));
+
   setupExpectingCertificateRequest();
   context_->setSupportedSigSchemes(
       {SignatureScheme::rsa_pss_sha512,
@@ -4228,12 +4238,6 @@ TEST_F(ClientProtocolTest, TestCertificateRequestPrefersContextOrder) {
   certificateRequest.extensions.emplace_back(
       encodeExtension(std::move(requestAlgos)));
 
-  EXPECT_CALL(*mockClientCert_, getSigSchemes())
-      .WillOnce(Return(std::vector<SignatureScheme>(
-          {SignatureScheme::ed25519,
-           SignatureScheme::ecdsa_secp521r1_sha512,
-           SignatureScheme::rsa_pss_sha512})));
-
   auto actions = detail::processEvent(state_, std::move(certificateRequest));
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -4243,12 +4247,12 @@ TEST_F(ClientProtocolTest, TestCertificateRequestPrefersContextOrder) {
 }
 
 TEST_F(ClientProtocolTest, TestCertificateRequestMatch) {
-  setupExpectingCertificateRequest();
-  auto certificateRequest = TestMessages::certificateRequest();
-
   EXPECT_CALL(*mockClientCert_, getSigSchemes())
       .WillOnce(Return(
           std::vector<SignatureScheme>(1, SignatureScheme::rsa_pss_sha256)));
+
+  setupExpectingCertificateRequest();
+  auto certificateRequest = TestMessages::certificateRequest();
 
   auto actions = detail::processEvent(state_, std::move(certificateRequest));
   expectActions<MutateState>(actions);

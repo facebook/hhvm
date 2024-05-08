@@ -1814,36 +1814,27 @@ Actions EventHandler<
   }
 }
 
-static std::tuple<
-    folly::Optional<SignatureScheme>,
-    std::shared_ptr<const SelfCert>>
-getClientCert(const State& state, const std::vector<SignatureScheme>& schemes) {
-  folly::Optional<SignatureScheme> selectedScheme;
-  auto clientCert = state.context()->getClientCertificate();
+static folly::Optional<
+    std::pair<std::shared_ptr<const SelfCert>, SignatureScheme>>
+getClientCert(
+    const State& state,
+    const std::vector<SignatureScheme>& schemes,
+    const std::vector<Extension>& peerExtensions) {
+  auto certManager = state.context()->getCertManager();
+  if (certManager == nullptr) {
+    return folly::none;
+  }
   const auto& supportedSchemes = state.context()->getSupportedSigSchemes();
-
-  if (clientCert) {
-    const auto certSchemes = clientCert->getSigSchemes();
-    for (const auto& scheme : supportedSchemes) {
-      if (std::find(certSchemes.begin(), certSchemes.end(), scheme) !=
-              certSchemes.end() &&
-          std::find(schemes.begin(), schemes.end(), scheme) != schemes.end()) {
-        selectedScheme = scheme;
-        break;
-      }
-    }
-
-    if (!selectedScheme) {
-      VLOG(1) << "client cert/context doesn't support any signature algorithms "
-              << "specified by the server";
-    }
+  auto result = certManager->getCert(
+      state.sni(), supportedSchemes, schemes, peerExtensions);
+  if (!result) {
+    VLOG(1) << "client cert/context doesn't support any signature algorithms "
+            << "specified by the server";
+    return folly::none;
   }
 
-  if (!selectedScheme) {
-    clientCert = nullptr;
-  }
-
-  return std::make_tuple(std::move(selectedScheme), std::move(clientCert));
+  std::shared_ptr<const SelfCert> cert = result->cert;
+  return std::make_pair(cert, result->scheme);
 }
 
 Actions EventHandler<
@@ -1873,12 +1864,19 @@ Actions EventHandler<
         AlertDescription::illegal_parameter);
   }
 
+  auto certAndScheme = getClientCert(
+      state,
+      sigAlgsExtension->supported_signature_algorithms,
+      certRequest.extensions);
+
   folly::Optional<SignatureScheme> scheme;
   std::shared_ptr<const SelfCert> cert;
-  std::tie(scheme, cert) =
-      getClientCert(state, sigAlgsExtension->supported_signature_algorithms);
-  ClientAuthType authType =
-      scheme ? ClientAuthType::Sent : ClientAuthType::RequestedNoMatch;
+  ClientAuthType authType = ClientAuthType::RequestedNoMatch;
+
+  if (certAndScheme.hasValue()) {
+    std::tie(cert, scheme) = *certAndScheme;
+    authType = ClientAuthType::Sent;
+  }
 
   MutateState mutateState([scheme = std::move(scheme),
                            cert = std::move(cert),

@@ -305,7 +305,7 @@ std::unique_ptr<SelfCert> readSelfCert() {
 }
 
 int serverTest() {
-  auto certManager = std::make_shared<CertManager>();
+  auto certManager = std::make_shared<server::CertManager>();
   certManager->addCert(readSelfCert(), true);
 
   auto serverContext = std::make_shared<FizzServerContext>();

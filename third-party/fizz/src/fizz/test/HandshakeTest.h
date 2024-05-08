@@ -65,7 +65,7 @@ class HandshakeTest : public Test {
     auto pskCache = std::make_shared<BasicPskCache>();
     clientContext_->setPskCache(std::move(pskCache));
 
-    auto certManager = std::make_shared<CertManager>();
+    auto certManager = std::make_shared<server::CertManager>();
     std::vector<std::shared_ptr<CertificateCompressor>> compressors = {
         std::make_shared<ZlibCertificateCompressor>(9)};
     std::vector<ssl::X509UniquePtr> rsaCerts;

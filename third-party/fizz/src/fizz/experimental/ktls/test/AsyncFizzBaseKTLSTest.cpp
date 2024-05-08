@@ -231,7 +231,7 @@ makeTestServerContext() {
       true);
 
   auto factory = std::make_shared<fizz::test::MockFactory>();
-  auto certManager = std::make_shared<CertManager>();
+  auto certManager = std::make_shared<server::CertManager>();
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
       std::move(factory), std::move(certManager));

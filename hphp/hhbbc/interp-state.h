@@ -602,10 +602,6 @@ struct CollectedInfo {
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};
-  /*
-   * See FuncAnalysisResult for details.
-   */
-  std::bitset<64> usedParams;
 
   PublicSPropMutations publicSPropMutations;
 

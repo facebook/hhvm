@@ -82,7 +82,6 @@ struct ISS {
   StateMutationUndo* undo;
   StepFlags flags;
   PropagateFn propagate;
-  bool recordUsedParams{true};
 
   Optional<State> stateBefore;
 
@@ -211,48 +210,30 @@ void jmp_nevertaken(ISS& env) {
   jmp_setdest(env, env.blk.fallthrough);
 }
 
-struct IgnoreUsedParams {
-  explicit IgnoreUsedParams(ISS& env) :
-      env{env}, record{env.recordUsedParams} {
-    env.recordUsedParams = false;
-  }
-
-  ~IgnoreUsedParams() {
-    env.recordUsedParams = record;
-  }
-
-  ISS& env;
-  const bool record;
-};
-
 void readUnknownParams(ISS& env) {
   for (LocalId p = 0; p < env.ctx.func->params.size(); p++) {
     if (p == env.flags.mayReadLocalSet.size()) break;
     env.flags.mayReadLocalSet.set(p);
   }
-  if (env.recordUsedParams) env.collect.usedParams.set();
+  env.flags.usedParams.set();
 }
 
 void readUnknownLocals(ISS& env) {
   env.flags.mayReadLocalSet.set();
-  if (env.recordUsedParams) env.collect.usedParams.set();
+  env.flags.usedParams.set();
 }
 
 void readAllLocals(ISS& env) {
   env.flags.mayReadLocalSet.set();
-  if (env.recordUsedParams) env.collect.usedParams.set();
+  env.flags.usedParams.set();
 }
 
 void doRet(ISS& env, Type t, bool hasEffects) {
-  IgnoreUsedParams _{env};
-
-  readAllLocals(env);
   assertx(env.state.stack.empty());
+  env.flags.mayReadLocalSet.set();
   env.flags.retParam = NoLocalId;
   env.flags.returned = t;
-  if (!hasEffects) {
-    effect_free(env);
-  }
+  if (!hasEffects) effect_free(env);
 }
 
 void hasInvariantIterBase(ISS& env) {
@@ -552,12 +533,12 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 //////////////////////////////////////////////////////////////////////
 // locals
 
-void mayReadLocal(ISS& env, uint32_t id) {
+void mayReadLocal(ISS& env, uint32_t id, bool isUse = true) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
   }
-  if (env.recordUsedParams && id < env.collect.usedParams.size()) {
-    env.collect.usedParams.set(id);
+  if (isUse && id < env.flags.usedParams.size()) {
+    env.flags.usedParams.set(id);
   }
 }
 

@@ -460,6 +460,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
         }
       }
 
+      ai.usedParams |= flags.usedParams;
       ai.bdata[bid].noThrow = flags.noThrow;
     }
 
@@ -473,7 +474,6 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   ai.effectFree = collect.effectFree;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;
-  ai.usedParams = collect.usedParams;
   ai.publicSPropMutations = std::move(collect.publicSPropMutations);
   for (auto& elm : blockUpdates) {
     ai.blockUpdates.emplace_back(elm.first, std::move(elm.second));

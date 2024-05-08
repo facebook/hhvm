@@ -39,10 +39,6 @@ namespace res { struct Func; }
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr auto kReadOnlyConstant = kInvalidDataType;
-
-//////////////////////////////////////////////////////////////////////
-
 struct BlockUpdateInfo {
   BlockId fallthrough{NoBlockId};
   uint32_t unchangedBcs{0};
@@ -67,6 +63,11 @@ struct RunFlags {
    */
   LocalId retParam{NoLocalId};
   BlockUpdateInfo updateInfo;
+
+  /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
 
   bool noThrow{true};
 };
@@ -140,6 +141,11 @@ struct StepFlags {
    * not read a local that isn't mentioned in this set.
    */
   std::bitset<kMaxTrackedLocals> mayReadLocalSet;
+
+  /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
 
   /*
    * If this is not none, the interpreter executed a return on this

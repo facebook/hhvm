@@ -412,6 +412,7 @@ void rewind(ISS& env, const Bytecode& bc) {
   assertx(!env.undo);
   ITRACE(2, "(rewind: {}\n", show(*env.ctx.func, bc));
   env.state.stack.rewind(numPop(bc), numPush(bc));
+  env.flags.usedParams.reset();
 }
 
 /*
@@ -447,6 +448,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
            unsplit<std::string>(", "));
     if (bcs.size()) {
       auto ef = !env.flags.reduced || env.flags.effectFree;
+      auto usedParams = env.flags.usedParams;
       Trace::Indent _;
       for (auto const& bc : bcs) {
         assertx(
@@ -454,10 +456,12 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
           "you can't use impl with branching opcodes before last position"
         );
         interpStep(env, bc);
+        usedParams |= env.flags.usedParams;
         if (!env.flags.effectFree) ef = false;
         if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
       }
       env.flags.effectFree = ef;
+      env.flags.usedParams = usedParams;
     } else if (!env.flags.reduced) {
       effect_free(env);
     }
@@ -471,11 +475,13 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
   // We should be at the start of a bytecode.
   assertx(env.flags.wasPEI &&
           !env.flags.canConstProp &&
-          !env.flags.effectFree);
+          !env.flags.effectFree &&
+          env.flags.usedParams.none());
 
   env.flags.wasPEI          = false;
   env.flags.canConstProp    = true;
   env.flags.effectFree      = true;
+  env.flags.usedParams.reset();
 
   for (auto const& bc : bcs) {
     assertx(env.flags.jmpDest == NoBlockId &&
@@ -5125,8 +5131,6 @@ bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
 using TCVec = std::vector<const TypeConstraint*>;
 
 void in(ISS& env, const bc::VerifyParamType& op) {
-  IgnoreUsedParams _{env};
-
   auto [newTy, remove, effectFree] =
     verify_param_type(env.index, env.ctx, op.loc1, topC(env));
 
@@ -5143,8 +5147,6 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
-  IgnoreUsedParams _{env};
-
   auto const a = topC(env);
   if (!a.couldBe(BDict)) {
     unreachable(env);
@@ -5187,7 +5189,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       }
     }
   }
-  mayReadLocal(env, op.loc1);
+  mayReadLocal(env, op.loc1, false);
   popC(env);
 }
 
@@ -5799,7 +5801,9 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
   // and $this isn't available.
   auto allArrKey = true;
   for (uint32_t i = 0; i < op.locrange.count; ++i) {
-    allArrKey &= locRaw(env, op.locrange.first + i).subtypeOf(BArrKey);
+    // Peek here, because if we decide to reduce the bytecode, we
+    // don't want to mark the locals as being read.
+    allArrKey &= peekLocRaw(env, op.locrange.first + i).subtypeOf(BArrKey);
   }
   if (allArrKey &&
       (!env.ctx.func->cls ||
@@ -5821,6 +5825,11 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
       }
     }
     effect_free(env);
+  }
+
+  // We don't remove the op, so mark the locals as being read.
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
+    mayReadLocal(env, op.locrange.first + i);
   }
 
   if (retTy.is(BBottom)) {
@@ -6222,6 +6231,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       env.replacedBcs.clear();
       size = retryOffset + retryBcs.size();
       idx = 0;
+      ret.usedParams.reset();
       continue;
     }
 
@@ -6231,6 +6241,8 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
 
     interpOne(env, bc);
     auto const& flags = env.flags;
+
+    ret.usedParams |= flags.usedParams;
 
     if (flags.wasPEI) ret.noThrow = false;
 

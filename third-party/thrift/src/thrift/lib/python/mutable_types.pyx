@@ -26,6 +26,7 @@ from thrift.python.mutable_typeinfos cimport MutableListTypeInfo
 from thrift.python.types cimport (
     AdaptedTypeInfo,
     FieldInfo,
+    StringTypeInfo,
     TypeInfoBase,
     getCTypeInfo,
     set_struct_field,
@@ -83,6 +84,27 @@ class _MutableStructField:
         (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
 
 
+cdef is_cacheable_non_primitive(object type_info):
+    if PyCallable_Check(type_info):
+        type_info = type_info()
+
+    return isinstance(type_info, (StringTypeInfo, AdaptedTypeInfo))
+
+
+class _MutableStructCachedField:
+    __slots__ = ('_field_index')
+
+    def __init__(self, field_id):
+        self._field_index = field_id
+
+    def __get__(self, obj, objtype):
+        return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
+
+    def __set__(self, obj, value):
+        (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
+        obj._fbthrift_field_cache[self._field_index] = None
+
+
 cdef is_mutable_container(object type_info):
     if PyCallable_Check(type_info):
         type_info = type_info()
@@ -97,13 +119,7 @@ class _MutableStructContainerField:
         self._field_index = field_id
 
     def __get__(self, obj, objtype):
-        cached = obj._fbthrift_field_cache[self._field_index]
-        if cached is not None:
-            return cached
-
-        value = (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
-        obj._fbthrift_field_cache[self._field_index] = value
-        return value
+        return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
 
     def __set__(self, obj, value):
         raise TypeError(
@@ -185,15 +201,16 @@ cdef class MutableStruct(MutableStructOrUnion):
 
     cdef _fbthrift_set_field_value(self, int16_t index, object value):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
-        field_spec = mutable_struct_info.fields[index]
+        cdef FieldInfo field_info = mutable_struct_info.fields[index]
 
-        # Handle field w/ adapter
-        adapter_info = field_spec.adapter_info
-        if adapter_info is not None:
-            # DO_BEFORE(alperyoney,20240515): Implement adapters for mutable types
-            raise NotImplementedError(
-              f"Field ({self.__class__.__name__}.{field_spec.py_name} with "
-              "adapters has not been implemented for mutable types")
+        if field_info.adapter_info is not None:
+            adapter_class, transitive_annotation = field_info.adapter_info
+            value = adapter_class.to_thrift_field(
+                value,
+                field_info.id,
+                self,
+                transitive_annotation=transitive_annotation(),
+            )
 
         set_struct_field(
             self._fbthrift_data,
@@ -204,14 +221,29 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef _fbthrift_get_field_value(self, int16_t index):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
         cdef TypeInfoBase field_type_info = mutable_struct_info.type_infos[index]
-        field_spec = mutable_struct_info.fields[index]
-
-        adapter_info = field_spec.adapter_info
-        if adapter_info is not None:
-            raise NotImplementedError("The field with adapters has not been implemented yet.")
+        cdef FieldInfo field_info = mutable_struct_info.fields[index]
 
         data = self._fbthrift_data[index + 1]
+        if field_info.adapter_info is not None:
+            py_value = field_type_info.to_python_value(data)
+            adapter_class, transitive_annotation = field_info.adapter_info
+            return adapter_class.from_thrift_field(
+                py_value,
+                field_info.id,
+                self,
+                transitive_annotation=transitive_annotation(),
+            )
+
         return field_type_info.to_python_value(data) if data is not None else None
+
+    cdef _fbthrift_get_cached_field_value(MutableStruct self, int16_t index):
+        cached = self._fbthrift_field_cache[index]
+        if cached is not None:
+            return cached
+
+        value = self._fbthrift_get_field_value(index)
+        self._fbthrift_field_cache[index] = value
+        return value
 
     def __eq__(MutableStruct self, other):
         if other is self:
@@ -361,7 +393,7 @@ cdef class MutableStructInfo:
 
             type_info = self.type_infos[idx]
             if isinstance(type_info, AdaptedTypeInfo):
-                raise NotImplementedError("The field with adapters has not been implemented yet.")
+                type_info = (<AdaptedTypeInfo>type_info)._orig_type_info
 
             default_value = (<TypeInfoBase>type_info).to_internal_data(default_value)
             dynamic_struct_info.addFieldValue(idx, default_value)
@@ -433,12 +465,16 @@ class MutableStructMeta(type):
         # use the `_MutableStructField` descriptor for all types, except for
         # `list`. For `list`, use `_MutableStructContainerField` descriptor.
         for field_index, field_name, type_info in non_primitive_types:
+            field_descriptor = _MutableStructField(field_index)
+            if is_mutable_container(type_info):
+                field_descriptor = _MutableStructContainerField(field_index)
+            elif is_cacheable_non_primitive(type_info):
+                field_descriptor = _MutableStructCachedField(field_index)
+
             type.__setattr__(
                 klass,
                 field_name,
-                _MutableStructContainerField(field_index)
-                if is_mutable_container(type_info)
-                else _MutableStructField(field_index),
+                field_descriptor,
             )
 
         return klass

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/python.thrift"
+
 namespace py3 thrift.test.thrift_python
 
 struct TestStruct {
@@ -90,4 +92,24 @@ struct TestStructAllThriftContainerTypes {
 
   5: map<string, i32> unqualified_map_string_i32;
   6: optional map<string, i32> optional_map_string_i32;
+}
+
+struct TestStructAdaptedTypes {
+  @python.Adapter{
+    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
+    typeHint = "datetime.datetime",
+  }
+  1: i32 unqualified_adapted_i32_to_datetime;
+
+  @python.Adapter{
+    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
+    typeHint = "datetime.datetime",
+  }
+  2: optional i32 optional_adapted_i32_to_datetime;
+
+  @python.Adapter{
+    name = "thrift.python.test.adapters.atoi.AtoiAdapter",
+    typeHint = "int",
+  }
+  3: string unqualified_adapted_string_to_i32 = "123";
 }

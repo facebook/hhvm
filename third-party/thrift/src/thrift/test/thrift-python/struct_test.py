@@ -17,6 +17,7 @@ import importlib
 import types
 import typing
 import unittest
+from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
 
@@ -38,6 +39,7 @@ from thrift.python.types import (
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
+    TestStructAdaptedTypes as MutableTestStructAdaptedTypes,
     TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
@@ -46,6 +48,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
+    TestStructAdaptedTypes as ImmutableTestStructAdaptedTypes,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
@@ -246,6 +249,46 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
 
         s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable()
         _thrift_serialization_round_trip(self, immutable_serializer, s_default_value)
+
+    def test_adapted_types(self) -> None:
+        s = ImmutableTestStructAdaptedTypes()
+        # standard default value for i32 is 0, therefore `fromtimestamp(0)`
+        self.assertEqual(
+            s.unqualified_adapted_i32_to_datetime, datetime.fromtimestamp(0)
+        )
+        self.assertEqual(s.unqualified_adapted_string_to_i32, 123)
+
+        new_date = datetime(2024, 5, 6, 12, 0, 0)
+        s = s(unqualified_adapted_i32_to_datetime=new_date)
+        self.assertEqual(s.unqualified_adapted_i32_to_datetime, new_date)
+
+        with self.assertRaisesRegex(
+            AttributeError, "'int' object has no attribute 'timestamp'"
+        ):
+            # Thrift simply passes the value to the adapter class. All type
+            # checking is performed within the adapter class.
+            s = s(unqualified_adapted_i32_to_datetime=123)
+
+        s = s(unqualified_adapted_string_to_i32=999)
+        self.assertEqual(s.unqualified_adapted_string_to_i32, 999)
+
+    @parameterized.expand(
+        [
+            (
+                ImmutableTestStructAdaptedTypes(
+                    optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400)
+                ),
+            ),
+            (
+                ImmutableTestStructAdaptedTypes(
+                    unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(0),
+                    optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400),
+                ),
+            ),
+        ]
+    )
+    def test_adapter_serialization_round_trip(self, struct) -> None:
+        _thrift_serialization_round_trip(self, immutable_serializer, struct)
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
@@ -697,4 +740,45 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         ]
     )
     def test_container_serialization_round_trip(self, struct) -> None:
+        _thrift_serialization_round_trip(self, mutable_serializer, struct)
+
+    def test_adapted_types(self) -> None:
+        s = MutableTestStructAdaptedTypes()
+        # standard default value for i32 is 0, therefore `fromtimestamp(0)`
+        self.assertEqual(
+            s.unqualified_adapted_i32_to_datetime, datetime.fromtimestamp(0)
+        )
+        # from IDL, 3: `string unqualified_adapted_string_to_i32 = "123";`
+        self.assertEqual(s.unqualified_adapted_string_to_i32, 123)
+
+        new_date = datetime(2024, 5, 6, 12, 0, 0)
+        s.unqualified_adapted_i32_to_datetime = new_date
+        self.assertEqual(s.unqualified_adapted_i32_to_datetime, new_date)
+
+        # Thrift simply passes the value to the adapter class. All type
+        # checking is performed within the adapter class.
+        with self.assertRaisesRegex(
+            AttributeError, "'int' object has no attribute 'timestamp'"
+        ):
+            s.unqualified_adapted_i32_to_datetime = 123
+
+        s.unqualified_adapted_string_to_i32 = 999
+        self.assertEqual(s.unqualified_adapted_string_to_i32, 999)
+
+    @parameterized.expand(
+        [
+            (
+                MutableTestStructAdaptedTypes(
+                    optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400)
+                ),
+            ),
+            (
+                MutableTestStructAdaptedTypes(
+                    unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(0),
+                    optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400),
+                ),
+            ),
+        ]
+    )
+    def test_adapter_serialization_round_trip(self, struct) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct)

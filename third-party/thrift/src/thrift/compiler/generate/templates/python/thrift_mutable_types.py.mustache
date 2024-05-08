@@ -26,6 +26,9 @@ import dataclasses
 import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types
 import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import {{program:base_library_package}}.types as _fbthrift_python_types
+{{#program:adapter_modules}}
+import {{module_path}}
+{{/program:adapter_modules}}
 
 {{!
 For now, process all structs that are neither exceptions nor unions.

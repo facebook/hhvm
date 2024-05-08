@@ -56,6 +56,7 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef _initStructTupleWithValues(MutableStruct self, object kwargs) except *
     cdef _fbthrift_set_field_value(self, int16_t index, object value) except *
     cdef _fbthrift_reset_field_to_standard_default(self, int16_t index) except *
+    cdef _fbthrift_get_cached_field_value(MutableStruct self, int16_t index) except *
 
 cdef class MutableStructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj

@@ -170,3 +170,60 @@ TEST(CursorSerializer, StringRead) {
   EXPECT_EQ("foo", str3.moveToFbString());
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, ContainerRead) {
+  CursorSerializationWrapper<Cookie> wrapper(Cookie{});
+  auto reader = wrapper.beginRead();
+  auto listReader = reader.beginRead<ident::lucky_numbers>();
+  EXPECT_EQ(listReader.size(), 3);
+  std::vector<int32_t> numbers(listReader.begin(), listReader.end());
+  EXPECT_THAT(numbers, ElementsAreArray({508, 493, 425}));
+
+  // Can't use parent reader while child reader is active.
+  EXPECT_THAT(
+      [&] { reader.read<ident::flavor>(); },
+      ThrowsMessage<std::runtime_error>("Child reader not passed to endRead"));
+  reader.endRead(std::move(listReader));
+  wrapper.endRead(std::move(reader));
+
+  reader = wrapper.beginRead();
+  listReader = reader.beginRead<ident::lucky_numbers>();
+  for (auto i : listReader) {
+    EXPECT_GT(i, 500);
+    break;
+  }
+  // Ending read in the middle of iteration still allows reading next field.
+  reader.endRead(std::move(listReader));
+  EXPECT_EQ(reader.read<ident::flavor>(), "Sugar");
+  wrapper.endRead(std::move(reader));
+
+  // Reading from a finalized reader is not allowed (besides the obvious
+  // use-after-move).
+  EXPECT_THAT(
+      [&] { listReader.begin(); },
+      ThrowsMessage<std::runtime_error>("Reader already finalized"));
+
+  // 0 and 1-element containers exercise separate edge cases
+  Cookie c;
+  c.lucky_numbers() = {};
+  wrapper = CursorSerializationWrapper<Cookie>(c);
+  reader = wrapper.beginRead();
+  listReader = reader.beginRead<ident::lucky_numbers>();
+  EXPECT_EQ(listReader.size(), 0);
+  for (auto i : listReader) {
+    ADD_FAILURE() << i;
+  }
+  reader.endRead(std::move(listReader));
+  wrapper.endRead(std::move(reader));
+
+  c.lucky_numbers() = {1};
+  wrapper = CursorSerializationWrapper<Cookie>(c);
+  reader = wrapper.beginRead();
+  listReader = reader.beginRead<ident::lucky_numbers>();
+  EXPECT_EQ(listReader.size(), 1);
+  for (auto i : listReader) {
+    EXPECT_EQ(i, 1);
+  }
+  reader.endRead(std::move(listReader));
+  wrapper.endRead(std::move(reader));
+}

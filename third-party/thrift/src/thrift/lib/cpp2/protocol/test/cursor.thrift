@@ -49,6 +49,7 @@ struct Cookie {
   1: i16 id = 2;
   2: string fortune = "About time I got out of that cookie!!";
   3: list<i32> lucky_numbers = [508, 493, 425];
+  4: string flavor = "Sugar";
 }
 struct Meal {
   1: i16 appetizer = 1;

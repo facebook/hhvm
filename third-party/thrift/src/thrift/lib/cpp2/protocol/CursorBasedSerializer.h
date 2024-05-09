@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <initializer_list>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -209,6 +210,36 @@ class StructuredCursorReader : detail::BaseCursorReader {
     return readField<Ident>([&] { protocol_.readBinary(value); }, value);
   }
 
+  /** containers
+   *
+   * See the ContainerCursorReader docblock for example usage.
+   *
+   * Note: when beginRead returns a reader, that reader must be passed to
+   * endRead before any other methods on this object can be called.
+   */
+
+  template <typename Ident, enable_for<type::container_c, Ident> = 0>
+  maybe_optional<ContainerCursorReader<type_tag<Ident>>, Ident> beginRead() {
+    if (!beforeReadField<Ident>()) {
+      return {};
+    }
+    state_ = State::Child;
+    return ContainerCursorReader<type_tag<Ident>>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endRead(ContainerCursorReader<CTag>&& child) {
+    if (state_ != State::Child) {
+      // This is a sentinel iterator for an empty container.
+      DCHECK_EQ(child.remaining_, 0);
+      return;
+    }
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    afterReadField();
+    state_ = State::Active;
+  }
+
   /** union type accessor */
 
   template <
@@ -289,7 +320,6 @@ class StructuredCursorReader : detail::BaseCursorReader {
     return true;
   }
 
-  template <typename>
   void afterReadField() {
     readState_.readFieldEnd(&protocol_);
     readState_.readFieldBegin(&protocol_);
@@ -302,7 +332,7 @@ class StructuredCursorReader : detail::BaseCursorReader {
         return false;
       }
       f();
-      afterReadField<Ident>();
+      afterReadField();
       return true;
     }();
     if constexpr (type::is_optional_or_union_field_v<T, Ident>) {
@@ -321,7 +351,122 @@ class StructuredCursorReader : detail::BaseCursorReader {
   // Contains last field id read from the buffer.
   BinaryProtocolReader::StructReadState readState_;
 
+  template <typename, bool>
+  friend class StructuredCursorReader;
   friend class CursorSerializationWrapper<T>;
+};
+
+/**
+ * Allows iterating over containers without materializing them.
+ * Behaves like a standard collection, ex:
+ *  StructuredCursorReader<Struct> reader;
+ *  auto listReader = reader.beginRead<ident::unqualified_list>();
+ *  for (auto& val : listReader) { use(val); }
+ *  reader.endRead(listReader);
+ *
+ *  auto mapReader = reader.beginRead<ident::unqualified_map>();
+ *  std::unordered_map<K, V> map;
+ *  map.reserve(mapReader.size());
+ *  map.insert(mapReader.begin(), mapReader.end());
+ *  reader.endRead(mapReader);
+ */
+template <typename Tag>
+class ContainerCursorReader : detail::BaseCursorReader {
+ public:
+  ContainerCursorIterator<Tag> begin() {
+    checkState(State::Active);
+    return remaining_ ? ContainerCursorIterator<Tag>{*this}
+                      : ContainerCursorIterator<Tag>{};
+  }
+  ContainerCursorIterator<Tag> end() const { return {}; }
+
+  // Returns remaining size if reading has begun.
+  int32_t remaining() const {
+    checkState(State::Active);
+    return remaining_;
+  }
+  [[deprecated("Call remaining() instead")]] int32_t size() const {
+    return remaining();
+  }
+
+  // End public API
+ private:
+  explicit ContainerCursorReader(BinaryProtocolReader&& p);
+  ContainerCursorReader() { remaining_ = 0; }
+
+  void finalize();
+
+  bool advance() {
+    checkState(State::Active);
+    DCHECK_GT(remaining_, 0);
+    if (--remaining_ == 0) {
+      return false;
+    }
+    read();
+    return true;
+  }
+
+  typename detail::ContainerTraits<Tag>::ElementType& currentValue() {
+    checkState(State::Active);
+    return lastRead_;
+  }
+
+  void read();
+
+  // remaining_ includes the element cached in the reader as lastRead_.
+  uint32_t remaining_;
+  typename detail::ContainerTraits<Tag>::ElementType lastRead_;
+
+  template <typename, bool>
+  friend class StructuredCursorReader;
+  friend class ContainerCursorIterator<Tag>;
+};
+
+/**
+ * Allows iterating over containers without materializing them.
+ * This is an InputIterator, which means it must be iterated in a single pass.
+ * Operator++ invalidates all other copies of the iterator.
+ */
+template <typename Tag>
+class ContainerCursorIterator {
+ public:
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = ssize_t;
+  using value_type = typename detail::ContainerTraits<Tag>::ElementType;
+  // These are non-const to allow moving the deserialzed value out.
+  // Modifying them does not affect the underlying buffer.
+  using pointer = value_type*;
+  using reference = value_type&;
+
+  explicit ContainerCursorIterator(ContainerCursorReader<Tag>& in)
+      : reader_(&in) {}
+  ContainerCursorIterator() = default;
+
+  // Prefix increment
+  ContainerCursorIterator& operator++() {
+    if (!reader_ || !reader_->advance()) {
+      reader_ = nullptr;
+    }
+    return *this;
+  }
+
+  // Postfix increment
+  // This iterator only targets weakly_incrementable, which allows void return.
+  void operator++(int) { ++(*this); }
+
+  // Dereference
+  // These return non-const to allow moving the deserialzed value out.
+  // Modifying them does not affect the underlying buffer.
+  reference operator*() { return reader_->currentValue(); }
+  pointer operator->() { return &reader_->currentValue(); }
+
+  // Equality is only defined against itself and the end iterator
+  bool operator==(ContainerCursorIterator other) const {
+    return reader_ == other.reader_;
+  }
+
+ private:
+  ContainerCursorReader<Tag>* reader_ = nullptr;
 };
 
 /**
@@ -405,6 +550,86 @@ StructuredCursorReader<Tag, Contiguous>::read(std::string_view& value) {
         protocol_.skipBytes(size);
       },
       value);
+}
+
+template <typename Tag>
+ContainerCursorReader<Tag>::ContainerCursorReader(BinaryProtocolReader&& p)
+    : BaseCursorReader(std::move(p)) {
+  // Check element types
+  if constexpr (type::is_a_v<Tag, type::list_c>) {
+    TType type;
+    protocol_.readListBegin(type, remaining_);
+    if (type !=
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected element type in list");
+    }
+  } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+    TType type;
+    protocol_.readSetBegin(type, remaining_);
+    if (type !=
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected element type in set");
+    }
+  } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+    TType key, value;
+    protocol_.readMapBegin(key, value, remaining_);
+    if (key !=
+            op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag> ||
+        value !=
+            op::typeTagToTType<
+                typename detail::ContainerTraits<Tag>::ValueTag>) {
+      folly::throw_exception<std::runtime_error>("Unexpected key type in map");
+    }
+  } else {
+    static_assert(!sizeof(Tag), "unexpected tag");
+  }
+
+  if (remaining_) {
+    read();
+  }
+}
+
+template <typename Tag>
+void ContainerCursorReader<Tag>::finalize() {
+  checkState(State::Active);
+  state_ = State::Done;
+
+  if (remaining_ > 1) {
+    // Skip remaining unread elements
+    skip_n(protocol_, remaining_ - 1, detail::ContainerTraits<Tag>::wireTypes);
+  }
+
+  if constexpr (type::is_a_v<Tag, type::list_c>) {
+    protocol_.readListEnd();
+  } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+    protocol_.readSetEnd();
+  } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+    protocol_.readMapEnd();
+  } else {
+    static_assert(!sizeof(Tag), "unexpected tag");
+  }
+}
+
+template <typename Tag>
+void ContainerCursorReader<Tag>::read() {
+  DCHECK_GT(remaining_, 0);
+
+  if constexpr (type::is_a_v<Tag, type::list_c>) {
+    op::decode<typename detail::ContainerTraits<Tag>::ValueTag>(
+        protocol_, lastRead_);
+  } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+    op::decode<typename detail::ContainerTraits<Tag>::KeyTag>(
+        protocol_, lastRead_);
+  } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+    op::decode<typename detail::ContainerTraits<Tag>::KeyTag>(
+        protocol_, lastRead_.first);
+    op::decode<typename detail::ContainerTraits<Tag>::ValueTag>(
+        protocol_, lastRead_.second);
+  } else {
+    static_assert(!sizeof(Tag), "unexpected tag");
+  }
 }
 
 } // namespace apache::thrift

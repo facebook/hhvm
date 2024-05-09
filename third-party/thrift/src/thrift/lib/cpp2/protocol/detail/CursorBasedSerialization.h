@@ -22,7 +22,16 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
 namespace apache::thrift {
+
+template <typename T, bool Contiguous>
+class StructuredCursorReader;
+template <typename Tag>
+class ContainerCursorReader;
+template <typename Tag>
+class ContainerCursorIterator;
+
 namespace detail {
+
 template <typename T>
 T& maybe_emplace(T& t) {
   return t;
@@ -31,6 +40,33 @@ template <typename T>
 T& maybe_emplace(std::optional<T>& t) {
   return t.emplace();
 }
+
+template <typename Tag>
+struct ContainerTraits;
+template <typename VTag>
+struct ContainerTraits<type::list<VTag>> {
+  using ElementType = type::native_type<VTag>;
+  using ValueTag = VTag;
+  // This is initializer_list becuase that's what skip_n accepts.
+  static constexpr std::initializer_list<protocol::TType> wireTypes = {
+      op::typeTagToTType<ValueTag>};
+};
+template <typename KTag>
+struct ContainerTraits<type::set<KTag>> {
+  using ElementType = type::native_type<KTag>;
+  using KeyTag = KTag;
+  static constexpr std::initializer_list<protocol::TType> wireTypes = {
+      op::typeTagToTType<KeyTag>};
+};
+template <typename KTag, typename VTag>
+struct ContainerTraits<type::map<KTag, VTag>> {
+  using ElementType =
+      std::pair<type::native_type<KTag>, type::native_type<VTag>>;
+  using KeyTag = KTag;
+  using ValueTag = VTag;
+  static constexpr std::initializer_list<protocol::TType> wireTypes = {
+      op::typeTagToTType<KeyTag>, op::typeTagToTType<ValueTag>};
+};
 
 class BaseCursorReader {
  protected:
@@ -42,14 +78,14 @@ class BaseCursorReader {
   };
   State state_ = State::Active;
 
-  void checkState(State expected) {
+  void checkState(State expected) const {
     if (state_ != expected) {
       folly::throw_exception<std::runtime_error>([&]() {
         switch (state_) {
           case State::Active:
-            return "Reader not yet finalized";
+            return "No child reader is active";
           case State::Child:
-            return "Child not yet finalized";
+            return "Child reader not passed to endRead";
           case State::Done:
             return "Reader already finalized";
         }
@@ -86,7 +122,4 @@ class BaseCursorReader {
 };
 
 } // namespace detail
-
-template <typename T, bool Contiguous>
-class StructuredCursorReader;
 } // namespace apache::thrift

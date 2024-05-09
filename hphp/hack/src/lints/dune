@@ -33,7 +33,11 @@
  (modules lints_errors)
  (preprocess
   (pps ppx_deriving.std))
- (libraries lints_core lints_codes utils_core))
+ (libraries
+  lints_core
+  lints_codes
+  typing_error
+  utils_core))
 
 (library
  (name linting_visitors)

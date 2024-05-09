@@ -54,12 +54,92 @@ let sketchy_equality pos b left right left_trail right_trail =
   in
   { code = Codes.SketchyEquality; claim; reasons; quickfixes = [] }
 
-let to_error (warning : Typing_warning.t) : t =
-  let open Typing_warning in
-  match warning with
-  | Sketchy_equality { pos; result; left; right; left_trail; right_trail } ->
-    sketchy_equality pos result left right left_trail right_trail
+module IsAsAlways = struct
+  let message { Typing_warning.IsAsAlways.kind; lhs_ty; rhs_ty } =
+    Printf.sprintf
+      (match kind with
+      | Typing_warning.IsAsAlways.Is_is_always_true ->
+        "This `is` check is always `true`. The expression on the left has type %s which is a subtype of %s."
+      | Typing_warning.IsAsAlways.Is_is_always_false ->
+        "This `is` check is always `false`. The expression on the left has type %s which shares no values with %s."
+      | Typing_warning.IsAsAlways.As_always_succeeds _ ->
+        "This `as` assertion will always succeed and hence is redundant. The expression on the left has a type %s which is a subtype of %s."
+      | Typing_warning.IsAsAlways.As_always_fails ->
+        "This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type %s which shares no values with %s.")
+      (Markdown_lite.md_codify lhs_ty)
+      (Markdown_lite.md_codify rhs_ty)
 
-let add (env : Typing_env_types.env) (warning : Typing_warning.t) : unit =
+  let lint_code (kind : Typing_warning.IsAsAlways.kind) =
+    match kind with
+    | Typing_warning.IsAsAlways.Is_is_always_true ->
+      Lints_codes.Codes.is_always_true
+    | Typing_warning.IsAsAlways.Is_is_always_false ->
+      Lints_codes.Codes.is_always_false
+    | Typing_warning.IsAsAlways.As_always_succeeds _ ->
+      Lints_codes.Codes.as_always_succeeds
+    | Typing_warning.IsAsAlways.As_always_fails ->
+      Lints_codes.Codes.as_always_fails
+
+  let quickfix (kind : Typing_warning.IsAsAlways.kind) =
+    match kind with
+    | Typing_warning.IsAsAlways.Is_is_always_true
+    | Typing_warning.IsAsAlways.Is_is_always_false
+    | Typing_warning.IsAsAlways.As_always_fails ->
+      None
+    | Typing_warning.IsAsAlways.As_always_succeeds quickfix -> Some quickfix
+
+  let warn pos x =
+    {
+      code = Codes.IsAsAlways;
+      claim = lazy (pos, message x);
+      reasons = lazy [];
+      quickfixes = (* TODO @catg migrate quickfixes too. *) [];
+    }
+end
+
+module Lint = struct
+  let code (warning : Typing_warning.migrated Typing_warning.t_) : int =
+    match warning with
+    | Typing_warning.Is_as_always { Typing_warning.IsAsAlways.kind; _ } ->
+      IsAsAlways.lint_code kind
+
+  let message (warning : Typing_warning.migrated Typing_warning.t_) : string =
+    match warning with
+    | Typing_warning.Is_as_always x -> IsAsAlways.message x
+
+  let quickfix (warning : Typing_warning.migrated Typing_warning.t_) =
+    (match warning with
+    | Typing_warning.Is_as_always { Typing_warning.IsAsAlways.kind; _ } ->
+      IsAsAlways.quickfix kind)
+    |> Option.map ~f:Lints_errors.quickfix
+end
+
+let to_error (type a) ((pos, warning) : a Typing_warning.t) : t =
+  match warning with
+  | Typing_warning.Sketchy_equality
+      { result; left; right; left_trail; right_trail } ->
+    sketchy_equality pos result left right left_trail right_trail
+  | Typing_warning.Is_as_always x -> IsAsAlways.warn pos x
+
+let add (type a) (warning : a Typing_warning.t) : unit =
+  Errors.add_error @@ to_user_error @@ to_error warning
+
+let add_for_migration
+    ~(as_lint : Tast.check_status option option)
+    (warning : Typing_warning.migrated Typing_warning.t) : unit =
+  match as_lint with
+  | None -> add warning
+  | Some check_status ->
+    let (pos, warning) = warning in
+    Lints_core.add
+      ~autofix:(Lint.quickfix warning)
+      (Lint.code warning)
+      ~check_status
+      Lints_core.Lint_warning
+      pos
+      (Lint.message warning)
+
+let add (type a) (env : Typing_env_types.env) (warning : a Typing_warning.t) :
+    unit =
   if TypecheckerOptions.hack_warnings (Typing_env.get_tcopt env) then
-    Errors.add_error @@ to_user_error @@ to_error warning
+    add warning

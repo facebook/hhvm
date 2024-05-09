@@ -31,7 +31,7 @@ let replace_placeholders_with_tvars env ty =
     (env, T.mk (Typing_reason.Rnone, T.Tclass (id, exact, targs)))
   | _ -> (env, ty)
 
-let trivial_check pos env lhs_ty rhs_ty ~always_subtype ~never_subtype =
+let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =
   let (env, lhs_ty) = Env.expand_type env lhs_ty in
   let (env, rhs_ty) = Env.expand_type env rhs_ty in
   let tenv = Env.tast_env_as_typing_env env in
@@ -54,52 +54,75 @@ let trivial_check pos env lhs_ty rhs_ty ~always_subtype ~never_subtype =
     let env = Env.typing_env_as_tast_env tenv in
     let (env, lhs_ty) = Env.expand_type env lhs_ty in
     let (env, rhs_ty) = Env.expand_type env rhs_ty in
-    let print_ty = Env.print_ty env in
-    if Option.is_none err_opt then
-      always_subtype pos (print_ty lhs_ty) (print_ty rhs_ty)
-    else if TUtils.is_type_disjoint tenv lhs_ty rhs_ty then
-      never_subtype pos (print_ty lhs_ty) (print_ty rhs_ty)
+    let kind =
+      if Option.is_none err_opt then
+        Some always_kind
+      else if TUtils.is_type_disjoint tenv lhs_ty rhs_ty then
+        Some never_kind
+      else
+        None
+    in
+    match kind with
+    | Some kind ->
+      let print_ty = Env.print_ty env in
+      Typing_warning_utils.add_for_migration
+        ~as_lint
+        ( pos,
+          Typing_warning.Is_as_always
+            {
+              Typing_warning.IsAsAlways.kind;
+              lhs_ty = print_ty lhs_ty;
+              rhs_ty = print_ty rhs_ty;
+            } )
+    | None -> ()
 
-let handler =
+let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env =
-      let check_status = Env.get_check_status env in
-      function
-      | (_, p, Is ((lhs_ty, _, _), hint)) ->
-        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
-        trivial_check
-          p
-          env
-          lhs_ty
-          hint_ty
-          ~always_subtype:(Lints_errors.is_always_true ~check_status)
-          ~never_subtype:(Lints_errors.is_always_false ~check_status)
-      | ( _,
-          p,
-          As
-            {
-              expr = (lhs_ty, lhs_pos, lhs_expr);
-              hint;
-              is_nullable = false;
-              enforce_deep = _;
-            } ) ->
-        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
-        let can_be_captured = Aast_utils.can_be_captured lhs_expr in
-        let always_subtype p =
-          Lints_errors.as_always_succeeds
-            ~check_status
-            ~can_be_captured
-            ~as_pos:p
-            ~child_expr_pos:lhs_pos
+    method! at_expr (env : Env.env) expr =
+      if as_lint || (Env.get_tcopt env).GlobalOptions.hack_warnings then
+        let as_lint =
+          if as_lint then
+            Some (Some (Env.get_check_status env))
+          else
+            None
         in
-        trivial_check
-          p
-          env
-          lhs_ty
-          hint_ty
-          ~always_subtype
-          ~never_subtype:(Lints_errors.as_always_fails ~check_status)
-      | _ -> ()
+        match expr with
+        | (_, p, Is ((lhs_ty, _, _), hint)) ->
+          let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
+          trivial_check
+            ~as_lint
+            p
+            env
+            lhs_ty
+            hint_ty
+            ~always_kind:Typing_warning.IsAsAlways.Is_is_always_true
+            ~never_kind:Typing_warning.IsAsAlways.Is_is_always_false
+        | ( _,
+            p,
+            As
+              {
+                expr = (lhs_ty, lhs_pos, lhs_expr);
+                hint;
+                is_nullable = false;
+                enforce_deep = _;
+              } ) ->
+          let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
+          trivial_check
+            ~as_lint
+            p
+            env
+            lhs_ty
+            hint_ty
+            ~always_kind:
+              (Typing_warning.IsAsAlways.As_always_succeeds
+                 {
+                   Typing_warning.can_be_captured =
+                     Aast_utils.can_be_captured lhs_expr;
+                   original_pos = p;
+                   replacement_pos = lhs_pos;
+                 })
+            ~never_kind:Typing_warning.IsAsAlways.As_always_fails
+        | _ -> ()
   end

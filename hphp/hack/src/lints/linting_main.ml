@@ -21,7 +21,7 @@ let typed_linters =
   [
     Linter_equality_check.handler;
     Linter_disjoint_types.handler;
-    Linter_is_checks.handler;
+    Is_check.handler ~as_lint:true;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
     Linter_sketchy_null_check.handler;

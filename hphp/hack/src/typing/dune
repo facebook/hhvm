@@ -70,6 +70,9 @@
     error_codes
     pos
     pos_or_decl
+    lints_codes
+    lints_core
+    lints_errors
     typing_error
     typing_env_types
     typing_env

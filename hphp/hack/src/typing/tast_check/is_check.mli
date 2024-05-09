@@ -6,9 +6,4 @@
  *
  *)
 
-val add : Typing_env_types.env -> 'a Typing_warning.t -> unit
-
-val add_for_migration :
-  as_lint:Tast.check_status option option ->
-  Typing_warning.migrated Typing_warning.t ->
-  unit
+val handler : as_lint:bool -> Tast_visitor.handler

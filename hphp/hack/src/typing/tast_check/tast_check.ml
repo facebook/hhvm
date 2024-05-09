@@ -85,6 +85,7 @@ let visitor ctx =
           Some Readonly_check.handler;
           Some Meth_caller_check.handler;
           Some Expression_tree_check.handler;
+          Some (Is_check.handler ~as_lint:false);
           hierarchy_check Class_const_origin_check.handler;
           (if TypecheckerOptions.global_access_check_enabled tcopt then
             Some Global_access_check.handler

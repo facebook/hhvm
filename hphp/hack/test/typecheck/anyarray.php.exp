@@ -2,4 +2,11 @@ File "anyarray.php", line 63, characters 5-15:
   AnyArray<arraykey, mixed>
 File "anyarray.php", line 76, characters 5-15:
   nothing
-No errors
+WARN: File "anyarray.php", line 69, characters 14-28:
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `dict<nothing, nothing>`. (Warn[12002])
+WARN: File "anyarray.php", line 71, characters 14-25:
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `vec<nothing>`. (Warn[12002])
+WARN: File "anyarray.php", line 73, characters 14-28:
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `keyset<nothing>`. (Warn[12002])
+WARN: File "anyarray.php", line 75, characters 14-32:
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `AnyArray<nothing, nothing>`. (Warn[12002])

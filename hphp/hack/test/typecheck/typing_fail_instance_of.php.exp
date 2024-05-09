@@ -4,3 +4,5 @@ Typing error (Typing[4429])
   Expected `?num`
   File "typing_fail_instance_of.php", line 39, characters 14-15:
   But got `(not A & not B)`
+WARN: File "typing_fail_instance_of.php", line 29, characters 7-13:
+This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12002])

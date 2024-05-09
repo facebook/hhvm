@@ -11,7 +11,7 @@ module Codes = Lints_codes.Codes
 open Lints_core
 module Lints = Lints_core
 
-let quickfix ~can_be_captured ~original_pos ~replacement_pos =
+let quickfix { Typing_warning.can_be_captured; original_pos; replacement_pos } =
   let path = Pos.filename (Pos.to_absolute original_pos) in
   let lines = Errors.read_lines path in
   let content = String.concat ~sep:"\n" lines in
@@ -87,67 +87,6 @@ let invalid_contains_key_check p trv_key_ty key_ty =
        "Invalid `C\\contains_key` check: This call will always return `false`.\nA `KeyedTraversable<%s, ...>` cannot contain a key of type %s"
        trv_key_ty
        (Markdown_lite.md_codify key_ty)
-
-let is_always_true ~check_status p lhs_ty rhs_ty =
-  let lhs_ty = Markdown_lite.md_codify lhs_ty in
-  let rhs_ty = Markdown_lite.md_codify rhs_ty in
-  Lints.add
-    Codes.is_always_true
-    ~check_status:(Some check_status)
-    Lint_warning
-    p
-    (Printf.sprintf
-       "This `is` check is always `true`. The expression on the left has type %s which is a subtype of %s."
-       lhs_ty
-       rhs_ty)
-
-let is_always_false ~check_status p lhs_ty rhs_ty =
-  let lhs_ty = Markdown_lite.md_codify lhs_ty in
-  let rhs_ty = Markdown_lite.md_codify rhs_ty in
-  Lints.add
-    Codes.is_always_false
-    ~check_status:(Some check_status)
-    Lint_warning
-    p
-    (Printf.sprintf
-       "This `is` check is always `false`. The expression on the left has type %s which shares no values with %s."
-       lhs_ty
-       rhs_ty)
-
-let as_always_succeeds
-    ~check_status ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
-  let lhs_ty = Markdown_lite.md_codify lhs_ty in
-  let rhs_ty = Markdown_lite.md_codify rhs_ty in
-  let autofix =
-    Some
-      (quickfix
-         ~can_be_captured
-         ~original_pos:as_pos
-         ~replacement_pos:child_expr_pos)
-  in
-  Lints.add
-    ~autofix
-    ~check_status:(Some check_status)
-    Codes.as_always_succeeds
-    Lint_warning
-    as_pos
-    (Printf.sprintf
-       "This `as` assertion will always succeed and hence is redundant. The expression on the left has a type %s which is a subtype of %s."
-       lhs_ty
-       rhs_ty)
-
-let as_always_fails ~check_status p lhs_ty rhs_ty =
-  let lhs_ty = Markdown_lite.md_codify lhs_ty in
-  let rhs_ty = Markdown_lite.md_codify rhs_ty in
-  Lints.add
-    Codes.as_always_fails
-    ~check_status:(Some check_status)
-    Lint_warning
-    p
-    (Printf.sprintf
-       "This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type %s which shares no values with %s."
-       lhs_ty
-       rhs_ty)
 
 let class_overrides_all_trait_methods pos class_name trait_name =
   Lints.add
@@ -392,9 +331,11 @@ let redundant_cast_common
   let autofix =
     Some
       (quickfix
-         ~can_be_captured
-         ~original_pos:cast_pos
-         ~replacement_pos:expr_pos)
+         {
+           Typing_warning.can_be_captured;
+           original_pos = cast_pos;
+           replacement_pos = expr_pos;
+         })
   in
   Lints.add ~check_status ~autofix code severity cast_pos msg
 

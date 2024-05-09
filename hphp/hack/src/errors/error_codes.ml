@@ -778,7 +778,9 @@ module Typing = struct
 end
 
 module Warning = struct
-  type t = SketchyEquality [@value 12001]
+  type t =
+    | SketchyEquality [@value 12001]
+    | IsAsAlways [@value 12002]
   [@@deriving enum, show { with_path = false }]
 end
 

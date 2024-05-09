@@ -23,7 +23,7 @@ type lint_target = {
   contents: string option;
 }
 
-let lint tcopt _acc (files_with_contents : lint_target list) =
+let lint ctx _acc (files_with_contents : lint_target list) =
   List.fold_left
     files_with_contents
     ~f:
@@ -38,14 +38,14 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
                       | None ->
                         Sys_utils.cat (Relative_path.to_absolute filename)
                     in
-                    Linting_main.lint tcopt filename contents))
+                    Linting_main.lint ctx filename contents))
           in
           errs @ acc
       end
     ~init:[]
 
-let lint_and_filter tcopt code acc fnl =
-  let lint_errs = lint tcopt acc fnl in
+let lint_and_filter ctx code acc fnl =
+  let lint_errs = lint ctx acc fnl in
   List.filter lint_errs ~f:(fun err -> Lints_core.get_code err = code)
 
 let lint_all genv ctx code =

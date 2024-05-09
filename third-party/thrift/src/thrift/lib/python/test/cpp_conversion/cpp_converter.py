@@ -20,6 +20,7 @@ import unittest
 import thrift.python.test.cpp_converter_helper as converter
 
 from convertible.thrift_types import Color, Nested, Simple, Union
+from thrift.python.test.annotations.thrift_types import RenamedEmpty
 
 
 class CppConverterEcho(unittest.TestCase):
@@ -101,3 +102,6 @@ class CppConverterEcho(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             converter.echo_simple(self.make_nested())  # type: ignore
+
+    def test_RenamedEmpty(self) -> None:
+        self.assertEqual(RenamedEmpty(), converter.echo_RenamedEmpty(RenamedEmpty()))

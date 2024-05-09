@@ -569,10 +569,10 @@ Extractor<::test::fixtures::python_capi::VapidStruct>::operator()(PyObject* obj)
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a EmptyStruct");
+        PyErr_SetString(PyExc_TypeError, "Not a VapidStruct");
       }
       return extractorError<::test::fixtures::python_capi::VapidStruct>(
-          "Marshal error: EmptyStruct");
+          "Marshal error: VapidStruct");
   }
   return ::test::fixtures::python_capi::VapidStruct{};
 }
@@ -592,10 +592,10 @@ int Extractor<::test::fixtures::python_capi::VapidStruct>::typeCheck(PyObject* o
       "Module test.fixtures.python_capi.module import error");
   }
   int result =
-      can_extract__test__fixtures__python_capi__module__EmptyStruct(obj);
+      can_extract__test__fixtures__python_capi__module__VapidStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
-      "Unexpected type check error: EmptyStruct");
+      "Unexpected type check error: VapidStruct");
   }
   return result;
 }
@@ -613,7 +613,7 @@ PyObject* Constructor<::test::fixtures::python_capi::VapidStruct>::operator()(
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__test__fixtures__python_capi__module__EmptyStruct(*fbthrift_data);
+  return init__test__fixtures__python_capi__module__VapidStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<

@@ -695,6 +695,7 @@ class python_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
+            {"struct:py_name", &python_mstch_struct::py_name},
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
             {"struct:exception_message?",
@@ -706,6 +707,8 @@ class python_mstch_struct : public mstch_struct {
             {"struct:fields_size", &python_mstch_struct::fields_size},
         });
   }
+
+  mstch::node py_name() { return py3::get_py3_name(*struct_); }
 
   mstch::node fields_ordered_by_id() {
     std::vector<const t_field*> fields = struct_->fields().copy();

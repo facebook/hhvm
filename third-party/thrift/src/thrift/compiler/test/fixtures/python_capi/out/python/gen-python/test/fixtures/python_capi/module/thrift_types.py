@@ -333,13 +333,13 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.StringPair, self)
 
 
-class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
+class VapidStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.EmptyStruct"
+        return "module.VapidStruct"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -347,7 +347,7 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_EmptyStruct()
+        return _fbthrift_metadata__struct_VapidStruct()
 
     def _to_python(self):
         return self
@@ -356,17 +356,17 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.EmptyStruct, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.VapidStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.EmptyStruct, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.VapidStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.EmptyStruct, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.VapidStruct, self)
 
 
 class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -496,7 +496,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "empty_struct",  # name
             "empty_struct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(EmptyStruct),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(VapidStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2261,8 +2261,8 @@ def _fbthrift_metadata__struct_DoubledPair():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_DoubledPair()
 def _fbthrift_metadata__struct_StringPair():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_StringPair()
-def _fbthrift_metadata__struct_EmptyStruct():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_EmptyStruct()
+def _fbthrift_metadata__struct_VapidStruct():
+    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_VapidStruct()
 def _fbthrift_metadata__struct_PrimitiveStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
 def _fbthrift_metadata__struct_AdaptedFields():
@@ -2308,7 +2308,7 @@ _fbthrift_all_structs = [
     TransitiveDoubler,
     DoubledPair,
     StringPair,
-    EmptyStruct,
+    VapidStruct,
     PrimitiveStruct,
     AdaptedFields,
     ListStruct,

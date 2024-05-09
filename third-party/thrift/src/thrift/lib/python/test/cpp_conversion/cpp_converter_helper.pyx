@@ -17,6 +17,8 @@ from libcpp.string cimport string
 
 from convertible.thrift_converter cimport cSimple, cNested, cUnion
 cimport convertible.thrift_converter as converter
+from thrift.python.test.annotations.thrift_converter cimport cRenamedEmpty
+cimport thrift.python.test.annotations.thrift_converter as renamed_converter
 
 cdef extern from *:
     """
@@ -51,3 +53,8 @@ def echo_union(strucc):
 def echo_simple_corrupted(strucc, bad):
     cdef cSimple c_strucc = converter.Simple_convert_to_cpp(strucc)
     return converter.Simple_from_cpp(corrupt_simple(c_strucc, bad))
+
+def echo_RenamedEmpty(strucc):
+    cdef cRenamedEmpty c_strucc = renamed_converter.RenamedEmpty_convert_to_cpp(strucc)
+    return renamed_converter.RenamedEmpty_from_cpp(echo_thrift(c_strucc))
+

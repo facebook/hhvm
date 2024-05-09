@@ -28,7 +28,7 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
-  }}{{struct:name}}{{!
+  }}{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{!
   }}_fbthrift_python_types.ListTypeFactory({{!

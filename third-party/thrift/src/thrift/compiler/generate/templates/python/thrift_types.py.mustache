@@ -77,7 +77,7 @@ class {{> structs/unadapted_name}}(metaclass={{!
     def __get_reflection__():
         import importlib
         types_reflection = importlib.import_module("{{program:module_path}}.types_reflection")
-        return types_reflection.get_reflection__{{struct:name}}()
+        return types_reflection.get_reflection__{{struct:py_name}}()
     {{/program:py3_auto_migrate?}}
 
     {{#struct:exception?}}
@@ -120,7 +120,7 @@ class {{> structs/unadapted_name}}(metaclass={{!
 {{#struct:has_adapter?}}
 
 
-{{struct:name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
+{{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
 

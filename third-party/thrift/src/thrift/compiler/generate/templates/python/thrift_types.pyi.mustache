@@ -112,7 +112,7 @@ class {{> structs/unadapted_name}}({{!
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
-{{struct:name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
+{{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
 {{#program:constants?}}

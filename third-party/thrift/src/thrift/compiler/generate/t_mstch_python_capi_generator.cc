@@ -429,6 +429,7 @@ class python_capi_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
+            {"struct:py_name", &python_capi_mstch_struct::py_name},
             {"struct:marshal_capi?", &python_capi_mstch_struct::marshal_capi},
             {"struct:cpp_name", &python_capi_mstch_struct::cpp_name},
             {"struct:cpp_adapter?", &python_capi_mstch_struct::cpp_adapter},
@@ -437,6 +438,8 @@ class python_capi_mstch_struct : public mstch_struct {
              &python_capi_mstch_struct::tuple_positions},
         });
   }
+
+  mstch::node py_name() { return py3::get_py3_name(*struct_); }
 
   mstch::node tuple_positions() {
     std::vector<std::pair<int, int>> index_keys;

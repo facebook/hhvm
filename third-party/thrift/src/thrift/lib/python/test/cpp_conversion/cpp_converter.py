@@ -104,4 +104,6 @@ class CppConverterEcho(unittest.TestCase):
             converter.echo_simple(self.make_nested())  # type: ignore
 
     def test_RenamedEmpty(self) -> None:
+        # pyre-fixme[16]: Module `cpp_converter_helper` has no attribute
+        #  `echo_RenamedEmpty`.
         self.assertEqual(RenamedEmpty(), converter.echo_RenamedEmpty(RenamedEmpty()))

@@ -1903,7 +1903,7 @@ PreprocessResult ThriftServer::preprocess(
   return preprocessFunctions_.run(params);
 }
 
-folly::Optional<server::ServerConfigs::ErrorCodeAndMessage>
+folly::Optional<server::ServerConfigs::OverloadResult>
 ThriftServer::checkOverload(
     const transport::THeader::StringToStringMap* readHeaders,
     const std::string* method) {
@@ -1912,11 +1912,12 @@ ThriftServer::checkOverload(
           (method == nullptr ||
            !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
           isOverloaded_(readHeaders, method))) {
-    return {std::make_pair(
+    return OverloadResult{
         kAppOverloadedErrorCode,
         fmt::format(
             "Host {} is load shedding due to custom isOverloaded() callback.",
-            getAddressAsString()))};
+            getAddressAsString()),
+        OverloadResult::LoadShedder::CUSTOM};
   }
 
   // If active request tracking is disabled or we are using resource pools,
@@ -1929,10 +1930,19 @@ ThriftServer::checkOverload(
         (method == nullptr ||
          !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {
-      getCPUConcurrencyController().requestShed(
-          CPUConcurrencyController::Method::CONCURRENCY_LIMITS);
-      return {std::make_pair(
-          kOverloadedErrorCode, "load shedding due to max request limit")};
+      OverloadResult::LoadShedder loadShedder =
+          OverloadResult::LoadShedder::MAX_REQUESTS;
+      if (getCPUConcurrencyController().requestShed(
+              CPUConcurrencyController::Method::CONCURRENCY_LIMITS)) {
+        loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
+      } else if (getAdaptiveConcurrencyController().enabled()) {
+        loadShedder =
+            OverloadResult::LoadShedder::ADAPTIVE_CONCURRENCY_CONTROLLER;
+      }
+      return OverloadResult{
+          kOverloadedErrorCode,
+          "load shedding due to max request limit",
+          loadShedder};
     }
   }
 
@@ -1941,10 +1951,14 @@ ThriftServer::checkOverload(
       (method == nullptr ||
        !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
-    getCPUConcurrencyController().requestShed(
-        CPUConcurrencyController::Method::TOKEN_BUCKET);
-    return {
-        std::make_pair(kOverloadedErrorCode, "load shedding due to qps limit")};
+    OverloadResult::LoadShedder loadShedder =
+        OverloadResult::LoadShedder::MAX_QPS;
+    if (getCPUConcurrencyController().requestShed(
+            CPUConcurrencyController::Method::TOKEN_BUCKET)) {
+      loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
+    }
+    return OverloadResult{
+        kOverloadedErrorCode, "load shedding due to qps limit", loadShedder};
   }
 
   return {};

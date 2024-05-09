@@ -580,8 +580,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto overloadResult = serverConfigs_->checkOverload(&headers, &name);
   serverConfigs_->incActiveRequests();
   if (UNLIKELY(overloadResult.has_value())) {
-    auto [errorCode, errorMessage] = overloadResult.value();
-    handleRequestOverloadedServer(std::move(request), errorCode, errorMessage);
+    handleRequestOverloadedServer(
+        std::move(request), std::move(*overloadResult));
     return;
   }
 
@@ -603,7 +603,11 @@ void ThriftRocketServerHandler::handleRequestCommon(
         },
         [&](AppOverloadedException& aoe) {
           handleRequestOverloadedServer(
-              std::move(request), kAppOverloadedErrorCode, aoe.getMessage());
+              std::move(request),
+              ThriftServer::OverloadResult{
+                  kAppOverloadedErrorCode,
+                  aoe.getMessage(),
+                  ThriftServer::OverloadResult::LoadShedder::CUSTOM});
         },
         [&](AppQuotaExceededException& aqe) {
           handleQuotaExceededException(
@@ -721,8 +725,7 @@ void ThriftRocketServerHandler::handleDecompressionFailure(
 
 void ThriftRocketServerHandler::handleRequestOverloadedServer(
     ThriftRequestCoreUniquePtr request,
-    const std::string& errorCode,
-    const std::string& errorMessage) {
+    ThriftServer::OverloadResult&& overloadResult) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->serverOverloaded();
   }
@@ -732,8 +735,9 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(
-          TApplicationException::LOADSHEDDING, errorMessage),
-      errorCode);
+          TApplicationException::LOADSHEDDING,
+          std::move(overloadResult.errorMessage)),
+      std::move(overloadResult.errorCode));
   if (request->includeInRecentRequests()) {
     requestsRegistry_->getRequestCounter().incrementOverloadCount();
   }

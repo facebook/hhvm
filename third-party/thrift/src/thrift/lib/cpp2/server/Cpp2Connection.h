@@ -282,6 +282,9 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
       TApplicationException::TApplicationExceptionType reason,
       const std::string& errorCode,
       const char* comment);
+  void killRequestServerOverloaded(
+      std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
+      ThriftServer::OverloadResult&& overloadResult);
   void disconnect(const char* comment) noexcept;
 
   void setServerHeaders(transport::THeader::StringToStringMap& writeHeaders);

@@ -67,7 +67,7 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
 
   // using ErrorCodeAndMessage = std::pair<std::string, std::string>;
   MOCK_METHOD(
-      folly::Optional<ErrorCodeAndMessage>,
+      folly::Optional<OverloadResult>,
       checkOverload,
       (const apache::thrift::transport::THeader::StringToStringMap*,
        const std::string* method),

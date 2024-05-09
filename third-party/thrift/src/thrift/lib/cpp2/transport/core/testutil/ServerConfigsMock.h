@@ -72,7 +72,7 @@ class ServerConfigsMock : public ServerConfigs {
     return 123;
   }
 
-  folly::Optional<ServerConfigs::ErrorCodeAndMessage> checkOverload(
+  folly::Optional<ServerConfigs::OverloadResult> checkOverload(
       const transport::THeader::StringToStringMap*,
       const std::string*) override {
     return {};

@@ -82,6 +82,9 @@ class FOLLY_EXPORT TApplicationException : public TException {
       TApplicationExceptionType type, const std::string& message)
       : message_(message), type_(type) {}
 
+  TApplicationException(TApplicationExceptionType type, std::string&& message)
+      : message_(std::move(message)), type_(type) {}
+
   ~TApplicationException() noexcept override {}
 
   const std::string& getMessage() const { return message_; }

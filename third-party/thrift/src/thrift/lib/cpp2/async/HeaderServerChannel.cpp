@@ -265,7 +265,7 @@ void HeaderServerChannel::HeaderRequest::sendErrorWrapped(
   // Other types are unimplemented.
   DCHECK(ew.is_compatible_with<TApplicationException>());
 
-  header_->setHeader("ex", exCode);
+  header_->setHeader("ex", std::move(exCode));
   ew.with_exception([&](TApplicationException& tae) {
     std::unique_ptr<folly::IOBuf> exbuf;
     uint16_t proto = header_->getProtocolId();

@@ -292,26 +292,18 @@ void Cpp2Connection::killRequest(
     TApplicationException::TApplicationExceptionType reason,
     const std::string& errorCode,
     const char* comment) {
+  DCHECK(
+      reason != TApplicationException::TApplicationExceptionType::LOADSHEDDING)
+      << "Use killRequestServerOverloaded instead";
   VLOG(1) << "ERROR: Task killed: " << comment << ": "
           << context_.getPeerAddress()->getAddressStr();
 
   auto server = worker_->getServer();
   if (auto* observer = server->getObserver()) {
-    if (reason ==
-        TApplicationException::TApplicationExceptionType::LOADSHEDDING) {
-      observer->serverOverloaded();
-    } else {
-      observer->taskKilled();
-    }
+    observer->taskKilled();
   }
   if (metricCollector_) {
-    if (reason ==
-        TApplicationException::TApplicationExceptionType::LOADSHEDDING) {
-      metricCollector_->requestRejected(
-          {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
-    } else {
-      metricCollector_->requestRejected({});
-    }
+    metricCollector_->requestRejected({});
   }
 
   // Nothing to do for Thrift oneway request.
@@ -324,6 +316,32 @@ void Cpp2Connection::killRequest(
   req->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(reason, comment),
       errorCode);
+}
+
+void Cpp2Connection::killRequestServerOverloaded(
+    std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
+    ThriftServer::OverloadResult&& overloadResult) {
+  auto server = worker_->getServer();
+  if (auto* observer = server->getObserver()) {
+    observer->serverOverloaded();
+  }
+  if (metricCollector_) {
+    metricCollector_->requestRejected(
+        {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
+  }
+
+  // Nothing to do for Thrift oneway request.
+  if (req->isOneway()) {
+    return;
+  }
+
+  setServerHeaders(*req);
+
+  req->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(
+          TApplicationException::TApplicationExceptionType::LOADSHEDDING,
+          std::move(overloadResult.errorMessage)),
+      std::move(overloadResult.errorCode));
 }
 
 // Response Channel callbacks
@@ -511,12 +529,7 @@ void Cpp2Connection::requestReceived(
 
   if (auto overloadResult = server->checkOverload(
           &hreq->getHeader()->getHeaders(), &methodName)) {
-    auto [errorCode, errorMessage] = overloadResult.value();
-    killRequest(
-        std::move(hreq),
-        TApplicationException::LOADSHEDDING,
-        errorCode,
-        errorMessage.c_str());
+    killRequestServerOverloaded(std::move(hreq), std::move(*overloadResult));
     return;
   }
 
@@ -529,11 +542,13 @@ void Cpp2Connection::requestReceived(
           handleAppError(std::move(hreq), ace.name(), ace.getMessage(), true);
         },
         [&](AppOverloadedException& aoe) {
-          killRequest(
+          killRequestServerOverloaded(
               std::move(hreq),
-              TApplicationException::LOADSHEDDING,
-              kAppOverloadedErrorCode,
-              aoe.getMessage().c_str());
+              ThriftServer::OverloadResult{
+                  kAppOverloadedErrorCode,
+                  aoe.getMessage(),
+                  ThriftServer::OverloadResult::LoadShedder::CUSTOM,
+              });
         },
         [&](AppQuotaExceededException& aqe) {
           killRequest(

@@ -101,8 +101,20 @@ class ServerConfigs {
       const std::string& counter = "", bool check_custom = true) const = 0;
 
   // @see ThriftServer::checkOverload function.
-  using ErrorCodeAndMessage = std::pair<std::string, std::string>;
-  virtual folly::Optional<ErrorCodeAndMessage> checkOverload(
+  struct OverloadResult {
+    enum class LoadShedder : uint8_t {
+      CUSTOM,
+      MAX_REQUESTS,
+      MAX_QPS,
+      CPU_CONCURRENCY_CONTROLLER,
+      ADAPTIVE_CONCURRENCY_CONTROLLER,
+    };
+
+    std::string errorCode;
+    std::string errorMessage;
+    LoadShedder loadShedder;
+  };
+  virtual folly::Optional<OverloadResult> checkOverload(
       const transport::THeader::StringToStringMap* readHeaders,
       const std::string* method) = 0;
 

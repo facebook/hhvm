@@ -32,7 +32,7 @@ class CertManager : public CertManagerBase {
    * cert for a particular signature scheme, by default we will override any
    * existing entry. The caller may choose to not do so.
    */
-  void addCert(
+  virtual void addCert(
       std::shared_ptr<SelfCert> cert,
       bool overrideExistingEntry = true);
 

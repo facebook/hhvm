@@ -80,4 +80,20 @@ module Prov : sig
   val prj_fn_ret : Typing_reason.t -> Typing_reason.t
 
   val prj_union : Typing_reason.t -> Typing_reason.t
+
+  val prj_class :
+    Typing_reason.t ->
+    nm:string ->
+    idx:int ->
+    var:Ast_defs.variance ->
+    Typing_reason.t
+
+  val prj_newtype :
+    Typing_reason.t ->
+    nm:string ->
+    idx:int ->
+    var:Ast_defs.variance ->
+    Typing_reason.t
+
+  val prj_extends : Typing_reason.t -> Typing_reason.t
 end

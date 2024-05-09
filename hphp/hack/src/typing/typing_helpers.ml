@@ -180,4 +180,12 @@ module Prov = struct
   let prj_fn_ret r = Typing_reason.(Rprj_symm (Prj_symm_fn_ret, r))
 
   let prj_union r = Typing_reason.(Rprj_asymm (Prj_asymm_union, r))
+
+  let prj_class r ~nm ~idx ~var =
+    Typing_reason.(Rprj_symm (Prj_symm_class (nm, idx, var), r))
+
+  let prj_newtype r ~nm ~idx ~var =
+    Typing_reason.(Rprj_symm (Prj_symm_newtype (nm, idx, var), r))
+
+  let prj_extends r = Typing_reason.(Rprj_asymm (Prj_asymm_extends, r))
 end

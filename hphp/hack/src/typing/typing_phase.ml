@@ -343,7 +343,13 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       match SMap.find_opt x ety_env.substs with
       | Some x_ty ->
         let (env, x_ty) = Env.expand_type env x_ty in
-        let r_inst = Reason.Rinstantiate (get_reason x_ty, x, r) in
+        let r_inst =
+          let rp = get_reason x_ty in
+          if not @@ TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+            Reason.Rinstantiate (rp, x, r)
+          else
+            rp
+        in
         begin
           match (targs, get_node x_ty) with
           | (_ :: _, Tclass (((_, name) as id), _, [])) ->

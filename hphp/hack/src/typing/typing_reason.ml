@@ -100,6 +100,7 @@ type prj_asymm =
   | Prj_asymm_union
   | Prj_asymm_inter
   | Prj_asymm_neg
+  | Prj_asymm_extends
 [@@deriving hash]
 
 let variance_to_json = function
@@ -110,26 +111,26 @@ let variance_to_json = function
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
-  | Prj_symm_class (class_nm, idx, variance) ->
+  | Prj_symm_class (nm, idx, variance) ->
     Hh_json.(
       JSON_Object
         [
           ( "Prj_symm_class",
             JSON_Array
               [
-                JSON_String class_nm;
+                JSON_String nm;
                 JSON_Number (string_of_int idx);
                 variance_to_json variance;
               ] );
         ])
-  | Prj_symm_newtype (ty_nm, idx, variance) ->
+  | Prj_symm_newtype (nm, idx, variance) ->
     Hh_json.(
       JSON_Object
         [
           ( "Prj_symm_newtype",
             JSON_Array
               [
-                JSON_String ty_nm;
+                JSON_String nm;
                 JSON_Number (string_of_int idx);
                 variance_to_json variance;
               ] );
@@ -157,6 +158,7 @@ let prj_asymm_to_json = function
   | Prj_asymm_union -> Hh_json.JSON_String "Prj_asymm_union"
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
+  | Prj_asymm_extends -> Hh_json.JSON_String "Prj_asymm_extends"
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_

@@ -2058,10 +2058,17 @@ end = struct
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ~super_like
-      (cid : string)
+      nm
+      (prj :
+        Typing_reason.t ->
+        nm:string ->
+        idx:int ->
+        var:Ast_defs.variance ->
+        Typing_reason.t)
+      idx
       (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
-      (children_tyl : locl_ty list)
-      (super_tyl : locl_ty list)
+      (r_sub, children_tyl)
+      (r_super, super_tyl)
       env =
     let simplify_subtype_help reify_kind ~sub_supportdyn ty_sub ty_super env =
       (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
@@ -2098,12 +2105,7 @@ end = struct
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
         env
     in
-    let simplify_subtype_variance_for_injective_loop_help =
-      simplify_subtype_variance_for_injective_loop
-        ~subtype_env
-        ~sub_supportdyn
-        ~super_like
-    in
+
     match (variance_reifiedl, children_tyl, super_tyl) with
     | ([], _, _)
     | (_, [], _)
@@ -2113,44 +2115,96 @@ end = struct
         child :: childrenl,
         super :: superl ) ->
       let simplify_subtype_help = simplify_subtype_help reify_kind in
-      begin
+
+      let prop env =
         match variance with
         | Ast_defs.Covariant ->
-          let super = Sd.liken ~super_like env super in
-          simplify_subtype_help ~sub_supportdyn child super env
+          let ty_sub =
+            Prov.(
+              update child ~env ~f:(fun from ->
+                  flow
+                    ~from
+                    ~into:
+                      (prj ~nm ~idx ~var:Ast_defs.Covariant
+                      @@ flow ~from:r_sub ~into:r_super)))
+          and ty_super = Sd.liken ~super_like env super in
+          simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
         | Ast_defs.Contravariant ->
-          let super =
-            mk
-              ( Reason.Rcontravariant_generic (get_reason super, cid),
-                get_node super )
-          in
-          simplify_subtype_help ~sub_supportdyn super child env
+          (* Since the current code is modifying the supertypes reason for
+                       existing ad-hoc dataflow we have to guard this on the
+                       --extended-reasons flag rather than using our helper functions
+                       directly *)
+          let ty_super =
+            if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+              map_reason
+                super
+                ~f:
+                  Prov.(
+                    fun from ->
+                      flow
+                        ~from
+                        ~into:
+                          (prj ~nm ~idx ~var:Ast_defs.Contravariant
+                          @@ flow ~from:r_super ~into:(rev r_sub)))
+            else
+              map_reason super ~f:(fun from ->
+                  Typing_reason.Rcontravariant_generic (from, nm))
+          and ty_sub = child in
+          simplify_subtype_help ~sub_supportdyn ty_super ty_sub env
         | Ast_defs.Invariant ->
-          let super' =
-            mk
-              (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
+          let covariant_prop env =
+            let f from =
+              if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+                from
+              else
+                Typing_reason.Rinvariant_generic (from, nm)
+            in
+            let ty_sub =
+              Prov.(
+                update child ~env ~f:(fun from ->
+                    flow
+                      ~from
+                      ~into:
+                        (prj ~nm ~idx ~var:Ast_defs.Covariant
+                        @@ flow ~from:r_sub ~into:r_super)))
+            and ty_super = Sd.liken ~super_like env @@ map_reason super ~f in
+            simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
+          and contravariant_prop env =
+            let f from =
+              if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+                Prov.(
+                  flow
+                    ~from
+                    ~into:
+                      (prj ~nm ~idx ~var:Ast_defs.Contravariant
+                      @@ flow ~from:r_super ~into:(rev r_sub)))
+              else
+                Typing_reason.Rinvariant_generic (from, nm)
+            in
+            let ty_sub = Sd.liken ~super_like env child
+            and ty_super = map_reason super ~f in
+            simplify_subtype_help ~sub_supportdyn ty_super ty_sub env
           in
-          env
-          |> simplify_subtype_help
-               ~sub_supportdyn
-               child
-               (Sd.liken ~super_like env super')
-          &&& simplify_subtype_help
-                ~sub_supportdyn
-                super'
-                (Sd.liken ~super_like env child)
-      end
-      &&& simplify_subtype_variance_for_injective_loop_help
-            cid
+          covariant_prop env &&& contravariant_prop
+      in
+      prop env
+      &&& simplify_subtype_variance_for_injective_loop
+            ~subtype_env
+            ~sub_supportdyn
+            ~super_like
+            nm
+            prj
+            (idx + 1)
             variance_reifiedl
-            childrenl
-            superl
+            (r_sub, childrenl)
+            (r_super, superl)
 
   and simplify_subtype_variance_for_injective
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ~super_like
-      (cid : string)
+      cid
+      prj
       (class_sub : Cls.t option) =
     (* Before looping through the generic arguments, check to see if we should push
        supportdyn onto them. This depends on the generic class itself. *)
@@ -2175,6 +2229,8 @@ end = struct
       ~sub_supportdyn
       ~super_like
       cid
+      prj
+      0
 
   and simplify_subtype_classes
       ~fail
@@ -2241,10 +2297,11 @@ end = struct
             ~sub_supportdyn
             ~super_like
             cid_sub
+            Prov.prj_class
             (Decl_entry.to_option class_def_sub)
             variance_reifiedl
-            tyl_sub
-            tyl_super
+            (r_sub, tyl_sub)
+            (r_super, tyl_super)
             env
     else if not exact_match then
       invalid_env env
@@ -2280,6 +2337,11 @@ end = struct
            * in the `expand_env`, this will not generate any errors *)
           let ((env, _ty_err_opt), up_obj) =
             Phase.localize ~ety_env env up_obj
+          in
+          let up_obj =
+            Prov.(
+              update up_obj ~env ~f:(fun from ->
+                  flow ~from ~into:(prj_extends r_sub)))
           in
           (match deref up_obj with
           | (r_sub, Tclass (class_id_sub, exact_sub, tyl_sub)) ->
@@ -2383,8 +2445,8 @@ end = struct
       cid
       class_sub
       (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
-      (children_tyl : locl_ty list)
-      (super_tyl : locl_ty list)
+      (r_sub, children_tyl)
+      (r_super, super_tyl)
       lty_sub
       lty_super
       env =
@@ -2394,12 +2456,14 @@ end = struct
         ~sub_supportdyn
         ~super_like
         cid
+        Prov.prj_newtype
         class_sub
         variance_reifiedl
-        children_tyl
-        super_tyl
+        (r_sub, children_tyl)
+        (r_super, super_tyl)
         env
     in
+
     if subtype_env.Subtype_env.require_completeness && not (TL.is_valid p) then
       (* If we require completeness, then we can still use the incomplete
        * N<t1, .., tn> <: N<u1, .., un> to t1 <:v1> u1 /\ ... /\ tn <:vn> un
@@ -3417,8 +3481,8 @@ end = struct
     (* -- C-Access-R -------------------------------------------------------- *)
     | (_, (_, Taccess _)) -> invalid ~fail env
     (* -- C-Generic-R ------------------------------------------------------- *)
-    | ( (_r_sub, Tgeneric (name_sub, tyargs_sub)),
-        (_r_super, Tgeneric (name_super, tyargs_super)) )
+    | ( (r_sub, Tgeneric (name_sub, tyargs_sub)),
+        (r_super, Tgeneric (name_super, tyargs_super)) )
       when String.equal name_sub name_super ->
       if List.is_empty tyargs_super then
         valid env
@@ -3435,8 +3499,8 @@ end = struct
           name_sub
           None
           variance_reifiedl
-          tyargs_sub
-          tyargs_super
+          (r_sub, tyargs_sub)
+          (r_super, tyargs_super)
           ty_sub
           ty_super
           env
@@ -4200,12 +4264,12 @@ end = struct
                   ty_super = ty_dyn;
                 }
     end
-    | (_, (_r_super, Tnewtype (name_super, lty_supers, _bound_super))) -> begin
+    | (_, (r_super, Tnewtype (name_super, lty_supers, _bound_super))) -> begin
       match deref ty_sub with
       | (_, Tclass ((_, name_sub), _, _))
         when String.equal name_sub name_super && Env.is_enum env name_super ->
         valid env
-      | (_, Tnewtype (name_sub, lty_subs, _))
+      | (r_sub, Tnewtype (name_sub, lty_subs, _))
         when String.equal name_sub name_super ->
         if List.is_empty lty_subs then
           valid env
@@ -4226,8 +4290,8 @@ end = struct
                 name_sub
                 None
                 variance_reifiedl
-                lty_subs
-                lty_supers
+                (r_sub, lty_subs)
+                (r_super, lty_supers)
                 ty_sub
                 ty_super
                 env

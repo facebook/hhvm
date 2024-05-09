@@ -475,6 +475,11 @@ struct Encode<type::binary_t> {
   uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.writeBinary(s);
   }
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot, const std::unique_ptr<folly::IOBuf>& s) const {
+    return prot.writeBinary(s);
+  }
 };
 
 template <class Tag>

@@ -2,6 +2,12 @@
 
 interface IBaseForAttributeFiltering {}
 
+new module someModule {};
+
+function outOfClassFunction(): void {}
+
+type AnAlias = someModule;
+
 class BaseClassForAttributeFiltering implements IBaseForAttributeFiltering {}
 
 class NoArgAttr implements HH\ClassAttribute {}

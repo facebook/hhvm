@@ -325,6 +325,22 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(name);
   }
 
+  Optional<FileResult> getConstantFileRelative(const String& constantName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getConstantFileRelative};
+    static const auto wrapper{wrap(m, "getConstantFileRelative1")};
+    return wrapper(constantName);
+  }
+
+  Optional<std::filesystem::path> getConstantFileRelative(std::string_view name)
+      override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getConstantFileRelative};
+    static const auto wrapper{wrap(m, "getConstantFileRelative2")};
+    return wrapper(name);
+  }
+
+
   Array getDerivedTypes(const String& baseType, const Variant& filters)
       override {
     static constexpr auto m{&HPHP::FactsStore::getDerivedTypes};
@@ -409,6 +425,21 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(name);
   }
 
+  Optional<FileResult> getFunctionFileRelative(const String& functionName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getFunctionFileRelative};
+    static const auto wrapper{wrap(m, "getFunctionFileRelative1")};
+    return wrapper(functionName);
+  }
+
+  Optional<std::filesystem::path> getFunctionFileRelative(std::string_view name)
+      override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getFunctionFileRelative};
+    static const auto wrapper{wrap(m, "getFunctionFileRelative2")};
+    return wrapper(name);
+  }
+
   Variant getKind(const String& type) override {
     static constexpr auto m{&HPHP::FactsStore::getKind};
     static const auto wrapper{wrap(m, "getKind")};
@@ -450,6 +481,21 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(name);
   }
 
+  Optional<FileResult> getModuleFileRelative(const String& moduleName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getModuleFileRelative};
+    static const auto wrapper{wrap(m, "getModuleFileRelative1")};
+    return wrapper(moduleName);
+  }
+
+  Optional<std::filesystem::path> getModuleFileRelative(std::string_view name)
+      override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getModuleFileRelative};
+    static const auto wrapper{wrap(m, "getModuleFileRelative2")};
+    return wrapper(name);
+  }
+
   Holder getNativeHolder() noexcept override {
     return Holder{this, nullptr};
   }
@@ -486,6 +532,22 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     static const auto wrapper{wrap(m, "getTypeAliasFile2")};
     return wrapper(name);
   }
+
+  Optional<FileResult> getTypeAliasFileRelative(const String& aliasName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getTypeAliasFileRelative};
+    static const auto wrapper{wrap(m, "getTypeAliasFileRelative1")};
+    return wrapper(aliasName);
+  }
+
+  Optional<std::filesystem::path> getTypeAliasFileRelative(std::string_view name)
+      override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getTypeAliasFileRelative};
+    static const auto wrapper{wrap(m, "getTypeAliasFileRelative2")};
+    return wrapper(name);
+  }
+
 
   Array getTypeAttrArgs(const String& type, const String& attr) override {
     static constexpr auto m{&HPHP::FactsStore::getTypeAttrArgs};
@@ -545,6 +607,21 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
     static constexpr M m{&HPHP::FactsStore::getTypeOrTypeAliasFile};
     static const auto wrapper{wrap(m, "getTypeOrTypeAliasFile2")};
+    return wrapper(name);
+  }
+
+  Optional<FileResult> getTypeOrTypeAliasFileRelative(const String& typeName) override {
+    using M = Optional<FileResult>(AutoloadMap::*)(const String&);
+    static constexpr M m{&HPHP::FactsStore::getTypeOrTypeAliasFileRelative};
+    static const auto wrapper{wrap(m, "getTypeOrTypeAliasFileRelative1")};
+    return wrapper(typeName);
+  }
+
+  Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(std::string_view name)
+      override {
+    using M = Optional<std::filesystem::path>(AutoloadMap::*)(std::string_view);
+    static constexpr M m{&HPHP::FactsStore::getTypeOrTypeAliasFileRelative};
+    static const auto wrapper{wrap(m, "getTypeOrTypeAliasFileRelative2")};
     return wrapper(name);
   }
 

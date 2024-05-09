@@ -43,22 +43,37 @@ struct FactsLogger final : public FactsStore,
   Holder getNativeHolder() noexcept override;
 
   Optional<FileResult> getTypeOrTypeAliasFile(const String&) override;
+  Optional<FileResult> getTypeOrTypeAliasFileRelative(const String&) override;
   Optional<FileResult> getTypeFile(const String&) override;
   Optional<FileResult> getTypeFileRelative(const String&) override;
   Optional<FileResult> getFunctionFile(const String&) override;
+  Optional<FileResult> getFunctionFileRelative(const String&) override;
   Optional<FileResult> getConstantFile(const String&) override;
+  Optional<FileResult> getConstantFileRelative(const String&) override;
   Optional<FileResult> getTypeAliasFile(const String&) override;
+  Optional<FileResult> getTypeAliasFileRelative(const String&) override;
   Optional<FileResult> getModuleFile(const String&) override;
+  Optional<FileResult> getModuleFileRelative(const String&) override;
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(
+      std::string_view) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(
       std::string_view) override;
   Optional<std::filesystem::path> getTypeFile(std::string_view) override;
   Optional<std::filesystem::path> getTypeFileRelative(
       std::string_view) override;
   Optional<std::filesystem::path> getFunctionFile(std::string_view) override;
+  Optional<std::filesystem::path> getFunctionFileRelative(
+      std::string_view) override;
   Optional<std::filesystem::path> getConstantFile(std::string_view) override;
+  Optional<std::filesystem::path> getConstantFileRelative(
+      std::string_view) override;
   Optional<std::filesystem::path> getTypeAliasFile(std::string_view) override;
+  Optional<std::filesystem::path> getTypeAliasFileRelative(
+      std::string_view) override;
   Optional<std::filesystem::path> getModuleFile(std::string_view) override;
+  Optional<std::filesystem::path> getModuleFileRelative(
+      std::string_view) override;
 
   Array getFileTypes(const String&) override;
   Array getFileFunctions(const String&) override;

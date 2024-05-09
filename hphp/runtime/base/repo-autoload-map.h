@@ -45,20 +45,30 @@ struct RepoAutoloadMap final : AutoloadMap {
     CaseSensitiveHashMapIndex modules);
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getTypeFileRelative(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFileRelative(const String& functionName) override;
   Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
+  Optional<AutoloadMap::FileResult> getConstantFileRelative(const String& constantName) override;
   Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(const String& typeAliasName) override;
   Optional<AutoloadMap::FileResult> getModuleFile(const String& moduleName) override;
+  Optional<AutoloadMap::FileResult> getModuleFileRelative(const String& moduleName) override;
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getTypeFile(std::string_view name) override;
   Optional<std::filesystem::path> getTypeFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getFunctionFile(std::string_view name) override;
+  Optional<std::filesystem::path> getFunctionFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getConstantFile(std::string_view name) override;
+  Optional<std::filesystem::path> getConstantFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeAliasFileRelative(std::string_view name) override;
   Optional<std::filesystem::path> getModuleFile(std::string_view name) override;
+  Optional<std::filesystem::path> getModuleFileRelative(std::string_view name) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;

@@ -590,6 +590,14 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(
+      const String& type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
   Optional<AutoloadMap::FileResult> getTypeFile(const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
@@ -611,9 +619,25 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<AutoloadMap::FileResult> getFunctionFileRelative(
+      const String& function) override {
+    return getSymbolFileRelative<SymKind::Function>(
+        function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
+  }
+
   Optional<AutoloadMap::FileResult> getConstantFile(
       const String& constant) override {
     return getSymbolFile<SymKind::Constant>(
+        constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getConstantFileRelative(
+      const String& constant) override {
+    return getSymbolFileRelative<SymKind::Constant>(
         constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
         });
@@ -627,6 +651,14 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(
+      const String& typeAlias) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
+  }
+
   Optional<AutoloadMap::FileResult> getModuleFile(
       const String& module) override {
     return getSymbolFile<SymKind::Module>(
@@ -635,8 +667,24 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<AutoloadMap::FileResult> getModuleFileRelative(
+      const String& module) override {
+    return getSymbolFileRelative<SymKind::Module>(
+        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
   Optional<fs::path> getTypeOrTypeAliasFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeOrTypeAliasFileRelative(
+      std::string_view type) override {
+    return getSymbolFileRelative<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
         });
@@ -661,8 +709,22 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<fs::path> getFunctionFileRelative(std::string_view func) override {
+    return getSymbolFileRelative<SymKind::Function>(
+        func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
+  }
+
   Optional<fs::path> getConstantFile(std::string_view name) override {
     return getSymbolFile<SymKind::Constant>(
+        name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
+  }
+
+  Optional<fs::path> getConstantFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Constant>(
         name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
         });
@@ -675,8 +737,22 @@ struct FactsStoreImpl final
         });
   }
 
+  Optional<fs::path> getTypeAliasFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
+  }
+
   Optional<fs::path> getModuleFile(std::string_view name) override {
     return getSymbolFile<SymKind::Module>(
+        name, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
+  Optional<fs::path> getModuleFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Module>(
         name, [](SymbolMap& m, Symbol<SymKind::Module> s) {
           return m.getModuleFile(s);
         });

@@ -74,6 +74,13 @@ Optional<AutoloadMap::FileResult> FactsLogger::getTypeOrTypeAliasFile(
   });
 }
 
+Optional<AutoloadMap::FileResult> FactsLogger::getTypeOrTypeAliasFileRelative(
+    const String& typeName) {
+  return logPerf(__func__, typeName.slice(), [&]() {
+    return m_inner->getTypeOrTypeAliasFileRelative(typeName);
+  });
+}
+
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeFile(const String& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getTypeFile(name); });
@@ -92,10 +99,24 @@ Optional<AutoloadMap::FileResult> FactsLogger::getFunctionFile(
       __func__, name.slice(), [&]() { return m_inner->getFunctionFile(name); });
 }
 
+Optional<AutoloadMap::FileResult> FactsLogger::getFunctionFileRelative(
+    const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getFunctionFileRelative(name);
+  });
+}
+
 Optional<AutoloadMap::FileResult> FactsLogger::getConstantFile(
     const String& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getConstantFile(name); });
+}
+
+Optional<AutoloadMap::FileResult> FactsLogger::getConstantFileRelative(
+    const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getConstantFileRelative(name);
+  });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeAliasFile(
@@ -105,16 +126,37 @@ Optional<AutoloadMap::FileResult> FactsLogger::getTypeAliasFile(
   });
 }
 
+Optional<AutoloadMap::FileResult> FactsLogger::getTypeAliasFileRelative(
+    const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getTypeAliasFileRelative(name);
+  });
+}
+
 Optional<AutoloadMap::FileResult> FactsLogger::getModuleFile(
     const String& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getModuleFile(name); });
 }
 
+Optional<AutoloadMap::FileResult> FactsLogger::getModuleFileRelative(
+    const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getModuleFileRelative(name);
+  });
+}
+
 Optional<std::filesystem::path> FactsLogger::getTypeOrTypeAliasFile(
     std::string_view name) {
   return logPerf(
       __func__, name, [&]() { return m_inner->getTypeOrTypeAliasFile(name); });
+}
+
+Optional<std::filesystem::path> FactsLogger::getTypeOrTypeAliasFileRelative(
+    std::string_view name) {
+  return logPerf(__func__, name, [&]() {
+    return m_inner->getTypeOrTypeAliasFileRelative(name);
+  });
 }
 
 Optional<std::filesystem::path> FactsLogger::getTypeFile(
@@ -134,10 +176,22 @@ Optional<std::filesystem::path> FactsLogger::getFunctionFile(
       __func__, name, [&]() { return m_inner->getFunctionFile(name); });
 }
 
+Optional<std::filesystem::path> FactsLogger::getFunctionFileRelative(
+    std::string_view name) {
+  return logPerf(
+      __func__, name, [&]() { return m_inner->getFunctionFileRelative(name); });
+}
+
 Optional<std::filesystem::path> FactsLogger::getConstantFile(
     std::string_view name) {
   return logPerf(
       __func__, name, [&]() { return m_inner->getConstantFile(name); });
+}
+
+Optional<std::filesystem::path> FactsLogger::getConstantFileRelative(
+    std::string_view name) {
+  return logPerf(
+      __func__, name, [&]() { return m_inner->getConstantFileRelative(name); });
 }
 
 Optional<std::filesystem::path> FactsLogger::getTypeAliasFile(
@@ -146,10 +200,23 @@ Optional<std::filesystem::path> FactsLogger::getTypeAliasFile(
       __func__, name, [&]() { return m_inner->getTypeAliasFile(name); });
 }
 
+Optional<std::filesystem::path> FactsLogger::getTypeAliasFileRelative(
+    std::string_view name) {
+  return logPerf(__func__, name, [&]() {
+    return m_inner->getTypeAliasFileRelative(name);
+  });
+}
+
 Optional<std::filesystem::path> FactsLogger::getModuleFile(
     std::string_view name) {
   return logPerf(
       __func__, name, [&]() { return m_inner->getModuleFile(name); });
+}
+
+Optional<std::filesystem::path> FactsLogger::getModuleFileRelative(
+    std::string_view name) {
+  return logPerf(
+      __func__, name, [&]() { return m_inner->getModuleFileRelative(name); });
 }
 
 Array FactsLogger::getFileTypes(const String& path) {

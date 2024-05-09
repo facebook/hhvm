@@ -239,6 +239,37 @@ function print_type_file_relative_path(
   print "$className has relative path: $path\n";
 }
 
+function print_function_file_relative_path(
+  string $function_name,
+): void {
+  $path = HH\Facts\function_to_path_relative($function_name);
+  print "$function_name has relative path: $path\n";
+}
+
+function print_type_alias_file_relative_path(
+  string $alias,
+): void {
+  $path = HH\Facts\type_or_type_alias_to_path_relative($alias);
+  print "alias $alias from type_or_type_alias_to_path_relative has relative path: $path\n";
+
+  $path = HH\Facts\type_alias_to_path_relative($alias);
+  print "alias $alias from type_alias_to_path_relative has relative path: $path\n";
+}
+
+function print_constant_file_relative_path(
+  string $constant,
+): void {
+  $path = HH\Facts\constant_to_path_relative($constant);
+  print "$constant has relative path: $path\n";
+}
+
+function print_module_file_relative_path(
+  string $module,
+): void {
+  $path = HH\Facts\module_to_path_relative($module);
+  print "$module has relative path: $path\n";
+}
+
 <<__EntryPoint>>
 function facts(): void {
     var_dump(HH\Facts\enabled());
@@ -467,7 +498,10 @@ function facts(): void {
 
   print "\nGetting paths\n";
   print_type_file_relative_path(AppleThenBanana::class);
-
+  print_function_file_relative_path("outOfClassFunction");
+  print_type_alias_file_relative_path("AnAlias");
+  print_constant_file_relative_path("SOME_CONSTANT");
+  print_module_file_relative_path("someModule");
   print "\nGetting attributes\n";
 
   print_type_attrs(AppleThenBanana::class);

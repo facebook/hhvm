@@ -57,6 +57,11 @@ Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require e
 
 Getting paths
 AppleThenBanana has relative path: attribute-classes.inc
+outOfClassFunction has relative path: attribute-classes.inc
+alias AnAlias from type_or_type_alias_to_path_relative has relative path: attribute-classes.inc
+alias AnAlias from type_alias_to_path_relative has relative path: attribute-classes.inc
+SOME_CONSTANT has relative path: constants.inc
+someModule has relative path: attribute-classes.inc
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
@@ -162,6 +167,11 @@ Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require e
 
 Getting paths
 AppleThenBanana has relative path: attribute-classes.inc
+outOfClassFunction has relative path: attribute-classes.inc
+alias AnAlias from type_or_type_alias_to_path_relative has relative path: attribute-classes.inc
+alias AnAlias from type_alias_to_path_relative has relative path: attribute-classes.inc
+SOME_CONSTANT has relative path: constants.inc
+someModule has relative path: attribute-classes.inc
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}

@@ -106,7 +106,7 @@ module Pretty : sig
     Typing_defs.internal_type ->
     string
 
-  val strip_existential :
+  val _strip_existential :
     ity_sub:Typing_defs.internal_type ->
     ity_sup:Typing_defs.internal_type ->
     (Typing_defs.internal_type * Typing_defs.internal_type) option
@@ -149,7 +149,7 @@ end = struct
   (* For reporting purposes we remove top-level existential types and
      existentials in type accesses when they don't occur on both subtype and
      supertype since they don't contribute to underlying error *)
-  let strip_existential ~ity_sub ~ity_sup =
+  let _strip_existential ~ity_sub ~ity_sup =
     match (ity_sub, ity_sup) with
     | (LoclType lty_sub, LoclType lty_sup) ->
       (match
@@ -378,13 +378,9 @@ module Subtype_env = struct
       =
     match tparam_constraints with
     | [] ->
-      let (ty_sub, ty_sup, stripped_existential) =
-        match Pretty.strip_existential ~ity_sub:ty_sub ~ity_sup:ty_super with
-        | None -> (ty_sub, ty_super, false)
-        | Some (ty_sub, ty_super) -> (ty_sub, ty_super, true)
-      in
+      let stripped_existential = false in
       Typing_error.Secondary.Subtyping_error
-        { ty_sub; ty_sup; is_coeffect; stripped_existential }
+        { ty_sub; ty_sup = ty_super; is_coeffect; stripped_existential }
     | cstrs ->
       Typing_error.Secondary.Violated_constraint
         { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }

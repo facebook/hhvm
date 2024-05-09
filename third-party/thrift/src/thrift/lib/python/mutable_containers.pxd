@@ -17,4 +17,3 @@ from thrift.python.types cimport TypeInfoBase
 cdef class MutableList:
     cdef TypeInfoBase _val_typeinfo
     cdef list _list_data
-    cdef _create_slice(self, slice)

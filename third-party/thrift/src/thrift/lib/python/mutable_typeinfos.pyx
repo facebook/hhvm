@@ -116,7 +116,4 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         Returns a `MutableList` instance with the internal data (`value`) and
             the type info (`self.val_info`) attached.
         """
-        cdef MutableList inst = MutableList.__new__(MutableList)
-        inst._val_typeinfo = self.val_info
-        inst._list_data = value
-        return inst
+        return MutableList(self.val_info, value)

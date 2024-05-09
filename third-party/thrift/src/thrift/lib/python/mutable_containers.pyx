@@ -38,12 +38,13 @@ cdef class MutableList:
     will raise a `TypeError`. Another consequence of the type checking is that
     `MutableList` cannot contain `None` elements.
     """
-    def __init__(self):
-        pass
+    def __cinit__(self, TypeInfoBase value_typeinfo, list list_data):
+        self._val_typeinfo = value_typeinfo
+        self._list_data = list_data
 
     def __getitem__(self, object index_obj):
         if isinstance(index_obj, slice):
-            return self._create_slice(index_obj)
+            return MutableList(self._val_typeinfo, self._list_data[index_obj])
 
         return self._val_typeinfo.to_python_value(self._list_data[index_obj])
 
@@ -113,12 +114,6 @@ cdef class MutableList:
 
         internal_item = self._val_typeinfo.to_internal_data(item)
         return internal_item in self._list_data
-
-    cdef _create_slice(self, slice index_obj):
-        cdef MutableList inst = MutableList.__new__(MutableList)
-        inst._val_typeinfo = self._val_typeinfo
-        inst._list_data = self._list_data[index_obj]
-        return inst
 
 
 MutableSequence.register(MutableList)

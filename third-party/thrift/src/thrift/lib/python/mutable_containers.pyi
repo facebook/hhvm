@@ -15,6 +15,13 @@
 import typing
 
 class MutableList:
+    def __init__(
+        self,
+        # pyre-ignore[2]: Parameter annotation cannot be `Any`.
+        typeinfo: typing.Any,
+        # pyre-ignore[2]: Parameter annotation cannot be `Any`.
+        list_data: typing.List[typing.Any],
+    ) -> None: ...
     # pyre-ignore[2]: Parameter annotation cannot be `Any`.
     # pyre-ignore[3]: Parameter annotation cannot be `Any`.
     def __getitem__(self, index: typing.Any) -> typing.Any: ...

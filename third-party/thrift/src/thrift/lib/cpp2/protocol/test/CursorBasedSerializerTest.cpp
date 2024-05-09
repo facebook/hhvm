@@ -57,3 +57,37 @@ TEST(CursorSerializerTest, RpcExample) {
       ThrowsMessage<std::runtime_error>(
           "Single pass serialization only supports binary protocol."));
 }
+
+TEST(CursorSerializer, QualifierRead) {
+  Qualifiers obj;
+  obj.opt() = 3;
+
+  // Reading from a serialized default-constructed object sees the written
+  // (default) values).
+  CursorSerializationWrapper<Qualifiers> wrapper(obj);
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.read<ident::opt>(), 3);
+  EXPECT_EQ(reader.read<ident::unq>(), 1);
+  EXPECT_EQ(reader.read<ident::terse>(), 2);
+  wrapper.endRead(std::move(reader));
+
+  // Reading from a serialized empty object applies the appropriate default
+  // based on the qualifier.
+  folly::IOBufQueue q;
+  BinarySerializer::serialize(Empty{}, &q);
+  wrapper = CursorSerializationWrapper<Qualifiers>(q.move());
+  reader = wrapper.beginRead();
+  EXPECT_FALSE(reader.read<ident::opt>());
+  EXPECT_EQ(reader.read<ident::unq>(), 1);
+  EXPECT_EQ(reader.read<ident::terse>(), 0);
+  wrapper.endRead(std::move(reader));
+}
+
+TEST(CursorSerializer, ReadWithSkip) {
+  CursorSerializationWrapper<Meal> wrapper(Meal{});
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.read<ident::appetizer>(), 1);
+  EXPECT_EQ(reader.read<ident::main>(), 2);
+  EXPECT_EQ(reader.read<ident::dessert>(), 3);
+  wrapper.endRead(std::move(reader));
+}

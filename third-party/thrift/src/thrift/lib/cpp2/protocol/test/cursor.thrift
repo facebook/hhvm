@@ -22,6 +22,26 @@ cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"
 @thrift.Experimental
 package "apache.org/thrift/test"
 
+struct Qualifiers {
+  1: optional i32 opt;
+  2: i32 unq = 1;
+  @thrift.TerseWrite
+  3: i32 terse = 2;
+}
+
+struct Cookie {
+  1: i16 id = 2;
+  2: string fortune = "About time I got out of that cookie!!";
+  3: list<i32> lucky_numbers = [508, 493, 425];
+}
+struct Meal {
+  1: i16 appetizer = 1;
+  2: i32 drink = -8;
+  3: i16 main = 2;
+  4: Cookie cookie;
+  5: i16 dessert = 3;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

@@ -19,6 +19,7 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
@@ -83,6 +84,15 @@ class CursorSerializationWrapper {
     return ret;
   }
 
+  /** Cursor read path */
+  StructuredCursorReader<Tag> beginRead() const {
+    assert(serializedData_);
+    return StructuredCursorReader<Tag>(*serializedData_);
+  }
+  void endRead(StructuredCursorReader<Tag>&& reader) const {
+    reader.finalize();
+  }
+
   /** Access to serialized data */
   const folly::IOBuf& serializedData() const& {
     assert(serializedData_);
@@ -96,6 +106,154 @@ class CursorSerializationWrapper {
  private:
   std::unique_ptr<folly::IOBuf> serializedData_;
   folly::IOBufQueue queue_;
+};
+
+/**
+ * Cursor deserializer for Thrift structs and unions.
+ * Typically constructed from a CursorSerializationWrapper.
+ */
+template <typename Tag>
+class StructuredCursorReader : detail::BaseCursorReader {
+  static_assert(
+      type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
+  using T = type::native_type<Tag>;
+
+  template <typename Ident>
+  using type_tag = op::get_type_tag<T, Ident>;
+  template <typename Ident>
+  using native_type = op::get_native_type<T, Ident>;
+
+  template <typename U, typename Ident>
+  using maybe_optional = std::conditional_t<
+      type::is_optional_or_union_field_v<T, Ident>,
+      std::optional<U>,
+      U>;
+  template <typename Ident>
+  using bool_if_optional = std::
+      conditional_t<type::is_optional_or_union_field_v<T, Ident>, bool, void>;
+
+ public:
+  /**
+   * Materializes a field into its native type (like in the generated struct).
+   * Optional and union fields are wrapped in std::optional.
+   *
+   * Ex:
+   *  StructuredCursorReader<OuterStruct> reader;
+   *  std::string val1 = reader.read<ident::unqualified_string>();
+   *  std::optional<InnerStruct> val2 = reader.read<ident::optional_struct>();
+   *  Union val3 = reader.read<ident::unqualified_union>();
+   *  StructuredCursorReader<Union> unionReader;
+   *  std::optional<int32_t> val4 = unionReader.read<ident::int>();
+   */
+  template <typename Ident>
+  maybe_optional<native_type<Ident>, Ident> read() {
+    maybe_optional<native_type<Ident>, Ident> value;
+    readField<Ident>(
+        [&] {
+          op::decode<type_tag<Ident>>(protocol_, detail::maybe_emplace(value));
+        },
+        value);
+    return value;
+  }
+
+  // End public API
+ private:
+  explicit StructuredCursorReader(const folly::IOBuf& c)
+      : StructuredCursorReader([&] {
+          folly::io::Cursor cursor(&c);
+          BinaryProtocolReader reader;
+          reader.setInput(cursor);
+          return reader;
+        }()) {}
+  explicit StructuredCursorReader(BinaryProtocolReader&& p)
+      : BaseCursorReader(std::move(p)) {
+    readState_.readStructBegin(&protocol_);
+    readState_.readFieldBegin(&protocol_);
+  }
+  StructuredCursorReader() { readState_.fieldType = TType::T_STOP; }
+
+  void finalize() {
+    checkState(State::Active);
+    if (readState_.fieldType != TType::T_STOP) {
+      protocol_.skip(readState_.fieldType);
+      readState_.readFieldEnd(&protocol_);
+      // Because there's no struct begin marker in Binary protocol this skips
+      // the rest of the struct.
+      protocol_.skip(TType::T_STRUCT);
+    }
+    readState_.readStructEnd(&protocol_);
+    state_ = State::Done;
+  }
+
+  template <typename Ident>
+  bool beforeReadField() {
+    checkState(State::Active);
+
+    using field_id = op::get_field_id<T, Ident>;
+    static_assert(field_id::value > FieldId{0}, "FieldId must be positive");
+    if (field_id::value <= fieldId_) {
+      folly::throw_exception<std::runtime_error>("Reading field out of order");
+    }
+    fieldId_ = field_id::value;
+
+    while (readState_.fieldType != TType::T_STOP &&
+           FieldId{readState_.fieldId} < field_id::value) {
+      readState_.readFieldEnd(&protocol_);
+      apache::thrift::skip(protocol_, readState_.fieldType);
+      int16_t lastRead = readState_.fieldId;
+      readState_.readFieldBegin(&protocol_);
+      if (lastRead >= readState_.fieldId) {
+        folly::throw_exception<std::runtime_error>(
+            "Reading fields that were serialized out of order");
+      }
+      lastRead = readState_.fieldId;
+    }
+
+    if (FieldId{readState_.fieldId} != field_id::value) {
+      return false;
+    }
+    if (readState_.fieldType != op::typeTagToTType<type_tag<Ident>>) {
+      folly::throw_exception<std::runtime_error>(fmt::format(
+          "Field type mismatch: expected {}, got {}.",
+          readState_.fieldType,
+          op::typeTagToTType<type_tag<Ident>>));
+    }
+    return true;
+  }
+
+  template <typename>
+  void afterReadField() {
+    readState_.readFieldEnd(&protocol_);
+    readState_.readFieldBegin(&protocol_);
+  }
+
+  template <typename Ident, typename F, typename U>
+  bool_if_optional<Ident> readField(F&& f, U& val) {
+    bool ret = [&] {
+      if (!beforeReadField<Ident>()) {
+        return false;
+      }
+      f();
+      afterReadField<Ident>();
+      return true;
+    }();
+    if constexpr (type::is_optional_or_union_field_v<T, Ident>) {
+      return ret;
+    } else if (ret) {
+    } else if (type::is_terse_field_v<T, Ident>) {
+      val = *op::get<Ident>(op::getIntrinsicDefault<T>());
+    } else {
+      val = *op::get<Ident>(op::getDefault<T>());
+    }
+  }
+
+ private:
+  // Last field id the caller tried to read.
+  FieldId fieldId_{0};
+  // Contains last field id read from the buffer.
+  BinaryProtocolReader::StructReadState readState_;
+
+  friend class CursorSerializationWrapper<T>;
 };
 
 /**

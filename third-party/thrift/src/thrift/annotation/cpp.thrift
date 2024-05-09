@@ -358,3 +358,15 @@ struct ProcessInEbThreadUnsafe {}
  */
 @scope.Struct
 struct RuntimeAnnotation {}
+
+/**
+ * Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.
+ * See documentation for this class in CursorBasedSerializer.h
+ * Can only be applied to top-level structs (used as return type or sole argument to an RPC or serialized directly), not to types used as struct fields or container elements.
+ */
+@scope.Struct
+@scope.Union
+@scope.Typedef
+@scope.Transitive
+@Adapter{name = "::apache::thrift::CursorSerializationAdapter"}
+struct UseCursorSerialization {}

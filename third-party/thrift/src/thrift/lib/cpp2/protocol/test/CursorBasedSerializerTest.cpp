@@ -227,3 +227,20 @@ TEST(CursorSerializer, ContainerRead) {
   reader.endRead(std::move(listReader));
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, NestedStructRead) {
+  CursorSerializationWrapper<Meal> wrapper(Meal{});
+  auto outerReader = wrapper.beginRead();
+  auto innerReader = outerReader.beginRead<ident::cookie>();
+
+  // Can't use parent reader while child reader is active.
+  EXPECT_THAT(
+      [&] { outerReader.read<ident::dessert>(); },
+      ThrowsMessage<std::runtime_error>("Child reader not passed to endRead"));
+
+  // endRead in the middle of reading the child skips to the end.
+  EXPECT_EQ(innerReader.read<ident::id>(), 2);
+  outerReader.endRead(std::move(innerReader));
+  EXPECT_EQ(outerReader.read<ident::dessert>(), 3);
+  wrapper.endRead(std::move(outerReader));
+}

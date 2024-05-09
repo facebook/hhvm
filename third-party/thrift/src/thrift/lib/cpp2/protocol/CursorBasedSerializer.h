@@ -240,6 +240,32 @@ class StructuredCursorReader : detail::BaseCursorReader {
     state_ = State::Active;
   }
 
+  /** structured types
+   *
+   * Note: when beginRead returns a reader, that reader must be passed to
+   * endRead before any other methods on this object can be called.
+   */
+
+  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  maybe_optional<StructuredCursorReader<type_tag<Ident>, Contiguous>, Ident>
+  beginRead() {
+    if (!beforeReadField<Ident>()) {
+      return {};
+    }
+    state_ = State::Child;
+    return StructuredCursorReader<type_tag<Ident>, Contiguous>{
+        std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endRead(StructuredCursorReader<CTag, Contiguous>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    afterReadField();
+    state_ = State::Active;
+  }
+
   /** union type accessor */
 
   template <

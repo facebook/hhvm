@@ -101,7 +101,7 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
       match td_as_constraint with
       | Some cstr -> cstr
       | None ->
-        let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "?nonnull") in
+        let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "mixed") in
         MakeType.mixed r_cstr
     in
     (td_tparams, Tnewtype (name, tyl, cstr), [])

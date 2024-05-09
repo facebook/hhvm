@@ -957,7 +957,7 @@ end = struct
           env
     end
     | (r_sub, Tprim Nast.Tvoid) ->
-      let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
+      let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "mixed") in
       simplify
         ~subtype_env
         ~this_ty
@@ -3636,7 +3636,7 @@ end = struct
           | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
           | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
           | Tneg _ | Tgeneric _ ) ),
-        (_, Tgeneric (name_super, _tyargs_super)) ) ->
+        (r_super, Tgeneric (name_super, _tyargs_super)) ) ->
       (* If we've seen this type parameter before then we must have gone
        * round a cycle so we fail
        *)
@@ -3666,6 +3666,11 @@ end = struct
               ~rhs:{ super_like; super_supportdyn = false; ty_super }
               env
           | ty :: tyl ->
+            let ty =
+              Prov.(
+                update ty ~env ~f:(fun from ->
+                    flow ~from ~into:(prj_super_cstr r_super)))
+            in
             simplify
               ~subtype_env
               ~this_ty
@@ -3676,7 +3681,12 @@ end = struct
         in
         (* Turn error into a generic error about the type parameter *)
         let bounds = Typing_set.elements other_lower_bounds in
-        env |> try_bounds bounds |> if_unsat (invalid ~fail))
+
+        let env_prop = try_bounds bounds env in
+        if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+          env_prop
+        else
+          if_unsat (invalid ~fail) env_prop)
     (* -- C-Nonnull-R ------------------------------------------------------- *)
     | ( ( _,
           ( Tprim
@@ -6360,6 +6370,10 @@ end = struct
           else
             this_ty
         in
+
+        let update_reason from =
+          Prov.(flow ~from ~into:(prj_as_cstr reason_generic))
+        in
         (* Otherwise, we collect all the upper bounds ("as" constraints) on
            the generic parameter, and check each of these in turn against
            ty_super until one of them succeeds
@@ -6373,29 +6387,31 @@ end = struct
                E.g., if t is a generic type parameter T with nonnull as
                a lower bound.
             *)
-            let r =
-              Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
-            in
+            let r = Reason.Rimplicit_upper_bound (get_pos lty_sub, "mixed") in
+
             let tmixed = MakeType.mixed r in
+            let ty_sub = Prov.(update tmixed ~env ~f:update_reason) in
             mk_prop
               ~subtype_env
               ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = tmixed }
+              ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:rhs_for_mixed
               env
           | [ty] ->
+            let ty_sub = Prov.(update ty ~env ~f:update_reason) in
             mk_prop
               ~subtype_env
               ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = ty }
+              ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs
               env
           | ty :: tyl ->
+            let ty_sub = Prov.(update ty ~env ~f:update_reason) in
             try_bounds tyl env
             ||| mk_prop
                   ~subtype_env
                   ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty }
+                  ~lhs:{ sub_supportdyn; ty_sub }
                   ~rhs
         in
         let bounds =
@@ -6404,8 +6420,14 @@ end = struct
         in
         try_bounds bounds env
       in
-      (* Turn error into a generic error about the type parameter *)
-      if_unsat (invalid ~fail) (env, prop)
+      if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+        (* Under exteded reasons, the failure on the type parameter is contained
+           in the failure for its bound
+           TODO(mjt): record disjunction here *)
+        (env, prop)
+      else
+        (* Turn error into a generic error about the type parameter *)
+        if_unsat (invalid ~fail) (env, prop)
     end
 
   let simplify_newtype_l

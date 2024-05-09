@@ -107,6 +107,8 @@ type prj_asymm =
   | Prj_asymm_inter
   | Prj_asymm_neg
   | Prj_asymm_extends
+  | Prj_asymm_as_cstr
+  | Prj_asymm_super_cstr
 [@@deriving hash]
 
 let variance_to_json = function
@@ -180,6 +182,8 @@ let prj_asymm_to_json = function
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
   | Prj_asymm_extends -> Hh_json.JSON_String "Prj_asymm_extends"
+  | Prj_asymm_as_cstr -> Hh_json.JSON_String "Prj_asymm_as_cstr"
+  | Prj_asymm_super_cstr -> Hh_json.JSON_String "Prj_asymm_super_cstr"
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
@@ -1315,6 +1319,8 @@ let explain_asymm_prj prj =
   | Prj_asymm_inter -> "via the intersection type"
   | Prj_asymm_neg -> "via the negation type"
   | Prj_asymm_extends -> "via a subclass relationship"
+  | Prj_asymm_as_cstr -> "via an `as` constraint"
+  | Prj_asymm_super_cstr -> "via an `super` constraint"
 
 (* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
    and ensure we handle all cases statically *)
@@ -1325,6 +1331,13 @@ let explain_witness = function
   | Rwitness_from_decl pos -> (pos, "this declaration")
   | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
   | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
+  | Rcstr_on_generics (pos, _) ->
+    (pos, "the constraint on the generic parameter")
+  | Rimplicit_upper_bound (pos, nm) ->
+    ( pos,
+      Format.sprintf
+        "the implicit upper bound (`%s`) on the generic parameter"
+        nm )
   | r -> (to_raw_pos r, "this thing")
 
 let explain_flow = function

@@ -207,7 +207,14 @@ error: Typing[4110] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":27,"char_end":44}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":38,"char_start":22,"char_end":23}]
@@ -241,7 +248,14 @@ error: Typing[4110] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -274,7 +288,14 @@ error: Typing[4110] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":27,"char_end":44}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":38,"char_start":22,"char_end":23}]
@@ -304,7 +325,14 @@ error: Typing[4110] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -324,6 +352,10 @@ error: Typing[4110] Invalid argument [1]
   },
   {"Fwd":[]},
   {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":27,"char_end":44}]
+  },
+  {"Fwd":[]},
   {
     "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
   },
@@ -345,6 +377,10 @@ error: Typing[4110] Invalid argument [1]
     "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
   },
   {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+  },
   {"Fwd":[]},
   {
     "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
@@ -770,7 +806,14 @@ error: Typing[4163] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":26,"char_end":43}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":44,"char_start":21,"char_end":22}]
@@ -804,7 +847,14 @@ error: Typing[4163] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -837,7 +887,14 @@ error: Typing[4163] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":26,"char_end":43}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":44,"char_start":21,"char_end":22}]
@@ -867,7 +924,14 @@ error: Typing[4163] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -887,6 +951,10 @@ error: Typing[4163] Invalid argument [1]
   },
   {"Fwd":[]},
   {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":26,"char_end":43}]
+  },
+  {"Fwd":[]},
   {
     "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
   },
@@ -910,6 +978,10 @@ error: Typing[4163] Invalid argument [1]
   {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+  },
+  {"Fwd":[]},
+  {
     "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
   },
   {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
@@ -920,25 +992,19 @@ error: Typing[4163] Invalid argument [1]
 ] [5]
 
 shape_subtyping.php:46:35
-    25 | 
-    26 | 
-[4] 27 | type required_a_at_int = shape('a' => int);
-    28 | type required_a_at_bool = shape('a' => bool);
-[5] 29 | type optional_a_at_int = shape(?'a' => int);
-    30 | type optional_a_at_bool = shape(?'a' => bool);
-    31 | 
-    32 | function expects_required_a_at_int_alias(
-[3] 33 | required_a_at_int $s,
-    34 | ): void {
-    35 | }
-       :
-    42 | 
-    43 | function passes_optional_a_at_int_alias(
-[2] 44 |   optional_a_at_int $s,
-    45 | ): void {
-[1] 46 |   expects_required_a_at_int_alias($s);
-    47 | }
-    48 | 
+      25 | 
+      26 | 
+[3,4] 27 | type required_a_at_int = shape('a' => int);
+      28 | type required_a_at_bool = shape('a' => bool);
+[2,5] 29 | type optional_a_at_int = shape(?'a' => int);
+      30 | type optional_a_at_bool = shape(?'a' => bool);
+      31 | 
+         :
+      44 |   optional_a_at_int $s,
+      45 | ): void {
+[1]   46 |   expects_required_a_at_int_alias($s);
+      47 | }
+      48 | 
 
 error: Typing[4163] Invalid argument [1]
 -> The field a is optional [2]
@@ -964,7 +1030,14 @@ error: Typing[4163] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":27,"char_end":45}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":50,"char_start":22,"char_end":23}]
@@ -998,7 +1071,14 @@ error: Typing[4163] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -1031,7 +1111,14 @@ error: Typing[4163] Invalid argument [1]
                         {
                           "Rflow":[
                             {
-                              "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":27,"char_end":45}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                                }
+                              ]
                             },
                             {
                               "Rwitness":[{"filename":"shape_subtyping.php","line":50,"char_start":22,"char_end":23}]
@@ -1061,7 +1148,14 @@ error: Typing[4163] Invalid argument [1]
                   ]
                 },
                 {
-                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                    }
+                  ]
                 }
               ]
             }
@@ -1081,6 +1175,10 @@ error: Typing[4163] Invalid argument [1]
   },
   {"Fwd":[]},
   {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":27,"char_end":45}]
+  },
+  {"Fwd":[]},
   {
     "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
   },
@@ -1104,6 +1202,10 @@ error: Typing[4163] Invalid argument [1]
   {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
   {"Fwd":[]},
   {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":26,"char_end":42}]
+  },
+  {"Fwd":[]},
+  {
     "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
   },
   {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
@@ -1114,23 +1216,18 @@ error: Typing[4163] Invalid argument [1]
 ] [5]
 
 shape_subtyping.php:52:35
-    25 | 
-    26 | 
-[4] 27 | type required_a_at_int = shape('a' => int);
-    28 | type required_a_at_bool = shape('a' => bool);
-    29 | type optional_a_at_int = shape(?'a' => int);
-[5] 30 | type optional_a_at_bool = shape(?'a' => bool);
-    31 | 
-    32 | function expects_required_a_at_int_alias(
-[3] 33 | required_a_at_int $s,
-    34 | ): void {
-    35 | }
-       :
-    48 | 
-    49 | function passes_optional_a_at_bool_alias(
-[2] 50 |   optional_a_at_bool $s,
-    51 | ): void {
-[1] 52 |   expects_required_a_at_int_alias($s);
-    53 | }
+      25 | 
+      26 | 
+[3,4] 27 | type required_a_at_int = shape('a' => int);
+      28 | type required_a_at_bool = shape('a' => bool);
+      29 | type optional_a_at_int = shape(?'a' => int);
+[2,5] 30 | type optional_a_at_bool = shape(?'a' => bool);
+      31 | 
+      32 | function expects_required_a_at_int_alias(
+         :
+      50 |   optional_a_at_bool $s,
+      51 | ): void {
+[1]   52 |   expects_required_a_at_int_alias($s);
+      53 | }
 
 6 errors found.

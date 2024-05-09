@@ -482,6 +482,15 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         let lty =
           set_origin_and_cache origin_opt env ty_err_opt lty (Some shp_def_pos)
         in
+        let lty =
+          Typing_helpers.Prov.(
+            update lty ~env ~f:(fun into ->
+                flow
+                  ~into
+                  ~from:
+                    (Typing_reason.localize
+                    @@ Typing_defs.get_reason typedef_info.td_type)))
+        in
         ((env, ty_err_opt), lty)
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->

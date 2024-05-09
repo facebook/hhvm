@@ -84,12 +84,18 @@ class CursorSerializationWrapper {
     return ret;
   }
 
-  /** Cursor read path */
-  StructuredCursorReader<Tag> beginRead() const {
+  /**
+   * Cursor read path
+   * Template parameter determines whether chained buffers are supported.
+   * Setting to false allows chained buffers and disables string_view API.
+   */
+  template <bool Contiguous = true>
+  StructuredCursorReader<Tag, Contiguous> beginRead() const {
     assert(serializedData_);
-    return StructuredCursorReader<Tag>(*serializedData_);
+    return StructuredCursorReader<Tag, Contiguous>(*serializedData_);
   }
-  void endRead(StructuredCursorReader<Tag>&& reader) const {
+  template <bool Contiguous>
+  void endRead(StructuredCursorReader<Tag, Contiguous>&& reader) const {
     reader.finalize();
   }
 
@@ -112,7 +118,7 @@ class CursorSerializationWrapper {
  * Cursor deserializer for Thrift structs and unions.
  * Typically constructed from a CursorSerializationWrapper.
  */
-template <typename Tag>
+template <typename Tag, bool Contiguous = true>
 class StructuredCursorReader : detail::BaseCursorReader {
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
@@ -124,8 +130,13 @@ class StructuredCursorReader : detail::BaseCursorReader {
   using native_type = op::get_native_type<T, Ident>;
 
   template <typename TypeClass, typename Ident>
-  using enable_for = typename std::
-      enable_if_t<std::is_base_of_v<TypeClass, type_tag<Ident>>, int>;
+  using enable_for =
+      typename std::enable_if_t<type::is_a_v<type_tag<Ident>, TypeClass>, int>;
+
+  template <typename Ident>
+  using enable_string_view = typename std::enable_if_t<
+      Contiguous && type::is_a_v<type_tag<Ident>, type::string_c>,
+      int>;
 
   template <typename U, typename Ident>
   using maybe_optional = std::conditional_t<
@@ -183,6 +194,21 @@ class StructuredCursorReader : detail::BaseCursorReader {
         [&] { op::decode<type_tag<Ident>>(protocol_, value); }, value);
   }
 
+  /** string/binary */
+
+  template <typename Ident, enable_string_view<Ident> = 0>
+  [[nodiscard]] bool_if_optional<Ident> read(std::string_view& value);
+
+  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  [[nodiscard]] bool_if_optional<Ident> read(std::string& value) {
+    return readField<Ident>([&] { protocol_.readString(value); }, value);
+  }
+
+  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  [[nodiscard]] bool_if_optional<Ident> read(folly::IOBuf& value) {
+    return readField<Ident>([&] { protocol_.readBinary(value); }, value);
+  }
+
   /** union type accessor */
 
   template <
@@ -201,7 +227,12 @@ class StructuredCursorReader : detail::BaseCursorReader {
           BinaryProtocolReader reader;
           reader.setInput(cursor);
           return reader;
-        }()) {}
+        }()) {
+    if (Contiguous && c.isChained()) {
+      folly::throw_exception<std::runtime_error>(
+          "Chained buffer passed to contiguous reader.");
+    }
+  }
   explicit StructuredCursorReader(BinaryProtocolReader&& p)
       : BaseCursorReader(std::move(p)) {
     readState_.readStructBegin(&protocol_);
@@ -350,5 +381,30 @@ class CursorSerializationAdapter {
 };
 
 // End public API
+
+template <typename Tag, bool Contiguous>
+template <
+    typename Ident,
+    typename StructuredCursorReader<Tag, Contiguous>::
+        template enable_string_view<Ident>>
+typename StructuredCursorReader<Tag, Contiguous>::template bool_if_optional<
+    Ident>
+StructuredCursorReader<Tag, Contiguous>::read(std::string_view& value) {
+  return readField<Ident>(
+      [&] {
+        int32_t size;
+        protocol_.readI32(size);
+        if (size < 0) {
+          TProtocolException::throwNegativeSize();
+        }
+        folly::io::Cursor c = protocol_.getCursor();
+        if (static_cast<size_t>(size) >= c.length()) {
+          TProtocolException::throwTruncatedData();
+        }
+        value = std::string_view(reinterpret_cast<const char*>(c.data()), size);
+        protocol_.skipBytes(size);
+      },
+      value);
+}
 
 } // namespace apache::thrift

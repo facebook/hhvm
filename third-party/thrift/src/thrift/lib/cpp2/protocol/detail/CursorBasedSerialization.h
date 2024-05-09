@@ -87,6 +87,6 @@ class BaseCursorReader {
 
 } // namespace detail
 
-template <typename T>
+template <typename T, bool Contiguous>
 class StructuredCursorReader;
 } // namespace apache::thrift

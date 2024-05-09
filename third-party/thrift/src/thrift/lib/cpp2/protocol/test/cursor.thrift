@@ -22,6 +22,22 @@ cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"
 @thrift.Experimental
 package "apache.org/thrift/test"
 
+union Inner {
+  1: binary binary_field;
+}
+
+@cpp.Adapter{name = "::apache::thrift::CursorSerializationAdapter"}
+typedef Struct StructCursor
+
+struct Struct {
+  1: optional string string_field;
+  2: i32 i32_field;
+  3: Inner union_field;
+  4: list<byte> list_field;
+  5: list<set<string>> set_nested_field;
+  6: map<byte, byte> map_field;
+}
+
 struct Qualifiers {
   1: optional i32 opt;
   2: i32 unq = 1;

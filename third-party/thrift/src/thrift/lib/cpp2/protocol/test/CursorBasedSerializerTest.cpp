@@ -146,3 +146,27 @@ TEST(CursorSerializer, NumericRead) {
   EXPECT_FLOAT_EQ(f, *obj.flt());
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, StringRead) {
+  Struct obj;
+  obj.string_field() = "foo";
+
+  StructCursor wrapper(obj);
+  auto reader = wrapper.beginRead();
+  std::string_view str;
+  EXPECT_TRUE(reader.read<ident::string_field>(str));
+  EXPECT_EQ("foo", str);
+  wrapper.endRead(std::move(reader));
+
+  reader = wrapper.beginRead();
+  std::string str2;
+  EXPECT_TRUE(reader.read<ident::string_field>(str2));
+  EXPECT_EQ("foo", str2);
+  wrapper.endRead(std::move(reader));
+
+  reader = wrapper.beginRead();
+  folly::IOBuf str3;
+  EXPECT_TRUE(reader.read<ident::string_field>(str3));
+  EXPECT_EQ("foo", str3.moveToFbString());
+  wrapper.endRead(std::move(reader));
+}

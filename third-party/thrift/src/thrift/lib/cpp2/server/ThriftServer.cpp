@@ -1933,7 +1933,7 @@ ThriftServer::checkOverload(
       OverloadResult::LoadShedder loadShedder =
           OverloadResult::LoadShedder::MAX_REQUESTS;
       if (getCPUConcurrencyController().requestShed(
-              CPUConcurrencyController::Method::CONCURRENCY_LIMITS)) {
+              CPUConcurrencyController::Method::MAX_REQUESTS)) {
         loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
       } else if (getAdaptiveConcurrencyController().enabled()) {
         loadShedder =
@@ -1954,7 +1954,7 @@ ThriftServer::checkOverload(
     OverloadResult::LoadShedder loadShedder =
         OverloadResult::LoadShedder::MAX_QPS;
     if (getCPUConcurrencyController().requestShed(
-            CPUConcurrencyController::Method::TOKEN_BUCKET)) {
+            CPUConcurrencyController::Method::MAX_QPS)) {
       loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
     }
     return OverloadResult{

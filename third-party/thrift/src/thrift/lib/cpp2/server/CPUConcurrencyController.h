@@ -54,8 +54,8 @@ class CPUConcurrencyController {
   };
 
   enum class Method : uint8_t {
-    CONCURRENCY_LIMITS,
-    TOKEN_BUCKET,
+    MAX_REQUESTS,
+    MAX_QPS,
   };
 
   struct Config {
@@ -64,7 +64,7 @@ class CPUConcurrencyController {
     // Operating mode
     Mode mode = Mode::DISABLED;
     // CPU concurrency enforcement method
-    Method method = Method::TOKEN_BUCKET;
+    Method method = Method::MAX_QPS;
     // CPU target in the range [0, 100]
     uint8_t cpuTarget = 90;
     // Source of CPU load metrics (container-only, host-only, or

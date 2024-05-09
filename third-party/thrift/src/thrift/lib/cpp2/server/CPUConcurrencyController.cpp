@@ -255,12 +255,12 @@ uint32_t CPUConcurrencyController::getLimit(
     limit = dryRunLimit_;
   } else {
     switch (config->method) {
-      case Method::CONCURRENCY_LIMITS:
+      case Method::MAX_REQUESTS:
         // Using ServiceConfigs instead of ThriftServerConfig, because the value
         // may come from AdaptiveConcurrencyController
         limit = serverConfigs_.getMaxRequests();
         break;
-      case Method::TOKEN_BUCKET:
+      case Method::MAX_QPS:
         limit = thriftServerConfig_.getMaxQps().get();
         break;
       default:
@@ -280,10 +280,10 @@ void CPUConcurrencyController::setLimit(
     dryRunLimit_ = newLimit;
   } else if (config->mode == Mode::ENABLED) {
     switch (config->method) {
-      case Method::CONCURRENCY_LIMITS:
+      case Method::MAX_REQUESTS:
         activeRequestsLimit_.setValue(newLimit);
         break;
-      case Method::TOKEN_BUCKET:
+      case Method::MAX_QPS:
         qpsLimit_.setValue(newLimit);
         break;
       default:
@@ -296,14 +296,14 @@ uint32_t CPUConcurrencyController::getLimitUsage(
     const std::shared_ptr<const Config>& config) {
   using namespace std::chrono;
   switch (config->method) {
-    case Method::CONCURRENCY_LIMITS:
+    case Method::MAX_REQUESTS:
       // Note: estimating concurrency from this is fairly lossy as it's a
       // gauge metric and we can't use techniques to measure it over a duration.
       // We may be able to get much better estimates if we switch to use QPS
       // and a token bucket for rate limiting.
       // TODO: We should exclude fb303 methods.
       return serverConfigs_.getActiveRequests();
-    case Method::TOKEN_BUCKET: {
+    case Method::MAX_QPS: {
       auto now = steady_clock::now();
       auto milliSince =
           duration_cast<milliseconds>(now - lastTotalRequestReset_).count();
@@ -340,7 +340,7 @@ uint32_t CPUConcurrencyController::getConcurrencyUpperBoundInternal(
   if (std::holds_alternative<Config::UseStaticLimit>(
           config->concurrencyUpperBound)) {
     // Use static limit as concurrencyUpperBound
-    return config->method == Method::CONCURRENCY_LIMITS
+    return config->method == Method::MAX_REQUESTS
         ? thriftServerConfig_.getMaxRequests().get()
         : thriftServerConfig_.getMaxQps().get();
   }
@@ -368,10 +368,11 @@ std::string_view CPUConcurrencyController::Config::modeName() const {
 
 std::string_view CPUConcurrencyController::Config::methodName() const {
   switch (method) {
-    case Method::CONCURRENCY_LIMITS:
-      return "CONCURRENCY_LIMITS";
-    case Method::TOKEN_BUCKET:
-      return "TOKEN_BUCKET";
+    // TODO(sazonovk): What's the effect of changing these strings?
+    case Method::MAX_REQUESTS:
+      return "MAX_REQUESTS";
+    case Method::MAX_QPS:
+      return "MAX_QPS";
   }
   folly::assume_unreachable();
 }
@@ -390,10 +391,11 @@ std::string_view CPUConcurrencyController::Config::cpuLoadSourceName() const {
 
 std::string_view CPUConcurrencyController::Config::concurrencyUnit() const {
   switch (method) {
-    case Method::CONCURRENCY_LIMITS:
-      return "Active Requests";
-    case Method::TOKEN_BUCKET:
-      return "QPS";
+    // TODO(sazonovk): What's the effect of changing these strings?
+    case Method::MAX_REQUESTS:
+      return "maxRequests";
+    case Method::MAX_QPS:
+      return "maxQps";
   }
   folly::assume_unreachable();
 }

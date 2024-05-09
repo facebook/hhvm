@@ -146,7 +146,7 @@ TEST_F(CPUConcurrencyControllerTest, getDbgInfo) {
 
   configObservable.setValue(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::ENABLED,
-      .method = CPUConcurrencyController::Method::TOKEN_BUCKET,
+      .method = CPUConcurrencyController::Method::MAX_QPS,
       .cpuTarget = 99,
       .cpuLoadSource = apache::thrift::CPULoadSource::CONTAINER_AND_HOST,
       .refreshPeriodMs = std::chrono::milliseconds(100),
@@ -188,7 +188,7 @@ TEST_F(CPUConcurrencyControllerTest, testConcurrencyUpperBound) {
   // Test concurrencyUpperBound with positive value
   setConfig(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::ENABLED,
-      .method = CPUConcurrencyController::Method::TOKEN_BUCKET,
+      .method = CPUConcurrencyController::Method::MAX_QPS,
       .concurrencyUpperBound = 100,
   });
 
@@ -199,13 +199,13 @@ TEST_F(CPUConcurrencyControllerTest, testConcurrencyUpperBound) {
       .mode = CPUConcurrencyController::Mode::DISABLED});
 
   // Test concurrencyUpperBound with kConcurrencyUpperBoundUseStaticLimit
-  // CONCURRENCY_LIMITS method
+  // MAX_REQUESTS method
   getThriftServerConfig().setMaxRequests(
       folly::observer::makeStaticObserver<std::optional<uint32_t>>(200));
 
   setConfig(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::ENABLED,
-      .method = CPUConcurrencyController::Method::CONCURRENCY_LIMITS,
+      .method = CPUConcurrencyController::Method::MAX_REQUESTS,
       .concurrencyUpperBound =
           CPUConcurrencyController::Config::UseStaticLimit{},
   });
@@ -223,7 +223,7 @@ TEST_F(CPUConcurrencyControllerTest, testConcurrencyUpperBound) {
 
   setConfig(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::ENABLED,
-      .method = CPUConcurrencyController::Method::TOKEN_BUCKET,
+      .method = CPUConcurrencyController::Method::MAX_QPS,
       .concurrencyUpperBound =
           CPUConcurrencyController::Config::UseStaticLimit{},
   });
@@ -237,7 +237,7 @@ TEST_F(CPUConcurrencyControllerTest, testConcurrencyUpperBound) {
   // Test concurrencyUpperBound with negative value
   setConfig(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::ENABLED,
-      .method = CPUConcurrencyController::Method::TOKEN_BUCKET,
+      .method = CPUConcurrencyController::Method::MAX_QPS,
       .concurrencyUpperBound = -2,
   });
 

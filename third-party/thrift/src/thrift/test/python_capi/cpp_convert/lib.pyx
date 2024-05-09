@@ -16,7 +16,7 @@ from libcpp.string cimport string as cstring
 from thrift.python.capi.cpp_converter cimport (
     python_to_cpp_throws
 )
-from thrift.test.python_capi.thrift_dep.converter cimport (
+from thrift.test.python_capi.thrift_dep.thrift_converter cimport (
     cDepEnum as cEnum,
     cDepStruct as cStruct,
     cDepUnion as cUnion,

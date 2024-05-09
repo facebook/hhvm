@@ -15,7 +15,7 @@
 """
     Note these functions are considered INTERNAL and no longer recommended for end use.
     Please use the python_capi converter cython module, imported like:
-        from cimport <py3_namespace>.<module_name>.converter cimport (
+        from cimport <py3_namespace>.<module_name>.thrift_converter cimport (
             <TypePythonName>_convert_to_cpp,
             <TypePythonName>_from_cpp,
         )

@@ -15,8 +15,8 @@
 from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
 
-from convertible.converter cimport cSimple, cNested, cUnion
-cimport convertible.converter as converter
+from convertible.thrift_converter cimport cSimple, cNested, cUnion
+cimport convertible.thrift_converter as converter
 
 cdef extern from *:
     """

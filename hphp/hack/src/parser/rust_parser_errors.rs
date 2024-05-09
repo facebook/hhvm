@@ -150,7 +150,7 @@ impl UnstableFeatures {
             UnstableFeatures::FunctionReferences => Unstable,
             UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
             UnstableFeatures::ExpressionTreeMap => OngoingRelease,
-            UnstableFeatures::ExpressionTreeNest => Unstable,
+            UnstableFeatures::ExpressionTreeNest => Preview,
         }
     }
 }

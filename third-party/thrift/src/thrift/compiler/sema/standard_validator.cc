@@ -39,6 +39,7 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
+#include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/const_checker.h>
@@ -1231,6 +1232,56 @@ void deprecate_annotations(diagnostic_context& ctx, const t_named& node) {
   }
 }
 
+template <typename Node>
+bool has_cursor_serialization_adapter(const Node& node) {
+  try {
+    if (auto* adapter = gen::cpp::type_resolver::find_first_adapter(node)) {
+      return adapter->find("apache::thrift::CursorSerializationAdapter") !=
+          adapter->npos;
+    }
+  } catch (const std::runtime_error&) {
+    // Adapter annotation is malformed, ignore it.
+  }
+  return false;
+}
+
+void validate_cursor_serialization_adapter_on_field(
+    diagnostic_context& ctx, const t_field& node) {
+  ctx.check(
+      !has_cursor_serialization_adapter(node),
+      "CursorSerializationAdapter is not supported on fields. Place it on the top-level struct/union instead.");
+}
+
+void validate_cursor_serialization_adapter_on_function(
+    diagnostic_context& ctx, const t_function& node) {
+  if (node.params().fields().size() <= 1) {
+    return;
+  }
+  for (const auto& field : node.params().fields()) {
+    ctx.check(
+        !has_cursor_serialization_adapter(field),
+        field,
+        "CursorSerializationAdapter only supports single-argument functions.");
+  }
+}
+
+void validate_cursor_serialization_adapter_in_container(
+    diagnostic_context& ctx, const t_container& node) {
+  auto check = [&](const t_type& type) {
+    ctx.check(
+        !has_cursor_serialization_adapter(type),
+        "CursorSerializationAdapter is not supported inside containers.");
+  };
+  if (auto* list = dynamic_cast<const t_list*>(&node)) {
+    check(*list->elem_type());
+  } else if (auto* set = dynamic_cast<const t_set*>(&node)) {
+    check(*set->elem_type());
+  } else if (auto* map = dynamic_cast<const t_map*>(&node)) {
+    check(*map->key_type());
+    check(*map->val_type());
+  }
+}
+
 } // namespace
 
 ast_validator standard_validator() {
@@ -1293,6 +1344,12 @@ ast_validator standard_validator() {
   validator.add_const_visitor(&validate_const_type_and_value);
   validator.add_const_visitor(ValidateAnnotationPositions());
   validator.add_program_visitor(&validate_uri_uniqueness);
+
+  validator.add_field_visitor(&validate_cursor_serialization_adapter_on_field);
+  validator.add_function_visitor(
+      &validate_cursor_serialization_adapter_on_function);
+  validator.add_container_visitor(
+      &validate_cursor_serialization_adapter_in_container);
 
   add_explicit_include_validators(validator);
 

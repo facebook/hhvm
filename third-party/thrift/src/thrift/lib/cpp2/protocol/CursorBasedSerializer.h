@@ -128,6 +128,18 @@ class CursorSerializationAdapter {
           .cloneAtMost(buf, std::numeric_limits<size_t>::max());
       // -1 to leave the stop marker for the presult struct when used in an RPC.
       prot_.skipBytes(buf->computeChainDataLength() - 1);
+
+      if constexpr (folly::kIsDebug) {
+        // Check that the buffer only contains one struct in it (without
+        // advancing the real cursor).
+        Protocol protForDebug;
+        protForDebug.setInput(buf.get());
+        protForDebug.skip(protocol::T_STRUCT);
+        DCHECK_LE(
+            buf->computeChainDataLength(), protForDebug.getCursorPosition() + 1)
+            << "Cursor serialization only supports messages containing a single struct or union.";
+      }
+
       wrapper = CursorSerializationWrapper<T>{std::move(buf)};
     } else {
       folly::throw_exception<std::runtime_error>(

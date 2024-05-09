@@ -361,6 +361,7 @@ struct RuntimeAnnotation {}
 
 /**
  * Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.
+ * Must add `cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"` to files that use this annotation.
  * See documentation for this class in CursorBasedSerializer.h
  * Can only be applied to top-level structs (used as return type or sole argument to an RPC or serialized directly), not to types used as struct fields or container elements.
  */

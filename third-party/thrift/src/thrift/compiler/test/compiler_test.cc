@@ -2007,3 +2007,27 @@ TEST(CompilerTest, same_named_field) {
     }
   )");
 }
+
+TEST(CompilerTest, cursor_serialization_adapter) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+
+    struct Regular {
+      @cpp.Adapter{name = "::apache::thrift::CursorSerializationAdapter"} # expected-error: CursorSerializationAdapter is not supported on fields. Place it on the top-level struct/union instead.
+      1: i32 field;
+      2: Adapted adapted; # expected-error: CursorSerializationAdapter is not supported on fields. Place it on the top-level struct/union instead.
+      3: set<Adapted> container; # expected-error: CursorSerializationAdapter is not supported inside containers.
+    }
+
+    @cpp.UseCursorSerialization
+    struct Adapted {}
+
+    service Service {
+      Adapted allowed(1: Adapted adapted);
+      Regular not_allowed(
+        1: Regular regular,
+        2: Adapted adapted # expected-error: CursorSerializationAdapter only supports single-argument functions.
+      );
+    }
+  )");
+}

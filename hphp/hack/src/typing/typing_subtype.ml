@@ -6424,12 +6424,11 @@ end = struct
           None
       | _ -> sub_supportdyn
     in
-    mk_prop
-      ~subtype_env
-      ~this_ty
-      ~lhs:{ sub_supportdyn; ty_sub = newtype_ty }
-      ~rhs
-      env
+    let ty_sub =
+      Prov.(
+        update newtype_ty ~env ~f:(fun into -> flow ~from:reason_newtype ~into))
+    in
+    mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
 
   let simplify_dependent_l
       ~subtype_env

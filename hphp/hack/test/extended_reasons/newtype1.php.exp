@@ -1,0 +1,154 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected bool [2]
+-> But got int [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
+                    },
+                    {
+                      "Rrev":[
+                        {
+                          "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+  }
+] [3]
+
+newtype1.php--file2.php:8:22
+    1 | <?hh
+    2 | 
+[2] 3 | function expect_bool(bool $x): bool {
+    4 |   return $x;
+    5 | }
+    6 | 
+[3] 7 | function pass_my_int(myint $y) : bool {
+[1] 8 |   return expect_bool($y);
+    9 | }
+
+1 error found.

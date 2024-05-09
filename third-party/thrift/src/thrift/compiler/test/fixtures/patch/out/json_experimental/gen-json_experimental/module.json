@@ -688,6 +688,14 @@
 },
         "value" : {"name": "MyDataPatchStructInternalDoNotUse"}
       },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
+},
+        "value" : {"name": "MyDataPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -902,6 +910,14 @@
   "type" : "struct",
   "name" : "Name",
   "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "MyDataWithCustomDefaultPatchStructInternalDoNotUse"}
+      },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
 },
         "value" : {"name": "MyDataWithCustomDefaultPatchStructInternalDoNotUse"}
       },
@@ -1474,6 +1490,14 @@
   "type" : "struct",
   "name" : "Name",
   "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "MyStructPatchStructInternalDoNotUse"}
+      },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
 },
         "value" : {"name": "MyStructPatchStructInternalDoNotUse"}
       },
@@ -3236,6 +3260,14 @@
 },
         "value" : {"name": "LateDefStructPatchStructInternalDoNotUse"}
       },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
+},
+        "value" : {"name": "LateDefStructPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3390,6 +3422,14 @@
   "type" : "struct",
   "name" : "Name",
   "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "RecursivePatchStructInternalDoNotUse"}
+      },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
 },
         "value" : {"name": "RecursivePatchStructInternalDoNotUse"}
       },
@@ -3628,6 +3668,14 @@
 },
         "value" : {"name": "BarPatchStructInternalDoNotUse"}
       },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
+},
+        "value" : {"name": "BarPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3830,6 +3878,14 @@
 },
         "value" : {"name": "LoopPatchStructInternalDoNotUse"}
       },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
+},
+        "value" : {"name": "LoopPatchStructInternalDoNotUse"}
+      },
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
@@ -3912,6 +3968,14 @@
   "type" : "struct",
   "name" : "Name",
   "path" : "thrift/annotation/hack.thrift"
+},
+        "value" : {"name": "RefFieldsPatchStructInternalDoNotUse"}
+      },
+          "python.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name",
+  "path" : "thrift/annotation/python.thrift"
 },
         "value" : {"name": "RefFieldsPatchStructInternalDoNotUse"}
       },

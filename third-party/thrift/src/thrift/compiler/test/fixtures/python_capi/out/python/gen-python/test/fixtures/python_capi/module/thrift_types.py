@@ -1251,7 +1251,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Onion, self)
 
 
-class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
+class MyStructPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1317,7 +1317,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyStructPatch"
+        return "module.MyStructPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -1325,7 +1325,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyStructPatch()
+        return _fbthrift_metadata__struct_MyStructPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -1334,17 +1334,17 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyStructPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructPatchStructInternalDoNotUse, self)
 
 
 class MyStructField4Patch(metaclass=_fbthrift_python_types.StructMeta):
@@ -1688,7 +1688,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "myItemy",  # name
             "myItemy",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1949,7 +1949,7 @@ class MyStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructSafePatch, self)
 
 
-class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
+class MyDataItemPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2015,7 +2015,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyDataItemPatch"
+        return "module.MyDataItemPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -2023,7 +2023,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyDataItemPatch()
+        return _fbthrift_metadata__struct_MyDataItemPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -2032,17 +2032,17 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItemPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItemPatchStructInternalDoNotUse, self)
 
 
 class MyDataItemFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -2277,8 +2277,8 @@ def _fbthrift_metadata__struct_ComposeStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
 def _fbthrift_metadata__struct_Onion():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_Onion()
-def _fbthrift_metadata__struct_MyStructPatch():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructPatch()
+def _fbthrift_metadata__struct_MyStructPatchStructInternalDoNotUse():
+    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_MyStructField4Patch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructField4Patch()
 def _fbthrift_metadata__struct_MyStructField6Patch():
@@ -2293,8 +2293,8 @@ def _fbthrift_metadata__struct_MyStructEnsureStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructEnsureStruct()
 def _fbthrift_metadata__struct_MyStructSafePatch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructSafePatch()
-def _fbthrift_metadata__struct_MyDataItemPatch():
-    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemPatch()
+def _fbthrift_metadata__struct_MyDataItemPatchStructInternalDoNotUse():
+    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_MyDataItemFieldPatch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemFieldPatch()
 def _fbthrift_metadata__struct_MyDataItemEnsureStruct():
@@ -2316,7 +2316,7 @@ _fbthrift_all_structs = [
     MapStruct,
     ComposeStruct,
     Onion,
-    MyStructPatch,
+    MyStructPatchStructInternalDoNotUse,
     MyStructField4Patch,
     MyStructField6Patch,
     MyStructField7Patch,
@@ -2324,7 +2324,7 @@ _fbthrift_all_structs = [
     MyStructFieldPatch,
     MyStructEnsureStruct,
     MyStructSafePatch,
-    MyDataItemPatch,
+    MyDataItemPatchStructInternalDoNotUse,
     MyDataItemFieldPatch,
     MyDataItemEnsureStruct,
     MyDataItemSafePatch,

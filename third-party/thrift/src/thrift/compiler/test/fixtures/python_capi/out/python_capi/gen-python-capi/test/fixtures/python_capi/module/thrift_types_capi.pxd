@@ -78,13 +78,13 @@ cdef api int can_extract__test__fixtures__python_capi__module__Onion(object) exc
 
 cdef api object init__test__fixtures__python_capi__module__Onion(object data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__MyStructPatch(object) except -1
+cdef api int can_extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyStructPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__python_capi__module__MyStructPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__python_capi__module__MyStructPatch(object data)
+cdef api object init__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyStructField4Patch(object) except -1
 
@@ -142,13 +142,13 @@ cdef api object construct__test__fixtures__python_capi__module__MyStructSafePatc
 
 cdef api object init__test__fixtures__python_capi__module__MyStructSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemPatch(object) except -1
+cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__python_capi__module__MyDataItemPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__python_capi__module__MyDataItemPatch(object data)
+cdef api object init__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemFieldPatch(object) except -1
 

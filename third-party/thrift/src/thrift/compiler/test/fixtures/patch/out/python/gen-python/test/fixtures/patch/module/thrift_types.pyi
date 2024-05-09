@@ -374,11 +374,11 @@ class RefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RefFiel
     def _to_py_deprecated(self) -> "module.ttypes.RefFields": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_MyDataPatch:
+class _fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse:
     pass
 
 
-class MyDataPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataPatch):
+class MyDataPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[MyData]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyDataFieldPatch] = ...
@@ -406,8 +406,8 @@ class MyDataPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDat
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyData, bool, MyDataFieldPatch, MyDataEnsureStruct, MyDataFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.MyDataPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_MyDataFieldPatch:
@@ -482,11 +482,11 @@ class MyDataSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_M
     def _to_py_deprecated(self) -> "module.ttypes.MyDataSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_MyDataWithCustomDefaultPatch:
+class _fbthrift_compatible_with_MyDataWithCustomDefaultPatchStructInternalDoNotUse:
     pass
 
 
-class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultPatch):
+class MyDataWithCustomDefaultPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[MyDataWithCustomDefault]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyDataWithCustomDefaultFieldPatch] = ...
@@ -514,8 +514,8 @@ class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct, _fbthrift_comp
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefault, bool, MyDataWithCustomDefaultFieldPatch, MyDataWithCustomDefaultEnsureStruct, MyDataWithCustomDefaultFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataWithCustomDefaultPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataWithCustomDefaultPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch:
@@ -752,11 +752,11 @@ class MyUnionSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_MyStructPatch:
+class _fbthrift_compatible_with_MyStructPatchStructInternalDoNotUse:
     pass
 
 
-class MyStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructPatch):
+class MyStructPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[MyStruct]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyStructFieldPatch] = ...
@@ -784,8 +784,8 @@ class MyStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyS
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyStruct, bool, MyStructFieldPatch, MyStructEnsureStruct, MyStructFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.MyStructPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.MyStructPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyStructPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyStructPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_MyStructField10Patch:
@@ -1048,15 +1048,15 @@ class _fbthrift_compatible_with_MyStructFieldPatch:
 
 
 class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructFieldPatch):
-    structWithCustomDefault: _typing.Final[MyDataWithCustomDefaultPatch] = ...
+    structWithCustomDefault: _typing.Final[MyDataWithCustomDefaultPatchStructInternalDoNotUse] = ...
     i32WithCustomDefault: _typing.Final[apache.thrift.op.patch.thrift_types.I32Patch] = ...
     mapMap: _typing.Final[MyStructField30Patch] = ...
     listMap: _typing.Final[MyStructField29Patch] = ...
     optMapVal: _typing.Final[MyStructField28Patch] = ...
     optSetVal: _typing.Final[MyStructField27Patch] = ...
     optListVal: _typing.Final[MyStructField26Patch] = ...
-    optLateStructVal: _typing.Final[LateDefStructPatch] = ...
-    optStructVal: _typing.Final[MyDataPatch] = ...
+    optLateStructVal: _typing.Final[LateDefStructPatchStructInternalDoNotUse] = ...
+    optStructVal: _typing.Final[MyDataPatchStructInternalDoNotUse] = ...
     optEnumVal: _typing.Final[MyStructField23Patch] = ...
     optBinaryVal: _typing.Final[apache.thrift.op.patch.thrift_types.BinaryPatch] = ...
     optStringVal: _typing.Final[apache.thrift.op.patch.thrift_types.StringPatch] = ...
@@ -1067,9 +1067,9 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
     optI16Val: _typing.Final[apache.thrift.op.patch.thrift_types.I16Patch] = ...
     optByteVal: _typing.Final[apache.thrift.op.patch.thrift_types.BytePatch] = ...
     optBoolVal: _typing.Final[apache.thrift.op.patch.thrift_types.BoolPatch] = ...
-    lateStructVal: _typing.Final[LateDefStructPatch] = ...
+    lateStructVal: _typing.Final[LateDefStructPatchStructInternalDoNotUse] = ...
     unionVal: _typing.Final[MyUnionPatch] = ...
-    structVal: _typing.Final[MyDataPatch] = ...
+    structVal: _typing.Final[MyDataPatchStructInternalDoNotUse] = ...
     enumVal: _typing.Final[MyStructField10Patch] = ...
     binaryVal: _typing.Final[apache.thrift.op.patch.thrift_types.BinaryPatch] = ...
     stringVal: _typing.Final[apache.thrift.op.patch.thrift_types.StringPatch] = ...
@@ -1080,18 +1080,18 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
     i16Val: _typing.Final[apache.thrift.op.patch.thrift_types.I16Patch] = ...
     byteVal: _typing.Final[apache.thrift.op.patch.thrift_types.BytePatch] = ...
     boolVal: _typing.Final[apache.thrift.op.patch.thrift_types.BoolPatch] = ...
-    structWithFieldCustomDefault: _typing.Final[MyDataPatch] = ...
+    structWithFieldCustomDefault: _typing.Final[MyDataPatchStructInternalDoNotUse] = ...
     def __init__(
         self, *,
-        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatch]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatchStructInternalDoNotUse]=...,
         i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
         mapMap: _typing.Optional[_fbthrift_compatible_with_MyStructField30Patch]=...,
         listMap: _typing.Optional[_fbthrift_compatible_with_MyStructField29Patch]=...,
         optMapVal: _typing.Optional[_fbthrift_compatible_with_MyStructField28Patch]=...,
         optSetVal: _typing.Optional[_fbthrift_compatible_with_MyStructField27Patch]=...,
         optListVal: _typing.Optional[_fbthrift_compatible_with_MyStructField26Patch]=...,
-        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
-        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...,
         optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField23Patch]=...,
         optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
         optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
@@ -1102,9 +1102,9 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
         optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
         optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
         optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
-        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse]=...,
         unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnionPatch]=...,
-        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...,
         enumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField10Patch]=...,
         binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
         stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
@@ -1115,20 +1115,20 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
         i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
         byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
         boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
-        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatch]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatchStructInternalDoNotUse]=...,
         i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
         mapMap: _typing.Optional[_fbthrift_compatible_with_MyStructField30Patch]=...,
         listMap: _typing.Optional[_fbthrift_compatible_with_MyStructField29Patch]=...,
         optMapVal: _typing.Optional[_fbthrift_compatible_with_MyStructField28Patch]=...,
         optSetVal: _typing.Optional[_fbthrift_compatible_with_MyStructField27Patch]=...,
         optListVal: _typing.Optional[_fbthrift_compatible_with_MyStructField26Patch]=...,
-        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
-        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...,
         optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField23Patch]=...,
         optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
         optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
@@ -1139,9 +1139,9 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
         optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
         optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
         optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
-        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse]=...,
         unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnionPatch]=...,
-        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...,
         enumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField10Patch]=...,
         binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
         stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
@@ -1152,9 +1152,9 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
         i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
         byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
         boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
-        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatchStructInternalDoNotUse]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefaultPatch, apache.thrift.op.patch.thrift_types.I32Patch, MyStructField30Patch, MyStructField29Patch, MyStructField28Patch, MyStructField27Patch, MyStructField26Patch, LateDefStructPatch, MyDataPatch, MyStructField23Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, LateDefStructPatch, MyUnionPatch, MyDataPatch, MyStructField10Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, MyDataPatch]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefaultPatchStructInternalDoNotUse, apache.thrift.op.patch.thrift_types.I32Patch, MyStructField30Patch, MyStructField29Patch, MyStructField28Patch, MyStructField27Patch, MyStructField26Patch, LateDefStructPatchStructInternalDoNotUse, MyDataPatchStructInternalDoNotUse, MyStructField23Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, LateDefStructPatchStructInternalDoNotUse, MyUnionPatch, MyDataPatchStructInternalDoNotUse, MyStructField10Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, MyDataPatchStructInternalDoNotUse]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.MyStructFieldPatch": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStructFieldPatch": ...  # type: ignore
@@ -1301,11 +1301,11 @@ class MyStructSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_py_deprecated(self) -> "module.ttypes.MyStructSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_LateDefStructPatch:
+class _fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse:
     pass
 
 
-class LateDefStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructPatch):
+class LateDefStructPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[LateDefStruct]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[LateDefStructFieldPatch] = ...
@@ -1333,8 +1333,8 @@ class LateDefStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[LateDefStruct, bool, LateDefStructFieldPatch, LateDefStructEnsureStruct, LateDefStructFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.LateDefStructPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.LateDefStructPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.LateDefStructPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.LateDefStructPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_LateDefStructFieldPatch:
@@ -1397,11 +1397,11 @@ class LateDefStructSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStructSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_RecursivePatch:
+class _fbthrift_compatible_with_RecursivePatchStructInternalDoNotUse:
     pass
 
 
-class RecursivePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursivePatch):
+class RecursivePatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursivePatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[Recursive]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[RecursiveFieldPatch] = ...
@@ -1429,8 +1429,8 @@ class RecursivePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Re
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Recursive, bool, RecursiveFieldPatch, RecursiveEnsureStruct, RecursiveFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.RecursivePatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.RecursivePatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.RecursivePatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.RecursivePatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_RecursiveField1Patch:
@@ -1523,11 +1523,11 @@ class RecursiveSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_BarPatch:
+class _fbthrift_compatible_with_BarPatchStructInternalDoNotUse:
     pass
 
 
-class BarPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarPatch):
+class BarPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[Bar]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[BarFieldPatch] = ...
@@ -1555,8 +1555,8 @@ class BarPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarPatch
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Bar, bool, BarFieldPatch, BarEnsureStruct, BarFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.BarPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.BarPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.BarPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.BarPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_BarFieldPatch:
@@ -1564,17 +1564,17 @@ class _fbthrift_compatible_with_BarFieldPatch:
 
 
 class BarFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarFieldPatch):
-    loop: _typing.Final[LoopPatch] = ...
+    loop: _typing.Final[LoopPatchStructInternalDoNotUse] = ...
     def __init__(
         self, *,
-        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatch]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatchStructInternalDoNotUse]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatch]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatchStructInternalDoNotUse]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[LoopPatch]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[LoopPatchStructInternalDoNotUse]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.BarFieldPatch": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.BarFieldPatch": ...  # type: ignore
@@ -1625,11 +1625,11 @@ class BarSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarS
     def _to_py_deprecated(self) -> "module.ttypes.BarSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_LoopPatch:
+class _fbthrift_compatible_with_LoopPatchStructInternalDoNotUse:
     pass
 
 
-class LoopPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopPatch):
+class LoopPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[Loop]] = ...
     clear: _typing.Final[bool] = ...
     def __init__(
@@ -1645,8 +1645,8 @@ class LoopPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopPat
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Loop, bool]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.LoopPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.LoopPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.LoopPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.LoopPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_LoopSafePatch:
@@ -1673,11 +1673,11 @@ class LoopSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Loo
     def _to_py_deprecated(self) -> "module.ttypes.LoopSafePatch": ...  # type: ignore
 
 
-class _fbthrift_compatible_with_RefFieldsPatch:
+class _fbthrift_compatible_with_RefFieldsPatchStructInternalDoNotUse:
     pass
 
 
-class RefFieldsPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RefFieldsPatch):
+class RefFieldsPatchStructInternalDoNotUse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RefFieldsPatchStructInternalDoNotUse):
     assign: _typing.Final[_typing.Optional[RefFields]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[RefFieldsFieldPatch] = ...
@@ -1705,8 +1705,8 @@ class RefFieldsPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Re
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[RefFields, bool, RefFieldsFieldPatch, RefFieldsEnsureStruct, RefFieldsFieldPatch, _typing.Sequence[int]]]]: ...
     def _to_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.patch.module.types.RefFieldsPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.RefFieldsPatch": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.patch.module.types.RefFieldsPatchStructInternalDoNotUse": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.RefFieldsPatchStructInternalDoNotUse": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_RefFieldsField1Patch:

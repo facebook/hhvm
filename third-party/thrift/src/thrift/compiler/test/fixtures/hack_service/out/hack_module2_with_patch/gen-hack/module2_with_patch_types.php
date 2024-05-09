@@ -396,6 +396,11 @@ class FBStructPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThrif
             "name" => "FBStructPatchStructInternalDoNotUse",
           )
         ),
+        '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "FBStructPatchStructInternalDoNotUse",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::hack::ns2::FBStructPatchStruct>",

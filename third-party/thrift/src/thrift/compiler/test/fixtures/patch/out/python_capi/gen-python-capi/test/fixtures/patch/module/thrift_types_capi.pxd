@@ -66,13 +66,13 @@ cdef api int can_extract__test__fixtures__patch__module__RefFields(object) excep
 
 cdef api object init__test__fixtures__patch__module__RefFields(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyDataPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__MyDataPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__MyDataPatch(object data)
+cdef api object init__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyDataFieldPatch(object) except -1
 
@@ -98,13 +98,13 @@ cdef api object construct__test__fixtures__patch__module__MyDataSafePatch(__uniq
 
 cdef api object init__test__fixtures__patch__module__MyDataSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object data)
+cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultFieldPatch(object) except -1
 
@@ -178,13 +178,13 @@ cdef api object construct__test__fixtures__patch__module__MyUnionSafePatch(__uni
 
 cdef api object init__test__fixtures__patch__module__MyUnionSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyStructPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyStructPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__MyStructPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__MyStructPatch(object data)
+cdef api object init__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyStructField10Patch(object) except -1
 
@@ -274,13 +274,13 @@ cdef api object construct__test__fixtures__patch__module__MyStructSafePatch(__un
 
 cdef api object init__test__fixtures__patch__module__MyStructSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__LateDefStructPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__LateDefStructPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__LateDefStructPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__LateDefStructPatch(object data)
+cdef api object init__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__LateDefStructFieldPatch(object) except -1
 
@@ -306,13 +306,13 @@ cdef api object construct__test__fixtures__patch__module__LateDefStructSafePatch
 
 cdef api object init__test__fixtures__patch__module__LateDefStructSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__RecursivePatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RecursivePatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__RecursivePatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__RecursivePatch(object data)
+cdef api object init__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__RecursiveField1Patch(object) except -1
 
@@ -346,13 +346,13 @@ cdef api object construct__test__fixtures__patch__module__RecursiveSafePatch(__u
 
 cdef api object init__test__fixtures__patch__module__RecursiveSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__BarPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__BarPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__BarPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__BarPatch(object data)
+cdef api object init__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__BarFieldPatch(object) except -1
 
@@ -378,13 +378,13 @@ cdef api object construct__test__fixtures__patch__module__BarSafePatch(__unique_
 
 cdef api object init__test__fixtures__patch__module__BarSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__LoopPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__LoopPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__LoopPatch(object data)
+cdef api object init__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__LoopSafePatch(object) except -1
 
@@ -394,13 +394,13 @@ cdef api object construct__test__fixtures__patch__module__LoopSafePatch(__unique
 
 cdef api object init__test__fixtures__patch__module__LoopSafePatch(object data)
 
-cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatch(object) except -1
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatch(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object) except NULL
 
-cdef api object construct__test__fixtures__patch__module__RefFieldsPatch(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__patch__module__RefFieldsPatch(object data)
+cdef api object init__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__RefFieldsField1Patch(object) except -1
 

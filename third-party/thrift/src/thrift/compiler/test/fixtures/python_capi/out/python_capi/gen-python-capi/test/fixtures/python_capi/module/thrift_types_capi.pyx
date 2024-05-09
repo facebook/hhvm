@@ -110,22 +110,22 @@ cdef api int can_extract__test__fixtures__python_capi__module__Onion(object __ob
 cdef api object init__test__fixtures__python_capi__module__Onion(object data):
     return __thrift_types.Onion._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__MyStructPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyStructPatch) else 0
+cdef api int can_extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyStructPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__python_capi__module__MyStructPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyStructPatch,
+        __thrift_types.MyStructPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__python_capi__module__MyStructPatch(object data):
-    return __thrift_types.MyStructPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(object data):
+    return __thrift_types.MyStructPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyStructField4Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructField4Patch) else 0
@@ -246,22 +246,22 @@ cdef api object construct__test__fixtures__python_capi__module__MyStructSafePatc
 cdef api object init__test__fixtures__python_capi__module__MyStructSafePatch(object data):
     return __thrift_types.MyStructSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyDataItemPatch) else 0
+cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataItemPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__python_capi__module__MyDataItemPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyDataItemPatch,
+        __thrift_types.MyDataItemPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__python_capi__module__MyDataItemPatch(object data):
-    return __thrift_types.MyDataItemPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(object data):
+    return __thrift_types.MyDataItemPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemFieldPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataItemFieldPatch) else 0

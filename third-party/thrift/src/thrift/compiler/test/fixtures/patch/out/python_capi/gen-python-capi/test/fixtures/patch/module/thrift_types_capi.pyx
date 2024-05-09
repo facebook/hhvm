@@ -99,22 +99,22 @@ cdef api int can_extract__test__fixtures__patch__module__RefFields(object __obj)
 cdef api object init__test__fixtures__patch__module__RefFields(object data):
     return __thrift_types.RefFields._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyDataPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyDataPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__MyDataPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyDataPatch,
+        __thrift_types.MyDataPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__MyDataPatch(object data):
-    return __thrift_types.MyDataPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__MyDataPatchStructInternalDoNotUse(object data):
+    return __thrift_types.MyDataPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyDataFieldPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataFieldPatch) else 0
@@ -167,22 +167,22 @@ cdef api object construct__test__fixtures__patch__module__MyDataSafePatch(__uniq
 cdef api object init__test__fixtures__patch__module__MyDataSafePatch(object data):
     return __thrift_types.MyDataSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefaultPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyDataWithCustomDefaultPatch,
+        __thrift_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object data):
-    return __thrift_types.MyDataWithCustomDefaultPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultPatchStructInternalDoNotUse(object data):
+    return __thrift_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultFieldPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefaultFieldPatch) else 0
@@ -337,22 +337,22 @@ cdef api object construct__test__fixtures__patch__module__MyUnionSafePatch(__uni
 cdef api object init__test__fixtures__patch__module__MyUnionSafePatch(object data):
     return __thrift_types.MyUnionSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__MyStructPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyStructPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__MyStructPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__MyStructPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyStructPatch,
+        __thrift_types.MyStructPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__MyStructPatch(object data):
-    return __thrift_types.MyStructPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__MyStructPatchStructInternalDoNotUse(object data):
+    return __thrift_types.MyStructPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyStructField10Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructField10Patch) else 0
@@ -541,22 +541,22 @@ cdef api object construct__test__fixtures__patch__module__MyStructSafePatch(__un
 cdef api object init__test__fixtures__patch__module__MyStructSafePatch(object data):
     return __thrift_types.MyStructSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__LateDefStructPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.LateDefStructPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.LateDefStructPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__LateDefStructPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__LateDefStructPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.LateDefStructPatch,
+        __thrift_types.LateDefStructPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__LateDefStructPatch(object data):
-    return __thrift_types.LateDefStructPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__LateDefStructPatchStructInternalDoNotUse(object data):
+    return __thrift_types.LateDefStructPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__LateDefStructFieldPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.LateDefStructFieldPatch) else 0
@@ -609,22 +609,22 @@ cdef api object construct__test__fixtures__patch__module__LateDefStructSafePatch
 cdef api object init__test__fixtures__patch__module__LateDefStructSafePatch(object data):
     return __thrift_types.LateDefStructSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__RecursivePatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.RecursivePatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RecursivePatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RecursivePatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__RecursivePatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.RecursivePatch,
+        __thrift_types.RecursivePatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__RecursivePatch(object data):
-    return __thrift_types.RecursivePatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__RecursivePatchStructInternalDoNotUse(object data):
+    return __thrift_types.RecursivePatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__RecursiveField1Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RecursiveField1Patch) else 0
@@ -694,22 +694,22 @@ cdef api object construct__test__fixtures__patch__module__RecursiveSafePatch(__u
 cdef api object init__test__fixtures__patch__module__RecursiveSafePatch(object data):
     return __thrift_types.RecursiveSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__BarPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.BarPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.BarPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__BarPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__BarPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.BarPatch,
+        __thrift_types.BarPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__BarPatch(object data):
-    return __thrift_types.BarPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__BarPatchStructInternalDoNotUse(object data):
+    return __thrift_types.BarPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__BarFieldPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.BarFieldPatch) else 0
@@ -762,22 +762,22 @@ cdef api object construct__test__fixtures__patch__module__BarSafePatch(__unique_
 cdef api object init__test__fixtures__patch__module__BarSafePatch(object data):
     return __thrift_types.BarSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__LoopPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.LoopPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.LoopPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__LoopPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.LoopPatch,
+        __thrift_types.LoopPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__LoopPatch(object data):
-    return __thrift_types.LoopPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__LoopPatchStructInternalDoNotUse(object data):
+    return __thrift_types.LoopPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__LoopSafePatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.LoopSafePatch) else 0
@@ -796,22 +796,22 @@ cdef api object construct__test__fixtures__patch__module__LoopSafePatch(__unique
 cdef api object init__test__fixtures__patch__module__LoopSafePatch(object data):
     return __thrift_types.LoopSafePatch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.RefFieldsPatch) else 0
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsPatchStructInternalDoNotUse) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatch(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__patch__module__RefFieldsPatch(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.RefFieldsPatch,
+        __thrift_types.RefFieldsPatchStructInternalDoNotUse,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__patch__module__RefFieldsPatch(object data):
-    return __thrift_types.RefFieldsPatch._fbthrift_create(data)
+cdef api object init__test__fixtures__patch__module__RefFieldsPatchStructInternalDoNotUse(object data):
+    return __thrift_types.RefFieldsPatchStructInternalDoNotUse._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__RefFieldsField1Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RefFieldsField1Patch) else 0

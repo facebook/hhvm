@@ -34,8 +34,8 @@ cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_type
         cComposeStruct()
     cdef cppclass cOnion "::test::fixtures::python_capi::Shallot":
         cOnion()
-    cdef cppclass cMyStructPatch "::test::fixtures::python_capi::MyStructPatchStruct":
-        cMyStructPatch()
+    cdef cppclass cMyStructPatchStructInternalDoNotUse "::test::fixtures::python_capi::MyStructPatchStruct":
+        cMyStructPatchStructInternalDoNotUse()
     cdef cppclass cMyStructField4Patch "::test::fixtures::python_capi::MyStructField4PatchStruct":
         cMyStructField4Patch()
     cdef cppclass cMyStructField6Patch "::test::fixtures::python_capi::MyStructField6PatchStruct":
@@ -50,8 +50,8 @@ cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_type
         cMyStructEnsureStruct()
     cdef cppclass cMyStructSafePatch "::test::fixtures::python_capi::MyStructSafePatch":
         cMyStructSafePatch()
-    cdef cppclass cMyDataItemPatch "::test::fixtures::python_capi::MyDataItemPatchStruct":
-        cMyDataItemPatch()
+    cdef cppclass cMyDataItemPatchStructInternalDoNotUse "::test::fixtures::python_capi::MyDataItemPatchStruct":
+        cMyDataItemPatchStructInternalDoNotUse()
     cdef cppclass cMyDataItemFieldPatch "::test::fixtures::python_capi::MyDataItemFieldPatchStruct":
         cMyDataItemFieldPatch()
     cdef cppclass cMyDataItemEnsureStruct "::test::fixtures::python_capi::MyDataItemEnsureStruct":
@@ -103,8 +103,8 @@ cdef object ComposeStruct_from_cpp(const cComposeStruct& c_struct)
 cdef cOnion Onion_convert_to_cpp(object inst) except*
 cdef object Onion_from_cpp(const cOnion& c_struct)
 
-cdef cMyStructPatch MyStructPatch_convert_to_cpp(object inst) except*
-cdef object MyStructPatch_from_cpp(const cMyStructPatch& c_struct)
+cdef cMyStructPatchStructInternalDoNotUse MyStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object MyStructPatchStructInternalDoNotUse_from_cpp(const cMyStructPatchStructInternalDoNotUse& c_struct)
 
 cdef cMyStructField4Patch MyStructField4Patch_convert_to_cpp(object inst) except*
 cdef object MyStructField4Patch_from_cpp(const cMyStructField4Patch& c_struct)
@@ -127,8 +127,8 @@ cdef object MyStructEnsureStruct_from_cpp(const cMyStructEnsureStruct& c_struct)
 cdef cMyStructSafePatch MyStructSafePatch_convert_to_cpp(object inst) except*
 cdef object MyStructSafePatch_from_cpp(const cMyStructSafePatch& c_struct)
 
-cdef cMyDataItemPatch MyDataItemPatch_convert_to_cpp(object inst) except*
-cdef object MyDataItemPatch_from_cpp(const cMyDataItemPatch& c_struct)
+cdef cMyDataItemPatchStructInternalDoNotUse MyDataItemPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object MyDataItemPatchStructInternalDoNotUse_from_cpp(const cMyDataItemPatchStructInternalDoNotUse& c_struct)
 
 cdef cMyDataItemFieldPatch MyDataItemFieldPatch_convert_to_cpp(object inst) except*
 cdef object MyDataItemFieldPatch_from_cpp(const cMyDataItemFieldPatch& c_struct)

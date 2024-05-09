@@ -128,18 +128,18 @@ struct StructGen {
   operator t_struct&() { return generated; }
   operator t_type_ref() { return generated; }
 
-  void add_hack_name(std::string name) {
-    const t_type* annotation = dynamic_cast<const t_type*>(
-        program_.scope()->find_by_uri(kHackNameUri));
+  void add_name_annotation(std::string name, std::string_view name_uri) {
+    const t_type* annotation =
+        dynamic_cast<const t_type*>(program_.scope()->find_by_uri(name_uri));
     assert(annotation);
     auto value = t_const_value::make_map();
     value->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(std::move(name)));
     value->set_ttype(*annotation);
-    auto hack_name =
+    auto const_name =
         std::make_unique<t_const>(&program_, annotation, "", std::move(value));
-    generated.add_structured_annotation(std::move(hack_name));
+    generated.add_structured_annotation(std::move(const_name));
   }
 
   void add_frozen_exclude() {
@@ -467,8 +467,11 @@ t_struct& patch_generator::add_struct_patch(
     const t_const& annot, t_structured& value_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
-  // Rename it for Hack to caution developers against accidental usage
-  gen.add_hack_name(value_type.name() + "PatchStructInternalDoNotUse");
+  // Rename it for Hack and Python to caution developers against accidental
+  // usage
+  const auto patch_name = value_type.name() + "PatchStructInternalDoNotUse";
+  gen.add_name_annotation(patch_name, kHackNameUri);
+  gen.add_name_annotation(patch_name, kPythonNameUri);
   gen.assign(value_type);
   gen.clear();
   if (get_assign_only_annotation_or_null(value_type)) {

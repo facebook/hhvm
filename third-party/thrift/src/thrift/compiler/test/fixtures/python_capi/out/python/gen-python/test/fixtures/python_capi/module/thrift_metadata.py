@@ -566,8 +566,8 @@ def gen_metadata_struct_Onion() -> _fbthrift_metadata.ThriftMetadata:
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
-def _fbthrift_gen_metadata_struct_MyStructPatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.MyStructPatch"
+def _fbthrift_gen_metadata_struct_MyStructPatchStructInternalDoNotUse(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyStructPatchStructInternalDoNotUse"
 
     if qualified_name in metadata_struct.structs:
         return metadata_struct
@@ -591,6 +591,7 @@ def _fbthrift_gen_metadata_struct_MyStructPatch(metadata_struct: _fbthrift_metad
         is_union=False,
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyStructPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -603,8 +604,8 @@ def _fbthrift_gen_metadata_struct_MyStructPatch(metadata_struct: _fbthrift_metad
      # remove
 
     return new_struct
-def gen_metadata_struct_MyStructPatch() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_struct_MyStructPatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+def gen_metadata_struct_MyStructPatchStructInternalDoNotUse() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_MyStructPatchStructInternalDoNotUse(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -764,7 +765,7 @@ def _fbthrift_gen_metadata_struct_MyStructFieldPatch(metadata_struct: _fbthrift_
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")), name="stringy", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.InternBox"), fields= {  }),
         ]),
-        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyDataItemPatch")), name="myItemy", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyDataItemPatchStructInternalDoNotUse")), name="myItemy", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.InternBox"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStructField4Patch")), name="myEnumy", is_optional=False, structured_annotations=[
@@ -793,7 +794,7 @@ def _fbthrift_gen_metadata_struct_MyStructFieldPatch(metadata_struct: _fbthrift_
 
     new_struct = apache.thrift.op.patch.thrift_metadata._fbthrift_gen_metadata_struct_I64Patch(new_struct) # inty
     new_struct = apache.thrift.op.patch.thrift_metadata._fbthrift_gen_metadata_struct_StringPatch(new_struct) # stringy
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItemPatch(new_struct) # myItemy
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse(new_struct) # myItemy
     new_struct = _fbthrift_gen_metadata_struct_MyStructField4Patch(new_struct) # myEnumy
     new_struct = apache.thrift.op.patch.thrift_metadata._fbthrift_gen_metadata_struct_BoolPatch(new_struct) # booly
     new_struct = _fbthrift_gen_metadata_struct_MyStructField6Patch(new_struct) # floatListy
@@ -882,8 +883,8 @@ def gen_metadata_struct_MyStructSafePatch() -> _fbthrift_metadata.ThriftMetadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
-def _fbthrift_gen_metadata_struct_MyDataItemPatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.MyDataItemPatch"
+def _fbthrift_gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyDataItemPatchStructInternalDoNotUse"
 
     if qualified_name in metadata_struct.structs:
         return metadata_struct
@@ -907,6 +908,7 @@ def _fbthrift_gen_metadata_struct_MyDataItemPatch(metadata_struct: _fbthrift_met
         is_union=False,
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataItemPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataItemPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyDataItemPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataItemPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -919,8 +921,8 @@ def _fbthrift_gen_metadata_struct_MyDataItemPatch(metadata_struct: _fbthrift_met
      # remove
 
     return new_struct
-def gen_metadata_struct_MyDataItemPatch() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_struct_MyDataItemPatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+def gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -1055,7 +1057,7 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_struct_MapStruct(meta)
     meta = _fbthrift_gen_metadata_struct_ComposeStruct(meta)
     meta = _fbthrift_gen_metadata_struct_Onion(meta)
-    meta = _fbthrift_gen_metadata_struct_MyStructPatch(meta)
+    meta = _fbthrift_gen_metadata_struct_MyStructPatchStructInternalDoNotUse(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructField4Patch(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructField6Patch(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructField7Patch(meta)
@@ -1063,7 +1065,7 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_struct_MyStructFieldPatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructEnsureStruct(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructSafePatch(meta)
-    meta = _fbthrift_gen_metadata_struct_MyDataItemPatch(meta)
+    meta = _fbthrift_gen_metadata_struct_MyDataItemPatchStructInternalDoNotUse(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemFieldPatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemEnsureStruct(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemSafePatch(meta)

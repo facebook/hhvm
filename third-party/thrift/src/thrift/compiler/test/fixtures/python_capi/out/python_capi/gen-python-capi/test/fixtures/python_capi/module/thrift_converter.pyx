@@ -90,11 +90,11 @@ cdef cOnion Onion_convert_to_cpp(object inst) except *:
 cdef object Onion_from_cpp(const cOnion& c_struct):
     return cpp_to_python[cOnion](c_struct)
 
-cdef cMyStructPatch MyStructPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyStructPatch](inst))
+cdef cMyStructPatchStructInternalDoNotUse MyStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyStructPatchStructInternalDoNotUse](inst))
 
-cdef object MyStructPatch_from_cpp(const cMyStructPatch& c_struct):
-    return cpp_to_python[cMyStructPatch](c_struct)
+cdef object MyStructPatchStructInternalDoNotUse_from_cpp(const cMyStructPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cMyStructPatchStructInternalDoNotUse](c_struct)
 
 cdef cMyStructField4Patch MyStructField4Patch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyStructField4Patch](inst))
@@ -138,11 +138,11 @@ cdef cMyStructSafePatch MyStructSafePatch_convert_to_cpp(object inst) except *:
 cdef object MyStructSafePatch_from_cpp(const cMyStructSafePatch& c_struct):
     return cpp_to_python[cMyStructSafePatch](c_struct)
 
-cdef cMyDataItemPatch MyDataItemPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyDataItemPatch](inst))
+cdef cMyDataItemPatchStructInternalDoNotUse MyDataItemPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyDataItemPatchStructInternalDoNotUse](inst))
 
-cdef object MyDataItemPatch_from_cpp(const cMyDataItemPatch& c_struct):
-    return cpp_to_python[cMyDataItemPatch](c_struct)
+cdef object MyDataItemPatchStructInternalDoNotUse_from_cpp(const cMyDataItemPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cMyDataItemPatchStructInternalDoNotUse](c_struct)
 
 cdef cMyDataItemFieldPatch MyDataItemFieldPatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyDataItemFieldPatch](inst))

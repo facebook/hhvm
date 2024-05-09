@@ -887,7 +887,7 @@ class RefFields(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.RefFields, self)
 
 
-class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
+class MyDataPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -953,7 +953,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyDataPatch"
+        return "module.MyDataPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -961,7 +961,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyDataPatch()
+        return _fbthrift_metadata__struct_MyDataPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -970,17 +970,17 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyDataPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataPatchStructInternalDoNotUse, self)
 
 
 class MyDataFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -1151,7 +1151,7 @@ class MyDataSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataSafePatch, self)
 
 
-class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
+class MyDataWithCustomDefaultPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1217,7 +1217,7 @@ class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyDataWithCustomDefaultPatch"
+        return "module.MyDataWithCustomDefaultPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -1225,7 +1225,7 @@ class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyDataWithCustomDefaultPatch()
+        return _fbthrift_metadata__struct_MyDataWithCustomDefaultPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -1234,17 +1234,17 @@ class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyDataWithCustomDefaultPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataWithCustomDefaultPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataWithCustomDefaultPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataWithCustomDefaultPatchStructInternalDoNotUse, self)
 
 
 class MyDataWithCustomDefaultFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -1811,7 +1811,7 @@ class MyUnionSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnionSafePatch, self)
 
 
-class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
+class MyStructPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1877,7 +1877,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyStructPatch"
+        return "module.MyStructPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -1885,7 +1885,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyStructPatch()
+        return _fbthrift_metadata__struct_MyStructPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -1894,17 +1894,17 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyStructPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructPatchStructInternalDoNotUse, self)
 
 
 class MyStructField10Patch(metaclass=_fbthrift_python_types.StructMeta):
@@ -2572,7 +2572,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithCustomDefault",  # name
             "structWithCustomDefault",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2642,7 +2642,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optLateStructVal",  # name
             "optLateStructVal",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2652,7 +2652,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "optStructVal",  # name
             "optStructVal",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2762,7 +2762,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "lateStructVal",  # name
             "lateStructVal",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2782,7 +2782,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structVal",  # name
             "structVal",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2892,7 +2892,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "structWithFieldCustomDefault",  # name
             "structWithFieldCustomDefault",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -3353,7 +3353,7 @@ class MyStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructSafePatch, self)
 
 
-class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
+class LateDefStructPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -3419,7 +3419,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.LateDefStructPatch"
+        return "module.LateDefStructPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -3427,7 +3427,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_LateDefStructPatch()
+        return _fbthrift_metadata__struct_LateDefStructPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -3436,17 +3436,17 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.LateDefStructPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.LateDefStructPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.LateDefStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.LateDefStructPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.LateDefStructPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.LateDefStructPatchStructInternalDoNotUse, self)
 
 
 class LateDefStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -3577,7 +3577,7 @@ class LateDefStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.LateDefStructSafePatch, self)
 
 
-class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
+class RecursivePatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -3643,7 +3643,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.RecursivePatch"
+        return "module.RecursivePatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -3651,7 +3651,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_RecursivePatch()
+        return _fbthrift_metadata__struct_RecursivePatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -3660,17 +3660,17 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.RecursivePatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.RecursivePatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.RecursivePatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.RecursivePatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.RecursivePatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.RecursivePatchStructInternalDoNotUse, self)
 
 
 class RecursiveField1Patch(metaclass=_fbthrift_python_types.StructMeta):
@@ -3877,7 +3877,7 @@ class RecursiveSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.RecursiveSafePatch, self)
 
 
-class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
+class BarPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -3943,7 +3943,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.BarPatch"
+        return "module.BarPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -3951,7 +3951,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_BarPatch()
+        return _fbthrift_metadata__struct_BarPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -3960,17 +3960,17 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.BarPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.BarPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.BarPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.BarPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.BarPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.BarPatchStructInternalDoNotUse, self)
 
 
 class BarFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -3980,7 +3980,7 @@ class BarFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "loop",  # name
             "loop",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(LoopPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(LoopPatchStructInternalDoNotUse),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -4121,7 +4121,7 @@ class BarSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.BarSafePatch, self)
 
 
-class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
+class LoopPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -4147,7 +4147,7 @@ class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.LoopPatch"
+        return "module.LoopPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -4155,7 +4155,7 @@ class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_LoopPatch()
+        return _fbthrift_metadata__struct_LoopPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -4164,17 +4164,17 @@ class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.LoopPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.LoopPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.LoopPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.LoopPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.LoopPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.LoopPatchStructInternalDoNotUse, self)
 
 
 class LoopSafePatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -4233,7 +4233,7 @@ class LoopSafePatch(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.LoopSafePatch, self)
 
 
-class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
+class RefFieldsPatchStructInternalDoNotUse(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -4299,7 +4299,7 @@ class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.RefFieldsPatch"
+        return "module.RefFieldsPatchStructInternalDoNotUse"
 
     @staticmethod
     def __get_thrift_uri__():
@@ -4307,7 +4307,7 @@ class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_RefFieldsPatch()
+        return _fbthrift_metadata__struct_RefFieldsPatchStructInternalDoNotUse()
 
     def _to_python(self):
         return self
@@ -4316,17 +4316,17 @@ class RefFieldsPatch(metaclass=_fbthrift_python_types.StructMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.patch.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsPatch, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsPatchStructInternalDoNotUse, self)
 
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsPatch, self)
+            return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsPatchStructInternalDoNotUse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.RefFieldsPatch, self)
+            return thrift.util.converter.to_py_struct(py_asyncio_types.RefFieldsPatchStructInternalDoNotUse, self)
 
 
 class RefFieldsField1Patch(metaclass=_fbthrift_python_types.StructMeta):
@@ -4836,16 +4836,16 @@ def _fbthrift_metadata__struct_Loop():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_Loop()
 def _fbthrift_metadata__struct_RefFields():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFields()
-def _fbthrift_metadata__struct_MyDataPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataPatch()
+def _fbthrift_metadata__struct_MyDataPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_MyDataFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataFieldPatch()
 def _fbthrift_metadata__struct_MyDataEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataEnsureStruct()
 def _fbthrift_metadata__struct_MyDataSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataSafePatch()
-def _fbthrift_metadata__struct_MyDataWithCustomDefaultPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultPatch()
+def _fbthrift_metadata__struct_MyDataWithCustomDefaultPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultFieldPatch()
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultEnsureStruct():
@@ -4864,8 +4864,8 @@ def _fbthrift_metadata__struct_MyUnionFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnionFieldPatch()
 def _fbthrift_metadata__struct_MyUnionSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnionSafePatch()
-def _fbthrift_metadata__struct_MyStructPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructPatch()
+def _fbthrift_metadata__struct_MyStructPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_MyStructField10Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField10Patch()
 def _fbthrift_metadata__struct_MyStructField23Patch():
@@ -4888,16 +4888,16 @@ def _fbthrift_metadata__struct_MyStructEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructEnsureStruct()
 def _fbthrift_metadata__struct_MyStructSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructSafePatch()
-def _fbthrift_metadata__struct_LateDefStructPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructPatch()
+def _fbthrift_metadata__struct_LateDefStructPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_LateDefStructFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructFieldPatch()
 def _fbthrift_metadata__struct_LateDefStructEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructEnsureStruct()
 def _fbthrift_metadata__struct_LateDefStructSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructSafePatch()
-def _fbthrift_metadata__struct_RecursivePatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursivePatch()
+def _fbthrift_metadata__struct_RecursivePatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursivePatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_RecursiveField1Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveField1Patch()
 def _fbthrift_metadata__struct_RecursiveFieldPatch():
@@ -4906,20 +4906,20 @@ def _fbthrift_metadata__struct_RecursiveEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveEnsureStruct()
 def _fbthrift_metadata__struct_RecursiveSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveSafePatch()
-def _fbthrift_metadata__struct_BarPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarPatch()
+def _fbthrift_metadata__struct_BarPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_BarFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarFieldPatch()
 def _fbthrift_metadata__struct_BarEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarEnsureStruct()
 def _fbthrift_metadata__struct_BarSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarSafePatch()
-def _fbthrift_metadata__struct_LoopPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LoopPatch()
+def _fbthrift_metadata__struct_LoopPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LoopPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_LoopSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LoopSafePatch()
-def _fbthrift_metadata__struct_RefFieldsPatch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsPatch()
+def _fbthrift_metadata__struct_RefFieldsPatchStructInternalDoNotUse():
+    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsPatchStructInternalDoNotUse()
 def _fbthrift_metadata__struct_RefFieldsField1Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField1Patch()
 def _fbthrift_metadata__struct_RefFieldsField4Patch():
@@ -4944,11 +4944,11 @@ _fbthrift_all_structs = [
     Bar,
     Loop,
     RefFields,
-    MyDataPatch,
+    MyDataPatchStructInternalDoNotUse,
     MyDataFieldPatch,
     MyDataEnsureStruct,
     MyDataSafePatch,
-    MyDataWithCustomDefaultPatch,
+    MyDataWithCustomDefaultPatchStructInternalDoNotUse,
     MyDataWithCustomDefaultFieldPatch,
     MyDataWithCustomDefaultEnsureStruct,
     MyDataWithCustomDefaultSafePatch,
@@ -4958,7 +4958,7 @@ _fbthrift_all_structs = [
     MyUnionPatch,
     MyUnionFieldPatch,
     MyUnionSafePatch,
-    MyStructPatch,
+    MyStructPatchStructInternalDoNotUse,
     MyStructField10Patch,
     MyStructField23Patch,
     MyStructField26Patch,
@@ -4970,22 +4970,22 @@ _fbthrift_all_structs = [
     MyStructFieldPatch,
     MyStructEnsureStruct,
     MyStructSafePatch,
-    LateDefStructPatch,
+    LateDefStructPatchStructInternalDoNotUse,
     LateDefStructFieldPatch,
     LateDefStructEnsureStruct,
     LateDefStructSafePatch,
-    RecursivePatch,
+    RecursivePatchStructInternalDoNotUse,
     RecursiveField1Patch,
     RecursiveFieldPatch,
     RecursiveEnsureStruct,
     RecursiveSafePatch,
-    BarPatch,
+    BarPatchStructInternalDoNotUse,
     BarFieldPatch,
     BarEnsureStruct,
     BarSafePatch,
-    LoopPatch,
+    LoopPatchStructInternalDoNotUse,
     LoopSafePatch,
-    RefFieldsPatch,
+    RefFieldsPatchStructInternalDoNotUse,
     RefFieldsField1Patch,
     RefFieldsField4Patch,
     RefFieldsField7Patch,

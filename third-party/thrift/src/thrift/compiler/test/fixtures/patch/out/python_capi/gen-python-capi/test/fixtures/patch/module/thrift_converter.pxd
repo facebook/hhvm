@@ -28,16 +28,16 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
         cLoop()
     cdef cppclass cRefFields "::test::fixtures::patch::RefFields":
         cRefFields()
-    cdef cppclass cMyDataPatch "::test::fixtures::patch::MyDataPatchStruct":
-        cMyDataPatch()
+    cdef cppclass cMyDataPatchStructInternalDoNotUse "::test::fixtures::patch::MyDataPatchStruct":
+        cMyDataPatchStructInternalDoNotUse()
     cdef cppclass cMyDataFieldPatch "::test::fixtures::patch::MyDataFieldPatchStruct":
         cMyDataFieldPatch()
     cdef cppclass cMyDataEnsureStruct "::test::fixtures::patch::MyDataEnsureStruct":
         cMyDataEnsureStruct()
     cdef cppclass cMyDataSafePatch "::test::fixtures::patch::MyDataSafePatch":
         cMyDataSafePatch()
-    cdef cppclass cMyDataWithCustomDefaultPatch "::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct":
-        cMyDataWithCustomDefaultPatch()
+    cdef cppclass cMyDataWithCustomDefaultPatchStructInternalDoNotUse "::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct":
+        cMyDataWithCustomDefaultPatchStructInternalDoNotUse()
     cdef cppclass cMyDataWithCustomDefaultFieldPatch "::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct":
         cMyDataWithCustomDefaultFieldPatch()
     cdef cppclass cMyDataWithCustomDefaultEnsureStruct "::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct":
@@ -56,8 +56,8 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
         cMyUnionFieldPatch()
     cdef cppclass cMyUnionSafePatch "::test::fixtures::patch::MyUnionSafePatch":
         cMyUnionSafePatch()
-    cdef cppclass cMyStructPatch "::test::fixtures::patch::MyStructPatchStruct":
-        cMyStructPatch()
+    cdef cppclass cMyStructPatchStructInternalDoNotUse "::test::fixtures::patch::MyStructPatchStruct":
+        cMyStructPatchStructInternalDoNotUse()
     cdef cppclass cMyStructField10Patch "::test::fixtures::patch::MyStructField10PatchStruct":
         cMyStructField10Patch()
     cdef cppclass cMyStructField23Patch "::test::fixtures::patch::MyStructField23PatchStruct":
@@ -80,16 +80,16 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
         cMyStructEnsureStruct()
     cdef cppclass cMyStructSafePatch "::test::fixtures::patch::MyStructSafePatch":
         cMyStructSafePatch()
-    cdef cppclass cLateDefStructPatch "::test::fixtures::patch::LateDefStructPatchStruct":
-        cLateDefStructPatch()
+    cdef cppclass cLateDefStructPatchStructInternalDoNotUse "::test::fixtures::patch::LateDefStructPatchStruct":
+        cLateDefStructPatchStructInternalDoNotUse()
     cdef cppclass cLateDefStructFieldPatch "::test::fixtures::patch::LateDefStructFieldPatchStruct":
         cLateDefStructFieldPatch()
     cdef cppclass cLateDefStructEnsureStruct "::test::fixtures::patch::LateDefStructEnsureStruct":
         cLateDefStructEnsureStruct()
     cdef cppclass cLateDefStructSafePatch "::test::fixtures::patch::LateDefStructSafePatch":
         cLateDefStructSafePatch()
-    cdef cppclass cRecursivePatch "::test::fixtures::patch::RecursivePatchStruct":
-        cRecursivePatch()
+    cdef cppclass cRecursivePatchStructInternalDoNotUse "::test::fixtures::patch::RecursivePatchStruct":
+        cRecursivePatchStructInternalDoNotUse()
     cdef cppclass cRecursiveField1Patch "::test::fixtures::patch::RecursiveField1PatchStruct":
         cRecursiveField1Patch()
     cdef cppclass cRecursiveFieldPatch "::test::fixtures::patch::RecursiveFieldPatchStruct":
@@ -98,20 +98,20 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h":
         cRecursiveEnsureStruct()
     cdef cppclass cRecursiveSafePatch "::test::fixtures::patch::RecursiveSafePatch":
         cRecursiveSafePatch()
-    cdef cppclass cBarPatch "::test::fixtures::patch::BarPatchStruct":
-        cBarPatch()
+    cdef cppclass cBarPatchStructInternalDoNotUse "::test::fixtures::patch::BarPatchStruct":
+        cBarPatchStructInternalDoNotUse()
     cdef cppclass cBarFieldPatch "::test::fixtures::patch::BarFieldPatchStruct":
         cBarFieldPatch()
     cdef cppclass cBarEnsureStruct "::test::fixtures::patch::BarEnsureStruct":
         cBarEnsureStruct()
     cdef cppclass cBarSafePatch "::test::fixtures::patch::BarSafePatch":
         cBarSafePatch()
-    cdef cppclass cLoopPatch "::test::fixtures::patch::LoopPatchStruct":
-        cLoopPatch()
+    cdef cppclass cLoopPatchStructInternalDoNotUse "::test::fixtures::patch::LoopPatchStruct":
+        cLoopPatchStructInternalDoNotUse()
     cdef cppclass cLoopSafePatch "::test::fixtures::patch::LoopSafePatch":
         cLoopSafePatch()
-    cdef cppclass cRefFieldsPatch "::test::fixtures::patch::RefFieldsPatchStruct":
-        cRefFieldsPatch()
+    cdef cppclass cRefFieldsPatchStructInternalDoNotUse "::test::fixtures::patch::RefFieldsPatchStruct":
+        cRefFieldsPatchStructInternalDoNotUse()
     cdef cppclass cRefFieldsField1Patch "::test::fixtures::patch::RefFieldsField1PatchStruct":
         cRefFieldsField1Patch()
     cdef cppclass cRefFieldsField4Patch "::test::fixtures::patch::RefFieldsField4PatchStruct":
@@ -158,8 +158,8 @@ cdef object Loop_from_cpp(const cLoop& c_struct)
 cdef cRefFields RefFields_convert_to_cpp(object inst) except*
 cdef object RefFields_from_cpp(const cRefFields& c_struct)
 
-cdef cMyDataPatch MyDataPatch_convert_to_cpp(object inst) except*
-cdef object MyDataPatch_from_cpp(const cMyDataPatch& c_struct)
+cdef cMyDataPatchStructInternalDoNotUse MyDataPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object MyDataPatchStructInternalDoNotUse_from_cpp(const cMyDataPatchStructInternalDoNotUse& c_struct)
 
 cdef cMyDataFieldPatch MyDataFieldPatch_convert_to_cpp(object inst) except*
 cdef object MyDataFieldPatch_from_cpp(const cMyDataFieldPatch& c_struct)
@@ -170,8 +170,8 @@ cdef object MyDataEnsureStruct_from_cpp(const cMyDataEnsureStruct& c_struct)
 cdef cMyDataSafePatch MyDataSafePatch_convert_to_cpp(object inst) except*
 cdef object MyDataSafePatch_from_cpp(const cMyDataSafePatch& c_struct)
 
-cdef cMyDataWithCustomDefaultPatch MyDataWithCustomDefaultPatch_convert_to_cpp(object inst) except*
-cdef object MyDataWithCustomDefaultPatch_from_cpp(const cMyDataWithCustomDefaultPatch& c_struct)
+cdef cMyDataWithCustomDefaultPatchStructInternalDoNotUse MyDataWithCustomDefaultPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object MyDataWithCustomDefaultPatchStructInternalDoNotUse_from_cpp(const cMyDataWithCustomDefaultPatchStructInternalDoNotUse& c_struct)
 
 cdef cMyDataWithCustomDefaultFieldPatch MyDataWithCustomDefaultFieldPatch_convert_to_cpp(object inst) except*
 cdef object MyDataWithCustomDefaultFieldPatch_from_cpp(const cMyDataWithCustomDefaultFieldPatch& c_struct)
@@ -200,8 +200,8 @@ cdef object MyUnionFieldPatch_from_cpp(const cMyUnionFieldPatch& c_struct)
 cdef cMyUnionSafePatch MyUnionSafePatch_convert_to_cpp(object inst) except*
 cdef object MyUnionSafePatch_from_cpp(const cMyUnionSafePatch& c_struct)
 
-cdef cMyStructPatch MyStructPatch_convert_to_cpp(object inst) except*
-cdef object MyStructPatch_from_cpp(const cMyStructPatch& c_struct)
+cdef cMyStructPatchStructInternalDoNotUse MyStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object MyStructPatchStructInternalDoNotUse_from_cpp(const cMyStructPatchStructInternalDoNotUse& c_struct)
 
 cdef cMyStructField10Patch MyStructField10Patch_convert_to_cpp(object inst) except*
 cdef object MyStructField10Patch_from_cpp(const cMyStructField10Patch& c_struct)
@@ -236,8 +236,8 @@ cdef object MyStructEnsureStruct_from_cpp(const cMyStructEnsureStruct& c_struct)
 cdef cMyStructSafePatch MyStructSafePatch_convert_to_cpp(object inst) except*
 cdef object MyStructSafePatch_from_cpp(const cMyStructSafePatch& c_struct)
 
-cdef cLateDefStructPatch LateDefStructPatch_convert_to_cpp(object inst) except*
-cdef object LateDefStructPatch_from_cpp(const cLateDefStructPatch& c_struct)
+cdef cLateDefStructPatchStructInternalDoNotUse LateDefStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object LateDefStructPatchStructInternalDoNotUse_from_cpp(const cLateDefStructPatchStructInternalDoNotUse& c_struct)
 
 cdef cLateDefStructFieldPatch LateDefStructFieldPatch_convert_to_cpp(object inst) except*
 cdef object LateDefStructFieldPatch_from_cpp(const cLateDefStructFieldPatch& c_struct)
@@ -248,8 +248,8 @@ cdef object LateDefStructEnsureStruct_from_cpp(const cLateDefStructEnsureStruct&
 cdef cLateDefStructSafePatch LateDefStructSafePatch_convert_to_cpp(object inst) except*
 cdef object LateDefStructSafePatch_from_cpp(const cLateDefStructSafePatch& c_struct)
 
-cdef cRecursivePatch RecursivePatch_convert_to_cpp(object inst) except*
-cdef object RecursivePatch_from_cpp(const cRecursivePatch& c_struct)
+cdef cRecursivePatchStructInternalDoNotUse RecursivePatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object RecursivePatchStructInternalDoNotUse_from_cpp(const cRecursivePatchStructInternalDoNotUse& c_struct)
 
 cdef cRecursiveField1Patch RecursiveField1Patch_convert_to_cpp(object inst) except*
 cdef object RecursiveField1Patch_from_cpp(const cRecursiveField1Patch& c_struct)
@@ -263,8 +263,8 @@ cdef object RecursiveEnsureStruct_from_cpp(const cRecursiveEnsureStruct& c_struc
 cdef cRecursiveSafePatch RecursiveSafePatch_convert_to_cpp(object inst) except*
 cdef object RecursiveSafePatch_from_cpp(const cRecursiveSafePatch& c_struct)
 
-cdef cBarPatch BarPatch_convert_to_cpp(object inst) except*
-cdef object BarPatch_from_cpp(const cBarPatch& c_struct)
+cdef cBarPatchStructInternalDoNotUse BarPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object BarPatchStructInternalDoNotUse_from_cpp(const cBarPatchStructInternalDoNotUse& c_struct)
 
 cdef cBarFieldPatch BarFieldPatch_convert_to_cpp(object inst) except*
 cdef object BarFieldPatch_from_cpp(const cBarFieldPatch& c_struct)
@@ -275,14 +275,14 @@ cdef object BarEnsureStruct_from_cpp(const cBarEnsureStruct& c_struct)
 cdef cBarSafePatch BarSafePatch_convert_to_cpp(object inst) except*
 cdef object BarSafePatch_from_cpp(const cBarSafePatch& c_struct)
 
-cdef cLoopPatch LoopPatch_convert_to_cpp(object inst) except*
-cdef object LoopPatch_from_cpp(const cLoopPatch& c_struct)
+cdef cLoopPatchStructInternalDoNotUse LoopPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object LoopPatchStructInternalDoNotUse_from_cpp(const cLoopPatchStructInternalDoNotUse& c_struct)
 
 cdef cLoopSafePatch LoopSafePatch_convert_to_cpp(object inst) except*
 cdef object LoopSafePatch_from_cpp(const cLoopSafePatch& c_struct)
 
-cdef cRefFieldsPatch RefFieldsPatch_convert_to_cpp(object inst) except*
-cdef object RefFieldsPatch_from_cpp(const cRefFieldsPatch& c_struct)
+cdef cRefFieldsPatchStructInternalDoNotUse RefFieldsPatchStructInternalDoNotUse_convert_to_cpp(object inst) except*
+cdef object RefFieldsPatchStructInternalDoNotUse_from_cpp(const cRefFieldsPatchStructInternalDoNotUse& c_struct)
 
 cdef cRefFieldsField1Patch RefFieldsField1Patch_convert_to_cpp(object inst) except*
 cdef object RefFieldsField1Patch_from_cpp(const cRefFieldsField1Patch& c_struct)

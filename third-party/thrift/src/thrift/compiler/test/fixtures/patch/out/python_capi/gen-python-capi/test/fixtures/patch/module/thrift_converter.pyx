@@ -72,11 +72,11 @@ cdef cRefFields RefFields_convert_to_cpp(object inst) except *:
 cdef object RefFields_from_cpp(const cRefFields& c_struct):
     return cpp_to_python[cRefFields](c_struct)
 
-cdef cMyDataPatch MyDataPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyDataPatch](inst))
+cdef cMyDataPatchStructInternalDoNotUse MyDataPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyDataPatchStructInternalDoNotUse](inst))
 
-cdef object MyDataPatch_from_cpp(const cMyDataPatch& c_struct):
-    return cpp_to_python[cMyDataPatch](c_struct)
+cdef object MyDataPatchStructInternalDoNotUse_from_cpp(const cMyDataPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cMyDataPatchStructInternalDoNotUse](c_struct)
 
 cdef cMyDataFieldPatch MyDataFieldPatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyDataFieldPatch](inst))
@@ -96,11 +96,11 @@ cdef cMyDataSafePatch MyDataSafePatch_convert_to_cpp(object inst) except *:
 cdef object MyDataSafePatch_from_cpp(const cMyDataSafePatch& c_struct):
     return cpp_to_python[cMyDataSafePatch](c_struct)
 
-cdef cMyDataWithCustomDefaultPatch MyDataWithCustomDefaultPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyDataWithCustomDefaultPatch](inst))
+cdef cMyDataWithCustomDefaultPatchStructInternalDoNotUse MyDataWithCustomDefaultPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyDataWithCustomDefaultPatchStructInternalDoNotUse](inst))
 
-cdef object MyDataWithCustomDefaultPatch_from_cpp(const cMyDataWithCustomDefaultPatch& c_struct):
-    return cpp_to_python[cMyDataWithCustomDefaultPatch](c_struct)
+cdef object MyDataWithCustomDefaultPatchStructInternalDoNotUse_from_cpp(const cMyDataWithCustomDefaultPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cMyDataWithCustomDefaultPatchStructInternalDoNotUse](c_struct)
 
 cdef cMyDataWithCustomDefaultFieldPatch MyDataWithCustomDefaultFieldPatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyDataWithCustomDefaultFieldPatch](inst))
@@ -156,11 +156,11 @@ cdef cMyUnionSafePatch MyUnionSafePatch_convert_to_cpp(object inst) except *:
 cdef object MyUnionSafePatch_from_cpp(const cMyUnionSafePatch& c_struct):
     return cpp_to_python[cMyUnionSafePatch](c_struct)
 
-cdef cMyStructPatch MyStructPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyStructPatch](inst))
+cdef cMyStructPatchStructInternalDoNotUse MyStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyStructPatchStructInternalDoNotUse](inst))
 
-cdef object MyStructPatch_from_cpp(const cMyStructPatch& c_struct):
-    return cpp_to_python[cMyStructPatch](c_struct)
+cdef object MyStructPatchStructInternalDoNotUse_from_cpp(const cMyStructPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cMyStructPatchStructInternalDoNotUse](c_struct)
 
 cdef cMyStructField10Patch MyStructField10Patch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyStructField10Patch](inst))
@@ -228,11 +228,11 @@ cdef cMyStructSafePatch MyStructSafePatch_convert_to_cpp(object inst) except *:
 cdef object MyStructSafePatch_from_cpp(const cMyStructSafePatch& c_struct):
     return cpp_to_python[cMyStructSafePatch](c_struct)
 
-cdef cLateDefStructPatch LateDefStructPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cLateDefStructPatch](inst))
+cdef cLateDefStructPatchStructInternalDoNotUse LateDefStructPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cLateDefStructPatchStructInternalDoNotUse](inst))
 
-cdef object LateDefStructPatch_from_cpp(const cLateDefStructPatch& c_struct):
-    return cpp_to_python[cLateDefStructPatch](c_struct)
+cdef object LateDefStructPatchStructInternalDoNotUse_from_cpp(const cLateDefStructPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cLateDefStructPatchStructInternalDoNotUse](c_struct)
 
 cdef cLateDefStructFieldPatch LateDefStructFieldPatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cLateDefStructFieldPatch](inst))
@@ -252,11 +252,11 @@ cdef cLateDefStructSafePatch LateDefStructSafePatch_convert_to_cpp(object inst) 
 cdef object LateDefStructSafePatch_from_cpp(const cLateDefStructSafePatch& c_struct):
     return cpp_to_python[cLateDefStructSafePatch](c_struct)
 
-cdef cRecursivePatch RecursivePatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cRecursivePatch](inst))
+cdef cRecursivePatchStructInternalDoNotUse RecursivePatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cRecursivePatchStructInternalDoNotUse](inst))
 
-cdef object RecursivePatch_from_cpp(const cRecursivePatch& c_struct):
-    return cpp_to_python[cRecursivePatch](c_struct)
+cdef object RecursivePatchStructInternalDoNotUse_from_cpp(const cRecursivePatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cRecursivePatchStructInternalDoNotUse](c_struct)
 
 cdef cRecursiveField1Patch RecursiveField1Patch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cRecursiveField1Patch](inst))
@@ -282,11 +282,11 @@ cdef cRecursiveSafePatch RecursiveSafePatch_convert_to_cpp(object inst) except *
 cdef object RecursiveSafePatch_from_cpp(const cRecursiveSafePatch& c_struct):
     return cpp_to_python[cRecursiveSafePatch](c_struct)
 
-cdef cBarPatch BarPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cBarPatch](inst))
+cdef cBarPatchStructInternalDoNotUse BarPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cBarPatchStructInternalDoNotUse](inst))
 
-cdef object BarPatch_from_cpp(const cBarPatch& c_struct):
-    return cpp_to_python[cBarPatch](c_struct)
+cdef object BarPatchStructInternalDoNotUse_from_cpp(const cBarPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cBarPatchStructInternalDoNotUse](c_struct)
 
 cdef cBarFieldPatch BarFieldPatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cBarFieldPatch](inst))
@@ -306,11 +306,11 @@ cdef cBarSafePatch BarSafePatch_convert_to_cpp(object inst) except *:
 cdef object BarSafePatch_from_cpp(const cBarSafePatch& c_struct):
     return cpp_to_python[cBarSafePatch](c_struct)
 
-cdef cLoopPatch LoopPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cLoopPatch](inst))
+cdef cLoopPatchStructInternalDoNotUse LoopPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cLoopPatchStructInternalDoNotUse](inst))
 
-cdef object LoopPatch_from_cpp(const cLoopPatch& c_struct):
-    return cpp_to_python[cLoopPatch](c_struct)
+cdef object LoopPatchStructInternalDoNotUse_from_cpp(const cLoopPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cLoopPatchStructInternalDoNotUse](c_struct)
 
 cdef cLoopSafePatch LoopSafePatch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cLoopSafePatch](inst))
@@ -318,11 +318,11 @@ cdef cLoopSafePatch LoopSafePatch_convert_to_cpp(object inst) except *:
 cdef object LoopSafePatch_from_cpp(const cLoopSafePatch& c_struct):
     return cpp_to_python[cLoopSafePatch](c_struct)
 
-cdef cRefFieldsPatch RefFieldsPatch_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cRefFieldsPatch](inst))
+cdef cRefFieldsPatchStructInternalDoNotUse RefFieldsPatchStructInternalDoNotUse_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cRefFieldsPatchStructInternalDoNotUse](inst))
 
-cdef object RefFieldsPatch_from_cpp(const cRefFieldsPatch& c_struct):
-    return cpp_to_python[cRefFieldsPatch](c_struct)
+cdef object RefFieldsPatchStructInternalDoNotUse_from_cpp(const cRefFieldsPatchStructInternalDoNotUse& c_struct):
+    return cpp_to_python[cRefFieldsPatchStructInternalDoNotUse](c_struct)
 
 cdef cRefFieldsField1Patch RefFieldsField1Patch_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cRefFieldsField1Patch](inst))

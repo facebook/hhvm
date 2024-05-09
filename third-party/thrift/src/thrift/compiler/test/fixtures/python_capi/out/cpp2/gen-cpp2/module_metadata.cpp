@@ -356,6 +356,7 @@ StructMetadata<::test::fixtures::python_capi::MyStructPatchStruct>::gen(ThriftMe
     module_MyStructPatch.fields()->push_back(std::move(field));
   }
   module_MyStructPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyStructPatchStructInternalDoNotUse") } }).cv_struct_ref());
+  module_MyStructPatch.structured_annotations()->push_back(*cvStruct("python.Name", { {"name", cvString("MyStructPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_MyStructPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyStructPatchStruct>") }, {"underlyingName", cvString("MyStructPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }
@@ -549,6 +550,7 @@ StructMetadata<::test::fixtures::python_capi::MyDataItemPatchStruct>::gen(Thrift
     module_MyDataItemPatch.fields()->push_back(std::move(field));
   }
   module_MyDataItemPatch.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyDataItemPatchStructInternalDoNotUse") } }).cv_struct_ref());
+  module_MyDataItemPatch.structured_annotations()->push_back(*cvStruct("python.Name", { {"name", cvString("MyDataItemPatchStructInternalDoNotUse") } }).cv_struct_ref());
   module_MyDataItemPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyDataItemPatchStruct>") }, {"underlyingName", cvString("MyDataItemPatchStruct") }, {"extraNamespace", cvString("") } }).cv_struct_ref());
   return res.first->second;
 }

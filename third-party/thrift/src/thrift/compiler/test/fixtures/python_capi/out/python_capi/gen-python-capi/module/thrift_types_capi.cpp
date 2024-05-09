@@ -2022,11 +2022,11 @@ Extractor<::test::fixtures::python_capi::MyStructPatchStruct>::operator()(PyObje
       "Module test.fixtures.python_capi.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__module__MyStructPatch(obj));
+      extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
     return extractorError<::test::fixtures::python_capi::MyStructPatchStruct>(
-        "Thrift serialize error: MyStructPatch");
+        "Thrift serialize error: MyStructPatchStructInternalDoNotUse");
   }
   return detail::deserialize_iobuf_to_adapted<
       ::test::fixtures::python_capi::MyStructPatchStruct, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyStructPatchStruct>
@@ -2042,10 +2042,10 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     return extractorError<::test::fixtures::python_capi::MyStructPatchStruct>(
       "Module test.fixtures.python_capi.module import error");
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyStructPatch(fbthrift_data));
+  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(fbthrift_data));
   if (!obj) {
       return extractorError<::test::fixtures::python_capi::MyStructPatchStruct>(
-          "Init from fbthrift error: MyStructPatch");
+          "Init from fbthrift error: MyStructPatchStructInternalDoNotUse");
   }
   return Extractor<::test::fixtures::python_capi::MyStructPatchStruct>{}(*obj);
 }
@@ -2056,10 +2056,10 @@ int Extractor<::test::fixtures::python_capi::MyStructPatchStruct>::typeCheck(PyO
       "Module test.fixtures.python_capi.module import error");
   }
   int result =
-      can_extract__test__fixtures__python_capi__module__MyStructPatch(obj);
+      can_extract__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
-      "Unexpected type check error: MyStructPatch");
+      "Unexpected type check error: MyStructPatchStructInternalDoNotUse");
   }
   return result;
 }
@@ -2071,7 +2071,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MyStructPatchStruct>::opera
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__python_capi__module__MyStructPatch(
+  auto ptr = construct__test__fixtures__python_capi__module__MyStructPatchStructInternalDoNotUse(
       detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyStructPatchStruct>>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());
@@ -2626,11 +2626,11 @@ Extractor<::test::fixtures::python_capi::MyDataItemPatchStruct>::operator()(PyOb
       "Module test.fixtures.python_capi.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__module__MyDataItemPatch(obj));
+      extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
     return extractorError<::test::fixtures::python_capi::MyDataItemPatchStruct>(
-        "Thrift serialize error: MyDataItemPatch");
+        "Thrift serialize error: MyDataItemPatchStructInternalDoNotUse");
   }
   return detail::deserialize_iobuf_to_adapted<
       ::test::fixtures::python_capi::MyDataItemPatchStruct, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyDataItemPatchStruct>
@@ -2646,10 +2646,10 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     return extractorError<::test::fixtures::python_capi::MyDataItemPatchStruct>(
       "Module test.fixtures.python_capi.module import error");
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyDataItemPatch(fbthrift_data));
+  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(fbthrift_data));
   if (!obj) {
       return extractorError<::test::fixtures::python_capi::MyDataItemPatchStruct>(
-          "Init from fbthrift error: MyDataItemPatch");
+          "Init from fbthrift error: MyDataItemPatchStructInternalDoNotUse");
   }
   return Extractor<::test::fixtures::python_capi::MyDataItemPatchStruct>{}(*obj);
 }
@@ -2660,10 +2660,10 @@ int Extractor<::test::fixtures::python_capi::MyDataItemPatchStruct>::typeCheck(P
       "Module test.fixtures.python_capi.module import error");
   }
   int result =
-      can_extract__test__fixtures__python_capi__module__MyDataItemPatch(obj);
+      can_extract__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
-      "Unexpected type check error: MyDataItemPatch");
+      "Unexpected type check error: MyDataItemPatchStructInternalDoNotUse");
   }
   return result;
 }
@@ -2675,7 +2675,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MyDataItemPatchStruct>::ope
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__python_capi__module__MyDataItemPatch(
+  auto ptr = construct__test__fixtures__python_capi__module__MyDataItemPatchStructInternalDoNotUse(
       detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyDataItemPatchStruct>>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());

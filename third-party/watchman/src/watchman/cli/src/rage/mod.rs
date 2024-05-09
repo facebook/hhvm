@@ -18,7 +18,6 @@ use anyhow::Result;
 use duct::Expression;
 use structopt::StructOpt;
 use sysinfo::System;
-use sysinfo::SystemExt;
 #[cfg(target_os = "linux")]
 use tabular::row;
 #[cfg(target_os = "linux")]
@@ -75,18 +74,15 @@ fn getuid() -> nix::unistd::Uid {
 }
 
 struct WatchmanRage {
-    system: System,
     stream: Stream,
 }
 
 impl WatchmanRage {
     async fn new() -> Self {
-        let mut system = System::new();
-        system.refresh_system();
-        let hostname = system.host_name();
+        let hostname = System::host_name();
         let stream = Stream::new(hostname);
 
-        Self { system, stream }
+        Self { stream }
     }
 
     fn empty_line(&mut self) -> Result<()> {
@@ -139,14 +135,10 @@ impl WatchmanRage {
             "Arch (Compile Time): {}",
             std::env::consts::ARCH
         )?;
-        write_or_unknown!(self.stream, "Hostname: {}", self.system.host_name())?;
-        write_or_unknown!(self.stream, "Release: {}", self.system.name())?;
-        write_or_unknown!(self.stream, "System Version: {}", self.system.os_version())?;
-        write_or_unknown!(
-            self.stream,
-            "Kernel Version: {}",
-            self.system.kernel_version()
-        )?;
+        write_or_unknown!(self.stream, "Hostname: {}", System::host_name())?;
+        write_or_unknown!(self.stream, "Release: {}", System::name())?;
+        write_or_unknown!(self.stream, "System Version: {}", System::os_version())?;
+        write_or_unknown!(self.stream, "Kernel Version: {}", System::kernel_version())?;
         #[cfg(unix)]
         writeln!(self.stream, "Running watchman-diag as UID: {}", getuid())?;
 

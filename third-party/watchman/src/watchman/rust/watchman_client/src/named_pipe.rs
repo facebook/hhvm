@@ -6,7 +6,7 @@
  */
 
 #![cfg(windows)]
-
+use core::ffi::c_void;
 use std::io::Error as IoError;
 use std::os::windows::ffi::OsStrExt;
 use std::path::PathBuf;
@@ -59,9 +59,14 @@ impl NamedPipe {
         }
 
         let io = unsafe {
-            NamedPipeClient::from_raw_handle(handle).map_err(|err| Error::Connect {
-                endpoint: path,
-                source: Box::new(err),
+            // CreateFileW returns HANDLE which is typedef PVOID HANDLE which itself is typedef void *PVOID;
+            // See https://learn.microsoft.com/en-us/windows/win32/winprog/windows-data-types
+            // tokio expects this: pub type HANDLE = *mut c_void;
+            NamedPipeClient::from_raw_handle(handle as *mut c_void).map_err(|err| {
+                Error::Connect {
+                    endpoint: path,
+                    source: Box::new(err),
+                }
             })?
         };
         Ok(Self { io })

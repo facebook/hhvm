@@ -308,6 +308,10 @@ TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
   baton1.post();
 
   baton2.wait();
+
+  // Sleep allows all the request to drain, removing flakiness.
+  // Exact cause of flakiness remains unknown
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   EXPECT_EQ(holder.controller->requestCount(), 0);
 
   holder.join();
@@ -334,7 +338,8 @@ TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
-  pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(
+      getRequest(staringBlockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
 
@@ -344,6 +349,10 @@ TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
   baton2.post();
 
   baton3.wait();
+
+  // Sleep allows all the request to drain, removing flakiness.
+  // Exact cause of flakiness remains unknown
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   EXPECT_EQ(holder.controller->requestCount(), 0);
 
   holder.join();

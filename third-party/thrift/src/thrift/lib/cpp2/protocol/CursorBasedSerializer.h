@@ -156,6 +156,16 @@ class StructuredCursorReader : detail::BaseCursorReader {
     return value;
   }
 
+  /** union type accessor */
+
+  template <
+      typename...,
+      typename U = T,
+      typename = std::enable_if_t<is_thrift_union_v<U>>>
+  auto readType() -> typename U::Type {
+    return static_cast<typename T::Type>(readState_.fieldId);
+  }
+
   // End public API
  private:
   explicit StructuredCursorReader(const folly::IOBuf& c)

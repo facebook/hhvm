@@ -91,3 +91,33 @@ TEST(CursorSerializer, ReadWithSkip) {
   EXPECT_EQ(reader.read<ident::dessert>(), 3);
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, UnionRead) {
+  Stringish string;
+
+  CursorSerializationWrapper<Stringish> wrapper(string);
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.readType(), Stringish::Type::__EMPTY__);
+  wrapper.endRead(std::move(reader));
+
+  string.string_field_ref() = "foo";
+  wrapper = CursorSerializationWrapper<Stringish>(string);
+  reader = wrapper.beginRead();
+  EXPECT_EQ(reader.readType(), Stringish::Type::string_field);
+  EXPECT_EQ(reader.read<ident::string_field>(), "foo");
+  EXPECT_FALSE(reader.read<ident::binary_field>());
+  wrapper.endRead(std::move(reader));
+
+  string.binary_field_ref() = folly::IOBuf::wrapBufferAsValue(
+      folly::ByteRange(std::string_view("bar")));
+  wrapper = CursorSerializationWrapper<Stringish>(string);
+  reader = wrapper.beginRead();
+  if (auto str = reader.read<ident::string_field>()) {
+    ADD_FAILURE();
+  } else if (auto buf = reader.read<ident::binary_field>()) {
+    EXPECT_EQ(buf->moveToFbString(), "bar");
+  } else {
+    ADD_FAILURE();
+  }
+  wrapper.endRead(std::move(reader));
+}

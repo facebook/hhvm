@@ -42,6 +42,12 @@ struct Meal {
   5: i16 dessert = 3;
 }
 
+union Stringish {
+  1: string string_field;
+  @cpp.Type{name = "folly::IOBuf"}
+  2: binary binary_field;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

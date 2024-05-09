@@ -233,6 +233,8 @@ pub(crate) enum Hhbc {
     Print,
     #[decl(fn hhbc_record_reified_generic(*HackMixed) -> *HackMixed)]
     RecordReifiedGeneric,
+    #[decl(fn hhbc_set_implicit_context_by_value(*HackMixed) -> *HackMixed)]
+    SetImplicitContextByValue,
     #[decl(fn hhbc_shl(*HackMixed, *HackMixed) -> *HackMixed)]
     Shl,
     #[decl(fn hhbc_shr(*HackMixed, *HackMixed) -> *HackMixed)]

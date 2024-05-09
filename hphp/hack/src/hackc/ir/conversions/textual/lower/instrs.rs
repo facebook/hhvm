@@ -169,6 +169,7 @@ impl LowerInstrs<'_> {
             Hhbc::Pow(..) => hack::Hhbc::Pow,
             Hhbc::Print(..) => hack::Hhbc::Print,
             Hhbc::RecordReifiedGeneric(..) => hack::Hhbc::RecordReifiedGeneric,
+            Hhbc::SetImplicitContextByValue(..) => hack::Hhbc::SetImplicitContextByValue,
             Hhbc::Shl(..) => hack::Hhbc::Shl,
             Hhbc::Shr(..) => hack::Hhbc::Shr,
             Hhbc::Sub(..) => hack::Hhbc::Sub,

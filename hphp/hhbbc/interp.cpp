@@ -5520,33 +5520,10 @@ void in(ISS& env, const bc::CreateSpecialImplicitContext&) {
   if (auto const v = tv(type); v && tvIsInt(*v)) {
     switch (static_cast<ImplicitContext::State>(v->m_data.num)) {
       case ImplicitContext::State::Value:
-        return push(env, TOptObj);
-      case ImplicitContext::State::SoftInaccessible: {
-        auto const sampleRate = [&] () -> uint32_t {
-          if (!memoKey.couldBe(BInitNull)) return 1;
-
-          auto const attrName = env.ctx.func->isMemoizeWrapperLSB
-            ? s_MemoizeLSB.get()
-            : s_Memoize.get();
-          auto const it = env.ctx.func->userAttributes.find(attrName);
-          if (it == env.ctx.func->userAttributes.end()) return 1;
-
-          uint32_t rate = 1;
-          assertx(tvIsVec(it->second));
-          IterateV(
-            it->second.m_data.parr,
-            [&](TypedValue elem) {
-              if (tvIsInt(elem)) {
-                rate = std::max<uint32_t>(rate, elem.m_data.num);
-              }
-            }
-          );
-          return rate;
-        }();
-        return push(env, sampleRate == 1 ? TObj : TOptObj);
-      }
-      case ImplicitContext::State::Inaccessible:
       case ImplicitContext::State::SoftSet:
+        return push(env, TOptObj);
+      case ImplicitContext::State::SoftInaccessible:
+      case ImplicitContext::State::Inaccessible:
         return push(env, TObj);
     }
   }

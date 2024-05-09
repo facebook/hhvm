@@ -727,7 +727,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_isUntrustedReturnType = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
-  m_allFlags.m_memoizeICType = Func::MemoizeICType::NoIC;
+  m_allFlags.m_memoizeICType = Func::MemoizeICType::MakeICInaccessible;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;

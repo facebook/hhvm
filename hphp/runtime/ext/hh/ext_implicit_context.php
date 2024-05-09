@@ -157,6 +157,15 @@ enum State: string as string {
 <<__Native>>
 function get_state_unsafe()[zoned]: string /* State */;
 
+/**
+ * Returns True if we are in ImplicitContext::State::Inaccessible
+ * False otherwise
+ *
+ * Does not affect the state of the IC
+ */
+<<__Native>>
+function is_inaccessible()[zoned]: bool;
+
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {
@@ -183,12 +192,26 @@ function create_implicit_context(
 )[zoned]: ImplicitContextData;
 
 /*
+* To keep the state, since we can't use memoize on create_ic_inaccessible_context anymore
+*/
+class HackyICSingletonState {
+  public static $state = null;
+}
+
+
+/*
  * Singleton memoization wrapper over create_special_implicit_context for
  * ic inaccessible case
  */
-<<__Memoize>>
 function create_ic_inaccessible_context()[] {
-  return create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE, null);
+  return \HH\Coeffects\backdoor(
+    ()[defaults] ==> {
+      if (HackyICSingletonState::$state === null) {
+        HackyICSingletonState::$state = create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE, null);
+      }
+      return HackyICSingletonState::$state;
+    },
+  );
 }
 
 /*

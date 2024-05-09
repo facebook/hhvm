@@ -48,6 +48,19 @@ union Stringish {
   2: binary binary_field;
 }
 
+enum E {
+  UNKNOWN = 0,
+  A = 1,
+  B = 2,
+}
+struct Numerics {
+  1: optional i16 int16;
+  @cpp.Type{name = "uint32_t"}
+  2: i32 uint32;
+  3: E enm;
+  4: float flt;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

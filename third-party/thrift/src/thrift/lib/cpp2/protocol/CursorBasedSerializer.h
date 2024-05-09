@@ -123,11 +123,16 @@ class StructuredCursorReader : detail::BaseCursorReader {
   template <typename Ident>
   using native_type = op::get_native_type<T, Ident>;
 
+  template <typename TypeClass, typename Ident>
+  using enable_for = typename std::
+      enable_if_t<std::is_base_of_v<TypeClass, type_tag<Ident>>, int>;
+
   template <typename U, typename Ident>
   using maybe_optional = std::conditional_t<
       type::is_optional_or_union_field_v<T, Ident>,
       std::optional<U>,
       U>;
+
   template <typename Ident>
   using bool_if_optional = std::
       conditional_t<type::is_optional_or_union_field_v<T, Ident>, bool, void>;
@@ -154,6 +159,28 @@ class StructuredCursorReader : detail::BaseCursorReader {
         },
         value);
     return value;
+  }
+
+  /**
+   * These methods allow reading a field in-place, which may be more efficient.
+   * Optional and union fields return bool to indicate whether the field was
+   * present; the value is not modified if the field is absent.
+   *
+   * Ex:
+   *  StructuredCursorReader<Struct> reader;
+   *  std::string val1;
+   *  reader.read<ident::unqualified_string>(val1);
+   *  int32_t val2;
+   *  if (reader.read<ident::optional_int>(val2)) { use(val2); }
+   *  // else val2 is still uninitialized
+   */
+
+  /** numeric types */
+
+  template <typename Ident, enable_for<type::number_c, Ident> = 0>
+  [[nodiscard]] bool_if_optional<Ident> read(native_type<Ident>& value) {
+    return readField<Ident>(
+        [&] { op::decode<type_tag<Ident>>(protocol_, value); }, value);
   }
 
   /** union type accessor */

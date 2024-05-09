@@ -121,3 +121,28 @@ TEST(CursorSerializer, UnionRead) {
   }
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, NumericRead) {
+  Numerics obj;
+  obj.int16() = 1;
+  obj.uint32() = 2;
+  obj.enm() = E::A;
+  obj.flt() = 3;
+
+  CursorSerializationWrapper wrapper(obj);
+
+  auto reader = wrapper.beginRead();
+  int16_t i;
+  EXPECT_TRUE(reader.read<ident::int16>(i));
+  EXPECT_EQ(i, *obj.int16());
+  uint32_t u;
+  reader.read<ident::uint32>(u);
+  EXPECT_EQ(u, *obj.uint32());
+  E e;
+  reader.read<ident::enm>(e);
+  EXPECT_EQ(e, *obj.enm());
+  float f;
+  reader.read<ident::flt>(f);
+  EXPECT_FLOAT_EQ(f, *obj.flt());
+  wrapper.endRead(std::move(reader));
+}

@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
 type expand_typedef =
   Typing_defs.expand_env ->
@@ -203,7 +204,7 @@ val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 val shape_field_name_with_ty_err :
   Typing_env_types.env ->
   ('a, 'b) Aast.expr ->
-  Ast_defs.shape_field_name option * Typing_error.t option
+  (Ast_defs.shape_field_name, Typing_error.t) Result.t
 
 val simplify_constraint_type :
   Typing_env_types.env ->

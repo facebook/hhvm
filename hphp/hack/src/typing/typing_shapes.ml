@@ -165,13 +165,11 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
  * useful typechecking of incomplete code (code in the process of being
  * written). *)
 let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
-  let (fld_opt, ty_err_opt) =
-    TUtils.shape_field_name_with_ty_err env (ty, p, field)
-  in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  match fld_opt with
-  | None -> ((env, None), shape_ty)
-  | Some field ->
+  match TUtils.shape_field_name_with_ty_err env (ty, p, field) with
+  | Error ty_err ->
+    Typing_error_utils.add_typing_error ~env ty_err;
+    ((env, None), shape_ty)
+  | Ok field ->
     let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
     let ((env, e1), shape_ty) =
       Typing_solver.expand_type_and_narrow
@@ -290,13 +288,12 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
   | _ -> (env, res)
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
-  let (fld_opt, ty_err_opt) = TUtils.shape_field_name_with_ty_err env field in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  match fld_opt with
-  | None ->
+  match TUtils.shape_field_name_with_ty_err env field with
+  | Error ty_err ->
+    Typing_error_utils.add_typing_error ~env ty_err;
     let (env, ty) = Env.fresh_type_error env field_p in
     ((env, None), ty)
-  | Some field_name ->
+  | Ok field_name ->
     let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
     shrink_shape ~supportdyn:false p field_name env shape_ty
 

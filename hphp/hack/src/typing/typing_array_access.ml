@@ -136,13 +136,11 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
   | (r, Tshape { s_fields = fdm; _ }) -> begin
-    let (fld_opt, ty_err_opt) =
-      TUtils.shape_field_name_with_ty_err env index_expr
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    match fld_opt with
-    | None -> ((env, None), None)
-    | Some field ->
+    match TUtils.shape_field_name_with_ty_err env index_expr with
+    | Error ty_err ->
+      Typing_error_utils.add_typing_error ~env ty_err;
+      ((env, None), None)
+    | Ok field ->
       let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
       (match TShapeMap.find_opt field fdm with
       (* If field is in the lower bound but is optional, then no upper bound makes sense
@@ -643,17 +641,14 @@ let rec array_get
       | Tshape { s_origin; s_fields = fdm; s_unknown_value; _ } ->
         let (_, p, _) = e2 in
         begin
-          let (fld_opt, ty_err_opt) =
-            TUtils.shape_field_name_with_ty_err env e2
-          in
-          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-          match fld_opt with
-          | None ->
+          match TUtils.shape_field_name_with_ty_err env e2 with
+          | Error ty_err ->
+            Typing_error_utils.add_typing_error ~env ty_err;
             (* there was already an error in shape_field name,
                don't report another one for a missing field *)
             let (env, ty) = err_witness env p in
             (env, (ty, dflt_arr_res, Ok ty2))
-          | Some field ->
+          | Ok field ->
             let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
             if is_lvalue || lhs_of_null_coalesce then
               (* The expression $s['x'] ?? $y is semantically equivalent to
@@ -1395,15 +1390,12 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         end
       | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
       begin
-        let (fld_opt, ty_err_opt) =
-          TUtils.shape_field_name_with_ty_err env key
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        match fld_opt with
-        | None ->
+        match TUtils.shape_field_name_with_ty_err env key with
+        | Error ty_err ->
+          Typing_error_utils.add_typing_error ~env ty_err;
           let (env, ety1) = maybe_make_supportdyn r env ~supportdyn ety1 in
           (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-        | Some field ->
+        | Ok field ->
           let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
           let (env, fdm) =
             if supportdyn then

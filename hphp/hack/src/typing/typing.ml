@@ -2297,13 +2297,12 @@ let safely_refine_is_array env ty p pred_name arg_expr =
 let key_exists env pos shape field =
   let field = Tast.to_nast_expr field in
   refine_lvalue_type env shape ~refine:(fun env shape_ty ->
-      let (fld_opt, ty_err_opt) =
-        TUtils.shape_field_name_with_ty_err env field
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-      match fld_opt with
-      | None -> (env, shape_ty)
-      | Some field_name ->
+      match TUtils.shape_field_name_with_ty_err env field with
+      | Error ty_err ->
+        Typing_error_utils.add_typing_error ~env ty_err;
+
+        (env, shape_ty)
+      | Ok field_name ->
         let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
         Typing_shapes.refine_shape field_name pos env shape_ty)
 
@@ -5730,13 +5729,11 @@ end = struct
           (* We expect the second argument to at, idx and keyExists to be a literal field name *)
           match el with
           | _ :: (_, field) :: _ -> begin
-            let (fld_opt, ty_err_opt) =
-              TUtils.shape_field_name_with_ty_err env field
-            in
-            Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-            match fld_opt with
-            | None -> None
-            | Some field_name ->
+            match TUtils.shape_field_name_with_ty_err env field with
+            | Error ty_err ->
+              Typing_error_utils.add_typing_error ~env ty_err;
+              None
+            | Ok field_name ->
               let field_name =
                 TShapeField.of_ast Pos_or_decl.of_raw_pos field_name
               in

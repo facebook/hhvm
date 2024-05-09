@@ -594,10 +594,10 @@ let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
 let shape_field_name_with_ty_err env (_, p, field) =
   match field with
-  | Aast.Int name -> (Some (Ast_defs.SFlit_int (p, name)), None)
-  | Aast.String name -> (Some (Ast_defs.SFlit_str (p, name)), None)
+  | Aast.Int name -> Ok (Ast_defs.SFlit_int (p, name))
+  | Aast.String name -> Ok (Ast_defs.SFlit_str (p, name))
   | Aast.Class_const ((_, _, Aast.CI x), y) ->
-    (Some (Ast_defs.SFclass_const (x, y)), None)
+    Ok (Ast_defs.SFclass_const (x, y))
   | Aast.Class_const ((_, _, Aast.CIself), y) ->
     let this =
       match Env.get_self_ty env with
@@ -608,18 +608,17 @@ let shape_field_name_with_ty_err env (_, p, field) =
         | _ -> None)
     in
     (match this with
-    | Some sid -> (Some (Ast_defs.SFclass_const (sid, y)), None)
+    | Some sid -> Ok (Ast_defs.SFclass_const (sid, y))
     | None ->
-      ( None,
-        Some
-          Typing_error.(
-            primary @@ Primary.Expected_class { pos = p; suffix = None }) ))
+      Error
+        Typing_error.(
+          primary @@ Primary.Expected_class { pos = p; suffix = None }))
   | _ ->
     let err =
       Typing_error.Primary.Shape.(
         Invalid_shape_field_name { pos = p; is_empty = false })
     in
-    (None, Some (Typing_error.shape err))
+    Error (Typing_error.shape err)
 
 (*****************************************************************************)
 (* Class types *)

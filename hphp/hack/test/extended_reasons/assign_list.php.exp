@@ -1,56 +1,9 @@
 error: Typing[4110] Invalid argument [1]
 -> Expected Sub [2]
 -> But got Super [3]
--> Unnormalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rhint":[{"filename":"assign_list.php","line":8,"char_start":24,"char_end":28}]
-        },
-        {
-          "Rtype_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"assign_list.php","line":6,"char_start":14,"char_end":16}]
-    }
-  ]
-} [3]
--> Normalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rhint":[{"filename":"assign_list.php","line":8,"char_start":24,"char_end":28}]
-        },
-        {
-          "Rtype_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"assign_list.php","line":6,"char_start":14,"char_end":16}]
-    }
-  ]
-} [3]
--> Path:
-[
-  {
-    "Rhint":[{"filename":"assign_list.php","line":8,"char_start":24,"char_end":28}]
-  },
-  {"Fwd":[]},
-  {
-    "Rtype_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
-  },
-  {"Fwd":[]},
-  {
-    "Rhint":[{"filename":"assign_list.php","line":6,"char_start":14,"char_end":16}]
-  }
-] [3]
+-> Here's why: this hint [3]
+-> flows into this type variable [4]
+-> which itself flows into this hint [2]
 
 assign_list.php:10:7
      4 | class Sub extends Super {}
@@ -58,7 +11,7 @@ assign_list.php:10:7
 [2]  6 | function foo(Sub $_): void {}
      7 | 
 [3]  8 | function bar_1((string,Super,bool) $xyz): void {
-     9 |   list($_, $y, $_) = $xyz;
+[4]  9 |   list($_, $y, $_) = $xyz;
 [1] 10 |   foo($y);
     11 | }
 

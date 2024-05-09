@@ -1188,17 +1188,24 @@ let reverse_direction = function
   | Fwd -> Bwd
   | Bwd -> Fwd
 
+(* TODO(mjt) encode the valid paths in the type *)
 type path_elem =
-  | Direction of direction
-  | Symm_projection of prj_symm
-  | Asymm_projection of prj_asymm
+  | Flow of direction
+  | Prj_symm_lhs of prj_symm
+  | Prj_symm_rhs of prj_symm
+  | Prj_asymm of prj_asymm
   | Witness of locl_phase t_
 
 let path_elem_to_json = function
-  | Direction direction -> direction_to_json direction
-  | Symm_projection prj -> prj_symm_to_json prj
-  | Asymm_projection prj -> prj_asymm_to_json prj
-  | Witness r -> to_json r
+  | Flow dir ->
+    Hh_json.(JSON_Object [("Flow", JSON_Array [direction_to_json dir])])
+  | Prj_symm_lhs prj ->
+    Hh_json.(JSON_Object [("Prj_symm_lhs", JSON_Array [prj_symm_to_json prj])])
+  | Prj_symm_rhs prj ->
+    Hh_json.(JSON_Object [("Prj_symm_rhs", JSON_Array [prj_symm_to_json prj])])
+  | Prj_asymm prj ->
+    Hh_json.(JSON_Object [("Prj_asymm", JSON_Array [prj_asymm_to_json prj])])
+  | Witness r -> Hh_json.(JSON_Object [("Witness", JSON_Array [to_json r])])
 
 let path_to_json path = Hh_json.JSON_Array (List.map ~f:path_elem_to_json path)
 
@@ -1229,32 +1236,205 @@ let to_path t =
     match t with
     | Rflow (t1, t2) ->
       aux t1 ~dir ~k:(fun p1 ->
-          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Direction dir :: p2)))
+          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Flow dir :: p2)))
     | Rprj_symm (prj, t) ->
       let dir = project prj dir in
-      aux t ~dir ~k:(fun t ->
-          k @@ (Symm_projection prj :: t) @ [Symm_projection prj])
+      aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
     | Rprj_asymm (prj, t) ->
       (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (Asymm_projection prj :: t))
+      aux t ~dir ~k:(fun t -> k (Prj_asymm prj :: t))
     | Rrev _ -> failwith "expected a normalized reason"
     | _ -> k @@ [Witness t]
   in
   aux t ~dir:Fwd ~k:(fun x -> x)
 
+let int_to_ordinal =
+  let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
+  fun n ->
+    let sfx =
+      if n >= 10 && n <= 20 then
+        "th"
+      else
+        sfxs.(min 4 (n mod 10))
+    in
+    Format.sprintf "%d%s" n sfx
+
+let explain_variance = function
+  | Ast_defs.Contravariant -> "contravariant"
+  | Ast_defs.Covariant -> "covariant"
+  | Ast_defs.Invariant -> "invariant"
+
+let explain_field_kind = function
+  | Required -> "required"
+  | Optional -> "optional"
+  | Absent -> "non-existent"
+
+let explain_symm_prj prj side =
+  match prj with
+  | Prj_symm_neg -> "via the negation type"
+  | Prj_symm_class (nm, idx, var) ->
+    Format.sprintf
+      "via the (%s) %s type parameter of the class `%s`"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+      nm
+  | Prj_symm_newtype (nm, idx, var) ->
+    Format.sprintf
+      "via the (%s) %s type parameter of the type definition `%s`"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+      nm
+  | Prj_symm_tuple idx ->
+    Format.sprintf "via the %s element of the tuple" (int_to_ordinal idx)
+  | Prj_symm_shape (fld_nm, fld_kind_lhs, fld_kind_rhs) ->
+    let fld_kind =
+      match side with
+      | `Lhs -> fld_kind_lhs
+      | `Rhs -> fld_kind_rhs
+    in
+    Format.sprintf
+      "via the %s shape field `'%s'`"
+      (explain_field_kind fld_kind)
+      fld_nm
+  | Prj_symm_fn_arg (idx_lhs, idx_rhs, var) ->
+    let idx =
+      match side with
+      | `Lhs -> idx_lhs
+      | `Rhs -> idx_rhs
+    in
+    Format.sprintf
+      "via the (%s) %s function parameter"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+  | Prj_symm_fn_ret -> "via the function return type"
+  | Prj_symm_access -> "via the type access"
+
+let explain_asymm_prj prj =
+  match prj with
+  | Prj_asymm_union -> "via the union type"
+  | Prj_asymm_inter -> "via the intersection type"
+  | Prj_asymm_neg -> "via the negation type"
+  | Prj_asymm_extends -> "via a subclass relationship"
+
+(* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
+   and ensure we handle all cases statically *)
+let explain_witness = function
+  | Rhint pos -> (pos, "this hint")
+  | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
+  | Rmissing_field -> (Pos_or_decl.none, "nothing")
+  | Rwitness_from_decl pos -> (pos, "this declaration")
+  | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
+  | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
+  | r -> (to_raw_pos r, "this thing")
+
+let explain_flow = function
+  | Fwd -> "flows *into*"
+  | Bwd -> "flows *from*"
+
+let explain_path ps =
+  let prefix_first (pos, expl) ~first =
+    if first then
+      (pos, Format.sprintf "Here's why: %s" expl)
+    else
+      (pos, expl)
+  in
+
+  let rec aux ps ~first =
+    match ps with
+    | Witness lhs :: Flow dir :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s" flow_expl rhs_hint_expl
+          else
+            Format.sprintf "which itself %s %s" flow_expl rhs_hint_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Flow dir :: Prj_symm_lhs prj :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_symm_prj prj `Lhs in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Prj_symm_rhs prj :: Flow dir :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_symm_prj prj `Rhs in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Flow dir :: Prj_asymm prj :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_asymm_prj prj in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    (* TODO(mjt) the cases above are the only valid path prefixes; this should
+       be encoded in the type *)
+    | _ -> []
+  in
+  aux ps ~first:true
+
 let debug t =
   let pos = to_raw_pos t in
   let norm_t = normalize t in
-  let unnorm = Hh_json.json_to_string ~pretty:true @@ to_json t
-  and norm = Hh_json.json_to_string ~pretty:true @@ to_json norm_t
-  and path =
-    Hh_json.json_to_string ~pretty:true @@ path_to_json @@ to_path norm_t
-  in
-  [
-    (pos, "Unnormalized reason:\n" ^ unnorm);
-    (pos, "Normalized reason:\n" ^ norm);
-    (pos, "Path:\n" ^ path);
-  ]
+  let path = to_path norm_t in
+  let path_json = Hh_json.json_to_string ~pretty:true @@ path_to_json path in
+  let path_expl = explain_path path in
+  (pos, "Path:\n" ^ path_json) :: path_expl
+
+let explain t = explain_path @@ to_path @@ normalize t
 
 type t = locl_phase t_
 

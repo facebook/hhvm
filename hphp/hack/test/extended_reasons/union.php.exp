@@ -1,96 +1,24 @@
 error: Typing[4110] Invalid return type [1]
 -> Expected A [2]
 -> But got B [3]
--> Unnormalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
-                {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]}
-              ]
-            },
-            {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]}
-          ]
-        },
-        {
-          "Rprj_asymm":[
-            "Prj_asymm_union",
-            {
-              "Rflow":[
-                {"Rwitness":[{"filename":"union.php","line":10,"char_start":3,"char_end":49}]},
-                {"Rwitness":[{"filename":"union.php","line":16,"char_start":10,"char_end":11}]}
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {"Rhint":[{"filename":"union.php","line":9,"char_start":37,"char_end":37}]}
-  ]
-} [3]
--> Normalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
-                {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]}
-              ]
-            },
-            {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]}
-          ]
-        },
-        {
-          "Rprj_asymm":[
-            "Prj_asymm_union",
-            {
-              "Rflow":[
-                {"Rwitness":[{"filename":"union.php","line":10,"char_start":3,"char_end":49}]},
-                {"Rwitness":[{"filename":"union.php","line":16,"char_start":10,"char_end":11}]}
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {"Rhint":[{"filename":"union.php","line":9,"char_start":37,"char_end":37}]}
-  ]
-} [3]
--> Path:
-[
-  {"Rhint":[{"filename":"union.php","line":9,"char_start":30,"char_end":30}]},
-  {"Fwd":[]},
-  {"Rwitness":[{"filename":"union.php","line":9,"char_start":32,"char_end":33}]},
-  {"Fwd":[]},
-  {"Rwitness":[{"filename":"union.php","line":13,"char_start":5,"char_end":6}]},
-  {"Fwd":[]},
-  "Prj_asymm_union",
-  {"Rwitness":[{"filename":"union.php","line":10,"char_start":3,"char_end":49}]},
-  {"Fwd":[]},
-  {"Rwitness":[{"filename":"union.php","line":16,"char_start":10,"char_end":11}]},
-  {"Fwd":[]},
-  {"Rhint":[{"filename":"union.php","line":9,"char_start":37,"char_end":37}]}
-] [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression, via the union type [6]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
 
 union.php:16:10
-       7 | }
-       8 | 
-[2,3]  9 | function foo(bool  $p, A $x, B $y): A {
-      10 |   if($p){
-      11 |     $z = $x;
-         :
-      14 |   }
-      15 | 
-[1]   16 |   return $z;
-      17 | }
+         7 | }
+         8 | 
+[2,3,4]  9 | function foo(bool  $p, A $x, B $y): A {
+[6]     10 |   if($p){
+[6]     11 |     $z = $x;
+[6]     12 |   } else{
+[5,6]   13 |     $z = $y;
+[6]     14 |   }
+        15 | 
+[1]     16 |   return $z;
+        17 | }
 
 1 error found.

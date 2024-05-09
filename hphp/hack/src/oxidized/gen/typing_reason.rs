@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b821488d6cc9a920a0b88991127ec63>>
+// @generated SignedSource<<25583b9769782cb94cf7e4df024ebc3b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -477,11 +477,13 @@ arena_deserializer::impl_deserialize_in_arena!(Direction);
 )]
 #[repr(C, u8)]
 pub enum PathElem {
-    Direction(Direction),
-    #[rust_to_ocaml(name = "Symm_projection")]
-    SymmProjection(PrjSymm),
-    #[rust_to_ocaml(name = "Asymm_projection")]
-    AsymmProjection(PrjAsymm),
+    Flow(Direction),
+    #[rust_to_ocaml(name = "Prj_symm_lhs")]
+    PrjSymmLhs(PrjSymm),
+    #[rust_to_ocaml(name = "Prj_symm_rhs")]
+    PrjSymmRhs(PrjSymm),
+    #[rust_to_ocaml(name = "Prj_asymm")]
+    PrjAsymm(PrjAsymm),
     Witness(T_),
 }
 

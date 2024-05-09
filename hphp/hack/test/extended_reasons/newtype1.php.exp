@@ -1,177 +1,29 @@
 error: Typing[4110] Invalid argument [1]
 -> Expected bool [2]
 -> But got int [3]
--> Unnormalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
-                        },
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
-                }
-              ]
-            },
-            {
-              "Rprj_symm":[
-                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-                {
-                  "Rflow":[
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
-                    },
-                    {
-                      "Rrev":[
-                        {
-                          "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
-    }
-  ]
-} [3]
--> Normalized reason:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
-                        },
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
-                }
-              ]
-            },
-            {
-              "Rprj_symm":[
-                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-                {
-                  "Rflow":[
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
-                    },
-                    {
-                      "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
-    }
-  ]
-} [3]
--> Path:
-[
-  {
-    "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
-  },
-  {"Fwd":[]},
-  {
-    "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-  },
-  {"Fwd":[]},
-  {
-    "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
-  },
-  {"Fwd":[]},
-  {
-    "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
-  },
-  {"Fwd":[]},
-  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-  {
-    "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
-  },
-  {"Bwd":[]},
-  {
-    "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
-  },
-  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-  {"Fwd":[]},
-  {
-    "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
-  },
-  {"Fwd":[]},
-  {
-    "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
-  }
-] [3]
+-> Here's why: this hint [3]
+-> flows into this hint [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [1]
+-> which itself flows into this expression, via the (contravariant) 1st function parameter [6]
+-> which itself flows from this declaration [7]
+-> which itself flows into this hint, via the (contravariant) 1st function parameter [8]
+-> which itself flows into this hint [2]
 
 newtype1.php--file2.php:8:22
-    1 | <?hh
-    2 | 
-[2] 3 | function expect_bool(bool $x): bool {
-    4 |   return $x;
-    5 | }
-    6 | 
-    7 | function pass_my_int(myint $y) : bool {
-[1] 8 |   return expect_bool($y);
-    9 | }
+      1 | <?hh
+      2 | 
+[2,7] 3 | function expect_bool(bool $x): bool {
+      4 |   return $x;
+      5 | }
+      6 | 
+[4,5] 7 | function pass_my_int(myint $y) : bool {
+[1,6] 8 |   return expect_bool($y);
+      9 | }
 
 newtype1.php--file1.php:3:24
-    1 | <?hh
-    2 | 
-[3] 3 | newtype myint as int = int;
+      1 | <?hh
+      2 | 
+[3,8] 3 | newtype myint as int = int;
 
 1 error found.

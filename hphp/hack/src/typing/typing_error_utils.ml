@@ -5762,7 +5762,7 @@ end = struct
          TypecheckerOptions.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
        then
-         let flow = Typing_reason.(debug @@ Rflow (r_sub, r_super)) in
+         let flow = Typing_reason.(explain @@ Rflow (r_sub, r_super)) in
          reasons @ flow
        else
          reasons)
@@ -5878,7 +5878,7 @@ end = struct
          TypecheckerOptions.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
         then
-          Typing_reason.(debug @@ Rflow (reason_sub, reason_super))
+          Typing_reason.(explain @@ Rflow (reason_sub, reason_super))
         else
           []))
     in
@@ -6021,7 +6021,7 @@ end = struct
          TypecheckerOptions.tco_extended_reasons
            Typing_env_types.(env.genv.tcopt)
         then
-          Typing_reason.(debug @@ Rflow (reason_sub, reason_super))
+          Typing_reason.(explain @@ Rflow (reason_sub, reason_super))
         else
           []))
     in

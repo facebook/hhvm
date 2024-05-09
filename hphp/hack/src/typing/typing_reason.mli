@@ -216,6 +216,8 @@ val to_json : 'a t_ -> Hh_json.json
 
 val debug : t -> (Pos_or_decl.t * string) list
 
+val explain : t -> (Pos_or_decl.t * string) list
+
 type decl_t = decl_phase t_
 
 val is_none : t -> bool

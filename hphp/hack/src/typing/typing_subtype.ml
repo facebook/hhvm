@@ -2586,109 +2586,206 @@ end = struct
       field_name =
     let field_pos = TShapeField.pos field_name in
     let printable_name = TUtils.get_printable_shape_field_name field_name in
-    match (proj_sub, proj_super) with
-    (***** "Successful" cases - 5 / 9 total cases *****)
-    | (`Required sub_ty, `Required super_ty)
-    | (`Required sub_ty, `Optional super_ty)
-    | (`Optional sub_ty, `Optional super_ty) ->
-      let super_ty = Sd.liken ~super_like env super_ty in
-      Ok
-        (fun env ->
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:
-              {
-                sub_supportdyn =
-                  (if supportdyn_sub then
-                    Some r_sub
-                  else
-                    None);
-                ty_sub = sub_ty;
-              }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = super_ty;
-              }
-            env)
-    | (`Absent, `Optional _)
-    | (`Absent, `Absent) ->
-      Ok (fun env -> valid env)
-    (***** Error cases - 4 / 9 total cases *****)
-    | (`Required _, `Absent)
-    | (`Optional _, `Absent) ->
-      let ty_err_opt =
-        Option.map
-          subtype_env.Subtype_env.on_error
-          ~f:
-            Typing_error.(
-              fun on_error ->
-                apply_reasons ~on_error
-                @@ Secondary.Missing_field
-                     {
-                       pos = Reason.to_pos r_super;
-                       decl_pos = field_pos;
-                       name = printable_name;
-                     })
-      in
-      Error ty_err_opt
-    | (`Optional _, `Required super_ty) ->
-      let ty_err_opt =
-        Option.map
-          subtype_env.Subtype_env.on_error
-          ~f:
-            Typing_error.(
-              fun on_error ->
-                apply_reasons ~on_error
-                @@ Secondary.Required_field_is_optional
-                     {
-                       pos = Reason.to_pos r_sub;
-                       decl_pos = Reason.to_pos r_super;
-                       name = printable_name;
-                       def_pos = get_pos super_ty;
-                     })
-      in
-      Error ty_err_opt
-    | (`Absent, `Required _) ->
-      let quickfixes_opt =
-        match r_sub with
-        | Reason.Rshape_literal p ->
-          let fix_pos =
-            Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
-          in
-          Some
-            [
-              Quickfix.make_eager_default_hint_style
-                ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
-                ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
-                fix_pos;
-            ]
-        | _ -> None
-      in
+    let res =
+      match (proj_sub, proj_super) with
+      (***** "Successful" cases - 5 / 9 total cases *****)
+      | (`Required ty_sub, `Required ty_super) ->
+        Ok
+          (Some
+             ( (Typing_reason.Required, ty_sub),
+               (Typing_reason.Required, ty_super) ))
+      | (`Required ty_sub, `Optional ty_super) ->
+        Ok
+          (Some
+             ( (Typing_reason.Required, ty_sub),
+               (Typing_reason.Optional, ty_super) ))
+      | (`Optional ty_sub, `Optional ty_super) ->
+        Ok
+          (Some
+             ( (Typing_reason.Optional, ty_sub),
+               (Typing_reason.Optional, ty_super) ))
+      | (`Absent, `Optional _)
+      | (`Absent, `Absent) ->
+        Ok None
+      (***** Error cases - 4 / 9 total cases *****)
+      | (`Required ty_sub, `Absent) ->
+        let r_field_sub =
+          get_reason
+          @@ Prov.(
+               update ty_sub ~env ~f:(fun from ->
+                   flow
+                     ~from
+                     ~into:
+                       (prj_shape
+                          ~fld_nm:printable_name
+                          ~fld_kind_sub:Typing_reason.Required
+                          ~fld_kind_super:Typing_reason.Absent
+                       @@ flow ~from:r_sub ~into:r_super)))
+        and r_field_super = Typing_reason.Rmissing_field in
+        let ty_err_opt =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Missing_field
+                       {
+                         pos = Reason.to_pos r_super;
+                         decl_pos = field_pos;
+                         name = printable_name;
+                         reason_sub = r_field_sub;
+                         reason_super = r_field_super;
+                       })
+        in
+        Error ty_err_opt
+      | (`Optional ty_sub, `Absent) ->
+        let r_field_sub =
+          get_reason
+          @@ Prov.(
+               update ty_sub ~env ~f:(fun from ->
+                   flow
+                     ~from
+                     ~into:
+                       (prj_shape
+                          ~fld_nm:printable_name
+                          ~fld_kind_sub:Typing_reason.Optional
+                          ~fld_kind_super:Typing_reason.Absent
+                       @@ flow ~from:r_sub ~into:r_super)))
+        and r_field_super = Typing_reason.Rmissing_field in
+        let ty_err_opt =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Missing_field
+                       {
+                         pos = Reason.to_pos r_super;
+                         decl_pos = field_pos;
+                         name = printable_name;
+                         reason_sub = r_field_sub;
+                         reason_super = r_field_super;
+                       })
+        in
 
-      let ty_err_opt =
-        Option.map
-          subtype_env.Subtype_env.on_error
-          ~f:
-            Typing_error.(
-              fun on_error ->
-                let on_error =
-                  Option.value_map
-                    ~default:on_error
-                    ~f:(Reasons_callback.add_quickfixes on_error)
-                    quickfixes_opt
-                in
-                apply_reasons ~on_error
-                @@ Secondary.Missing_field
-                     {
-                       decl_pos = field_pos;
-                       pos = Reason.to_pos r_sub;
-                       name = printable_name;
-                     })
+        Error ty_err_opt
+      | (`Optional ty_sub, `Required ty_super) ->
+        let r_field_sub =
+          get_reason
+          @@ Prov.(
+               update ty_sub ~env ~f:(fun from ->
+                   flow
+                     ~from
+                     ~into:
+                       (prj_shape
+                          ~fld_nm:printable_name
+                          ~fld_kind_sub:Typing_reason.Optional
+                          ~fld_kind_super:Typing_reason.Required
+                       @@ flow ~from:r_sub ~into:r_super)))
+        and r_field_super = get_reason ty_super in
+        let ty_err_opt =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Required_field_is_optional
+                       {
+                         pos = Reason.to_pos r_sub;
+                         decl_pos = Reason.to_pos r_super;
+                         name = printable_name;
+                         def_pos = get_pos ty_super;
+                         reason_sub = r_field_sub;
+                         reason_super = r_field_super;
+                       })
+        in
+
+        Error ty_err_opt
+      | (`Absent, `Required ty_super) ->
+        let quickfixes_opt =
+          match r_sub with
+          | Reason.Rshape_literal p ->
+            let fix_pos =
+              Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
+            in
+            Some
+              [
+                Quickfix.make_eager_default_hint_style
+                  ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
+                  ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
+                  fix_pos;
+              ]
+          | _ -> None
+        in
+        let r_field_sub =
+          let from = Typing_reason.Rmissing_field in
+          if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+            Prov.(
+              flow
+                ~from
+                ~into:
+                  (prj_shape
+                     ~fld_nm:printable_name
+                     ~fld_kind_sub:Typing_reason.Absent
+                     ~fld_kind_super:Typing_reason.Required
+                  @@ flow ~from:r_sub ~into:r_super))
+          else
+            from
+        and r_field_super = get_reason ty_super in
+        let ty_err_opt =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  let on_error =
+                    Option.value_map
+                      ~default:on_error
+                      ~f:(Reasons_callback.add_quickfixes on_error)
+                      quickfixes_opt
+                  in
+                  apply_reasons ~on_error
+                  @@ Secondary.Missing_field
+                       {
+                         decl_pos = field_pos;
+                         pos = Reason.to_pos r_sub;
+                         name = printable_name;
+                         reason_sub = r_field_sub;
+                         reason_super = r_field_super;
+                       })
+        in
+
+        Error ty_err_opt
+    in
+
+    match res with
+    | Ok None -> Ok valid
+    | Ok (Some ((fld_kind_sub, ty_sub), (fld_kind_super, ty_super))) ->
+      let ty_sub =
+        Prov.(
+          update ty_sub ~env ~f:(fun from ->
+              flow
+                ~from
+                ~into:
+                  (prj_shape
+                     ~fld_nm:printable_name
+                     ~fld_kind_sub
+                     ~fld_kind_super
+                  @@ flow ~from:r_sub ~into:r_super)))
+      and ty_super = Sd.liken ~super_like env ty_super in
+      let sub_supportdyn =
+        if supportdyn_sub then
+          Some r_sub
+        else
+          None
       in
-      Error ty_err_opt
+      let lhs = { sub_supportdyn; ty_sub }
+      and rhs = { super_like = false; super_supportdyn = false; ty_super } in
+      Ok (simplify ~subtype_env ~this_ty ~lhs ~rhs)
+    | Error err -> Error err
 
   (* Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
      - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`

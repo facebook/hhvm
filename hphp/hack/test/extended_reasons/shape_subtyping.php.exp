@@ -1,0 +1,1136 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected int [2]
+-> But got bool [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":16,"char_end":19}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":9,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":16,"char_end":19}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":9,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":16,"char_end":19}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":9,"char_start":3,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":9,"char_start":22,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":29,"char_end":30}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":11,"char_start":3,"char_end":27}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+  }
+] [3]
+
+shape_subtyping.php:11:29
+     2 | 
+     3 | function expects_required_a_at_int(
+[2]  4 | shape('a' => int) $s,
+     5 | ): void {
+     6 | }
+     7 | 
+     8 | function passes_required_a_at_bool(
+[3]  9 |   shape('a' => bool) $s,
+    10 | ): void {
+[1] 11 |   expects_required_a_at_int($s);
+    12 | }
+    13 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected int [2]
+-> But got bool [3]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":40,"char_end":43}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":38,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [3]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":40,"char_end":43}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":38,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [3]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":28,"char_start":40,"char_end":43}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":38,"char_start":3,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":38,"char_start":22,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":35,"char_end":36}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":40,"char_start":3,"char_end":33}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+  }
+] [3]
+
+shape_subtyping.php:40:35
+    25 | 
+    26 | 
+[2] 27 | type required_a_at_int = shape('a' => int);
+[3] 28 | type required_a_at_bool = shape('a' => bool);
+    29 | type optional_a_at_int = shape(?'a' => int);
+    30 | type optional_a_at_bool = shape(?'a' => bool);
+       :
+    38 |   required_a_at_bool $s,
+    39 | ): void {
+[1] 40 |   expects_required_a_at_int_alias($s);
+    41 | }
+    42 | 
+
+error: Typing[4163] Invalid argument [1]
+-> The field a is optional [2]
+-> The field a is defined as required [3]
+-> a is defined here [4]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":17,"char_end":19}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":15,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [5]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":17,"char_end":19}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":15,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [5]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":17,"char_end":19}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":15,"char_start":3,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":15,"char_start":22,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":29,"char_end":30}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":17,"char_start":3,"char_end":27}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+  }
+] [5]
+
+shape_subtyping.php:17:29
+       2 | 
+       3 | function expects_required_a_at_int(
+[3,4]  4 | shape('a' => int) $s,
+       5 | ): void {
+       6 | }
+         :
+      13 | 
+      14 | function passes_optional_a_at_int(
+[2,5] 15 |   shape(?'a' => int) $s,
+      16 | ): void {
+[1]   17 |   expects_required_a_at_int($s);
+      18 | }
+      19 | 
+
+error: Typing[4163] Invalid argument [1]
+-> The field a is optional [2]
+-> The field a is defined as required [3]
+-> a is defined here [4]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":17,"char_end":20}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":3,"char_end":21}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":21,"char_start":23,"char_end":24}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [5]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":17,"char_end":20}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":3,"char_end":21}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":21,"char_start":23,"char_end":24}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+    }
+  ]
+} [5]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":17,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":21,"char_start":3,"char_end":21}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":21,"char_start":23,"char_end":24}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":29,"char_end":30}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":23,"char_start":3,"char_end":27}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":3,"char_start":10,"char_end":34}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":4,"char_start":14,"char_end":16}]
+  }
+] [5]
+
+shape_subtyping.php:23:29
+       2 | 
+       3 | function expects_required_a_at_int(
+[3,4]  4 | shape('a' => int) $s,
+       5 | ): void {
+       6 | }
+         :
+      19 | 
+      20 | function passes_optional_a_at_bool(
+[2,5] 21 |   shape(?'a' => bool) $s,
+      22 | ): void {
+[1]   23 |   expects_required_a_at_int($s);
+      24 | }
+      25 | 
+
+error: Typing[4163] Invalid argument [1]
+-> The field a is optional [2]
+-> The field a is defined as required [3]
+-> a is defined here [4]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":40,"char_end":42}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":44,"char_start":21,"char_end":22}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [5]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":40,"char_end":42}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":44,"char_start":21,"char_end":22}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [5]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":29,"char_start":40,"char_end":42}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":44,"char_start":3,"char_end":19}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":44,"char_start":21,"char_end":22}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":35,"char_end":36}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":46,"char_start":3,"char_end":33}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+  }
+] [5]
+
+shape_subtyping.php:46:35
+    25 | 
+    26 | 
+[4] 27 | type required_a_at_int = shape('a' => int);
+    28 | type required_a_at_bool = shape('a' => bool);
+[5] 29 | type optional_a_at_int = shape(?'a' => int);
+    30 | type optional_a_at_bool = shape(?'a' => bool);
+    31 | 
+    32 | function expects_required_a_at_int_alias(
+[3] 33 | required_a_at_int $s,
+    34 | ): void {
+    35 | }
+       :
+    42 | 
+    43 | function passes_optional_a_at_int_alias(
+[2] 44 |   optional_a_at_int $s,
+    45 | ): void {
+[1] 46 |   expects_required_a_at_int_alias($s);
+    47 | }
+    48 | 
+
+error: Typing[4163] Invalid argument [1]
+-> The field a is optional [2]
+-> The field a is defined as required [3]
+-> a is defined here [4]
+-> Unnormalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":41,"char_end":44}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":50,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rrev":[
+                                {
+                                  "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [5]
+-> Normalized reason:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":41,"char_end":44}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":50,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+    }
+  ]
+} [5]
+-> Path:
+[
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":30,"char_start":41,"char_end":44}]
+  },
+  {"Fwd":[]},
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":50,"char_start":3,"char_end":20}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":50,"char_start":22,"char_end":23}]
+  },
+  {"Fwd":[]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":35,"char_end":36}]
+  },
+  {"Fwd":[]},
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {
+    "Rwitness":[{"filename":"shape_subtyping.php","line":52,"char_start":3,"char_end":33}]
+  },
+  {"Bwd":[]},
+  {
+    "Rwitness_from_decl":[{"filename":"shape_subtyping.php","line":32,"char_start":10,"char_end":40}]
+  },
+  {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":33,"char_start":1,"char_end":17}]
+  },
+  {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+  {"Fwd":[]},
+  {
+    "Rhint":[{"filename":"shape_subtyping.php","line":27,"char_start":39,"char_end":41}]
+  }
+] [5]
+
+shape_subtyping.php:52:35
+    25 | 
+    26 | 
+[4] 27 | type required_a_at_int = shape('a' => int);
+    28 | type required_a_at_bool = shape('a' => bool);
+    29 | type optional_a_at_int = shape(?'a' => int);
+[5] 30 | type optional_a_at_bool = shape(?'a' => bool);
+    31 | 
+    32 | function expects_required_a_at_int_alias(
+[3] 33 | required_a_at_int $s,
+    34 | ): void {
+    35 | }
+       :
+    48 | 
+    49 | function passes_optional_a_at_bool_alias(
+[2] 50 |   optional_a_at_bool $s,
+    51 | ): void {
+[1] 52 |   expects_required_a_at_int_alias($s);
+    53 | }
+
+6 errors found.

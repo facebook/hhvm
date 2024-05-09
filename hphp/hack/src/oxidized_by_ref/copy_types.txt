@@ -252,6 +252,7 @@ typing_reason::Blame
 typing_reason::BlameSource
 typing_reason::DeclPhase
 typing_reason::ExprDepTypeReason
+typing_reason::FieldKind
 typing_reason::LoclPhase
 typing_reason::PosId
 typing_reason::PrjAsymm

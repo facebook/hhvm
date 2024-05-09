@@ -1570,6 +1570,8 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
+        reason_sub: Typing_reason.t;
+        reason_super: Typing_reason.t;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -1617,6 +1619,8 @@ and Secondary : sig
         decl_pos: Pos_or_decl.t;
         def_pos: Pos_or_decl.t;
         name: string;
+        reason_sub: Typing_reason.t;
+        reason_super: Typing_reason.t;
       }
     | Return_disposable_mismatch of {
         pos_sub: Pos_or_decl.t;
@@ -1861,6 +1865,8 @@ end = struct
         pos: Pos_or_decl.t;
         name: string;
         decl_pos: Pos_or_decl.t;
+        reason_sub: Typing_reason.t;
+        reason_super: Typing_reason.t;
       }
     | Shape_fields_unknown of {
         pos: Pos_or_decl.t;
@@ -1908,6 +1914,8 @@ end = struct
         decl_pos: Pos_or_decl.t;
         def_pos: Pos_or_decl.t;
         name: string;
+        reason_sub: Typing_reason.t;
+        reason_super: Typing_reason.t;
       }
     | Return_disposable_mismatch of {
         pos_sub: Pos_or_decl.t;

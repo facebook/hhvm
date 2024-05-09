@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bcfd95e086aa199634ae79bc1c8c8723>>
+// @generated SignedSource<<1b821488d6cc9a920a0b88991127ec63>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -128,6 +128,33 @@ pub enum Blame {
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(u8)]
+pub enum FieldKind {
+    Absent,
+    Optional,
+    Required,
+}
+impl TrivialDrop for FieldKind {}
+arena_deserializer::impl_deserialize_in_arena!(FieldKind);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -153,7 +180,7 @@ pub enum PrjSymm {
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
     PrjSymmTuple(isize),
     #[rust_to_ocaml(name = "Prj_symm_shape")]
-    PrjSymmShape(String),
+    PrjSymmShape(String, FieldKind, FieldKind),
     #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
     PrjSymmFnArg(isize, isize, ast_defs::Variance),
     #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
@@ -404,6 +431,8 @@ pub enum T_ {
     RprjSymm(PrjSymm, Box<T_>),
     #[rust_to_ocaml(name = "Rprj_asymm")]
     RprjAsymm(PrjAsymm, Box<T_>),
+    #[rust_to_ocaml(name = "Rmissing_field")]
+    RmissingField,
 }
 
 #[derive(

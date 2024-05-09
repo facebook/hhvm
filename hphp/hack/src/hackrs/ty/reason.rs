@@ -251,6 +251,7 @@ pub trait Reason:
                 OR::Rrev(_) => RI::Rnone,
                 OR::RprjAsymm(_) => RI::Rnone,
                 OR::RprjSymm(_) => RI::Rnone,
+                OR::RmissingField => RI::Rnone,
             }
         })
     }

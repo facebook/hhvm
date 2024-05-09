@@ -85,12 +85,18 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
+type field_kind =
+  | Absent
+  | Optional
+  | Required
+[@@deriving hash]
+
 type prj_symm =
   | Prj_symm_neg
   | Prj_symm_class of string * int * Ast_defs.variance
   | Prj_symm_newtype of string * int * Ast_defs.variance
   | Prj_symm_tuple of int
-  | Prj_symm_shape of string
+  | Prj_symm_shape of string * field_kind * field_kind
   | Prj_symm_fn_arg of int * int * Ast_defs.variance
   | Prj_symm_fn_ret
   | Prj_symm_access
@@ -108,6 +114,11 @@ let variance_to_json = function
   | Ast_defs.Contravariant ->
     Hh_json.(JSON_Object [("Contravariant", JSON_Array [])])
   | Ast_defs.Invariant -> Hh_json.(JSON_Object [("Invariant", JSON_Array [])])
+
+let field_kind_to_json = function
+  | Absent -> Hh_json.(JSON_Object [("Absent", JSON_Array [])])
+  | Optional -> Hh_json.(JSON_Object [("Optional", JSON_Array [])])
+  | Required -> Hh_json.(JSON_Object [("Required", JSON_Array [])])
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
@@ -137,8 +148,18 @@ let prj_symm_to_json = function
         ])
   | Prj_symm_tuple idx ->
     Hh_json.(JSON_Object [(" Prj_symm_tuple", JSON_Number (string_of_int idx))])
-  | Prj_symm_shape fld_nm ->
-    Hh_json.(JSON_Object [(" Prj_symm_shape", JSON_String fld_nm)])
+  | Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( " Prj_symm_shape",
+            JSON_Array
+              [
+                JSON_String fld_nm;
+                field_kind_to_json fld_kind_sub;
+                field_kind_to_json fld_kind_super;
+              ] );
+        ])
   | Prj_symm_fn_arg (idx_sub, idx_sup, variance) ->
     Hh_json.(
       JSON_Object
@@ -300,6 +321,7 @@ type _ t_ =
   | Rrev : locl_phase t_ -> locl_phase t_
   | Rprj_symm : prj_symm * locl_phase t_ -> locl_phase t_
   | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
+  | Rmissing_field : locl_phase t_
 [@@deriving hash]
 
 let rec normalize : locl_phase t_ -> locl_phase t_ = function
@@ -320,7 +342,8 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
   match r with
   | Rnone
-  | Rinvalid ->
+  | Rinvalid
+  | Rmissing_field ->
     Pos_or_decl.none
   | Rret_fun_kind_from_decl (p, _)
   | Rhint p
@@ -531,6 +554,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rrev _ -> "Rrev"
   | Rprj_symm _ -> "Rprj_symm"
   | Rprj_asymm _ -> "Rprj_asymm"
+  | Rmissing_field -> "Rmissing_field"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -543,13 +567,15 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
   Format.pp_print_string fmt @@ to_constructor_string r;
   match r with
   | Rnone
-  | Rinvalid ->
+  | Rinvalid
+  | Rmissing_field ->
     ()
   | _ ->
     Format.fprintf fmt "@ (@[";
     (match r with
     | Rnone
-    | Rinvalid ->
+    | Rinvalid
+    | Rmissing_field ->
       failwith "already matched"
     | Rtypeconst (r1, (p, s1), (lazy s2), r2) ->
       pp_t_ fmt r1;
@@ -1148,6 +1174,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
     Hh_json.(
       JSON_Object
         [("Rprj_asymm", JSON_Array [prj_asymm_to_json prj; to_json r])])
+  | Rmissing_field -> Hh_json.(JSON_Object [("Rmissing_field", JSON_Array [])])
 
 type direction =
   | Fwd
@@ -1320,6 +1347,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   let p = to_pos r in
   match r with
   | Rnone -> [(p, prefix)]
+  | Rmissing_field -> [(p, prefix)]
   | Rinvalid -> [(p, prefix)]
   | Rwitness _ -> [(p, prefix)]
   | Rwitness_from_decl p -> [(p, prefix)]
@@ -1908,6 +1936,7 @@ module Visitor = struct
           Ropaque_type_from_module (x, y, this#on_reason r)
         | Rnone -> Rnone
         | Rinvalid -> Rinvalid
+        | Rmissing_field -> Rmissing_field
         | Rwitness x -> Rwitness x
         | Rwitness_from_decl x -> Rwitness_from_decl x
         | Ridx_vector x -> Ridx_vector x

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7235775b066628ee243a2a6d043747c3>>
+// @generated SignedSource<<ee3eb404483655dab6a46181263a34f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -85,6 +85,8 @@ pub enum Blame<'a> {
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
 
+pub use oxidized::typing_reason::FieldKind;
+
 #[derive(
     Clone,
     Copy,
@@ -118,7 +120,14 @@ pub enum PrjSymm<'a> {
     PrjSymmTuple(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_symm_shape")]
-    PrjSymmShape(&'a str),
+    #[rust_to_ocaml(inline_tuple)]
+    PrjSymmShape(
+        &'a (
+            &'a str,
+            &'a oxidized::typing_reason::FieldKind,
+            &'a oxidized::typing_reason::FieldKind,
+        ),
+    ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
     #[rust_to_ocaml(inline_tuple)]
@@ -493,6 +502,8 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "Rprj_asymm")]
     #[rust_to_ocaml(inline_tuple)]
     RprjAsymm(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
+    #[rust_to_ocaml(name = "Rmissing_field")]
+    RmissingField,
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

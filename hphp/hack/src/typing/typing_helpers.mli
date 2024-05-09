@@ -96,4 +96,11 @@ module Prov : sig
     Typing_reason.t
 
   val prj_extends : Typing_reason.t -> Typing_reason.t
+
+  val prj_shape :
+    Typing_reason.t ->
+    fld_nm:string ->
+    fld_kind_sub:Typing_reason.field_kind ->
+    fld_kind_super:Typing_reason.field_kind ->
+    Typing_reason.t
 end

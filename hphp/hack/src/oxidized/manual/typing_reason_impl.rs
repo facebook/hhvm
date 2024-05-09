@@ -22,6 +22,7 @@ impl Reason {
         match self {
             Rnone => None,
             Rinvalid => None,
+            RmissingField => None,
             Rwitness(p)
             | RwitnessFromDecl(p)
             | Ridx(p, _)

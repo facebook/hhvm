@@ -50,13 +50,19 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
+type field_kind =
+  | Absent
+  | Optional
+  | Required
+[@@deriving hash]
+
 (** A symmetric projection into a type constructor *)
 type prj_symm =
   | Prj_symm_neg
   | Prj_symm_class of string * int * Ast_defs.variance
   | Prj_symm_newtype of string * int * Ast_defs.variance
   | Prj_symm_tuple of int
-  | Prj_symm_shape of string
+  | Prj_symm_shape of string * field_kind * field_kind
   | Prj_symm_fn_arg of int * int * Ast_defs.variance
   | Prj_symm_fn_ret
   | Prj_symm_access
@@ -201,6 +207,7 @@ type _ t_ =
       (** Records reasons through type constructors where both sub- and supertype are projected in the same way *)
   | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
       (** Records reasons through type constructors where only one of the sub- or supertype is projected *)
+  | Rmissing_field : locl_phase t_
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

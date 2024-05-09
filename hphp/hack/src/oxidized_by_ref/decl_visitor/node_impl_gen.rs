@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d2dd3503234edb68f2fb5de8c8e00a89>>
+// @generated SignedSource<<a94f9f0436e6769c930ce9bc3e923e66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1154,6 +1154,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rrev(ref __binding_0) => __binding_0.accept(v),
             T_::RprjSymm(ref __binding_0) => __binding_0.accept(v),
             T_::RprjAsymm(ref __binding_0) => __binding_0.accept(v),
+            T_::RmissingField => {}
         }
     }
 }
@@ -1346,6 +1347,18 @@ impl<'a> Node<'a> for BlameSource {
             BlameSource::BSlambda => {}
             BlameSource::BSassignment => {}
             BlameSource::BSoutOfScope => {}
+        }
+    }
+}
+impl<'a> Node<'a> for FieldKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_field_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FieldKind::Absent => {}
+            FieldKind::Optional => {}
+            FieldKind::Required => {}
         }
     }
 }

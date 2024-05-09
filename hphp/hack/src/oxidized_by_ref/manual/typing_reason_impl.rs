@@ -44,6 +44,7 @@ impl<'a> Reason<'a> {
         match self {
             Rnone => None,
             Rinvalid => None,
+            RmissingField => None,
             Rwitness(p)
             | RwitnessFromDecl(p)
             | Ridx((p, _))
@@ -154,6 +155,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
         use T_::*;
         match self {
             Rnone => f.debug_tuple("Rnone").finish(),
+            RmissingField => f.debug_tuple("RmissingField").finish(),
             Rwitness(p) => f.debug_tuple("Rwitness").field(p).finish(),
             RwitnessFromDecl(p) => f.debug_tuple("RwitnessFromDecl").field(p).finish(),
             Ridx((p, t)) => f.debug_tuple("Ridx").field(p).field(t).finish(),

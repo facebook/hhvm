@@ -38,6 +38,7 @@ struct
   let rec reason : type ph. ph Typing_reason.t_ -> ph Typing_reason.t_ =
     function
     | Rnone -> Rnone
+    | Rmissing_field -> Rmissing_field
     | Rwitness p -> Rwitness (pos p)
     | Rwitness_from_decl p -> Rwitness_from_decl (pos_or_decl p)
     | Ridx (p, r) -> Ridx (pos p, reason r)

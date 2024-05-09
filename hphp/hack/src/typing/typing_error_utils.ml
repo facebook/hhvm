@@ -5866,13 +5866,21 @@ end = struct
     in
     (Error_code.ConcreteConstInterfaceOverride, reasons, User_error_flags.empty)
 
-  let missing_field pos name decl_pos =
+  let missing_field pos name decl_pos reason_sub reason_super env =
     let reasons =
       lazy
-        [
-          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
-          (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
-        ]
+        ((pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing")
+        :: ( decl_pos,
+             "The field " ^ Markdown_lite.md_codify name ^ " is defined" )
+        ::
+        (* If the extended reasons flag is set, we output the debug data  *)
+        (if
+         TypecheckerOptions.tco_extended_reasons
+           Typing_env_types.(env.genv.tcopt)
+        then
+          Typing_reason.(debug @@ Rflow (reason_sub, reason_super))
+        else
+          []))
     in
     (Error_code.MissingField, reasons, User_error_flags.empty)
 
@@ -5998,17 +6006,24 @@ end = struct
     in
     (Error_code.AcceptDisposableInvariant, reasons, User_error_flags.empty)
 
-  let required_field_is_optional pos name decl_pos def_pos =
+  let required_field_is_optional
+      pos name decl_pos def_pos reason_sub reason_super env =
     let reasons =
       lazy
-        [
-          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**");
-          ( decl_pos,
-            "The field "
-            ^ Markdown_lite.md_codify name
-            ^ " is defined as **required**" );
-          (def_pos, Markdown_lite.md_codify name ^ " is defined here");
-        ]
+        ((pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**")
+        :: ( decl_pos,
+             "The field "
+             ^ Markdown_lite.md_codify name
+             ^ " is defined as **required**" )
+        :: (def_pos, Markdown_lite.md_codify name ^ " is defined here")
+        ::
+        (if
+         TypecheckerOptions.tco_extended_reasons
+           Typing_env_types.(env.genv.tcopt)
+        then
+          Typing_reason.(debug @@ Rflow (reason_sub, reason_super))
+        else
+          []))
     in
     (Error_code.RequiredFieldIsOptional, reasons, User_error_flags.empty)
 
@@ -6517,8 +6532,9 @@ end = struct
            origin
            parent_origin
            is_abstract)
-    | Missing_field { pos; name; decl_pos } ->
-      Eval_result.single (missing_field pos name decl_pos)
+    | Missing_field { pos; name; decl_pos; reason_sub; reason_super } ->
+      Eval_result.single
+        (missing_field pos name decl_pos reason_sub reason_super env)
     | Shape_fields_unknown { pos; decl_pos } ->
       Eval_result.single (shape_fields_unknown pos decl_pos)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
@@ -6541,8 +6557,17 @@ end = struct
     | Missing_constructor pos -> Eval_result.single (missing_constructor pos)
     | Accept_disposable_invariant { pos; decl_pos } ->
       Eval_result.single (accept_disposable_invariant pos decl_pos)
-    | Required_field_is_optional { pos; name; decl_pos; def_pos } ->
-      Eval_result.single (required_field_is_optional pos name decl_pos def_pos)
+    | Required_field_is_optional
+        { pos; name; decl_pos; def_pos; reason_sub; reason_super } ->
+      Eval_result.single
+        (required_field_is_optional
+           pos
+           name
+           decl_pos
+           def_pos
+           reason_sub
+           reason_super
+           env)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
       Eval_result.single

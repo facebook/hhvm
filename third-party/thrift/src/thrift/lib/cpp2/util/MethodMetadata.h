@@ -74,7 +74,7 @@ class MethodMetadata {
           interactionPosition(position),
           interactionName(std::move(interaction)) {}
 
-    FOLLY_COLD
+    [[FOLLY_ATTR_GNU_COLD]]
     Data(
         const char* name,
         FunctionQualifier qualifier,

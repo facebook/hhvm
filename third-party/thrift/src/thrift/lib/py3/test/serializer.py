@@ -135,8 +135,11 @@ class SerializerTests(SerializerTestBase):
     def test_from_thread_pool(self) -> None:
         control = easy(val=5, val_list=[1, 2, 3, 4])
         loop = asyncio.get_event_loop()
+        # pyre-fixme[6]: For 2nd argument expected `(*(*asyncio.events._Ts)) -> _T`
+        #  but got `(tstruct: sT, protocol: Protocol = ...) -> bytes`.
         coro = loop.run_in_executor(None, serialize, control)
         encoded = loop.run_until_complete(coro)
+        # pyre-fixme[6]: For 2nd argument expected `(*(*asyncio.events._Ts)) -> _T` b...
         coro = loop.run_in_executor(None, deserialize, type(control), encoded)
         decoded = loop.run_until_complete(coro)
         self.assertEqual(control, decoded)

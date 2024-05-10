@@ -166,6 +166,48 @@ class PatchTest : public testing::Test {
         folly::IOBuf::wrapBufferAsValue(expected.data(), expected.size());
     return folly::IOBufEqualTo{}(value.as_binary(), buf);
   }
+
+  static void checkMapMask(
+      const Object& patchObj,
+      const std::unordered_set<std::string_view>& expectedReadKeys,
+      const std::unordered_set<std::string_view>& expectedWriteKeys) {
+    auto checkMaskView = [](const auto& mask, const auto& expectedKeys) {
+      EXPECT_EQ(mask.size(), expectedKeys.size());
+      for (auto& kv : mask) {
+        EXPECT_TRUE(std::any_of(
+            expectedKeys.begin(),
+            expectedKeys.end(),
+            [&](const auto& expectKey) {
+              return isBinaryEqual(*((Value*)kv.first), expectKey);
+            }));
+        EXPECT_EQ(kv.second, allMask());
+      }
+    };
+    auto checkMask = [](const auto& mask, const auto& expectedKeys) {
+      EXPECT_EQ(mask.size(), expectedKeys.size());
+      for (auto& kv : mask) {
+        EXPECT_TRUE(std::any_of(
+            expectedKeys.begin(),
+            expectedKeys.end(),
+            [&](const auto& expectKey) { return kv.first == expectKey; }));
+        EXPECT_EQ(kv.second, allMask());
+      }
+    };
+
+    auto masks = extractMaskViewFromPatch(patchObj);
+    checkMaskView(masks.read.includes_map_ref().value(), expectedReadKeys);
+    checkMaskView(masks.write.includes_map_ref().value(), expectedWriteKeys);
+
+    masks = extractMaskFromPatch(patchObj);
+    checkMask(masks.read.includes_string_map_ref().value(), expectedReadKeys);
+    checkMask(masks.write.includes_string_map_ref().value(), expectedWriteKeys);
+  }
+
+  static void checkMapMask(
+      const auto& patchObj,
+      const std::unordered_set<std::string_view>& expectKeys) {
+    checkMapMask(patchObj, expectKeys, expectKeys);
+  }
 };
 
 TEST_F(PatchTest, Bool) {
@@ -586,39 +628,6 @@ TEST_F(PatchTest, Map) {
     EXPECT_EQ(value.as_map(), applyDynamicPatch(patchObj, value).as_map());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
-
-  // Checks if the map mask generated from patchObj contains the expectKeys in
-  // both read and write masks.
-  auto checkMapMask =
-      [&](auto&& patchObj,
-          const std::unordered_set<std::string_view>& expectKeys) {
-        {
-          auto masks = extractMaskViewFromPatch(patchObj);
-          EXPECT_EQ(masks.read, masks.write);
-          auto mask = masks.read.includes_map_ref().value();
-          EXPECT_EQ(mask.size(), expectKeys.size());
-          for (auto& kv : mask) {
-            EXPECT_TRUE(std::any_of(
-                expectKeys.begin(), expectKeys.end(), [&](auto& expectKey) {
-                  return isBinaryEqual(*((Value*)kv.first), expectKey);
-                }));
-            EXPECT_EQ(kv.second, allMask());
-          }
-        }
-        {
-          auto masks = extractMaskFromPatch(patchObj);
-          EXPECT_EQ(masks.read, masks.write);
-          auto mask = masks.read.includes_string_map_ref().value();
-          EXPECT_EQ(mask.size(), expectKeys.size());
-          for (auto& kv : mask) {
-            EXPECT_TRUE(std::any_of(
-                expectKeys.begin(), expectKeys.end(), [&](auto& expectKey) {
-                  return kv.first == expectKey;
-                }));
-            EXPECT_EQ(kv.second, allMask());
-          }
-        }
-      };
 
   // Noop
   {

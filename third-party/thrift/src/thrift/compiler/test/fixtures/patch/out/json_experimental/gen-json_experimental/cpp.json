@@ -579,6 +579,54 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 359
+      },
+      "UseCursorSerialization" : {
+        "name" : "UseCursorSerialization",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Transitive" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"name": "::apache::thrift::CursorSerializationAdapter"}
+      }
+        },
+        "docstring" : "Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.\nMust add `cpp_include \"thrift/lib/cpp2/protocol/CursorBasedSerializer.h\"` to files that use this annotation.\nSee documentation for this class in CursorBasedSerializer.h\nCan only be applied to top-level structs (used as return type or sole argument to an RPC or serialized directly), not to types used as struct fields or container elements.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 368
       }
       },
   "source_path" : "thrift/annotation/cpp",

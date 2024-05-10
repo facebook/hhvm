@@ -197,6 +197,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.RuntimeAnnotation").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("cpp.UseCursorSerialization").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

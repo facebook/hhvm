@@ -654,6 +654,31 @@
           "column" : 28
         }
       }
+    },
+    "UseCursorSerialization" : {
+      "lineno" : 368,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "scope.Union" : {  },
+        "scope.Typedef" : {  },
+        "scope.Transitive" : {  },
+        "Adapter" : { "name" : "::apache::thrift::CursorSerializationAdapter" }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 368,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 373,
+          "column" : 33
+        }
+      }
     }
   }
 }

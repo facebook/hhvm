@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import unittest
 
 import thrift.python.test.annotations.thrift_types as test_types

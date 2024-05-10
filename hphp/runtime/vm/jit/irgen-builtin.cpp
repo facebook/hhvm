@@ -2676,15 +2676,6 @@ void emitSetImplicitContextByValue(IRGS& env) {
   );
 }
 
-void verifyImplicitContextState(IRGS& env, const Func* func) {
-  assertx(!func->hasCoeffectRules());
-  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-}
-
-void emitVerifyImplicitContextState(IRGS& env) {
-  verifyImplicitContextState(env, curFunc(env));
-}
-
 void emitCreateSpecialImplicitContext(IRGS& env) {
   auto const memoKey = topC(env, BCSPRelOffset{0});
   auto const type = topC(env, BCSPRelOffset{1});

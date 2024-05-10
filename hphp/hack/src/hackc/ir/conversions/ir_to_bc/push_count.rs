@@ -60,7 +60,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::ThrowNonExhaustiveSwitch(_)
             | Hhbc::UnsetG(..)
             | Hhbc::UnsetL(..)
-            | Hhbc::VerifyImplicitContextState(_)
             | Hhbc::VerifyParamTypeTS(..) => 0,
 
             // --- 1 pushed value

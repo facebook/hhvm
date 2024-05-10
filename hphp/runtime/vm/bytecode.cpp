@@ -5210,12 +5210,6 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
   tvDecRefGen(tv);
 }
 
-OPTBLD_INLINE void iopVerifyImplicitContextState() {
-  UNUSED auto const func = vmfp()->func();
-  assertx(!func->hasCoeffectRules());
-  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-}
-
 OPTBLD_INLINE void iopCreateSpecialImplicitContext() {
   auto const memoKey = vmStack().topC();
   auto const type = vmStack().indC(1);

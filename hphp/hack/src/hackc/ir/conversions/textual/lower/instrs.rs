@@ -786,10 +786,6 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
             }
-            Instr::Hhbc(Hhbc::VerifyImplicitContextState(_)) => {
-                // no-op
-                Instr::tombstone()
-            }
             Instr::Hhbc(Hhbc::LIterFree(id, loc)) => {
                 let lid = iter_var_name(id);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));

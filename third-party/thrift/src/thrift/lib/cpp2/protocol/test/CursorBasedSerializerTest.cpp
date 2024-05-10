@@ -200,6 +200,7 @@ TEST(CursorSerializer, ContainerRead) {
   // Reading from a finalized reader is not allowed (besides the obvious
   // use-after-move).
   EXPECT_THAT(
+      // @lint-ignore CLANGTIDY bugprone-use-after-move
       [&] { listReader.begin(); },
       ThrowsMessage<std::runtime_error>("Reader already finalized"));
 

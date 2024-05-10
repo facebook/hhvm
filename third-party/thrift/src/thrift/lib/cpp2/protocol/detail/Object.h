@@ -531,34 +531,34 @@ void setMaskedDataFull(
       type::ValueId{apache::thrift::util::i32ToZigzag(values.size() - 1)};
 }
 
-// parseValue with readMask and writeMask
+// parseValue with readMaskRef and writeMaskRef
 template <bool KeepExcludedData, typename Protocol>
 MaskedDecodeResultValue parseValueWithMask(
     Protocol& prot,
     TType arg_type,
-    MaskRef readMask,
-    MaskRef writeMask,
+    MaskRef readMaskRef,
+    MaskRef writeMaskRef,
     MaskedProtocolData& protocolData,
     bool string_to_binary = true) {
   MaskedDecodeResultValue result;
-  if (readMask.isAllMask()) { // serialize all
+  if (readMaskRef.isAllMask()) { // serialize all
     parseValueInplace(prot, arg_type, result.included, string_to_binary);
     return result;
   }
-  if (readMask.isNoneMask()) { // do not deserialize
+  if (readMaskRef.isNoneMask()) { // do not deserialize
     if constexpr (!KeepExcludedData) { // no need to store
       apache::thrift::skip(prot, arg_type);
       return result;
     }
-    if (writeMask.isNoneMask()) { // store the serialized data
+    if (writeMaskRef.isNoneMask()) { // store the serialized data
       setMaskedDataFull(prot, arg_type, result.excluded, protocolData);
       return result;
     }
-    if (writeMask.isAllMask()) { // no need to store
+    if (writeMaskRef.isAllMask()) { // no need to store
       apache::thrift::skip(prot, arg_type);
       return result;
     }
-    // Need to recursively store the result not in writeMask.
+    // Need to recursively store the result not in writeMaskRef.
   }
   switch (arg_type) {
     case protocol::T_STRUCT: {
@@ -572,8 +572,8 @@ MaskedDecodeResultValue parseValueWithMask(
         if (ftype == protocol::T_STOP) {
           break;
         }
-        MaskRef nextRead = readMask.get(FieldId{fid});
-        MaskRef nextWrite = writeMask.get(FieldId{fid});
+        MaskRef nextRead = readMaskRef.get(FieldId{fid});
+        MaskRef nextWrite = writeMaskRef.get(FieldId{fid});
         MaskedDecodeResultValue nestedResult =
             parseValueWithMask<KeepExcludedData>(
                 prot,
@@ -605,10 +605,10 @@ MaskedDecodeResultValue parseValueWithMask(
       prot.readMapBegin(keyType, valType, size);
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
-        MaskRef nextRead =
-            readMask.get(findMapIdByValueAddress(readMask.mask, keyValue));
-        MaskRef nextWrite =
-            writeMask.get(findMapIdByValueAddress(writeMask.mask, keyValue));
+        MaskRef nextRead = readMaskRef.get(
+            findMapIdByValueAddress(readMaskRef.mask, keyValue));
+        MaskRef nextWrite = writeMaskRef.get(
+            findMapIdByValueAddress(writeMaskRef.mask, keyValue));
         MaskedDecodeResultValue nestedResult =
             parseValueWithMask<KeepExcludedData>(
                 prot,

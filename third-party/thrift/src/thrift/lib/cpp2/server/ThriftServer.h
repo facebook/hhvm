@@ -2216,7 +2216,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   // if overloaded, returns applicable overloaded exception code.
-  folly::Optional<server::ServerConfigs::OverloadResult> checkOverload(
+  folly::Optional<OverloadResult> checkOverload(
       const transport::THeader::StringToStringMap* readHeaders = nullptr,
       const std::string* = nullptr) final;
 

@@ -604,10 +604,10 @@ void ThriftRocketServerHandler::handleRequestCommon(
         [&](AppOverloadedException& aoe) {
           handleRequestOverloadedServer(
               std::move(request),
-              ThriftServer::OverloadResult{
+              OverloadResult{
                   kAppOverloadedErrorCode,
                   aoe.getMessage(),
-                  ThriftServer::OverloadResult::LoadShedder::CUSTOM});
+                  LoadShedder::CUSTOM});
         },
         [&](AppQuotaExceededException& aqe) {
           handleQuotaExceededException(
@@ -724,8 +724,7 @@ void ThriftRocketServerHandler::handleDecompressionFailure(
 }
 
 void ThriftRocketServerHandler::handleRequestOverloadedServer(
-    ThriftRequestCoreUniquePtr request,
-    ThriftServer::OverloadResult&& overloadResult) {
+    ThriftRequestCoreUniquePtr request, OverloadResult&& overloadResult) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->serverOverloaded();
   }

@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
@@ -284,7 +285,7 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
       const char* comment);
   void killRequestServerOverloaded(
       std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
-      ThriftServer::OverloadResult&& overloadResult);
+      OverloadResult&& overloadResult);
   void disconnect(const char* comment) noexcept;
 
   void setServerHeaders(transport::THeader::StringToStringMap& writeHeaders);

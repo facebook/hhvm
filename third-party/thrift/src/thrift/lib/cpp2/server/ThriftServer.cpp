@@ -1903,8 +1903,7 @@ PreprocessResult ThriftServer::preprocess(
   return preprocessFunctions_.run(params);
 }
 
-folly::Optional<server::ServerConfigs::OverloadResult>
-ThriftServer::checkOverload(
+folly::Optional<OverloadResult> ThriftServer::checkOverload(
     const transport::THeader::StringToStringMap* readHeaders,
     const std::string* method) {
   if (UNLIKELY(
@@ -1917,7 +1916,7 @@ ThriftServer::checkOverload(
         fmt::format(
             "Host {} is load shedding due to custom isOverloaded() callback.",
             getAddressAsString()),
-        OverloadResult::LoadShedder::CUSTOM};
+        LoadShedder::CUSTOM};
   }
 
   // If active request tracking is disabled or we are using resource pools,
@@ -1930,14 +1929,12 @@ ThriftServer::checkOverload(
         (method == nullptr ||
          !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {
-      OverloadResult::LoadShedder loadShedder =
-          OverloadResult::LoadShedder::MAX_REQUESTS;
+      LoadShedder loadShedder = LoadShedder::MAX_REQUESTS;
       if (getCPUConcurrencyController().requestShed(
               CPUConcurrencyController::Method::MAX_REQUESTS)) {
-        loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
+        loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
       } else if (getAdaptiveConcurrencyController().enabled()) {
-        loadShedder =
-            OverloadResult::LoadShedder::ADAPTIVE_CONCURRENCY_CONTROLLER;
+        loadShedder = LoadShedder::ADAPTIVE_CONCURRENCY_CONTROLLER;
       }
       return OverloadResult{
           kOverloadedErrorCode,
@@ -1951,11 +1948,10 @@ ThriftServer::checkOverload(
       (method == nullptr ||
        !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
-    OverloadResult::LoadShedder loadShedder =
-        OverloadResult::LoadShedder::MAX_QPS;
+    LoadShedder loadShedder = LoadShedder::MAX_QPS;
     if (getCPUConcurrencyController().requestShed(
             CPUConcurrencyController::Method::MAX_QPS)) {
-      loadShedder = OverloadResult::LoadShedder::CPU_CONCURRENCY_CONTROLLER;
+      loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
     }
     return OverloadResult{
         kOverloadedErrorCode, "load shedding due to qps limit", loadShedder};

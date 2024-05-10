@@ -320,7 +320,7 @@ void Cpp2Connection::killRequest(
 
 void Cpp2Connection::killRequestServerOverloaded(
     std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
-    ThriftServer::OverloadResult&& overloadResult) {
+    OverloadResult&& overloadResult) {
   auto server = worker_->getServer();
   if (auto* observer = server->getObserver()) {
     observer->serverOverloaded();
@@ -544,10 +544,10 @@ void Cpp2Connection::requestReceived(
         [&](AppOverloadedException& aoe) {
           killRequestServerOverloaded(
               std::move(hreq),
-              ThriftServer::OverloadResult{
+              OverloadResult{
                   kAppOverloadedErrorCode,
                   aoe.getMessage(),
-                  ThriftServer::OverloadResult::LoadShedder::CUSTOM,
+                  LoadShedder::CUSTOM,
               });
         },
         [&](AppQuotaExceededException& aqe) {

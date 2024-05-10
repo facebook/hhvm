@@ -83,7 +83,6 @@ Object create_new_IC() {
   auto obj = Object{ ImplicitContextLoader::classof() };
   return obj;
 }
-
 } // namespace
 
 bool HHVM_FUNCTION(is_inaccessible) {
@@ -92,6 +91,13 @@ bool HHVM_FUNCTION(is_inaccessible) {
   auto const context = Native::data<ImplicitContext>(obj);
   return context->m_state == ImplicitContext::State::Inaccessible;
 }
+
+Object initInaccessibleConext() {
+  auto const obj = Object{ ImplicitContextLoader::classof() };
+  auto context = Native::data<ImplicitContext>(obj.get());
+  context->m_state = ImplicitContext::State::Inaccessible;
+  return obj;
+};
 
 String HHVM_FUNCTION(get_state_unsafe) {
   auto const obj = *ImplicitContext::activeCtx;
@@ -180,9 +186,11 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
 Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
                                               TypedValue data) {
   auto const key = keyarg.get();
-  // Reserve the underscore prefix for the time being in case we want to
-  // emit keys from the compiler. This would allow us to avoid having
-  // conflicts with other key generation mechanisms.
+  /*
+   * Reserve the underscore prefix for the time being in case we want to
+   * emit keys from the compiler. This would allow us to avoid having
+   * conflicts with other key generation mechanisms.
+  */
   if (key->size() == 0 || key->data()[0] == '_') {
     throw_implicit_context_exception(
       "Implicit context keys cannot be empty or start with _");
@@ -238,10 +246,7 @@ namespace {
 Object create_special_implicit_context_impl(int64_t type_enum,
                                             const StringData* memo_key,
                                             const Func* func) {
-  auto const prev_obj = *ImplicitContext::activeCtx;
   auto const type = static_cast<ImplicitContext::State>(type_enum);
-
-  assertx(type != ImplicitContext::State::Value);
   if (type == ImplicitContext::State::SoftSet) {
     /*
      * SoftSet is passthrough, return the previous state if present
@@ -249,30 +254,15 @@ Object create_special_implicit_context_impl(int64_t type_enum,
      * 1. This is the very first call into IC functions
      * 2. Backdoor was used, which resets IC to null
     */
-    return Object{prev_obj};
+    return Object{*ImplicitContext::activeCtx};
   }
-
+  assertx(type == ImplicitContext::State::Inaccessible);
   /*
-   * Default to inaccessible memo_key, as soft inaccessible is no longer used
-   * and SoftSet and Value are dealt with
-   * NOTE: This whole code will be replaced with RDS based inaccessible IC
-   * in the next diff
+   * We can get away with just returning the inaccessible IC here
+   * without even adding it to the side map because the address of
+   * this obj remains the same throughout the request
   */
-  auto const target_memo_key = s_ICInaccessibleMemoKey.get();
-  auto& m_to_ic = *s_memokey_to_IC;
-  if (m_to_ic.find(target_memo_key) != m_to_ic.end()) {
-    // We already created the inaccessible IC, return it
-    return Object{m_to_ic.at(target_memo_key)};
-  }
-
-  auto obj = create_new_IC();
-  auto const context = Native::data<ImplicitContext>(obj.get());
-  context->m_state = ImplicitContext::State::Inaccessible;
-
-  // Store new IC into the map
-  auto UNUSED ret = m_to_ic.emplace(std::make_pair(target_memo_key, Object(obj).detach()));
-  assertx(ret.second); // the emplace should always succeed
-  return obj;
+  return Object{*ImplicitContext::inaccessibleCtx};
 }
 
 } // namespace

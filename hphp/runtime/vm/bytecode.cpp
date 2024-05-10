@@ -5234,6 +5234,7 @@ OPTBLD_INLINE void iopCreateSpecialImplicitContext() {
   vmStack().popC();
   vmStack().popC();
   tvCopy(ret, vmStack().allocC());
+
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

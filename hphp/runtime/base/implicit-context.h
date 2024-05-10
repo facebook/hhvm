@@ -49,6 +49,7 @@ req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
 ////////////////////////////////////////////////////////////////////////////
 
 static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+static rds::Link<ObjectData*, rds::Mode::Normal> inaccessibleCtx;
 
 static std::string stateToString(State);
 

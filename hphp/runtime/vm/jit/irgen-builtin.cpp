@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -2692,12 +2693,22 @@ void emitCreateSpecialImplicitContext(IRGS& env) {
     PUNT(CreateSpecialImplicitContext);
   }
   auto const func = curFunc(env);
-  auto const obj =
-    gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
-  decRef(env, memoKey);
-  decRef(env, type);
-  discard(env, 2);
-  push(env, obj);
+  if (type->hasConstVal(TInt) && type->intVal() == static_cast<int64_t>(ImplicitContext::State::Inaccessible)) {
+    auto rdsHandleAndTypeIC = RDSHandleAndType {ImplicitContext::inaccessibleCtx.handle(), TObj};
+    auto const src = gen(env, LdRDSAddr, rdsHandleAndTypeIC, TPtrToOther);
+    auto obj = gen(env, LdMem, TObj, src);
+    decRef(env, memoKey);
+    decRef(env, type);
+    discard(env, 2);
+    pushIncRef(env, obj);
+  } else {
+    auto const obj =
+      gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
+    decRef(env, memoKey);
+    decRef(env, type);
+    discard(env, 2);
+    push(env, obj);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

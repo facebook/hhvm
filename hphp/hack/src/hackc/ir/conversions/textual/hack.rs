@@ -137,6 +137,8 @@ pub(crate) enum Hhbc {
     Concat,
     #[decl(fn hhbc_concat(...) -> *HackMixed)]
     ConcatN,
+    #[decl(fn hhbc_create_special_implicit_context(*HackMixed) -> *HackMixed)]
+    CreateSpecialImplicitContext,
     #[decl(fn hhbc_div(*HackMixed, *HackMixed) -> *HackMixed)]
     Div,
     #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]

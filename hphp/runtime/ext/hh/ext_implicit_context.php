@@ -192,29 +192,6 @@ function create_implicit_context(
 )[zoned]: ImplicitContextData;
 
 /*
-* To keep the state, since we can't use memoize on create_ic_inaccessible_context anymore
-*/
-class HackyICSingletonState {
-  public static $state = null;
-}
-
-
-/*
- * Singleton memoization wrapper over create_special_implicit_context for
- * ic inaccessible case
- */
-function create_ic_inaccessible_context()[] {
-  return \HH\Coeffects\backdoor(
-    ()[defaults] ==> {
-      if (HackyICSingletonState::$state === null) {
-        HackyICSingletonState::$state = create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE, null);
-      }
-      return HackyICSingletonState::$state;
-    },
-  );
-}
-
-/*
  * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */

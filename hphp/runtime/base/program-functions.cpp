@@ -2539,6 +2539,8 @@ void hphp_process_init(bool skipExtensions) {
 
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
+  ImplicitContext::inaccessibleCtx
+    .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::inaccessibleCtx"});
 
   if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
     DebuggerHook::s_exceptionBreakpointIntr

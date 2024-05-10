@@ -26,6 +26,8 @@ namespace HPHP {
 
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
+rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::inaccessibleCtx;
+
 std::string ImplicitContext::stateToString(ImplicitContext::State state) {
   switch (state) {
     case ImplicitContext::State::Value:

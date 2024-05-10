@@ -24,6 +24,7 @@ void MemcacheRequestCommon::serialize(Writer&& writer) const {
   writer.writeField(2 /* field id */, afterLatencyUs_ref());
   writer.writeField(3 /* field id */, bucketId_ref());
   writer.writeField(4 /* field id */, productId_ref());
+  writer.writeField(5 /* field id */, regionalizationEntity_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -42,6 +43,9 @@ void MemcacheRequestCommon::visitFields(V&& v) {
   if (!v.visitField(4, "productId", this->productId_ref())) {
     return;
   }
+  if (!v.visitField(5, "regionalizationEntity", this->regionalizationEntity_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -56,6 +60,9 @@ void MemcacheRequestCommon::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(4, "productId", this->productId_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "regionalizationEntity", this->regionalizationEntity_ref())) {
     return;
   }
 }

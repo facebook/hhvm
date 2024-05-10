@@ -48,6 +48,10 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
         reader.readField(productId_ref(), fieldType);
         break;
       }
+      case 5: {
+        reader.readField(regionalizationEntity_ref(), fieldType);
+        break;
+      }
       default: {
         reader.skip(fieldType);
         break;

@@ -26,6 +26,7 @@ struct MemcacheRequestCommon {
   2: optional i64_8073 afterLatencyUs
   3: optional string bucketId
   4: optional i64 productId
+  5: optional i32 regionalizationEntity
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

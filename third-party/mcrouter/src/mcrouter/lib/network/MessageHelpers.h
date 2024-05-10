@@ -68,6 +68,20 @@ std::optional<int64_t> getProductIdImpl(std::false_type, Message&) {
 }
 
 template <typename Message>
+std::optional<int64_t> getRegionalizationEntityImpl(
+    std::true_type,
+    Message& message) {
+  if (message.regionalizationEntity_ref()) {
+    return *message.regionalizationEntity_ref();
+  }
+  return std::nullopt;
+}
+template <typename Message>
+std::optional<int64_t> getRegionalizationEntityImpl(std::false_type, Message&) {
+  return std::nullopt;
+}
+
+template <typename Message>
 uint64_t getQueryTagsImpl(std::true_type, Message& message) {
   return *message.queryTags_ref();
 }
@@ -196,6 +210,21 @@ class HasProductIdTrait<
 template <typename Message>
 std::optional<int64_t> getProductId(Message& message) {
   return detail::getProductIdImpl(HasProductIdTrait<Message>{}, message);
+}
+
+template <typename Message, typename = std::enable_if_t<true>>
+class HasRegionalizationEntityTrait : public std::false_type {};
+template <typename Message>
+class HasRegionalizationEntityTrait<
+    Message,
+    std::void_t<decltype(std::declval<std::decay_t<Message>&>()
+                             .regionalizationEntity_ref())>>
+    : public std::true_type {};
+
+template <typename Message>
+std::optional<int64_t> getRegionalizationEntity(Message& message) {
+  return detail::getRegionalizationEntityImpl(
+      HasRegionalizationEntityTrait<Message>{}, message);
 }
 
 template <typename Message, typename = std::enable_if_t<true>>

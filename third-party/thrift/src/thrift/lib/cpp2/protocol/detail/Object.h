@@ -645,8 +645,8 @@ MaskedDecodeResultValue parseValueWithMask(
 template <typename Protocol, bool KeepExcludedData>
 MaskedDecodeResult parseObject(
     const folly::IOBuf& buf,
-    Mask readMask,
-    Mask writeMask,
+    const Mask& readMask,
+    const Mask& writeMask,
     bool string_to_binary = true) {
   Protocol prot;
   prot.setInput(&buf);

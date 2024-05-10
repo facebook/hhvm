@@ -62,7 +62,7 @@ Object parseObject(const folly::IOBuf& buf, bool string_to_binary = true) {
 // Only parses values that are masked. Unmasked fields are stored in MaskedData.
 template <typename Protocol>
 Object parseObjectWithoutExcludedData(
-    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+    const folly::IOBuf& buf, const Mask& mask, bool string_to_binary = true) {
   return detail::parseObject<Protocol, false>(
              buf, mask, noneMask(), string_to_binary)
       .included;
@@ -72,7 +72,7 @@ Object parseObjectWithoutExcludedData(
 // Only parses values that are masked. Unmasked fields are stored in MaskedData.
 template <typename Protocol>
 MaskedDecodeResult parseObject(
-    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+    const folly::IOBuf& buf, const Mask& mask, bool string_to_binary = true) {
   return detail::parseObject<Protocol, true>(
       buf, mask, noneMask(), string_to_binary);
 }
@@ -83,8 +83,8 @@ MaskedDecodeResult parseObject(
 template <typename Protocol>
 MaskedDecodeResult parseObject(
     const folly::IOBuf& buf,
-    Mask readMask,
-    Mask writeMask,
+    const Mask& readMask,
+    const Mask& writeMask,
     bool string_to_binary = true) {
   return detail::parseObject<
       Protocol,

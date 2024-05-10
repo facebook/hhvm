@@ -26,8 +26,7 @@ namespace facebook {
 namespace memcache {
 
 class ThriftAcceptorFactory final : public wangle::AcceptorFactory {
-  using ThriftAclCheckerFunc =
-      std::function<bool(const folly::AsyncTransportWrapper*)>;
+  using ThriftAclCheckerFunc = bool (*)(const folly::AsyncTransportWrapper*);
 
  public:
   explicit ThriftAcceptorFactory(

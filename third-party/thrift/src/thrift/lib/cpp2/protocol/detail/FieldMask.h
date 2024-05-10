@@ -159,4 +159,10 @@ using ValueIndex = folly::F14FastSet<
 // of the value is preserved by the index.
 ValueIndex buildValueIndex(const Mask& mask);
 
+// Returns the MapId in value index of the given Value key.
+// If it isn't indexed, it returns the new MapId (pointer to the key).
+// Assumes the map mask uses pointers to keys.
+MapId getMapIdValueAddressFromIndex(
+    const ValueIndex& index, const Value& newKey);
+
 } // namespace apache::thrift::protocol::detail

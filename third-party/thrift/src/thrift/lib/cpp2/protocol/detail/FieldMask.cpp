@@ -129,16 +129,22 @@ MapId findMapIdByValueAddress(const Mask& mask, const Value& newKey) {
   return it == mapIdToMask.end() ? mapId : MapId{it->first};
 }
 
+MapId getMapIdValueAddressFromIndex(
+    const ValueIndex& index, const Value& newKey) {
+  if (auto it = index.find(newKey); it != index.end()) {
+    return MapId{reinterpret_cast<int64_t>(&(it->get()))};
+  }
+  return MapId{reinterpret_cast<int64_t>(&newKey)};
+}
+
 ValueIndex buildValueIndex(const Mask& mask) {
   ValueIndex index;
-  if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {
+  const auto* mapIdToMask = getIntegerMapMask(mask);
+  if (!mapIdToMask) {
     return index;
   }
-
-  const auto& mapIdToMask = mask.includes_map_ref() ? *mask.includes_map_ref()
-                                                    : *mask.excludes_map_ref();
-  index.reserve(mapIdToMask.size());
-  for (auto& [key, _] : mapIdToMask) {
+  index.reserve(mapIdToMask->size());
+  for (auto& [key, _] : *mapIdToMask) {
     index.insert(std::cref(*reinterpret_cast<Value*>(key)));
   }
   return index;

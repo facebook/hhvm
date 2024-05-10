@@ -21,7 +21,6 @@
 #include <stdexcept>
 
 #include <fmt/core.h>
-#include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/lang/Exception.h>
@@ -616,40 +615,28 @@ void insertFieldsToMask(
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
-    struct ValueIndices {
-      ValueIndex readValues;
-      ValueIndex writeValues;
-    };
-    auto indices = folly::lazy([&] {
-      return ValueIndices{
-          .readValues = buildValueIndex(masks.read),
-          .writeValues = buildValueIndex(masks.write),
-      };
-    });
-
-    auto getMapId = [](const ValueIndex& index, const Value& newKey) {
-      if (auto it = index.find(std::cref(newKey)); it != index.end()) {
-        return MapId{reinterpret_cast<int64_t>(&(it->get()))};
-      }
-      return MapId{reinterpret_cast<int64_t>(&newKey)};
-    };
-    for (const auto& [key, value] : *map) {
-      if (view) {
-        auto readId = static_cast<int64_t>(getMapId(indices().readValues, key));
-        auto writeId =
-            static_cast<int64_t>(getMapId(indices().writeValues, key));
+    if (view) {
+      auto readValueIndex = buildValueIndex(masks.read);
+      auto writeValueIndex = buildValueIndex(masks.write);
+      for (const auto& [key, value] : *map) {
+        auto readId = static_cast<int64_t>(
+            getMapIdValueAddressFromIndex(readValueIndex, key));
+        auto writeId = static_cast<int64_t>(
+            getMapIdValueAddressFromIndex(writeValueIndex, key));
         insertNextMask(
             masks, value, readId, writeId, recursive, view, getIncludesMapRef);
+      }
+      return;
+    }
+    for (const auto& [key, value] : *map) {
+      if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
+        auto id = static_cast<int64_t>(getMapIdFromValue(key));
+        insertNextMask(
+            masks, value, id, id, recursive, view, getIncludesMapRef);
       } else {
-        if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
-          auto id = static_cast<int64_t>(getMapIdFromValue(key));
-          insertNextMask(
-              masks, value, id, id, recursive, view, getIncludesMapRef);
-        } else {
-          auto id = getStringFromValue(key);
-          insertNextMask(
-              masks, value, id, id, recursive, view, getIncludesStringMapRef);
-        }
+        auto id = getStringFromValue(key);
+        insertNextMask(
+            masks, value, id, id, recursive, view, getIncludesStringMapRef);
       }
     }
   }

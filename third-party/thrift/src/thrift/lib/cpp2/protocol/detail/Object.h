@@ -603,12 +603,18 @@ MaskedDecodeResultValue parseValueWithMask(
       TType valType;
       uint32_t size;
       prot.readMapBegin(keyType, valType, size);
+      if (!size) {
+        prot.readMapEnd();
+        return result;
+      }
+      auto readValueIndex = buildValueIndex(readMaskRef.mask);
+      auto writeValueIndex = buildValueIndex(writeMaskRef.mask);
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
         MaskRef nextRead = readMaskRef.get(
-            findMapIdByValueAddress(readMaskRef.mask, keyValue));
+            getMapIdValueAddressFromIndex(readValueIndex, keyValue));
         MaskRef nextWrite = writeMaskRef.get(
-            findMapIdByValueAddress(writeMaskRef.mask, keyValue));
+            getMapIdValueAddressFromIndex(writeValueIndex, keyValue));
         MaskedDecodeResultValue nestedResult =
             parseValueWithMask<KeepExcludedData>(
                 prot,

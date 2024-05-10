@@ -893,7 +893,6 @@ FuncAnalysis analyze_func_inline(const IIndex& index,
 ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
   assertx(ctx.cls);
   assertx(!ctx.func);
-  assertx(!is_used_trait(*ctx.cls));
   assertx(!is_closure(*ctx.cls));
 
   {
@@ -909,7 +908,9 @@ ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
   ContextPusher _{index, ctx};
   ClassAnalysis analysis{ctx};
 
-  resolve_type_constants(index, ctx, analysis);
+  if (!is_used_trait(*ctx.cls)) {
+    resolve_type_constants(index, ctx, analysis);
+  }
 
   for (auto const& m : ctx.cls->methods) {
     if (!is_86init_func(*m)) continue;

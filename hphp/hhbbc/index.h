@@ -2467,6 +2467,8 @@ private:
   void addAllDeps(TSStringSet&, const DepState&) const;
   void addDepsForTypeCns(TraceState&);
 
+  const TraceState* lookupTrace(DepState::Kind, SString) const;
+
   const TraceState* traceForClass(SString) const;
   const TraceState* traceForFunc(SString) const;
   const TraceState* traceForUnit(SString) const;

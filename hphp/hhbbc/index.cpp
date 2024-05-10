@@ -3153,7 +3153,11 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
       if (n.isMissing() || !n.hasCompleteChildren()) {
         if (nonRegL && nonRegR) nonRegOut = true;
       } else if (!n.isRegular()) {
-        nonRegOut = true;
+        if (!nonRegL || !nonRegR) {
+          assertx(!ClassGraph{&n}.allowed(true));
+        } else {
+          nonRegOut = true;
+        }
       } else if (!nonRegOut && nonRegL && nonRegR) {
         if (n.hasNonRegularSubclass()) nonRegOut = true;
       }
@@ -21374,6 +21378,18 @@ void AnalysisScheduler::removeFuncs() {
   funcsToRemove.clear();
 }
 
+const AnalysisScheduler::TraceState*
+AnalysisScheduler::lookupTrace(DepState::Kind k, SString n) const {
+  auto const s = folly::get_ptr(traceState, n);
+  if (!s) return nullptr;
+  for (auto const d : s->depStates) {
+    if (d->kind != k) continue;
+    if (!d->name->tsame(n)) continue;
+    return s;
+  }
+  return nullptr;
+}
+
 // Retrieve the TraceState appropriate for the class with the given
 // name.
 const AnalysisScheduler::TraceState*
@@ -21386,7 +21402,7 @@ AnalysisScheduler::traceForClass(SString cls) const {
       return traceForFunc(n);
     }
   }
-  return folly::get_ptr(traceState, cls);
+  return lookupTrace(DepState::Class, cls);
 }
 
 // Retrieve the TraceState appropriate for the func with the given
@@ -21396,14 +21412,14 @@ AnalysisScheduler::traceForFunc(SString func) const {
   if (auto const cns = Constant::nameFromFuncName(func)) {
     return traceForConstant(cns);
   }
-  return folly::get_ptr(traceState, func);
+  return lookupTrace(DepState::Func, func);
 }
 
 // Retrieve the TraceState appropriate for the unit with the given
 // path.
 const AnalysisScheduler::TraceState*
 AnalysisScheduler::traceForUnit(SString unit) const {
-  return folly::get_ptr(traceState, unit);
+  return lookupTrace(DepState::Unit, unit);
 }
 
 // Retrive the TraceState appropriate for the constant with the given
@@ -23208,7 +23224,21 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
          auto const s = folly::get_ptr(traceState, item);
          if (!s) continue;
          assertx(!s->depStates.empty());
-         assertx(s->buckets.present->contains(i));
+         if (!s->buckets.present->contains(i)) {
+           // If this trace state isn't in the bucket, an untracked
+           // item (with the same name) should be.
+           auto const b = [&] () -> const AnalysisInput::BucketPresence* {
+             auto const& u = untracked;
+             if (auto const b = folly::get_ptr(u.classes, item))      return b;
+             if (auto const b = folly::get_ptr(u.funcs, item))        return b;
+             if (auto const b = folly::get_ptr(u.units, item))        return b;
+             if (auto const b = folly::get_ptr(u.badConstants, item)) return b;
+             return nullptr;
+           }();
+           always_assert(b);
+           always_assert(b->present->contains(i));
+           continue;
+         }
 
          for (auto const d : s->depStates) {
            switch (d->kind) {

@@ -149,8 +149,8 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Resul
     let hhvm_options = &opts.hhvm_options;
     let hhvm_config = hhvm_options.to_config()?;
     let parser_options = ParserOptions {
-        po_auto_namespace_map: auto_namespace_map().collect(),
-        po_unwrap_concurrent: opts.unwrap_concurrent,
+        auto_namespace_map: auto_namespace_map().collect(),
+        unwrap_concurrent: opts.unwrap_concurrent,
         ..hhvm_config::parser_options(&hhvm_config)?
     };
     let hhbc_flags = HhbcFlags::from_config(&hhvm_config)?;

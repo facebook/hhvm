@@ -114,12 +114,12 @@ fn contexts_ns() -> Arc<namespace_env::Env> {
             // used in the OCaml visitor at the moment. Since we don't elaborate
             // context names in codegen, perhaps these settings don't end up
             // being relevant.
-            if oxidized::global_options::GlobalOptions::default().po_codegen {
+            if oxidized::parser_options::ParserOptions::default().codegen {
                 Mode::ForCodegen
             } else {
                 Mode::ForTypecheck
             },
-            oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
+            oxidized::parser_options::ParserOptions::default().disable_xhp_element_mangling,
         )
     })
 }
@@ -130,12 +130,12 @@ fn unsafe_contexts_ns() -> Arc<namespace_env::Env> {
         ..namespace_env::Env::empty(
             vec![],
             // As above, these look wrong, but may be irrelevant.
-            if oxidized::global_options::GlobalOptions::default().po_codegen {
+            if oxidized::parser_options::ParserOptions::default().codegen {
                 Mode::ForCodegen
             } else {
                 Mode::ForTypecheck
             },
-            oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
+            oxidized::parser_options::ParserOptions::default().disable_xhp_element_mangling,
         )
     })
 }

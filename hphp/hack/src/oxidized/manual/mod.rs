@@ -20,6 +20,7 @@ pub mod local_id;
 pub mod method_flags;
 pub mod namespace_env_impl;
 pub mod package_info_impl;
+pub mod parser_options_impl;
 pub mod prop_flags;
 pub mod s_map;
 pub mod s_set;

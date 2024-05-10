@@ -147,7 +147,7 @@ let disallow_unresolved_type_variables t =
 
 let custom_error_config t = t.GlobalOptions.tco_custom_error_config
 
-let const_static_props t = t.GlobalOptions.po_const_static_props
+let const_static_props t = t.GlobalOptions.po.ParserOptions.const_static_props
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
 
@@ -158,7 +158,7 @@ let error_php_lambdas t = t.GlobalOptions.tco_error_php_lambdas
 let disallow_discarded_nullable_awaitables t =
   t.GlobalOptions.tco_disallow_discarded_nullable_awaitables
 
-let is_systemlib t = t.GlobalOptions.tco_is_systemlib
+let is_systemlib t = t.GlobalOptions.po.ParserOptions.is_systemlib
 
 let higher_kinded_types t = t.GlobalOptions.tco_higher_kinded_types
 
@@ -174,7 +174,7 @@ let set_skip_check_under_dynamic t =
   GlobalOptions.{ t with tco_skip_check_under_dynamic = true }
 
 let interpret_soft_types_as_like_types t =
-  t.GlobalOptions.po_interpret_soft_types_as_like_types
+  t.GlobalOptions.po.ParserOptions.interpret_soft_types_as_like_types
 
 let enable_strict_string_concat_interp t =
   t.GlobalOptions.tco_enable_strict_string_concat_interp
@@ -182,10 +182,13 @@ let enable_strict_string_concat_interp t =
 let ignore_unsafe_cast t = t.GlobalOptions.tco_ignore_unsafe_cast
 
 let set_tco_no_parser_readonly_check t b =
-  GlobalOptions.{ t with tco_no_parser_readonly_check = b }
+  let po =
+    { t.GlobalOptions.po with ParserOptions.no_parser_readonly_check = b }
+  in
+  GlobalOptions.{ t with po }
 
 let tco_no_parser_readonly_check t =
-  t.GlobalOptions.tco_no_parser_readonly_check
+  t.GlobalOptions.po.ParserOptions.no_parser_readonly_check
 
 let set_tco_enable_expression_trees t b =
   GlobalOptions.{ t with tco_enable_expression_trees = b }
@@ -219,7 +222,7 @@ let strict_value_equality t = t.GlobalOptions.tco_strict_value_equality
 
 let enforce_sealed_subclasses t = t.GlobalOptions.tco_enforce_sealed_subclasses
 
-let everything_sdt t = t.GlobalOptions.tco_everything_sdt
+let everything_sdt t = t.GlobalOptions.po.ParserOptions.everything_sdt
 
 let implicit_inherit_sdt t = t.GlobalOptions.tco_implicit_inherit_sdt
 

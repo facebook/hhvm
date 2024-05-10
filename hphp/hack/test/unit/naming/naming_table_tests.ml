@@ -102,10 +102,7 @@ let run_naming_table_test f =
           }
       in
       let popt =
-        {
-          ParserOptions.default with
-          GlobalOptions.po_allow_unstable_features = true;
-        }
+        ParserOptions.{ default with allow_unstable_features = true }
       in
       let tcopt = TypecheckerOptions.default in
       let ctx =

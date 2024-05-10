@@ -221,7 +221,7 @@ impl Opts {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
         let parser_options = ParserOptions {
-            po_auto_namespace_map: compile::auto_namespace_map().collect(),
+            auto_namespace_map: compile::auto_namespace_map().collect(),
             ..hhvm_config::parser_options(&hhvm_config)?
         };
         let hhbc_flags = HhbcFlags::from_config(&hhvm_config)?;

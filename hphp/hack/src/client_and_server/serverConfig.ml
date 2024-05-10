@@ -258,25 +258,104 @@ let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes"
 
 let load_config config options =
+  let ( >?? ) x y = Option.value x ~default:y in
+  let po_opt = options.GlobalOptions.po in
+  let po =
+    ParserOptions.
+      {
+        (* These aren't set in the config file, so init them to their defaults. *)
+        hhvm_compat_mode = po_opt.hhvm_compat_mode;
+        allow_unstable_features = po_opt.allow_unstable_features;
+        hhi_mode = po_opt.hhi_mode;
+        codegen = po_opt.codegen;
+        stack_size = po_opt.stack_size;
+        no_parser_readonly_check = po_opt.no_parser_readonly_check;
+        unwrap_concurrent = po_opt.unwrap_concurrent;
+        parser_errors_only = po_opt.parser_errors_only;
+        (* The remainder are set in the config file *)
+        is_systemlib = bool_opt "is_systemlib" config >?? po_opt.is_systemlib;
+        disable_lval_as_an_expression =
+          bool_opt "disable_lval_as_an_expression" config
+          >?? po_opt.disable_lval_as_an_expression;
+        disable_legacy_soft_typehints =
+          bool_opt "disable_legacy_soft_typehints" config
+          >?? po_opt.disable_legacy_soft_typehints;
+        disable_legacy_attribute_syntax =
+          bool_opt "disable_legacy_attribute_syntax" config
+          >?? po_opt.disable_legacy_attribute_syntax;
+        const_default_func_args =
+          bool_opt "const_default_func_args" config
+          >?? po_opt.const_default_func_args;
+        const_default_lambda_args =
+          bool_opt "const_default_lambda_args" config
+          >?? po_opt.const_default_lambda_args;
+        const_static_props =
+          bool_opt "const_static_props" config >?? po_opt.const_static_props;
+        abstract_static_props =
+          bool_opt "abstract_static_props" config
+          >?? po_opt.abstract_static_props;
+        disallow_func_ptrs_in_constants =
+          bool_opt "disallow_func_ptrs_in_constants" config
+          >?? po_opt.disallow_func_ptrs_in_constants;
+        disable_xhp_element_mangling =
+          bool_opt "disable_xhp_element_mangling" config
+          >?? po_opt.disable_xhp_element_mangling;
+        disable_xhp_children_declarations =
+          bool_opt "disable_xhp_children_declarations" config
+          >?? po_opt.disable_xhp_children_declarations;
+        enable_xhp_class_modifier =
+          bool_opt "enable_xhp_class_modifier" config
+          >?? po_opt.enable_xhp_class_modifier;
+        interpret_soft_types_as_like_types =
+          bool_opt "interpret_soft_types_as_like_types" config
+          >?? po_opt.interpret_soft_types_as_like_types;
+        disallow_static_constants_in_default_func_args =
+          bool_opt "disallow_static_constants_in_default_func_args" config
+          >?? po_opt.disallow_static_constants_in_default_func_args;
+        disallow_direct_superglobals_refs =
+          bool_opt "disallow_direct_superglobals_refs" config
+          >?? po_opt.disallow_direct_superglobals_refs;
+        auto_namespace_map =
+          prepare_auto_namespace_map config >?? po_opt.auto_namespace_map;
+        everything_sdt =
+          bool_opt "everything_sdt" config >?? po_opt.everything_sdt;
+        keep_user_attributes =
+          bool_opt "keep_user_attributes" config >?? po_opt.keep_user_attributes;
+        deregister_php_stdlib =
+          bool_opt "deregister_php_stdlib" config
+          >?? po_opt.deregister_php_stdlib;
+        enable_class_level_where_clauses =
+          bool_opt "class_level_where_clauses" config
+          >?? po_opt.enable_class_level_where_clauses;
+        union_intersection_type_hints =
+          bool_opt "union_intersection_type_hints" config
+          >?? po_opt.union_intersection_type_hints;
+        disallow_silence =
+          bool_opt "disallow_silence" config >?? po_opt.disallow_silence;
+        nameof_precedence =
+          bool_opt "nameof_precedence" config >?? po_opt.nameof_precedence;
+        allowed_decl_fixme_codes =
+          prepare_allowed_decl_fixme_codes config
+          >?? po_opt.allowed_decl_fixme_codes;
+        disable_hh_ignore_error =
+          int_opt "disable_hh_ignore_error" config
+          >?? po_opt.disable_hh_ignore_error;
+      }
+  in
   GlobalOptions.set
-    ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
+    ~po
     ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
     ?tco_disallow_byref_dynamic_calls:
       (bool_opt "disallow_byref_dynamic_calls" config)
     ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
-    ?po_disable_lval_as_an_expression:
-      (bool_opt "disable_lval_as_an_expression" config)
     ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
     ?allowed_fixme_codes_strict:
       (prepare_iset config "allowed_fixme_codes_strict")
-    ?po_auto_namespace_map:(prepare_auto_namespace_map config)
     ?tco_experimental_features:(config_experimental_tc_features config)
     ?tco_migration_flags:(config_tc_migration_flags config)
     ?tco_like_type_hints:(bool_opt "like_type_hints" config)
-    ?tco_union_intersection_type_hints:
-      (bool_opt "union_intersection_type_hints" config)
     ?tco_coeffects:(bool_opt "call_coeffects" config)
     ?tco_coeffects_local:(bool_opt "local_coeffects" config)
     ?tco_like_casts:(bool_opt "like_casts" config)
@@ -286,22 +365,9 @@ let load_config config options =
       (bool_opt "disallow_unresolved_type_variables" config)
     ?tco_locl_cache_capacity:(int_opt "locl_cache_capacity" config)
     ?tco_locl_cache_node_threshold:(int_opt "locl_cache_node_threshold" config)
-    ?po_enable_class_level_where_clauses:
-      (bool_opt "class_level_where_clauses" config)
-    ?po_disable_legacy_soft_typehints:
-      (bool_opt "disable_legacy_soft_typehints" config)
     ?po_disallow_toplevel_requires:
       (bool_opt "disallow_toplevel_requires" config)
-    ?po_allowed_decl_fixme_codes:(prepare_allowed_decl_fixme_codes config)
-    ?po_disable_legacy_attribute_syntax:
-      (bool_opt "disable_legacy_attribute_syntax" config)
     ?tco_const_attribute:(bool_opt "const_attribute" config)
-    ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
-    ?po_const_default_lambda_args:(bool_opt "const_default_lambda_args" config)
-    ?po_disallow_silence:(bool_opt "disallow_silence" config)
-    ?po_keep_user_attributes:(bool_opt "keep_user_attributes" config)
-    ?po_const_static_props:(bool_opt "const_static_props" config)
-    ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
     ?tco_check_attribute_locations:(bool_opt "check_attribute_locations" config)
     ?glean_reponame:(string_opt "glean_reponame" config)
     ?symbol_write_index_inherited_members:
@@ -324,17 +390,9 @@ let load_config config options =
       (string_opt "symbol_write_referenced_out" config)
     ?symbol_write_reindexed_out:(string_opt "symbol_write_reindexed_out" config)
     ?symbol_write_sym_hash_out:(bool_opt "symbol_write_sym_hash_out" config)
-    ?po_disallow_func_ptrs_in_constants:
-      (bool_opt "disallow_func_ptrs_in_constants" config)
     ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
     ?tco_disallow_discarded_nullable_awaitables:
       (bool_opt "disallow_discarded_nullable_awaitables" config)
-    ?po_disable_xhp_element_mangling:
-      (bool_opt "disable_xhp_element_mangling" config)
-    ?po_disable_xhp_children_declarations:
-      (bool_opt "disable_xhp_children_declarations" config)
-    ?po_enable_xhp_class_modifier:(bool_opt "enable_xhp_class_modifier" config)
-    ?po_disable_hh_ignore_error:(int_opt "disable_hh_ignore_error" config)
     ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
     ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
     ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
@@ -343,8 +401,6 @@ let load_config config options =
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
     ?tco_enable_function_references:
       (bool_opt "enable_function_references" config)
-    ?po_interpret_soft_types_as_like_types:
-      (bool_opt "interpret_soft_types_as_like_types" config)
     ?tco_enable_strict_string_concat_interp:
       (bool_opt "enable_strict_string_concat_interp" config)
     ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
@@ -369,7 +425,6 @@ let load_config config options =
       (bool_opt "require_extends_implements_ancestors" config)
     ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
     ?tco_enforce_sealed_subclasses:(bool_opt "enforce_sealed_subclasses" config)
-    ?tco_everything_sdt:(bool_opt "everything_sdt" config)
     ?tco_implicit_inherit_sdt:(bool_opt "implicit_inherit_sdt" config)
     ?tco_explicit_consistent_constructors:
       (int_opt "explicit_consistent_constructors" config)
@@ -378,7 +433,6 @@ let load_config config options =
     ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
     ?tco_profile_top_level_definitions:
       (bool_opt "profile_top_level_definitions" config)
-    ?tco_is_systemlib:(bool_opt "is_systemlib" config)
     ?log_levels:(prepare_log_levels config)
     ?class_pointer_levels:
       (Option.map
@@ -391,13 +445,8 @@ let load_config config options =
     ?tco_use_type_alias_heap:(bool_opt "use_type_alias_heap" config)
     ?tco_populate_dead_unsafe_cast_heap:
       (bool_opt "populate_dead_unsafe_cast_heap" config)
-    ?po_disallow_static_constants_in_default_func_args:
-      (bool_opt "disallow_static_constants_in_default_func_args" config)
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
-    ?po_disallow_direct_superglobals_refs:
-      (bool_opt "disallow_direct_superglobals_refs" config)
-    ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
     ?hack_warnings:(bool_opt "hack_warnings" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
@@ -480,6 +529,14 @@ let load ~silent options : t * ServerLocalConfig.t =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =
       GlobalOptions.set
+        ~po:
+          GlobalOptions.
+            {
+              default.po with
+              ParserOptions.allow_unstable_features =
+                local_config.ServerLocalConfig.allow_unstable_features;
+              parser_errors_only = Option.is_some (ServerArgs.ai_mode options);
+            }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:
           local_config.log_large_fanouts_threshold
@@ -494,13 +551,10 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_skip_hierarchy_checks:
           local_config.ServerLocalConfig.skip_hierarchy_checks
         ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
-        ~po_allow_unstable_features:
-          local_config.ServerLocalConfig.allow_unstable_features
         ~tco_saved_state:local_config.ServerLocalConfig.saved_state
         ~tco_rust_elab:local_config.ServerLocalConfig.rust_elab
         ~tco_log_inference_constraints:
           (ServerArgs.log_inference_constraints options)
-        ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
         ~tco_global_access_check_enabled:
           (ServerArgs.enable_global_access_check options)
         ~dump_tast_hashes:local_config.dump_tast_hashes
@@ -525,7 +579,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       gc_control = make_gc_control config;
       sharedmem_config = make_sharedmem_config config options local_config;
       tc_options = global_opts;
-      parser_options = global_opts;
+      parser_options = global_opts.GlobalOptions.po;
       glean_options = global_opts;
       symbol_write_options = global_opts;
       formatter_override;

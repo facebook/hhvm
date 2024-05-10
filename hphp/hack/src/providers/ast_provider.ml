@@ -60,7 +60,7 @@ let parse
   let ast =
     if
       Relative_path.(is_hhi (prefix path))
-      && popt.GlobalOptions.po_deregister_php_stdlib
+      && popt.ParserOptions.deregister_php_stdlib
     then
       Nast.deregister_ignored_attributes ast
     else
@@ -109,7 +109,7 @@ let get_from_local_cache ~full ctx file_name =
     let ast =
       if
         Relative_path.(is_hhi (prefix file_name))
-        && popt.GlobalOptions.po_deregister_php_stdlib
+        && popt.ParserOptions.deregister_php_stdlib
       then
         Nast.deregister_ignored_attributes ast
       else

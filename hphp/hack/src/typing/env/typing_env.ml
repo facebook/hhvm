@@ -1033,7 +1033,9 @@ let set_no_auto_likes env b =
 
 let set_everything_sdt env b =
   map_tcopt
-    ~f:(fun tcopt -> { tcopt with GlobalOptions.tco_everything_sdt = b })
+    ~f:(fun tcopt ->
+      GlobalOptions.
+        { tcopt with po = { tcopt.po with ParserOptions.everything_sdt = b } })
     env
 
 let get_support_dynamic_type env = env.genv.this_support_dynamic_type

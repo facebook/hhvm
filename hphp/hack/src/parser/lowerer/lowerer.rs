@@ -49,9 +49,9 @@ use oxidized::errors::Error as HHError;
 use oxidized::errors::Naming;
 use oxidized::errors::NastCheck;
 use oxidized::file_info;
-use oxidized::global_options::GlobalOptions;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::namespace_env::Mode;
+use oxidized::parser_options::ParserOptions;
 use oxidized::pos::Pos;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::lexable_token::LexablePositionedToken;
@@ -186,7 +186,7 @@ pub struct Env<'a> {
     pub saw_yield: bool, /* Information flowing back up */
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
-    pub parser_options: &'a GlobalOptions,
+    pub parser_options: &'a ParserOptions,
 
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
@@ -203,7 +203,7 @@ impl<'a> Env<'a> {
         show_all_errors: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
-        parser_options: &'a GlobalOptions,
+        parser_options: &'a ParserOptions,
         namespace_env: Arc<NamespaceEnv>,
         token_factory: PositionedTokenFactory<'a>,
         arena: &'a Bump,
@@ -1934,7 +1934,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
     let mk_unop = |op, e| Ok(Expr_::mk_unop(op, e));
     let op_kind = token_kind(op);
     if let Some(TK::At) = op_kind {
-        if env.parser_options.po_disallow_silence {
+        if env.parser_options.disallow_silence {
             raise_parsing_error(op, env, &syntax_error::no_silence);
         }
         if env.is_codegen() {
@@ -2909,7 +2909,7 @@ fn p_concurrent_stmt<'a>(
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
-    if env.parser_options.po_unwrap_concurrent {
+    if env.parser_options.unwrap_concurrent {
         return p_stmt(&c.statement, env);
     }
     Ok(new(

@@ -16,18 +16,18 @@ let popt
     ~keep_user_attributes
     ~interpret_soft_types_as_like_types
     ~everything_sdt =
-  GlobalOptions.
+  ParserOptions.
     {
-      ParserOptions.default with
-      po_auto_namespace_map = auto_namespace_map;
-      po_disable_xhp_element_mangling = disable_xhp_element_mangling;
-      po_keep_user_attributes = keep_user_attributes;
-      po_enable_xhp_class_modifier = enable_xhp_class_modifier;
-      po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
-      tco_everything_sdt = everything_sdt;
+      default with
+      auto_namespace_map;
+      disable_xhp_element_mangling;
+      keep_user_attributes;
+      enable_xhp_class_modifier;
+      interpret_soft_types_as_like_types;
+      everything_sdt;
     }
 
-let init root popt ~rust_provider_backend : Provider_context.t =
+let init root tcopt ~rust_provider_backend : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   Relative_path.(set_path_prefix Tmp (Path.make "/tmp"));
   Relative_path.(set_path_prefix Hhi (Path.make "/tmp/non_existent"));
@@ -47,9 +47,10 @@ let init root popt ~rust_provider_backend : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
-  let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
+  let popt = tcopt.GlobalOptions.po in
+  let tcopt = { tcopt with GlobalOptions.tco_higher_kinded_types = true } in
   if rust_provider_backend then
-    let backend = Hh_server_provider_backend.make popt in
+    let backend = Hh_server_provider_backend.make tcopt in
     Provider_backend.set_rust_backend backend
   else
     Provider_backend.set_shared_memory_backend ();
@@ -286,7 +287,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
         in
         let ast =
           let { Parser_return.ast; _ } = parsed_file in
-          if popt.GlobalOptions.po_deregister_php_stdlib then
+          if popt.ParserOptions.deregister_php_stdlib then
             Nast.deregister_ignored_attributes ast
           else
             ast
@@ -580,9 +581,11 @@ let () =
     TypecheckerOptions.experimental_from_flags
       ~disallow_static_memoized:!disallow_static_memoized
   in
-  let popt = { popt with GlobalOptions.tco_experimental_features } in
+  let tcopt =
+    GlobalOptions.{ default with po = popt; tco_experimental_features }
+  in
   let ctx =
-    init (Path.dirname file) popt ~rust_provider_backend:!rust_provider_backend
+    init (Path.dirname file) tcopt ~rust_provider_backend:!rust_provider_backend
   in
   let file = Relative_path.(create Root (Path.to_string file)) in
   let files = Multifile.file_to_file_list file in

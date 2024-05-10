@@ -113,8 +113,12 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let parser = DeclParser::new(
         file_provider,
         DeclParserOptions::from_parser_options(&parser_opts),
-        parser_opts.po_deregister_php_stdlib,
+        parser_opts.deregister_php_stdlib,
     );
+    let tco = oxidized::global_options::GlobalOptions {
+        po: parser_opts,
+        ..Default::default()
+    };
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.no_serialize {
         StoreOpts::Unserialized
     } else {
@@ -144,7 +148,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         },
         opts.naming_table.as_ref(),
         shallow_decl_store,
-        Arc::new(parser_opts),
+        Arc::new(tco),
         parser,
     );
     if opts.fold {

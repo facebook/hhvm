@@ -57,7 +57,7 @@ let parse_and_lint fn content ctx =
     Errors.ignore_ (fun () ->
         Full_fidelity_ast.defensive_program
           ~elaborate_namespaces:true
-          (Provider_context.get_tcopt ctx)
+          (Provider_context.get_popt ctx)
           fn
           content)
   in

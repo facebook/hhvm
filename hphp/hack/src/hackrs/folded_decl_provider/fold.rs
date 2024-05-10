@@ -193,7 +193,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn maybe_add_supportdyn_bound(&self, p: &R::Pos, kind: &mut Typeconst<R>) {
-        if self.opts.tco_everything_sdt {
+        if self.opts.po.everything_sdt {
             if let Typeconst::TCAbstract(AbstractTypeconst {
                 as_constraint: as_constraint @ None,
                 ..
@@ -802,7 +802,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         shallow_props
             .chain(extends_props)
-            .chain(parent_construct.into_iter())
+            .chain(parent_construct)
             .collect()
     }
 
@@ -914,7 +914,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let mut tparams = self.child.tparams.clone();
         decl_enforceability::maybe_add_supportdyn_constraints(
-            self.opts,
+            &self.opts.po,
             Some(self.child),
             self.child.name.pos(),
             &mut tparams,

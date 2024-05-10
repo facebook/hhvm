@@ -91,8 +91,8 @@ impl HhServerProviderBackend {
         });
         let decl_parser = DeclParser::new(
             Arc::clone(&file_provider) as _,
-            DeclParserOptions::from_parser_options(&opts),
-            opts.po_deregister_php_stdlib,
+            DeclParserOptions::from_parser_options(&opts.po),
+            opts.po.deregister_php_stdlib,
         );
         let naming_table = Arc::new(NamingTableWithContext {
             ctx_is_empty: Arc::clone(&ctx_is_empty),

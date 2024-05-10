@@ -62,7 +62,12 @@ let init (root : Path.t) (naming_table_path : string option) :
     ServerConfig.load ~silent:true server_args
   in
   let popt = ServerConfig.parser_options server_config in
-  let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
+  let tcopt =
+    {
+      (ServerConfig.typechecker_options server_config) with
+      GlobalOptions.tco_higher_kinded_types = true;
+    }
+  in
   let ctx =
     Provider_context.empty_for_tool
       ~popt
@@ -289,7 +294,7 @@ let () =
   let rust_decl_map =
     Decl_folded_class_rupro.partition_and_fold_dir
       ~www_root:(Path.to_string www_root)
-      popt
+      GlobalOptions.{ default with po = popt }
       !num_partitions
       !partition_index
   in

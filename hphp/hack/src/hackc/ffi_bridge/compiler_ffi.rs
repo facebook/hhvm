@@ -538,10 +538,10 @@ impl ffi::NativeEnv {
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
                     .collect(),
                 parser_options: ParserOptions {
-                    po_auto_namespace_map: (self.aliased_namespaces.iter())
+                    auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))
                         .collect(),
-                    po_nameof_precedence: true,
+                    nameof_precedence: true,
                     ..self.parser_flags.to_parser_options()
                 },
             },

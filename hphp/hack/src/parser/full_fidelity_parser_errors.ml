@@ -28,6 +28,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | NoCompat
       | HHVMCompat
 
+    (* TODO(sao): FIX *)
     type env = {
       syntax_tree: SyntaxTree.t;
       level: error_level;
@@ -79,14 +80,17 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         Syntax.rust_parser_errors
           (SyntaxTree.text env.syntax_tree)
           rust_tree
-          (ParserOptions.to_rust_ffi_t
-             env.parser_options
-             ~hhvm_compat_mode:
-               (match env.hhvm_compat_mode with
-               | NoCompat -> false
-               | HHVMCompat -> true)
-             ~hhi_mode:env.hhi_mode
-             ~codegen:env.codegen)
+          ParserOptions.(
+            to_rust_ffi_t
+              {
+                env.parser_options with
+                hhvm_compat_mode =
+                  (match env.hhvm_compat_mode with
+                  | NoCompat -> false
+                  | HHVMCompat -> true);
+                hhi_mode = env.hhi_mode;
+                codegen = env.codegen;
+              })
       | None ->
         failwith
           "expected to find Rust tree. ~leak_rust_tree was not set correctly somwhere earlier"

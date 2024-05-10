@@ -23,7 +23,7 @@ use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
-use oxidized::parser_options::ParserOptions;
+use oxidized::global_options::GlobalOptions;
 use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
@@ -78,7 +78,7 @@ where
 ocaml_ffi! {
     fn fold_classes_in_files_ffi(
         root: PathBuf,
-        opts: ParserOptions,
+        opts: GlobalOptions,
         files: Vec<relative_path::RelativePath>,
     ) -> Result<BTreeMap<RelativePath, Vec<Arc<FoldedClass<BReason>>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
@@ -89,8 +89,8 @@ ocaml_ffi! {
         let file_provider: Arc<dyn file_provider::FileProvider> =
             Arc::new(file_provider::DiskProvider::new(path_ctx, None));
         let decl_parser = DeclParser::new(file_provider,
-                                          DeclParserOptions::from_parser_options(&opts),
-                                          opts.po_deregister_php_stdlib);
+                                          DeclParserOptions::from_parser_options(&opts.po),
+                                          opts.po.deregister_php_stdlib);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
         let reverse_files = files.iter().copied().rev().collect::<Vec<_>>();
@@ -175,7 +175,7 @@ ocaml_ffi! {
     // Returns a SMap from class_name to folded_decl
     fn partition_and_fold_dir_ffi(
         www_root: PathBuf,
-        opts: ParserOptions,
+        opts: GlobalOptions,
         num_partitions: usize,
         partition_index: usize,
     ) -> BTreeMap<String, Arc<FoldedClass<BReason>>> {
@@ -205,8 +205,8 @@ ocaml_ffi! {
             Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
         let decl_parser: DeclParser<BReason> = DeclParser::new(
             file_provider,
-            DeclParserOptions::from_parser_options(&opts),
-            opts.po_deregister_php_stdlib
+            DeclParserOptions::from_parser_options(&opts.po),
+            opts.po.deregister_php_stdlib
         );
         let shallow_decl_store =
             make_shallow_decl_store(StoreOpts::Serialized(Compression::default()));
@@ -240,8 +240,6 @@ ocaml_ffi! {
                 (class.as_str().into(), folded_decl)
             })
             .collect();
-        s.into_iter()
-            .map(|(name, fc)| (name, fc))
-            .collect()
+        s.into_iter().collect()
     }
 }

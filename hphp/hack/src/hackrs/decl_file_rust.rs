@@ -102,8 +102,12 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
     let decl_parser = DeclParser::<R>::new(
         Arc::clone(&file_provider),
         DeclParserOptions::from_parser_options(&parser_opts),
-        parser_opts.po_deregister_php_stdlib,
+        parser_opts.deregister_php_stdlib,
     );
+    let tco = oxidized::global_options::GlobalOptions {
+        po: parser_opts,
+        ..Default::default()
+    };
     all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
@@ -113,7 +117,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         StoreOpts::Unserialized,
         opts.naming_table.as_ref(),
         shallow_decl_store,
-        Arc::new(parser_opts),
+        Arc::new(tco),
         decl_parser.clone(),
     ));
 

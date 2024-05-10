@@ -161,7 +161,7 @@ let init
     (env : ServerEnv.env) : ServerEnv.env * init_result =
   if genv.local_config.ServerLocalConfig.rust_provider_backend then (
     Hh_logger.log "ServerInit: using rust backend";
-    let backend = Hh_server_provider_backend.make env.popt in
+    let backend = Hh_server_provider_backend.make env.tcopt in
     Provider_backend.set_rust_backend backend
   );
   let lazy_lev = get_lazy_level genv in

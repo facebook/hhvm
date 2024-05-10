@@ -1236,7 +1236,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let text = self.text(&x.expression);
                 match UnstableFeatures::from_str(escaper::unquote_str(text)) {
                     Ok(feature) => {
-                        if !self.env.parser_options.po_allow_unstable_features
+                        if !self.env.parser_options.allow_unstable_features
                             && !self.env.is_hhi_mode()
                             && feature.get_feature_status() == FeatureStatus::Unstable
                         {
@@ -1277,9 +1277,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let parser_options = &self.env.parser_options;
         let enabled = match feature {
             UnstableFeatures::UnionIntersectionTypeHints => {
-                parser_options.tco_union_intersection_type_hints
+                parser_options.union_intersection_type_hints
             }
-            UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
+            UnstableFeatures::ClassLevelWhere => parser_options.enable_class_level_where_clauses,
 
             _ => false,
         } || self.env.context.active_unstable_features.contains(feature)
@@ -2339,7 +2339,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn lval_errors(&mut self, syntax_node: S<'a>) {
-        if self.env.parser_options.po_disable_lval_as_an_expression {
+        if self.env.parser_options.disable_lval_as_an_expression {
             if let LvalTypeNonFinal = node_lval_type(syntax_node, &self.parents) {
                 self.errors.push(make_error_from_node(
                     syntax_node,
@@ -2663,7 +2663,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if name == sn::superglobals::GLOBALS {
                     self.errors
                         .push(make_error_from_node(node, errors::globals_disallowed))
-                } else if self.env.parser_options.po_disallow_direct_superglobals_refs
+                } else if self.env.parser_options.disallow_direct_superglobals_refs
                     && sn::superglobals::is_superglobal(name)
                 {
                     self.errors.push(make_error_from_node(
@@ -4721,7 +4721,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             FunctionPointerExpression(_) => {
                 // Bans the equivalent of inst_meth as well as class_meth and fun
-                if self.env.parser_options.po_disallow_func_ptrs_in_constants {
+                if self.env.parser_options.disallow_func_ptrs_in_constants {
                     default(self)
                 }
             }
@@ -4799,7 +4799,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let PropertyDeclaration(x) = &node.children {
             let property_modifiers = &x.modifiers;
 
-            let abstract_static_props = self.env.parser_options.po_abstract_static_props;
+            let abstract_static_props = self.env.parser_options.abstract_static_props;
             self.invalid_modifier_errors("Properties", node, |kind| {
                 if kind == TokenKind::Abstract {
                     return abstract_static_props;
@@ -4819,7 +4819,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 node,
             );
 
-            if self.env.parser_options.po_abstract_static_props {
+            if self.env.parser_options.abstract_static_props {
                 self.produce_error(
                     |_, n| has_modifier_abstract(n) && !has_modifier_static(n),
                     node,
@@ -4866,8 +4866,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             })
         };
         if let PropertyDeclaration(x) = &node.children {
-            if self.env.parser_options.po_const_static_props && has_modifier_static(node) {
-                if self.env.parser_options.po_abstract_static_props && has_modifier_abstract(node) {
+            if self.env.parser_options.const_static_props && has_modifier_static(node) {
+                if self.env.parser_options.abstract_static_props && has_modifier_abstract(node) {
                     check_decls(
                         self,
                         &|n| !n.is_missing(),
@@ -5216,7 +5216,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a>) {
         if let SoftTypeSpecifier(_) = node.children {
-            if self.env.parser_options.po_disable_legacy_soft_typehints {
+            if self.env.parser_options.disable_legacy_soft_typehints {
                 self.errors
                     .push(make_error_from_node(node, errors::no_legacy_soft_typehints))
             }
@@ -5226,7 +5226,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn disabled_legacy_attribute_syntax_errors(&mut self, node: S<'a>) {
         match node.children {
             OldAttributeSpecification(_)
-                if self.env.parser_options.po_disable_legacy_attribute_syntax =>
+                if self.env.parser_options.disable_legacy_attribute_syntax =>
             {
                 self.errors.push(make_error_from_node(
                     node,
@@ -5239,7 +5239,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn param_default_decl_errors(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
-            if self.env.parser_options.po_const_default_lambda_args {
+            if self.env.parser_options.const_default_lambda_args {
                 match self.env.context.active_callable {
                     Some(node) => match node.children {
                         AnonymousFunction(_) | LambdaExpression(_) => {
@@ -5250,14 +5250,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     _ => {}
                 }
             }
-            if self.env.parser_options.po_const_default_func_args {
+            if self.env.parser_options.const_default_func_args {
                 self.check_constant_expression(
                     &x.default_value,
                     // `static` in constant
                     !self
                         .env
                         .parser_options
-                        .po_disallow_static_constants_in_default_func_args,
+                        .disallow_static_constants_in_default_func_args,
                 )
             }
         }

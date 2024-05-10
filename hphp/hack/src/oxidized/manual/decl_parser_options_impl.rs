@@ -17,16 +17,16 @@ impl Default for DeclParserOptions {
 impl DeclParserOptions {
     pub fn from_parser_options(opts: &ParserOptions) -> Self {
         Self {
-            auto_namespace_map: opts.po_auto_namespace_map.clone(),
-            disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
-            interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
-            enable_xhp_class_modifier: opts.po_enable_xhp_class_modifier,
-            everything_sdt: opts.tco_everything_sdt,
+            auto_namespace_map: opts.auto_namespace_map.clone(),
+            disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
+            enable_xhp_class_modifier: opts.enable_xhp_class_modifier,
+            everything_sdt: opts.everything_sdt,
             php5_compat_mode: false,
             hhvm_compat_mode: false,
             keep_user_attributes: false,
             include_assignment_values: false,
-            stack_size: opts.po_stack_size,
+            stack_size: opts.stack_size,
         }
     }
 }

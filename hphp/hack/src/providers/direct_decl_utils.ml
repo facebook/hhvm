@@ -181,7 +181,7 @@ let direct_decl_parse ?(ignore_file_content_caches = false) ctx file =
     let popt = Provider_context.get_popt ctx in
     let opts = DeclParserOptions.from_parser_options popt in
     let deregister_php_stdlib_if_hhi =
-      popt.GlobalOptions.po_deregister_php_stdlib
+      popt.ParserOptions.deregister_php_stdlib
     in
     let parsed_file =
       Direct_decl_parser.parse_and_hash_decls

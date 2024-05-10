@@ -99,7 +99,7 @@ impl NativeEnv {
         Options {
             hhvm: Hhvm {
                 parser_options: ParserOptions {
-                    po_disable_legacy_soft_typehints: false,
+                    disable_legacy_soft_typehints: false,
                     ..self.hhvm.parser_options.clone()
                 },
                 ..self.hhvm.clone()
@@ -115,9 +115,9 @@ impl NativeEnv {
         let lang_flags = &self.hhvm.parser_options;
         DeclParserOptions {
             auto_namespace_map,
-            disable_xhp_element_mangling: lang_flags.po_disable_xhp_element_mangling,
+            disable_xhp_element_mangling: lang_flags.disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: true,
-            enable_xhp_class_modifier: lang_flags.po_enable_xhp_class_modifier,
+            enable_xhp_class_modifier: lang_flags.enable_xhp_class_modifier,
             php5_compat_mode: true,
             hhvm_compat_mode: true,
             keep_user_attributes: true,
@@ -308,7 +308,7 @@ fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
             .options()
             .hhvm
             .parser_options
-            .po_disable_xhp_element_mangling,
+            .disable_xhp_element_mangling,
     )
 }
 
@@ -612,9 +612,9 @@ fn create_emitter<'d>(
 
 fn create_parser_options(opts: &Options, type_directed: bool) -> ParserOptions {
     ParserOptions {
-        po_codegen: true,
-        po_disallow_silence: false,
-        tco_no_parser_readonly_check: type_directed,
+        codegen: true,
+        disallow_silence: false,
+        no_parser_readonly_check: type_directed,
         ..opts.hhvm.parser_options.clone()
     }
 }

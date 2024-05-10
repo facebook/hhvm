@@ -27,7 +27,7 @@ let process_parse_result
   let ast =
     if
       Relative_path.(is_hhi (Relative_path.prefix fn))
-      && popt.GlobalOptions.po_deregister_php_stdlib
+      && popt.ParserOptions.deregister_php_stdlib
     then
       Nast.deregister_ignored_attributes ast
     else

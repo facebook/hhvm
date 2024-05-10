@@ -72,6 +72,7 @@ let with_zstd_decompress_by_file zstd_decompress_by_file ss =
   - so_<feature/flag/setting> - server option
 *)
 type t = {
+  po: ParserOptions.t;
   tco_saved_state: saved_state;
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
@@ -80,11 +81,7 @@ type t = {
   tco_locl_cache_capacity: int;
   tco_locl_cache_node_threshold: int;
   so_naming_sqlite_path: string option;
-  po_auto_namespace_map: (string * string) list;
-  po_codegen: bool;
-  po_deregister_php_stdlib: bool;
   po_disallow_toplevel_requires: bool;
-  po_allow_unstable_features: bool;
   tco_log_large_fanouts_threshold: int option;
   tco_log_inference_constraints: bool;
   tco_language_feature_logging: bool;
@@ -96,7 +93,6 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
   class_pointer_levels: int SMap.t;
-  po_disable_lval_as_an_expression: bool;
   tco_remote_old_decls_no_limit: bool;
   tco_use_old_decls_from_cas: bool;
   tco_fetch_remote_old_decls: bool;
@@ -104,7 +100,6 @@ type t = {
   tco_skip_hierarchy_checks: bool;
   tco_skip_tast_checks: bool;
   tco_like_type_hints: bool;
-  tco_union_intersection_type_hints: bool;
   tco_coeffects: bool;
   tco_coeffects_local: bool;
   tco_strict_contexts: bool;
@@ -113,17 +108,7 @@ type t = {
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
   tco_custom_error_config: Custom_error_config.t;
-  po_enable_class_level_where_clauses: bool;
-  po_disable_legacy_soft_typehints: bool;
-  po_allowed_decl_fixme_codes: ISet.t;
-  po_const_static_props: bool;
-  po_disable_legacy_attribute_syntax: bool;
   tco_const_attribute: bool;
-  po_const_default_func_args: bool;
-  po_const_default_lambda_args: bool;
-  po_disallow_silence: bool;
-  po_abstract_static_props: bool;
-  po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
   glean_reponame: string;
   symbol_write_index_inherited_members: bool;
@@ -140,15 +125,8 @@ type t = {
   symbol_write_referenced_out: string option;
   symbol_write_reindexed_out: string option;
   symbol_write_sym_hash_out: bool;
-  po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
-  po_enable_xhp_class_modifier: bool;
-  po_disable_xhp_element_mangling: bool;
-  po_disable_xhp_children_declarations: bool;
-  po_disable_hh_ignore_error: int;
-  po_keep_user_attributes: bool;
-  tco_is_systemlib: bool;
   tco_higher_kinded_types: bool;
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
@@ -157,10 +135,8 @@ type t = {
   tco_enable_no_auto_dynamic: bool;
   tco_skip_check_under_dynamic: bool;
   tco_global_access_check_enabled: bool;
-  po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
   tco_ignore_unsafe_cast: bool;
-  tco_no_parser_readonly_check: bool;
   tco_enable_expression_trees: bool;
   tco_enable_function_references: bool;
   tco_allowed_expression_tree_visitors: string list;
@@ -171,7 +147,6 @@ type t = {
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
-  tco_everything_sdt: bool;
   tco_implicit_inherit_sdt: bool;
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
@@ -184,20 +159,15 @@ type t = {
   tco_loop_iteration_upper_bound: int option;
   tco_use_type_alias_heap: bool;
   tco_populate_dead_unsafe_cast_heap: bool;
-  po_disallow_static_constants_in_default_func_args: bool;
   tco_rust_elab: bool;
   dump_tast_hashes: bool;
   dump_tasts: string list;
   tco_autocomplete_mode: bool;
   tco_package_info: PackageInfo.t;
-  po_unwrap_concurrent: bool;
   tco_log_exhaustivity_check: bool;
-  po_disallow_direct_superglobals_refs: bool;
   tco_sticky_quarantine: bool;
   tco_lsp_invalidation: bool;
   tco_autocomplete_sort_text: bool;
-  po_nameof_precedence: bool;
-  po_stack_size: int;
   tco_extended_reasons: bool;
   hack_warnings: bool;
   tco_strict_switch: bool;
@@ -207,6 +177,7 @@ type t = {
 
 let default =
   {
+    po = ParserOptions.default;
     tco_saved_state = default_saved_state;
     tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
@@ -215,11 +186,7 @@ let default =
     tco_locl_cache_capacity = 30;
     tco_locl_cache_node_threshold = 10_000;
     so_naming_sqlite_path = None;
-    po_auto_namespace_map = [];
-    po_codegen = false;
     po_disallow_toplevel_requires = false;
-    po_deregister_php_stdlib = false;
-    po_allow_unstable_features = false;
     tco_log_large_fanouts_threshold = None;
     tco_log_inference_constraints = false;
     tco_language_feature_logging = false;
@@ -231,7 +198,6 @@ let default =
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
     class_pointer_levels = SMap.empty;
-    po_disable_lval_as_an_expression = true;
     tco_remote_old_decls_no_limit = false;
     tco_use_old_decls_from_cas = false;
     tco_fetch_remote_old_decls = true;
@@ -239,7 +205,6 @@ let default =
     tco_skip_hierarchy_checks = false;
     tco_skip_tast_checks = false;
     tco_like_type_hints = false;
-    tco_union_intersection_type_hints = false;
     tco_coeffects = true;
     tco_coeffects_local = true;
     tco_strict_contexts = true;
@@ -248,17 +213,7 @@ let default =
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
     tco_custom_error_config = Custom_error_config.empty;
-    po_enable_class_level_where_clauses = false;
-    po_disable_legacy_soft_typehints = true;
-    po_allowed_decl_fixme_codes = ISet.empty;
-    po_const_static_props = false;
-    po_disable_legacy_attribute_syntax = false;
     tco_const_attribute = false;
-    po_const_default_func_args = false;
-    po_const_default_lambda_args = false;
-    po_disallow_silence = false;
-    po_abstract_static_props = false;
-    po_parser_errors_only = false;
     tco_check_attribute_locations = true;
     glean_reponame = "www.hack.light";
     symbol_write_index_inherited_members = true;
@@ -275,15 +230,8 @@ let default =
     symbol_write_referenced_out = None;
     symbol_write_reindexed_out = None;
     symbol_write_sym_hash_out = false;
-    po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
-    po_enable_xhp_class_modifier = true;
-    po_disable_xhp_element_mangling = true;
-    po_disable_xhp_children_declarations = true;
-    po_disable_hh_ignore_error = 0;
-    po_keep_user_attributes = false;
-    tco_is_systemlib = false;
     tco_higher_kinded_types = false;
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
@@ -292,10 +240,8 @@ let default =
     tco_enable_no_auto_dynamic = false;
     tco_skip_check_under_dynamic = false;
     tco_global_access_check_enabled = false;
-    po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
     tco_ignore_unsafe_cast = false;
-    tco_no_parser_readonly_check = false;
     tco_enable_expression_trees = false;
     tco_enable_function_references = false;
     tco_allowed_expression_tree_visitors = [];
@@ -306,7 +252,6 @@ let default =
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
-    tco_everything_sdt = false;
     tco_implicit_inherit_sdt = false;
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
@@ -319,21 +264,15 @@ let default =
     tco_loop_iteration_upper_bound = None;
     tco_use_type_alias_heap = false;
     tco_populate_dead_unsafe_cast_heap = false;
-    po_disallow_static_constants_in_default_func_args = false;
     tco_rust_elab = false;
     dump_tast_hashes = false;
     dump_tasts = [];
     tco_autocomplete_mode = false;
     tco_package_info = PackageInfo.empty;
-    po_unwrap_concurrent = false;
     tco_log_exhaustivity_check = false;
-    po_disallow_direct_superglobals_refs = false;
     tco_sticky_quarantine = false;
     tco_lsp_invalidation = false;
     tco_autocomplete_sort_text = false;
-    po_nameof_precedence = false;
-    po_stack_size = 32 * 1024 * 1024;
-    (* The largest stack size we can use without requiring sudo *)
     tco_extended_reasons = false;
     hack_warnings = false;
     tco_strict_switch = false;
@@ -341,8 +280,8 @@ let default =
   }
 
 let set
+    ?po
     ?tco_saved_state
-    ?po_deregister_php_stdlib
     ?po_disallow_toplevel_requires
     ?tco_log_large_fanouts_threshold
     ?tco_log_inference_constraints
@@ -353,8 +292,6 @@ let set
     ?tco_locl_cache_capacity
     ?tco_locl_cache_node_threshold
     ?so_naming_sqlite_path
-    ?po_auto_namespace_map
-    ?po_codegen
     ?tco_language_feature_logging
     ?tco_timeout
     ?tco_disallow_invalid_arraykey
@@ -364,7 +301,6 @@ let set
     ?allowed_fixme_codes_strict
     ?log_levels
     ?class_pointer_levels
-    ?po_disable_lval_as_an_expression
     ?tco_remote_old_decls_no_limit
     ?tco_use_old_decls_from_cas
     ?tco_fetch_remote_old_decls
@@ -372,7 +308,6 @@ let set
     ?tco_skip_hierarchy_checks
     ?tco_skip_tast_checks
     ?tco_like_type_hints
-    ?tco_union_intersection_type_hints
     ?tco_coeffects
     ?tco_coeffects_local
     ?tco_strict_contexts
@@ -381,17 +316,7 @@ let set
     ?tco_check_redundant_generics
     ?tco_disallow_unresolved_type_variables
     ?tco_custom_error_config
-    ?po_enable_class_level_where_clauses
-    ?po_disable_legacy_soft_typehints
-    ?po_allowed_decl_fixme_codes
-    ?po_const_static_props
-    ?po_disable_legacy_attribute_syntax
     ?tco_const_attribute
-    ?po_const_default_func_args
-    ?po_const_default_lambda_args
-    ?po_disallow_silence
-    ?po_abstract_static_props
-    ?po_parser_errors_only
     ?tco_check_attribute_locations
     ?glean_reponame
     ?symbol_write_index_inherited_members
@@ -408,16 +333,8 @@ let set
     ?symbol_write_referenced_out
     ?symbol_write_reindexed_out
     ?symbol_write_sym_hash_out
-    ?po_disallow_func_ptrs_in_constants
     ?tco_error_php_lambdas
     ?tco_disallow_discarded_nullable_awaitables
-    ?po_enable_xhp_class_modifier
-    ?po_disable_xhp_element_mangling
-    ?po_disable_xhp_children_declarations
-    ?po_disable_hh_ignore_error
-    ?po_keep_user_attributes
-    ?po_allow_unstable_features
-    ?tco_is_systemlib
     ?tco_higher_kinded_types
     ?tco_report_pos_from_reason
     ?tco_typecheck_sample_rate
@@ -426,10 +343,8 @@ let set
     ?tco_enable_no_auto_dynamic
     ?tco_skip_check_under_dynamic
     ?tco_global_access_check_enabled
-    ?po_interpret_soft_types_as_like_types
     ?tco_enable_strict_string_concat_interp
     ?tco_ignore_unsafe_cast
-    ?tco_no_parser_readonly_check
     ?tco_enable_expression_trees
     ?tco_enable_function_references
     ?tco_allowed_expression_tree_visitors
@@ -440,7 +355,6 @@ let set
     ?tco_require_extends_implements_ancestors
     ?tco_strict_value_equality
     ?tco_enforce_sealed_subclasses
-    ?tco_everything_sdt
     ?tco_implicit_inherit_sdt
     ?tco_explicit_consistent_constructors
     ?tco_require_types_class_consts
@@ -453,20 +367,15 @@ let set
     ?tco_loop_iteration_upper_bound
     ?tco_use_type_alias_heap
     ?tco_populate_dead_unsafe_cast_heap
-    ?po_disallow_static_constants_in_default_func_args
     ?tco_rust_elab
     ?dump_tast_hashes
     ?dump_tasts
     ?tco_autocomplete_mode
     ?tco_package_info
-    ?po_unwrap_concurrent
     ?tco_log_exhaustivity_check
-    ?po_disallow_direct_superglobals_refs
     ?tco_sticky_quarantine
     ?tco_lsp_invalidation
     ?tco_autocomplete_sort_text
-    ?po_nameof_precedence
-    ?po_stack_size
     ?tco_extended_reasons
     ?hack_warnings
     ?tco_strict_switch
@@ -483,6 +392,7 @@ let set
     | Some _ -> setting
   in
   {
+    po = setting po options.po;
     tco_saved_state = setting tco_saved_state options.tco_saved_state;
     tco_experimental_features =
       setting tco_experimental_features options.tco_experimental_features;
@@ -502,21 +412,14 @@ let set
         options.tco_locl_cache_node_threshold;
     so_naming_sqlite_path =
       setting_opt so_naming_sqlite_path options.so_naming_sqlite_path;
-    po_auto_namespace_map =
-      setting po_auto_namespace_map options.po_auto_namespace_map;
-    po_codegen = setting po_codegen options.po_codegen;
     code_agnostic_fixme =
       setting code_agnostic_fixme options.code_agnostic_fixme;
     allowed_fixme_codes_strict =
       setting allowed_fixme_codes_strict options.allowed_fixme_codes_strict;
-    po_deregister_php_stdlib =
-      setting po_deregister_php_stdlib options.po_deregister_php_stdlib;
     po_disallow_toplevel_requires =
       setting
         po_disallow_toplevel_requires
         options.po_disallow_toplevel_requires;
-    po_allow_unstable_features =
-      setting po_allow_unstable_features options.po_allow_unstable_features;
     tco_log_large_fanouts_threshold =
       setting_opt
         tco_log_large_fanouts_threshold
@@ -541,10 +444,6 @@ let set
     log_levels = setting log_levels options.log_levels;
     class_pointer_levels =
       setting class_pointer_levels options.class_pointer_levels;
-    po_disable_lval_as_an_expression =
-      setting
-        po_disable_lval_as_an_expression
-        options.po_disable_lval_as_an_expression;
     tco_remote_old_decls_no_limit =
       setting
         tco_remote_old_decls_no_limit
@@ -561,10 +460,6 @@ let set
       setting tco_skip_tast_checks options.tco_skip_tast_checks;
     tco_like_type_hints =
       setting tco_like_type_hints options.tco_like_type_hints;
-    tco_union_intersection_type_hints =
-      setting
-        tco_union_intersection_type_hints
-        options.tco_union_intersection_type_hints;
     tco_coeffects = setting tco_coeffects options.tco_coeffects;
     tco_coeffects_local =
       setting tco_coeffects_local options.tco_coeffects_local;
@@ -581,34 +476,8 @@ let set
         options.tco_disallow_unresolved_type_variables;
     tco_custom_error_config =
       setting tco_custom_error_config options.tco_custom_error_config;
-    po_enable_class_level_where_clauses =
-      setting
-        po_enable_class_level_where_clauses
-        options.po_enable_class_level_where_clauses;
-    po_disable_legacy_soft_typehints =
-      setting
-        po_disable_legacy_soft_typehints
-        options.po_disable_legacy_soft_typehints;
-    po_allowed_decl_fixme_codes =
-      setting po_allowed_decl_fixme_codes options.po_allowed_decl_fixme_codes;
-    po_const_static_props =
-      setting po_const_static_props options.po_const_static_props;
-    po_disable_legacy_attribute_syntax =
-      setting
-        po_disable_legacy_attribute_syntax
-        options.po_disable_legacy_attribute_syntax;
     tco_const_attribute =
       setting tco_const_attribute options.tco_const_attribute;
-    po_const_default_func_args =
-      setting po_const_default_func_args options.po_const_default_func_args;
-    po_const_default_lambda_args =
-      setting po_const_default_lambda_args options.po_const_default_lambda_args;
-    po_disallow_silence =
-      setting po_disallow_silence options.po_disallow_silence;
-    po_abstract_static_props =
-      setting po_abstract_static_props options.po_abstract_static_props;
-    po_parser_errors_only =
-      setting po_parser_errors_only options.po_parser_errors_only;
     tco_check_attribute_locations =
       setting
         tco_check_attribute_locations
@@ -650,31 +519,12 @@ let set
       setting_opt symbol_write_reindexed_out options.symbol_write_reindexed_out;
     symbol_write_sym_hash_out =
       setting symbol_write_sym_hash_out options.symbol_write_sym_hash_out;
-    po_disallow_func_ptrs_in_constants =
-      setting
-        po_disallow_func_ptrs_in_constants
-        options.po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas =
       setting tco_error_php_lambdas options.tco_error_php_lambdas;
     tco_disallow_discarded_nullable_awaitables =
       setting
         tco_disallow_discarded_nullable_awaitables
         options.tco_disallow_discarded_nullable_awaitables;
-    po_enable_xhp_class_modifier =
-      setting po_enable_xhp_class_modifier options.po_enable_xhp_class_modifier;
-    po_disable_xhp_element_mangling =
-      setting
-        po_disable_xhp_element_mangling
-        options.po_disable_xhp_element_mangling;
-    po_disable_xhp_children_declarations =
-      setting
-        po_disable_xhp_children_declarations
-        options.po_disable_xhp_children_declarations;
-    po_disable_hh_ignore_error =
-      setting po_disable_hh_ignore_error options.po_disable_hh_ignore_error;
-    po_keep_user_attributes =
-      setting po_keep_user_attributes options.po_keep_user_attributes;
-    tco_is_systemlib = setting tco_is_systemlib options.tco_is_systemlib;
     tco_higher_kinded_types =
       setting tco_higher_kinded_types options.tco_higher_kinded_types;
     tco_report_pos_from_reason =
@@ -693,18 +543,12 @@ let set
       setting
         tco_global_access_check_enabled
         options.tco_global_access_check_enabled;
-    po_interpret_soft_types_as_like_types =
-      setting
-        po_interpret_soft_types_as_like_types
-        options.po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp =
       setting
         tco_enable_strict_string_concat_interp
         options.tco_enable_strict_string_concat_interp;
     tco_ignore_unsafe_cast =
       setting tco_ignore_unsafe_cast options.tco_ignore_unsafe_cast;
-    tco_no_parser_readonly_check =
-      setting tco_no_parser_readonly_check options.tco_no_parser_readonly_check;
     tco_enable_expression_trees =
       setting tco_enable_expression_trees options.tco_enable_expression_trees;
     tco_enable_function_references =
@@ -739,7 +583,6 @@ let set
       setting
         tco_enforce_sealed_subclasses
         options.tco_enforce_sealed_subclasses;
-    tco_everything_sdt = setting tco_everything_sdt options.tco_everything_sdt;
     tco_implicit_inherit_sdt =
       setting tco_implicit_inherit_sdt options.tco_implicit_inherit_sdt;
     tco_explicit_consistent_constructors =
@@ -780,33 +623,20 @@ let set
       setting
         tco_populate_dead_unsafe_cast_heap
         options.tco_populate_dead_unsafe_cast_heap;
-    po_disallow_static_constants_in_default_func_args =
-      setting
-        po_disallow_static_constants_in_default_func_args
-        options.po_disallow_static_constants_in_default_func_args;
     tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
     dump_tasts = setting dump_tasts options.dump_tasts;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
     tco_package_info = setting tco_package_info options.tco_package_info;
-    po_unwrap_concurrent =
-      setting po_unwrap_concurrent options.po_unwrap_concurrent;
     tco_log_exhaustivity_check =
       setting tco_log_exhaustivity_check options.tco_log_exhaustivity_check;
-    po_disallow_direct_superglobals_refs =
-      setting
-        po_disallow_direct_superglobals_refs
-        options.po_disallow_direct_superglobals_refs;
     tco_sticky_quarantine =
       setting tco_sticky_quarantine options.tco_sticky_quarantine;
     tco_lsp_invalidation =
       setting tco_lsp_invalidation options.tco_lsp_invalidation;
     tco_autocomplete_sort_text =
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
-    po_nameof_precedence =
-      setting po_nameof_precedence options.po_nameof_precedence;
-    po_stack_size = setting po_stack_size options.po_stack_size;
     tco_extended_reasons =
       setting tco_extended_reasons options.tco_extended_reasons;
     hack_warnings = setting hack_warnings options.hack_warnings;

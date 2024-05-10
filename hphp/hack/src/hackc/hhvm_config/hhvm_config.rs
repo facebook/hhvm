@@ -29,57 +29,54 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
 
     // Note: Could only find examples of Hack.Lang.AbstractStaticProps
     init(
-        &mut flags.po_abstract_static_props,
+        &mut flags.abstract_static_props,
         "Hack.Lang.AbstractStaticProps",
     )?;
 
     // Both hdf and ini versions are being used
     init(
-        &mut flags.po_allow_unstable_features,
+        &mut flags.allow_unstable_features,
         "Hack.Lang.AllowUnstableFeatures",
     )?;
 
     // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
     init(
-        &mut flags.po_const_default_func_args,
+        &mut flags.const_default_func_args,
         "Hack.Lang.ConstDefaultFuncArgs",
     )?;
 
     // Only hdf version found in use
-    init(
-        &mut flags.po_const_static_props,
-        "Hack.Lang.ConstStaticProps",
-    )?;
+    init(&mut flags.const_static_props, "Hack.Lang.ConstStaticProps")?;
 
     // TODO: Kill disable_lval_as_an_expression
 
     // Both ini and hdf variants in use
     init(
-        &mut flags.po_disable_xhp_element_mangling,
+        &mut flags.disable_xhp_element_mangling,
         "Hack.Lang.DisableXHPElementMangling",
     )?;
 
     // Only hdf option in use
     init(
-        &mut flags.po_disallow_func_ptrs_in_constants,
+        &mut flags.disallow_func_ptrs_in_constants,
         "Hack.Lang.DisallowFuncPtrsInConstants",
     )?;
 
     // Both options in use
     init(
-        &mut flags.po_enable_xhp_class_modifier,
+        &mut flags.enable_xhp_class_modifier,
         "Hack.Lang.EnableXHPClassModifier",
     )?;
 
     // Only hdf option in use. Kill variant in options_cli.rs
     init(
-        &mut flags.po_enable_class_level_where_clauses,
+        &mut flags.enable_class_level_where_clauses,
         "Hack.Lang.EnableClassLevelWhereClauses",
     )?;
 
     // Only hdf option in use
     init(
-        &mut flags.po_disallow_direct_superglobals_refs,
+        &mut flags.disallow_direct_superglobals_refs,
         "Hack.Lang.DisallowDirectSuperglobalsRefs",
     )?;
 

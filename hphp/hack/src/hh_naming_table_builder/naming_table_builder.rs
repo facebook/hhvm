@@ -91,8 +91,8 @@ pub fn build_naming_table(args: Args) -> anyhow::Result<ExitStatus> {
     let mut filenames = walk(&args.www, relative_path::Prefix::Root)?;
     filenames.extend(walk(&hhi_path, relative_path::Prefix::Hhi)?);
 
-    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts);
-    let parse = |path| parse_file(&hhconfig.opts, decl_opts, &args.www, &hhi_path, path);
+    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts.po);
+    let parse = |path| parse_file(&hhconfig.opts.po, decl_opts, &args.www, &hhi_path, path);
     let save_result = if args.unsorted {
         slog::info!(log, "Parsing files and writing to DB...");
         names::Names::build(&args.output, |tx| {
@@ -147,7 +147,7 @@ pub fn build_naming_table_ide(
     let mut filenames = walk(www, relative_path::Prefix::Root)?;
     filenames.extend(walk(hhi_path, relative_path::Prefix::Hhi)?);
 
-    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts);
+    let decl_opts = &DeclParserOptions::from_parser_options(&hhconfig.opts.po);
 
     // Parse each file in parallel to get the file summary and a list of symbol
     // index addenda. The addenda are used to update the symbol index DB (e.g.
@@ -159,7 +159,7 @@ pub fn build_naming_table_ide(
         .into_par_iter()
         .map(|path| {
             let (path, summary, addenda) =
-                parse_file_with_addenda(&hhconfig.opts, decl_opts, www, hhi_path, path)?;
+                parse_file_with_addenda(&hhconfig.opts.po, decl_opts, www, hhi_path, path)?;
             Ok(((path.clone(), summary), (path, addenda)))
         })
         .collect::<anyhow::Result<_>>()?;
@@ -195,7 +195,7 @@ fn parse_file_with_hashes<'a>(
     let parsed_file =
         direct_decl_parser::parse_decls_for_typechecking(decl_opts, path, text, arena);
     let with_hashes =
-        ParsedFileWithHashes::new(parsed_file, opts.po_deregister_php_stdlib, prefix, arena);
+        ParsedFileWithHashes::new(parsed_file, opts.deregister_php_stdlib, prefix, arena);
     Ok(with_hashes)
 }
 

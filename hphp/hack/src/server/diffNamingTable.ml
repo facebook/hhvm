@@ -19,7 +19,7 @@ let get_default_provider_context () =
   let hh_parser_options = GlobalOptions.default in
   let provider_backend = Provider_backend.get () in
   Provider_context.empty_for_tool
-    ~popt:hh_parser_options
+    ~popt:hh_parser_options.GlobalOptions.po
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)

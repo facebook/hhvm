@@ -255,20 +255,27 @@ let parse_options () =
       let root = Path.make root in
       (allowed_fixme_codes_strict, sharedmem_config, root)
   in
-
+  let ( >?? ) x y = Option.value x ~default:y in
+  let po =
+    ParserOptions.
+      {
+        default with
+        disable_xhp_element_mangling = !disable_xhp_element_mangling;
+        disable_xhp_children_declarations = !disable_xhp_children_declarations;
+        enable_xhp_class_modifier = !enable_xhp_class_modifier;
+        everything_sdt = true;
+        auto_namespace_map = !auto_namespace_map >?? default.auto_namespace_map;
+      }
+  in
   let tcopt =
     GlobalOptions.set
+      ~po
       ~tco_saved_state:
         (GlobalOptions.default_saved_state
         |> GlobalOptions.with_saved_state_manifold_api_key
              !saved_state_manifold_api_key)
       ~tco_check_xhp_attribute:!check_xhp_attribute
-      ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
-      ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
-      ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~tco_everything_sdt:true
       ~tco_enable_sound_dynamic:true
-      ?po_auto_namespace_map:!auto_namespace_map
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
       ~glean_reponame:!glean_reponame
@@ -293,13 +300,13 @@ let parse_and_name ctx files_contents =
       (* Get parse errors. *)
       let () =
         Errors.run_in_context fn (fun () ->
-            let popt = Provider_context.get_tcopt ctx in
+            let popt = Provider_context.get_popt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
             in
             let ast =
               let { Parser_return.ast; _ } = parsed_file in
-              if popt.GlobalOptions.po_deregister_php_stdlib then
+              if popt.ParserOptions.deregister_php_stdlib then
                 Nast.deregister_ignored_attributes ast
               else
                 ast
@@ -768,7 +775,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
 
 let decl_and_run_mode
     { files; extra_builtins; mode; no_builtins; tcopt; naming_table_path }
-    (popt : TypecheckerOptions.t)
+    (popt : ParserOptions.t)
     (hhi_root : Path.t) : unit =
   Ident.track_names := true;
   let builtins =
@@ -906,7 +913,7 @@ let decl_and_run_mode
 
   (* SYMBOL INDEX PHASE 1: initialize *)
   let glean_reponame = GleanOptions.reponame tcopt in
-  let namespace_map = tcopt.GlobalOptions.po_auto_namespace_map in
+  let namespace_map = popt.ParserOptions.auto_namespace_map in
   let sienv =
     SymbolIndex.initialize
       ~gleanopt:tcopt
@@ -954,7 +961,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root;
+      decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)

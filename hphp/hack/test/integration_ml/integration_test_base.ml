@@ -29,18 +29,25 @@ let () = Folly.ensure_folly_init ()
 
 let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 
+let po =
+  ParserOptions.
+    {
+      default with
+      disable_xhp_element_mangling = false;
+      deregister_php_stdlib = true;
+    }
+
 let global_opts =
   GlobalOptions.set
+    ~po
     ~tco_num_local_workers:1
     ~tco_saved_state:GlobalOptions.default_saved_state
-    ~po_disable_xhp_element_mangling:false
-    ~po_deregister_php_stdlib:true
     ~tco_fetch_remote_old_decls:false
     GlobalOptions.default
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 
-let server_config = ServerConfig.set_parser_options server_config global_opts
+let server_config = ServerConfig.set_parser_options server_config po
 
 let genv =
   ref { ServerEnvBuild.default_genv with ServerEnv.config = server_config }

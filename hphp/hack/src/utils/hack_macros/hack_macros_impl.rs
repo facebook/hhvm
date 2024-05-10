@@ -472,8 +472,8 @@ fn parse_repl_var(input: &str, span: Span, default_pos: &TokenStream) -> Result<
 
 fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Result<Program> {
     let parser_options = ParserOptions {
-        tco_union_intersection_type_hints: true,
-        po_allow_unstable_features: true,
+        union_intersection_type_hints: true,
+        allow_unstable_features: true,
         ..ParserOptions::default()
     };
 

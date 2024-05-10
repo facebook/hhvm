@@ -1470,7 +1470,7 @@ module Test = struct
     let sienv =
       SymbolIndex.initialize
         ~gleanopt:(ServerConfig.glean_options config)
-        ~namespace_map:tcopt.GlobalOptions.po_auto_namespace_map
+        ~namespace_map:tcopt.GlobalOptions.po.ParserOptions.auto_namespace_map
         ~provider_name:
           local_config.ServerLocalConfig.ide_symbolindex_search_provider
         ~quiet:local_config.ServerLocalConfig.symbolindex_quiet

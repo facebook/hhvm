@@ -136,7 +136,7 @@ let get_occurrence_info
     | _ ->
       let fun_name =
         Utils.expand_namespace
-          (Provider_context.get_popt ctx).GlobalOptions.po_auto_namespace_map
+          (Provider_context.get_popt ctx).ParserOptions.auto_namespace_map
           occurrence.SO.name
       in
       let ft = Decl_provider.get_fun ctx fun_name |> Decl_entry.to_option in

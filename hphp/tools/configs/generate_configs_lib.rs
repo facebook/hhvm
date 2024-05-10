@@ -880,10 +880,8 @@ pub fn generate_hackc(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                     ));
 
                 if hackc_flag.type_ == HackcFlagType::Parser {
-                    hackc_parser_to_parser_options.push(format!(
-                        "            po_{}: self.{},",
-                        snake_case, snake_case
-                    ));
+                    hackc_parser_to_parser_options
+                        .push(format!("            {}: self.{},", snake_case, snake_case));
                 }
             }
         }

@@ -75,13 +75,14 @@ let setup
   (* Parsing produces the file infos that the naming table module can use
      to construct the forward naming table (files-to-symbols) *)
   let popt =
-    {
-      ParserOptions.default with
-      GlobalOptions.po_disable_xhp_element_mangling =
-        (match xhp_as with
-        | `Namespaces -> true
-        | `MangledSymbols -> false);
-    }
+    ParserOptions.
+      {
+        default with
+        disable_xhp_element_mangling =
+          (match xhp_as with
+          | `Namespaces -> true
+          | `MangledSymbols -> false);
+      }
   in
   (* Since the common test has a module in it, always allow all files for module declarations *)
   let tcopt =

@@ -103,17 +103,19 @@ allowed_decl_fixme_codes = 4336
 "
 
 let test () =
+  let po =
+    ParserOptions.
+      { default with allowed_decl_fixme_codes = ISet.of_list [4336] }
+  in
   let global_opts : GlobalOptions.t =
     GlobalOptions.set
+      ~po
       ~allowed_fixme_codes_strict:(ISet.of_list [4336])
-      ~po_allowed_decl_fixme_codes:(ISet.of_list [4336])
       GlobalOptions.default
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_tc_options custom_config global_opts in
-  let custom_config =
-    ServerConfig.set_parser_options custom_config global_opts
-  in
+  let custom_config = ServerConfig.set_parser_options custom_config po in
   Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
   (* 200 files with errors *)
   let disk_contents = [(foo_name, foo_contents "")] in

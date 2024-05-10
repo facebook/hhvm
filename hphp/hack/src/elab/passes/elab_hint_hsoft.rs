@@ -39,6 +39,7 @@ mod tests {
     use nast::Hint;
     use nast::Hint_;
     use nast::Pos;
+    use oxidized::parser_options::ParserOptions;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -68,8 +69,12 @@ mod tests {
 
         // Transform `elem2` with flag `SOFT_AS_LIKE` set & expect `Hlike(_,
         // Hdynamic)`.
+        let po = ParserOptions {
+            interpret_soft_types_as_like_types: true,
+            ..Default::default()
+        };
         let tco = TypecheckerOptions {
-            po_interpret_soft_types_as_like_types: true,
+            po,
             ..Default::default()
         };
         let pso = ProgramSpecificOptions {

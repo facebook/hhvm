@@ -39,7 +39,7 @@ pub fn add_supportdyn_constraints<R: Reason>(pos: &R::Pos, tparams: &mut [decl::
 /// Add `as supportdyn<mixed>` constraints to the type parameters if in implicit
 /// pessimisation mode.
 pub fn maybe_add_supportdyn_constraints<R: Reason>(
-    opts: &oxidized::typechecker_options::TypecheckerOptions,
+    opts: &oxidized::parser_options::ParserOptions,
     this_class: Option<&decl::ShallowClass<R>>,
     pos: &R::Pos,
     tparams: &mut [decl::Tparam<R, Ty<R>>],
@@ -66,8 +66,8 @@ fn noautobound<R: Reason>(tp: &decl::Tparam<R, Ty<R>>) -> bool {
 }
 
 fn implicit_sdt_for_class<R: Reason>(
-    opts: &oxidized::typechecker_options::TypecheckerOptions,
+    opts: &oxidized::parser_options::ParserOptions,
     this_class: Option<&decl::ShallowClass<R>>,
 ) -> bool {
-    opts.tco_everything_sdt && !noautodynamic(this_class)
+    opts.everything_sdt && !noautodynamic(this_class)
 }

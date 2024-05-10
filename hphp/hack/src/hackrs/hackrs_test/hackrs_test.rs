@@ -53,7 +53,7 @@ impl TestContext {
         let decl_parser = DeclParser::new(
             Arc::new(file_provider::DiskProvider::new(path_ctx, None)),
             DeclParserOptions::from_parser_options(&parser_opts),
-            parser_opts.po_deregister_php_stdlib,
+            parser_opts.deregister_php_stdlib,
         );
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::new(make_shallow_decl_store::<BReason>(Unserialized)),

@@ -19,6 +19,7 @@ pub use local_config::LocalConfig;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
+use oxidized::parser_options::ParserOptions;
 use package::PackageInfo;
 use sha1::Digest;
 use sha1::Sha1;
@@ -214,8 +215,80 @@ impl HhConfig {
             &hh_conf,
         )?;
 
+        let default = ParserOptions::default();
+        let po = ParserOptions {
+            hhvm_compat_mode: default.hhvm_compat_mode,
+            hhi_mode: default.hhi_mode,
+            auto_namespace_map: match hhconfig.get_str("auto_namespace_map") {
+                None => default.auto_namespace_map,
+                Some(s) => parse_json::<BTreeMap<String, String>>(s)?
+                    .into_iter()
+                    .collect(),
+            },
+            codegen: hhconfig.get_bool_or("codegen", default.codegen)?,
+            deregister_php_stdlib: hhconfig
+                .get_bool_or("deregister_php_stdlib", default.deregister_php_stdlib)?,
+            allow_unstable_features: local_config.allow_unstable_features,
+            disable_lval_as_an_expression: default.disable_lval_as_an_expression,
+            union_intersection_type_hints: hhconfig.get_bool_or(
+                "union_intersection_type_hints",
+                default.union_intersection_type_hints,
+            )?,
+            enable_class_level_where_clauses: default.enable_class_level_where_clauses,
+            disable_legacy_soft_typehints: default.disable_legacy_soft_typehints,
+            allowed_decl_fixme_codes: hhconfig
+                .get_int_set_or("allowed_decl_fixme_codes", default.allowed_decl_fixme_codes)?,
+            const_static_props: default.const_static_props,
+            disable_legacy_attribute_syntax: default.disable_legacy_attribute_syntax,
+            const_default_func_args: hhconfig
+                .get_bool_or("const_default_func_args", default.const_default_func_args)?,
+            const_default_lambda_args: hhconfig.get_bool_or(
+                "const_default_lambda_args",
+                default.const_default_lambda_args,
+            )?,
+            disallow_silence: hhconfig.get_bool_or("disallow_silence", default.disallow_silence)?,
+            abstract_static_props: default.abstract_static_props,
+            parser_errors_only: default.parser_errors_only,
+            disallow_func_ptrs_in_constants: hhconfig.get_bool_or(
+                "disallow_func_ptrs_in_constants",
+                default.disallow_func_ptrs_in_constants,
+            )?,
+            enable_xhp_class_modifier: hhconfig.get_bool_or(
+                "enable_xhp_class_modifier",
+                default.enable_xhp_class_modifier,
+            )?,
+            disable_xhp_element_mangling: hhconfig.get_bool_or(
+                "disable_xhp_element_mangling",
+                default.disable_xhp_element_mangling,
+            )?,
+            disable_xhp_children_declarations: hhconfig.get_bool_or(
+                "disable_xhp_children_declarations",
+                default.disable_xhp_children_declarations,
+            )?,
+            disable_hh_ignore_error: hhconfig
+                .get_int_or("disable_hh_ignore_error", default.disable_hh_ignore_error)?,
+            keep_user_attributes: default.keep_user_attributes,
+            is_systemlib: default.is_systemlib,
+            interpret_soft_types_as_like_types: hhconfig.get_bool_or(
+                "interpret_soft_types_as_like_types",
+                default.interpret_soft_types_as_like_types,
+            )?,
+            no_parser_readonly_check: default.no_parser_readonly_check,
+            everything_sdt: hhconfig.get_bool_or("everything_sdt", default.everything_sdt)?,
+            disallow_static_constants_in_default_func_args: default
+                .disallow_static_constants_in_default_func_args,
+            unwrap_concurrent: default.unwrap_concurrent,
+            disallow_direct_superglobals_refs: hhconfig.get_bool_or(
+                "disallow_direct_superglobals_refs",
+                default.disallow_direct_superglobals_refs,
+            )?,
+            nameof_precedence: hhconfig
+                .get_bool_or("nameof_precedence", default.nameof_precedence)?,
+            stack_size: default.stack_size,
+        };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
+            po,
             tco_saved_state: local_config.saved_state.clone(),
             tco_experimental_features: hhconfig
                 .get_string_set_or("enable_experimental_tc_features", default.tco_experimental_features),
@@ -225,13 +298,7 @@ impl HhConfig {
             tco_locl_cache_capacity: hhconfig.get_int_or("locl_cache_capacity", default.tco_locl_cache_capacity)?,
             tco_locl_cache_node_threshold: hhconfig.get_int_or("locl_cache_node_threshold", default.tco_locl_cache_node_threshold)?,
             so_naming_sqlite_path: default.so_naming_sqlite_path,
-            po_auto_namespace_map: match hhconfig.get_str("auto_namespace_map") {
-                None => default.po_auto_namespace_map,
-                Some(s) => parse_json::<BTreeMap<String, String>>(s)?.into_iter().collect()},
-            po_codegen: hhconfig.get_bool_or("codegen", default.po_codegen)?,
-            po_deregister_php_stdlib: hhconfig.get_bool_or("deregister_php_stdlib", default.po_deregister_php_stdlib)?,
             po_disallow_toplevel_requires: hhconfig.get_bool_or("disallow_toplevel_requires", default.po_disallow_toplevel_requires)?,
-            po_allow_unstable_features: local_config.allow_unstable_features,
             tco_log_large_fanouts_threshold: default.tco_log_large_fanouts_threshold,
             tco_log_inference_constraints: default.tco_log_inference_constraints,
             tco_language_feature_logging: default.tco_language_feature_logging,
@@ -243,7 +310,6 @@ impl HhConfig {
             allowed_fixme_codes_strict: hhconfig.get_int_set_or("allowed_fixme_codes_strict", default.allowed_fixme_codes_strict)?,
             log_levels: hhconfig.get_str("log_levels").map_or(Ok(default.log_levels), parse_json)?,
             class_pointer_levels: hhconfig.get_str("class_pointer_levels").map_or(Ok(default.class_pointer_levels), parse_json)?,
-            po_disable_lval_as_an_expression: default.po_disable_lval_as_an_expression,
             tco_remote_old_decls_no_limit: default.tco_remote_old_decls_no_limit,
             tco_use_old_decls_from_cas: default.tco_use_old_decls_from_cas,
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
@@ -251,7 +317,6 @@ impl HhConfig {
             tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
             tco_like_type_hints: hhconfig.get_bool_or("like_type_hints", default.tco_like_type_hints)?,
-            tco_union_intersection_type_hints: hhconfig.get_bool_or("union_intersection_type_hints", default.tco_union_intersection_type_hints)?,
             tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,
             tco_strict_contexts: default.tco_strict_contexts,
@@ -261,17 +326,7 @@ impl HhConfig {
             tco_disallow_unresolved_type_variables: default
                 .tco_disallow_unresolved_type_variables,
             tco_custom_error_config: custom_error_config,
-            po_enable_class_level_where_clauses: default.po_enable_class_level_where_clauses,
-            po_disable_legacy_soft_typehints: default.po_disable_legacy_soft_typehints,
-            po_allowed_decl_fixme_codes: hhconfig.get_int_set_or("allowed_decl_fixme_codes", default.po_allowed_decl_fixme_codes)?,
-            po_const_static_props: default.po_const_static_props,
-            po_disable_legacy_attribute_syntax: default.po_disable_legacy_attribute_syntax,
             tco_const_attribute: default.tco_const_attribute,
-            po_const_default_func_args: hhconfig.get_bool_or("const_default_func_args", default.po_const_default_func_args)?,
-            po_const_default_lambda_args: hhconfig.get_bool_or("const_default_lambda_args", default.po_const_default_lambda_args)?,
-            po_disallow_silence: hhconfig.get_bool_or("disallow_silence", default.po_disallow_silence)?,
-            po_abstract_static_props: default.po_abstract_static_props,
-            po_parser_errors_only: default.po_parser_errors_only,
             tco_check_attribute_locations: default.tco_check_attribute_locations,
             glean_reponame: default.glean_reponame,
             symbol_write_index_inherited_members: default.symbol_write_index_inherited_members,
@@ -288,16 +343,9 @@ impl HhConfig {
             symbol_write_referenced_out: default.symbol_write_referenced_out,
             symbol_write_reindexed_out: default.symbol_write_reindexed_out,
             symbol_write_sym_hash_out: default.symbol_write_sym_hash_out,
-            po_disallow_func_ptrs_in_constants: hhconfig.get_bool_or("disallow_func_ptrs_in_constants", default.po_disallow_func_ptrs_in_constants)?,
             tco_error_php_lambdas: default.tco_error_php_lambdas,
             tco_disallow_discarded_nullable_awaitables: default
                 .tco_disallow_discarded_nullable_awaitables,
-            po_enable_xhp_class_modifier: hhconfig.get_bool_or("enable_xhp_class_modifier", default.po_enable_xhp_class_modifier)?,
-            po_disable_xhp_element_mangling: hhconfig.get_bool_or("disable_xhp_element_mangling", default.po_disable_xhp_element_mangling)?,
-            po_disable_xhp_children_declarations: hhconfig.get_bool_or("disable_xhp_children_declarations", default.po_disable_xhp_children_declarations)?,
-            po_disable_hh_ignore_error: hhconfig.get_int_or("disable_hh_ignore_error", default.po_disable_hh_ignore_error)?,
-            po_keep_user_attributes: default.po_keep_user_attributes,
-            tco_is_systemlib: default.tco_is_systemlib,
             tco_higher_kinded_types: default.tco_higher_kinded_types,
             tco_report_pos_from_reason: default.tco_report_pos_from_reason,
             tco_typecheck_sample_rate: hhconfig.get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
@@ -306,11 +354,9 @@ impl HhConfig {
             tco_enable_no_auto_dynamic: hhconfig.get_bool_or("enable_no_auto_dynamic", default.tco_enable_no_auto_dynamic)?,
             tco_skip_check_under_dynamic: hhconfig.get_bool_or("skip_check_under_dynamic", default.tco_skip_check_under_dynamic)?,
             tco_global_access_check_enabled: hhconfig.get_bool_or("tco_global_access_check_enabled", default.tco_global_access_check_enabled)?,
-            po_interpret_soft_types_as_like_types: hhconfig.get_bool_or("interpret_soft_types_as_like_types", default.po_interpret_soft_types_as_like_types)?,
             tco_enable_strict_string_concat_interp: hhconfig.get_bool_or("enable_strict_string_concat_interp", default
                 .tco_enable_strict_string_concat_interp)?,
             tco_ignore_unsafe_cast: default.tco_ignore_unsafe_cast,
-            tco_no_parser_readonly_check: default.tco_no_parser_readonly_check,
             tco_enable_expression_trees: default.tco_enable_expression_trees,
             tco_enable_function_references: hhconfig.get_bool_or("enable_function_references", default.tco_enable_function_references)?,
             tco_allowed_expression_tree_visitors:
@@ -336,7 +382,6 @@ impl HhConfig {
                 .tco_require_extends_implements_ancestors,
             tco_strict_value_equality: default.tco_strict_value_equality,
             tco_enforce_sealed_subclasses: default.tco_enforce_sealed_subclasses,
-            tco_everything_sdt: hhconfig.get_bool_or("everything_sdt", default.tco_everything_sdt)?,
             tco_implicit_inherit_sdt: default.tco_implicit_inherit_sdt,
             tco_explicit_consistent_constructors: hhconfig.get_int_or("explicit_consistent_constructors", default.tco_explicit_consistent_constructors)?,
             tco_require_types_class_consts: hhconfig.get_int_or("require_types_tco_require_types_class_consts", default.tco_require_types_class_consts)?,
@@ -351,8 +396,6 @@ impl HhConfig {
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_use_type_alias_heap: default.tco_use_type_alias_heap,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
-            po_disallow_static_constants_in_default_func_args: default
-                .po_disallow_static_constants_in_default_func_args,
             tco_rust_elab: local_config.rust_elab,
             dump_tast_hashes: hh_conf.get_bool_or("dump_tast_hashes", default.dump_tast_hashes)?,
             dump_tasts: match hh_conf.get_str("dump_tasts") {
@@ -371,14 +414,10 @@ impl HhConfig {
                 // If there are errors, ignore them for the tcopt, the parser errors will be caught and
                 // sent separately.
                 package_info.try_into().unwrap_or_default(),
-            po_unwrap_concurrent: default.po_unwrap_concurrent,
             tco_log_exhaustivity_check: hhconfig.get_bool_or("log_exhaustivity_check", default.tco_log_exhaustivity_check)?,
-            po_disallow_direct_superglobals_refs: hhconfig.get_bool_or("disallow_direct_superglobals_refs", default.po_disallow_direct_superglobals_refs)?,
             tco_sticky_quarantine: default.tco_sticky_quarantine,
             tco_lsp_invalidation: default.tco_lsp_invalidation,
             tco_autocomplete_sort_text: default.tco_autocomplete_sort_text,
-            po_nameof_precedence: hhconfig.get_bool_or("nameof_precedence", default.po_nameof_precedence)?,
-            po_stack_size: default.po_stack_size,
             tco_extended_reasons:  default.tco_extended_reasons,
             hack_warnings: hhconfig.get_bool_or("hack_warnings", default.hack_warnings)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
@@ -443,7 +482,7 @@ impl HhConfig {
     }
 
     pub fn get_decl_parser_options(&self) -> DeclParserOptions {
-        DeclParserOptions::from_parser_options(&self.opts)
+        DeclParserOptions::from_parser_options(&self.opts.po)
     }
 }
 

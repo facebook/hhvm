@@ -163,21 +163,28 @@ let parse_options () =
   in
 
   let root = Path.make "/" (* if none specified, we use this dummy *) in
+  let popt =
+    ParserOptions.
+      {
+        default with
+        keep_user_attributes = true;
+        disable_xhp_element_mangling = !disable_xhp_element_mangling;
+        disable_xhp_children_declarations = !disable_xhp_children_declarations;
+        enable_xhp_class_modifier = !enable_xhp_class_modifier;
+        everything_sdt = true;
+        disable_hh_ignore_error = !disable_hh_ignore_error;
+        allowed_decl_fixme_codes =
+          Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+      }
+  in
   let tcopt =
     GlobalOptions.set
+      ~po:popt
       ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~po_disable_hh_ignore_error:!disable_hh_ignore_error
-      ~po_keep_user_attributes:true
       ~tco_check_xhp_attribute:!check_xhp_attribute
-      ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
-      ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
-      ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~po_allowed_decl_fixme_codes:
-        (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
       ~tco_enable_sound_dynamic:true
-      ~tco_everything_sdt:true
       GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
@@ -201,13 +208,13 @@ let parse_and_name ctx files_contents =
       (* Get parse errors *)
       let _ =
         Errors.run_in_context fn (fun () ->
-            let popt = Provider_context.get_tcopt ctx in
+            let popt = Provider_context.get_popt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
             in
             let ast =
               let { Parser_return.ast; _ } = parsed_file in
-              if popt.GlobalOptions.po_deregister_php_stdlib then
+              if popt.ParserOptions.deregister_php_stdlib then
                 Nast.deregister_ignored_attributes ast
               else
                 ast
@@ -245,7 +252,7 @@ let handle_mode ai_options ctx files_info parse_errors error_format =
 
 let decl_and_run_mode
     { files; extra_builtins; ai_options; error_format; no_builtins; tcopt }
-    (popt : TypecheckerOptions.t)
+    (popt : ParserOptions.t)
     (hhi_root : Path.t)
     (naming_table_path : string option) : unit =
   Ident.track_names := true;
@@ -371,7 +378,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root naming_table;
+      decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root naming_table;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)

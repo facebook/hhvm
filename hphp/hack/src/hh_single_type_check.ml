@@ -870,14 +870,59 @@ let parse_options () =
       (* Path.make canonicalizes it, i.e. resolves symlinks *)
       Path.make root
   in
+  let ( >?? ) x y = Option.value x ~default:y in
+  let po =
+    ParserOptions.
+      {
+        (* These don't have command-line flags, so init them to their defaults. *)
+        hhvm_compat_mode = default.hhvm_compat_mode;
+        hhi_mode = default.hhi_mode;
+        codegen = default.codegen;
+        disable_lval_as_an_expression = default.disable_lval_as_an_expression;
+        disallow_static_constants_in_default_func_args =
+          default.disallow_static_constants_in_default_func_args;
+        disallow_direct_superglobals_refs =
+          default.disallow_direct_superglobals_refs;
+        stack_size = default.stack_size;
+        unwrap_concurrent = default.unwrap_concurrent;
+        parser_errors_only = default.parser_errors_only;
+        no_parser_readonly_check = default.no_parser_readonly_check;
+        nameof_precedence = default.nameof_precedence;
+        (* These are set specifically for single type check *)
+        allow_unstable_features = true;
+        (* The remainder are set in the config file *)
+        is_systemlib = !is_systemlib;
+        disable_legacy_soft_typehints = !disable_legacy_soft_typehints;
+        disable_legacy_attribute_syntax = !disable_legacy_attribute_syntax;
+        const_default_func_args = !const_default_func_args;
+        const_default_lambda_args = !const_default_lambda_args;
+        const_static_props = !const_static_props;
+        abstract_static_props = !abstract_static_props;
+        disallow_func_ptrs_in_constants = !disallow_func_ptrs_in_constants;
+        disable_xhp_element_mangling = !disable_xhp_element_mangling;
+        disable_xhp_children_declarations = !disable_xhp_children_declarations;
+        enable_xhp_class_modifier = !enable_xhp_class_modifier;
+        interpret_soft_types_as_like_types = !interpret_soft_types_as_like_types;
+        keep_user_attributes = !keep_user_attributes;
+        auto_namespace_map = !auto_namespace_map >?? default.auto_namespace_map;
+        deregister_php_stdlib =
+          !deregister_attributes >?? default.deregister_php_stdlib;
+        everything_sdt = !everything_sdt;
+        enable_class_level_where_clauses = !enable_class_level_where_clauses;
+        union_intersection_type_hints = !union_intersection_type_hints;
+        disallow_silence = !disallow_silence;
+        disable_hh_ignore_error = !disable_hh_ignore_error;
+        allowed_decl_fixme_codes =
+          Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+      }
+  in
 
   let tcopt : GlobalOptions.t =
     GlobalOptions.set
+      ~po
       ~tco_saved_state:GlobalOptions.default_saved_state
-      ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
-      ?po_auto_namespace_map:!auto_namespace_map
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ~allowed_fixme_codes_strict:
@@ -887,43 +932,23 @@ let parse_options () =
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_like_type_hints:true
-      ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:false
       ~log_levels:!log_levels
-      ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
-      ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
-      ~po_const_static_props:!const_static_props
-      ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
       ~tco_const_attribute:!const_attribute
-      ~po_const_default_func_args:!const_default_func_args
-      ~po_const_default_lambda_args:!const_default_lambda_args
-      ~po_disallow_silence:!disallow_silence
-      ~po_abstract_static_props:!abstract_static_props
-      ~po_disallow_func_ptrs_in_constants:!disallow_func_ptrs_in_constants
       ~tco_check_attribute_locations:true
       ~tco_error_php_lambdas:!error_php_lambdas
       ~tco_disallow_discarded_nullable_awaitables:
         !disallow_discarded_nullable_awaitables
       ~glean_reponame:!glean_reponame
-      ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
-      ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
-      ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~po_keep_user_attributes:!keep_user_attributes
-      ~po_disable_hh_ignore_error:!disable_hh_ignore_error
-      ~tco_is_systemlib:!is_systemlib
       ~tco_higher_kinded_types:!enable_higher_kinded_types
-      ~po_allowed_decl_fixme_codes:
-        (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
-      ~po_allow_unstable_features:true
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
-      ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
@@ -936,7 +961,6 @@ let parse_options () =
         !require_extends_implements_ancestors
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
-      ~tco_everything_sdt:!everything_sdt
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
@@ -1139,13 +1163,13 @@ let parse_and_name ctx files_contents =
       (* Get parse errors. *)
       let () =
         Errors.run_in_context fn (fun () ->
-            let popt = Provider_context.get_tcopt ctx in
+            let popt = Provider_context.get_popt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
             in
             let ast =
               let { Parser_return.ast; _ } = parsed_file in
-              if popt.GlobalOptions.po_deregister_php_stdlib then
+              if popt.ParserOptions.deregister_php_stdlib then
                 Nast.deregister_ignored_attributes ast
               else
                 ast
@@ -2488,18 +2512,19 @@ let decl_and_run_mode
       info
   in
   let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
+  let popt = tcopt.GlobalOptions.po in
   let ctx =
     if rust_provider_backend then
       let backend = Hh_server_provider_backend.make tcopt in
       let () = Provider_backend.set_rust_backend backend in
       Provider_context.empty_for_tool
-        ~popt:tcopt
+        ~popt
         ~tcopt
         ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
     else
       Provider_context.empty_for_test
-        ~popt:tcopt
+        ~popt
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in

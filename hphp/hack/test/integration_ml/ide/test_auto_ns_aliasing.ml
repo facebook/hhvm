@@ -91,18 +91,23 @@ function testTypecheck(): void {
 "
 
 let test () =
+  let po =
+    ParserOptions.
+      {
+        default with
+        auto_namespace_map = [("ShortName", "HH\\LongName\\ShortName")];
+        deregister_php_stdlib = true;
+      }
+  in
   let global_opts : GlobalOptions.t =
     GlobalOptions.set
+      ~po
       ~tco_saved_state:GlobalOptions.default_saved_state
-      ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
-      ~po_deregister_php_stdlib:true
       GlobalOptions.default
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_tc_options custom_config global_opts in
-  let custom_config =
-    ServerConfig.set_parser_options custom_config global_opts
-  in
+  let custom_config = ServerConfig.set_parser_options custom_config po in
   Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
   let env = Test.Client.setup_disk env [("foo.php", foo_contents)] in
   let env =

@@ -44,7 +44,7 @@ pub struct Hhvm {
 
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        self.parser_options.po_auto_namespace_map.iter().cloned()
+        self.parser_options.auto_namespace_map.iter().cloned()
     }
 }
 

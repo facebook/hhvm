@@ -24,28 +24,26 @@ type naming_table = Naming_table.t * Relative_path.t SymbolMap.t
 
 let deps_mode = Typing_deps_mode.InMemoryMode None
 
-let tcopt =
-  {
-    GlobalOptions.default with
-    GlobalOptions.tco_allow_all_files_for_module_declarations = true;
-    tco_saved_state =
-      {
-        GlobalOptions.default_saved_state with
-        GlobalOptions.rollouts =
-          {
-            Saved_state_rollouts.default with
-            Saved_state_rollouts.optimized_member_fanout = true;
-            optimized_parent_fanout = true;
-            optimized_attribute_fanout = true;
-          };
-      };
-  }
+let popt = ParserOptions.{ default with disable_xhp_element_mangling = false }
 
-let popt =
-  {
-    GlobalOptions.default with
-    GlobalOptions.po_disable_xhp_element_mangling = false;
-  }
+let tcopt =
+  GlobalOptions.
+    {
+      default with
+      po = popt;
+      tco_allow_all_files_for_module_declarations = true;
+      tco_saved_state =
+        {
+          default_saved_state with
+          rollouts =
+            {
+              Saved_state_rollouts.default with
+              Saved_state_rollouts.optimized_member_fanout = true;
+              optimized_parent_fanout = true;
+              optimized_attribute_fanout = true;
+            };
+        };
+    }
 
 let parse_defs (ctx : Provider_context.t) (files : Relative_path.t list) :
     FileInfo.t Relative_path.Map.t =

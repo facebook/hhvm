@@ -118,6 +118,10 @@ class MysqlClientBase {
     return false;
   }
 
+  virtual bool shouldAddConnectionToException() const {
+    return false;
+  }
+
  protected:
   friend class Connection;
   friend class Operation;

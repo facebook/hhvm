@@ -161,7 +161,7 @@ class Connection {
       std::shared_ptr<QueryOperation>& op,
       Args&&... args) {
     CHECK_THROW(op->done(), db::OperationStateException);
-    auto conn = std::move(op->releaseConnection());
+    auto conn = op->releaseConnection();
     op = beginQuery(std::move(conn), std::forward<Args>(args)...);
     return op;
   }

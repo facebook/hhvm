@@ -555,7 +555,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   // Connections are transferred across operations.  At any one time,
   // there is one unique owner of the connection.
-  std::unique_ptr<Connection>&& releaseConnection();
+  std::unique_ptr<Connection> releaseConnection();
   const Connection* connection() const {
     return conn_proxy_.get();
   }
@@ -677,7 +677,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
     OwnedConnection();
     explicit OwnedConnection(std::unique_ptr<Connection>&& conn);
     Connection* get();
-    std::unique_ptr<Connection>&& releaseConnection();
+    std::unique_ptr<Connection> releaseConnection();
 
    private:
     std::unique_ptr<Connection> conn_;
@@ -708,7 +708,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
     Connection* get();
 
-    std::unique_ptr<Connection>&& releaseConnection();
+    std::unique_ptr<Connection> releaseConnection();
 
     const Connection* get() const {
       return const_cast<ConnectionProxy*>(this)->get();

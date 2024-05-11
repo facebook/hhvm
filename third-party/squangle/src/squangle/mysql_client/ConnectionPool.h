@@ -286,6 +286,10 @@ class ConnectionPoolBase {
     shouldThrottleCallback_ = std::move(cb);
   }
 
+  virtual bool shouldAddConnectionToException() const {
+    return false;
+  }
+
  protected:
   virtual bool isShuttingDown() const = 0;
 

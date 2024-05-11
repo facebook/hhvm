@@ -51,8 +51,6 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/low-ptr.h"
-#include "hphp/runtime/base/implicit-context.h"
-
 
 namespace HPHP {
 size_t asio_object_size(const ObjectData*);
@@ -166,7 +164,6 @@ bool isObjprofRoot(
   auto cls_name = cls->name()->toCppString();
   // Classes in exclude_classes not considered root
   if (exclude_classes.find(cls_name) != exclude_classes.end()) return false;
-  if (obj == *ImplicitContext::inaccessibleCtx) return false;
   // In USER_TYPES_ONLY mode, Classes with "HH\\" prefix not considered root
   if ((flags & ObjprofFlags::USER_TYPES_ONLY) != 0) {
     if (cls_name.compare(0, 3, "HH\\") == 0) return false;

@@ -36,7 +36,7 @@ function params_and_locals(int $a) : void {
 
 // TEST-CHECK-BAL: define $root.locals_for_iter
 // CHECK: define $root.locals_for_iter($this: *void, $d: .notnull *HackDict) : *void {
-// CHECK: local $k: *void, $v: *void, iter0: *void, $0: *void
+// CHECK: local $k: *void, $v: *void, iter0: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
 // CHECK:   n1: *HackMixed = load &$d
@@ -49,7 +49,6 @@ function params_and_locals(int $a) : void {
 // CHECK:   n5: *HackMixed = load &$0
 // CHECK:   n6 = $builtins.hhbc_iter_init(&iter0, &$k, &$v, n5)
 // CHECK:   jmp b2, b7
-// CHECK:   .handlers b9
 // CHECK: #b2:
 // CHECK:   prune $builtins.hack_is_true(n6)
 // CHECK:   jmp b3
@@ -63,7 +62,6 @@ function params_and_locals(int $a) : void {
 // CHECK:   n11: *HackMixed = load &iter0
 // CHECK:   n12 = $builtins.hhbc_liter_free(n11)
 // CHECK:   throw n10
-// CHECK:   .handlers b9
 // CHECK: #b5:
 // CHECK:   prune $builtins.hack_is_true(n9)
 // CHECK:   jmp b8
@@ -74,14 +72,6 @@ function params_and_locals(int $a) : void {
 // CHECK:   prune ! $builtins.hack_is_true(n6)
 // CHECK:   jmp b8
 // CHECK: #b8:
-// CHECK:   jmp b10
-// CHECK:   .handlers b9
-// CHECK: #b9(n13: *HackMixed):
-// CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   throw n13
-// CHECK: #b10:
-// CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function locals_for_iter(dict<int, int> $d) : void {

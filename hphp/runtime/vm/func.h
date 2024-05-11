@@ -737,6 +737,12 @@ public:
   bool isSoftMakeICInaccessibleMemoize() const;
 
   /*
+   * What rate should we sample soft make IC inaccessible memoized function?
+   * Requires: isSoftMakeICInaccessibleMemoize()
+   */
+  uint32_t softMakeICInaccessibleSampleRate() const;
+
+  /*
    * Is this string the name of a memoize implementation.
    */
   static bool isMemoizeImplName(const StringData*);
@@ -1460,10 +1466,11 @@ private:
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
+    uint32_t m_softMakeICInaccessibleSampleRate;
     LowStringPtr m_docComment;
     LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 328>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 296 : 336>(), "");
 
   /*
    * SharedData accessors for internal use.

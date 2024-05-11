@@ -2111,6 +2111,20 @@ void in(ISS& env, const bc::Throw& /*op*/) {
 
 void in(ISS& env, const bc::ThrowNonExhaustiveSwitch& /*op*/) {}
 
+void in(ISS& env, const bc::VerifyImplicitContextState& /*op*/) {
+  assertx(env.ctx.func->coeffectRules.empty());
+  assertx(env.ctx.func->isMemoizeWrapper || env.ctx.func->isMemoizeWrapperLSB);
+  auto const providedCoeffects =
+    RuntimeCoeffects::fromValue(env.ctx.func->requiredCoeffects.value() |
+                                env.ctx.func->coeffectEscapes.value());
+  if (!providedCoeffects.canCall(RuntimeCoeffects::zoned()) &&
+      !providedCoeffects.canCall(RuntimeCoeffects::leak_safe_shallow())) {
+    // If the current function cannot call zoned code, it cannot retrieve the
+    // implicit context, so it is safe to kill the verify instruction.
+    return reduce(env);
+  }
+}
+
 void in(ISS& env, const bc::RaiseClassStringConversionNotice& /*op*/) {}
 
 void in(ISS& env, const bc::ChainFaults&) {
@@ -5506,10 +5520,33 @@ void in(ISS& env, const bc::CreateSpecialImplicitContext&) {
   if (auto const v = tv(type); v && tvIsInt(*v)) {
     switch (static_cast<ImplicitContext::State>(v->m_data.num)) {
       case ImplicitContext::State::Value:
-      case ImplicitContext::State::SoftSet:
         return push(env, TOptObj);
-      case ImplicitContext::State::SoftInaccessible:
+      case ImplicitContext::State::SoftInaccessible: {
+        auto const sampleRate = [&] () -> uint32_t {
+          if (!memoKey.couldBe(BInitNull)) return 1;
+
+          auto const attrName = env.ctx.func->isMemoizeWrapperLSB
+            ? s_MemoizeLSB.get()
+            : s_Memoize.get();
+          auto const it = env.ctx.func->userAttributes.find(attrName);
+          if (it == env.ctx.func->userAttributes.end()) return 1;
+
+          uint32_t rate = 1;
+          assertx(tvIsVec(it->second));
+          IterateV(
+            it->second.m_data.parr,
+            [&](TypedValue elem) {
+              if (tvIsInt(elem)) {
+                rate = std::max<uint32_t>(rate, elem.m_data.num);
+              }
+            }
+          );
+          return rate;
+        }();
+        return push(env, sampleRate == 1 ? TObj : TOptObj);
+      }
       case ImplicitContext::State::Inaccessible:
+      case ImplicitContext::State::SoftSet:
         return push(env, TObj);
     }
   }

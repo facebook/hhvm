@@ -1,9 +1,5 @@
   Before: C
-vec(1) {
-  string(14) "%%Inaccessible%%"
-}
-
-memo_normal passed
+memo_normal failed with: memo_normal is a [defaults] memoized function, but it is called with a value state implicit context
   After: C
 ------------------------
   Before: C
@@ -21,18 +17,31 @@ memo_ic_inaccessible passed
   After: C
 ------------------------
   Before: C
-vec(1) {
-  string(14) "%%Inaccessible%%"
-}
-
-memo_soft_ic_inaccessible passed
+memo_soft_ic_inaccessible failed with: memo_soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a value state implicit context
   After: C
 ------------------------
+
+Warning: memo_normal is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line 7
+vec(2) {
+  string(9) "%%SoftSet%%"
+  string(8) "SOFT_KEY"
+}
+
 memo_normal passed
 ------------------------
+string(19) "%%SoftSet%%, SOFT_KEY"
+
 memo_keyed passed
 ------------------------
 memo_ic_inaccessible passed
 ------------------------
+
+Warning: memo_soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 26
+vec(3) {
+  string(18) "%%SoftInaccessible%%"
+  string(25) "memo_soft_ic_inaccessible"
+  string(8) "SOFT_KEY"
+}
+
 memo_soft_ic_inaccessible passed
 ------------------------

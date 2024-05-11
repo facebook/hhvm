@@ -1,20 +1,20 @@
 >>>>> from null
-  Before: Expected nonnull, got null
+  Before:Expected nonnull, got null
 Expected nonnull, got null
 Hash:
 NULL
 memoNoArg passed
-  After: Expected nonnull, got null
+  After:Expected nonnull, got null
 ------------------------
-  Before: Expected nonnull, got null
+  Before:Expected nonnull, got null
 Expected nonnull, got null
 Hash:
 NULL
 memoWithArg passed
-  After: Expected nonnull, got null
+  After:Expected nonnull, got null
 ------------------------
 >>>>> from value
-  Before: C
+  Before:C
 C
 Hash:
 vec(2) {
@@ -22,9 +22,9 @@ vec(2) {
   string(7) "%sKEYC"
 }
 memoNoArg passed
-  After: C
+  After:C
 ------------------------
-  Before: C
+  Before:C
 C
 Hash:
 vec(2) {
@@ -32,45 +32,81 @@ vec(2) {
   string(7) "%sKEYC"
 }
 memoWithArg passed
-  After: C
+  After:C
 ------------------------
 >>>>> from inaccessible
-  Before: Implicit context is set to inaccessible
+  Before:Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
 vec(1) {
   string(14) "%%Inaccessible%%"
 }
 memoNoArg passed
-  After: Implicit context is set to inaccessible
+  After:Implicit context is set to inaccessible
 ------------------------
-  Before: Implicit context is set to inaccessible
+  Before:Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
 vec(1) {
   string(14) "%%Inaccessible%%"
 }
 memoWithArg passed
-  After: Implicit context is set to inaccessible
+  After:Implicit context is set to inaccessible
 ------------------------
 >>>>> from soft inaccessible
-  Before: Implicit context is set to inaccessible
+  Before:
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+Hash:
+vec(2) {
+  string(18) "%%SoftInaccessible%%"
+  string(20) "soft_ic_inaccessible"
+}
 memoNoArg passed
-  After: Implicit context is set to inaccessible
+  After:
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
 ------------------------
-  Before: Implicit context is set to inaccessible
+  Before:
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+Hash:
+vec(2) {
+  string(18) "%%SoftInaccessible%%"
+  string(20) "soft_ic_inaccessible"
+}
 memoWithArg passed
-  After: Implicit context is set to inaccessible
+  After:
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
 ------------------------
 >>>>> from soft run with
-  Before: Expected nonnull, got null
+  Before:Expected nonnull, got null
+Expected nonnull, got null
+Hash:
+vec(2) {
+  string(9) "%%SoftSet%%"
+  string(8) "SOFT_KEY"
+}
 memoNoArg passed
-  After: Expected nonnull, got null
+  After:Expected nonnull, got null
 ------------------------
-  Before: Expected nonnull, got null
+  Before:Expected nonnull, got null
+Expected nonnull, got null
+Hash:
+vec(2) {
+  string(9) "%%SoftSet%%"
+  string(8) "SOFT_KEY"
+}
 memoWithArg passed
-  After: Expected nonnull, got null
+  After:Expected nonnull, got null
 ------------------------
 >>>>> final report
-No arg ran: 3 times
-With arg ran: 3 times
+No arg ran: 5 times
+With arg ran: 5 times

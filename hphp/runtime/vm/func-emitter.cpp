@@ -286,16 +286,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     preClass && name == s_construct.get());
   f->m_requiredCoeffects = coeffectsInfo.first.toRequired();
 
-  Func::MemoizeICType icType = Func::MemoizeICType::MakeICInaccessible;
+  Func::MemoizeICType icType = Func::MemoizeICType::NoIC;
+  uint32_t softMakeICInaccessibleSampleRate = 1;
   if (isMemoizeWrapper || isMemoizeWrapperLSB) {
     auto const getICType = [&] (TypedValue tv) {
       assertx(tvIsVec(tv));
       IterateV(tv.m_data.parr, [&](TypedValue elem) {
         if (tvIsString(elem)) {
-          /*
-           * TODO: simplify this into a 2 state if else once Soft states are
-           * entirely removed
-          */
+          assertx(icType == Func::MemoizeICType::NoIC);
           if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
             assertx(tv.m_data.parr->size() == 1);
             icType = Func::MemoizeICType::KeyedByIC;
@@ -304,20 +302,18 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
             icType = Func::MemoizeICType::MakeICInaccessible;
           } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
             assertx(tv.m_data.parr->size() <= 2);
-            icType = Func::MemoizeICType::MakeICInaccessible;
+            icType = Func::MemoizeICType::SoftMakeICInaccessible;
           } else if (elem.m_data.pstr->same(s_Uncategorized.get())) {
-            icType = Func::MemoizeICType::MakeICInaccessible;
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::NoIC; // explicitly so
           } else {
             assertx(false && "invalid string");
           }
         } else if (tvIsInt(elem)) {
-          /*
-           * This would be the sample rate, we don't use it
-           * this branch will be removed once the SoftMakeICInaccessible
-           * is removed from www
-           * for now assert that the SoftMakeICInaccessible was mapped to non-soft
-          */
-          assertx(icType == Func::MemoizeICType::MakeICInaccessible);
+          assertx(icType == Func::MemoizeICType::SoftMakeICInaccessible);
+          assertx(softMakeICInaccessibleSampleRate == 1);
+          softMakeICInaccessibleSampleRate =
+            std::max(1u, static_cast<uint32_t>(elem.m_data.num));
         } else {
           assertx(false && "invalid input");
         }
@@ -340,6 +336,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
+    softMakeICInaccessibleSampleRate > 1 ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
     (docComment && !docComment->empty()) ||
@@ -363,6 +360,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_sn = m_sn;
     ex->m_line2 = line2;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
+    ex->m_softMakeICInaccessibleSampleRate = softMakeICInaccessibleSampleRate;
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isUntrustedReturnType = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;

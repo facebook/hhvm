@@ -741,15 +741,27 @@ Type specialICReturn(const IRInstruction* inst) {
   assertx(inst->is(CreateSpecialImplicitContext));
 
   auto const type = inst->src(0)->type();
+  auto const memoKey = inst->src(1)->type();
+  auto const func = inst->src(2)->type();
 
   if (!type.hasConstVal(TInt)) return TObj|TInitNull;
 
   switch (static_cast<ImplicitContext::State>(type.intVal())) {
     case ImplicitContext::State::Value:
-    case ImplicitContext::State::SoftSet:
       return TObj|TInitNull;
-    case ImplicitContext::State::SoftInaccessible:
+    case ImplicitContext::State::SoftInaccessible: {
+      auto const sampleRate = [&] () -> uint32_t {
+        if (!memoKey.maybe(TInitNull)) return 1;
+        if (!func.hasConstVal(TFunc)) return 0;
+        auto const f = func.funcVal();
+        assertx(f->isMemoizeWrapper() || f->isMemoizeWrapperLSB());
+        assertx(f->isSoftMakeICInaccessibleMemoize());
+        return f->softMakeICInaccessibleSampleRate();
+      }();
+      return sampleRate == 1 ? TObj : (TObj | TInitNull);
+    }
     case ImplicitContext::State::Inaccessible:
+    case ImplicitContext::State::SoftSet:
       return TObj;
   }
   always_assert(false);

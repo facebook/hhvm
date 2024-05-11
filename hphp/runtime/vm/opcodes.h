@@ -248,6 +248,8 @@ namespace HPHP {
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyImplicitContextState,                                         \
+                     NA,               NOV,             NOV,        NF) \
   O(CreateSpecialImplicitContext,                                       \
                      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \

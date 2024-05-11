@@ -613,6 +613,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (!calleeFP->isA(TBottom)) calleeFP->inst()->convertToNop();
 
     if (hasRdsCache) {
+      verifyImplicitContextState(env, callee);
       auto const link =
         constParamCacheLink(env, callee, objOrClass, asyncEagerReturn);
       assertx(link.isNormal());

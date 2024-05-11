@@ -157,15 +157,6 @@ enum State: string as string {
 <<__Native>>
 function get_state_unsafe()[zoned]: string /* State */;
 
-/**
- * Returns True if we are in ImplicitContext::State::Inaccessible
- * False otherwise
- *
- * Does not affect the state of the IC
- */
-<<__Native>>
-function is_inaccessible()[zoned]: bool;
-
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {
@@ -190,6 +181,15 @@ function create_implicit_context(
   string $key,
   mixed $context,
 )[zoned]: ImplicitContextData;
+
+/*
+ * Singleton memoization wrapper over create_special_implicit_context for
+ * ic inaccessible case
+ */
+<<__Memoize>>
+function create_ic_inaccessible_context()[] {
+  return create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE, null);
+}
 
 /*
  * Returns the currently implicit context hash or empty string if

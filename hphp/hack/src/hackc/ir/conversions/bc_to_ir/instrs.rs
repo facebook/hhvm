@@ -1096,6 +1096,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::UGetCUNop => todo!(),
         Opcode::UnsetG => simple!(Hhbc::UnsetG),
         Opcode::UnsetL => simple!(Hhbc::UnsetL),
+        Opcode::VerifyImplicitContextState => simple!(Hhbc::VerifyImplicitContextState),
         Opcode::VerifyOutType => simple!(Hhbc::VerifyOutType),
         Opcode::VerifyParamType => simple!(Hhbc::VerifyParamType),
         Opcode::VerifyParamTypeTS => simple!(Hhbc::VerifyParamTypeTS),

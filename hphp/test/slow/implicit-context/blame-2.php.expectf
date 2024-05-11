@@ -1,0 +1,8 @@
+1
+
+Warning: soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 6
+ok
+2
+
+Warning: soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 6
+3

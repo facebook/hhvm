@@ -832,6 +832,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::ThrowNonExhaustiveSwitch(_), _)
         | (Hhbc::UnsetG(_, _), _)
         | (Hhbc::UnsetL(_, _), _)
+        | (Hhbc::VerifyImplicitContextState(_), _)
         | (Hhbc::VerifyOutType(_, _, _), _)
         | (Hhbc::VerifyParamType(_, _, _), _)
         | (Hhbc::VerifyParamTypeTS(_, _, _), _)

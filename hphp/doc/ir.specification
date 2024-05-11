@@ -2318,6 +2318,12 @@ ReqBindJmp and CallFuncEntry.
   Raises a warning to indicate a deployment boundary violation resulting from caller
   attempting to call the the callee in S0 in context `ctx`.
 
+| RaiseImplicitContextStateInvalid<func>, ND, NA, NF
+
+  Raises a warning or throws an exception for invalid, soft implicit context
+  or cleared states.
+  Can only be used in memoized wrapper functions.
+
 | RaiseStrToClassNotice, ND, S(Str), NF
 
   Raise a notice if a class is being loaded from a string e.g. in a `$c::f()`

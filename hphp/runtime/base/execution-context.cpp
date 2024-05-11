@@ -86,7 +86,6 @@
 #include "hphp/zend/zend-math.h"
 
 #include "hphp/runtime/base/bespoke-runtime.h"
-#include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1432,9 +1431,6 @@ void ExecutionContext::requestInit() {
 
   assertx(!ImplicitContext::activeCtx.isInit());
   ImplicitContext::activeCtx.initWith(nullptr);
-
-  assertx(!ImplicitContext::inaccessibleCtx.isInit());
-  ImplicitContext::inaccessibleCtx.initWith(initInaccessibleConext().detach());
 
   profileRequestStart();
 

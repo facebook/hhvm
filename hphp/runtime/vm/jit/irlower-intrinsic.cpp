@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/implicit-context.h"
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/hh/ext_implicit_context.h"

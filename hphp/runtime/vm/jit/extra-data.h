@@ -3081,6 +3081,8 @@ X(LdObjMethodS,                 FuncNameCtxData);
 X(LdObjMethodD,                 OptClassAndFuncData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
+X(RaiseImplicitContextStateInvalid,
+                                FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);

@@ -547,6 +547,7 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
   case RaiseDeploymentBoundaryViolation:
+  case RaiseImplicitContextStateInvalid:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:

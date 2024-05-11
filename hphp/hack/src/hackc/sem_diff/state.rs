@@ -1323,7 +1323,8 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
 
         // Verify Instructions
         NodeInstr::Opcode(
-            Opcode::VerifyOutType(..)
+            Opcode::VerifyImplicitContextState
+            | Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
             | Opcode::VerifyRetNonNullC
@@ -1653,6 +1654,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::True
         | Opcode::UGetCUNop
         | Opcode::UnsetG
+        | Opcode::VerifyImplicitContextState
         | Opcode::VerifyRetNonNullC
         | Opcode::VerifyRetTypeC
         | Opcode::VerifyRetTypeTS

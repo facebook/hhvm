@@ -74,19 +74,37 @@ pub fn get_implicit_context_memo_key(local: Local) -> InstrSeq {
     ])
 }
 
-fn ic_set(local: Local) -> InstrSeq {
-    InstrSeq::gather(vec![
-        instr::cns_e(hhbc::ConstName::intern("HH\\MEMOIZE_IC_TYPE_INACCESSIBLE")),
-        instr::null(),
-        instr::create_special_implicit_context(),
-        instr::set_implicit_context_by_value(),
-        instr::set_l(local),
-        instr::pop_c(),
-    ])
+fn ic_set(local: Local, soft: bool) -> InstrSeq {
+    if soft {
+        InstrSeq::gather(vec![
+            instr::cns_e(hhbc::ConstName::intern(
+                "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE",
+            )),
+            instr::null(),
+            instr::create_special_implicit_context(),
+            instr::set_implicit_context_by_value(),
+            instr::set_l(local),
+            instr::pop_c(),
+        ])
+    } else {
+        InstrSeq::gather(vec![
+            instr::null_uninit(),
+            instr::null_uninit(),
+            instr::f_call_func_d(
+                FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
+                hhbc::FunctionName::intern(
+                    "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",
+                ),
+            ),
+            instr::set_implicit_context_by_value(),
+            instr::set_l(local),
+            instr::pop_c(),
+        ])
+    }
 }
 
-pub fn ic_restore(local: Local, should_make_ic_inaccessible: bool) -> InstrSeq {
-    if should_make_ic_inaccessible {
+pub fn ic_restore(local: Local, should_make_ic_inaccessible: Option<bool>) -> InstrSeq {
+    if should_make_ic_inaccessible.is_some() {
         InstrSeq::gather(vec![
             instr::c_get_l(local),
             instr::set_implicit_context_by_value(),
@@ -101,11 +119,11 @@ pub fn with_possible_ic(
     label_gen: &mut LabelGen,
     local: Local,
     instrs: InstrSeq,
-    should_make_ic_inaccessible: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> InstrSeq {
-    if should_make_ic_inaccessible {
+    if let Some(soft) = should_make_ic_inaccessible {
         InstrSeq::gather(vec![
-            ic_set(local),
+            ic_set(local, soft),
             create_try_catch(
                 label_gen,
                 None,

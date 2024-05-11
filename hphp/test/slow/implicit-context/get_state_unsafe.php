@@ -21,6 +21,11 @@ function expect(HH\ImplicitContext\State $expected): void {
   }
 }
 
+<<__Memoize(#SoftMakeICInaccessible)>>
+function soft_mici(): void {
+  expect(HH\ImplicitContext\State::SOFT_INACCESSIBLE);
+}
+
 <<__Memoize(#MakeICInaccessible)>>
 function mici(): void {
   expect(HH\ImplicitContext\State::INACCESSIBLE);
@@ -33,6 +38,10 @@ function main(): void {
     0,
     () ==> expect(HH\ImplicitContext\State::VALUE),
   );
-  expect(HH\ImplicitContext\State::NULL);
+  HH\ImplicitContext\soft_run_with(
+    () ==> expect(HH\ImplicitContext\State::SOFT_SET),
+    '',
+  );
+  soft_mici();
   mici();
 }

@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object initInaccessibleConext();
-
 TypedValue create_special_implicit_context_explicit(int64_t,
                                                     const StringData*,
                                                     const Func* func);

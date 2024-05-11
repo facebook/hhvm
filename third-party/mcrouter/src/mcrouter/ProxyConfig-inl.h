@@ -128,6 +128,12 @@ ProxyConfig<RouterInfo>::ProxyConfig(
 
   bool enableAsyncDlBroadcast = readBool("enable_async_dl_broadcast", false);
 
+  bool enableCrossRegionSetRpc = readBool("enable_cross_region_set_rpc", true);
+  bool enableSetDistribution = readBool("enable_set_distribution", false);
+  checkLogic(
+      enableSetDistribution || enableCrossRegionSetRpc,
+      "ProxyConfig: cannot disable cross-region set rpc if set distribution is disabled");
+
   proxy.router().runtimeFeatures_.enableOdslScuba =
       readBool("enable_odsl_scuba", false);
   proxy.router().runtimeFeatures_.enableOdslODS =
@@ -143,7 +149,9 @@ ProxyConfig<RouterInfo>::ProxyConfig(
       RootRouteRolloutOpts{
           .enableDeleteDistribution = enableDeleteDistribution,
           .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc,
-          .enableAsyncDlBroadcast = enableAsyncDlBroadcast});
+          .enableAsyncDlBroadcast = enableAsyncDlBroadcast,
+          .enableSetDistribution = enableSetDistribution,
+          .enableCrossRegionSetRpc = enableCrossRegionSetRpc});
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

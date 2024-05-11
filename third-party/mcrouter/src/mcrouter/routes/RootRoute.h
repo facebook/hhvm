@@ -30,6 +30,8 @@ struct RootRouteRolloutOpts {
   bool enableDeleteDistribution = false;
   bool enableCrossRegionDeleteRpc = true;
   bool enableAsyncDlBroadcast = false;
+  bool enableSetDistribution = false;
+  bool enableCrossRegionSetRpc = true;
 };
 
 template <class RouterInfo>
@@ -52,7 +54,9 @@ class RootRoute {
         defaultRoute_(opts_.default_route),
         enableDeleteDistribution_(rolloutOpts.enableDeleteDistribution),
         enableCrossRegionDeleteRpc_(rolloutOpts.enableCrossRegionDeleteRpc),
-        enableAsyncDlBroadcast_(rolloutOpts.enableAsyncDlBroadcast) {}
+        enableAsyncDlBroadcast_(rolloutOpts.enableAsyncDlBroadcast),
+        enableSetDistribution_(rolloutOpts.enableSetDistribution),
+        enableCrossRegionSetRpc_(rolloutOpts.enableCrossRegionSetRpc) {}
 
   template <class Request>
   bool traverse(
@@ -131,6 +135,8 @@ class RootRoute {
   bool enableDeleteDistribution_;
   bool enableCrossRegionDeleteRpc_;
   bool enableAsyncDlBroadcast_;
+  bool enableSetDistribution_;
+  bool enableCrossRegionSetRpc_;
 
   template <class Request>
   FOLLY_ALWAYS_INLINE ReplyT<Request> getTargetsAndRoute(

@@ -849,7 +849,7 @@ struct Decode<type::list<Tag>> {
               apache::thrift::detail::pm::detect_resize,
               ListType,
               decltype(s)> &&
-          std::is_trivially_constructible_v<typename ListType::value_type>;
+          std::is_trivial_v<typename ListType::value_type>;
       if constexpr (should_resize) {
         list.resize(s);
         for (auto&& elem : list) {

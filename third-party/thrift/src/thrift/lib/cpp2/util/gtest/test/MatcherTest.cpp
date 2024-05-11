@@ -135,3 +135,13 @@ TEST(ThriftMacherUnion, CanBindToRValueMatcher) {
   namespace field = apache::thrift::ident;
   testing::Matcher<SameType&&> _ = IsThriftUnionWith<field::a>(testing::_);
 }
+
+TEST(MatcherTest, WorksWithUnion) {
+  namespace field = apache::thrift::ident;
+  auto r = Result();
+
+  int value = 42;
+  r.success_ref() = value;
+  EXPECT_THAT(r, ThriftField<field::success>(value));
+  EXPECT_THAT(r, ThriftField<field::error>(testing::IsFalse()));
+}

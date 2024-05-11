@@ -56,7 +56,7 @@ class IsThriftUnionWithMatcher;
 // namespace in the `_types.h` generated file.
 // A useful pattern is to define `namespace field = apache::thrift::ident;`, and
 // refer to the fields as `field::field_name`, e.g.
-// `ThriftField<op::get_field_id>(_)`.
+// `ThriftField<field::id>(_)`.
 //
 // Alternatively, the following also works (but doesn't print the field name on
 // failure):
@@ -105,7 +105,7 @@ detail::ThriftFieldMatcher<FieldTag, Matcher> ThriftField(Matcher matcher) {
 // `apache::thrift::ident` namespace in the `_types.h` generated file. A useful
 // pattern is to define `namespace field = apache::thrift::ident;`, and refer to
 // the fields as `field::field_name`, e.g.
-// `IsThriftUnionWith<op::get_field_id>(_)`.
+// `IsThriftUnionWith<field::success>(_)`.
 //
 template <typename FieldTag, typename Matcher>
 detail::IsThriftUnionWithMatcher<FieldTag, Matcher> IsThriftUnionWith(

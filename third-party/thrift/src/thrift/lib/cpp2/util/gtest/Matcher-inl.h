@@ -57,8 +57,7 @@ class ThriftFieldMatcher {
   template <
       typename ThriftStruct,
       typename = std::enable_if_t<
-          is_thrift_exception_v<folly::remove_cvref_t<ThriftStruct>> ||
-          is_thrift_struct_v<folly::remove_cvref_t<ThriftStruct>>>>
+          is_thrift_class_v<folly::remove_cvref_t<ThriftStruct>>>>
   operator testing::Matcher<ThriftStruct>() const {
     return testing::Matcher<ThriftStruct>(
         new Impl<const ThriftStruct&>(matcher_));
@@ -81,7 +80,7 @@ class ThriftFieldMatcher {
     using FieldRef = decltype(Accessor{}(std::declval<ConstRefThriftStruct>()));
     using FieldReferenceType = typename FieldRef::reference_type;
     inline static constexpr bool IsOptionalFieldRef =
-        std::is_same_v<optional_field_ref<FieldReferenceType>, FieldRef>;
+        ::apache::thrift::detail::is_optional_or_union_field_ref_v<FieldRef>;
     // See above on why we do this switch
     using MatchedType =
         std::conditional_t<IsOptionalFieldRef, FieldRef, FieldReferenceType>;

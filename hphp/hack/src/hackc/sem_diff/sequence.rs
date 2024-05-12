@@ -354,8 +354,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
 
         // Verify
         NodeInstr::Opcode(
-            Opcode::VerifyImplicitContextState
-            | Opcode::VerifyOutType(..)
+            Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
             | Opcode::VerifyRetNonNullC

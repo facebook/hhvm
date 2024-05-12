@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -2675,54 +2676,6 @@ void emitSetImplicitContextByValue(IRGS& env) {
   );
 }
 
-void verifyImplicitContextState(IRGS& env, const Func* func) {
-  assertx(!func->hasCoeffectRules());
-  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-
-  switch (func->memoizeICType()) {
-    case Func::MemoizeICType::NoIC:
-      if (providedCoeffectsKnownStatically(func).canCall(
-          RuntimeCoeffects::leak_safe_shallow())) {
-        // We are in a memoized that can call [defaults] code or any escape
-        ifThen(
-          env,
-          [&] (Block* taken) {
-            auto const ctx = gen(env, LdImplicitContext);
-            gen(env, CheckType, TInitNull, taken, ctx);
-          },
-          [&] {
-            hint(env, Block::Hint::Unlikely);
-            gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
-            return cns(env, TBottom);
-          }
-        );
-      }
-      return;
-    case Func::MemoizeICType::SoftMakeICInaccessible:
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          auto const ctx = gen(env, LdImplicitContext);
-          gen(env, CheckType, TInitNull, taken, ctx);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
-        }
-      );
-      return;
-    case Func::MemoizeICType::KeyedByIC:
-    case Func::MemoizeICType::MakeICInaccessible:
-      return;
-  }
-
-  not_reached();
-}
-
-void emitVerifyImplicitContextState(IRGS& env) {
-  verifyImplicitContextState(env, curFunc(env));
-}
-
 void emitCreateSpecialImplicitContext(IRGS& env) {
   auto const memoKey = topC(env, BCSPRelOffset{0});
   auto const type = topC(env, BCSPRelOffset{1});
@@ -2731,12 +2684,22 @@ void emitCreateSpecialImplicitContext(IRGS& env) {
     PUNT(CreateSpecialImplicitContext);
   }
   auto const func = curFunc(env);
-  auto const obj =
-    gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
-  decRef(env, memoKey);
-  decRef(env, type);
-  discard(env, 2);
-  push(env, obj);
+  if (type->hasConstVal(TInt) && type->intVal() == static_cast<int64_t>(ImplicitContext::State::Inaccessible)) {
+    auto rdsHandleAndTypeIC = RDSHandleAndType {ImplicitContext::inaccessibleCtx.handle(), TObj};
+    auto const src = gen(env, LdRDSAddr, rdsHandleAndTypeIC, TPtrToOther);
+    auto obj = gen(env, LdMem, TObj, src);
+    decRef(env, memoKey);
+    decRef(env, type);
+    discard(env, 2);
+    pushIncRef(env, obj);
+  } else {
+    auto const obj =
+      gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
+    decRef(env, memoKey);
+    decRef(env, type);
+    discard(env, 2);
+    push(env, obj);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

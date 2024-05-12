@@ -1689,7 +1689,6 @@ void dce(Env& env, const bc::RaiseClassStringConversionNotice& op) {
 }
 void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { no_dce(env, op); }
-void dce(Env& env, const bc::VerifyImplicitContextState& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyParamType& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyParamTypeTS& op) { no_dce(env, op); }

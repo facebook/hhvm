@@ -582,7 +582,6 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(lid);
                 Opcode::UnsetL(local)
             }
-            Hhbc::VerifyImplicitContextState(_) => Opcode::VerifyImplicitContextState,
             Hhbc::VerifyOutType(_, pid, _) => {
                 let local = self.lookup_local(pid);
                 Opcode::VerifyOutType(local)

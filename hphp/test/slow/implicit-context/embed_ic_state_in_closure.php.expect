@@ -1,0 +1,4 @@
+(no warning expected)Calling closure with IC value: 42
+(no warning expected)Calling closure with IC value: 42
+string(23) "returned value not lost"
+string(23) "returned value not lost"

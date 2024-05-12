@@ -44,15 +44,12 @@ State m_state;
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
 
-// Blame of when an event happened resulting in state transition
-req::vector<const StringData*> m_blameFromSoftInaccessible;
-req::vector<const StringData*> m_blameFromSoftSet;
-
 ////////////////////////////////////////////////////////////////////////////
 // Statics
 ////////////////////////////////////////////////////////////////////////////
 
 static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+static rds::Link<ObjectData*, rds::Mode::Normal> inaccessibleCtx;
 
 static std::string stateToString(State);
 

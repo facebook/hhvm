@@ -161,14 +161,6 @@ fn make_memoize_wrapper_method<'a, 'd>(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
         hhbc::is_keyed_by_ic_memoize(attributes.iter()),
     );
-    arg_flags.set(
-        Flags::SHOULD_MAKE_IC_INACCESSIBLE,
-        hhbc::is_make_ic_inaccessible_memoize(attributes.iter()),
-    );
-    arg_flags.set(
-        Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE,
-        hhbc::is_soft_make_ic_inaccessible_memoize(attributes.iter()),
-    );
     let mut args = Args {
         info,
         method,
@@ -364,13 +356,9 @@ fn make_memoize_method_with_params_code<'a, 'd>(
         len: key_count.try_into().unwrap(),
     };
     let ic_stash_local = Local::new((key_count) as usize + first_unnamed_idx);
-    let should_make_ic_inaccessible = if args.flags.contains(Flags::SHOULD_MAKE_IC_INACCESSIBLE)
-        || args.flags.contains(Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE)
-    {
-        Some(args.flags.contains(Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE))
-    } else {
-        None
-    };
+    // TODO: add the coeffects to this decision, done in a later diff on this stack
+    let should_make_ic_inaccessible: bool =
+        !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
@@ -380,7 +368,6 @@ fn make_memoize_method_with_params_code<'a, 'd>(
         } else {
             instr::check_this()
         },
-        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -459,13 +446,8 @@ fn make_memoize_method_no_params_code<'a, 'd>(
         None,
     );
     let ic_stash_local = Local::new(0);
-    let should_make_ic_inaccessible = if args.flags.contains(Flags::SHOULD_MAKE_IC_INACCESSIBLE)
-        || args.flags.contains(Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE)
-    {
-        Some(args.flags.contains(Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE))
-    } else {
-        None
-    };
+    // we are in a no parameter function that sets no zoned IC either, default to IC inaccessible
+    let should_make_ic_inaccessible: bool = true;
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {
@@ -473,7 +455,6 @@ fn make_memoize_method_no_params_code<'a, 'd>(
         } else {
             instr::check_this()
         },
-        instr::verify_implicit_context_state(),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),

@@ -385,8 +385,6 @@ static const struct {
   { OpResolveClass,{None,             Stack1,       OutClass      }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
-  { OpVerifyImplicitContextState,
-                   {None,             None,         OutNone         }},
   { OpCreateSpecialImplicitContext,
                    {StackTop2,        Stack1,       OutUnknown      }},
 

@@ -92,15 +92,8 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
     let should_emit_implicit_context = hhbc::is_keyed_by_ic_memoize(attributes.iter());
-    let is_make_ic_inaccessible_memoize = hhbc::is_make_ic_inaccessible_memoize(attributes.iter());
-    let is_soft_make_ic_inaccessible_memoize =
-        hhbc::is_soft_make_ic_inaccessible_memoize(attributes.iter());
-    let should_make_ic_inaccessible =
-        if is_make_ic_inaccessible_memoize || is_soft_make_ic_inaccessible_memoize {
-            Some(is_soft_make_ic_inaccessible_memoize)
-        } else {
-            None
-        };
+    // TODO: Also add coeffects in the decision to make ic inaccessible, implemented later in this stack
+    let should_make_ic_inaccessible: bool = !should_emit_implicit_context;
     let mut env = Env::default(Arc::clone(&fd.namespace)).with_scope(scope);
     let (instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -150,7 +143,7 @@ fn make_memoize_function_code<'a, 'd>(
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
-    should_make_ic_inaccessible: Option<bool>,
+    should_make_ic_inaccessible: bool,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let (fun, decl_vars) = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context
     {
@@ -191,7 +184,7 @@ fn make_memoize_function_with_params_code<'a, 'd>(
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
-    should_make_ic_inaccessible: Option<bool>,
+    should_make_ic_inaccessible: bool,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();
@@ -260,7 +253,6 @@ fn make_memoize_function_with_params_code<'a, 'd>(
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
-        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -308,7 +300,7 @@ fn make_memoize_function_no_params_code<'a, 'd>(
     deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName,
     is_async: bool,
-    should_make_ic_inaccessible: Option<bool>,
+    should_make_ic_inaccessible: bool,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
@@ -327,7 +319,6 @@ fn make_memoize_function_no_params_code<'a, 'd>(
     let ic_stash_local = Local::new(0);
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
-        instr::verify_implicit_context_state(),
         if is_async {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),

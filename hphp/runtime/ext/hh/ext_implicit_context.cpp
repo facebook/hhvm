@@ -35,8 +35,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/hash-map.h"
-
 #include "hphp/runtime/base/init-fini-node.h"
 
 namespace HPHP {
@@ -85,99 +83,21 @@ Object create_new_IC() {
   auto obj = Object{ ImplicitContextLoader::classof() };
   return obj;
 }
-
-String get_target_memo_key(const StringData* memo_key,
-                                const Func* func,
-                                const HPHP::ImplicitContext::State state) {
-
-  assertx(state != ImplicitContext::State::Value); // Value state IC cration should never call this
-
-  if (state == ImplicitContext::State::Inaccessible) {
-    return s_ICInaccessibleMemoKey;
-  }
-
-  assertx(func);
-  assertx(state == ImplicitContext::State::SoftInaccessible ||
-          state == ImplicitContext::State::SoftSet);
-
-  auto const cur_blame = [&] {
-    if (memo_key) return memo_key;
-    return func->fullName();
-  }();
-
-  StringBuffer sb;
-  sb.append(state == ImplicitContext::State::SoftSet
-              ? s_ICSoftSetMemoKey.get() : s_ICSoftInaccessibleMemoKey.get());
-  if (auto const obj = *ImplicitContext::activeCtx) {
-    auto const prev = Native::data<ImplicitContext>(obj);
-    for (auto const& s : prev->m_blameFromSoftInaccessible) {
-      serialize_memoize_string_data(sb, s);
-    }
-    if (state == ImplicitContext::State::SoftInaccessible) {
-      serialize_memoize_string_data(sb, cur_blame);
-    }
-    sb.append('%'); // separator
-    for (auto const& s : prev->m_blameFromSoftSet) {
-      serialize_memoize_string_data(sb, s);
-    }
-    if (state == ImplicitContext::State::SoftSet) {
-      serialize_memoize_string_data(sb, cur_blame);
-    }
-  } else {
-    serialize_memoize_string_data(sb, cur_blame);
-  }
-  return sb.detach();
-}
-
-void set_implicit_context_blame(ImplicitContext* context,
-                                const StringData* memo_key,
-                                const Func* func) {
-  auto const state = context->m_state;
-
-  // the memo_key is only provided for one of two situations:
-  // (1) always when entering the SoftSet state
-  // (2) when entering the SoftInaccessible state via
-  //     the function run_with_soft_inaccessible_state
-  assertx(IMPLIES(state == ImplicitContext::State::SoftSet, memo_key));
-  assertx(IMPLIES(state != ImplicitContext::State::SoftSet &&
-                  state != ImplicitContext::State::SoftInaccessible, !memo_key));
-
-  if (state == ImplicitContext::State::Value ||
-      state == ImplicitContext::State::Inaccessible) {
-    // We do not currently need blame here
-    return;
-  }
-
-  assertx(func);
-  assertx(state == ImplicitContext::State::SoftInaccessible ||
-          state == ImplicitContext::State::SoftSet);
-
-  req::vector<const StringData*> blameFromSoftInaccessible;
-  req::vector<const StringData*> blameFromSoftSet;
-
-  if (auto const obj = *ImplicitContext::activeCtx) {
-    auto const prev = Native::data<ImplicitContext>(obj);
-    blameFromSoftInaccessible = prev->m_blameFromSoftInaccessible;
-    blameFromSoftSet = prev->m_blameFromSoftSet;
-  }
-
-  auto const cur_blame = [&] {
-    if (memo_key) return memo_key;
-    return func->fullName();
-  }();
-
-  if (state == ImplicitContext::State::SoftInaccessible) {
-    blameFromSoftInaccessible.push_back(cur_blame);
-  } else {
-    assertx(state == ImplicitContext::State::SoftSet);
-    blameFromSoftSet.push_back(cur_blame);
-  }
-
-  context->m_blameFromSoftInaccessible = std::move(blameFromSoftInaccessible);
-  context->m_blameFromSoftSet = std::move(blameFromSoftSet);
-}
-
 } // namespace
+
+bool HHVM_FUNCTION(is_inaccessible) {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return false;
+  auto const context = Native::data<ImplicitContext>(obj);
+  return context->m_state == ImplicitContext::State::Inaccessible;
+}
+
+Object initInaccessibleConext() {
+  auto const obj = Object{ ImplicitContextLoader::classof() };
+  auto context = Native::data<ImplicitContext>(obj.get());
+  context->m_state = ImplicitContext::State::Inaccessible;
+  return obj;
+};
 
 String HHVM_FUNCTION(get_state_unsafe) {
   auto const obj = *ImplicitContext::activeCtx;
@@ -246,51 +166,31 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
   if (!obj) return Array{};
   auto const context = Native::data<ImplicitContext>(obj);
 
-  if (context->m_state == ImplicitContext::State::Inaccessible) {
+  if (context->m_state != ImplicitContext::State::Value) {
     VecInit ret{1};
     ret.append(s_ICInaccessibleMemoKey.data());
     return ret.toArray();
   }
-  if (context->m_state == ImplicitContext::State::SoftSet ||
-      context->m_state == ImplicitContext::State::SoftInaccessible) {
-    VecInit ret{context->m_blameFromSoftInaccessible.size() +
-                context->m_blameFromSoftSet.size() + 1}; // extra 1 for the memokey name
-    if (context->m_state == ImplicitContext::State::SoftInaccessible) {
-      ret.append(s_ICSoftInaccessibleMemoKey.data());
-    } else {
-      ret.append(s_ICSoftSetMemoKey.data());
-    }
-
-    for (auto const& s : context->m_blameFromSoftInaccessible) {
-      ret.append(s->data());
-    }
-
-    for (auto const& s : context->m_blameFromSoftSet) {
-      ret.append(s->data());
-    }
-    return ret.toArray();
+  assertx(context->m_state == ImplicitContext::State::Value);
+  VecInit ret{context->m_map.size() * 2}; // key and value
+  for (auto const& p : context->m_map) {
+    auto const key = String(p.first->data());
+    auto const value = HHVM_FN(serialize_memoize_param)(p.second.first);
+    ret.append(key);
+    ret.append(value);
   }
-
-  if (context->m_state == ImplicitContext::State::Value) {
-    VecInit ret{context->m_map.size() * 2}; // key and value
-    for (auto const& p : context->m_map) {
-      auto const key = String(p.first->data());
-      auto const value = HHVM_FN(serialize_memoize_param)(p.second.first);
-      ret.append(key);
-      ret.append(value);
-    }
-    return ret.toArray();
-  }
-  return Array{};
+  return ret.toArray();
 }
 
 
 Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
                                               TypedValue data) {
   auto const key = keyarg.get();
-  // Reserve the underscore prefix for the time being in case we want to
-  // emit keys from the compiler. This would allow us to avoid having
-  // conflicts with other key generation mechanisms.
+  /*
+   * Reserve the underscore prefix for the time being in case we want to
+   * emit keys from the compiler. This would allow us to avoid having
+   * conflicts with other key generation mechanisms.
+  */
   if (key->size() == 0 || key->data()[0] == '_') {
     throw_implicit_context_exception(
       "Implicit context keys cannot be empty or start with _");
@@ -329,7 +229,6 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
   auto const context = Native::data<ImplicitContext>(obj.get());
 
   context->m_state = ImplicitContext::State::Value;
-  set_implicit_context_blame(context, nullptr, nullptr);
   // IncRef data and key as we are storing in the map
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
   key->incRefCount();
@@ -347,74 +246,23 @@ namespace {
 Object create_special_implicit_context_impl(int64_t type_enum,
                                             const StringData* memo_key,
                                             const Func* func) {
-  auto const prev_obj = *ImplicitContext::activeCtx;
-  auto const prev_context =
-    prev_obj ? Native::data<ImplicitContext>(prev_obj) : nullptr;
-
   auto const type = static_cast<ImplicitContext::State>(type_enum);
-  assertx(type != ImplicitContext::State::Value);
-  if (type == ImplicitContext::State::SoftSet &&
-      prev_context &&
-      (prev_context->m_state == ImplicitContext::State::Value ||
-       prev_context->m_state == ImplicitContext::State::Inaccessible)) {
-    // If we are moving from Value or Inaccessible to SoftSet, remain
-    // in previous configuration
-    return Object{prev_obj};
+  if (type == ImplicitContext::State::SoftSet) {
+    /*
+     * SoftSet is passthrough, return the previous state if present
+     * NOTE: previous state will always exist unless,
+     * 1. This is the very first call into IC functions
+     * 2. Backdoor was used, which resets IC to null
+    */
+    return Object{*ImplicitContext::activeCtx};
   }
-
-  if (type == ImplicitContext::State::SoftInaccessible) {
-    auto const sampleRate = [&] {
-      if (memo_key) return 1u;
-      assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-      assertx(func->isSoftMakeICInaccessibleMemoize());
-      return func->softMakeICInaccessibleSampleRate();
-    }();
-    if (sampleRate > 1) {
-      bool shouldSample;
-      if (UNLIKELY(RO::EvalRecordReplay)) {
-        auto rand{reinterpret_cast<int64_t(*)(int64_t, const Variant&)>(
-          Func::lookup(StringData::Make("rand"))->nativeFuncPtr())};
-        shouldSample = rand(0, sampleRate - 1) != 0;
-      } else {
-        shouldSample = !folly::Random::oneIn(sampleRate);
-      }
-      if (shouldSample) {
-        // Return the previous object if we coinflipped false
-        return Object{prev_obj};
-      }
-    }
-  }
-
-  auto target_memo_key = get_target_memo_key(memo_key, func, type);
-
-  auto& m_to_ic = *s_memokey_to_IC;
-  if (m_to_ic.find(target_memo_key.get()) != m_to_ic.end()) {
-    return Object{m_to_ic.at(target_memo_key.get())};
-  }
-
-  // create new IC since we did not find an existing one that matches the description
-  auto obj = create_new_IC();
-  auto const context = Native::data<ImplicitContext>(obj.get());
-  context->m_state = type;
-  auto const key = [&] () -> const StringData* {
-    if (!memo_key) return nullptr;
-    // Leak the memo_key until the end of the request
-    memo_key->incRefCount();
-    return memo_key;
-  }();
-  set_implicit_context_blame(context, key, func);
-  if (type == ImplicitContext::State::SoftSet &&
-      prev_context &&
-      prev_context->m_state == ImplicitContext::State::SoftInaccessible) {
-    // If we are moving from SoftInaccessible to SoftSet, remain in
-    // SoftInaccessible
-    // This must happen after setting the blame as blame setting uses the state
-    context->m_state = ImplicitContext::State::SoftInaccessible;
-  }
-  // Store new IC into the map
-  auto UNUSED ret = m_to_ic.emplace(std::make_pair(target_memo_key.detach(), Object(obj).detach()));
-  assertx(ret.second); // the emplace should always succeed
-  return obj;
+  assertx(type == ImplicitContext::State::Inaccessible);
+  /*
+   * We can get away with just returning the inaccessible IC here
+   * without even adding it to the side map because the address of
+   * this obj remains the same throughout the request
+  */
+  return Object{*ImplicitContext::inaccessibleCtx};
 }
 
 } // namespace
@@ -477,6 +325,8 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(create_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\is_inaccessible,
+                  HHVM_FN(is_inaccessible));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
                   HHVM_FN(get_implicit_context_debug_info));
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,

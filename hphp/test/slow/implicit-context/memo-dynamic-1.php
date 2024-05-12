@@ -9,8 +9,11 @@ function memo_normal() :mixed{
 <<__Memoize(#KeyedByIC)>>
 function memo_keyed() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
-  $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
-  echo var_dump($str_hash) . "\n";
+  if ($hash != null) {
+    $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
+    echo var_dump($str_hash) . "\n";
+  }
+
 }
 
 <<__Memoize(#MakeICInaccessible)>>

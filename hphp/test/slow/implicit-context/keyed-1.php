@@ -41,14 +41,14 @@ function f() :mixed{
     tuple('memoWithArg', () ==> memoWithArg(1)),
   ];
   foreach ($v as list($name, $f)) {
-    echo "  Before:"; dump_ctx_data();
+    echo "  Before: "; dump_ctx_data();
     try {
       $f();
       echo $name . " passed\n";
     } catch (Exception $e) {
       echo $name . " failed with: " . $e->getMessage() . "\n";
     }
-    echo "  After:"; dump_ctx_data();
+    echo "  After: "; dump_ctx_data();
     echo "------------------------\n";
   }
 }

@@ -1453,7 +1453,6 @@ impl FunctionParser<'_> {
             "unreachable" => I::Terminator(T::Unreachable),
             "unset" => self.parse_unset(tok, loc)?,
             "unsetm" => self.parse_member_op(tok, mnemonic, loc)?,
-            "verify_implicit_context_state" => I::Hhbc(H::VerifyImplicitContextState(loc)),
             "verify_out_type" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyOutType(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
             "verify_param_type" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyParamType(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
             "verify_param_type_ts" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyParamTypeTS(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),

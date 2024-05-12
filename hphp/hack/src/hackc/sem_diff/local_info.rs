@@ -250,7 +250,6 @@ impl LocalInfo {
             | Opcode::UnsetG
             | Opcode::UnsetM(..)
             | Opcode::Vec(..)
-            | Opcode::VerifyImplicitContextState
             | Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)

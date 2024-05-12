@@ -76,9 +76,7 @@ pub fn get_implicit_context_memo_key(local: Local) -> InstrSeq {
 
 fn ic_set(local: Local) -> InstrSeq {
     InstrSeq::gather(vec![
-        instr::cns_e(hhbc::ConstName::intern("HH\\MEMOIZE_IC_TYPE_INACCESSIBLE")),
-        instr::null(),
-        instr::create_special_implicit_context(),
+        instr::get_inaccessible_implicit_context(),
         instr::set_implicit_context_by_value(),
         instr::set_l(local),
         instr::pop_c(),

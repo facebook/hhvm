@@ -562,7 +562,6 @@ using TypeNames::TCA;
 #define DElemLvalPos
 #define DCOW
 #define DStructTypeBound
-#define DSpecialIC
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -635,7 +634,6 @@ using TypeNames::TCA;
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
-#undef DSpecialIC
 
   if (inst->is(LdMBase)) {
     auto const& acls = inst->extra<LdMBase>()->acls;

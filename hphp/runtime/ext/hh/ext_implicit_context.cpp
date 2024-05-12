@@ -243,40 +243,6 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
 
 namespace {
 
-Object create_special_implicit_context_impl(int64_t type_enum,
-                                            const StringData* memo_key,
-                                            const Func* func) {
-  auto const type = static_cast<ImplicitContext::State>(type_enum);
-  if (type == ImplicitContext::State::SoftSet) {
-    /*
-     * SoftSet is passthrough, return the previous state if present
-     * NOTE: previous state will always exist unless,
-     * 1. This is the very first call into IC functions
-     * 2. Backdoor was used, which resets IC to null
-    */
-    return Object{*ImplicitContext::activeCtx};
-  }
-  assertx(type == ImplicitContext::State::Inaccessible);
-  /*
-   * We can get away with just returning the inaccessible IC here
-   * without even adding it to the side map because the address of
-   * this obj remains the same throughout the request
-  */
-  return Object{*ImplicitContext::inaccessibleCtx};
-}
-
-} // namespace
-
-TypedValue create_special_implicit_context_explicit(int64_t type_enum,
-                                                    const StringData* memo_key,
-                                                    const Func* func) {
-  auto ret = create_special_implicit_context_impl(type_enum, memo_key, func);
-  if (ret.isNull()) return make_tv<KindOfNull>();
-  return make_tv<KindOfObject>(ret.detach());
-}
-
-namespace {
-
 Variant coeffects_call_helper(const Variant& function, const char* name,
                               RuntimeCoeffects coeffects,
                               bool getCoeffectsFromClosure) {

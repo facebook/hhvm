@@ -3239,13 +3239,10 @@ SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
 
-CreateSpecialImplicitContext [C:Int C:?Str] -> [C:?Obj]
+GetInaccessibleImplicitContext [] -> [C:Obj]
 
-  Creates a special implicit context as if by calling the
-  create_special_implicit_context builtin. $1 is one of the
-  ImplicitContext::State enum values, and $2 is a nullable string optionally
-  providing a memo-key. If $1 is not an int, or if $2 is not a nullable string,
-  a fatal is raised.
+  Returns the inaccessible context that was created at the beginning
+  of the request.
 
 14. Generator creation and execution
 ---------------------------------------

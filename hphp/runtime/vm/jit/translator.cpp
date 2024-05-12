@@ -382,11 +382,11 @@ static const struct {
                    {Stack1,           Stack1,       OutClsMethLike  }},
   { OpResolveRClsMethodS,
                    {Stack1,           Stack1,       OutClsMethLike  }},
-  { OpResolveClass,{None,             Stack1,       OutClass      }},
+  { OpResolveClass,{None,             Stack1,       OutClass        }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
-  { OpCreateSpecialImplicitContext,
-                   {StackTop2,        Stack1,       OutUnknown      }},
+  { OpGetInaccessibleImplicitContext,
+                   {None,             Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/
 

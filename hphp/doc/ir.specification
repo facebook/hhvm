@@ -2680,11 +2680,6 @@ ReqBindJmp and CallFuncEntry.
   Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
   AsyncFunctionWaitHandle object in S0.
 
-| CreateSpecialImplicitContext, DSpecialIC, S(Int) S(Str|InitNull) S(Func), NF
-
-  Creates an implicit context for special circumstances, as if by calling the
-  create_special_implicit_context builtin function.
-
 15. Debugging, instrumentation, and profiling
 
 | IncStat, ND, C(Int), NF

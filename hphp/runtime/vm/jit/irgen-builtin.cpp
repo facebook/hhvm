@@ -2676,30 +2676,11 @@ void emitSetImplicitContextByValue(IRGS& env) {
   );
 }
 
-void emitCreateSpecialImplicitContext(IRGS& env) {
-  auto const memoKey = topC(env, BCSPRelOffset{0});
-  auto const type = topC(env, BCSPRelOffset{1});
-  if (!type->isA(TInt)) PUNT(CreateSpecialImplicitContext);
-  if (!memoKey->isA(TStr) && !memoKey->isA(TInitNull)) {
-    PUNT(CreateSpecialImplicitContext);
-  }
-  auto const func = curFunc(env);
-  if (type->hasConstVal(TInt) && type->intVal() == static_cast<int64_t>(ImplicitContext::State::Inaccessible)) {
+void emitGetInaccessibleImplicitContext(IRGS& env) {
     auto rdsHandleAndTypeIC = RDSHandleAndType {ImplicitContext::inaccessibleCtx.handle(), TObj};
     auto const src = gen(env, LdRDSAddr, rdsHandleAndTypeIC, TPtrToOther);
     auto obj = gen(env, LdMem, TObj, src);
-    decRef(env, memoKey);
-    decRef(env, type);
-    discard(env, 2);
     pushIncRef(env, obj);
-  } else {
-    auto const obj =
-      gen(env, CreateSpecialImplicitContext, type, memoKey, cns(env, func));
-    decRef(env, memoKey);
-    decRef(env, type);
-    discard(env, 2);
-    push(env, obj);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

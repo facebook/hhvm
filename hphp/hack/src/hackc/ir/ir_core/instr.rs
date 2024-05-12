@@ -472,7 +472,7 @@ pub enum Hhbc {
         loc: LocId,
     },
     CreateCont(LocId),
-    CreateSpecialImplicitContext([ValueId; 2], LocId),
+    GetInaccessibleImplicitContext(LocId),
     Div([ValueId; 2], LocId),
     EnumClassLabelName(ValueId, LocId),
     GetClsRGProp(ValueId, LocId),

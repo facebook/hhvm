@@ -479,7 +479,7 @@ impl<'b> InstrEmitter<'b> {
                 ..
             } => Opcode::CreateCl(operands.len() as u32, clsid),
             Hhbc::CreateCont(_) => Opcode::CreateCont,
-            Hhbc::CreateSpecialImplicitContext(..) => Opcode::CreateSpecialImplicitContext,
+            Hhbc::GetInaccessibleImplicitContext(..) => Opcode::GetInaccessibleImplicitContext,
             Hhbc::Div(..) => Opcode::Div,
             Hhbc::EnumClassLabelName(..) => Opcode::EnumClassLabelName,
             Hhbc::GetClsRGProp(..) => Opcode::GetClsRGProp,

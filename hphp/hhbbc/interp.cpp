@@ -5490,31 +5490,8 @@ const StaticString
   s_Memoize("__Memoize"),
   s_MemoizeLSB("__MemoizeLSB");
 
-void in(ISS& env, const bc::CreateSpecialImplicitContext&) {
-  auto const memoKey = popC(env);
-  auto const type = popC(env);
-
-  if (!type.couldBe(BInt) || !memoKey.couldBe(BOptStr)) {
-    unreachable(env);
-    return push(env, TBottom);
-  }
-
-  if (type.subtypeOf(BInt) && memoKey.subtypeOf(BOptStr)) {
-    effect_free(env);
-  }
-
-  if (auto const v = tv(type); v && tvIsInt(*v)) {
-    switch (static_cast<ImplicitContext::State>(v->m_data.num)) {
-      case ImplicitContext::State::Value:
-      case ImplicitContext::State::SoftSet:
-        return push(env, TOptObj);
-      case ImplicitContext::State::SoftInaccessible:
-      case ImplicitContext::State::Inaccessible:
-        return push(env, TObj);
-    }
-  }
-
-  return push(env, TOptObj);
+void in(ISS& env, const bc::GetInaccessibleImplicitContext&) {
+  return push(env, TObj);
 }
 
 void in(ISS& env, const bc::Idx&) {

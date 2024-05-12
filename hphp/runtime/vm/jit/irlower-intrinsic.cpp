@@ -1054,27 +1054,6 @@ void cgDirFromFilepath(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgCreateSpecialImplicitContext(IRLS& env, const IRInstruction* inst) {
-  auto args = argGroup(env, inst).ssa(0);
-  if (inst->src(1)->isA(TStr)) {
-    args.ssa(1);
-  } else {
-    args.immPtr(nullptr);
-  }
-  args.ssa(2);
-
-  cgCallHelper(
-    vmain(env),
-    env,
-    CallSpec::direct(create_special_implicit_context_explicit),
-    callDestTV(env, inst),
-    SyncOptions::None,
-    args
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgStaticAnalysisError(IRLS& env, const IRInstruction* inst) {
   if (RO::EvalCrashOnStaticAnalysisError) {
     auto& v = vmain(env);

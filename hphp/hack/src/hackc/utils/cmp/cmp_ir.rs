@@ -792,7 +792,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::ContValid(_), _)
         | (Hhbc::CreateCl { .. }, _)
         | (Hhbc::CreateCont(_), _)
-        | (Hhbc::CreateSpecialImplicitContext(_, _), _)
+        | (Hhbc::GetInaccessibleImplicitContext(_), _)
         | (Hhbc::Div(_, _), _)
         | (Hhbc::EnumClassLabelName(_, _), _)
         | (Hhbc::GetClsRGProp(_, _), _)

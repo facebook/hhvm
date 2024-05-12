@@ -737,24 +737,6 @@ Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
   return inst->src(0)->type() & type;
 }
 
-Type specialICReturn(const IRInstruction* inst) {
-  assertx(inst->is(CreateSpecialImplicitContext));
-
-  auto const type = inst->src(0)->type();
-
-  if (!type.hasConstVal(TInt)) return TObj|TInitNull;
-
-  switch (static_cast<ImplicitContext::State>(type.intVal())) {
-    case ImplicitContext::State::Value:
-    case ImplicitContext::State::SoftSet:
-      return TObj|TInitNull;
-    case ImplicitContext::State::SoftInaccessible:
-    case ImplicitContext::State::Inaccessible:
-      return TObj;
-  }
-  always_assert(false);
-}
-
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -852,7 +834,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DElemLvalPos    return elemLvalPos(inst);
 #define DCOW            return cowReturn(inst);
 #define DStructTypeBound return structDictTypeBoundCheckReturn(inst);
-#define DSpecialIC      return specialICReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -903,7 +884,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
-#undef DSpecialIC
 
 }
 

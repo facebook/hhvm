@@ -880,13 +880,8 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             )?;
         }
         Hhbc::CreateCont(_) => write!(w, "create_cont")?,
-        Hhbc::CreateSpecialImplicitContext(vids, _) => {
-            write!(
-                w,
-                "create_special_implicit_context {}, {}",
-                FmtVid(func, vids[0], verbose),
-                FmtVid(func, vids[1], verbose)
-            )?;
+        Hhbc::GetInaccessibleImplicitContext(_) => {
+            write!(w, "get_inaccessible_implicit_context",)?;
         }
         Hhbc::EnumClassLabelName(vid, _) => {
             write!(w, "enum_class_label_name {}", FmtVid(func, vid, verbose))?;

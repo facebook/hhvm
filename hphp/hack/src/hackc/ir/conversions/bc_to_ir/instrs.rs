@@ -990,7 +990,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::ContRaise => simple!(Hhbc::ContRaise),
         Opcode::ContValid => simple!(Hhbc::ContValid),
         Opcode::CreateCont => simple!(Hhbc::CreateCont),
-        Opcode::CreateSpecialImplicitContext => simple!(Hhbc::CreateSpecialImplicitContext),
+        Opcode::GetInaccessibleImplicitContext => simple!(Hhbc::GetInaccessibleImplicitContext),
         Opcode::DblAsBits => todo!(),
         Opcode::Dir => simple!(Immediate::Dir),
         Opcode::Div => simple!(Hhbc::Div),

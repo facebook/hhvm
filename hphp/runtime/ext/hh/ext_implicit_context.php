@@ -8,37 +8,14 @@ async function soft_run_with_async<Tout>(
   (function ()[_]: Awaitable<Tout>) $f,
   string $key,
 )[zoned, ctx $f]: Awaitable<Tout> {
-  $prev = _Private\set_implicit_context_by_value(
-    _Private\create_special_implicit_context(
-      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-      $key
-    ),
-  );
-  try {
-    $result = $f();
-  } finally {
-    _Private\set_implicit_context_by_value($prev);
-  }
-  // Needs to be awaited here so that context dependency is established
-  // between parent/child functions
-  return await $result;
+  return await $f();
 }
 
 function soft_run_with<Tout>(
   (function ()[_]: Tout) $f,
   string $key,
 )[zoned, ctx $f]: Tout {
-  $prev = _Private\set_implicit_context_by_value(
-    _Private\create_special_implicit_context(
-      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-      $key
-    ),
-  );
-  try {
-    return $f();
-  } finally {
-    _Private\set_implicit_context_by_value($prev);
-  }
+  return $f();
 }
 
 const string RUN_WITH_SOFT_INACCESSIBLE_KEY_PREFIX = 'nonfunction/';

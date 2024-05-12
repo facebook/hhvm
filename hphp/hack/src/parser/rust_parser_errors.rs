@@ -1790,20 +1790,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 None
             })
     }
-    // Tests if the immediate classish parent is a trait with a <<__ModuleLevelTrait>> attribute.
-    fn is_inside_module_level_trait(&self) -> bool {
-        if let Some(trait_node) = self.first_parent_classish_node(TokenKind::Trait) {
-            match trait_node.children {
-                ClassishDeclaration(cd) => self.attribute_specification_contains(
-                    &cd.attribute,
-                    sn::user_attributes::MODULE_LEVEL_TRAIT,
-                ),
-                _ => false,
-            }
-        } else {
-            false
-        }
-    }
 
     // Tests if the immediate classish parent is an interface.
     fn is_inside_interface(&self) -> bool {
@@ -2189,20 +2175,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         || kind == TokenKind::Async
                         || kind == TokenKind::Readonly
                 });
-
-                if self.is_inside_module_level_trait() {
-                    if let Some(modifiers) = get_modifiers_of_declaration(node) {
-                        for modifier in syntax_to_list_no_separators(modifiers) {
-                            if let Some(TokenKind::Internal) = token_kind(modifier) {
-                                self.check_can_use_feature(
-                                    node,
-                                    &UnstableFeatures::ModuleLevelTraitsExtensions,
-                                );
-                            }
-                        }
-                    }
-                }
-
                 if self.is_inside_interface() {
                     self.invalid_modifier_errors("Interface methods", node, |kind| {
                         kind != TokenKind::Final && kind != TokenKind::Abstract

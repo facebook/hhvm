@@ -552,7 +552,7 @@ LocalId findLocEquiv(ISS& env, LocalId l) {
 }
 
 // Given an iterator base local, find an equivalent local that is possibly
-// better. LIterInit/LIterNext often uses an unnamed local that came from
+// better. IterInit/IterNext often uses an unnamed local that came from
 // a regular local, which would be a better choice if that local was not
 // manipulated in an unsafe way. Regular locals have lower ids.
 LocalId findIterBaseLoc(State& state, const php::Func* func, LocalId l) {

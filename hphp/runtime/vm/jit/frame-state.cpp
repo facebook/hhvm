@@ -597,20 +597,20 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case LIterInitArr:
-  case LIterInitObj:
-  case LIterNextArr:
-  case LIterNextObj: {
+  case IterInitArr:
+  case IterInitObj:
+  case IterNextArr:
+  case IterNextObj: {
     auto const& args = inst->extra<IterData>()->args;
     assertx(!args.hasKey());
     killIterLocals({safe_cast<uint32_t>(args.valId)});
     break;
   }
 
-  case LIterInitArrK:
-  case LIterInitObjK:
-  case LIterNextArrK:
-  case LIterNextObjK: {
+  case IterInitArrK:
+  case IterInitObjK:
+  case IterNextArrK:
+  case IterNextObjK: {
     auto const& args = inst->extra<IterData>()->args;
     assertx(args.hasKey());
     killIterLocals({safe_cast<uint32_t>(args.keyId),

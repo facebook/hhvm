@@ -63,7 +63,7 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const isInitK = inst->is(LIterInitArrK, LIterInitObjK);
+  auto const isInitK = inst->is(IterInitArrK, IterInitObjK);
   auto const extra = &inst->extra<IterData>()->args;
 
   auto const src = inst->src(0);
@@ -108,11 +108,11 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void implLIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
-  always_assert(inst->is(LIterNextArr, LIterNextArrK,
-                         LIterNextObj, LIterNextObjK));
-  auto const isArr = inst->is(LIterNextArr, LIterNextArrK);
-  auto const isKey = inst->is(LIterNextArrK, LIterNextObjK);
+void implIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
+  always_assert(inst->is(IterNextArr, IterNextArrK,
+                         IterNextObj, IterNextObjK));
+  auto const isArr = inst->is(IterNextArr, IterNextArrK);
+  auto const isKey = inst->is(IterNextArrK, IterNextObjK);
   auto const extra = &inst->extra<IterData>()->args;
 
   auto const sync = isArr ? SyncOptions::None : SyncOptions::Sync;
@@ -257,36 +257,36 @@ void cgProfileIterInit(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::None, args);
 }
 
-void cgLIterInitArr(IRLS& env, const IRInstruction* inst) {
+void cgIterInitArr(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterInitArrK(IRLS& env, const IRInstruction* inst) {
+void cgIterInitArrK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterInitObj(IRLS& env, const IRInstruction* inst) {
+void cgIterInitObj(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterInitObjK(IRLS& env, const IRInstruction* inst) {
+void cgIterInitObjK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgLIterNextArr(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst, CallSpec::direct(liter_array_next_ind));
+void cgIterNextArr(IRLS& env, const IRInstruction* inst) {
+  implIterNext(env, inst, CallSpec::direct(iter_array_next_ind));
 }
 
-void cgLIterNextArrK(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst, CallSpec::direct(liter_array_next_key_ind));
+void cgIterNextArrK(IRLS& env, const IRInstruction* inst) {
+  implIterNext(env, inst, CallSpec::direct(iter_array_next_key_ind));
 }
 
-void cgLIterNextObj(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst, CallSpec::direct(liter_object_next_ind));
+void cgIterNextObj(IRLS& env, const IRInstruction* inst) {
+  implIterNext(env, inst, CallSpec::direct(iter_object_next_ind));
 }
 
-void cgLIterNextObjK(IRLS& env, const IRInstruction* inst) {
-  implLIterNext(env, inst, CallSpec::direct(liter_object_next_key_ind));
+void cgIterNextObjK(IRLS& env, const IRInstruction* inst) {
+  implIterNext(env, inst, CallSpec::direct(iter_object_next_key_ind));
 }
 
 IMPL_OPCODE_CALL(IterExtractBase)

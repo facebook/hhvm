@@ -2717,14 +2717,14 @@ IterBase    [C]  ->  [C:Arr|Obj]
 
     - If $1 is not an array-like or object, an exception is thrown.
 
-IterInit  <IterArgs> <rel offset>    [C:Arr|Obj]  ->  []
+IterInit  <IterArgs> <local id> <rel offset>    []   ->  []
 
-  Initialize an iterator. This instruction takes a "base" in $1, which must be
+  Initialize an iterator. This instruction takes a "base" in %2, which must be
   an array-like or an object implementing the Iterator interface. It creates
-  an iterator with ID given in %1 pointing to the beginning of $1 and, if $1 is
-  an Iterator object, rewinds $1. It then checks if the base is empty. If so,
+  an iterator with ID given in %1 pointing to the beginning of %2 and, if %2 is
+  an Iterator object, rewinds %2. It then checks if the base is empty. If so,
   it frees the iterator (with an implicit IterFree) and transfers control to
-  the target %2.
+  the target %3.
 
   If the base is non-empty, this instruction writes the value of the base's
   first element to the value local given in %1. If the iterator is a key-value
@@ -2747,32 +2747,21 @@ IterInit  <IterArgs> <rel offset>    [C:Arr|Obj]  ->  []
       call $1->valid() to check if $1 is non-empty. If $1 is valid, then we call
       $1->current() (and $1->key()) to get the $1's first value (and key).
 
-LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
+  All other operations on this iterator must provide the same local (containing
+  the same iterator base) as immediates.
 
-  Initialize iterator with local. This instruction creates an iterator pointing
-  to the beginning of %2, but leaves %2 in its local rather than copying it into
-  the iterator and inc-ref-ing it.
-
-  If the base is non-empty, this instruction sets the output value (and, for
-  key-value iterators, the output key) to the first element of the base.
-  Otherwise, it frees the iterator and transfers control to the target %3.
-
-  Since we don't store bases in the iterator, all other operations on this
-  iterator must use the LIter variants (LIterNext, LIterFree) and must provide
-  the same local (containing the same iterator base) as immediates.
-
-IterNext  <IterArgs> <rel offset>    []   ->  []
+IterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 
   Iterator next. This instruction first advances the iterator with the ID given
-  in %1. If the iterator has more elements, then it writes the next element's
-  value (and, for key-value iters, its key) to the output locals given in %1
-  and transfers control to the location specified by %2, Otherwise, the base
-  frees the iterator (with an implicit IterFree).
+  in %1 using a base in %2. If the iterator has more elements, then it writes
+  the next element's value (and, for key-value iters, its key) to the output
+  locals given in %1 and transfers control to the location specified by %3,
+  Otherwise, it frees the iterator (with an implicit IterFree).
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
   depend on the iterator type. (We could also say it depends on the type of
   the base, but we use some iterator types (e.g. array iterator) for multiple
-  base types (e.g. array-likes and collection objects).)
+  base types (e.g. array-likes).)
 
     - For array iterators: "advance" increments the iterator's position, and
       the base "has more elements" if this position is not the final position
@@ -2783,30 +2772,12 @@ IterNext  <IterArgs> <rel offset>    []   ->  []
       state, then call $base->valid() to check whether it has more elements. If
       so, we use $base->key() and $base->current() to get the new key and value.
 
-    - For default class iterators, we advance to the base's class's next
-      accessible property (if there are more) and we use its name and value as
-      the new key and value.
-
-LIterNext  <IterArgs> <local id> <rel offset>    []   ->  []
-
-  Iterator next with local. The iterator with ID given in %1 must have been
-  initialized with LIterInit. This instructions behaves similarily to IterNext,
-  except that it will use the %2 local as the iterator's base rather than the
-  one stored in the iterator.
-
 IterFree <iterator id>    []  ->  []
 
-  Iterator free. This instruction frees the iterator with ID %1. An iterator is
-  typically freed by IterInit or IterNext when its base has no more elements,
-  so IterFree is only needed for guarding against exceptions.
-
-LIterFree <iterator id>    []  ->  []
-
-  Iterator free with local. This instruction frees the iterator with ID %1,
-  which must have been initialized by LIterInit with base %2. Since the
-  iterator does not contain the base, this does not actually free anything.
-  This instruction is just used to inform the VM that the iterator slot is
-  no longer used.
+  Iterator free. This instruction frees the iterator with ID %1, which must have
+  been initialized by IterInit. Since the iterator does not contain the base,
+  this does not actually free anything. This instruction is just used to inform
+  the VM that the iterator slot is no longer used.
 
 
 12. Include, eval, and define instructions

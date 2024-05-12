@@ -301,7 +301,7 @@ bool in(StatsSS& /*env*/, const OpCode&) {
   return false;
 }
 
-bool in(StatsSS& env, const bc::LIterInit& op) {
+bool in(StatsSS& env, const bc::IterInit& op) {
   add_type(env.stats.iterInitBase, locAsCell(env, op.loc2));
   return false;
 }

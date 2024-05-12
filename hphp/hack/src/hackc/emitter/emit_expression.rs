@@ -1055,7 +1055,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
     f: F,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = e.iterator_mut().gen_liter();
+        let iter_id = e.iterator_mut().gen_iter();
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
         let loop_end = e.label_gen_mut().next_regular();
@@ -1066,7 +1066,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
             val_id,
             flags: IterArgsFlags::None, // base is being modified
         };
-        let iter_init = InstrSeq::gather(vec![instr::l_iter_init(
+        let iter_init = InstrSeq::gather(vec![instr::iter_init(
             iter_args.clone(),
             *collection,
             loop_end,
@@ -1074,7 +1074,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_next),
             f(val_id, key_id),
-            instr::l_iter_next(iter_args, *collection, loop_next),
+            instr::iter_next(iter_args, *collection, loop_next),
         ]);
         let iter_done = InstrSeq::gather(vec![
             instr::unset_l(val_id),

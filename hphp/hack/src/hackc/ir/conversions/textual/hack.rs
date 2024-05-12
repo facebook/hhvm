@@ -191,12 +191,12 @@ pub(crate) enum Hhbc {
     IsTypeVec,
     #[decl(fn hhbc_iter_base(*HackMixed) -> *HackMixed)]
     IterBase,
+    #[decl(fn hhbc_iter_free(it: *Iterator) -> void)]
+    IterFree,
     #[decl(fn hhbc_iter_init(it: **Iterator, key: **HackMixed, var: **HackMixed, container: *HackMixed) -> *HackBool)]
     IterInit,
     #[decl(fn hhbc_iter_next(it: *Iterator, key: **HackMixed, var: **HackMixed) -> *HackBool)]
     IterNext,
-    #[decl(fn hhbc_liter_free(it: *Iterator) -> void)]
-    LIterFree,
     #[decl(fn hhbc_lazy_class_from_class(*HackMixed) -> *HackString)]
     LazyClassFromClass,
     #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]

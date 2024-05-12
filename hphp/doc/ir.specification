@@ -2762,13 +2762,13 @@ ReqBindJmp and CallFuncEntry.
 
   Profile iterator initialization from base S0.
 
-| LIterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
+| IterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+| IterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterInitObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
+| IterInitObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
 
-| LIterInitObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
+| IterInitObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2789,13 +2789,13 @@ ReqBindJmp and CallFuncEntry.
   value (and key) into the local variable with index valId (and keyId,
   respectively).
 
-| LIterNextArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
+| IterNextArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterNextArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+| IterNextArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterNextObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
+| IterNextObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
 
-| LIterNextObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
+| IterNextObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local

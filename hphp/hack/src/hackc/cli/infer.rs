@@ -144,8 +144,7 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
     env.hhbc_flags.optimize_local_lifetimes = false;
 
     // Similarly this flag should have no affect on program function but causes
-    // us to generate LIter(Init,Next,Free) bytecodes which have not yet been
-    // implemented in the IR
+    // us to generate Iter(Init,Next,Free) bytecodes using an existing local.
     env.hhbc_flags.optimize_local_iterators = false;
 
     // And here again for IsTypeC optimizations as this changes the structure of

@@ -8,7 +8,7 @@ use instruction_sequence::InstrSeq;
 
 #[derive(Debug, Clone)]
 enum IterKind {
-    LIter,
+    Iter,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -26,8 +26,8 @@ impl IterGen {
         self.iters.len() as u32
     }
 
-    pub fn gen_liter(&mut self) -> IterId {
-        self.iters.push(IterKind::LIter);
+    pub fn gen_iter(&mut self) -> IterId {
+        self.iters.push(IterKind::Iter);
         self.count = std::cmp::max(self.count, self.iters.len() as u32);
         IterId::new(self.iters.len() - 1)
     }
@@ -42,7 +42,7 @@ impl IterGen {
                 .enumerate()
                 .map(|(i, _)| {
                     let id = IterId::new(total - i - 1);
-                    instr::l_iter_free(id)
+                    instr::iter_free(id)
                 })
                 .collect(),
         )

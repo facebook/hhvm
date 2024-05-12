@@ -651,7 +651,7 @@ constexpr bool isTypeAssert(Op op) {
 }
 
 constexpr bool isIteratorOp(Op op) {
-  return op == Op::LIterInit || op == Op::LIterNext;
+  return op == Op::IterInit || op == Op::IterNext;
 }
 
 inline bool isMemberBaseOp(Op op) {

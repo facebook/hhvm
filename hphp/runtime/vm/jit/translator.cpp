@@ -293,9 +293,9 @@ static const struct {
   /*** 11. Iterator instructions ***/
 
   { OpIterBase,    {Stack1,           Stack1,       OutUnknown      }},
-  { OpLIterInit,   {Local,            Local,        OutUnknown      }},
-  { OpLIterNext,   {Local,            Local,        OutUnknown      }},
-  { OpLIterFree,   {None,             None,         OutNone         }},
+  { OpIterInit,    {Local,            Local,        OutUnknown      }},
+  { OpIterNext,    {Local,            Local,        OutUnknown      }},
+  { OpIterFree,    {None,             None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -607,8 +607,8 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 
 size_t localImmIdx(Op op) {
   switch (op) {
-    case Op::LIterInit:
-    case Op::LIterNext:
+    case Op::IterInit:
+    case Op::IterNext:
       return 1;
     default:
       break;

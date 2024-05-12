@@ -786,10 +786,10 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
             }
-            Instr::Hhbc(Hhbc::LIterFree(id, loc)) => {
+            Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
                 let lid = iter_var_name(id);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
-                builder.hhbc_builtin(hack::Hhbc::LIterFree, &[value], loc)
+                builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
             }
             Instr::Hhbc(Hhbc::ClassHasReifiedGenerics(..) | Hhbc::HasReifiedParent(..)) => {
                 // Reified generics generate a lot of IR that is opaque to the analysis and actually

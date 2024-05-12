@@ -431,7 +431,7 @@ void visit_blocks(const char* what, VisitContext& visit, Fun&& fun) {
 
 IterId iterFromInit(const php::WideFunc& func, BlockId initBlock) {
   auto const& op = func.blocks()[initBlock]->hhbcs.back();
-  if (op.op == Op::LIterInit) return op.LIterInit.ita.iterId;
+  if (op.op == Op::IterInit) return op.IterInit.ita.iterId;
   always_assert(false);
 }
 
@@ -528,12 +528,12 @@ struct OptimizeIterState {
       // ultimately eligible, but we'll check that before actually doing the
       // transformation.
       switch (op.op) {
-        case Op::LIterInit:
+        case Op::IterInit:
           assertx(opIdx == blk->hhbcs.size() - 1);
-          fixupForInit(findIterBaseLoc(state, func, op.LIterInit.loc2));
+          fixupForInit(findIterBaseLoc(state, func, op.IterInit.loc2));
           break;
-        case Op::LIterNext:
-          fixupFromState(op.LIterNext.ita.iterId);
+        case Op::IterNext:
+          fixupFromState(op.IterNext.ita.iterId);
           break;
         default:
           break;
@@ -607,23 +607,23 @@ void optimize_iterators(VisitContext& visit) {
 
     // Rewrite the iteration op to its liter equivalent:
     switch (op.op) {
-      case Op::LIterInit: {
-        auto args = op.LIterInit.ita;
-        if (args.flags == flags && op.LIterInit.loc2 == fixup.base) continue;
-        auto const target = op.LIterInit.target3;
+      case Op::IterInit: {
+        auto args = op.IterInit.ita;
+        if (args.flags == flags && op.IterInit.loc2 == fixup.base) continue;
+        auto const target = op.IterInit.target3;
         args.flags = flags;
         newOps = {
-          bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
+          bc_with_loc(op.srcLoc, bc::IterInit{args, fixup.base, target})
         };
         break;
       }
-      case Op::LIterNext: {
-        auto args = op.LIterNext.ita;
-        if (args.flags == flags && op.LIterNext.loc2 == fixup.base) continue;
-        auto const target = op.LIterNext.target3;
+      case Op::IterNext: {
+        auto args = op.IterNext.ita;
+        if (args.flags == flags && op.IterNext.loc2 == fixup.base) continue;
+        auto const target = op.IterNext.target3;
         args.flags = flags;
         newOps = {
-          bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),
+          bc_with_loc(op.srcLoc, bc::IterNext{args, fixup.base, target}),
         };
         break;
       }

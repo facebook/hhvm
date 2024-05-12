@@ -97,7 +97,7 @@ struct FuncAnalysisResult {
   /*
    * Flag to indicate that an iterator's base was unchanged on at least one path
    * to that iterator's release. If this is false, we can skip doing the more
-   * expensive LIter optimization pass (because it will never succeed).
+   * expensive Iter local optimization pass (because it will never succeed).
    */
   bool hasInvariantIterBase{false};
 

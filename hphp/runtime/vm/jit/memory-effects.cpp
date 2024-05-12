@@ -845,10 +845,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterExtractBase:
     return may_load_store(AEmpty, AEmpty);
 
-  case LIterInitArr:
-  case LIterInitObj:
-  case LIterNextArr:
-  case LIterNextObj: {
+  case IterInitArr:
+  case IterInitObj:
+  case IterNextArr:
+  case IterNextObj: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(!args.hasKey());
     auto const fp = inst.src(1);
@@ -856,10 +856,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return iter_effects(inst, fp, val);
   }
 
-  case LIterInitArrK:
-  case LIterInitObjK:
-  case LIterNextArrK:
-  case LIterNextObjK: {
+  case IterInitArrK:
+  case IterInitObjK:
+  case IterNextArrK:
+  case IterNextObjK: {
     auto const& args = inst.extra<IterData>()->args;
     assertx(args.hasKey());
     auto const fp = inst.src(1);

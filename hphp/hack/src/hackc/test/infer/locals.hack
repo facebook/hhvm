@@ -61,7 +61,7 @@ function params_and_locals(int $a) : void {
 // CHECK:   .handlers b4
 // CHECK: #b4(n10: *HackMixed):
 // CHECK:   n11: *HackMixed = load &iter0
-// CHECK:   n12 = $builtins.hhbc_liter_free(n11)
+// CHECK:   n12 = $builtins.hhbc_iter_free(n11)
 // CHECK:   throw n10
 // CHECK:   .handlers b9
 // CHECK: #b5:

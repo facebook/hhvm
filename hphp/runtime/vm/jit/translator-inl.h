@@ -40,8 +40,8 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::Exit:
     case Op::Fatal:
     case Op::StaticAnalysisError:
-    case Op::LIterInit: // May branch to fail case.
-    case Op::LIterNext: // Ditto
+    case Op::IterInit: // May branch to fail case.
+    case Op::IterNext: // Ditto
     case Op::Throw:
     case Op::NativeImpl:
     case Op::BreakTraceHint:

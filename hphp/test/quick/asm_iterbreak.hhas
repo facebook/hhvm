@@ -18,7 +18,7 @@
   SetL $0
   PopC
 
-  LIterInit <> 0 K:$2 V:$1 $0 endOuter
+  IterInit <> 0 K:$2 V:$1 $0 endOuter
   .try {
   startOuter:
 
@@ -34,7 +34,7 @@
     Print
     PopC
 
-    LIterInit <> 1 K:$4 V:$3 $0 endInner
+    IterInit <> 1 K:$4 V:$3 $0 endInner
     .try {
     startInner:
       String "\n"
@@ -49,20 +49,20 @@
       Print
       PopC
 
-      LIterFree 1
-      LIterFree 0
+      IterFree 1
+      IterFree 0
       Jmp endOuter
-      LIterNext <> 1 K:$4 V:$3 $0 startInner
+      IterNext <> 1 K:$4 V:$3 $0 startInner
       Jmp endInner
     } .catch {
-      LIterFree 1
+      IterFree 1
       Throw
     }
   endInner:
-    LIterNext <> 0 K:$2 V:$1 $0 startOuter
+    IterNext <> 0 K:$2 V:$1 $0 startOuter
     Jmp endOuter
   } .catch {
-    LIterFree 0
+    IterFree 0
     Throw
   }
 endOuter:

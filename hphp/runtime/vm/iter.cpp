@@ -192,19 +192,19 @@ IterImpl* unwrap(Iter* iter) { return &iter->m_iter; }
 namespace {
 
 /*
- * liter_value_cell* will store a copy of the current value at the address
- * given by 'out'. liter_value_cell* will increment the refcount of the current
+ * iter_value_cell* will store a copy of the current value at the address
+ * given by 'out'. iter_value_cell* will increment the refcount of the current
  * value if appropriate.
  */
 
-inline void liter_value_cell_local_impl(Iter* iter,
+inline void iter_value_cell_local_impl(Iter* iter,
                                         TypedValue* out,
                                         const ArrayData* ad) {
   auto const& arrIter = *unwrap(iter);
   tvSet(arrIter.nvSecondLocal(ad), *out);
 }
 
-inline void liter_key_cell_local_impl(Iter* iter,
+inline void iter_key_cell_local_impl(Iter* iter,
                                       TypedValue* out,
                                       const ArrayData* ad) {
   auto const& arrIter = *unwrap(iter);
@@ -414,23 +414,23 @@ int64_t new_iter_object(ObjectData* obj, TypedValue* valOut,
 // iterators; for value iterators, keyOut is nullptr.
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 NEVER_INLINE
-int64_t liter_array_next_cold(Iter* iter,
-                              const ArrayData* ad,
-                              TypedValue* valOut,
-                              TypedValue* keyOut) {
+int64_t iter_array_next_cold(Iter* iter,
+                             const ArrayData* ad,
+                             TypedValue* valOut,
+                             TypedValue* keyOut) {
   auto const ai = unwrap(iter);
   if (ai->nextLocal(ad)) {
     ai->kill();
     return 0;
   }
-  liter_value_cell_local_impl(iter, valOut, ad);
-  if (keyOut) liter_key_cell_local_impl(iter, keyOut, ad);
+  iter_value_cell_local_impl(iter, valOut, ad);
+  if (keyOut) iter_key_cell_local_impl(iter, keyOut, ad);
   return 1;
 }
 
-uint64_t liter_object_next_impl(ObjectData* obj,
-                                TypedValue* valOut,
-                                TypedValue* keyOut) {
+uint64_t iter_object_next_impl(ObjectData* obj,
+                               TypedValue* valOut,
+                               TypedValue* keyOut) {
   obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
 
   auto const end =
@@ -607,20 +607,20 @@ int64_t iter_next_struct_dict(Iter* it, TypedValue* valOut,
 
 }
 
-int64_t literNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "literNextArray: I %p\n", it);
-  return liter_array_next_cold(it, ad, valOut, nullptr);
+int64_t iterNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
+  TRACE(2, "iterNextArray: I %p\n", it);
+  return iter_array_next_cold(it, ad, valOut, nullptr);
 }
 
-int64_t literNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
-  TRACE(2, "literNextKArray: I %p\n", it);
-  return liter_array_next_cold(it, ad, valOut, keyOut);
+int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
+  TRACE(2, "iterNextKArray: I %p\n", it);
+  return iter_array_next_cold(it, ad, valOut, keyOut);
 }
 
-int64_t literNextObject(Iter*, TypedValue*, ArrayData*) {
+int64_t iterNextObject(Iter*, TypedValue*, ArrayData*) {
   always_assert(false);
 }
-int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
+int64_t iterNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
   always_assert(false);
 }
 
@@ -629,14 +629,14 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
  * on <bool HasKey> (e.g. iter_next_packed_impl) and produces the two helpers
  * that we'll call from the iter_next dispatch methods below.
  */
-#define VTABLE_METHODS(name, fn)                                         \
-  int64_t literNext##name(Iter* it, TypedValue* valOut, ArrayData* ad) { \
-    TRACE(2, "literNext" #name ": I %p\n", it);                          \
+#define VTABLE_METHODS(name, fn)                                          \
+  int64_t iterNext##name(Iter* it, TypedValue* valOut, ArrayData* ad) { \
+    TRACE(2, "iterNext" #name ": I %p\n", it);                           \
     return fn<false>(it, valOut, nullptr, ad);                           \
   }                                                                      \
-  int64_t literNextK##name(                                              \
+  int64_t iterNextK##name(                                               \
       Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) { \
-    TRACE(2, "literNextK" #name ": I %p\n", it);                         \
+    TRACE(2, "iterNextK" #name ": I %p\n", it);                          \
     return fn<true>(it, valOut, keyOut, ad);                             \
   }                                                                      \
 
@@ -648,69 +648,67 @@ VTABLE_METHODS(StructDict,         iter_next_struct_dict);
 
 #undef VTABLE_METHODS
 
-using IterNextHelper  = int64_t (*)(Iter*, TypedValue*);
-using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);
-using LIterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
-using LIterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
+using IterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
+using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 // The order of these function pointers must match the order that their
 // corresponding IterNextIndex enum members were declared in.
 
-const LIterNextHelper g_literNextHelpers[] = {
-  &literNextVanillaVec,
-  &literNextArrayMixed,
-  &literNextArray,
-  &literNextObject,
-  &literNextArrayMixedPointer,
-  &literNextVanillaVecPointer,
-  &literNextStructDict,
+const IterNextHelper g_iterNextHelpers[] = {
+  &iterNextVanillaVec,
+  &iterNextArrayMixed,
+  &iterNextArray,
+  &iterNextObject,
+  &iterNextArrayMixedPointer,
+  &iterNextVanillaVecPointer,
+  &iterNextStructDict,
 };
 
-const LIterNextKHelper g_literNextKHelpers[] = {
-  &literNextKVanillaVec,
-  &literNextKArrayMixed,
-  &literNextKArray,
-  &literNextKObject,
-  &literNextKArrayMixedPointer,
-  &literNextKVanillaVecPointer,
-  &literNextKStructDict,
+const IterNextKHelper g_iterNextKHelpers[] = {
+  &iterNextKVanillaVec,
+  &iterNextKArrayMixed,
+  &iterNextKArray,
+  &iterNextKObject,
+  &iterNextKArrayMixedPointer,
+  &iterNextKVanillaVecPointer,
+  &iterNextKStructDict,
 };
 
-int64_t liter_array_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "liter_array_next_ind: I %p\n", iter);
+int64_t iter_array_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
+  TRACE(2, "iter_array_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   auto const index = unwrap(iter)->getHelperIndex();
-  LIterNextHelper helper = g_literNextHelpers[static_cast<uint32_t>(index)];
+  IterNextHelper helper = g_iterNextHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, ad);
 }
 
-int64_t liter_array_next_key_ind(Iter* iter,
-                                 TypedValue* valOut,
-                                 TypedValue* keyOut,
-                                 ArrayData* ad) {
-  TRACE(2, "liter_array_next_key_ind: I %p\n", iter);
+int64_t iter_array_next_key_ind(Iter* iter,
+                                TypedValue* valOut,
+                                TypedValue* keyOut,
+                                ArrayData* ad) {
+  TRACE(2, "iter_array_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
   auto const index = unwrap(iter)->getHelperIndex();
-  LIterNextKHelper helper = g_literNextKHelpers[static_cast<uint32_t>(index)];
+  IterNextKHelper helper = g_iterNextKHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, keyOut, ad);
 }
 
-int64_t liter_object_next_ind(TypedValue* valOut, ObjectData* obj) {
-  TRACE(2, "liter_object_next_ind: obj %p\n", obj);
+int64_t iter_object_next_ind(TypedValue* valOut, ObjectData* obj) {
+  TRACE(2, "iter_object_next_ind: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
-  return liter_object_next_impl(obj, valOut, nullptr);
+  return iter_object_next_impl(obj, valOut, nullptr);
 }
 
-int64_t liter_object_next_key_ind(TypedValue* valOut,
+int64_t iter_object_next_key_ind(TypedValue* valOut,
                                   TypedValue* keyOut,
                                   ObjectData* obj) {
-  TRACE(2, "liter_object_next_key_ind: obj %p\n", obj);
+  TRACE(2, "iter_object_next_key_ind: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
-  return liter_object_next_impl(obj, valOut, keyOut);
+  return iter_object_next_impl(obj, valOut, keyOut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

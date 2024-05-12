@@ -392,11 +392,11 @@ impl<'a> State<'a> {
                 self.step_memo_get_eager(builder, targets, range)?;
             }
 
-            Instruct::Opcode(Opcode::LIterInit(ref iter_args, local, target)) => {
+            Instruct::Opcode(Opcode::IterInit(ref iter_args, local, target)) => {
                 self.step_iter_init(builder, iter_args, local, target)
             }
-            Instruct::Opcode(Opcode::LIterFree(iter_id)) => self.step_iter_free(iter_id),
-            Instruct::Opcode(Opcode::LIterNext(ref iter_args, local, target)) => {
+            Instruct::Opcode(Opcode::IterFree(iter_id)) => self.step_iter_free(iter_id),
+            Instruct::Opcode(Opcode::IterNext(ref iter_args, local, target)) => {
                 self.step_iter_next(builder, iter_args, local, target)
             }
 
@@ -940,7 +940,7 @@ impl<'a> State<'a> {
             // registered our iterator - so we don't have to clear it.
         });
 
-        let instr = NodeInstr::Opcode(Opcode::LIterInit(
+        let instr = NodeInstr::Opcode(Opcode::IterInit(
             IterArgs::default(),
             Local::INVALID,
             Label::INVALID,
@@ -972,7 +972,7 @@ impl<'a> State<'a> {
         let base = self.local_get(&base_local);
         let inputs = vec![self.reffy(base)];
 
-        let instr = NodeInstr::Opcode(Opcode::LIterNext(
+        let instr = NodeInstr::Opcode(Opcode::IterNext(
             IterArgs::default(),
             Local::INVALID,
             Label::INVALID,
@@ -1428,9 +1428,9 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::IterBase
             | Opcode::JmpNZ(..)
             | Opcode::JmpZ(..)
-            | Opcode::LIterFree(..)
-            | Opcode::LIterInit(..)
-            | Opcode::LIterNext(..)
+            | Opcode::IterFree(..)
+            | Opcode::IterInit(..)
+            | Opcode::IterNext(..)
             | Opcode::LockObj
             | Opcode::Lte
             | Opcode::MemoGet(..)
@@ -1768,9 +1768,9 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::FCallObjMethodD(_, _, _, _)
         | Opcode::IncDecL(_, _)
         | Opcode::InitProp(_, _)
-        | Opcode::LIterFree(_)
-        | Opcode::LIterInit(_, _, _)
-        | Opcode::LIterNext(_, _, _)
+        | Opcode::IterFree(_)
+        | Opcode::IterInit(_, _, _)
+        | Opcode::IterNext(_, _, _)
         | Opcode::ResolveClsMethodD(_, _)
         | Opcode::ResolveClsMethodS(_, _)
         | Opcode::ResolveRClsMethodD(_, _)

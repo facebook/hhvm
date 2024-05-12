@@ -500,7 +500,7 @@ pub enum Hhbc {
     IssetS([ValueId; 2], LocId),
     IterBase(ValueId, LocId),
     #[has_operands(none)]
-    LIterFree(IterId, LocId),
+    IterFree(IterId, LocId),
     LateBoundCls(LocId),
     LazyClassFromClass(ValueId, LocId),
     LockObj(ValueId, LocId),

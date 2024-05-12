@@ -331,6 +331,10 @@ bool opcodeMayRaise(Opcode opc) {
   case IssetElem:
   case IssetProp:
   case IterExtractBase:
+  case IterInitObj:
+  case IterInitObjK:
+  case IterNextObj:
+  case IterNextObjK:
   case KeysetGet:
   case LdCls:
   case LdClsCached:
@@ -347,10 +351,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdTypeCns:
   case LdTypeCnsClsName:
   case LdTypeCnsNoThrow:
-  case LIterInitObj:
-  case LIterInitObjK:
-  case LIterNextObj:
-  case LIterNextObjK:
   case LookupClsCns:
   case LookupClsCtxCns:
   case LookupClsMethod:
@@ -691,6 +691,10 @@ bool opcodeMayRaise(Opcode opc) {
   case IsTypeMem:
   case IsTypeStructCached:
   case IsWaitHandle:
+  case IterInitArr:
+  case IterInitArrK:
+  case IterNextArr:
+  case IterNextArrK:
   case Jmp:
   case JmpExit:
   case JmpNZero:
@@ -799,10 +803,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdWHNotDone:
   case LdWHResult:
   case LdWHState:
-  case LIterInitArr:
-  case LIterInitArrK:
-  case LIterNextArr:
-  case LIterNextArrK:
   case LoadBCSP:
   case LockObj:
   case LogArrayReach:

@@ -54,7 +54,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::CheckThis(_)
             | Hhbc::ContCheck(..)
             | Hhbc::InitProp(..)
-            | Hhbc::LIterFree(..)
+            | Hhbc::IterFree(..)
             | Hhbc::RaiseClassStringConversionNotice(..)
             | Hhbc::Silence(..)
             | Hhbc::ThrowNonExhaustiveSwitch(_)

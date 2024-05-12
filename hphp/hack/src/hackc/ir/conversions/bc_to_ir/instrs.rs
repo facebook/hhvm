@@ -679,7 +679,7 @@ fn convert_local_range(ctx: &mut Context<'_>, range: &hhbc::LocalRange) -> Box<[
 
 fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
     match *opcode {
-        Opcode::LIterInit(ref args, ref base_id, label) => {
+        Opcode::IterInit(ref args, ref base_id, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
@@ -700,7 +700,7 @@ fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
             ctx.builder.start_block(next_bid);
             ctx.unspill_stack(stack_size);
         }
-        Opcode::LIterNext(ref args, ref base_id, label) => {
+        Opcode::IterNext(ref args, ref base_id, label) => {
             let hhbc::IterArgs {
                 iter_id,
                 ref key_id,
@@ -857,7 +857,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
 
-        Opcode::LIterInit(_, _, _) | Opcode::LIterNext(_, _, _) => {
+        Opcode::IterInit(_, _, _) | Opcode::IterNext(_, _, _) => {
             convert_iterator(ctx, opcode);
             Action::None
         }
@@ -1023,7 +1023,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),
         Opcode::IterBase => simple!(Hhbc::IterBase),
-        Opcode::LIterFree => simple!(Hhbc::LIterFree),
+        Opcode::IterFree => simple!(Hhbc::IterFree),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
         Opcode::LazyClass => simple!(Immediate::LazyClass),
         Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),

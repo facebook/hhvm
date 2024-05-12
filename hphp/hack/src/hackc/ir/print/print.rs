@@ -965,7 +965,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             )?;
         }
         Hhbc::IterBase(vid, _) => write!(w, "iter_base {}", FmtVid(func, vid, ctx.verbose))?,
-        Hhbc::LIterFree(iter_id, _loc) => {
+        Hhbc::IterFree(iter_id, _loc) => {
             write!(w, "iterator ^{} free", iter_id)?;
         }
         Hhbc::LateBoundCls(_) => {

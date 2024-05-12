@@ -4833,7 +4833,7 @@ void in(ISS& env, const bc::IterBase&) {
   push(env, tOut);
 }
 
-void in(ISS& env, const bc::LIterInit& op) {
+void in(ISS& env, const bc::IterInit& op) {
   auto const ita = op.ita;
   auto const baseLoc = op.loc2;
   auto const sourceLoc = [&] {
@@ -4891,7 +4891,7 @@ void in(ISS& env, const bc::LIterInit& op) {
   always_assert(false);
 }
 
-void in(ISS& env, const bc::LIterNext& op) {
+void in(ISS& env, const bc::IterNext& op) {
   auto const ita = op.ita;
   auto const curVal = peekLocRaw(env, ita.valId);
   auto const curKey = ita.hasKey() ? peekLocRaw(env, ita.keyId) : TBottom;
@@ -4927,7 +4927,7 @@ void in(ISS& env, const bc::LIterNext& op) {
 
   if (noTaken && noThrow && will_reduce(env)) {
     auto const iterId = safe_cast<IterId>(ita.iterId);
-    reduce(env, bc::LIterFree { iterId });
+    reduce(env, bc::IterFree { iterId });
   }
 
   mayReadLocal(env, op.loc2);
@@ -4949,7 +4949,7 @@ void in(ISS& env, const bc::LIterNext& op) {
   if (ita.hasKey()) setLocRaw(env, ita.keyId, curKey);
 }
 
-void in(ISS& env, const bc::LIterFree& op) {
+void in(ISS& env, const bc::IterFree& op) {
   nothrow(env);
   freeIter(env, op.iter1);
 }

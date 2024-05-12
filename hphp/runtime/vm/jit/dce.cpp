@@ -591,14 +591,14 @@ bool canDCE(const IRInstruction& inst) {
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case IterExtractBase:
-  case LIterInitArr:
-  case LIterInitArrK:
-  case LIterInitObj:
-  case LIterInitObjK:
-  case LIterNextArr:
-  case LIterNextArrK:
-  case LIterNextObj:
-  case LIterNextObjK:
+  case IterInitArr:
+  case IterInitArrK:
+  case IterInitObj:
+  case IterInitObjK:
+  case IterNextArr:
+  case IterNextArrK:
+  case IterNextObj:
+  case IterNextObjK:
   case KillActRec:
   case KillIter:
   case KillLoc:

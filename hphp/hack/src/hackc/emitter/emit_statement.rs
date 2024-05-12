@@ -968,9 +968,9 @@ fn emit_foreach<'a, 'd>(
     })
 }
 
-/// Determine whether or not an LIter can be used rather than a traditional
-/// Iter, and return the Local to be iterated. Generally LIter is only safe when
-/// the iterated value is:
+/// Determine whether or not an Iter over an existing local can be used rather
+/// than an Iter over an unnamed one, and return the Local to be iterated.
+/// Generally this is only safe when the iterated value is:
 ///  - Stored in a local, $L
 ///  - Not modified, -or- only modified by writing to $L[$k] when iterated by
 ///    key $k
@@ -1233,7 +1233,7 @@ fn emit_foreach_local<'a, 'd>(
     flags: IterArgsFlags,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = e.iterator_mut().gen_liter();
+        let iter_id = e.iterator_mut().gen_iter();
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
@@ -1252,14 +1252,14 @@ fn emit_foreach_local<'a, 'd>(
             block,
             emit_block,
         )?;
-        let iter_init = instr::l_iter_init(iter_args.clone(), local, loop_break_label);
+        let iter_init = instr::iter_init(iter_args.clone(), local, loop_break_label);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
             preamble,
             body,
             instr::label(loop_continue_label),
             emit_pos(pos),
-            instr::l_iter_next(iter_args, local, loop_head_label),
+            instr::iter_next(iter_args, local, loop_head_label),
         ]);
         let iter_done = instr::label(loop_break_label);
         Ok((iter_init, iterate, iter_done))

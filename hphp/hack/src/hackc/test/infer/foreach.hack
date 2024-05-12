@@ -29,7 +29,7 @@
 // CHECK:   .handlers b4
 // CHECK: #b4(n12: *HackMixed):
 // CHECK:   n13: *HackMixed = load &iter0
-// CHECK:   n14 = $builtins.hhbc_liter_free(n13)
+// CHECK:   n14 = $builtins.hhbc_iter_free(n13)
 // CHECK:   throw n12
 // CHECK:   .handlers b9
 // CHECK: #b5:

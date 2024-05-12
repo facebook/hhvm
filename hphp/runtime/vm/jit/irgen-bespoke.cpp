@@ -1278,8 +1278,8 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
       return {Location::Stack{soff}};
 
     // Local iterators constrain the local base.
-    case Op::LIterInit:
-    case Op::LIterNext: {
+    case Op::IterInit:
+    case Op::IterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
       return {Location::Local{safe_cast<uint32_t>(local)}};
     }

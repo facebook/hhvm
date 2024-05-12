@@ -268,7 +268,7 @@ public:
  *  1. In a "foreach" loop, using the *IterInit* / *IterNext* bytecodes.
  *  2. As a delegated generator ("yield from").
  *
- * (*IterInit* here refers to {IterInit, IterInitK, LIterInit, LIterInitK}).
+ * (*IterInit* here refers to {IterInit, IterInitK, IterInit, IterInitK}).
  *
  * The methods exposed here should be sufficient to implement both kinds of
  * iterator behavior. To speed up "foreach" loops, we also provide helpers
@@ -338,10 +338,10 @@ int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-NEVER_INLINE int64_t liter_array_next_ind(Iter*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t liter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t liter_object_next_ind(TypedValue*, ObjectData*);
-NEVER_INLINE int64_t liter_object_next_key_ind(TypedValue*, TypedValue*, ObjectData*);
+NEVER_INLINE int64_t iter_array_next_ind(Iter*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t iter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t iter_object_next_ind(TypedValue*, ObjectData*);
+NEVER_INLINE int64_t iter_object_next_key_ind(TypedValue*, TypedValue*, ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

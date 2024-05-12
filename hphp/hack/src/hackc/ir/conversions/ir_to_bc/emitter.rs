@@ -511,7 +511,7 @@ impl<'b> InstrEmitter<'b> {
             }
             Hhbc::IssetS(_, _) => Opcode::IssetS,
             Hhbc::IterBase(..) => Opcode::IterBase,
-            Hhbc::LIterFree(iter_id, _) => Opcode::LIterFree(iter_id),
+            Hhbc::IterFree(iter_id, _) => Opcode::IterFree(iter_id),
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
             Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,
@@ -877,7 +877,7 @@ impl<'b> InstrEmitter<'b> {
                 };
                 let base_id = self.lookup_local(ir_args.base_lid());
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
-                self.push_opcode(Opcode::LIterInit(args, base_id, label));
+                self.push_opcode(Opcode::IterInit(args, base_id, label));
                 self.jump_to(ir_args.next_bid());
             }
             Terminator::IterNext(ref ir_args) => {
@@ -891,7 +891,7 @@ impl<'b> InstrEmitter<'b> {
                 };
                 let base_id = self.lookup_local(ir_args.base_lid());
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
-                self.push_opcode(Opcode::LIterNext(args, base_id, label));
+                self.push_opcode(Opcode::IterNext(args, base_id, label));
                 self.jump_to(ir_args.next_bid());
             }
             Terminator::Jmp(bid, _) | Terminator::JmpArgs(bid, _, _) => {

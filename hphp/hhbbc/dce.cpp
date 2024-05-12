@@ -1623,10 +1623,10 @@ void dce(Env& env, const bc::InstanceOfD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IsUnsetL& op) { no_dce(env, op); }
+void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpZ& op) { no_dce(env, op); }
-void dce(Env& env, const bc::LIterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGet& op) {
   pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
@@ -1717,11 +1717,11 @@ void iter_dce(Env& env, const IterArgs& ita, LocalId baseId, int numPop) {
   pop_inputs(env, numPop);
 }
 
-void dce(Env& env, const bc::LIterInit& op) {
+void dce(Env& env, const bc::IterInit& op) {
   iter_dce(env, op.ita, op.loc2, op.numPop());
 }
 
-void dce(Env& env, const bc::LIterNext& op) {
+void dce(Env& env, const bc::IterNext& op) {
   iter_dce(env, op.ita, op.loc2, op.numPop());
 }
 
@@ -2983,12 +2983,12 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
       auto ita = Optional<IterArgs>{};
       auto const kill = [&]{
         switch (lastOpc.op) {
-          case Op::LIterInit:
-            ita = lastOpc.LIterInit.ita;
-            return next && lastOpc.LIterInit.target3 != succId;
-          case Op::LIterNext:
-            ita = lastOpc.LIterNext.ita;
-            return !next && lastOpc.LIterNext.target3 == succId;
+          case Op::IterInit:
+            ita = lastOpc.IterInit.ita;
+            return next && lastOpc.IterInit.target3 != succId;
+          case Op::IterNext:
+            ita = lastOpc.IterNext.ita;
+            return !next && lastOpc.IterNext.target3 == succId;
           default:
             return false;
         }

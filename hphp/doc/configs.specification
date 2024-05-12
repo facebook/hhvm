@@ -287,10 +287,9 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - bool Hack.Lang.OptimizeLocalIterators = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
 
-  When set the frontend will attempt to emit LIter bytecodes when compiling
-  foreach style loops where the iterand is stored in a local, which during the
-  course of the loop is either not modified, or is only modified at the $key
-  location.
+  When set the frontend will attempt to emit Iter bytecodes over an existing
+  local rather than an unnamed one, if during the course of the loop the local
+  is either not modified, or is only modified at the $key location.
 
 - bool Hack.Lang.OptimizeIsTypeChecks = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
 

@@ -418,9 +418,7 @@ fn compile_php_file<'a>(
     );
 
     if for_ir {
-        // The LIter(Init,Next,Free) instructions have not yet been implemented
-        // for the IR. This optimization should have no affect on program
-        // behavior.
+        // This optimization should have no affect on program behavior.
         env.hhbc_flags.optimize_local_iterators = false;
     }
 

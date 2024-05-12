@@ -166,10 +166,10 @@ void emitIterBase(IRGS& env) {
   decRef(env, base);
 }
 
-void emitLIterInit(IRGS& env, IterArgs ita,
+void emitIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterInit);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, doneOffset, base)) return;
   auto const profiledResult = profileIterInit(env, base);
   auto const done =
@@ -177,30 +177,30 @@ void emitLIterInit(IRGS& env, IterArgs ita,
   if (done) return;
 
   auto const op = base->isA(TArrLike)
-    ? (ita.hasKey() ? LIterInitArrK : LIterInitArr)
-    : (ita.hasKey() ? LIterInitObjK : LIterInitObj);
+    ? (ita.hasKey() ? IterInitArrK : IterInitArr)
+    : (ita.hasKey() ? IterInitObjK : IterInitObj);
   auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterInitJmp(env, doneOffset, result, ita.iterId);
 }
 
-void emitLIterNext(IRGS& env, IterArgs ita,
+void emitIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(LIterNext);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterNext);
 
   if (specializeIterNext(env, loopOffset, ita, base, baseLocalId)) return;
 
   auto const op = base->isA(TArrLike)
-    ? ita.hasKey() ? LIterNextArrK : LIterNextArr
-    : ita.hasKey() ? LIterNextObjK : LIterNextObj;
+    ? ita.hasKey() ? IterNextArrK : IterNextArr
+    : ita.hasKey() ? IterNextObjK : IterNextObj;
   auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, loopOffset, result, ita.iterId);
 }
 
-void emitLIterFree(IRGS& env, int32_t iterId) {
+void emitIterFree(IRGS& env, int32_t iterId) {
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 

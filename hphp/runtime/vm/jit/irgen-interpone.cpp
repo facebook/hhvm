@@ -232,8 +232,8 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpLIterInit:
-    case OpLIterNext: {
+    case OpIterInit:
+    case OpIterNext: {
       auto const ita = getImm(sk.pc(),  0).u_ITA;
       setLocType(ita.valId, TCell);
       if (ita.hasKey()) setLocType(ita.keyId, TCell);

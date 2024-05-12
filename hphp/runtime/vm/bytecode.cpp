@@ -4407,8 +4407,8 @@ OPTBLD_INLINE void iopIterBase() {
 }
 
 
-OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
-                                TypedValue* base, PC targetpc) {
+OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
+                               TypedValue* base, PC targetpc) {
   auto const op = has_flag(ita.flags, IterArgs::Flags::BaseConst)
     ? IterTypeOp::LocalBaseConst
     : IterTypeOp::LocalBaseMutable;
@@ -4435,8 +4435,8 @@ OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
   }
 }
 
-OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
-                                TypedValue* base, PC targetpc) {
+OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita,
+                               TypedValue* base, PC targetpc) {
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
@@ -4445,14 +4445,14 @@ OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
     if (isArrayLikeType(type(base))) {
       auto const arr = val(base).parr;
       return key
-        ? liter_array_next_key_ind(it, value, key, arr)
-        : liter_array_next_ind(it, value, arr);
+        ? iter_array_next_key_ind(it, value, key, arr)
+        : iter_array_next_ind(it, value, arr);
     }
     assertx(isObjectType(type(base)));
     auto const obj = val(base).pobj;
     return key
-      ? liter_object_next_key_ind(value, key, obj)
-      : liter_object_next_ind(value, obj);
+      ? iter_object_next_key_ind(value, key, obj)
+      : iter_object_next_ind(value, obj);
   }();
 
   if (more) {
@@ -4462,7 +4462,7 @@ OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
   }
 }
 
-OPTBLD_INLINE void iopLIterFree(Iter* it) {
+OPTBLD_INLINE void iopIterFree(Iter* it) {
   it->kill();
 }
 

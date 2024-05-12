@@ -83,10 +83,10 @@ fn compare_instrs(path: &CodePath<'_>, a: &NodeInstr, b: &NodeInstr) -> Result<(
         | (I::Opcode(O::JmpNZ(_)), I::Opcode(O::JmpNZ(_)))
         | (I::Opcode(O::JmpZ(_)), I::Opcode(O::JmpZ(_))) => Ok(()),
 
-        (I::Opcode(O::LIterInit(a0, b0, _)), I::Opcode(O::LIterInit(a1, b1, _))) => {
+        (I::Opcode(O::IterInit(a0, b0, _)), I::Opcode(O::IterInit(a1, b1, _))) => {
             sem_diff_eq(path, &(a0, b0), &(a1, b1))
         }
-        (I::Opcode(O::LIterNext(a0, b0, _)), I::Opcode(O::LIterNext(a1, b1, _))) => {
+        (I::Opcode(O::IterNext(a0, b0, _)), I::Opcode(O::IterNext(a1, b1, _))) => {
             sem_diff_eq(path, &(a0, b0), &(a1, b1))
         }
         (I::Opcode(O::MemoGet(_, a0)), I::Opcode(O::MemoGet(_, a1))) => sem_diff_eq(path, a0, a1),
@@ -400,9 +400,9 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::InclOnce
             | Opcode::InitProp(..)
             | Opcode::IterBase
-            | Opcode::LIterFree(..)
-            | Opcode::LIterInit(..)
-            | Opcode::LIterNext(..)
+            | Opcode::IterFree(..)
+            | Opcode::IterInit(..)
+            | Opcode::IterNext(..)
             | Opcode::LateBoundCls
             | Opcode::LockObj
             | Opcode::MemoSet(..)

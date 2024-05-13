@@ -296,19 +296,16 @@ let pessimised_tup_assign p env arg_ty =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, ty)
 
-(* Typing of array-get like expressions; [ty1] is the type of the expression
-   into which we are indexing (the 'collection'), [e2] is the index expression
-   and [ty2] is the type of that expression.
-
-   We return:
-   1) the (modified) typing environment,
-   2) the type of the resulting expression (i.e. the type of the element we are 'getting')
-   3) the actual and expected type of the indexed expression, indicating a type mismatch (if any)
-   4) the actual and expected type of the indexing expression, indicating a type mismatch (if any)
-   and an optional type mismatch giving the actual vs expected type of the
-
-   The function has an error side-effect
-*)
+(** Typing of array-get like expressions; [ty1] is the type of the expression
+  into which we are indexing (the 'collection'), [e2] is the index expression
+  and [ty2] is the type of that expression.
+  We return:
+  1) the (modified) typing environment,
+  2) the type of the resulting expression (i.e. the type of the element we are 'getting')
+  3) the actual and expected type of the indexed expression, indicating a type mismatch (if any)
+  4) the actual and expected type of the indexing expression, indicating a type mismatch (if any)
+  and an optional type mismatch giving the actual vs expected type of the
+  The function has an error side-effect *)
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -320,6 +317,26 @@ let rec array_get
     ty1
     e2
     ty2 =
+  Typing_log.(
+    log_with_level env "typing" ~level:1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos array_pos)
+          env
+          [
+            Log_head
+              ( "array_get",
+                [
+                  Log_type ("receiver_type", ty1);
+                  Log_type ("indexing_type", ty2);
+                  Log_head
+                    ( Printf.sprintf
+                        "lhs_of_null_coalesce: %b"
+                        lhs_of_null_coalesce,
+                      [] );
+                  Log_head (Printf.sprintf "is_lvalue: %b" is_lvalue, []);
+                  Log_head (Printf.sprintf "ignore_error: %b" ignore_error, []);
+                ] );
+          ]));
   let ((env, ty_err1), ty1) =
     Typing_solver.expand_type_and_narrow
       env

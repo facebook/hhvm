@@ -6,6 +6,9 @@
  *
  *)
 
+(** Refine a shape with the knowledge that field_name
+  exists. We do this by intersecting with
+  shape(field_name => mixed, ...) *)
 val refine_shape :
   Typing_defs.TShapeMap.key ->
   Pos.t ->
@@ -13,6 +16,8 @@ val refine_shape :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+(** [idx_without_default env shape_type field] returns the type of Shapes::idx($s)
+  where $s has type [shape_type] *)
 val idx_without_default :
   Typing_env_types.env ->
   expr_pos:Pos.t ->
@@ -21,6 +26,14 @@ val idx_without_default :
   Typing_defs.tshape_field_name ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+(** Refine the type of a shape knowing that a call to Shapes::idx is not null.
+  This means that the shape now has the field, and that the type for this
+  field is not nullable.
+  We stay quite liberal here: we add the field to the shape type regardless
+  of whether this field can be here at all. Errors will anyway be raised
+  elsewhere when typechecking the call to Shapes::idx. This allows for more
+  useful typechecking of incomplete code (code in the process of being
+  written). *)
 val shapes_idx_not_null :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

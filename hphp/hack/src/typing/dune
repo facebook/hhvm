@@ -256,7 +256,8 @@
   type_mapper
   typing_modules)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_deriving.std)))
 
 (library
  (name typing_skeleton)
@@ -276,7 +277,10 @@
   typing_toplevel
   typing_typedef
   typing_toplevel_profile)
- (libraries tast_check typing typing_wellformedness))
+ (libraries tast_check typing typing_wellformedness)
+ (preprocess
+  (pps
+   ppx_deriving.show)))
 
 (library
  (name typing_wellformedness)

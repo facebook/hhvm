@@ -49,10 +49,9 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   end
   | _ -> ((env, None), None)
 
-(* Refine a shape with the knowledge that field_name
- * exists. We do this by intersecting with
- * shape(field_name => mixed, ...)
- *)
+(** Refine a shape with the knowledge that field_name
+  exists. We do this by intersecting with
+  shape(field_name => mixed, ...) *)
 let refine_shape field_name pos env shape =
   let ((env, e1), shape) =
     Typing_solver.expand_type_and_narrow
@@ -84,12 +83,8 @@ let refine_shape field_name pos env shape =
     shape
     (MakeType.open_shape Reason.Rnone (TShapeMap.singleton field_name sft))
 
-(*****************************************************************************)
-(* Remove a field from all the shapes found in a given type.
- * The function leaves all the other types (non-shapes) unchanged.
- *)
-(*****************************************************************************)
-
+(** Remove a field from all the shapes found in a given type.
+  The function leaves all the other types (non-shapes) unchanged. *)
 let rec shrink_shape pos ~supportdyn field_name env shape =
   (* Make sure we have a shape type in our hands.
    * Note that we don't want to freshen any types inside the shape
@@ -156,14 +151,14 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
       else
         shape )
 
-(* Refine the type of a shape knowing that a call to Shapes::idx is not null.
- * This means that the shape now has the field, and that the type for this
- * field is not nullable.
- * We stay quite liberal here: we add the field to the shape type regardless
- * of whether this field can be here at all. Errors will anyway be raised
- * elsewhere when typechecking the call to Shapes::idx. This allows for more
- * useful typechecking of incomplete code (code in the process of being
- * written). *)
+(** Refine the type of a shape knowing that a call to Shapes::idx is not null.
+  This means that the shape now has the field, and that the type for this
+  field is not nullable.
+  We stay quite liberal here: we add the field to the shape type regardless
+  of whether this field can be here at all. Errors will anyway be raised
+  elsewhere when typechecking the call to Shapes::idx. This allows for more
+  useful typechecking of incomplete code (code in the process of being
+  written). *)
 let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
   match TUtils.shape_field_name_with_ty_err env (ty, p, field) with
   | Error ty_err ->
@@ -249,6 +244,21 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
  *     Shapes::idx(e, sfn) : ~?t
  *)
 let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
+  Typing_log.(
+    log_with_level env "shapes" ~level:1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos expr_pos)
+          env
+          [
+            Log_head
+              ( "Typing_shapes.idx_without_default",
+                [
+                  Log_type ("Shape type", shape_ty);
+                  Log_head
+                    ( Printf.sprintf "Field: %s" (TShapeField.name field_name),
+                      [] );
+                ] );
+          ]));
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
   let ((env, ty_err_opt), res) =

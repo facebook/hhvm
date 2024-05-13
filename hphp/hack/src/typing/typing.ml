@@ -2385,6 +2385,7 @@ module Valkind = struct
     | Lvalue
     | Lvalue_subexpr
     | Other
+  [@@deriving show]
 
   let is_lvalue = function
     | Lvalue -> true
@@ -2405,7 +2406,9 @@ module rec Expr : sig
       in_await: locl_phase Reason.t_ option;
           (** Set to [Some] when the subexpression we are typing occurs inside an [Await] expression. *)
       lhs_of_null_coalesce: bool;
-          (** Set to [true] when the subexpression we are typing occurs on the left-hand-side of a [binop] with the [QuestionQuestion] (coalesce) binary operator *)
+          (** Set to [true] when the subexpression we are typing occurs on the
+              left-hand-side of a [binop] with the [QuestionQuestion] (coalesce)
+              binary operator *)
       accept_using_var: bool;
           (** Set to [true] when the subexpression we are typing is either a function/method argument, the receiver of a property access or instance method invocation or the scrutinee in a [foreach] statment. When set, [This] and [Lvar] expressions will be checked against in-scope using vars to ensure they don't escape *)
       check_defined: bool;
@@ -2512,12 +2515,13 @@ end = struct
       is_using_clause: bool;
       valkind: Valkind.t;
       is_attribute_param: bool;
-      in_await: locl_phase Reason.t_ option;
+      in_await: locl_phase Reason.t_ option; [@opaque]
       lhs_of_null_coalesce: bool;
       accept_using_var: bool;
       check_defined: bool;
       immediately_called_lambda: bool;
     }
+    [@@deriving show]
 
     let default =
       {
@@ -2701,32 +2705,32 @@ end = struct
     end
 
   let rec expr ~(expected : ExpectedTy.t option) ~ctxt env ((_, p, _) as e) =
-    try
-      begin
+    begin
+      let (ureason_string, log_list) =
         match expected with
-        | None -> ()
+        | None -> ("", [])
         | Some ExpectedTy.{ reason = r; ty; _ } ->
-          Typing_log.(
-            log_with_level env "typing" ~level:1 (fun () ->
-                log_types
-                  (Pos_or_decl.of_raw_pos p)
-                  env
-                  [
-                    Log_head
-                      ( "Typing.expr " ^ Reason.string_of_ureason r,
-                        [Log_type ("expected_ty", ty)] );
-                  ]))
-      end;
-      let (_, p, _) = e in
-      debug_last_pos := p;
-      expr_ ~expected ~ctxt env e
-    with
+          ( " " ^ Reason.string_of_ureason r,
+            [Typing_log.Log_type ("expected_ty", ty)] )
+      in
+      Typing_log.(
+        log_with_level env "typing" ~level:1 (fun () ->
+            log_types
+              (Pos_or_decl.of_raw_pos p)
+              env
+              [
+                Log_head
+                  ( "Typing.expr" ^ ureason_string,
+                    Log_head ("ctxt :" ^ Context.show ctxt, []) :: log_list );
+              ]))
+    end;
+    let (_, p, _) = e in
+    debug_last_pos := p;
+    try expr_ ~expected ~ctxt env e with
     | Inf.InconsistentTypeVarState _ as exn ->
       (* we don't want to catch unwanted exceptions here, eg Timeouts *)
       Errors.exception_occurred p (Exception.wrap exn);
       expr_error env p e
-  (*let (env, ty) = Env.fresh_type_error env p in
-    make_result env p (invalid_expr_ env p) @@ ty*)
 
   (* Some (legacy) special functions are allowed in initializers,
      therefore treat them as pure and insert the matching capabilities. *)

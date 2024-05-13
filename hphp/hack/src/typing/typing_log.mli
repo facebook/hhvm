@@ -31,9 +31,13 @@ type log_structure =
   | Log_decl_type of string * Typing_defs.decl_ty
   | Log_type_i of string * Typing_defs.internal_type
 
+(** [log_with_level env level_category ~level log_f] executes
+  the the logging function [log_f] if the configured level for
+  the provided category is higher than [level]. *)
 val log_with_level :
   Typing_env_types.env -> string -> level:int -> (unit -> unit) -> unit
 
+(** Logs a log_structure, which itself is a way to specify how to log types. *)
 val log_types :
   Pos_or_decl.t -> Typing_env_types.env -> log_structure list -> unit
 

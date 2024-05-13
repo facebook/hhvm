@@ -2465,12 +2465,16 @@ module rec Expr : sig
 
   val lvalue : env -> Nast.expr -> env * Tast.expr * locl_ty
 
-  val type_switch :
-    env -> Tast.expr -> (env * Aast.lid * locl_ty * locl_ty) option
-
   (** Build an environment for the true or false branch of
   conditional statements. *)
   val condition : env -> bool -> Tast.expr -> env * branch_info
+
+  (** Produce environment transformers for both branches of when using an
+      expression as a condition **)
+  val condition_dual :
+    env ->
+    Tast.expr ->
+    env * (env -> env * branch_info) * (env -> env * branch_info)
 
   (** Typechecks a call.
   Returns in this order the typed expressions for the arguments, for the
@@ -7112,19 +7116,14 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
-  and type_switch env ((_ty, p, e) : Tast.expr) =
+  and type_switch env p ivar hint =
     let open Option.Let_syntax in
     let* (env, errs, ivar, pos_hint, predicate) =
-      match e with
-      | Aast.Is (ivar, hint) ->
-        let ((env, ty_err_opt), hint_ty) =
-          Typing_phase.localize_hint_for_refinement env hint
-        in
-        let* (env, predicate) =
-          Typing_refinement.TyPredicate.of_ty env hint_ty
-        in
-        Some (env, ty_err_opt, ivar, fst hint, predicate)
-      | _ -> None
+      let ((env, ty_err_opt), hint_ty) =
+        Typing_phase.localize_hint_for_refinement env hint
+      in
+      let* (env, predicate) = Typing_refinement.TyPredicate.of_ty env hint_ty in
+      Some (env, ty_err_opt, ivar, fst hint, predicate)
     in
     let (env, locl_opt) =
       make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
@@ -7157,9 +7156,110 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
     return (env, locl, ty_true, ty_false)
 
-  and condition env tparamet ((ty, p, e) as te : Tast.expr) =
+  and condition env tparamet te =
+    let (env, cond_true, cond_false) = condition_dual env te in
+    if tparamet then
+      cond_true env
+    else
+      cond_false env
+
+  and condition_dual env ((_ty, p, e) as te : Tast.expr) =
+    let default_branch env =
+      ( env,
+        (fun env -> condition_single env true te),
+        (fun env -> condition_single env false te) )
+    in
     match e with
-    | Aast.Hole (e, _, _, _) -> condition env tparamet e
+    | Aast.Binop { bop = Ast_defs.Ampamp; lhs = e1; rhs = e2 } ->
+      let (env_inter, cond_true, cond_false) = condition_dual env e1 in
+      ( env_inter,
+        (fun env ->
+          let (env, { pkgs = pkgs1 }) = cond_true env in
+          (* This is necessary in case there is an assignment in e2
+             * We essentially redo what has been undone in the
+             * `Binop (Ampamp|Barbar)` case of `expr` *)
+          let (env, _, _) =
+            expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
+          in
+          let (env, cond_true, _cond_false) = condition_dual env e2 in
+          let (env, { pkgs = pkgs2 }) = cond_true env in
+          let pkgs = SSet.union pkgs1 pkgs2 in
+          (env, { pkgs })),
+        fun env ->
+          let (env, _, _) =
+            branch ~join_pos:p env cond_false (fun env ->
+                let (env, _) = cond_true env in
+                (* Similarly to the conjunction case, there might be an assignment in
+                   cond2 which we must account for. Again we redo what has been undone in
+                   the `Binop (Ampamp|Barbar)` case of `expr` *)
+                let (env, _, _) =
+                  expr
+                    ~expected:None
+                    ~ctxt:Context.default
+                    env
+                    (Tast.to_nast_expr e2)
+                in
+                let (env, _cond_true, cond_false) = condition_dual env e2 in
+                cond_false env)
+          in
+          (env, { pkgs = SSet.empty }) )
+    | Aast.Binop { bop = Ast_defs.Barbar; lhs = e1; rhs = e2 } ->
+      let (env_inter, cond_true, cond_false) = condition_dual env e1 in
+      ( env_inter,
+        (fun env ->
+          let (env, _, _) =
+            branch ~join_pos:p env cond_true (fun env ->
+                let (env, _) = cond_false env in
+                (* Similarly to the conjunction case, there might be an assignment in
+                    cond2 which we must account for. Again we redo what has been undone in
+                    the `Binop (Ampamp|Barbar)` case of `expr` *)
+                let (env, _, _) =
+                  expr
+                    ~expected:None
+                    ~ctxt:Context.default
+                    env
+                    (Tast.to_nast_expr e2)
+                in
+                let (env, cond_true, _cond_false) = condition_dual env e2 in
+                cond_true env)
+          in
+          (env, { pkgs = SSet.empty })),
+        fun env ->
+          let (env, _) = cond_false env in
+          (* This is necessary in case there is an assignment in e2
+           * We essentially redo what has been undone in the
+           * `Binop (Ampamp|Barbar)` case of `expr` *)
+          let (env, _, _) =
+            expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
+          in
+          let (env, _cond_true, cond_false) = condition_dual env e2 in
+          let (env, _) = cond_false env in
+          (env, { pkgs = SSet.empty }) )
+    | Aast.Hole (e, _, _, _) -> condition_dual env e
+    | Aast.Is (ivar, hint) -> begin
+      match type_switch env p ivar hint with
+      | Some (env, locl_ivar, ty_true, ty_false) ->
+        let (_, local_id) = locl_ivar in
+        let bound_ty =
+          (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+        in
+        ( env,
+          (fun env ->
+            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
+              { pkgs = SSet.empty } )),
+          fun env ->
+            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
+              { pkgs = SSet.empty } ) )
+      | None -> default_branch env
+    end
+    | Aast.Unop (Ast_defs.Unot, e) ->
+      let (env, cond_true, cond_false) = condition_dual env e in
+      (env, cond_false, cond_true)
+    | _ -> default_branch env
+
+  and condition_single env tparamet ((ty, p, e) as te : Tast.expr) =
+    match e with
+    | Aast.Hole (e, _, _, _) -> condition_single env tparamet e
     | Aast.True when not tparamet ->
       (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
     | Aast.False when tparamet ->
@@ -7224,58 +7324,6 @@ end = struct
         env
         (not tparamet)
         (ty, p, Aast.Binop { bop = op; lhs = e1; rhs = e2 })
-    (* Conjunction of conditions. Matches the two following forms:
-        if (cond1 && cond2)
-        if (!(cond1 || cond2))
-    *)
-    | Aast.Binop
-        { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
-      when Bool.equal tparamet Ast_defs.(equal_bop bop Ampamp) ->
-      let (env, { pkgs = pkgs1 }) = condition env tparamet e1 in
-      (* This is necessary in case there is an assignment in e2
-       * We essentially redo what has been undone in the
-       * `Binop (Ampamp|Barbar)` case of `expr` *)
-      let (env, _, _) =
-        expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
-      in
-      let (env, { pkgs = pkgs2 }) = condition env tparamet e2 in
-      let pkgs =
-        if tparamet then
-          SSet.union pkgs1 pkgs2
-        else
-          SSet.empty
-      in
-      (env, { pkgs })
-    (* Disjunction of conditions. Matches the two following forms:
-        if (cond1 || cond2)
-        if (!(cond1 && cond2))
-    *)
-    | Aast.Binop
-        { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
-      when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
-      let (env, _, _) =
-        branch
-          ~join_pos:p
-          env
-          (fun env ->
-            (* Either cond1 is true and we don't know anything about cond2... *)
-            condition env tparamet e1)
-          (fun env ->
-            (* ... Or cond1 is false and therefore cond2 must be true *)
-            let (env, _) = condition env (not tparamet) e1 in
-            (* Similarly to the conjunction case, there might be an assignment in
-               cond2 which we must account for. Again we redo what has been undone in
-               the `Binop (Ampamp|Barbar)` case of `expr` *)
-            let (env, _, _) =
-              expr
-                ~expected:None
-                ~ctxt:Context.default
-                env
-                (Tast.to_nast_expr e2)
-            in
-            condition env tparamet e2)
-      in
-      (env, { pkgs = SSet.empty })
     | Aast.Call
         {
           func = (_, p, Aast.Id (_, f));
@@ -7330,7 +7378,6 @@ end = struct
            && String.equal method_name SN.Shapes.keyExists ->
       let env = key_exists env p shape field in
       (env, { pkgs = SSet.empty })
-    | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
     | Aast.Is (ivar, h) ->
       let env =
         refine_for_is ~hint_first:false env tparamet ivar (Reason.Ris (fst h)) h
@@ -7564,63 +7611,43 @@ end = struct
       let (env, te, _) =
         Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
+      let (env, condition_true, condition_false) = Expr.condition_dual env te in
       let (env, tb1, tb2) =
-        match Expr.type_switch env te with
-        | Some (env, locl_ivar, ty_true, ty_false) ->
-          let (_, local_id) = locl_ivar in
-          let bound_ty =
-            (Typing_env.get_local env local_id).Typing_local_types.bound_ty
-          in
-          branch
-            ~join_pos:pos
-            env
-            (fun env ->
-              let env =
-                set_local ~is_defined:true ~bound_ty env locl_ivar ty_true
-              in
-              block env b1)
-            (fun env ->
-              let env =
-                set_local ~is_defined:true ~bound_ty env locl_ivar ty_false
-              in
-              block env b2)
-        | None ->
-          branch
-            ~join_pos:pos
-            env
-            (fun env ->
-              let (env, { pkgs }) = Expr.condition env true te in
-              let (env, b1) =
-                Env.with_packages env pkgs @@ fun env -> block env b1
-              in
-              let rec get_loaded_packages_from_invariant (_, _, e) acc =
-                match e with
-                | Aast.Package (_, pkg) -> SSet.add pkg acc
-                | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
-                  get_loaded_packages_from_invariant lhs acc
-                  |> get_loaded_packages_from_invariant rhs
-                | _ -> acc
-              in
-              (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
-                 revisit the branch and harvest packages loaded in `cond` if the branch contains an
-                 invariant statement. *)
-              let env =
-                List.fold ~init:env b1 ~f:(fun env (_, tst) ->
-                    match (te, tst) with
-                    | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
-                        Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ })
-                      )
-                      when String.equal
-                             s
-                             SN.AutoimportedFunctions.invariant_violation ->
-                      get_loaded_packages_from_invariant e SSet.empty
-                      |> Env.load_packages env
-                    | _ -> env)
-              in
-              (env, b1))
-            (fun env ->
-              let (env, { pkgs }) = Expr.condition env false te in
-              Env.with_packages env pkgs @@ fun env -> block env b2)
+        branch
+          ~join_pos:pos
+          env
+          (fun env ->
+            let (env, { pkgs }) = condition_true env in
+            let (env, b1) =
+              Env.with_packages env pkgs @@ fun env -> block env b1
+            in
+            let rec get_loaded_packages_from_invariant (_, _, e) acc =
+              match e with
+              | Aast.Package (_, pkg) -> SSet.add pkg acc
+              | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
+                get_loaded_packages_from_invariant lhs acc
+                |> get_loaded_packages_from_invariant rhs
+              | _ -> acc
+            in
+            (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
+                revisit the branch and harvest packages loaded in `cond` if the branch contains an
+                invariant statement. *)
+            let env =
+              List.fold ~init:env b1 ~f:(fun env (_, tst) ->
+                  match (te, tst) with
+                  | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
+                      Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ }) )
+                    when String.equal
+                           s
+                           SN.AutoimportedFunctions.invariant_violation ->
+                    get_loaded_packages_from_invariant e SSet.empty
+                    |> Env.load_packages env
+                  | _ -> env)
+            in
+            (env, b1))
+          (fun env ->
+            let (env, { pkgs }) = condition_false env in
+            Env.with_packages env pkgs @@ fun env -> block env b2)
       in
       (* TODO TAST: annotate with joined types *)
       (env, Aast.If (te, tb1, tb2))

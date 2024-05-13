@@ -3,19 +3,19 @@ Invalid argument (Typing[4110])
   File "or.php", line 25, characters 21-23:
   Expected `int`
   File "or.php", line 4, characters 13-18:
-  But got `string`
+  But got `string` from this `is` expression test
 ERROR: File "or.php", line 7, characters 19-20:
 Invalid argument (Typing[4110])
   File "or.php", line 26, characters 24-29:
   Expected `string`
   File "or.php", line 4, characters 29-31:
-  But got `int`
+  But got `int` from this `is` expression test
 ERROR: File "or.php", line 13, characters 19-20:
 Invalid argument (Typing[4110])
   File "or.php", line 26, characters 24-29:
   Expected `string`
-  File "or.php", line 12, characters 13-18:
-  But got `mixed`
+  File "or.php", line 12, characters 7-18:
+  But got `mixed` because a type could not be determined here
 ERROR: File "or.php", line 14, characters 19-20:
 Invalid argument (Typing[4110])
   File "or.php", line 26, characters 24-29:

@@ -3287,17 +3287,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            // TODO(T21285960): Remove this bug-port, stemming from T22184312
-            LambdaExpression(x)
-                if self.env.is_hhvm_compat()
-                    && !x.async_.is_missing()
-                    && x.async_.trailing_width() == 0
-                    && x.signature.leading_width() == 0 =>
-            {
-                self.errors
-                    .push(make_error_from_node(node, errors::error1057("==>")))
-            }
-            // End of bug-port
             IsExpression(x) => check_is_as_expression(self, &x.right_operand),
             AsExpression(x) => check_is_as_expression(self, &x.right_operand),
 

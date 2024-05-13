@@ -97,7 +97,9 @@ resolveRootByName(Client* client, const char* rootName, bool create) {
       client->perf_sample->add_root_metadata(root->getRootMetadata());
     }
     return root;
-
+  } catch (const RootNotConnectedError&) {
+    // pass through RootNotConnectedError
+    throw;
   } catch (const std::exception& exc) {
     RootResolveError::throwf(
         "unable to resolve root {}: {}{}",

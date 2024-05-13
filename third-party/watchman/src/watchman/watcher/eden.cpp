@@ -151,13 +151,17 @@ std::string resolveSocketPath(w_string_piece rootPath) {
   } catch (const std::system_error& e) {
     // When Eden fails during graceful takeover, the mount can exist, but it
     // is disconnected. In this case, we can't use the eden watcher. Log this
-    // error and throw.
-    log(DBG, "Failed to read EdenFS root when mount exists: ", e.what());
-    RootNotConnectedError::throwf(
-        "{} appears to be a disconnected EdenFS mount. "
-        "Try running `eden doctor` to bring it back online and "
-        "then retry your watch",
-        rootPath);
+    // error and return no address - this will result makeThriftChannel failing
+    // with an AsyncSocketException.
+    log(DBG,
+        fmt::format(
+            "Failed to read EdenFS root when mount exists: {}."
+            "{} appears to be a disconnected EdenFS mount. "
+            "Try running `eden doctor` to bring it back online and "
+            "then retry your watch.",
+            e.what(),
+            rootPath));
+    return std::string();
   }
 #endif
 }

@@ -168,7 +168,7 @@ class RootResolveError : public WatchmanError<RootResolveError> {
 /**
  * Represents an error when root is not conntected.
  */
-class RootNotConnectedError : public WatchmanError<RootResolveError> {
+class RootNotConnectedError : public WatchmanError<RootNotConnectedError> {
  public:
   static constexpr const char* prefix = "root not connected";
   using WatchmanError::WatchmanError;

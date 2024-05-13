@@ -40,13 +40,13 @@ const char* level_to_string(diagnostic_level level) {
 fmt::format_context::iterator fmt::formatter<diagnostic>::format(
     const diagnostic& d, format_context& ctx) const {
   auto out = ctx.out();
-  format_to(out, "[{}:{}", level_to_string(d.level()), d.file());
+  fmt::format_to(out, "[{}:{}", level_to_string(d.level()), d.file());
   if (d.lineno() > 0) {
-    format_to(out, ":{}", d.lineno());
+    fmt::format_to(out, ":{}", d.lineno());
   }
-  format_to(out, "] {}", d.message());
+  fmt::format_to(out, "] {}", d.message());
   if (!d.name().empty()) {
-    format_to(out, " [{}]", d.name());
+    fmt::format_to(out, " [{}]", d.name());
   }
   return out;
 }

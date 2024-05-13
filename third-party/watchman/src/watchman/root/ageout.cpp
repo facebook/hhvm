@@ -51,25 +51,7 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
       }
     }
   }
-
   auto root_metadata = getRootMetadata();
-  auto ageOut = AgeOut{
-      // MetadataEvent
-      {
-          // BaseEvent
-          {
-              root_metadata.root_path.string(), // root
-              std::string() // error
-          },
-          root_metadata.recrawl_count, // recrawl
-          root_metadata.case_sensitive, // case_sensitive
-          root_metadata.watcher.string() // watcher
-      },
-      walked, // walked
-      files, // files
-      dirs // dirs
-  };
-  getLogger()->logEvent(ageOut);
 
   if (sample.finish()) {
     sample.add_meta(
@@ -81,6 +63,30 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
 
     sample.add_root_metadata(root_metadata);
     sample.log();
+  }
+
+  const auto& [samplingRate, eventCount] =
+      getLogEventCounters(LogEventType::AgeOutType);
+  // Log if override set, or if we have hit the sample rate
+  if (sample.will_log || eventCount == samplingRate) {
+    auto ageOut = AgeOut{
+        // MetadataEvent
+        {
+            // BaseEvent
+            {
+                root_metadata.root_path.string(), // root
+                std::string(), // error
+                eventCount != samplingRate ? 0 : eventCount // event_count
+            },
+            root_metadata.recrawl_count, // recrawl
+            root_metadata.case_sensitive, // case_sensitive
+            root_metadata.watcher.string() // watcher
+        },
+        walked, // walked
+        files, // files
+        dirs // dirs
+    };
+    getLogger()->logEvent(ageOut);
   }
 }
 

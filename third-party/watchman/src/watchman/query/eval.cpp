@@ -219,7 +219,7 @@ static void execute_common(
 
     // NOTE: sample and queryExecute are either both non-null or both null
     queryExecute->num_special_files = ctx->namesToLog.size();
-    queryExecute->special_files = json_array(std::move(nameList)).toString();
+    queryExecute->special_files = json_array(nameList).toString();
 
     sample->add_meta(
         "num_special_files_in_result_set",
@@ -231,16 +231,7 @@ static void execute_common(
 
   if (sample) {
     // NOTE: sample and queryExecute are either both non-null or both null
-    RootMetadata root_metadata = ctx->root->getRootMetadata();
-    addRootMetadataToEvent(root_metadata, *queryExecute);
-    queryExecute->fresh_instance = res->isFreshInstance;
-    queryExecute->deduped = ctx->num_deduped;
-    queryExecute->results = ctx->resultsArray.size();
-    queryExecute->walked = ctx->getNumWalked();
-    if (ctx->query->query_spec) {
-      queryExecute->query = ctx->query->query_spec->toString();
-    }
-    getLogger()->logEvent(*queryExecute);
+    auto root_metadata = ctx->root->getRootMetadata();
 
     if (sample->finish()) {
       sample->add_root_metadata(root_metadata);
@@ -255,6 +246,24 @@ static void execute_common(
       }
       sample->add_meta("query_execute", std::move(meta));
       sample->log();
+    }
+
+    const auto& [samplingRate, eventCount] =
+        getLogEventCounters(LogEventType::QueryExecuteType);
+    // Log if override set, or if we have hit the sample rate
+    if (sample->will_log || eventCount == samplingRate) {
+      addRootMetadataToEvent(root_metadata, *queryExecute);
+      queryExecute->event_count = eventCount != samplingRate ? 0 : eventCount;
+      queryExecute->fresh_instance = res->isFreshInstance;
+      queryExecute->deduped = ctx->num_deduped;
+      queryExecute->results = ctx->resultsArray.size();
+      queryExecute->walked = ctx->getNumWalked();
+
+      if (ctx->query->query_spec) {
+        queryExecute->query = ctx->query->query_spec->toString();
+      }
+
+      getLogger()->logEvent(*queryExecute);
     }
   }
 

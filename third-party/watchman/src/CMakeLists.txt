@@ -690,6 +690,7 @@ watchman/saved_state/SavedStateInterface.cpp
 watchman/scm/Git.cpp
 watchman/scm/Mercurial.cpp
 watchman/scm/SCM.cpp
+watchman/telemetry/LogEvent.cpp
 watchman/telemetry/WatchmanStats.cpp
 watchman/telemetry/WatchmanStructuredLogger.cpp
 watchman/thirdparty/getopt/GetOpt.cpp

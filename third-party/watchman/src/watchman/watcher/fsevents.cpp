@@ -145,6 +145,7 @@ static void log_drop_event(const std::shared_ptr<Root>& root, bool isKernel) {
           {
               root_metadata.root_path.string(), // root
               std::string() // error
+              // event_count = 1, default
           },
           root_metadata.recrawl_count, // recrawl
           root_metadata.case_sensitive, // case_sensitive

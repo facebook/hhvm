@@ -170,9 +170,17 @@ void do_clock_check(watchman_stream* client) {
         sample.force_log();
       }
 
-      getLogger()->logEvent(clockTest);
-      sample.finish();
-      sample.log();
+      if (sample.finish()) {
+        sample.log();
+      }
+
+      const auto& [samplingRate, eventCount] =
+          getLogEventCounters(LogEventType::ClockTestType);
+      // Log if override set, or if we have hit the sample rate
+      if (sample.will_log || eventCount == samplingRate) {
+        clockTest.event_count = eventCount != samplingRate ? 0 : eventCount;
+        getLogger()->logEvent(clockTest);
+      }
     }
   } catch (const std::exception& ex) {
     // Catch std::domain_error and std::runtime_error

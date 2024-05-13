@@ -83,7 +83,12 @@ void InMemoryView::fullCrawl(
 
   root->cookies.abortAllCookies();
 
-  RootMetadata root_metadata = root->getRootMetadata();
+  auto root_metadata = root->getRootMetadata();
+  sample.add_root_metadata(root_metadata);
+  sample.finish();
+  sample.force_log();
+  sample.log();
+
   auto fullCrawl = FullCrawl{
       // MetadataEvent
       {
@@ -91,6 +96,7 @@ void InMemoryView::fullCrawl(
           {
               root_metadata.root_path.string(), // root
               std::string() // error
+              // event_count = 1, default
           },
           root_metadata.recrawl_count, // recrawl
           root_metadata.case_sensitive, // case_sensitive
@@ -98,11 +104,6 @@ void InMemoryView::fullCrawl(
       },
   };
   getLogger()->logEvent(fullCrawl);
-
-  sample.add_root_metadata(root_metadata);
-  sample.finish();
-  sample.force_log();
-  sample.log();
 
   logf(ERR, "{}crawl complete\n", recrawlCount ? "re" : "");
 }

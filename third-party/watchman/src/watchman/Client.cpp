@@ -140,6 +140,7 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
       DispatchCommand dispatchCommand;
       dispatchCommand.command = command.name();
       dispatch_command = &dispatchCommand;
+
       auto sample_name = "dispatch_command:" + std::string{def->name};
       PerfSample sample(sample_name.c_str());
       perf_sample = &sample;
@@ -156,6 +157,7 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
       // Let's change `func` to take a Command after Command knows what a root
       // path is.
       auto rendered = command.render();
+      auto renderedString = rendered.toString();
 
       try {
         enqueueResponse(def->handler(this, rendered));
@@ -165,11 +167,6 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
       } catch (const ResponseWasHandledManually&) {
       }
 
-      dispatchCommand.duration =
-          std::chrono::duration<double>{dispatchCommandStart.elapsed()}.count();
-      dispatchCommand.args = rendered.toString();
-      getLogger()->logEvent(dispatchCommand);
-
       if (sample.finish()) {
         sample.add_meta("args", std::move(rendered));
         sample.add_meta(
@@ -177,6 +174,20 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
             json_object({{"pid", json_integer(stm->getPeerProcessID())}}));
         sample.log();
       }
+
+      const auto& [samplingRate, eventCount] =
+          getLogEventCounters(LogEventType::DispatchCommandType);
+      // Log if override set, or if we have hit the sample rate
+      if (sample.will_log || eventCount == samplingRate) {
+        dispatchCommand.event_count =
+            eventCount != samplingRate ? 0 : eventCount;
+        dispatchCommand.duration =
+            std::chrono::duration<double>{dispatchCommandStart.elapsed()}
+                .count();
+        dispatchCommand.args = renderedString;
+        getLogger()->logEvent(dispatchCommand);
+      }
+
       logf(DBG, "dispatch_command: {} (completed)\n", def->name);
     }
 

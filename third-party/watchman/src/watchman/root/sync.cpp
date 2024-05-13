@@ -23,24 +23,7 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
   auto root = shared_from_this();
   try {
     auto result = view()->syncToNow(root, timeout);
-
     auto root_metadata = getRootMetadata();
-    auto syncToNow = SyncToNow{
-        // MetadataEvent
-        {
-            // BaseEvent
-            {
-                root_metadata.root_path.string(), // root
-                std::string() // error
-            },
-            root_metadata.recrawl_count, // recrawl
-            root_metadata.case_sensitive, // case_sensitive
-            root_metadata.watcher.string() // watcher
-        },
-        true, // success
-        timeout.count() // timeoutms
-    };
-    getLogger()->logEvent(syncToNow);
 
     if (sample.finish()) {
       sample.add_root_metadata(root_metadata);
@@ -51,26 +34,32 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
                {"timeoutms", json_integer(timeout.count())}}));
       sample.log();
     }
+
+    const auto& [samplingRate, eventCount] =
+        getLogEventCounters(LogEventType::SyncToNowType);
+    // Log if override set, or if we have hit the sample rate
+    if (sample.will_log || eventCount == samplingRate) {
+      auto syncToNow = SyncToNow{
+          // MetadataEvent
+          {
+              // BaseEvent
+              {
+                  root_metadata.root_path.string(), // root
+                  std::string(), // error
+                  eventCount != samplingRate ? 0 : eventCount // event_count
+              },
+              root_metadata.recrawl_count, // recrawl
+              root_metadata.case_sensitive, // case_sensitive
+              root_metadata.watcher.string() // watcher
+          },
+          true, // success
+          timeout.count() // timeoutms
+      };
+      getLogger()->logEvent(syncToNow);
+    }
     return result;
   } catch (const std::exception& exc) {
     auto root_metadata = getRootMetadata();
-    auto syncToNow = SyncToNow{
-        // MetadataEvent
-        {
-            // BaseEvent
-            {
-                root_metadata.root_path.string(), // root
-                exc.what() // error
-            },
-            root_metadata.recrawl_count, // recrawl
-            root_metadata.case_sensitive, // case_sensitive
-            root_metadata.watcher.string() // watcher
-        },
-        false, // success
-        timeout.count() // timeoutms
-    };
-    getLogger()->logEvent(syncToNow);
-
     sample.force_log();
     sample.finish();
     sample.add_root_metadata(root_metadata);
@@ -81,6 +70,27 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
              {"reason", w_string_to_json(exc.what())},
              {"timeoutms", json_integer(timeout.count())}}));
     sample.log();
+
+    const auto& [samplingRate, eventCount] =
+        getLogEventCounters(LogEventType::SyncToNowType);
+    auto syncToNow = SyncToNow{
+        // MetadataEvent
+        {
+            // BaseEvent
+            {
+                root_metadata.root_path.string(), // root
+                exc.what(), // error
+                eventCount != samplingRate ? 0 : eventCount // event_count
+            },
+            root_metadata.recrawl_count, // recrawl
+            root_metadata.case_sensitive, // case_sensitive
+            root_metadata.watcher.string() // watcher
+        },
+        false, // success
+        timeout.count() // timeoutms
+    };
+    getLogger()->logEvent(syncToNow);
+
     throw;
   }
 }

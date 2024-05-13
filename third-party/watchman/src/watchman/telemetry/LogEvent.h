@@ -8,6 +8,7 @@
 #pragma once
 
 #include <folly/portability/SysTypes.h>
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -18,9 +19,24 @@ namespace watchman {
 
 using DynamicEvent = facebook::eden::DynamicEvent;
 
+enum LogEventType : uint8_t {
+  DispatchCommandType,
+  ClockTestType,
+  AgeOutType,
+  SyncToNowType,
+  SavedStateType,
+  QueryExecuteType,
+  FullCrawlType,
+  DroppedType
+};
+
+// Returns samplingRate and eventCount
+std::pair<int64_t, int64_t> getLogEventCounters(const LogEventType& type);
+
 struct BaseEvent {
   std::string root;
   std::string error;
+  int64_t event_count = 1;
 
   void populate(DynamicEvent& event) const {
     if (!root.empty()) {
@@ -29,6 +45,7 @@ struct BaseEvent {
     if (!error.empty()) {
       event.addString("error", error);
     }
+    event.addInt("event_count", event_count);
   }
 };
 

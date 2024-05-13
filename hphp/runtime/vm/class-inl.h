@@ -764,15 +764,29 @@ inline Class* Class::lookup(const StringData* name) {
   return get(name, false);
 }
 
-inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
+/*
+ * Check whether a class is can be trusted in the given context.
+ * We can trust a class if:
+ * (1) Its persistent. It will not change.
+ * (2) We are currently jitting a translation for a class that is
+ *     a non-strict subtype of cls. If cls changes, ctx will be
+ *     re-loaded and re-jitted anyways, so we can trust cls.
+ */
+inline const Class* Class::lookupUniqueInContext(const Class* cls,
                                                  const Class* ctx,
                                                  const Unit* unit) {
-  Class* cls = ne->clsList();
   if (UNLIKELY(cls == nullptr)) return nullptr;
   if (cls->attrs() & AttrPersistent) return cls;
   if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
   return ctx->classof(cls) ? cls : nullptr;
+}
+
+inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
+                                                 const Class* ctx,
+                                                 const Unit* unit) {
+  Class* cls = ne->clsList();
+  return lookupUniqueInContext(cls, ctx, unit);
 }
 
 inline const Class* Class::lookupUniqueInContext(const StringData* name,

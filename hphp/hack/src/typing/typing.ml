@@ -7162,21 +7162,61 @@ end = struct
         (fun env -> condition_single env true te),
         (fun env -> condition_single env false te) )
     in
-    let branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
-      match type_switch env ~p ~ivar ~errs ~reason ~predicate with
-      | Some (env, locl_ivar, ty_true, ty_false) ->
-        let (_, local_id) = locl_ivar in
-        let bound_ty =
-          (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+    let rec branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
+      match (predicate, ivar) with
+      (* Legacy case: apply refinements to both lsh and rhs for assignments *)
+      | (IsNull, (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs; rhs })) ->
+        let (env, cond_true_l, cond_false_l) =
+          branch_for_type_switch env ~p ~ivar:lhs ~errs ~reason ~predicate
+        in
+        let (env, cond_true_r, cond_false_r) =
+          branch_for_type_switch env ~p ~ivar:rhs ~errs:None ~reason ~predicate
         in
         ( env,
           (fun env ->
-            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
-              { pkgs = SSet.empty } )),
+            let (env, _pkgs) = cond_true_l env in
+            cond_true_r env),
           fun env ->
-            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
+            let (env, _pkgs) = cond_false_l env in
+            cond_false_r env )
+      (* Special case: treat Shapes::idx($s, 'k') is nonnull
+         roughly like $s is shape('k' => nonnull, ...) *)
+      | ( IsNull,
+          ( _,
+            _,
+            Aast.Call
+              {
+                func =
+                  ( _,
+                    _,
+                    Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx)) );
+                args = [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)];
+                _;
+              } ) )
+        when String.equal shapes SN.Shapes.cShapes
+             && String.equal idx SN.Shapes.idx ->
+        let field = Tast.to_nast_expr field in
+        ( env,
+          (fun env -> (env, { pkgs = SSet.empty })),
+          fun env ->
+            ( refine_lvalue_type env shape ~refine:(fun env shape_ty ->
+                  Typing_shapes.shapes_idx_not_null env shape_ty field),
               { pkgs = SSet.empty } ) )
-      | None -> default_branch env
+      | _ ->
+        (match type_switch env ~p ~ivar ~errs ~reason ~predicate with
+        | Some (env, locl_ivar, ty_true, ty_false) ->
+          let (_, local_id) = locl_ivar in
+          let bound_ty =
+            (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+          in
+          ( env,
+            (fun env ->
+              ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
+                { pkgs = SSet.empty } )),
+            fun env ->
+              ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
+                { pkgs = SSet.empty } ) )
+        | None -> default_branch env)
     in
     match e with
     | Aast.Binop { bop = Ast_defs.Ampamp; lhs = e1; rhs = e2 } ->
@@ -7244,6 +7284,25 @@ end = struct
           let (env, _cond_true, cond_false) = condition_dual env e2 in
           let (env, _) = cond_false env in
           (env, { pkgs = SSet.empty }) )
+    | Aast.Binop
+        {
+          bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
+          lhs = (_, _, Aast.Null);
+          rhs = te;
+        }
+    | Aast.Binop
+        {
+          bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
+          lhs = te;
+          rhs = (_, _, Aast.Null);
+        } ->
+      branch_for_type_switch
+        env
+        ~p
+        ~ivar:te
+        ~errs:None
+        ~reason:(Reason.Rwitness p)
+        ~predicate:IsNull
     | Aast.Call
         {
           func = (_, _, Aast.Id (_, f));
@@ -7289,22 +7348,6 @@ end = struct
       (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
     | Aast.False when tparamet ->
       (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
-    | Aast.Binop
-        {
-          bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
-          lhs = (_, _, Aast.Null);
-          rhs = e;
-        }
-    | Aast.Binop
-        {
-          bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
-          lhs = e;
-          rhs = (_, _, Aast.Null);
-        } ->
-      let env =
-        condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env e
-      in
-      (env, { pkgs = SSet.empty })
     | Aast.Binop
         {
           bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;

@@ -1801,25 +1801,6 @@ let rec condition_nullity ~is_sketchy ~nonnull (env : env) te =
     let env = condition_nullity ~is_sketchy ~nonnull env te in
     let env = condition_nullity ~is_sketchy ~nonnull env var in
     env
-  (* case where `Shapes::idx(...)` must be made null/non-null *)
-  | ( _,
-      _,
-      Aast.Call
-        {
-          func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx)));
-          args = [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)];
-          _;
-        } )
-    when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
-    ->
-    let field = Tast.to_nast_expr field in
-    let refine env shape_ty =
-      if nonnull then
-        Typing_shapes.shapes_idx_not_null env shape_ty field
-      else
-        (env, shape_ty)
-    in
-    refine_lvalue_type env shape ~refine
   | (_, _, Hole (te, _, _, _)) -> condition_nullity ~is_sketchy ~nonnull env te
   | (_, p, _) ->
     let refine env ty =
@@ -2154,14 +2135,6 @@ let refine_for_hint
     hint_ty
 
 let refine_for_is ~hint_first env tparamet ivar refinement_reason hint =
-  let env =
-    match snd hint with
-    | Aast.Hnonnull ->
-      condition_nullity ~is_sketchy:false ~nonnull:tparamet env ivar
-    | Aast.Hprim Tnull ->
-      condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env ivar
-    | _ -> env
-  in
   let (env, locl) =
     make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
   in
@@ -7324,16 +7297,30 @@ end = struct
         Typing_phase.localize_hint_for_refinement env hint
       in
       begin
-        match Typing_refinement.TyPredicate.of_ty env hint_ty with
-        | None -> default_branch env
-        | Some (env, predicate) ->
-          branch_for_type_switch
-            env
-            ~p
-            ~ivar
-            ~errs:ty_err_opt
-            ~reason:(Reason.Ris (fst hint))
-            ~predicate
+        match get_node hint_ty with
+        | Tnonnull ->
+          let (env, cond_true, cond_false) =
+            branch_for_type_switch
+              env
+              ~p
+              ~ivar
+              ~errs:ty_err_opt
+              ~reason:(Reason.Ris (fst hint))
+              ~predicate:IsNull
+          in
+          (env, cond_false, cond_true)
+        | _ -> begin
+          match Typing_refinement.TyPredicate.of_ty env hint_ty with
+          | None -> default_branch env
+          | Some (env, predicate) ->
+            branch_for_type_switch
+              env
+              ~p
+              ~ivar
+              ~errs:ty_err_opt
+              ~reason:(Reason.Ris (fst hint))
+              ~predicate
+        end
       end
     end
     | Aast.Unop (Ast_defs.Unot, e) ->

@@ -2126,9 +2126,7 @@ std::string t_hack_generator::render_const_value_helper(
       out << (immutable_collections ? "Imm" : "") << "Vector {\n";
     }
     indent_up();
-    // Workaround to cover the cases where list is initialized with an empty
-    // map, e.g. list<i32> l = {}
-    for (const auto* val : value->get_list_or_empty_map()) {
+    for (const auto* val : value->get_list()) {
       out << indent();
       out << render_const_value_helper(
           etype,

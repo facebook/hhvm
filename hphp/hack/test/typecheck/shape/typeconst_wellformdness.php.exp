@@ -1,0 +1,36 @@
+ERROR: File "typeconst_wellformdness.php", line 4, characters 28-61:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 4, characters 44-48:
+  No type constant `class` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here
+ERROR: File "typeconst_wellformdness.php", line 5, characters 29-60:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 5, characters 45-47:
+  No type constant `FOO` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here
+ERROR: File "typeconst_wellformdness.php", line 7, characters 29-63:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 7, characters 46-50:
+  No type constant `class` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here
+ERROR: File "typeconst_wellformdness.php", line 8, characters 29-61:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 8, characters 46-48:
+  No type constant `FOO` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here
+ERROR: File "typeconst_wellformdness.php", line 11, characters 18-51:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 11, characters 34-38:
+  No type constant `class` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here
+ERROR: File "typeconst_wellformdness.php", line 12, characters 19-50:
+Invalid type hint (Typing[4090])
+  File "typeconst_wellformdness.php", line 12, characters 35-37:
+  No type constant `FOO` in `C`
+  File "typeconst_wellformdness.php", line 3, characters 16-16:
+  Declaration of `C` is here

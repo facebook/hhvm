@@ -967,33 +967,41 @@ let typeconst_def
   (* Check constraints and report cycles through the definition *)
   let (env, ty_err_opt) =
     match c_tconst_kind with
-    | TCAbstract
-        { c_atc_as_constraint; c_atc_super_constraint; c_atc_default = Some ty }
+    | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
       ->
-      let ((env, ty_err_opt1), ty) =
-        Phase.localize_hint_no_subst
-          ~ignore_errors:false
-          ~report_cycle:(pos, name)
-          env
-          ty
+      let (env, ty_default_opt) =
+        match c_atc_default with
+        | Some ty ->
+          let ((env, ty_err_opt1), ty) =
+            Phase.localize_hint_no_subst
+              ~ignore_errors:false
+              ~report_cycle:(pos, name)
+              env
+              ty
+          in
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
+          (env, Some ty)
+        | None -> (env, None)
       in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
       let (env, ty_err_opt2) =
         match c_atc_as_constraint with
         | Some as_ ->
           let ((env, ty_err_opt1), as_) =
             Phase.localize_hint_no_subst ~ignore_errors:false env as_
           in
-          let (env, ty_err_opt2) =
-            Type.sub_type
-              pos
-              Reason.URtypeconst_cstr
-              env
-              ty
-              as_
-              Typing_error.Callback.unify_error
-          in
-          (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
+          (match ty_default_opt with
+          | Some ty ->
+            let (env, ty_err_opt2) =
+              Type.sub_type
+                pos
+                Reason.URtypeconst_cstr
+                env
+                ty
+                as_
+                Typing_error.Callback.unify_error
+            in
+            (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
+          | None -> (env, ty_err_opt1))
         | None -> (env, None)
       in
       let (env, ty_err_opt3) =
@@ -1002,33 +1010,34 @@ let typeconst_def
           let ((env, te1), super) =
             Phase.localize_hint_no_subst ~ignore_errors:false env super
           in
-          let (env, te2) =
-            Type.sub_type
-              pos
-              Reason.URtypeconst_cstr
-              env
-              super
-              ty
-              Typing_error.Callback.unify_error
-          in
-          (env, Option.merge ~f:Typing_error.both te1 te2)
+          (match ty_default_opt with
+          | Some ty ->
+            let (env, te2) =
+              Type.sub_type
+                pos
+                Reason.URtypeconst_cstr
+                env
+                super
+                ty
+                Typing_error.Callback.unify_error
+            in
+            (env, Option.merge ~f:Typing_error.both te1 te2)
+          | None -> (env, te1))
         | None -> (env, None)
       in
       let ty_err_opt =
-        Typing_error.multiple_opt
-        @@ List.filter_map ~f:Fn.id [ty_err_opt1; ty_err_opt2; ty_err_opt3]
+        Option.merge ~f:Typing_error.both ty_err_opt2 ty_err_opt3
       in
       (env, ty_err_opt)
     | TCConcrete { c_tc_type = ty } ->
-      let (env, _ty) =
+      let ((env, ty_err_opt), _ty) =
         Phase.localize_hint_no_subst
           ~ignore_errors:false
           ~report_cycle:(pos, name)
           env
           ty
       in
-      env
-    | _ -> (env, None)
+      (env, ty_err_opt)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   (* TODO(T88552052): should this check be happening for defaults

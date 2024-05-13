@@ -655,6 +655,55 @@ class HealthCheckHandler : public BaseSampleHandler {
   bool healthy_;
 };
 
+class SimplePostHandler : public BaseSampleHandler {
+ public:
+  explicit SimplePostHandler(const HandlerParams& params)
+      : BaseSampleHandler(params) {
+  }
+
+  void onHeadersComplete(
+      std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override {
+    VLOG(10) << "SimplePostHandler::onHeadersComplete";
+    proxygen::HTTPMessage resp;
+    VLOG(10) << "Setting http-version to " << getHttpVersion();
+    resp.setVersionString(getHttpVersion());
+    if (msg->getMethod() != proxygen::HTTPMethod::POST) {
+      resp.setStatusCode(400);
+      resp.setStatusMessage("Use POST, it's in the name!");
+      txn_->sendHeaders(resp);
+      txn_->sendEOM();
+    }
+  }
+
+  void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override {
+    VLOG(10) << "SimplePostHandler::onBody";
+    numBodyBytesReceived_ += chain->computeChainDataLength();
+  }
+
+  void onEOM() noexcept override {
+    VLOG(10) << "SimplePostHandler::onEOM";
+    proxygen::HTTPMessage resp;
+    VLOG(10) << "Setting http-version to " << getHttpVersion();
+    resp.setVersionString(getHttpVersion());
+    resp.setStatusCode(200);
+    resp.setStatusMessage("Ok");
+    resp.setWantsKeepalive(true);
+    maybeAddAltSvcHeader(resp);
+    txn_->sendHeaders(resp);
+    txn_->sendBody(folly::IOBuf::copyBuffer(
+        "Got " + folly::to<std::string>(numBodyBytesReceived_) +
+        " POST bytes"));
+    txn_->sendEOM();
+  }
+
+  void onError(const proxygen::HTTPException& /*error*/) noexcept override {
+    txn_->sendAbort();
+  }
+
+ private:
+  uint64_t numBodyBytesReceived_{0};
+};
+
 class WaitReleaseHandler : public BaseSampleHandler {
  public:
   WaitReleaseHandler(folly::EventBase* evb, const HandlerParams& params)

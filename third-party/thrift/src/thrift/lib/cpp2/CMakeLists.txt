@@ -109,8 +109,8 @@ add_library(
   type/TypeRegistry.cpp
   type/UniversalName.cpp
 )
-add_dependencies(thrifttype type-cpp2-target thriftannotation thrifttyperep
-  thriftprotocol)
+add_dependencies(thrifttype any_rep-cpp2-target type-cpp2-target
+  thriftannotation thrifttyperep thriftprotocol)
 target_link_libraries(
   thrifttype
   PUBLIC

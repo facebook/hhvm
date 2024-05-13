@@ -222,6 +222,8 @@ void joinAsyncTranslationWorkerThreads() {
   FTRACE(2, "Waiting for background jit worker threads\n");
   s_asyncTranslationDispatcher->stop();
   delete s_asyncTranslationDispatcher;
+  // Clearing the ConcurrentHashMap here avoids a crash in the destructor.
+  s_enqueuedSKs.clear();
 }
 
 void enqueueAsyncTranslateRequest(const RegionContext& ctx,

@@ -14,7 +14,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/SocketAddress.h>
 #include <folly/executors/InlineExecutor.h>
-#include <folly/experimental/bser/Bser.h>
+#include <folly/json/bser/Bser.h>
 
 #ifdef _WIN32
 #include <eden/common/utils/SpawnedProcess.h> // @manual

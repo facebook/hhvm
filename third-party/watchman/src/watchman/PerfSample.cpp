@@ -113,6 +113,22 @@ PerfSample::PerfSample(const char* description) : description(description) {
 #endif
 }
 
+double PerfSample::get_perf_sampling_thresh() const {
+  static double perf_sampling_thresh{0};
+  if (perf_sampling_thresh == 0) {
+    auto thresh = cfg_get_json("perf_sampling_thresh");
+    if (thresh) {
+      if (thresh->isNumber()) {
+        perf_sampling_thresh = json_number_value(*thresh);
+      } else {
+        perf_sampling_thresh =
+            json_number_value(thresh->get_default(description, json_real(0.0)));
+      }
+    }
+  }
+  return perf_sampling_thresh;
+}
+
 bool PerfSample::finish() {
   gettimeofday(&time_end, nullptr);
   w_timeval_sub(time_end, time_begin, &duration);
@@ -142,15 +158,7 @@ bool PerfSample::finish() {
 
   if (!will_log) {
     if (wall_time_elapsed_thresh == 0) {
-      auto thresh = cfg_get_json("perf_sampling_thresh");
-      if (thresh) {
-        if (thresh->isNumber()) {
-          wall_time_elapsed_thresh = json_number_value(*thresh);
-        } else {
-          wall_time_elapsed_thresh = json_number_value(
-              thresh->get_default(description, json_real(0.0)));
-        }
-      }
+      wall_time_elapsed_thresh = get_perf_sampling_thresh();
     }
 
     if (wall_time_elapsed_thresh > 0 &&

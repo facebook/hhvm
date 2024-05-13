@@ -57,6 +57,8 @@ class PerfSample {
   // that this value
   double wall_time_elapsed_thresh{0};
 
+  double get_perf_sampling_thresh() const;
+
 #ifdef HAVE_SYS_RESOURCE_H
   // When available (posix), record these process-wide stats.
   // It can be difficult to attribute these directly to the

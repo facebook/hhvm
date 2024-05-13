@@ -7116,15 +7116,8 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
-  and type_switch env p ivar hint =
+  and type_switch env ~p ~ivar ~errs ~reason ~predicate =
     let open Option.Let_syntax in
-    let* (env, errs, ivar, pos_hint, predicate) =
-      let ((env, ty_err_opt), hint_ty) =
-        Typing_phase.localize_hint_for_refinement env hint
-      in
-      let* (env, predicate) = Typing_refinement.TyPredicate.of_ty env hint_ty in
-      Some (env, ty_err_opt, ivar, fst hint, predicate)
-    in
     let (env, locl_opt) =
       make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
     in
@@ -7136,7 +7129,7 @@ end = struct
     let type_switch_constraint =
       ConstraintType
         (mk_constraint_type
-           (Reason.Ris pos_hint, Ttype_switch { predicate; ty_true; ty_false }))
+           (reason, Ttype_switch { predicate; ty_true; ty_false }))
     in
     let env = Env.set_tyvar_variance_i env type_switch_constraint in
     let ty = fst3 ivar in
@@ -7168,6 +7161,22 @@ end = struct
       ( env,
         (fun env -> condition_single env true te),
         (fun env -> condition_single env false te) )
+    in
+    let branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
+      match type_switch env ~p ~ivar ~errs ~reason ~predicate with
+      | Some (env, locl_ivar, ty_true, ty_false) ->
+        let (_, local_id) = locl_ivar in
+        let bound_ty =
+          (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+        in
+        ( env,
+          (fun env ->
+            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
+              { pkgs = SSet.empty } )),
+          fun env ->
+            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
+              { pkgs = SSet.empty } ) )
+      | None -> default_branch env
     in
     match e with
     | Aast.Binop { bop = Ast_defs.Ampamp; lhs = e1; rhs = e2 } ->
@@ -7235,22 +7244,38 @@ end = struct
           let (env, _cond_true, cond_false) = condition_dual env e2 in
           let (env, _) = cond_false env in
           (env, { pkgs = SSet.empty }) )
+    | Aast.Call
+        {
+          func = (_, _, Aast.Id (_, f));
+          args = [(_, te)];
+          unpacked_arg = None;
+          _;
+        }
+      when String.equal SN.StdlibFunctions.is_null f ->
+      branch_for_type_switch
+        env
+        ~p
+        ~ivar:te
+        ~errs:None
+        ~reason:(Reason.Rwitness p)
+        ~predicate:IsNull
     | Aast.Hole (e, _, _, _) -> condition_dual env e
     | Aast.Is (ivar, hint) -> begin
-      match type_switch env p ivar hint with
-      | Some (env, locl_ivar, ty_true, ty_false) ->
-        let (_, local_id) = locl_ivar in
-        let bound_ty =
-          (Typing_env.get_local env local_id).Typing_local_types.bound_ty
-        in
-        ( env,
-          (fun env ->
-            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
-              { pkgs = SSet.empty } )),
-          fun env ->
-            ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
-              { pkgs = SSet.empty } ) )
-      | None -> default_branch env
+      let ((env, ty_err_opt), hint_ty) =
+        Typing_phase.localize_hint_for_refinement env hint
+      in
+      begin
+        match Typing_refinement.TyPredicate.of_ty env hint_ty with
+        | None -> default_branch env
+        | Some (env, predicate) ->
+          branch_for_type_switch
+            env
+            ~p
+            ~ivar
+            ~errs:ty_err_opt
+            ~reason:(Reason.Ris (fst hint))
+            ~predicate
+      end
     end
     | Aast.Unop (Ast_defs.Unot, e) ->
       let (env, cond_true, cond_false) = condition_dual env e in
@@ -7264,18 +7289,6 @@ end = struct
       (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
     | Aast.False when tparamet ->
       (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
-    | Aast.Call
-        {
-          func = (_, _, Aast.Id (_, f));
-          args = [(_, te)];
-          unpacked_arg = None;
-          _;
-        }
-      when String.equal SN.StdlibFunctions.is_null f ->
-      let env =
-        condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env te
-      in
-      (env, { pkgs = SSet.empty })
     | Aast.Binop
         {
           bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;

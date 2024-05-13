@@ -155,7 +155,7 @@ std::string resolveSocketPath(w_string_piece rootPath) {
     // with an AsyncSocketException.
     log(DBG,
         fmt::format(
-            "Failed to read EdenFS root when mount exists: {}."
+            "Failed to read EdenFS root when mount exists: {} ."
             "{} appears to be a disconnected EdenFS mount. "
             "Try running `eden doctor` to bring it back online and "
             "then retry your watch.",

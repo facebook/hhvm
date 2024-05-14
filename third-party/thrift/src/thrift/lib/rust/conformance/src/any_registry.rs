@@ -60,7 +60,9 @@ impl AnyRegistry {
         }
     }
 
-    pub fn register_type<T: 'static + GetUri>(&mut self) -> Result<bool> {
+    pub fn register_type<T: 'static + GetUri + SerializeRef + DeserializeSlice>(
+        &mut self,
+    ) -> Result<bool> {
         let uri = T::uri();
         let type_id = TypeId::of::<T>();
         if self.uri_to_typeid.contains_key(uri) || self.typeid_to_uri.contains_key(&type_id) {

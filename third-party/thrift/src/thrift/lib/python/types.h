@@ -497,13 +497,14 @@ class MutableListTypeInfo {
   const detail::TypeInfo typeinfo_;
 };
 
-class SetTypeInfo {
+template <typename T>
+class SetTypeInfoTemplate {
  public:
   static std::uint32_t size(const void* object) {
     return PySet_GET_SIZE(toPyObject(object));
   }
 
-  static void clear(void* object) { setFrozenSet(object); }
+  static void clear(void* object) { T::clear(object); }
 
   static void read(
       const void* context,
@@ -522,7 +523,7 @@ class SetTypeInfo {
       void* object,
       void (*reader)(const void* /*context*/, void* /*val*/));
 
-  explicit SetTypeInfo(const detail::TypeInfo* valInfo)
+  explicit SetTypeInfoTemplate(const detail::TypeInfo* valInfo)
       : ext_{
             /* .valInfo */ valInfo,
             /* .size */ size,
@@ -534,7 +535,7 @@ class SetTypeInfo {
         typeinfo_{
             protocol::TType::T_SET,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setFrozenSet),
+            reinterpret_cast<detail::VoidFuncPtr>(T::clear),
             &ext_,
         } {}
   const detail::TypeInfo* get() const { return &typeinfo_; }
@@ -543,6 +544,103 @@ class SetTypeInfo {
   const detail::SetFieldExt ext_;
   const detail::TypeInfo typeinfo_;
 };
+
+template <typename T>
+void SetTypeInfoTemplate<T>::read(
+    const void* context,
+    void* object,
+    std::uint32_t setSize,
+    void (*reader)(const void* /*context*/, void* /*val*/)) {
+  UniquePyObjectPtr set{T::create(nullptr)};
+  if (!set) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  for (std::uint32_t i = 0; i < setSize; ++i) {
+    PyObject* elem{};
+    reader(context, &elem);
+    if (PySet_Add(set.get(), elem) == -1) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    Py_DECREF(elem);
+  }
+  setPyObject(object, std::move(set));
+}
+
+template <typename T>
+size_t SetTypeInfoTemplate<T>::write(
+    const void* context,
+    const void* object,
+    bool protocolSortKeys,
+    size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
+  size_t written = 0;
+  PyObject* set = const_cast<PyObject*>(toPyObject(object));
+  UniquePyObjectPtr iter;
+  if (protocolSortKeys) {
+    UniquePyObjectPtr seq{PySequence_List(set)};
+    if (!seq) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    if (PyList_Sort(seq.get()) == -1) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    iter = UniquePyObjectPtr{PyObject_GetIter(seq.get())};
+  } else {
+    iter = UniquePyObjectPtr{PyObject_GetIter(set)};
+  }
+  if (!iter) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  PyObject* elem;
+  while ((elem = PyIter_Next(iter.get())) != nullptr) {
+    written += writer(context, &elem);
+    Py_DECREF(elem);
+  }
+  return written;
+}
+
+// keep until python3.9, where Py_SET_REFCNT is available officially
+inline void _fbthrift_Py_SET_REFCNT(PyObject* ob, Py_ssize_t refcnt) {
+  ob->ob_refcnt = refcnt;
+}
+
+template <typename T>
+void SetTypeInfoTemplate<T>::consumeElem(
+    const void* context,
+    void* object,
+    void (*reader)(const void* /*context*/, void* /*val*/)) {
+  PyObject** pyObjPtr = toPyObjectPtr(object);
+  DCHECK(*pyObjPtr);
+  PyObject* elem = nullptr;
+  reader(context, &elem);
+  DCHECK(elem);
+  // This is nasty hack since Cython generated code will incr the refcnt
+  // so PySet_Add will fail. Need to temporarily decrref.
+  auto currentRefCnt = Py_REFCNT(*pyObjPtr);
+  _fbthrift_Py_SET_REFCNT(*pyObjPtr, 1);
+  if (PySet_Add(*pyObjPtr, elem) == -1) {
+    _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  Py_DECREF(elem);
+  _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+}
+
+/**
+ * This class is intended to be used as a template parameter for the
+ * `SetTypeInfoTemplate` class.
+ *
+ * Immutable Thrift structs utilize Python's `Frozenset` for internal data
+ * representation. The `ImmutableSetHandler` class provides methods to create
+ * and clear the set.
+ */
+struct ImmutableSetHandler {
+  static PyObject* create(PyObject* iterable) {
+    return PyFrozenSet_New(iterable);
+  }
+  static void* clear(void* object) { return setFrozenSet(object); }
+};
+
+using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler>;
 
 class MapTypeInfo {
  public:

@@ -552,18 +552,8 @@ TEST_F(PatchTest, Set) {
         op::PatchOp::Remove,
         asValueStruct<type::set<type::binary_t>>({"test"}));
     EXPECT_TRUE(applyDynamicPatch(patchObj, value).as_set().empty());
-    // Both read and write mask are allMask, as RemovePatch can't be
-    // distinguished between set, map, and struct.
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
+    // Since we cannot distinguish set and map, we always produce map mask.
+    checkMapMask(patchObj, {}, {"test"});
   }
   {
     Object patchObj = makePatch(op::PatchOp::Remove, emptySet);
@@ -674,16 +664,7 @@ TEST_F(PatchTest, Map) {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::binary_t>>({"key"}));
     EXPECT_EQ(emptyMap, applyDynamicPatch(patchObj, value).as_map());
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
+    checkMapMask(patchObj, {}, {"key"});
   }
   {
     Object patchObj = makePatch(op::PatchOp::Remove, emptySet);

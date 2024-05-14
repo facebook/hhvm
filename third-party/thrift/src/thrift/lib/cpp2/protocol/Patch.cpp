@@ -580,29 +580,41 @@ void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
   }
 }
 
+template <typename T>
+const T& getKeyOrElem(const T& value) {
+  return value;
+}
+template <typename K, typename V>
+const K& getKeyOrElem(const std::pair<const K, V>& value) {
+  return value.first;
+}
+
 // `view` specifies whether to use address of Value to populate map mask
 // (deprecated).
-void insertWriteKeysToMask(
-    Mask& mask, const folly::F14FastMap<Value, Value>& map, bool view) {
+template <typename Container>
+void insertWriteKeysToMapMask(Mask& mask, const Container& c, bool view) {
   if (mask == allMask()) {
     return;
   }
 
   if (view) {
-    for (const auto& [key, _] : map) {
+    for (const auto& elem : c) {
+      const auto& v = getKeyOrElem(elem);
       mask.includes_map_ref().ensure().emplace(
-          reinterpret_cast<int64_t>(&key), allMask());
+          reinterpret_cast<int64_t>(&v), allMask());
     }
     return;
   }
 
-  for (const auto& [key, _] : map) {
-    if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
+  for (const auto& elem : c) {
+    const auto& v = getKeyOrElem(elem);
+
+    if (getArrayKeyFromValue(v) == ArrayKey::Integer) {
       mask.includes_map_ref().ensure().emplace(
-          static_cast<int64_t>(getMapIdFromValue(key)), allMask());
+          static_cast<int64_t>(getMapIdFromValue(v)), allMask());
     } else {
       mask.includes_string_map_ref().ensure().emplace(
-          getStringFromValue(key), allMask());
+          getStringFromValue(v), allMask());
     }
   }
 }
@@ -692,21 +704,21 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
   // others.
   if (auto* value = findOp(patch, PatchOp::Put)) {
     if (value->is_map()) {
-      insertWriteKeysToMask(masks.write, value->as_map(), view);
+      insertWriteKeysToMapMask(masks.write, value->as_map(), view);
     } else if (!isIntrinsicDefault(*value)) {
       return {allMask(), allMask()};
     }
   }
   // We can only distinguish struct. For struct, add removed fields to write
   // mask. Both set and map use a set for Remove, so they are indistinguishable.
-  // For set and map, it is a read-write operation if not intristic default.
+  // Therefore, we always add removed keys to write map mask.
   if (auto* value = findOp(patch, PatchOp::Remove)) {
     if (value->is_list()) {
       // struct patch
       insertRemoveWriteFieldsToMask(masks.write, value->as_list());
     } else if (!isIntrinsicDefault(*value)) {
       // set/map patch
-      return {allMask(), allMask()};
+      insertWriteKeysToMapMask(masks.write, value->as_set(), view);
     }
   }
 

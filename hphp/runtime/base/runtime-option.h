@@ -291,6 +291,11 @@ struct RuntimeOption {
 
   static std::string getTraceOutputFile();
 
+  // Store the list of input values used to calculate the tier overwrites
+  static std::map<std::string, std::string> TierOverwriteInputs;
+  static void StoreTierOverwriteInputs(const std::string &machine, const std::string &tier,
+    const std::string &task, const std::string &cpu, const std::string &tiers, const std::string &tags);
+
   static std::string BuildId;
   static std::string InstanceId;
   static std::string DeploymentId; // ID for set of instances deployed at once
@@ -342,7 +347,7 @@ struct RuntimeOption {
 
   static hphp_string_imap<std::string> StaticFileExtensions;
   static hphp_string_imap<std::string> PhpFileExtensions;
-    static std::set<std::string> StaticFileGenerators;
+  static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
 
   static std::string AdminServerIP;

@@ -69,6 +69,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
 #include "hphp/zend/zend-string.h"
 
@@ -590,6 +591,8 @@ void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+std::map<std::string, std::string> RuntimeOption::TierOverwriteInputs;
 
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
@@ -1153,6 +1156,7 @@ static std::vector<std::string> getTierOverwrites(
 
   // Tier overwrites
   {
+    // Required to get log entries actually written to scuba
     for (Hdf hdf = config["Tiers"].firstChild(); hdf.exists();
          hdf = hdf.next()) {
       if (messages.empty()) {
@@ -1161,6 +1165,8 @@ static std::vector<std::string> getTierOverwrites(
                                 "machine='{}', tier='{}', task='{}', "
                                 "cpu='{}', tiers='{}', tags='{}'",
                                 hostname, tier, task, cpu, tiers, tags));
+
+        RuntimeOption::StoreTierOverwriteInputs(hostname, tier, task, cpu, tiers, tags);
       }
       auto const matches = matchesTier(hdf);
       auto const matches_exp = matchExperiment(
@@ -1196,6 +1202,32 @@ static std::vector<std::string> getTierOverwrites(
   }
   return messages;
 }
+
+// Log the inputs used for calculating tier overwrites for this machine
+void RuntimeOption::StoreTierOverwriteInputs(const std::string &machine, const std::string &tier,
+  const std::string &task, const std::string &cpu, const std::string &tiers, const std::string &tags) {
+    // Store the tier inputs as part of the RuntimeOption singleton, so that we can access it later
+    RuntimeOption::TierOverwriteInputs["machine"] = machine;
+    RuntimeOption::TierOverwriteInputs["tier"] = tier;
+    RuntimeOption::TierOverwriteInputs["task"] = task;
+    RuntimeOption::TierOverwriteInputs["cpu"] = cpu;
+    RuntimeOption::TierOverwriteInputs["tiers"] = tiers;
+    RuntimeOption::TierOverwriteInputs["tags"] = tags;
+}
+
+void logTierOverwriteInputs() {
+  StructuredLogEntry log_entry;
+  log_entry.force_init = true;
+  log_entry.setStr("machine", RuntimeOption::TierOverwriteInputs["machine"]);
+  log_entry.setStr("tier", RuntimeOption::TierOverwriteInputs["tier"]);
+  log_entry.setStr("task", RuntimeOption::TierOverwriteInputs["task"]);
+  log_entry.setStr("cpu", RuntimeOption::TierOverwriteInputs["cpu"]);
+  log_entry.setStr("tiers", RuntimeOption::TierOverwriteInputs["tiers"]);
+  log_entry.setStr("tags", RuntimeOption::TierOverwriteInputs["tags"]);
+  StructuredLog::log("hhvm_config_hdf_logs", log_entry);
+}
+
+InitFiniNode s_logTierOverwrites(logTierOverwriteInputs, InitFiniNode::When::ServerInit);
 
 void RuntimeOption::ReadSatelliteInfo(
     const IniSettingMap& ini,

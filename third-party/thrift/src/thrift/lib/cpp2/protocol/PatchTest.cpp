@@ -1079,27 +1079,6 @@ TEST_F(PatchTest, Struct) {
         op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({}));
     expectNoop(patchObj);
   }
-  // TODO: Remove this after migrating to List
-  {
-    Object patchObj = makePatch(
-        op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({1}));
-    testDynamicPatch(patchObj, value.as_object(), {});
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
-      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
-    }
-  }
-  {
-    Object patchObj = makePatch(
-        op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({}));
-    expectNoop(patchObj);
-  }
 }
 
 TEST_F(PatchTest, GeneratedStructPatch) {

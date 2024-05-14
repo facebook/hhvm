@@ -1019,6 +1019,7 @@ public:
   static bool ThreadTuneDebug;
   static bool ThreadTuneSkipWarmup;
   static double ThreadTuneAdjustmentPct;
+  static double ThreadTuneAdjustmentDownPct;
   static double ThreadTuneStepPct;
   // CPU high threshold is used for determining when to adjust threads. If the
   // host CPU is > this threshold no adjustments will be made.

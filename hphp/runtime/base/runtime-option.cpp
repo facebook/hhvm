@@ -923,6 +923,7 @@ std::string RuntimeOption::Fb303ServerIdentity;
 bool RuntimeOption::ThreadTuneDebug = false;
 bool RuntimeOption::ThreadTuneSkipWarmup = false;
 double RuntimeOption::ThreadTuneAdjustmentPct = 0;
+double RuntimeOption::ThreadTuneAdjustmentDownPct = 0;
 double RuntimeOption::ThreadTuneStepPct = 5;
 double RuntimeOption::ThreadTuneCPUThreshold = 95.0;
 double RuntimeOption::ThreadTuneThreadUtilizationThreshold = 90.0;
@@ -2004,6 +2005,8 @@ void RuntimeOption::Load(
                  "ThreadTuneSkipWarmup", ThreadTuneSkipWarmup);
     Config::Bind(ThreadTuneAdjustmentPct, ini, config,
                  "ThreadTuneAdjustmentPct", ThreadTuneAdjustmentPct);
+    Config::Bind(ThreadTuneAdjustmentDownPct, ini, config,
+                 "ThreadTuneAdjustmentDownPct", ThreadTuneAdjustmentDownPct);
     Config::Bind(ThreadTuneStepPct, ini, config,
                  "ThreadTuneStepPct", ThreadTuneStepPct);
     Config::Bind(ThreadTuneCPUThreshold, ini, config,

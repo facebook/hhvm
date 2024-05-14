@@ -659,7 +659,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             cmp_eq(x0, x1).qualified("InitProp param x")?;
             cmp_eq(y0, y1).qualified("InitProp param y")?;
         }
-        (Hhbc::InstanceOfD(_, x0, _), Hhbc::InstanceOfD(_, x1, _)) => {
+        (Hhbc::InstanceOfD(_, x0, _, _), Hhbc::InstanceOfD(_, x1, _, _)) => {
             cmp_eq(x0, x1).qualified("InstanceOfD param x")?;
         }
         (Hhbc::IsTypeC(_, x0, _), Hhbc::IsTypeC(_, x1, _)) => {

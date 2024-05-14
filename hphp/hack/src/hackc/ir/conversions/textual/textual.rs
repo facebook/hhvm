@@ -811,8 +811,8 @@ pub(crate) enum Expr {
     Field(Box<Expr>, Ty, FieldName),
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
-    /// __sil_instanceof(expr, \<ty\>)
-    InstanceOf(Box<Expr>, Ty),
+    /// __sil_instanceof(expr, \<ty\>, nullable)
+    InstanceOf(Box<Expr>, Ty, bool),
     Sid(Sid),
     Var(VarName),
 }
@@ -1424,10 +1424,15 @@ trait ExprWriter {
                 self.write_expr(offset)?;
                 self.internal_get_writer().write_all(b"]")?;
             }
-            Expr::InstanceOf(ref expr, ref ty) => {
+            Expr::InstanceOf(ref expr, ref ty, ref nullable) => {
                 write!(self.internal_get_writer(), "__sil_instanceof(")?;
                 self.write_expr(expr)?;
-                write!(self.internal_get_writer(), ", <{}>)", ty.display())?;
+                write!(
+                    self.internal_get_writer(),
+                    ", <{}>, {})",
+                    ty.display(),
+                    if *nullable { "1" } else { "0" }
+                )?;
             }
             Expr::Sid(sid) => write!(self.internal_get_writer(), "{}", FmtSid(sid))?,
             Expr::Var(ref var) => {

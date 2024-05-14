@@ -484,7 +484,7 @@ pub enum Hhbc {
     IncDecS([ValueId; 2], IncDecOp, LocId),
     IncludeEval(IncludeEval),
     InitProp(ValueId, PropName, InitPropOp, LocId),
-    InstanceOfD(ValueId, ClassName, LocId),
+    InstanceOfD(ValueId, ClassName, bool, LocId),
     IsLateBoundCls(ValueId, LocId),
     IsTypeC(ValueId, IsTypeOp, LocId),
     #[has_operands(none)]

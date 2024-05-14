@@ -1379,7 +1379,8 @@ impl FunctionParser<'_> {
             "include" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::Include, vid: self.vid(tok)?, loc })),
             "include_once" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::IncludeOnce, vid: self.vid(tok)?, loc })),
             "init_prop" => parse_instr!(tok, I::Hhbc(H::InitProp(p0, p1, p2, loc)), <p1:parse_prop_id> "," <p0:self.vid> "," <p2:parse_init_prop_op>),
-            "instance_of_d" => parse_instr!(tok, I::Hhbc(H::InstanceOfD(p0, p1, loc)), <p0:self.vid> "," <p1:parse_class_name>),
+            // parse nullable boolean from 0/1 arguments
+            "instance_of_d" => parse_instr!(tok, I::Hhbc(H::InstanceOfD(p0, p1, p2 > 0, loc)), <p0:self.vid> "," <p1:parse_class_name> "," <p2:parse_u32>),
             "is_late_bound_cls" => I::Hhbc(H::IsLateBoundCls(self.vid(tok)?, loc)),
             "is_type_c" => parse_instr!(tok, I::Hhbc(H::IsTypeC(p0, p1, loc)), <p0:self.vid> "," <p1:parse_is_type_op>),
             "is_type_l" => parse_instr!(tok, I::Hhbc(H::IsTypeL(p0, p1, loc)), <p0:self.lid> "," <p1:parse_is_type_op>),

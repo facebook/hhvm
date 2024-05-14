@@ -930,11 +930,12 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
                 FmtInitPropOp(op)
             )?;
         }
-        Hhbc::InstanceOfD(vid, clsid, _) => write!(
+        Hhbc::InstanceOfD(vid, clsid, nullable, _) => write!(
             w,
-            "instance_of_d {}, {}",
+            "instance_of_d {}, {}, {}",
             FmtVid(func, vid, ctx.verbose),
-            FmtIdentifierId(clsid.as_bytes_id())
+            FmtIdentifierId(clsid.as_bytes_id(),),
+            if nullable { "1" } else { "0" }
         )?,
         Hhbc::IsLateBoundCls(vid, _) => {
             write!(w, "is_late_bound_cls {}", FmtVid(func, vid, ctx.verbose))?;

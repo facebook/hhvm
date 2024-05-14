@@ -140,13 +140,26 @@ function check_param_types(int $a, float $b, string $c): void {
 // CHECK: define $root.check_is_class($this: *void, $a: *HackMixed) : .notnull *HackBool {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
-// CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>))
+// CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 0))
 // CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
 // CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
 // CHECK:   ret n1
 // CHECK: }
 function check_is_class(mixed $a): bool {
   return $a is C;
+}
+
+// TEST-CHECK-BAL: define $root.check_is_class_nullable
+// CHECK: define $root.check_is_class_nullable($this: *void, $a: *HackMixed) : .notnull *HackBool {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 1))
+// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
+// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
+// CHECK:   ret n1
+// CHECK: }
+function check_is_class_nullable(mixed $a): bool {
+  return $a is ?C;
 }
 
 // TEST-CHECK-BAL: define $root.check_global

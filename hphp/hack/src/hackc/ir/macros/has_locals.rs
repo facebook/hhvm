@@ -66,7 +66,8 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "ValueId"
             || ident == "VarId"
             || ident == "u32"
-            || ident == "usize")
+            || ident == "usize"
+            || ident == "bool")
     } else {
         true
     }

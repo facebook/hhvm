@@ -714,11 +714,14 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             )?;
             state.set_iid(iid, obj);
         }
-        Instr::Hhbc(Hhbc::InstanceOfD(target, cid, _)) => {
+        Instr::Hhbc(Hhbc::InstanceOfD(target, cid, nullable, _)) => {
             let ty = class::non_static_ty(cid).deref();
             let target = Box::new(state.lookup_vid(target));
             // The result of __sil_instanceof is unboxed int, but we need a boxed HackBool
-            let output = state.call_builtin(hack::Builtin::Bool, [Expr::InstanceOf(target, ty)])?;
+            let output = state.call_builtin(
+                hack::Builtin::Bool,
+                [Expr::InstanceOf(target, ty, nullable)],
+            )?;
             state.set_iid(iid, output);
         }
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {

@@ -213,7 +213,9 @@ impl FuncBuilderEx for FuncBuilder {
                 BaseType::VecOrDict => is_type_op(IsTypeOp::Dict, vid, loc),
 
                 BaseType::Class(cid) => {
-                    let constant = Immediate::from(TypeStruct::Unresolved(cid).into_typed_value());
+                    let constant =
+                    // passing nullable=false here because the above code should have dealt with the case that the original ety is nullable
+                        Immediate::from(TypeStruct::Unresolved(cid, false).into_typed_value());
                     let adata = self.emit_imm(constant);
                     Instr::Hhbc(Hhbc::IsTypeStructC(
                         [vid, adata],

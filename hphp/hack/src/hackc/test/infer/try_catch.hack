@@ -12,7 +12,7 @@
 // CHECK:   jmp b5
 // CHECK:   .handlers b2
 // CHECK: #b2(n2: *HackMixed):
-// CHECK:   n3 = $builtins.hack_bool(__sil_instanceof(n2, <Exception>))
+// CHECK:   n3 = $builtins.hack_bool(__sil_instanceof(n2, <Exception>, 0))
 // CHECK:   jmp b3, b4
 // CHECK: #b3:
 // CHECK:   prune ! $builtins.hack_is_true(n3)
@@ -45,7 +45,7 @@ function main(): void {
 // CHECK:   jmp b4
 // CHECK:   .handlers b1
 // CHECK: #b1(n1: *HackMixed):
-// CHECK:   n2 = $builtins.hack_bool(__sil_instanceof(n1, <Exception>))
+// CHECK:   n2 = $builtins.hack_bool(__sil_instanceof(n1, <Exception>, 0))
 // CHECK:   jmp b2, b3
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n2)

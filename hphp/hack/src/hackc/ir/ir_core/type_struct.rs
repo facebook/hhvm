@@ -10,7 +10,8 @@ use crate::TypedValue;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum TypeStruct {
-    Unresolved(ClassName),
+    // bool is for nullable
+    Unresolved(ClassName, bool),
     Null,
     Nonnull,
 }
@@ -20,10 +21,12 @@ impl TypeStruct {
         let kind_key = TypedValue::String(bytes_id!(b"kind"));
 
         match self {
-            TypeStruct::Unresolved(cid) => {
+            TypeStruct::Unresolved(cid, nullable) => {
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
                 let classname_key = TypedValue::String(bytes_id!(b"classname"));
                 let name = TypedValue::String(cid.as_bytes_id());
+                let nullable = TypedValue::Bool(nullable);
+                let nullable_key = TypedValue::String(bytes_id!(b"nullable"));
                 TypedValue::dict(vec![
                     DictEntry {
                         key: kind_key,
@@ -32,6 +35,10 @@ impl TypeStruct {
                     DictEntry {
                         key: classname_key,
                         value: name,
+                    },
+                    DictEntry {
+                        key: nullable_key,
+                        value: nullable,
                     },
                 ])
             }
@@ -67,7 +74,12 @@ impl TypeStruct {
                 None
             } else {
                 let cid = ClassName::from_bytes(classname).ok()?;
-                Some(TypeStruct::Unresolved(cid))
+                let nullable_key = TypedValue::String(bytes_id!(b"nullable"));
+                let nullable = match hhbc::dict_get(dv, &nullable_key) {
+                    None => false,
+                    Some(tv) => tv.get_bool()?,
+                };
+                Some(TypeStruct::Unresolved(cid, nullable))
             }
         } else {
             None
@@ -91,7 +103,7 @@ mod test {
             Some(TypeStruct::Nonnull)
         );
 
-        let class_ts = TypeStruct::Unresolved(ClassName::intern("ExampleClass"));
+        let class_ts = TypeStruct::Unresolved(ClassName::intern("ExampleClass"), false);
         assert_eq!(
             TypeStruct::try_from_typed_value(&class_ts.clone().into_typed_value()),
             Some(class_ts)

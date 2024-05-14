@@ -1012,7 +1012,11 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IncDecS => simple!(Hhbc::IncDecS),
         Opcode::InitProp => simple!(Hhbc::InitProp),
         Opcode::InstanceOf => todo!(),
-        Opcode::InstanceOfD => simple!(Hhbc::InstanceOfD),
+        Opcode::InstanceOfD(ref cn) => {
+            let cn = *cn;
+            let v = ctx.pop();
+            Action::Push(Instr::Hhbc(Hhbc::InstanceOfD(v, cn, false, ctx.loc)))
+        }
         Opcode::Int => simple!(Immediate::Int),
         Opcode::IsLateBoundCls => simple!(Hhbc::IsLateBoundCls),
         Opcode::IsTypeC => simple!(Hhbc::IsTypeC),

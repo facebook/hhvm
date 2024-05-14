@@ -29,7 +29,7 @@ class InternalGeneric<T> {}
 // CHECK:   store &$2 <- null: *HackMixed
 // CHECK:   n7 = n5.?.__construct()
 // CHECK:   n8 = $builtins.hhbc_lock_obj(n5)
-// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <Internal>))
+// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <Internal>, 0))
 // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK:   ret n5
 // CHECK: }
@@ -62,7 +62,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK:   store &$2 <- null: *HackMixed
 // CHECK:   n7 = n5.?.__construct()
 // CHECK:   n8 = $builtins.hhbc_lock_obj(n5)
-// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <External>))
+// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <External>, 0))
 // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK:   ret n5
 // CHECK: }

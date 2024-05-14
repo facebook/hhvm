@@ -171,6 +171,13 @@ impl TypedValue {
         }
     }
 
+    pub fn get_bool(&self) -> Option<bool> {
+        match self {
+            TypedValue::Bool(b) => Some(*b),
+            _ => None,
+        }
+    }
+
     pub fn get_dict(&self) -> Option<&[DictEntry]> {
         match self {
             TypedValue::Dict(dv) => Some(&dv.0),

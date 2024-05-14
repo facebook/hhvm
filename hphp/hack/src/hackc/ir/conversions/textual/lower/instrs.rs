@@ -987,8 +987,8 @@ fn rewrite_constant_type_check(
             let is_null = builder.emit_hhbc_builtin(hack::Hhbc::IsTypeNull, &[obj], loc);
             Some(builder.hhbc_builtin(hack::Hhbc::Not, &[is_null], loc))
         }
-        TypeStruct::Unresolved(clsid) => {
-            let instr = Instr::Hhbc(Hhbc::InstanceOfD(obj, clsid, loc));
+        TypeStruct::Unresolved(clsid, nullable) => {
+            let instr = Instr::Hhbc(Hhbc::InstanceOfD(obj, clsid, nullable, loc));
             Some(instr)
         }
     }

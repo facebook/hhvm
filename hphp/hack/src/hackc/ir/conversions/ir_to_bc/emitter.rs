@@ -496,7 +496,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::IncDecS(_, op, _) => Opcode::IncDecS(op),
             Hhbc::IncludeEval(ref ie) => self.emit_include_eval(ie),
             Hhbc::InitProp(_, prop, op, _) => Opcode::InitProp(prop, op),
-            Hhbc::InstanceOfD(_, clsid, _) => Opcode::InstanceOfD(clsid),
+            Hhbc::InstanceOfD(_, clsid, _, _) => Opcode::InstanceOfD(clsid),
             Hhbc::IsLateBoundCls(_, _) => Opcode::IsLateBoundCls,
             Hhbc::IsTypeC(_, op, _) => Opcode::IsTypeC(op),
             Hhbc::IsTypeL(lid, op, _) => {

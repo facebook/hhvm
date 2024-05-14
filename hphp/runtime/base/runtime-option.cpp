@@ -58,6 +58,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
@@ -1216,6 +1217,8 @@ void RuntimeOption::StoreTierOverwriteInputs(const std::string &machine, const s
 }
 
 void logTierOverwriteInputs() {
+  if(!Cfg::Server::LogTierOverwriteInputs) return;
+
   StructuredLogEntry log_entry;
   log_entry.force_init = true;
   log_entry.setStr("machine", RuntimeOption::TierOverwriteInputs["machine"]);

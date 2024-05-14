@@ -894,6 +894,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - int Server.GzipMaxCompressionLevel = 9, UNKNOWN
 - bool Server.GzipUseLocalArena = false, UNKNOWN
 
+  Enable additional for config.hdf overwrite inputs to scuba:hhvm_config_hdf_logs (eg. machine, cpu, tier, tag etc)
+
+- bool Server.LogTierOverwriteInputs = false, ffledgling
+
 # Xbox
 
 - int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN

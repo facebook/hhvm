@@ -48,12 +48,12 @@ GaussianMixtureModel::GaussianMixtureModel(const folly::dynamic& cfgDict) {
     this->sigmas.push_back(sigma);
   }
   threadLocalGaussianGenerators =
-      folly::ThreadLocal<TGaussianGenerators>([this]() -> TGaussianGenerators* {
-        TGaussianGenerators* ggP = new TGaussianGenerators();
+      folly::ThreadLocal<TGaussianGenerators>([this] {
+        TGaussianGenerators ggP = TGaussianGenerators();
         for (uint32_t idx = 0; idx < this->nComponents; ++idx) {
           boost::normal_distribution<double> dist(
               this->mus[idx], this->sigmas[idx]);
-          ggP->push_back(
+          ggP.push_back(
               boost::variate_generator<RNG, boost::normal_distribution<double>>(
                   RNG::getRNG(), dist));
         }

@@ -205,7 +205,7 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
  public:
   explicit DebuggingFrameHandler(ThriftServer& server)
       : origServer_(server),
-        reqRegistry_([] { return new RequestsRegistry(0, 0, 0); }) {
+        reqRegistry_([] { return RequestsRegistry(0, 0, 0); }) {
     auto tf =
         std::make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
     tm_ = std::make_shared<SimpleThreadManager>(1);

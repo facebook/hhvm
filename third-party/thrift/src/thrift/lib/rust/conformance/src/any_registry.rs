@@ -21,6 +21,7 @@ use std::collections::HashSet;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
+use anyhow::Context;
 use anyhow::Result;
 use fbthrift::binary_protocol;
 use fbthrift::compact_protocol;
@@ -35,10 +36,16 @@ use crate::universal_name::UniversalHashAlgorithm;
 
 const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;
 
+pub struct AnySerDeser {
+    pub serialize: fn(Box<dyn std::any::Any>, StandardProtocol) -> Result<Vec<u8>>,
+    pub deserialize: fn(&[u8], StandardProtocol) -> Result<Box<dyn std::any::Any>>,
+}
+
 pub struct AnyRegistry {
     uri_to_typeid: HashMap<&'static str, TypeId>,
     typeid_to_uri: HashMap<TypeId, &'static str>,
     alg_to_hashes: HashMap<UniversalHashAlgorithm, HashSet<Vec<u8>>>,
+    typeid_to_serializers: HashMap<TypeId, AnySerDeser>,
 }
 
 pub trait SerializeRef = binary_protocol::SerializeRef
@@ -56,6 +63,7 @@ impl AnyRegistry {
         Self {
             uri_to_typeid: HashMap::new(),
             typeid_to_uri: HashMap::new(),
+            typeid_to_serializers: HashMap::new(),
             alg_to_hashes,
         }
     }
@@ -74,6 +82,20 @@ impl AnyRegistry {
             let hash = get_universal_hash(*alg, uri)?;
             hashes.insert(hash);
         }
+        self.typeid_to_serializers.insert(
+            type_id,
+            AnySerDeser {
+                serialize: |x, prot| {
+                    x.downcast::<T>().map_or_else(
+                        |_| bail!("bad any (\"{}\" expected)", T::uri()),
+                        |t| serialize::<T>(&t, prot),
+                    )
+                },
+                deserialize: |bytes, prot| {
+                    deserialize::<T>(bytes, prot).map(|t| Box::new(t) as Box<dyn std::any::Any>)
+                },
+            },
+        );
         Ok(true)
     }
 
@@ -129,6 +151,16 @@ impl AnyRegistry {
         }
         deserialize(&obj.data, obj.protocol.unwrap_or(StandardProtocol::Compact))
     }
+
+    pub fn serializers(&self, uri: &str) -> Result<&AnySerDeser> {
+        self.typeid_to_serializers
+            .get(
+                self.uri_to_typeid
+                    .get(uri)
+                    .context("typeid lookup failure")?,
+            )
+            .context("serializers lookup failure")
+    }
 }
 
 fn serialize<T: SerializeRef>(obj: &T, protocol: StandardProtocol) -> Result<Vec<u8>> {
@@ -164,6 +196,14 @@ mod tests {
         }
     }
 
+    fn get_test_protocols() -> Vec<StandardProtocol> {
+        vec![
+            StandardProtocol::Binary,
+            StandardProtocol::Compact,
+            StandardProtocol::SimpleJson,
+        ]
+    }
+
     fn test_serialize_round_trip_for_protocol(protocol: StandardProtocol) -> Result<()> {
         let original = get_test_object();
 
@@ -178,13 +218,7 @@ mod tests {
 
     #[test]
     fn test_round_trip() -> Result<()> {
-        let protocols = vec![
-            StandardProtocol::Binary,
-            StandardProtocol::Compact,
-            StandardProtocol::SimpleJson,
-        ];
-
-        for protocol in protocols {
+        for protocol in get_test_protocols() {
             test_serialize_round_trip_for_protocol(protocol)?;
         }
 
@@ -200,5 +234,29 @@ mod tests {
 
         assert!(deserialize::<struct_map_string_i32>(b"", StandardProtocol::Custom).is_err());
         assert!(deserialize::<struct_map_string_i32>(b"", StandardProtocol::Json).is_err());
+    }
+
+    #[test]
+    fn test_round_trip_through_any() -> Result<()> {
+        let mut any_registry = AnyRegistry::new();
+        any_registry.register_type::<struct_map_string_i32>()?;
+
+        let AnySerDeser {
+            serialize,
+            deserialize,
+        } = any_registry.serializers(struct_map_string_i32::uri())?;
+
+        let obj = get_test_object();
+        for protocol in get_test_protocols() {
+            let any: Box<dyn std::any::Any> = Box::new(obj.clone());
+            let bytes = serialize(any, protocol)?;
+            assert!(!bytes.is_empty());
+            let val = *(deserialize(&bytes, protocol)?
+                .downcast::<struct_map_string_i32>()
+                .map_err(|_| anyhow::Error::msg("cast failure")))?;
+            assert_eq!(val, obj);
+        }
+
+        Ok(())
     }
 }

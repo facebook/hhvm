@@ -236,6 +236,28 @@ mod tests {
         assert!(deserialize::<struct_map_string_i32>(b"", StandardProtocol::Json).is_err());
     }
 
+    fn test_store_load_for_protocol(protocol: StandardProtocol) -> Result<()> {
+        let mut registry = AnyRegistry::new();
+        registry.register_type::<struct_map_string_i32>()?;
+
+        let original = get_test_object();
+        let any_obj = registry.store(&original, protocol)?;
+        assert!(any_obj.typeHashPrefixSha2_256.is_some());
+        assert_eq!(protocol, any_obj.protocol.unwrap());
+
+        let loaded = registry.load(&any_obj)?;
+        assert_eq!(original, loaded);
+        Ok(())
+    }
+
+    #[test]
+    fn test_round_trip_through_store_load() -> Result<()> {
+        for protocol in get_test_protocols() {
+            test_store_load_for_protocol(protocol)?;
+        }
+        Ok(())
+    }
+
     #[test]
     fn test_round_trip_through_any() -> Result<()> {
         let mut any_registry = AnyRegistry::new();

@@ -178,12 +178,15 @@ let handler =
           (Pos_or_decl.of_raw_pos pos, field_name)
       | (_, p, Binop { bop = Ast_defs.QuestionQuestion; lhs = exp; _ }) ->
         let rec check_nested_accesses = function
-          | (_, _, Array_get (exp, Some (_, pos, String field_name))) ->
-            shape_access_with_non_existent_field
-              p
-              env
-              exp
-              (Pos_or_decl.of_raw_pos pos, field_name);
+          | (_, _, Array_get (exp, Some indexing_expr)) ->
+            (match indexing_expr with
+            | (_, pos, String field_name) ->
+              shape_access_with_non_existent_field
+                p
+                env
+                exp
+                (Pos_or_decl.of_raw_pos pos, field_name)
+            | _ -> ());
             check_nested_accesses exp
           | _ -> ()
         in

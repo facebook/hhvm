@@ -262,6 +262,7 @@ struct Context<'a> {
     pub active_callable: Option<S<'a>>,
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
+    pub active_enum_class: Option<S<'a>>,
     pub active_unstable_features: HashSet<UnstableFeatures>,
 }
 
@@ -2643,6 +2644,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         errors::superglobal_disallowed(name),
                     ))
                 } else if name == sn::special_idents::THIS && !self.has_this() {
+                    if self.env.context.active_enum_class.is_some() {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            errors::enum_class_references_this,
+                        ))
+                    }
                     // If we are in the special top level debugger function, lets not check for $this since
                     // it will be properly lifted in closure convert
                     if self
@@ -5365,6 +5372,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ModuleMembershipDeclaration(_) => {
                 self.in_module = true;
             }
+            EnumClassDeclaration(_) => {
+                prev_context = Some(self.env.context.clone());
+                self.env.context.active_enum_class = Some(node);
+            }
             _ => {}
         };
 
@@ -5762,6 +5773,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable: None,
                 active_callable_attr_spec: None,
                 active_const: None,
+                active_enum_class: None,
                 active_unstable_features: default_unstable_features,
             },
             hhvm_compat_mode,

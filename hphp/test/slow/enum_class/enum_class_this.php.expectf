@@ -1,0 +1,1 @@
+Fatal error: `$this` cannot be used inside an enum class in %s/enum_class_this.php on line 8

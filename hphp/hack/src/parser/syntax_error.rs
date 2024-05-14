@@ -1145,6 +1145,9 @@ pub const enum_class_constant_missing_initializer: Error =
 pub const enum_class_abstract_constant_with_value: Error =
     Cow::Borrowed("Abstract enum class constants must not provide any initial value");
 
+pub const enum_class_references_this: Error =
+    Cow::Borrowed("`$this` cannot be used inside an enum class");
+
 pub const enum_with_modifiers: Error = Cow::Borrowed("Enums can't have any modifiers");
 
 pub const enum_missing_base_type: Error =

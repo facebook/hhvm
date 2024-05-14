@@ -27,10 +27,12 @@ cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
 
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/rust.thrift"
 include "thrift/conformance/if/protocol.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
 // Any encoded thrift value.
+@rust.Ord
 struct Any {
   // The unique name for this type.
   1: optional string type;
@@ -46,7 +48,7 @@ struct Any {
 
   // The encoded value.
   5: standard.ByteBuffer data;
-} (rust.ord)
+}
 
 // Typedef for Any.
 // LazyAny provides higher level APIs and hides all internal complexity of Any.

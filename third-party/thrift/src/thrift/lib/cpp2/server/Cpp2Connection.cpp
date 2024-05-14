@@ -327,7 +327,8 @@ void Cpp2Connection::killRequestServerOverloaded(
   }
   if (metricCollector_) {
     metricCollector_->requestRejected(
-        {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
+        {IMetricCollector::RequestRejectedScope::ServerOverloaded{
+            overloadResult.loadShedder}});
   }
 
   // Nothing to do for Thrift oneway request.

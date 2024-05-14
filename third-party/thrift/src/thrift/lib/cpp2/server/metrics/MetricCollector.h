@@ -15,6 +15,9 @@
  */
 
 #include <cstdint>
+#include <variant>
+
+#include <thrift/lib/cpp2/server/Overload.h>
 
 #pragma once
 
@@ -25,12 +28,16 @@ class IMetricCollector {
   virtual ~IMetricCollector() = default;
 
   struct RequestRejectedScope {
-    enum class Reason : uint8_t {
-      UNKNOWN,
-      SERVER_OVERLOADED,
+    // Reasons
+    struct Unknown {};
+
+    struct ServerOverloaded {
+      const LoadShedder loadShedder;
     };
 
-    const Reason reason;
+    using Reason = std::variant<Unknown, ServerOverloaded>;
+
+    const Reason reason{Unknown{}};
   };
 
   virtual void requestRejected(const RequestRejectedScope&) = 0;

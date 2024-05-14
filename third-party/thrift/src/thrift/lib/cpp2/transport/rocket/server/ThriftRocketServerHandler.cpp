@@ -730,7 +730,8 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
   }
   if (metricCollector_) {
     metricCollector_->requestRejected(
-        {IMetricCollector::RequestRejectedScope::Reason::SERVER_OVERLOADED});
+        {IMetricCollector::RequestRejectedScope::ServerOverloaded{
+            overloadResult.loadShedder}});
   }
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(

@@ -194,13 +194,27 @@ class PatchTest : public testing::Test {
       }
     };
 
-    auto masks = extractMaskViewFromPatch(patchObj);
-    checkMaskView(masks.read.includes_map_ref().value(), expectedReadKeys);
-    checkMaskView(masks.write.includes_map_ref().value(), expectedWriteKeys);
+    auto maskViews = extractMaskViewFromPatch(patchObj);
+    auto masks = extractMaskFromPatch(patchObj);
 
-    masks = extractMaskFromPatch(patchObj);
-    checkMask(masks.read.includes_string_map_ref().value(), expectedReadKeys);
-    checkMask(masks.write.includes_string_map_ref().value(), expectedWriteKeys);
+    if (!expectedReadKeys.empty()) {
+      checkMaskView(
+          maskViews.read.includes_map_ref().value(), expectedReadKeys);
+      checkMask(masks.read.includes_string_map_ref().value(), expectedReadKeys);
+    } else {
+      EXPECT_EQ(maskViews.read, noneMask());
+      EXPECT_EQ(masks.read, noneMask());
+    }
+
+    if (!expectedWriteKeys.empty()) {
+      checkMaskView(
+          maskViews.write.includes_map_ref().value(), expectedWriteKeys);
+      checkMask(
+          masks.write.includes_string_map_ref().value(), expectedWriteKeys);
+    } else {
+      EXPECT_EQ(maskViews.write, noneMask());
+      EXPECT_EQ(masks.write, noneMask());
+    }
   }
 
   static void checkMapMask(
@@ -714,7 +728,7 @@ TEST_F(PatchTest, Map) {
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
             {{"key", "key updated value"}}));
     EXPECT_EQ(expected, applyDynamicPatch(patchObj, value).as_map());
-    checkMapMask(patchObj, {"key"});
+    checkMapMask(patchObj, {}, {"key"});
   }
   {
     Object patchObj = makePatch(op::PatchOp::Put, emptyValue);

@@ -580,6 +580,33 @@ void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
   }
 }
 
+// `view` specifies whether to use address of Value to populate map mask
+// (deprecated).
+void insertWriteKeysToMask(
+    Mask& mask, const folly::F14FastMap<Value, Value>& map, bool view) {
+  if (mask == allMask()) {
+    return;
+  }
+
+  if (view) {
+    for (const auto& [key, _] : map) {
+      mask.includes_map_ref().ensure().emplace(
+          reinterpret_cast<int64_t>(&key), allMask());
+    }
+    return;
+  }
+
+  for (const auto& [key, _] : map) {
+    if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
+      mask.includes_map_ref().ensure().emplace(
+          static_cast<int64_t>(getMapIdFromValue(key)), allMask());
+    } else {
+      mask.includes_string_map_ref().ensure().emplace(
+          getStringFromValue(key), allMask());
+    }
+  }
+}
+
 // Remove only requires writing fields that exists in the patch.
 void insertRemoveWriteFieldsToMask(Mask& mask, const std::vector<Value>& ids) {
   if (mask == allMask()) {
@@ -661,11 +688,11 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
     }
   }
 
-  // Put is a read-write operation if not a map patch. Otherwise add keys to
-  // mask.
+  // If Put, it is a write operation for map and read-write operation for
+  // others.
   if (auto* value = findOp(patch, PatchOp::Put)) {
     if (value->is_map()) {
-      insertFieldsToMask(masks, *value, false, view);
+      insertWriteKeysToMask(masks.write, value->as_map(), view);
     } else if (!isIntrinsicDefault(*value)) {
       return {allMask(), allMask()};
     }

@@ -46,8 +46,16 @@ func TestStructMapKey(t *testing.T) {
 	}
 }
 
+func getValues[K comparable, V any](m map[K]V) []V {
+	values := []V{}
+	for _, v := range m {
+		values = append(values, v)
+	}
+	return values
+}
+
 func TestEnumValues(t *testing.T) {
-	generatedValues := thrifttest.NumberzValues
+	generatedValues := getValues(thrifttest.NumberzToValue)
 	sort.Slice(generatedValues, func(i, j int) bool { return generatedValues[i] < generatedValues[j] })
 
 	values := []thrifttest.Numberz{}
@@ -62,7 +70,7 @@ func TestEnumValues(t *testing.T) {
 }
 
 func TestEnumNames(t *testing.T) {
-	generatedNames := thrifttest.NumberzNames
+	generatedNames := getValues(thrifttest.NumberzToName)
 	sort.Strings(generatedNames)
 
 	names := []string{}

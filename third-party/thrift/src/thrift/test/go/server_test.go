@@ -67,7 +67,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 // connectTestHeaderServer Create a client and connect to a test server
 func connectTestHeaderServer(
 	addr net.Addr,
-) (*thrifttest.ThriftTestChannelClient, error) {
+) (*thrifttest.ThriftTestClient, error) {
 	socket, err := thrift.NewSocket(thrift.SocketAddr(addr.String()), thrift.SocketTimeout(localConnTimeout))
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func connectTestHeaderServer(
 	}
 
 	prot := thrift.NewHeaderProtocol(socket)
-	return thrifttest.NewThriftTestChannelClient(thrift.NewSerialChannel(prot)), nil
+	return thrifttest.NewThriftTestClient(prot), nil
 }
 
 func doClientTest(ctx context.Context, t *testing.T) {
@@ -96,7 +96,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	}
 	defer client.Close()
 
-	res, err := client.DoTestString(ctx, testCallString)
+	res, err := client.DoTestStringContext(ctx, testCallString)
 	if err != nil {
 		t.Fatalf("failed to query test server: %s", err.Error())
 	}
@@ -107,7 +107,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 
 	// Try sending a lot of requests
 	for i := 0; i < 1000; i++ {
-		res, err = client.DoTestString(ctx, testCallString)
+		res, err = client.DoTestStringContext(ctx, testCallString)
 		if err != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -122,7 +122,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	exp1.Message = testCallString
 	handler.ReturnError = exp1
 
-	err = client.DoTestException(ctx, testCallString)
+	err = client.DoTestExceptionContext(ctx, testCallString)
 	if texp, ok := err.(*thrifttest.Xception); ok && texp != nil {
 		if texp.ErrorCode != 5 || texp.Message != testCallString {
 			t.Fatalf("application exception values incorrect: got=%s", texp.String())
@@ -146,7 +146,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 
 	// Try sending a lot of large things
 	for i := 0; i < 10; i++ {
-		resp, terr := client.DoTestInsanity(ctx, insanity)
+		resp, terr := client.DoTestInsanityContext(ctx, insanity)
 		if terr != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -167,7 +167,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	}
 
 	// Ensure poorly named method exists
-	_ = client.XDoTestPoorName(ctx)
+	_ = client.XDoTestPoorNameContext(ctx)
 }
 
 func TestHeaderHeader(t *testing.T) {

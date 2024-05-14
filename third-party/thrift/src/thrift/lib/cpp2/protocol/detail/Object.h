@@ -1089,7 +1089,7 @@ struct ProtocolValueToThriftValue<type::string_t> {
 
   bool operator()(const Value& value, folly::IOBuf& s) const {
     std::unique_ptr<folly::IOBuf> buf;
-    if (auto ret = operator()(value, buf)) {
+    if (operator()(value, buf)) {
       s = *buf;
       return true;
     }

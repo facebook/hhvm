@@ -277,12 +277,12 @@ void Operation::completeOperationInner(OperationResult result) {
   client()->deferRemoveOperation(this);
 }
 
-std::unique_ptr<Connection> Operation::releaseConnection() {
+std::unique_ptr<Connection>&& Operation::releaseConnection() {
   CHECK_THROW(
       state_ == OperationState::Completed ||
           state_ == OperationState::Unstarted,
       db::OperationStateException);
-  return conn_proxy_.releaseConnection();
+  return std::move(conn_proxy_.releaseConnection());
 }
 
 void Operation::snapshotMysqlErrors() {
@@ -2007,7 +2007,7 @@ std::unique_ptr<Connection> blockingConnectHelper(
         conn_op->elapsed());
   }
 
-  return conn_op->releaseConnection();
+  return std::move(conn_op->releaseConnection());
 }
 
 Operation::OwnedConnection::OwnedConnection() {}
@@ -2019,7 +2019,7 @@ Connection* Operation::OwnedConnection::get() {
   return conn_.get();
 }
 
-std::unique_ptr<Connection> Operation::OwnedConnection::releaseConnection() {
+std::unique_ptr<Connection>&& Operation::OwnedConnection::releaseConnection() {
   return std::move(conn_);
 }
 
@@ -2034,12 +2034,11 @@ Connection* Operation::ConnectionProxy::get() {
   return ownedConn_.get() ? ownedConn_.get() : referencedConn_.get();
 }
 
-std::unique_ptr<Connection> Operation::ConnectionProxy::releaseConnection() {
+std::unique_ptr<Connection>&& Operation::ConnectionProxy::releaseConnection() {
   if (ownedConn_.get() != nullptr) {
     return ownedConn_.releaseConnection();
   }
-
-  return nullptr;
+  throw std::runtime_error("Releasing connection from referenced conn");
 }
 
 std::string Operation::threadOverloadMessage(double cbDelayUs) const {

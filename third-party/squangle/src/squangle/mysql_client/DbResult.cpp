@@ -6,11 +6,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/ScopeGuard.h>
+#include "squangle/mysql_client/DbResult.h"
+
 #include <ostream>
 
+#include <folly/ScopeGuard.h>
+
 #include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook {
@@ -47,29 +49,12 @@ MysqlException::MysqlException(
       mysql_errno_(mysql_errno),
       mysql_error_(mysql_error) {}
 
-QueryException::QueryException(
-    int num_executed_queries,
-    OperationResult failure_type,
-    unsigned int mysql_errno,
-    const std::string& mysql_error,
-    ConnectionKey conn_key,
-    Duration elapsed_time,
-    std::unique_ptr<Connection> conn)
-    : MysqlException(
-          failure_type,
-          mysql_errno,
-          mysql_error,
-          std::move(conn_key),
-          elapsed_time),
-      num_executed_queries_(num_executed_queries),
-      conn_(std::make_shared<std::unique_ptr<Connection>>(std::move(conn))) {}
-
 bool DbResult::ok() const {
   return result_ == OperationResult::Succeeded;
 }
 
 DbResult::DbResult(
-    std::unique_ptr<Connection> conn,
+    std::unique_ptr<Connection>&& conn,
     OperationResult result,
     ConnectionKey conn_key,
     Duration elapsed)
@@ -82,7 +67,7 @@ std::unique_ptr<Connection> DbResult::releaseConnection() {
 }
 
 ConnectResult::ConnectResult(
-    std::unique_ptr<Connection> conn,
+    std::unique_ptr<Connection>&& conn,
     OperationResult result,
     ConnectionKey conn_key,
     Duration elapsed_time,
@@ -237,7 +222,8 @@ folly::Optional<StreamedQueryResult> MultiQueryStreamHandler::nextQuery() {
     start();
   }
 
-  wait();
+  // Runs in User thread
+  connection()->wait();
   DCHECK(operation_->isPaused() || operation_->done());
 
   folly::Optional<StreamedQueryResult> res;
@@ -257,7 +243,8 @@ folly::Optional<StreamedQueryResult> MultiQueryStreamHandler::nextQuery() {
 }
 
 std::unique_ptr<Connection> MultiQueryStreamHandler::releaseConnection() {
-  wait();
+  // Runs in User thread
+  connection()->wait();
   if (state_ == State::OperationSucceeded || state_ == State::OperationFailed) {
     return operation_->releaseConnection();
   }
@@ -299,34 +286,14 @@ void MultiQueryStreamHandler::streamCallback(
   } else if (op_state == StreamState::Success) {
     state_ = State::OperationSucceeded;
   } else {
-    if (op->conn()->client()->shouldAddConnectionToException()) {
-      // New behavior - move the connection into the QueryException so the
-      // client can re-use it (assuming the connection was not dropped).
-      state_ = State::OperationFailed;
-      auto conn = op->releaseConnection();
-      conn->notify();
-      auto connKey = *conn->getKey();
-      exception_wrapper_ = folly::make_exception_wrapper<QueryException>(
-          op->numCurrentQuery(),
-          op->result(),
-          op->mysql_errno(),
-          op->mysql_error(),
-          std::move(connKey),
-          op->elapsed(),
-          std::move(conn));
-      state_ = State::OperationFailed;
-      return; // Return here so we don't notify the connection again.
-    } else {
-      // Old behavior - connection is not moved in and goes out of scope.
-      exception_wrapper_ = folly::make_exception_wrapper<QueryException>(
-          op->numCurrentQuery(),
-          op->result(),
-          op->mysql_errno(),
-          op->mysql_error(),
-          *op->connection()->getKey(),
-          op->elapsed());
-      state_ = State::OperationFailed;
-    }
+    exception_wrapper_ = folly::make_exception_wrapper<QueryException>(
+        op->numCurrentQuery(),
+        op->result(),
+        op->mysql_errno(),
+        op->mysql_error(),
+        *op->connection()->getKey(),
+        op->elapsed());
+    state_ = State::OperationFailed;
   }
   op->connection()->notify();
 }
@@ -334,7 +301,7 @@ void MultiQueryStreamHandler::streamCallback(
 folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
     StreamedQueryResult* result) {
   checkStreamedQueryResult(result);
-  wait();
+  connection()->wait();
   // Accepted states: ReadRows, ReadResult, OperationFailed
   if (state_ == State::ReadRows) {
     if (!operation_->rowStream()->hasNext()) {
@@ -360,7 +327,7 @@ folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
 
 void MultiQueryStreamHandler::fetchQueryEnd(StreamedQueryResult* result) {
   checkStreamedQueryResult(result);
-  wait();
+  connection()->wait();
   // Accepted states: ReadResult, OperationFailed
   if (state_ == State::ReadResult) {
     handleQueryEnded(result);
@@ -409,14 +376,6 @@ void MultiQueryStreamHandler::start() {
   operation_->setCallback(this);
   state_ = State::WaitForInitResult;
   operation_->run();
-}
-
-void MultiQueryStreamHandler::wait() {
-  auto* conn = connection();
-  if (conn) {
-    // Runs in User thread
-    conn->wait();
-  }
 }
 
 void MultiQueryStreamHandler::checkStreamedQueryResult(

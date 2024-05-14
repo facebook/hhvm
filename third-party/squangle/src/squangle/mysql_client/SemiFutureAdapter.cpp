@@ -73,17 +73,13 @@ void handleQueryCompletion(
     promise.setValue(std::make_pair(
         std::move(result), std::move(op.callbacks_.post_query_callback_)));
   } else {
-    auto possibleConn = conn->client()->shouldAddConnectionToException()
-        ? std::move(conn)
-        : nullptr;
     promise.setException(QueryException(
         op.numQueriesExecuted(),
         op.result(),
         op.mysql_errno(),
         op.mysql_error(),
         std::move(conn_key),
-        op.elapsed(),
-        std::move(possibleConn)));
+        op.elapsed()));
   }
 }
 

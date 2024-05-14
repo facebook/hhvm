@@ -275,17 +275,13 @@ Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
   op->run()->wait();
 
   if (!op->ok()) {
-    auto possibleConn = op->conn()->client()->shouldAddConnectionToException()
-        ? op->releaseConnection()
-        : nullptr;
     throw QueryException(
         op->numQueriesExecuted(),
         op->result(),
         op->mysql_errno(),
         op->mysql_error(),
         *getKey(),
-        op->elapsed(),
-        std::move(possibleConn));
+        op->elapsed());
   }
   auto conn_key = *op->connection()->getKey();
   DbQueryResult result(
@@ -346,18 +342,13 @@ DbMultiQueryResult Connection::multiQuery(
   op->run()->wait();
 
   if (!op->ok()) {
-    auto possibleConn = op->conn()->client()->shouldAddConnectionToException()
-        ? op->releaseConnection()
-        : nullptr;
-
     throw QueryException(
         op->numQueriesExecuted(),
         op->result(),
         op->mysql_errno(),
         op->mysql_error(),
         *getKey(),
-        op->elapsed(),
-        std::move(possibleConn));
+        op->elapsed());
   }
 
   auto conn_key = *op->connection()->getKey();

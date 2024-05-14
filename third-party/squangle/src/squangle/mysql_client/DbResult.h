@@ -24,7 +24,6 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
-class Connection;
 enum class OperationResult;
 
 // Basic info about the Operation and connection info, everything that is
@@ -92,40 +91,22 @@ class QueryException : public MysqlException {
       unsigned int mysql_errno,
       const std::string& mysql_error,
       ConnectionKey conn_key,
-      Duration elapsed_time,
-      std::unique_ptr<Connection> conn = nullptr);
+      Duration elapsed_time)
+      : MysqlException(
+            failure_type,
+            mysql_errno,
+            mysql_error,
+            std::move(conn_key),
+            elapsed_time),
+        num_executed_queries_(num_executed_queries) {}
 
   // In case of MultiQuery was ran, some queries might have succeeded
   int numExecutedQueries() const {
     return num_executed_queries_;
   }
 
-  // Note the QueryException is NOT guaranteed to have the connection available
-  // and this function CAN return nullptr. This occurs under three scenarios:
-  // 1. The feature is turned off.  This is the default for Squangle to provide
-  //    backwards compatibility with previous behavior.
-  // 2. You are using the "sync" API (i.e. conn->query() or conn->multiQuery()).
-  //    In this scenario the QueryOperation only references the connection as
-  //    the `std::unique_ptr<Connection>` is not moved into the QueryOperation.
-  //    Since it never owns the connection it can't release it to the exception.
-  //    Note that the client still has the connection in `conn`.
-  // 3. There were multiple copies of the QueryException and a different one
-  //    already released the connection.  The QueryException is copyable (note
-  //    that we used a shared_ptr<unique_ptr<Connection>> because of this).
-  //    Usually a copy is not needed, but it is possible and if another copy
-  //    was used to call releaseConnection() then a second call on another
-  //    QueryException that shared the same connection would return nullptr.
-  std::unique_ptr<Connection> releaseConnection() const {
-    return std::move(*conn_);
-  }
-
  private:
   int num_executed_queries_;
-  // We cannot hold the unique_ptr directly here because QueryException has to
-  // be copyable.  Instead hold a shared_ptr to the unique_ptr.  Each copy of
-  // the QueryException is pointing to the same unique_ptr.  As soon as someone
-  // pulls the connection out it is no longer available to any of them.
-  mutable std::shared_ptr<std::unique_ptr<Connection>> conn_;
 };
 
 class Connection;
@@ -133,7 +114,7 @@ class Connection;
 class DbResult : public OperationResultBase {
  public:
   DbResult(
-      std::unique_ptr<Connection> conn,
+      std::unique_ptr<Connection>&& conn,
       OperationResult result,
       ConnectionKey conn_key,
       Duration elapsed_time);
@@ -157,7 +138,7 @@ class DbResult : public OperationResultBase {
 class ConnectResult : public DbResult {
  public:
   ConnectResult(
-      std::unique_ptr<Connection> conn,
+      std::unique_ptr<Connection>&& conn,
       OperationResult result,
       ConnectionKey conn_key,
       Duration elapsed_time,
@@ -178,7 +159,7 @@ class FetchResult : public DbResult {
       SingleMultiResult query_result,
       int num_queries_executed,
       uint64_t result_size,
-      std::unique_ptr<Connection> conn,
+      std::unique_ptr<Connection>&& conn,
       OperationResult result,
       ConnectionKey conn_key,
       Duration elapsed)
@@ -651,9 +632,6 @@ class MultiQueryStreamHandler {
   // This schedules the operation to be run and starts the result retreival
   // process
   void start();
-
-  // This blocks until the operation has finished
-  void wait();
 
   void streamCallback(FetchOperation* op, StreamState state);
 

@@ -204,7 +204,7 @@ using AsyncTranslationDispatcher = JobQueueDispatcher<AsyncTranslationWorker>;
 AsyncTranslationDispatcher* s_asyncTranslationDispatcher;
 
 AsyncTranslationDispatcher& asyncTranslationDispatcher() {
-  assertx(s_asyncTranslationDispatcher);
+  always_assert(s_asyncTranslationDispatcher);
   return *s_asyncTranslationDispatcher;
 }
 } // namespace
@@ -222,6 +222,7 @@ void joinAsyncTranslationWorkerThreads() {
   FTRACE(2, "Waiting for background jit worker threads\n");
   s_asyncTranslationDispatcher->stop();
   delete s_asyncTranslationDispatcher;
+  s_asyncTranslationDispatcher = nullptr;
   // Clearing the ConcurrentHashMap here avoids a crash in the destructor.
   s_enqueuedSKs.clear();
 }

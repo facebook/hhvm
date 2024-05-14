@@ -3053,7 +3053,6 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
-  LOG_AND_IGNORE(jit::mcgen::joinAsyncTranslationWorkerThreads())
   LOG_AND_IGNORE(jit::tc::processExit())
   LOG_AND_IGNORE(bespoke::waitOnExportProfiles())
   LOG_AND_IGNORE(PageletServer::Stop())
@@ -3061,6 +3060,7 @@ void hphp_process_exit() noexcept {
   // Debugger::Stop() needs an execution context
   LOG_AND_IGNORE(g_context.getCheck())
   LOG_AND_IGNORE(Eval::Debugger::Stop())
+  LOG_AND_IGNORE(jit::mcgen::joinAsyncTranslationWorkerThreads())
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(shutdownUnitPrefetcher());
   LOG_AND_IGNORE(shutdownUnitReaper());

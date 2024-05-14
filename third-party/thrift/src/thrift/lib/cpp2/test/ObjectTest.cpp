@@ -409,8 +409,7 @@ void testParseObject() {
   for (const auto& val : data::ValueGenerator<Tag>::getKeyValues()) {
     SCOPED_TRACE(val.name);
     testsetValue.field_1_ref() = val.value;
-    auto valueStruct = asValueStruct<type::struct_c>(testsetValue);
-    const Object& object = valueStruct.get_objectValue();
+    auto object = asObject(testsetValue);
 
     auto iobuf = serialize<Protocol, T>(testsetValue);
     auto objFromParseObject = parseObject<protocol_reader_t<Protocol>>(*iobuf);
@@ -434,8 +433,7 @@ void testWithMask(bool testSerialize) {
   for (const auto& val : data::ValueGenerator<Tag>::getKeyValues()) {
     SCOPED_TRACE(val.name);
     testsetValue.field_1_ref() = val.value;
-    auto valueStruct = asValueStruct<type::struct_c>(testsetValue);
-    const Object& object = valueStruct.get_objectValue();
+    auto object = asObject(testsetValue);
 
     auto reserialize = [&](MaskedDecodeResult& result) {
       auto reserialized = serializeObject<protocol_writer_t<Protocol>>(
@@ -728,10 +726,8 @@ TEST(Value, IsIntrinsicDefaultTrue) {
       asValueStruct<type::map<type::i32_t, type::string_t>>({})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   s.field_1_ref() = std::map<std::string, int>{};
-  Value objectValue = asValueStruct<type::struct_c>(s);
-  EXPECT_TRUE(isIntrinsicDefault(objectValue));
-  EXPECT_TRUE(isIntrinsicDefault(objectValue.as_object()));
-  EXPECT_TRUE(isIntrinsicDefault(Value{}));
+  Object obj = asObject(s);
+  EXPECT_TRUE(isIntrinsicDefault(obj));
 }
 
 TEST(Value, IsIntrinsicDefaultFalse) {
@@ -753,9 +749,7 @@ TEST(Value, IsIntrinsicDefaultFalse) {
           {{1, "foo"}, {2, "bar"}})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   s.field_1_ref() = std::map<std::string, int>{{"foo", 1}, {"bar", 2}};
-  Value objectValue = asValueStruct<type::struct_c>(s);
-  EXPECT_FALSE(isIntrinsicDefault(objectValue));
-  EXPECT_FALSE(isIntrinsicDefault(objectValue.as_object()));
+  EXPECT_FALSE(isIntrinsicDefault(asObject(s)));
 }
 
 template <typename ProtocolReader, typename Tag>

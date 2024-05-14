@@ -1168,12 +1168,11 @@ TEST(PatchTest, StructRemove) {
   obj.i16Val() = 160;
   obj.i32Val() = 320;
 
-  protocol::Value value =
-      protocol::asValueStruct<type::struct_t<MyStruct>>(obj);
+  auto dynObj = protocol::asObject(obj);
 
-  protocol::applyPatch(patch.toObject(), value);
+  protocol::applyPatch(patch.toObject(), dynObj);
 
-  auto buffer = protocol::serializeValue<CompactProtocolWriter>(value);
+  auto buffer = protocol::serializeObject<CompactProtocolWriter>(dynObj);
 
   MyStruct patched;
   CompactSerializer::deserialize(buffer.get(), patched);
@@ -1240,7 +1239,7 @@ TEST(PatchDiscrepancy, AssignOnly) {
 TEST(PatchDiscrepancy, ClearOptionalFieldInPatchPrior) {
   Opt foo;
   foo.field() = 10;
-  auto dynFoo = protocol::asValueStruct<type::struct_t<Opt>>(foo);
+  auto dynFoo = protocol::asObject(foo);
 
   OptPatch patch;
   patch.patchIfSet<ident::field>().clear();
@@ -1252,7 +1251,7 @@ TEST(PatchDiscrepancy, ClearOptionalFieldInPatchPrior) {
 
   // Apply patch dynamically
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+  EXPECT_EQ(dynFoo[FieldId{1}].as_i32(), 1);
 }
 
 TEST(PatchDiscrepancy, ClearUnionFieldInPatchPrior) {

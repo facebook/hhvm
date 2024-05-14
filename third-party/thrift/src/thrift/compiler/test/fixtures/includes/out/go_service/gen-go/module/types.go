@@ -114,7 +114,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // MyIncludedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIncludedFieldNonCompat()
+    item := x.MyIncludedField
     if err := item.Write(p); err != nil {
     return err
 }
@@ -134,7 +134,7 @@ func (x *MyStruct) writeField2(p thrift.Format) error {  // MyOtherIncludedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyOtherIncludedFieldNonCompat()
+    item := x.MyOtherIncludedField
     if err := item.Write(p); err != nil {
     return err
 }
@@ -150,7 +150,7 @@ func (x *MyStruct) writeField3(p thrift.Format) error {  // MyIncludedInt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIncludedIntNonCompat()
+    item := x.MyIncludedInt
     err := includes.WriteIncludedInt64(item, p)
 if err != nil {
     return err
@@ -195,15 +195,15 @@ if err != nil {
 }
 
 func (x *MyStruct) toString1() string {  // MyIncludedField
-    return fmt.Sprintf("%v", x.GetMyIncludedFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyIncludedField)
 }
 
 func (x *MyStruct) toString2() string {  // MyOtherIncludedField
-    return fmt.Sprintf("%v", x.GetMyOtherIncludedFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyOtherIncludedField)
 }
 
 func (x *MyStruct) toString3() string {  // MyIncludedInt
-    return fmt.Sprintf("%v", x.GetMyIncludedIntNonCompat())
+    return fmt.Sprintf("%v", x.MyIncludedInt)
 }
 
 // Deprecated: Use NewMyStruct().GetMyIncludedField() instead.

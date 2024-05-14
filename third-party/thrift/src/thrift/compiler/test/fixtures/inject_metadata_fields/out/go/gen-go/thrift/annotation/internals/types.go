@@ -50,7 +50,7 @@ func (x *InjectMetadataFields) writeField1(p thrift.Format) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeNonCompat()
+    item := x.Type
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *InjectMetadataFields) toString1() string {  // Type
-    return fmt.Sprintf("%v", x.GetTypeNonCompat())
+    return fmt.Sprintf("%v", x.Type)
 }
 
 

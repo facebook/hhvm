@@ -50,7 +50,7 @@ func (x *TrivialStruct) writeField1(p thrift.Format) error {  // IntValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntValueNonCompat()
+    item := x.IntValue
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *TrivialStruct) toString1() string {  // IntValue
-    return fmt.Sprintf("%v", x.GetIntValueNonCompat())
+    return fmt.Sprintf("%v", x.IntValue)
 }
 
 
@@ -339,7 +339,7 @@ func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnqualifiedIntegerNonCompat()
+    item := x.UnqualifiedInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -359,7 +359,7 @@ func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptionalIntegerNonCompat()
+    item := *x.OptionalInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -375,7 +375,7 @@ func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRequiredIntegerNonCompat()
+    item := x.RequiredInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -395,7 +395,7 @@ func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnqualifiedStructNonCompat()
+    item := x.UnqualifiedStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -415,7 +415,7 @@ func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptionalStructNonCompat()
+    item := x.OptionalStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -435,7 +435,7 @@ func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRequiredStructNonCompat()
+    item := x.RequiredStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -510,30 +510,30 @@ if err != nil {
 }
 
 func (x *StructWithNoCustomDefaultValues) toString1() string {  // UnqualifiedInteger
-    return fmt.Sprintf("%v", x.GetUnqualifiedIntegerNonCompat())
+    return fmt.Sprintf("%v", x.UnqualifiedInteger)
 }
 
 func (x *StructWithNoCustomDefaultValues) toString2() string {  // OptionalInteger
     if x.IsSetOptionalInteger() {
-        return fmt.Sprintf("%v", *x.GetOptionalIntegerNonCompat())
+        return fmt.Sprintf("%v", *x.OptionalInteger)
     }
-    return fmt.Sprintf("%v", x.GetOptionalIntegerNonCompat())
+    return fmt.Sprintf("%v", x.OptionalInteger)
 }
 
 func (x *StructWithNoCustomDefaultValues) toString3() string {  // RequiredInteger
-    return fmt.Sprintf("%v", x.GetRequiredIntegerNonCompat())
+    return fmt.Sprintf("%v", x.RequiredInteger)
 }
 
 func (x *StructWithNoCustomDefaultValues) toString4() string {  // UnqualifiedStruct
-    return fmt.Sprintf("%v", x.GetUnqualifiedStructNonCompat())
+    return fmt.Sprintf("%v", x.UnqualifiedStruct)
 }
 
 func (x *StructWithNoCustomDefaultValues) toString5() string {  // OptionalStruct
-    return fmt.Sprintf("%v", x.GetOptionalStructNonCompat())
+    return fmt.Sprintf("%v", x.OptionalStruct)
 }
 
 func (x *StructWithNoCustomDefaultValues) toString6() string {  // RequiredStruct
-    return fmt.Sprintf("%v", x.GetRequiredStructNonCompat())
+    return fmt.Sprintf("%v", x.RequiredStruct)
 }
 
 
@@ -916,7 +916,7 @@ func (x *StructWithCustomDefaultValues) writeField1(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnqualifiedIntegerNonCompat()
+    item := x.UnqualifiedInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -936,7 +936,7 @@ func (x *StructWithCustomDefaultValues) writeField2(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptionalIntegerNonCompat()
+    item := *x.OptionalInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -952,7 +952,7 @@ func (x *StructWithCustomDefaultValues) writeField3(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRequiredIntegerNonCompat()
+    item := x.RequiredInteger
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -972,7 +972,7 @@ func (x *StructWithCustomDefaultValues) writeField4(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnqualifiedStructNonCompat()
+    item := x.UnqualifiedStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -992,7 +992,7 @@ func (x *StructWithCustomDefaultValues) writeField5(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptionalStructNonCompat()
+    item := x.OptionalStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1012,7 +1012,7 @@ func (x *StructWithCustomDefaultValues) writeField6(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRequiredStructNonCompat()
+    item := x.RequiredStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1087,30 +1087,30 @@ if err != nil {
 }
 
 func (x *StructWithCustomDefaultValues) toString1() string {  // UnqualifiedInteger
-    return fmt.Sprintf("%v", x.GetUnqualifiedIntegerNonCompat())
+    return fmt.Sprintf("%v", x.UnqualifiedInteger)
 }
 
 func (x *StructWithCustomDefaultValues) toString2() string {  // OptionalInteger
     if x.IsSetOptionalInteger() {
-        return fmt.Sprintf("%v", *x.GetOptionalIntegerNonCompat())
+        return fmt.Sprintf("%v", *x.OptionalInteger)
     }
-    return fmt.Sprintf("%v", x.GetOptionalIntegerNonCompat())
+    return fmt.Sprintf("%v", x.OptionalInteger)
 }
 
 func (x *StructWithCustomDefaultValues) toString3() string {  // RequiredInteger
-    return fmt.Sprintf("%v", x.GetRequiredIntegerNonCompat())
+    return fmt.Sprintf("%v", x.RequiredInteger)
 }
 
 func (x *StructWithCustomDefaultValues) toString4() string {  // UnqualifiedStruct
-    return fmt.Sprintf("%v", x.GetUnqualifiedStructNonCompat())
+    return fmt.Sprintf("%v", x.UnqualifiedStruct)
 }
 
 func (x *StructWithCustomDefaultValues) toString5() string {  // OptionalStruct
-    return fmt.Sprintf("%v", x.GetOptionalStructNonCompat())
+    return fmt.Sprintf("%v", x.OptionalStruct)
 }
 
 func (x *StructWithCustomDefaultValues) toString6() string {  // RequiredStruct
-    return fmt.Sprintf("%v", x.GetRequiredStructNonCompat())
+    return fmt.Sprintf("%v", x.RequiredStruct)
 }
 
 

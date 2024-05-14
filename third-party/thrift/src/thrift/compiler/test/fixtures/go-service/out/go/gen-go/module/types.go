@@ -50,7 +50,7 @@ func (x *GetEntityRequest) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *GetEntityRequest) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -209,7 +209,7 @@ func (x *GetEntityResponse) writeField1(p thrift.Format) error {  // Entity
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEntityNonCompat()
+    item := x.Entity
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -231,7 +231,7 @@ if err != nil {
 }
 
 func (x *GetEntityResponse) toString1() string {  // Entity
-    return fmt.Sprintf("%v", x.GetEntityNonCompat())
+    return fmt.Sprintf("%v", x.Entity)
 }
 
 
@@ -424,7 +424,7 @@ func (x *NonComparableStruct) writeField1(p thrift.Format) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -440,7 +440,7 @@ func (x *NonComparableStruct) writeField2(p thrift.Format) error {  // Bar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBarNonCompat()
+    item := x.Bar
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -467,7 +467,7 @@ func (x *NonComparableStruct) writeField3(p thrift.Format) error {  // Baz
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBazNonCompat()
+    item := x.Baz
     if err := p.WriteMapBegin(thrift.STRUCT, thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -578,15 +578,15 @@ result := mapResult
 }
 
 func (x *NonComparableStruct) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 func (x *NonComparableStruct) toString2() string {  // Bar
-    return fmt.Sprintf("%v", x.GetBarNonCompat())
+    return fmt.Sprintf("%v", x.Bar)
 }
 
 func (x *NonComparableStruct) toString3() string {  // Baz
-    return fmt.Sprintf("%v", x.GetBazNonCompat())
+    return fmt.Sprintf("%v", x.Baz)
 }
 
 

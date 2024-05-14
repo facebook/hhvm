@@ -202,7 +202,7 @@ func (x *MyStructNestedAnnotation) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -224,7 +224,7 @@ if err != nil {
 }
 
 func (x *MyStructNestedAnnotation) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -738,7 +738,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // AbstractName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAbstractNameNonCompat()
+    item := x.AbstractName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -754,7 +754,7 @@ func (x *MyStruct) writeField2(p thrift.Format) error {  // MajorVer
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMajorVerNonCompat()
+    item := x.MajorVer
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -770,7 +770,7 @@ func (x *MyStruct) writeField3(p thrift.Format) error {  // AnnotationWithQuote
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAnnotationWithQuoteNonCompat()
+    item := x.AnnotationWithQuote
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -786,7 +786,7 @@ func (x *MyStruct) writeField4(p thrift.Format) error {  // Class_
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClass_NonCompat()
+    item := x.Class_
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -802,7 +802,7 @@ func (x *MyStruct) writeField5(p thrift.Format) error {  // AnnotationWithTraili
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAnnotationWithTrailingCommaNonCompat()
+    item := x.AnnotationWithTrailingComma
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -818,7 +818,7 @@ func (x *MyStruct) writeField6(p thrift.Format) error {  // EmptyAnnotations
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEmptyAnnotationsNonCompat()
+    item := x.EmptyAnnotations
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -834,7 +834,7 @@ func (x *MyStruct) writeField7(p thrift.Format) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyEnumNonCompat()
+    item := x.MyEnum
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -850,7 +850,7 @@ func (x *MyStruct) writeField8(p thrift.Format) error {  // CppTypeAnnotation
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCppTypeAnnotationNonCompat()
+    item := x.CppTypeAnnotation
     err := WriteListString_6884(item, p)
 if err != nil {
     return err
@@ -871,7 +871,7 @@ func (x *MyStruct) writeField9(p thrift.Format) error {  // MyUnion
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyUnionNonCompat()
+    item := x.MyUnion
     if err := item.Write(p); err != nil {
     return err
 }
@@ -975,39 +975,39 @@ if err != nil {
 }
 
 func (x *MyStruct) toString1() string {  // AbstractName
-    return fmt.Sprintf("%v", x.GetAbstractNameNonCompat())
+    return fmt.Sprintf("%v", x.AbstractName)
 }
 
 func (x *MyStruct) toString2() string {  // MajorVer
-    return fmt.Sprintf("%v", x.GetMajorVerNonCompat())
+    return fmt.Sprintf("%v", x.MajorVer)
 }
 
 func (x *MyStruct) toString3() string {  // AnnotationWithQuote
-    return fmt.Sprintf("%v", x.GetAnnotationWithQuoteNonCompat())
+    return fmt.Sprintf("%v", x.AnnotationWithQuote)
 }
 
 func (x *MyStruct) toString4() string {  // Class_
-    return fmt.Sprintf("%v", x.GetClass_NonCompat())
+    return fmt.Sprintf("%v", x.Class_)
 }
 
 func (x *MyStruct) toString5() string {  // AnnotationWithTrailingComma
-    return fmt.Sprintf("%v", x.GetAnnotationWithTrailingCommaNonCompat())
+    return fmt.Sprintf("%v", x.AnnotationWithTrailingComma)
 }
 
 func (x *MyStruct) toString6() string {  // EmptyAnnotations
-    return fmt.Sprintf("%v", x.GetEmptyAnnotationsNonCompat())
+    return fmt.Sprintf("%v", x.EmptyAnnotations)
 }
 
 func (x *MyStruct) toString7() string {  // MyEnum
-    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+    return fmt.Sprintf("%v", x.MyEnum)
 }
 
 func (x *MyStruct) toString8() string {  // CppTypeAnnotation
-    return fmt.Sprintf("%v", x.GetCppTypeAnnotationNonCompat())
+    return fmt.Sprintf("%v", x.CppTypeAnnotation)
 }
 
 func (x *MyStruct) toString9() string {  // MyUnion
-    return fmt.Sprintf("%v", x.GetMyUnionNonCompat())
+    return fmt.Sprintf("%v", x.MyUnion)
 }
 
 // Deprecated: Use NewMyStruct().GetMyUnion() instead.
@@ -1300,7 +1300,7 @@ func (x *SecretStruct) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1316,7 +1316,7 @@ func (x *SecretStruct) writeField2(p thrift.Format) error {  // Password
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPasswordNonCompat()
+    item := x.Password
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1348,11 +1348,11 @@ if err != nil {
 }
 
 func (x *SecretStruct) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 func (x *SecretStruct) toString2() string {  // Password
-    return fmt.Sprintf("%v", x.GetPasswordNonCompat())
+    return fmt.Sprintf("%v", x.Password)
 }
 
 

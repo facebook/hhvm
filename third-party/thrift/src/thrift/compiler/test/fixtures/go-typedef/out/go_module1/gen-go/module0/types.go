@@ -70,7 +70,7 @@ func (x *Accessory) writeField1(p thrift.Format) error {  // InventoryId
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInventoryIdNonCompat()
+    item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -86,7 +86,7 @@ func (x *Accessory) writeField2(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -118,11 +118,11 @@ if err != nil {
 }
 
 func (x *Accessory) toString1() string {  // InventoryId
-    return fmt.Sprintf("%v", x.GetInventoryIdNonCompat())
+    return fmt.Sprintf("%v", x.InventoryId)
 }
 
 func (x *Accessory) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -295,7 +295,7 @@ func (x *PartName) writeField1(p thrift.Format) error {  // InventoryId
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInventoryIdNonCompat()
+    item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -311,7 +311,7 @@ func (x *PartName) writeField2(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -343,11 +343,11 @@ if err != nil {
 }
 
 func (x *PartName) toString1() string {  // InventoryId
-    return fmt.Sprintf("%v", x.GetInventoryIdNonCompat())
+    return fmt.Sprintf("%v", x.InventoryId)
 }
 
 func (x *PartName) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 

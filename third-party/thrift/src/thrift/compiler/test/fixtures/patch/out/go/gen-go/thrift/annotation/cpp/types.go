@@ -162,7 +162,7 @@ func (x *Type) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -178,7 +178,7 @@ func (x *Type) writeField2(p thrift.Format) error {  // Template
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTemplateNonCompat()
+    item := x.Template
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -210,11 +210,11 @@ if err != nil {
 }
 
 func (x *Type) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *Type) toString2() string {  // Template
-    return fmt.Sprintf("%v", x.GetTemplateNonCompat())
+    return fmt.Sprintf("%v", x.Template)
 }
 
 
@@ -367,7 +367,7 @@ func (x *Ref) writeField1(p thrift.Format) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeNonCompat()
+    item := x.Type
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -390,7 +390,7 @@ result := RefType(enumResult)
 }
 
 func (x *Ref) toString1() string {  // Type
-    return fmt.Sprintf("%v", x.GetTypeNonCompat())
+    return fmt.Sprintf("%v", x.Type)
 }
 
 
@@ -527,7 +527,7 @@ func (x *Name) writeField1(p thrift.Format) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.Value
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -549,7 +549,7 @@ if err != nil {
 }
 
 func (x *Name) toString1() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+    return fmt.Sprintf("%v", x.Value)
 }
 
 
@@ -686,7 +686,7 @@ func (x *Lazy) writeField1(p thrift.Format) error {  // Ref
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRefNonCompat()
+    item := x.Ref
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -708,7 +708,7 @@ if err != nil {
 }
 
 func (x *Lazy) toString1() string {  // Ref
-    return fmt.Sprintf("%v", x.GetRefNonCompat())
+    return fmt.Sprintf("%v", x.Ref)
 }
 
 
@@ -1018,7 +1018,7 @@ func (x *Adapter) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1034,7 +1034,7 @@ func (x *Adapter) writeField2(p thrift.Format) error {  // AdaptedType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdaptedTypeNonCompat()
+    item := x.AdaptedType
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1050,7 +1050,7 @@ func (x *Adapter) writeField3(p thrift.Format) error {  // UnderlyingName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnderlyingNameNonCompat()
+    item := x.UnderlyingName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1066,7 +1066,7 @@ func (x *Adapter) writeField4(p thrift.Format) error {  // ExtraNamespace
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetExtraNamespaceNonCompat()
+    item := x.ExtraNamespace
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1082,7 +1082,7 @@ func (x *Adapter) writeField5(p thrift.Format) error {  // MoveOnly
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMoveOnlyNonCompat()
+    item := x.MoveOnly
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1144,23 +1144,23 @@ if err != nil {
 }
 
 func (x *Adapter) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *Adapter) toString2() string {  // AdaptedType
-    return fmt.Sprintf("%v", x.GetAdaptedTypeNonCompat())
+    return fmt.Sprintf("%v", x.AdaptedType)
 }
 
 func (x *Adapter) toString3() string {  // UnderlyingName
-    return fmt.Sprintf("%v", x.GetUnderlyingNameNonCompat())
+    return fmt.Sprintf("%v", x.UnderlyingName)
 }
 
 func (x *Adapter) toString4() string {  // ExtraNamespace
-    return fmt.Sprintf("%v", x.GetExtraNamespaceNonCompat())
+    return fmt.Sprintf("%v", x.ExtraNamespace)
 }
 
 func (x *Adapter) toString5() string {  // MoveOnly
-    return fmt.Sprintf("%v", x.GetMoveOnlyNonCompat())
+    return fmt.Sprintf("%v", x.MoveOnly)
 }
 
 
@@ -1361,7 +1361,7 @@ func (x *PackIsset) writeField1(p thrift.Format) error {  // Atomic
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAtomicNonCompat()
+    item := x.Atomic
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1383,7 +1383,7 @@ if err != nil {
 }
 
 func (x *PackIsset) toString1() string {  // Atomic
-    return fmt.Sprintf("%v", x.GetAtomicNonCompat())
+    return fmt.Sprintf("%v", x.Atomic)
 }
 
 
@@ -1912,7 +1912,7 @@ func (x *FieldInterceptor) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1928,7 +1928,7 @@ func (x *FieldInterceptor) writeField2(p thrift.Format) error {  // Noinline
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNoinlineNonCompat()
+    item := x.Noinline
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1960,11 +1960,11 @@ if err != nil {
 }
 
 func (x *FieldInterceptor) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *FieldInterceptor) toString2() string {  // Noinline
-    return fmt.Sprintf("%v", x.GetNoinlineNonCompat())
+    return fmt.Sprintf("%v", x.Noinline)
 }
 
 
@@ -2210,7 +2210,7 @@ func (x *EnumType) writeField1(p thrift.Format) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeNonCompat()
+    item := x.Type
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -2233,7 +2233,7 @@ result := EnumUnderlyingType(enumResult)
 }
 
 func (x *EnumType) toString1() string {  // Type
-    return fmt.Sprintf("%v", x.GetTypeNonCompat())
+    return fmt.Sprintf("%v", x.Type)
 }
 
 

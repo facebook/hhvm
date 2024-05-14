@@ -268,7 +268,7 @@ func (x *ComplexUnion) writeField1(p thrift.Format) error {  // IntValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetIntValueNonCompat()
+    item := *x.IntValue
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -288,7 +288,7 @@ func (x *ComplexUnion) writeField2(p thrift.Format) error {  // IntListValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntListValueNonCompat()
+    item := x.IntListValue
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -319,7 +319,7 @@ func (x *ComplexUnion) writeField3(p thrift.Format) error {  // StringListValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringListValueNonCompat()
+    item := x.StringListValue
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -350,7 +350,7 @@ func (x *ComplexUnion) writeField5(p thrift.Format) error {  // StringValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringValueNonCompat()
+    item := *x.StringValue
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -370,7 +370,7 @@ func (x *ComplexUnion) writeField9(p thrift.Format) error {  // TypedefValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypedefValueNonCompat()
+    item := x.TypedefValue
     err := WriteContainerTypedef(item, p)
 if err != nil {
     return err
@@ -391,7 +391,7 @@ func (x *ComplexUnion) writeField14(p thrift.Format) error {  // StringRef
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringRefNonCompat()
+    item := *x.StringRef
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -500,35 +500,35 @@ if err != nil {
 
 func (x *ComplexUnion) toString1() string {  // IntValue
     if x.IsSetIntValue() {
-        return fmt.Sprintf("%v", *x.GetIntValueNonCompat())
+        return fmt.Sprintf("%v", *x.IntValue)
     }
-    return fmt.Sprintf("%v", x.GetIntValueNonCompat())
+    return fmt.Sprintf("%v", x.IntValue)
 }
 
 func (x *ComplexUnion) toString2() string {  // IntListValue
-    return fmt.Sprintf("%v", x.GetIntListValueNonCompat())
+    return fmt.Sprintf("%v", x.IntListValue)
 }
 
 func (x *ComplexUnion) toString3() string {  // StringListValue
-    return fmt.Sprintf("%v", x.GetStringListValueNonCompat())
+    return fmt.Sprintf("%v", x.StringListValue)
 }
 
 func (x *ComplexUnion) toString5() string {  // StringValue
     if x.IsSetStringValue() {
-        return fmt.Sprintf("%v", *x.GetStringValueNonCompat())
+        return fmt.Sprintf("%v", *x.StringValue)
     }
-    return fmt.Sprintf("%v", x.GetStringValueNonCompat())
+    return fmt.Sprintf("%v", x.StringValue)
 }
 
 func (x *ComplexUnion) toString9() string {  // TypedefValue
-    return fmt.Sprintf("%v", x.GetTypedefValueNonCompat())
+    return fmt.Sprintf("%v", x.TypedefValue)
 }
 
 func (x *ComplexUnion) toString14() string {  // StringRef
     if x.IsSetStringRef() {
-        return fmt.Sprintf("%v", *x.GetStringRefNonCompat())
+        return fmt.Sprintf("%v", *x.StringRef)
     }
-    return fmt.Sprintf("%v", x.GetStringRefNonCompat())
+    return fmt.Sprintf("%v", x.StringRef)
 }
 
 
@@ -816,7 +816,7 @@ func (x *ListUnion) writeField2(p thrift.Format) error {  // IntListValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntListValueNonCompat()
+    item := x.IntListValue
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -847,7 +847,7 @@ func (x *ListUnion) writeField3(p thrift.Format) error {  // StringListValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringListValueNonCompat()
+    item := x.StringListValue
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -926,11 +926,11 @@ result := listResult
 }
 
 func (x *ListUnion) toString2() string {  // IntListValue
-    return fmt.Sprintf("%v", x.GetIntListValueNonCompat())
+    return fmt.Sprintf("%v", x.IntListValue)
 }
 
 func (x *ListUnion) toString3() string {  // StringListValue
-    return fmt.Sprintf("%v", x.GetStringListValueNonCompat())
+    return fmt.Sprintf("%v", x.StringListValue)
 }
 
 func (x *ListUnion) countSetFields() int {
@@ -1139,7 +1139,7 @@ func (x *DataUnion) writeField1(p thrift.Format) error {  // BinaryData
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryDataNonCompat()
+    item := x.BinaryData
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -1159,7 +1159,7 @@ func (x *DataUnion) writeField2(p thrift.Format) error {  // StringData
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringDataNonCompat()
+    item := *x.StringData
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1191,14 +1191,14 @@ if err != nil {
 }
 
 func (x *DataUnion) toString1() string {  // BinaryData
-    return fmt.Sprintf("%v", x.GetBinaryDataNonCompat())
+    return fmt.Sprintf("%v", x.BinaryData)
 }
 
 func (x *DataUnion) toString2() string {  // StringData
     if x.IsSetStringData() {
-        return fmt.Sprintf("%v", *x.GetStringDataNonCompat())
+        return fmt.Sprintf("%v", *x.StringData)
     }
-    return fmt.Sprintf("%v", x.GetStringDataNonCompat())
+    return fmt.Sprintf("%v", x.StringData)
 }
 
 
@@ -1418,7 +1418,7 @@ func (x *Val) writeField1(p thrift.Format) error {  // StrVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStrValNonCompat()
+    item := x.StrVal
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1434,7 +1434,7 @@ func (x *Val) writeField2(p thrift.Format) error {  // IntVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntValNonCompat()
+    item := x.IntVal
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1450,7 +1450,7 @@ func (x *Val) writeField9(p thrift.Format) error {  // TypedefValue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypedefValueNonCompat()
+    item := x.TypedefValue
     err := WriteContainerTypedef(item, p)
 if err != nil {
     return err
@@ -1493,15 +1493,15 @@ if err != nil {
 }
 
 func (x *Val) toString1() string {  // StrVal
-    return fmt.Sprintf("%v", x.GetStrValNonCompat())
+    return fmt.Sprintf("%v", x.StrVal)
 }
 
 func (x *Val) toString2() string {  // IntVal
-    return fmt.Sprintf("%v", x.GetIntValNonCompat())
+    return fmt.Sprintf("%v", x.IntVal)
 }
 
 func (x *Val) toString9() string {  // TypedefValue
-    return fmt.Sprintf("%v", x.GetTypedefValueNonCompat())
+    return fmt.Sprintf("%v", x.TypedefValue)
 }
 
 
@@ -1708,7 +1708,7 @@ func (x *ValUnion) writeField1(p thrift.Format) error {  // V1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetV1NonCompat()
+    item := x.V1
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1728,7 +1728,7 @@ func (x *ValUnion) writeField2(p thrift.Format) error {  // V2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetV2NonCompat()
+    item := x.V2
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1762,11 +1762,11 @@ if err != nil {
 }
 
 func (x *ValUnion) toString1() string {  // V1
-    return fmt.Sprintf("%v", x.GetV1NonCompat())
+    return fmt.Sprintf("%v", x.V1)
 }
 
 func (x *ValUnion) toString2() string {  // V2
-    return fmt.Sprintf("%v", x.GetV2NonCompat())
+    return fmt.Sprintf("%v", x.V2)
 }
 
 // Deprecated: Use NewValUnion().GetV1() instead.
@@ -1991,7 +1991,7 @@ func (x *VirtualComplexUnion) writeField1(p thrift.Format) error {  // ThingOne
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetThingOneNonCompat()
+    item := *x.ThingOne
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2011,7 +2011,7 @@ func (x *VirtualComplexUnion) writeField2(p thrift.Format) error {  // ThingTwo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetThingTwoNonCompat()
+    item := *x.ThingTwo
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2044,16 +2044,16 @@ if err != nil {
 
 func (x *VirtualComplexUnion) toString1() string {  // ThingOne
     if x.IsSetThingOne() {
-        return fmt.Sprintf("%v", *x.GetThingOneNonCompat())
+        return fmt.Sprintf("%v", *x.ThingOne)
     }
-    return fmt.Sprintf("%v", x.GetThingOneNonCompat())
+    return fmt.Sprintf("%v", x.ThingOne)
 }
 
 func (x *VirtualComplexUnion) toString2() string {  // ThingTwo
     if x.IsSetThingTwo() {
-        return fmt.Sprintf("%v", *x.GetThingTwoNonCompat())
+        return fmt.Sprintf("%v", *x.ThingTwo)
     }
-    return fmt.Sprintf("%v", x.GetThingTwoNonCompat())
+    return fmt.Sprintf("%v", x.ThingTwo)
 }
 
 
@@ -2226,7 +2226,7 @@ func (x *NonCopyableStruct) writeField1(p thrift.Format) error {  // Num
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumNonCompat()
+    item := x.Num
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2248,7 +2248,7 @@ if err != nil {
 }
 
 func (x *NonCopyableStruct) toString1() string {  // Num
-    return fmt.Sprintf("%v", x.GetNumNonCompat())
+    return fmt.Sprintf("%v", x.Num)
 }
 
 
@@ -2396,7 +2396,7 @@ func (x *NonCopyableUnion) writeField1(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSNonCompat()
+    item := x.S
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2419,7 +2419,7 @@ if err != nil {
 }
 
 func (x *NonCopyableUnion) toString1() string {  // S
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 // Deprecated: Use NewNonCopyableUnion().GetS() instead.

@@ -228,7 +228,7 @@ func (x *ReserveIds) writeField1(p thrift.Format) error {  // Ids
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdsNonCompat()
+    item := x.Ids
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -255,7 +255,7 @@ func (x *ReserveIds) writeField2(p thrift.Format) error {  // IdRanges
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdRangesNonCompat()
+    item := x.IdRanges
     if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -351,11 +351,11 @@ result := mapResult
 }
 
 func (x *ReserveIds) toString1() string {  // Ids
-    return fmt.Sprintf("%v", x.GetIdsNonCompat())
+    return fmt.Sprintf("%v", x.Ids)
 }
 
 func (x *ReserveIds) toString2() string {  // IdRanges
-    return fmt.Sprintf("%v", x.GetIdRangesNonCompat())
+    return fmt.Sprintf("%v", x.IdRanges)
 }
 
 
@@ -508,7 +508,7 @@ func (x *RequiresBackwardCompatibility) writeField1(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNameNonCompat()
+    item := x.FieldName
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -530,7 +530,7 @@ if err != nil {
 }
 
 func (x *RequiresBackwardCompatibility) toString1() string {  // FieldName
-    return fmt.Sprintf("%v", x.GetFieldNameNonCompat())
+    return fmt.Sprintf("%v", x.FieldName)
 }
 
 
@@ -1225,7 +1225,7 @@ func (x *GenerateRuntimeSchema) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1247,7 +1247,7 @@ if err != nil {
 }
 
 func (x *GenerateRuntimeSchema) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -1570,7 +1570,7 @@ func (x *Uri) writeField1(p thrift.Format) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.Value
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1592,7 +1592,7 @@ if err != nil {
 }
 
 func (x *Uri) toString1() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+    return fmt.Sprintf("%v", x.Value)
 }
 
 
@@ -1729,7 +1729,7 @@ func (x *Priority) writeField1(p thrift.Format) error {  // Level
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLevelNonCompat()
+    item := x.Level
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1752,7 +1752,7 @@ result := RpcPriority(enumResult)
 }
 
 func (x *Priority) toString1() string {  // Level
-    return fmt.Sprintf("%v", x.GetLevelNonCompat())
+    return fmt.Sprintf("%v", x.Level)
 }
 
 
@@ -1897,7 +1897,7 @@ func (x *DeprecatedUnvalidatedAnnotations) writeField1(p thrift.Format) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetItemsNonCompat()
+    item := x.Items
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1965,7 +1965,7 @@ result := mapResult
 }
 
 func (x *DeprecatedUnvalidatedAnnotations) toString1() string {  // Items
-    return fmt.Sprintf("%v", x.GetItemsNonCompat())
+    return fmt.Sprintf("%v", x.Items)
 }
 
 

@@ -236,7 +236,7 @@ func (x *Name) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -258,7 +258,7 @@ if err != nil {
 }
 
 func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -415,7 +415,7 @@ func (x *Adapter) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -431,7 +431,7 @@ func (x *Adapter) writeField2(p thrift.Format) error {  // TypeHint
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeHintNonCompat()
+    item := x.TypeHint
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -463,11 +463,11 @@ if err != nil {
 }
 
 func (x *Adapter) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *Adapter) toString2() string {  // TypeHint
-    return fmt.Sprintf("%v", x.GetTypeHintNonCompat())
+    return fmt.Sprintf("%v", x.TypeHint)
 }
 
 
@@ -620,7 +620,7 @@ func (x *UseCAPI) writeField1(p thrift.Format) error {  // Serialize
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSerializeNonCompat()
+    item := x.Serialize
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -642,7 +642,7 @@ if err != nil {
 }
 
 func (x *UseCAPI) toString1() string {  // Serialize
-    return fmt.Sprintf("%v", x.GetSerializeNonCompat())
+    return fmt.Sprintf("%v", x.Serialize)
 }
 
 

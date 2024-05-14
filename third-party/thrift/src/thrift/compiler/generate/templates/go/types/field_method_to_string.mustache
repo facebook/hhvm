@@ -22,9 +22,9 @@
 func (x *{{struct:go_name}}) toString{{field:key_str}}() string {  // {{field:go_name}}
     {{#field:non_struct_pointer?}}
     if x.IsSet{{field:go_name}}() {
-        return fmt.Sprintf("%v", *x.Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}())
+        return fmt.Sprintf("%v", *x.{{field:go_name}})
     }
     {{/field:non_struct_pointer?}}
-    return fmt.Sprintf("%v", x.Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}())
+    return fmt.Sprintf("%v", x.{{field:go_name}})
 }
 {{! new line }}

@@ -135,7 +135,7 @@ func (x *Included) writeField1(p thrift.Format) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntFieldNonCompat()
+    item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -155,7 +155,7 @@ func (x *Included) writeField2(p thrift.Format) error {  // MyTransitiveField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyTransitiveFieldNonCompat()
+    item := x.MyTransitiveField
     if err := item.Write(p); err != nil {
     return err
 }
@@ -188,11 +188,11 @@ if err != nil {
 }
 
 func (x *Included) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyIntField)
 }
 
 func (x *Included) toString2() string {  // MyTransitiveField
-    return fmt.Sprintf("%v", x.GetMyTransitiveFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyTransitiveField)
 }
 
 // Deprecated: Use NewIncluded().GetMyTransitiveField() instead.

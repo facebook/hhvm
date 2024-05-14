@@ -253,7 +253,7 @@ func (x *TypeUri) writeField1(p thrift.Format) error {  // Uri
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUriNonCompat()
+    item := *x.Uri
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -273,7 +273,7 @@ func (x *TypeUri) writeField2(p thrift.Format) error {  // TypeHashPrefixSha2_25
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeHashPrefixSha2_256NonCompat()
+    item := x.TypeHashPrefixSha2_256
     err := WriteByteString(item, p)
 if err != nil {
     return err
@@ -294,7 +294,7 @@ func (x *TypeUri) writeField3(p thrift.Format) error {  // ScopedName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetScopedNameNonCompat()
+    item := *x.ScopedName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -337,20 +337,20 @@ if err != nil {
 
 func (x *TypeUri) toString1() string {  // Uri
     if x.IsSetUri() {
-        return fmt.Sprintf("%v", *x.GetUriNonCompat())
+        return fmt.Sprintf("%v", *x.Uri)
     }
-    return fmt.Sprintf("%v", x.GetUriNonCompat())
+    return fmt.Sprintf("%v", x.Uri)
 }
 
 func (x *TypeUri) toString2() string {  // TypeHashPrefixSha2_256
-    return fmt.Sprintf("%v", x.GetTypeHashPrefixSha2_256NonCompat())
+    return fmt.Sprintf("%v", x.TypeHashPrefixSha2_256)
 }
 
 func (x *TypeUri) toString3() string {  // ScopedName
     if x.IsSetScopedName() {
-        return fmt.Sprintf("%v", *x.GetScopedNameNonCompat())
+        return fmt.Sprintf("%v", *x.ScopedName)
     }
-    return fmt.Sprintf("%v", x.GetScopedNameNonCompat())
+    return fmt.Sprintf("%v", x.ScopedName)
 }
 
 
@@ -985,7 +985,7 @@ func (x *TypeName) writeField1(p thrift.Format) error {  // BoolType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBoolTypeNonCompat()
+    item := *x.BoolType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1005,7 +1005,7 @@ func (x *TypeName) writeField2(p thrift.Format) error {  // ByteType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetByteTypeNonCompat()
+    item := *x.ByteType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1025,7 +1025,7 @@ func (x *TypeName) writeField3(p thrift.Format) error {  // I16Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI16TypeNonCompat()
+    item := *x.I16Type
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1045,7 +1045,7 @@ func (x *TypeName) writeField4(p thrift.Format) error {  // I32Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32TypeNonCompat()
+    item := *x.I32Type
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1065,7 +1065,7 @@ func (x *TypeName) writeField5(p thrift.Format) error {  // I64Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI64TypeNonCompat()
+    item := *x.I64Type
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1085,7 +1085,7 @@ func (x *TypeName) writeField6(p thrift.Format) error {  // FloatType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFloatTypeNonCompat()
+    item := *x.FloatType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1105,7 +1105,7 @@ func (x *TypeName) writeField7(p thrift.Format) error {  // DoubleType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDoubleTypeNonCompat()
+    item := *x.DoubleType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1125,7 +1125,7 @@ func (x *TypeName) writeField8(p thrift.Format) error {  // StringType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringTypeNonCompat()
+    item := *x.StringType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1145,7 +1145,7 @@ func (x *TypeName) writeField9(p thrift.Format) error {  // BinaryType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBinaryTypeNonCompat()
+    item := *x.BinaryType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1165,7 +1165,7 @@ func (x *TypeName) writeField10(p thrift.Format) error {  // EnumType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumTypeNonCompat()
+    item := x.EnumType
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1185,7 +1185,7 @@ func (x *TypeName) writeField11(p thrift.Format) error {  // StructType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructTypeNonCompat()
+    item := x.StructType
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1205,7 +1205,7 @@ func (x *TypeName) writeField12(p thrift.Format) error {  // UnionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionTypeNonCompat()
+    item := x.UnionType
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1225,7 +1225,7 @@ func (x *TypeName) writeField13(p thrift.Format) error {  // ExceptionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetExceptionTypeNonCompat()
+    item := x.ExceptionType
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1245,7 +1245,7 @@ func (x *TypeName) writeField14(p thrift.Format) error {  // ListType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetListTypeNonCompat()
+    item := *x.ListType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1265,7 +1265,7 @@ func (x *TypeName) writeField15(p thrift.Format) error {  // SetType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSetTypeNonCompat()
+    item := *x.SetType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1285,7 +1285,7 @@ func (x *TypeName) writeField16(p thrift.Format) error {  // MapType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMapTypeNonCompat()
+    item := *x.MapType
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1305,7 +1305,7 @@ func (x *TypeName) writeField17(p thrift.Format) error {  // TypedefType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypedefTypeNonCompat()
+    item := x.TypedefType
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1505,106 +1505,106 @@ if err != nil {
 
 func (x *TypeName) toString1() string {  // BoolType
     if x.IsSetBoolType() {
-        return fmt.Sprintf("%v", *x.GetBoolTypeNonCompat())
+        return fmt.Sprintf("%v", *x.BoolType)
     }
-    return fmt.Sprintf("%v", x.GetBoolTypeNonCompat())
+    return fmt.Sprintf("%v", x.BoolType)
 }
 
 func (x *TypeName) toString2() string {  // ByteType
     if x.IsSetByteType() {
-        return fmt.Sprintf("%v", *x.GetByteTypeNonCompat())
+        return fmt.Sprintf("%v", *x.ByteType)
     }
-    return fmt.Sprintf("%v", x.GetByteTypeNonCompat())
+    return fmt.Sprintf("%v", x.ByteType)
 }
 
 func (x *TypeName) toString3() string {  // I16Type
     if x.IsSetI16Type() {
-        return fmt.Sprintf("%v", *x.GetI16TypeNonCompat())
+        return fmt.Sprintf("%v", *x.I16Type)
     }
-    return fmt.Sprintf("%v", x.GetI16TypeNonCompat())
+    return fmt.Sprintf("%v", x.I16Type)
 }
 
 func (x *TypeName) toString4() string {  // I32Type
     if x.IsSetI32Type() {
-        return fmt.Sprintf("%v", *x.GetI32TypeNonCompat())
+        return fmt.Sprintf("%v", *x.I32Type)
     }
-    return fmt.Sprintf("%v", x.GetI32TypeNonCompat())
+    return fmt.Sprintf("%v", x.I32Type)
 }
 
 func (x *TypeName) toString5() string {  // I64Type
     if x.IsSetI64Type() {
-        return fmt.Sprintf("%v", *x.GetI64TypeNonCompat())
+        return fmt.Sprintf("%v", *x.I64Type)
     }
-    return fmt.Sprintf("%v", x.GetI64TypeNonCompat())
+    return fmt.Sprintf("%v", x.I64Type)
 }
 
 func (x *TypeName) toString6() string {  // FloatType
     if x.IsSetFloatType() {
-        return fmt.Sprintf("%v", *x.GetFloatTypeNonCompat())
+        return fmt.Sprintf("%v", *x.FloatType)
     }
-    return fmt.Sprintf("%v", x.GetFloatTypeNonCompat())
+    return fmt.Sprintf("%v", x.FloatType)
 }
 
 func (x *TypeName) toString7() string {  // DoubleType
     if x.IsSetDoubleType() {
-        return fmt.Sprintf("%v", *x.GetDoubleTypeNonCompat())
+        return fmt.Sprintf("%v", *x.DoubleType)
     }
-    return fmt.Sprintf("%v", x.GetDoubleTypeNonCompat())
+    return fmt.Sprintf("%v", x.DoubleType)
 }
 
 func (x *TypeName) toString8() string {  // StringType
     if x.IsSetStringType() {
-        return fmt.Sprintf("%v", *x.GetStringTypeNonCompat())
+        return fmt.Sprintf("%v", *x.StringType)
     }
-    return fmt.Sprintf("%v", x.GetStringTypeNonCompat())
+    return fmt.Sprintf("%v", x.StringType)
 }
 
 func (x *TypeName) toString9() string {  // BinaryType
     if x.IsSetBinaryType() {
-        return fmt.Sprintf("%v", *x.GetBinaryTypeNonCompat())
+        return fmt.Sprintf("%v", *x.BinaryType)
     }
-    return fmt.Sprintf("%v", x.GetBinaryTypeNonCompat())
+    return fmt.Sprintf("%v", x.BinaryType)
 }
 
 func (x *TypeName) toString10() string {  // EnumType
-    return fmt.Sprintf("%v", x.GetEnumTypeNonCompat())
+    return fmt.Sprintf("%v", x.EnumType)
 }
 
 func (x *TypeName) toString11() string {  // StructType
-    return fmt.Sprintf("%v", x.GetStructTypeNonCompat())
+    return fmt.Sprintf("%v", x.StructType)
 }
 
 func (x *TypeName) toString12() string {  // UnionType
-    return fmt.Sprintf("%v", x.GetUnionTypeNonCompat())
+    return fmt.Sprintf("%v", x.UnionType)
 }
 
 func (x *TypeName) toString13() string {  // ExceptionType
-    return fmt.Sprintf("%v", x.GetExceptionTypeNonCompat())
+    return fmt.Sprintf("%v", x.ExceptionType)
 }
 
 func (x *TypeName) toString14() string {  // ListType
     if x.IsSetListType() {
-        return fmt.Sprintf("%v", *x.GetListTypeNonCompat())
+        return fmt.Sprintf("%v", *x.ListType)
     }
-    return fmt.Sprintf("%v", x.GetListTypeNonCompat())
+    return fmt.Sprintf("%v", x.ListType)
 }
 
 func (x *TypeName) toString15() string {  // SetType
     if x.IsSetSetType() {
-        return fmt.Sprintf("%v", *x.GetSetTypeNonCompat())
+        return fmt.Sprintf("%v", *x.SetType)
     }
-    return fmt.Sprintf("%v", x.GetSetTypeNonCompat())
+    return fmt.Sprintf("%v", x.SetType)
 }
 
 func (x *TypeName) toString16() string {  // MapType
     if x.IsSetMapType() {
-        return fmt.Sprintf("%v", *x.GetMapTypeNonCompat())
+        return fmt.Sprintf("%v", *x.MapType)
     }
-    return fmt.Sprintf("%v", x.GetMapTypeNonCompat())
+    return fmt.Sprintf("%v", x.MapType)
 }
 
 func (x *TypeName) toString17() string {  // TypedefType
-    return fmt.Sprintf("%v", x.GetTypedefTypeNonCompat())
+    return fmt.Sprintf("%v", x.TypedefType)
 }
 
 

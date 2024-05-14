@@ -169,7 +169,7 @@ func (x *reqSomeServiceBounceMap) writeField1(p thrift.Format) error {  // M
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMNonCompat()
+    item := x.M
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -192,7 +192,7 @@ if err != nil {
 }
 
 func (x *reqSomeServiceBounceMap) toString1() string {  // M
-    return fmt.Sprintf("%v", x.GetMNonCompat())
+    return fmt.Sprintf("%v", x.M)
 }
 
 
@@ -343,7 +343,7 @@ func (x *respSomeServiceBounceMap) writeField0(p thrift.Format) error {  // Succ
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -366,7 +366,7 @@ if err != nil {
 }
 
 func (x *respSomeServiceBounceMap) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -517,7 +517,7 @@ func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRNonCompat()
+    item := x.R
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -568,7 +568,7 @@ result := listResult
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) toString1() string {  // R
-    return fmt.Sprintf("%v", x.GetRNonCompat())
+    return fmt.Sprintf("%v", x.R)
 }
 
 
@@ -719,7 +719,7 @@ func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := p.WriteMapBegin(thrift.STRING, thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -792,7 +792,7 @@ result := mapResult
 }
 
 func (x *respSomeServiceBinaryKeyedMap) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 

@@ -139,7 +139,7 @@ func (x *A) writeField1(p thrift.Format) error {  // UselessField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUselessFieldNonCompat()
+    item := x.UselessField
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -161,7 +161,7 @@ if err != nil {
 }
 
 func (x *A) toString1() string {  // UselessField
-    return fmt.Sprintf("%v", x.GetUselessFieldNonCompat())
+    return fmt.Sprintf("%v", x.UselessField)
 }
 
 
@@ -336,7 +336,7 @@ func (x *U) writeField1(p thrift.Format) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetINonCompat()
+    item := *x.I
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -356,7 +356,7 @@ func (x *U) writeField2(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSNonCompat()
+    item := *x.S
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -389,16 +389,16 @@ if err != nil {
 
 func (x *U) toString1() string {  // I
     if x.IsSetI() {
-        return fmt.Sprintf("%v", *x.GetINonCompat())
+        return fmt.Sprintf("%v", *x.I)
     }
-    return fmt.Sprintf("%v", x.GetINonCompat())
+    return fmt.Sprintf("%v", x.I)
 }
 
 func (x *U) toString2() string {  // S
     if x.IsSetS() {
-        return fmt.Sprintf("%v", *x.GetSNonCompat())
+        return fmt.Sprintf("%v", *x.S)
     }
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 
@@ -571,7 +571,7 @@ func (x *Bang) writeField1(p thrift.Format) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageNonCompat()
+    item := x.Message
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -593,7 +593,7 @@ if err != nil {
 }
 
 func (x *Bang) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.GetMessageNonCompat())
+    return fmt.Sprintf("%v", x.Message)
 }
 
 

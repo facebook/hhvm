@@ -90,7 +90,7 @@ func (x *Foo) writeField1(p thrift.Format) error {  // Field2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField2NonCompat()
+    item := x.Field2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -106,7 +106,7 @@ func (x *Foo) writeField2(p thrift.Format) error {  // Field3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField3NonCompat()
+    item := x.Field3
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -122,7 +122,7 @@ func (x *Foo) writeField3(p thrift.Format) error {  // Field1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField1NonCompat()
+    item := x.Field1
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -164,15 +164,15 @@ if err != nil {
 }
 
 func (x *Foo) toString1() string {  // Field2
-    return fmt.Sprintf("%v", x.GetField2NonCompat())
+    return fmt.Sprintf("%v", x.Field2)
 }
 
 func (x *Foo) toString2() string {  // Field3
-    return fmt.Sprintf("%v", x.GetField3NonCompat())
+    return fmt.Sprintf("%v", x.Field3)
 }
 
 func (x *Foo) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.GetField1NonCompat())
+    return fmt.Sprintf("%v", x.Field1)
 }
 
 
@@ -381,7 +381,7 @@ func (x *Foo2) writeField1(p thrift.Format) error {  // Field2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField2NonCompat()
+    item := x.Field2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -397,7 +397,7 @@ func (x *Foo2) writeField2(p thrift.Format) error {  // Field3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField3NonCompat()
+    item := x.Field3
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -413,7 +413,7 @@ func (x *Foo2) writeField3(p thrift.Format) error {  // Field1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField1NonCompat()
+    item := x.Field1
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -455,15 +455,15 @@ if err != nil {
 }
 
 func (x *Foo2) toString1() string {  // Field2
-    return fmt.Sprintf("%v", x.GetField2NonCompat())
+    return fmt.Sprintf("%v", x.Field2)
 }
 
 func (x *Foo2) toString2() string {  // Field3
-    return fmt.Sprintf("%v", x.GetField3NonCompat())
+    return fmt.Sprintf("%v", x.Field3)
 }
 
 func (x *Foo2) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.GetField1NonCompat())
+    return fmt.Sprintf("%v", x.Field1)
 }
 
 

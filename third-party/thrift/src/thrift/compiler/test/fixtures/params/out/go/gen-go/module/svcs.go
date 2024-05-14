@@ -236,7 +236,7 @@ func (x *reqNestedContainersMapList) writeField1(p thrift.Format) error {  // Fo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteMapBegin(thrift.I32, thrift.LIST, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -333,7 +333,7 @@ result := mapResult
 }
 
 func (x *reqNestedContainersMapList) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 
@@ -580,7 +580,7 @@ func (x *reqNestedContainersMapSet) writeField1(p thrift.Format) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteMapBegin(thrift.I32, thrift.SET, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -677,7 +677,7 @@ result := mapResult
 }
 
 func (x *reqNestedContainersMapSet) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 
@@ -924,7 +924,7 @@ func (x *reqNestedContainersListMap) writeField1(p thrift.Format) error {  // Fo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1021,7 +1021,7 @@ result := listResult
 }
 
 func (x *reqNestedContainersListMap) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 
@@ -1268,7 +1268,7 @@ func (x *reqNestedContainersListSet) writeField1(p thrift.Format) error {  // Fo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteListBegin(thrift.SET, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1348,7 +1348,7 @@ result := listResult
 }
 
 func (x *reqNestedContainersListSet) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 
@@ -1595,7 +1595,7 @@ func (x *reqNestedContainersTurtles) writeField1(p thrift.Format) error {  // Fo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteListBegin(thrift.LIST, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1796,7 +1796,7 @@ result := listResult
 }
 
 func (x *reqNestedContainersTurtles) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 

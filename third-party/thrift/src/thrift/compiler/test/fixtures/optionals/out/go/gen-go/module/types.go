@@ -179,7 +179,7 @@ func (x *Color) writeField1(p thrift.Format) error {  // Red
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRedNonCompat()
+    item := x.Red
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -195,7 +195,7 @@ func (x *Color) writeField2(p thrift.Format) error {  // Green
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetGreenNonCompat()
+    item := x.Green
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -211,7 +211,7 @@ func (x *Color) writeField3(p thrift.Format) error {  // Blue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBlueNonCompat()
+    item := x.Blue
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -227,7 +227,7 @@ func (x *Color) writeField4(p thrift.Format) error {  // Alpha
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAlphaNonCompat()
+    item := x.Alpha
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -279,19 +279,19 @@ if err != nil {
 }
 
 func (x *Color) toString1() string {  // Red
-    return fmt.Sprintf("%v", x.GetRedNonCompat())
+    return fmt.Sprintf("%v", x.Red)
 }
 
 func (x *Color) toString2() string {  // Green
-    return fmt.Sprintf("%v", x.GetGreenNonCompat())
+    return fmt.Sprintf("%v", x.Green)
 }
 
 func (x *Color) toString3() string {  // Blue
-    return fmt.Sprintf("%v", x.GetBlueNonCompat())
+    return fmt.Sprintf("%v", x.Blue)
 }
 
 func (x *Color) toString4() string {  // Alpha
-    return fmt.Sprintf("%v", x.GetAlphaNonCompat())
+    return fmt.Sprintf("%v", x.Alpha)
 }
 
 
@@ -597,7 +597,7 @@ func (x *Vehicle) writeField1(p thrift.Format) error {  // Color
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetColorNonCompat()
+    item := x.Color
     if err := item.Write(p); err != nil {
     return err
 }
@@ -617,7 +617,7 @@ func (x *Vehicle) writeField2(p thrift.Format) error {  // LicensePlate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetLicensePlateNonCompat()
+    item := *x.LicensePlate
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -637,7 +637,7 @@ func (x *Vehicle) writeField3(p thrift.Format) error {  // Description
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDescriptionNonCompat()
+    item := *x.Description
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -657,7 +657,7 @@ func (x *Vehicle) writeField4(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetNameNonCompat()
+    item := *x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -677,7 +677,7 @@ func (x *Vehicle) writeField5(p thrift.Format) error {  // HasAC
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetHasACNonCompat()
+    item := *x.HasAC
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -740,35 +740,35 @@ if err != nil {
 }
 
 func (x *Vehicle) toString1() string {  // Color
-    return fmt.Sprintf("%v", x.GetColorNonCompat())
+    return fmt.Sprintf("%v", x.Color)
 }
 
 func (x *Vehicle) toString2() string {  // LicensePlate
     if x.IsSetLicensePlate() {
-        return fmt.Sprintf("%v", *x.GetLicensePlateNonCompat())
+        return fmt.Sprintf("%v", *x.LicensePlate)
     }
-    return fmt.Sprintf("%v", x.GetLicensePlateNonCompat())
+    return fmt.Sprintf("%v", x.LicensePlate)
 }
 
 func (x *Vehicle) toString3() string {  // Description
     if x.IsSetDescription() {
-        return fmt.Sprintf("%v", *x.GetDescriptionNonCompat())
+        return fmt.Sprintf("%v", *x.Description)
     }
-    return fmt.Sprintf("%v", x.GetDescriptionNonCompat())
+    return fmt.Sprintf("%v", x.Description)
 }
 
 func (x *Vehicle) toString4() string {  // Name
     if x.IsSetName() {
-        return fmt.Sprintf("%v", *x.GetNameNonCompat())
+        return fmt.Sprintf("%v", *x.Name)
     }
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *Vehicle) toString5() string {  // HasAC
     if x.IsSetHasAC() {
-        return fmt.Sprintf("%v", *x.GetHasACNonCompat())
+        return fmt.Sprintf("%v", *x.HasAC)
     }
-    return fmt.Sprintf("%v", x.GetHasACNonCompat())
+    return fmt.Sprintf("%v", x.HasAC)
 }
 
 // Deprecated: Use NewVehicle().GetColor() instead.
@@ -1217,7 +1217,7 @@ func (x *Person) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     err := WritePersonID(item, p)
 if err != nil {
     return err
@@ -1234,7 +1234,7 @@ func (x *Person) writeField2(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1254,7 +1254,7 @@ func (x *Person) writeField3(p thrift.Format) error {  // Age
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAgeNonCompat()
+    item := *x.Age
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1274,7 +1274,7 @@ func (x *Person) writeField4(p thrift.Format) error {  // Address
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAddressNonCompat()
+    item := *x.Address
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1294,7 +1294,7 @@ func (x *Person) writeField5(p thrift.Format) error {  // FavoriteColor
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFavoriteColorNonCompat()
+    item := x.FavoriteColor
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1314,7 +1314,7 @@ func (x *Person) writeField6(p thrift.Format) error {  // Friends
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFriendsNonCompat()
+    item := x.Friends
     if err := p.WriteSetBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -1346,7 +1346,7 @@ func (x *Person) writeField7(p thrift.Format) error {  // BestFriend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBestFriendNonCompat()
+    item := *x.BestFriend
     err := WritePersonID(item, p)
 if err != nil {
     return err
@@ -1367,7 +1367,7 @@ func (x *Person) writeField8(p thrift.Format) error {  // PetNames
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPetNamesNonCompat()
+    item := x.PetNames
     if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1405,7 +1405,7 @@ func (x *Person) writeField9(p thrift.Format) error {  // AfraidOfAnimal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAfraidOfAnimalNonCompat()
+    item := *x.AfraidOfAnimal
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1425,7 +1425,7 @@ func (x *Person) writeField10(p thrift.Format) error {  // Vehicles
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVehiclesNonCompat()
+    item := x.Vehicles
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1616,55 +1616,55 @@ result := listResult
 }
 
 func (x *Person) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 func (x *Person) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 func (x *Person) toString3() string {  // Age
     if x.IsSetAge() {
-        return fmt.Sprintf("%v", *x.GetAgeNonCompat())
+        return fmt.Sprintf("%v", *x.Age)
     }
-    return fmt.Sprintf("%v", x.GetAgeNonCompat())
+    return fmt.Sprintf("%v", x.Age)
 }
 
 func (x *Person) toString4() string {  // Address
     if x.IsSetAddress() {
-        return fmt.Sprintf("%v", *x.GetAddressNonCompat())
+        return fmt.Sprintf("%v", *x.Address)
     }
-    return fmt.Sprintf("%v", x.GetAddressNonCompat())
+    return fmt.Sprintf("%v", x.Address)
 }
 
 func (x *Person) toString5() string {  // FavoriteColor
-    return fmt.Sprintf("%v", x.GetFavoriteColorNonCompat())
+    return fmt.Sprintf("%v", x.FavoriteColor)
 }
 
 func (x *Person) toString6() string {  // Friends
-    return fmt.Sprintf("%v", x.GetFriendsNonCompat())
+    return fmt.Sprintf("%v", x.Friends)
 }
 
 func (x *Person) toString7() string {  // BestFriend
     if x.IsSetBestFriend() {
-        return fmt.Sprintf("%v", *x.GetBestFriendNonCompat())
+        return fmt.Sprintf("%v", *x.BestFriend)
     }
-    return fmt.Sprintf("%v", x.GetBestFriendNonCompat())
+    return fmt.Sprintf("%v", x.BestFriend)
 }
 
 func (x *Person) toString8() string {  // PetNames
-    return fmt.Sprintf("%v", x.GetPetNamesNonCompat())
+    return fmt.Sprintf("%v", x.PetNames)
 }
 
 func (x *Person) toString9() string {  // AfraidOfAnimal
     if x.IsSetAfraidOfAnimal() {
-        return fmt.Sprintf("%v", *x.GetAfraidOfAnimalNonCompat())
+        return fmt.Sprintf("%v", *x.AfraidOfAnimal)
     }
-    return fmt.Sprintf("%v", x.GetAfraidOfAnimalNonCompat())
+    return fmt.Sprintf("%v", x.AfraidOfAnimal)
 }
 
 func (x *Person) toString10() string {  // Vehicles
-    return fmt.Sprintf("%v", x.GetVehiclesNonCompat())
+    return fmt.Sprintf("%v", x.Vehicles)
 }
 
 

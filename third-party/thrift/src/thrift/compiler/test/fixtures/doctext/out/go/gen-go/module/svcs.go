@@ -405,7 +405,7 @@ func (x *reqCThing) writeField1(p thrift.Format) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetANonCompat()
+    item := x.A
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -421,7 +421,7 @@ func (x *reqCThing) writeField2(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -437,7 +437,7 @@ func (x *reqCThing) writeField3(p thrift.Format) error {  // C
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCNonCompat()
+    item := x.C
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -508,15 +508,15 @@ result := setResult
 }
 
 func (x *reqCThing) toString1() string {  // A
-    return fmt.Sprintf("%v", x.GetANonCompat())
+    return fmt.Sprintf("%v", x.A)
 }
 
 func (x *reqCThing) toString2() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 func (x *reqCThing) toString3() string {  // C
-    return fmt.Sprintf("%v", x.GetCNonCompat())
+    return fmt.Sprintf("%v", x.C)
 }
 
 
@@ -726,7 +726,7 @@ func (x *respCThing) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -746,7 +746,7 @@ func (x *respCThing) writeField1(p thrift.Format) error {  // Bang
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBangNonCompat()
+    item := x.Bang
     if err := item.Write(p); err != nil {
     return err
 }
@@ -780,13 +780,13 @@ if err != nil {
 
 func (x *respCThing) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 func (x *respCThing) toString1() string {  // Bang
-    return fmt.Sprintf("%v", x.GetBangNonCompat())
+    return fmt.Sprintf("%v", x.Bang)
 }
 
 

@@ -50,7 +50,7 @@ func (x *Foo) writeField1(p thrift.Format) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetANonCompat()
+    item := x.A
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *Foo) toString1() string {  // A
-    return fmt.Sprintf("%v", x.GetANonCompat())
+    return fmt.Sprintf("%v", x.A)
 }
 
 

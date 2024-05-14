@@ -205,7 +205,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSNonCompat()
+    item := x.S
     if err := item.Write(p); err != nil {
     return err
 }
@@ -225,7 +225,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Format) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetINonCompat()
+    item := x.I
     if err := item.Write(p); err != nil {
     return err
 }
@@ -259,11 +259,11 @@ if err != nil {
 }
 
 func (x *reqMyServiceQuery) toString1() string {  // S
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 func (x *reqMyServiceQuery) toString2() string {  // I
-    return fmt.Sprintf("%v", x.GetINonCompat())
+    return fmt.Sprintf("%v", x.I)
 }
 
 // Deprecated: Use newReqMyServiceQuery().GetS() instead.
@@ -574,7 +574,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSNonCompat()
+    item := x.S
     if err := item.Write(p); err != nil {
     return err
 }
@@ -594,7 +594,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Format) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetINonCompat()
+    item := x.I
     if err := item.Write(p); err != nil {
     return err
 }
@@ -628,11 +628,11 @@ if err != nil {
 }
 
 func (x *reqMyServiceHasArgDocs) toString1() string {  // S
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 func (x *reqMyServiceHasArgDocs) toString2() string {  // I
-    return fmt.Sprintf("%v", x.GetINonCompat())
+    return fmt.Sprintf("%v", x.I)
 }
 
 // Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.

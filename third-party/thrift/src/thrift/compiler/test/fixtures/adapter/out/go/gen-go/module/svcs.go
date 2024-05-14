@@ -186,7 +186,7 @@ func (x *reqServiceFunc) writeField1(p thrift.Format) error {  // Arg1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg1NonCompat()
+    item := x.Arg1
     err := WriteStringWithAdapter_7208(item, p)
 if err != nil {
     return err
@@ -203,7 +203,7 @@ func (x *reqServiceFunc) writeField2(p thrift.Format) error {  // Arg2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg2NonCompat()
+    item := x.Arg2
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -223,7 +223,7 @@ func (x *reqServiceFunc) writeField3(p thrift.Format) error {  // Arg3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg3NonCompat()
+    item := x.Arg3
     if err := item.Write(p); err != nil {
     return err
 }
@@ -266,15 +266,15 @@ if err != nil {
 }
 
 func (x *reqServiceFunc) toString1() string {  // Arg1
-    return fmt.Sprintf("%v", x.GetArg1NonCompat())
+    return fmt.Sprintf("%v", x.Arg1)
 }
 
 func (x *reqServiceFunc) toString2() string {  // Arg2
-    return fmt.Sprintf("%v", x.GetArg2NonCompat())
+    return fmt.Sprintf("%v", x.Arg2)
 }
 
 func (x *reqServiceFunc) toString3() string {  // Arg3
-    return fmt.Sprintf("%v", x.GetArg3NonCompat())
+    return fmt.Sprintf("%v", x.Arg3)
 }
 
 // Deprecated: Use newReqServiceFunc().GetArg3() instead.
@@ -465,7 +465,7 @@ func (x *respServiceFunc) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     err := WriteMyI32_4873(item, p)
 if err != nil {
     return err
@@ -489,9 +489,9 @@ if err != nil {
 
 func (x *respServiceFunc) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -943,7 +943,7 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Format) error {  // Succe
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := item.Write(p); err != nil {
     return err
 }
@@ -966,7 +966,7 @@ if err != nil {
 }
 
 func (x *respAdapterServiceCount) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
@@ -1129,7 +1129,7 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArgNonCompat()
+    item := x.Arg
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1152,7 +1152,7 @@ if err != nil {
 }
 
 func (x *reqAdapterServiceAdaptedTypes) toString1() string {  // Arg
-    return fmt.Sprintf("%v", x.GetArgNonCompat())
+    return fmt.Sprintf("%v", x.Arg)
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
@@ -1311,7 +1311,7 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Format) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1334,7 +1334,7 @@ if err != nil {
 }
 
 func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.

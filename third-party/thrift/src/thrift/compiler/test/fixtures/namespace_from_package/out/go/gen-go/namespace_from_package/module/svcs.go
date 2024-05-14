@@ -136,7 +136,7 @@ func (x *reqTestServiceInit) writeField1(p thrift.Format) error {  // Int1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInt1NonCompat()
+    item := x.Int1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -158,7 +158,7 @@ if err != nil {
 }
 
 func (x *reqTestServiceInit) toString1() string {  // Int1
-    return fmt.Sprintf("%v", x.GetInt1NonCompat())
+    return fmt.Sprintf("%v", x.Int1)
 }
 
 
@@ -309,7 +309,7 @@ func (x *respTestServiceInit) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -332,9 +332,9 @@ if err != nil {
 
 func (x *respTestServiceInit) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 

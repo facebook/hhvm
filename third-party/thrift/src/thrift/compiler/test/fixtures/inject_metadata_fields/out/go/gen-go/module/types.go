@@ -52,7 +52,7 @@ func (x *Fields) writeField100(p thrift.Format) error {  // InjectedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInjectedFieldNonCompat()
+    item := x.InjectedField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -74,7 +74,7 @@ if err != nil {
 }
 
 func (x *Fields) toString100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 
@@ -211,7 +211,7 @@ func (x *FieldsInjectedToEmptyStruct) writeField_1100(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInjectedFieldNonCompat()
+    item := x.InjectedField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -233,7 +233,7 @@ if err != nil {
 }
 
 func (x *FieldsInjectedToEmptyStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 
@@ -390,7 +390,7 @@ func (x *FieldsInjectedToStruct) writeField_1100(p thrift.Format) error {  // In
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInjectedFieldNonCompat()
+    item := x.InjectedField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -406,7 +406,7 @@ func (x *FieldsInjectedToStruct) writeField1(p thrift.Format) error {  // String
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringFieldNonCompat()
+    item := x.StringField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -438,11 +438,11 @@ if err != nil {
 }
 
 func (x *FieldsInjectedToStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 func (x *FieldsInjectedToStruct) toString1() string {  // StringField
-    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+    return fmt.Sprintf("%v", x.StringField)
 }
 
 
@@ -673,7 +673,7 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1102(p thrift.Format) erro
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetInjectedUnstructuredAnnotationFieldNonCompat()
+    item := *x.InjectedUnstructuredAnnotationField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -693,7 +693,7 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1101(p thrift.Format) erro
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetInjectedStructuredAnnotationFieldNonCompat()
+    item := *x.InjectedStructuredAnnotationField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -709,7 +709,7 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1100(p thrift.Format) erro
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInjectedFieldNonCompat()
+    item := x.InjectedField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -725,7 +725,7 @@ func (x *FieldsInjectedWithIncludedStruct) writeField1(p thrift.Format) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringFieldNonCompat()
+    item := x.StringField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -778,24 +778,24 @@ if err != nil {
 
 func (x *FieldsInjectedWithIncludedStruct) toString_1102() string {  // InjectedUnstructuredAnnotationField
     if x.IsSetInjectedUnstructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+        return fmt.Sprintf("%v", *x.InjectedUnstructuredAnnotationField)
     }
-    return fmt.Sprintf("%v", x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedUnstructuredAnnotationField)
 }
 
 func (x *FieldsInjectedWithIncludedStruct) toString_1101() string {  // InjectedStructuredAnnotationField
     if x.IsSetInjectedStructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.GetInjectedStructuredAnnotationFieldNonCompat())
+        return fmt.Sprintf("%v", *x.InjectedStructuredAnnotationField)
     }
-    return fmt.Sprintf("%v", x.GetInjectedStructuredAnnotationFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedStructuredAnnotationField)
 }
 
 func (x *FieldsInjectedWithIncludedStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 func (x *FieldsInjectedWithIncludedStruct) toString1() string {  // StringField
-    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+    return fmt.Sprintf("%v", x.StringField)
 }
 
 

@@ -569,7 +569,7 @@ func (x *respRaiserDoRaise) writeField1(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := item.Write(p); err != nil {
     return err
 }
@@ -589,7 +589,7 @@ func (x *respRaiserDoRaise) writeField2(p thrift.Format) error {  // F
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFNonCompat()
+    item := x.F
     if err := item.Write(p); err != nil {
     return err
 }
@@ -609,7 +609,7 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSNonCompat()
+    item := x.S
     if err := item.Write(p); err != nil {
     return err
 }
@@ -654,15 +654,15 @@ if err != nil {
 }
 
 func (x *respRaiserDoRaise) toString1() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 func (x *respRaiserDoRaise) toString2() string {  // F
-    return fmt.Sprintf("%v", x.GetFNonCompat())
+    return fmt.Sprintf("%v", x.F)
 }
 
 func (x *respRaiserDoRaise) toString3() string {  // S
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
@@ -977,7 +977,7 @@ func (x *respRaiserGet200) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1000,9 +1000,9 @@ if err != nil {
 
 func (x *respRaiserGet200) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1334,7 +1334,7 @@ func (x *respRaiserGet500) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1354,7 +1354,7 @@ func (x *respRaiserGet500) writeField1(p thrift.Format) error {  // F
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFNonCompat()
+    item := x.F
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1374,7 +1374,7 @@ func (x *respRaiserGet500) writeField2(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1394,7 +1394,7 @@ func (x *respRaiserGet500) writeField3(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSNonCompat()
+    item := x.S
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1450,21 +1450,21 @@ if err != nil {
 
 func (x *respRaiserGet500) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 func (x *respRaiserGet500) toString1() string {  // F
-    return fmt.Sprintf("%v", x.GetFNonCompat())
+    return fmt.Sprintf("%v", x.F)
 }
 
 func (x *respRaiserGet500) toString2() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 func (x *respRaiserGet500) toString3() string {  // S
-    return fmt.Sprintf("%v", x.GetSNonCompat())
+    return fmt.Sprintf("%v", x.S)
 }
 
 

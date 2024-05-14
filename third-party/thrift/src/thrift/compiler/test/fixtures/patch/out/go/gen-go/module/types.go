@@ -111,7 +111,7 @@ func (x *MyData) writeField1(p thrift.Format) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1NonCompat()
+    item := x.Data1
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -127,7 +127,7 @@ func (x *MyData) writeField2(p thrift.Format) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2NonCompat()
+    item := x.Data2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -159,11 +159,11 @@ if err != nil {
 }
 
 func (x *MyData) toString1() string {  // Data1
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyData) toString2() string {  // Data2
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 
@@ -336,7 +336,7 @@ func (x *MyDataWithCustomDefault) writeField1(p thrift.Format) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1NonCompat()
+    item := x.Data1
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -352,7 +352,7 @@ func (x *MyDataWithCustomDefault) writeField2(p thrift.Format) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2NonCompat()
+    item := x.Data2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -384,11 +384,11 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefault) toString1() string {  // Data1
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyDataWithCustomDefault) toString2() string {  // Data2
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 
@@ -552,7 +552,7 @@ func (x *InnerUnion) writeField1(p thrift.Format) error {  // InnerOption
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInnerOptionNonCompat()
+    item := x.InnerOption
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -574,7 +574,7 @@ if err != nil {
 }
 
 func (x *InnerUnion) toString1() string {  // InnerOption
-    return fmt.Sprintf("%v", x.GetInnerOptionNonCompat())
+    return fmt.Sprintf("%v", x.InnerOption)
 }
 
 func (x *InnerUnion) countSetFields() int {
@@ -791,7 +791,7 @@ func (x *MyUnion) writeField1(p thrift.Format) error {  // Option1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOption1NonCompat()
+    item := *x.Option1
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -811,7 +811,7 @@ func (x *MyUnion) writeField2(p thrift.Format) error {  // Option2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOption2NonCompat()
+    item := *x.Option2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -831,7 +831,7 @@ func (x *MyUnion) writeField3(p thrift.Format) error {  // Option3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption3NonCompat()
+    item := x.Option3
     if err := item.Write(p); err != nil {
     return err
 }
@@ -875,20 +875,20 @@ if err != nil {
 
 func (x *MyUnion) toString1() string {  // Option1
     if x.IsSetOption1() {
-        return fmt.Sprintf("%v", *x.GetOption1NonCompat())
+        return fmt.Sprintf("%v", *x.Option1)
     }
-    return fmt.Sprintf("%v", x.GetOption1NonCompat())
+    return fmt.Sprintf("%v", x.Option1)
 }
 
 func (x *MyUnion) toString2() string {  // Option2
     if x.IsSetOption2() {
-        return fmt.Sprintf("%v", *x.GetOption2NonCompat())
+        return fmt.Sprintf("%v", *x.Option2)
     }
-    return fmt.Sprintf("%v", x.GetOption2NonCompat())
+    return fmt.Sprintf("%v", x.Option2)
 }
 
 func (x *MyUnion) toString3() string {  // Option3
-    return fmt.Sprintf("%v", x.GetOption3NonCompat())
+    return fmt.Sprintf("%v", x.Option3)
 }
 
 
@@ -1905,7 +1905,7 @@ func (x *MyStruct) writeField_32(p thrift.Format) error {  // StructWithCustomDe
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefaultNonCompat()
+    item := x.StructWithCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1921,7 +1921,7 @@ func (x *MyStruct) writeField_31(p thrift.Format) error {  // I32WithCustomDefau
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32WithCustomDefaultNonCompat()
+    item := x.I32WithCustomDefault
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1937,7 +1937,7 @@ func (x *MyStruct) writeField_30(p thrift.Format) error {  // MapMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMapNonCompat()
+    item := x.MapMap
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1989,7 +1989,7 @@ func (x *MyStruct) writeField_29(p thrift.Format) error {  // ListMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMapNonCompat()
+    item := x.ListMap
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -2038,7 +2038,7 @@ func (x *MyStruct) writeField_28(p thrift.Format) error {  // OptMapVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapValNonCompat()
+    item := x.OptMapVal
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -2076,7 +2076,7 @@ func (x *MyStruct) writeField_27(p thrift.Format) error {  // OptSetVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetValNonCompat()
+    item := x.OptSetVal
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -2107,7 +2107,7 @@ func (x *MyStruct) writeField_26(p thrift.Format) error {  // OptListVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListValNonCompat()
+    item := x.OptListVal
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -2138,7 +2138,7 @@ func (x *MyStruct) writeField_25(p thrift.Format) error {  // OptLateStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructValNonCompat()
+    item := x.OptLateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2158,7 +2158,7 @@ func (x *MyStruct) writeField_24(p thrift.Format) error {  // OptStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructValNonCompat()
+    item := x.OptStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2178,7 +2178,7 @@ func (x *MyStruct) writeField_23(p thrift.Format) error {  // OptEnumVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptEnumValNonCompat()
+    item := *x.OptEnumVal
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -2198,7 +2198,7 @@ func (x *MyStruct) writeField_22(p thrift.Format) error {  // OptBinaryVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryValNonCompat()
+    item := x.OptBinaryVal
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -2218,7 +2218,7 @@ func (x *MyStruct) writeField_21(p thrift.Format) error {  // OptStringVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptStringValNonCompat()
+    item := *x.OptStringVal
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2238,7 +2238,7 @@ func (x *MyStruct) writeField_20(p thrift.Format) error {  // OptDoubleVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptDoubleValNonCompat()
+    item := *x.OptDoubleVal
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2258,7 +2258,7 @@ func (x *MyStruct) writeField_19(p thrift.Format) error {  // OptFloatVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptFloatValNonCompat()
+    item := *x.OptFloatVal
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -2278,7 +2278,7 @@ func (x *MyStruct) writeField_18(p thrift.Format) error {  // OptI64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI64ValNonCompat()
+    item := *x.OptI64Val
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2298,7 +2298,7 @@ func (x *MyStruct) writeField_17(p thrift.Format) error {  // OptI32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI32ValNonCompat()
+    item := *x.OptI32Val
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2318,7 +2318,7 @@ func (x *MyStruct) writeField_16(p thrift.Format) error {  // OptI16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI16ValNonCompat()
+    item := *x.OptI16Val
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -2338,7 +2338,7 @@ func (x *MyStruct) writeField_15(p thrift.Format) error {  // OptByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptByteValNonCompat()
+    item := *x.OptByteVal
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -2358,7 +2358,7 @@ func (x *MyStruct) writeField_14(p thrift.Format) error {  // OptBoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptBoolValNonCompat()
+    item := *x.OptBoolVal
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2378,7 +2378,7 @@ func (x *MyStruct) writeField_13(p thrift.Format) error {  // LateStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructValNonCompat()
+    item := x.LateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2398,7 +2398,7 @@ func (x *MyStruct) writeField_12(p thrift.Format) error {  // UnionVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionValNonCompat()
+    item := x.UnionVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2418,7 +2418,7 @@ func (x *MyStruct) writeField_11(p thrift.Format) error {  // StructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructValNonCompat()
+    item := x.StructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2434,7 +2434,7 @@ func (x *MyStruct) writeField_10(p thrift.Format) error {  // EnumVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumValNonCompat()
+    item := x.EnumVal
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -2450,7 +2450,7 @@ func (x *MyStruct) writeField_9(p thrift.Format) error {  // BinaryVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryValNonCompat()
+    item := x.BinaryVal
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -2466,7 +2466,7 @@ func (x *MyStruct) writeField_8(p thrift.Format) error {  // StringVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringValNonCompat()
+    item := x.StringVal
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2482,7 +2482,7 @@ func (x *MyStruct) writeField_7(p thrift.Format) error {  // DoubleVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDoubleValNonCompat()
+    item := x.DoubleVal
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2498,7 +2498,7 @@ func (x *MyStruct) writeField_6(p thrift.Format) error {  // FloatVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatValNonCompat()
+    item := x.FloatVal
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -2514,7 +2514,7 @@ func (x *MyStruct) writeField_5(p thrift.Format) error {  // I64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI64ValNonCompat()
+    item := x.I64Val
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2530,7 +2530,7 @@ func (x *MyStruct) writeField_4(p thrift.Format) error {  // I32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32ValNonCompat()
+    item := x.I32Val
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2546,7 +2546,7 @@ func (x *MyStruct) writeField_3(p thrift.Format) error {  // I16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI16ValNonCompat()
+    item := x.I16Val
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -2562,7 +2562,7 @@ func (x *MyStruct) writeField_2(p thrift.Format) error {  // ByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetByteValNonCompat()
+    item := x.ByteVal
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -2578,7 +2578,7 @@ func (x *MyStruct) writeField_1(p thrift.Format) error {  // BoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBoolValNonCompat()
+    item := x.BoolVal
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2598,7 +2598,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // StructWithFieldCusto
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefaultNonCompat()
+    item := x.StructWithFieldCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3117,162 +3117,162 @@ if err != nil {
 }
 
 func (x *MyStruct) toString_32() string {  // StructWithCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithCustomDefault)
 }
 
 func (x *MyStruct) toString_31() string {  // I32WithCustomDefault
-    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.I32WithCustomDefault)
 }
 
 func (x *MyStruct) toString_30() string {  // MapMap
-    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+    return fmt.Sprintf("%v", x.MapMap)
 }
 
 func (x *MyStruct) toString_29() string {  // ListMap
-    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+    return fmt.Sprintf("%v", x.ListMap)
 }
 
 func (x *MyStruct) toString_28() string {  // OptMapVal
-    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+    return fmt.Sprintf("%v", x.OptMapVal)
 }
 
 func (x *MyStruct) toString_27() string {  // OptSetVal
-    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+    return fmt.Sprintf("%v", x.OptSetVal)
 }
 
 func (x *MyStruct) toString_26() string {  // OptListVal
-    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+    return fmt.Sprintf("%v", x.OptListVal)
 }
 
 func (x *MyStruct) toString_25() string {  // OptLateStructVal
-    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptLateStructVal)
 }
 
 func (x *MyStruct) toString_24() string {  // OptStructVal
-    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptStructVal)
 }
 
 func (x *MyStruct) toString_23() string {  // OptEnumVal
     if x.IsSetOptEnumVal() {
-        return fmt.Sprintf("%v", *x.GetOptEnumValNonCompat())
+        return fmt.Sprintf("%v", *x.OptEnumVal)
     }
-    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+    return fmt.Sprintf("%v", x.OptEnumVal)
 }
 
 func (x *MyStruct) toString_22() string {  // OptBinaryVal
-    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.OptBinaryVal)
 }
 
 func (x *MyStruct) toString_21() string {  // OptStringVal
     if x.IsSetOptStringVal() {
-        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
+        return fmt.Sprintf("%v", *x.OptStringVal)
     }
-    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+    return fmt.Sprintf("%v", x.OptStringVal)
 }
 
 func (x *MyStruct) toString_20() string {  // OptDoubleVal
     if x.IsSetOptDoubleVal() {
-        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
+        return fmt.Sprintf("%v", *x.OptDoubleVal)
     }
-    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.OptDoubleVal)
 }
 
 func (x *MyStruct) toString_19() string {  // OptFloatVal
     if x.IsSetOptFloatVal() {
-        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
+        return fmt.Sprintf("%v", *x.OptFloatVal)
     }
-    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+    return fmt.Sprintf("%v", x.OptFloatVal)
 }
 
 func (x *MyStruct) toString_18() string {  // OptI64Val
     if x.IsSetOptI64Val() {
-        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI64Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI64Val)
 }
 
 func (x *MyStruct) toString_17() string {  // OptI32Val
     if x.IsSetOptI32Val() {
-        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI32Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI32Val)
 }
 
 func (x *MyStruct) toString_16() string {  // OptI16Val
     if x.IsSetOptI16Val() {
-        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI16Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI16Val)
 }
 
 func (x *MyStruct) toString_15() string {  // OptByteVal
     if x.IsSetOptByteVal() {
-        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
+        return fmt.Sprintf("%v", *x.OptByteVal)
     }
-    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+    return fmt.Sprintf("%v", x.OptByteVal)
 }
 
 func (x *MyStruct) toString_14() string {  // OptBoolVal
     if x.IsSetOptBoolVal() {
-        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
+        return fmt.Sprintf("%v", *x.OptBoolVal)
     }
-    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+    return fmt.Sprintf("%v", x.OptBoolVal)
 }
 
 func (x *MyStruct) toString_13() string {  // LateStructVal
-    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.LateStructVal)
 }
 
 func (x *MyStruct) toString_12() string {  // UnionVal
-    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+    return fmt.Sprintf("%v", x.UnionVal)
 }
 
 func (x *MyStruct) toString_11() string {  // StructVal
-    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+    return fmt.Sprintf("%v", x.StructVal)
 }
 
 func (x *MyStruct) toString_10() string {  // EnumVal
-    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+    return fmt.Sprintf("%v", x.EnumVal)
 }
 
 func (x *MyStruct) toString_9() string {  // BinaryVal
-    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.BinaryVal)
 }
 
 func (x *MyStruct) toString_8() string {  // StringVal
-    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+    return fmt.Sprintf("%v", x.StringVal)
 }
 
 func (x *MyStruct) toString_7() string {  // DoubleVal
-    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.DoubleVal)
 }
 
 func (x *MyStruct) toString_6() string {  // FloatVal
-    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+    return fmt.Sprintf("%v", x.FloatVal)
 }
 
 func (x *MyStruct) toString_5() string {  // I64Val
-    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+    return fmt.Sprintf("%v", x.I64Val)
 }
 
 func (x *MyStruct) toString_4() string {  // I32Val
-    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+    return fmt.Sprintf("%v", x.I32Val)
 }
 
 func (x *MyStruct) toString_3() string {  // I16Val
-    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+    return fmt.Sprintf("%v", x.I16Val)
 }
 
 func (x *MyStruct) toString_2() string {  // ByteVal
-    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+    return fmt.Sprintf("%v", x.ByteVal)
 }
 
 func (x *MyStruct) toString_1() string {  // BoolVal
-    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+    return fmt.Sprintf("%v", x.BoolVal)
 }
 
 func (x *MyStruct) toString1() string {  // StructWithFieldCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithFieldCustomDefault)
 }
 
 // Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
@@ -4087,7 +4087,7 @@ func (x *Recursive) writeField_1(p thrift.Format) error {  // Nodes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodesNonCompat()
+    item := x.Nodes
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -4156,7 +4156,7 @@ result := mapResult
 }
 
 func (x *Recursive) toString_1() string {  // Nodes
-    return fmt.Sprintf("%v", x.GetNodesNonCompat())
+    return fmt.Sprintf("%v", x.Nodes)
 }
 
 
@@ -4305,7 +4305,7 @@ func (x *Bar) writeField_1(p thrift.Format) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoopNonCompat()
+    item := x.Loop
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4328,7 +4328,7 @@ if err != nil {
 }
 
 func (x *Bar) toString_1() string {  // Loop
-    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+    return fmt.Sprintf("%v", x.Loop)
 }
 
 // Deprecated: Use NewBar().GetLoop() instead.
@@ -4485,7 +4485,7 @@ func (x *Loop) writeField_1(p thrift.Format) error {  // Bar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBarNonCompat()
+    item := x.Bar
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4508,7 +4508,7 @@ if err != nil {
 }
 
 func (x *Loop) toString_1() string {  // Bar
-    return fmt.Sprintf("%v", x.GetBarNonCompat())
+    return fmt.Sprintf("%v", x.Bar)
 }
 
 // Deprecated: Use NewLoop().GetBar() instead.
@@ -4825,7 +4825,7 @@ func (x *RefFields) writeField1(p thrift.Format) error {  // Unique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUniqueNonCompat()
+    item := x.Unique
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -4852,7 +4852,7 @@ func (x *RefFields) writeField2(p thrift.Format) error {  // SharedConst
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSharedConstNonCompat()
+    item := x.SharedConst
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -4879,7 +4879,7 @@ func (x *RefFields) writeField3(p thrift.Format) error {  // SharedMustable
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSharedMustableNonCompat()
+    item := x.SharedMustable
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -4910,7 +4910,7 @@ func (x *RefFields) writeField4(p thrift.Format) error {  // OptUnique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptUniqueNonCompat()
+    item := x.OptUnique
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -4941,7 +4941,7 @@ func (x *RefFields) writeField5(p thrift.Format) error {  // OptSharedConst
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSharedConstNonCompat()
+    item := x.OptSharedConst
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -4972,7 +4972,7 @@ func (x *RefFields) writeField6(p thrift.Format) error {  // OptSharedMustable
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSharedMustableNonCompat()
+    item := x.OptSharedMustable
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -5003,7 +5003,7 @@ func (x *RefFields) writeField7(p thrift.Format) error {  // OptBox
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBoxNonCompat()
+    item := x.OptBox
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -5222,31 +5222,31 @@ result := listResult
 }
 
 func (x *RefFields) toString1() string {  // Unique
-    return fmt.Sprintf("%v", x.GetUniqueNonCompat())
+    return fmt.Sprintf("%v", x.Unique)
 }
 
 func (x *RefFields) toString2() string {  // SharedConst
-    return fmt.Sprintf("%v", x.GetSharedConstNonCompat())
+    return fmt.Sprintf("%v", x.SharedConst)
 }
 
 func (x *RefFields) toString3() string {  // SharedMustable
-    return fmt.Sprintf("%v", x.GetSharedMustableNonCompat())
+    return fmt.Sprintf("%v", x.SharedMustable)
 }
 
 func (x *RefFields) toString4() string {  // OptUnique
-    return fmt.Sprintf("%v", x.GetOptUniqueNonCompat())
+    return fmt.Sprintf("%v", x.OptUnique)
 }
 
 func (x *RefFields) toString5() string {  // OptSharedConst
-    return fmt.Sprintf("%v", x.GetOptSharedConstNonCompat())
+    return fmt.Sprintf("%v", x.OptSharedConst)
 }
 
 func (x *RefFields) toString6() string {  // OptSharedMustable
-    return fmt.Sprintf("%v", x.GetOptSharedMustableNonCompat())
+    return fmt.Sprintf("%v", x.OptSharedMustable)
 }
 
 func (x *RefFields) toString7() string {  // OptBox
-    return fmt.Sprintf("%v", x.GetOptBoxNonCompat())
+    return fmt.Sprintf("%v", x.OptBox)
 }
 
 
@@ -5622,7 +5622,7 @@ func (x *MyDataPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5638,7 +5638,7 @@ func (x *MyDataPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -5658,7 +5658,7 @@ func (x *MyDataPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5678,7 +5678,7 @@ func (x *MyDataPatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5698,7 +5698,7 @@ func (x *MyDataPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5714,7 +5714,7 @@ func (x *MyDataPatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -5791,27 +5791,27 @@ if err != nil {
 }
 
 func (x *MyDataPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyDataPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyDataPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyDataPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *MyDataPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyDataPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewMyDataPatch().GetAssign() instead.
@@ -6100,7 +6100,7 @@ func (x *MyDataFieldPatch) writeField1(p thrift.Format) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1NonCompat()
+    item := x.Data1
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6120,7 +6120,7 @@ func (x *MyDataFieldPatch) writeField2(p thrift.Format) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2NonCompat()
+    item := x.Data2
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6154,11 +6154,11 @@ if err != nil {
 }
 
 func (x *MyDataFieldPatch) toString1() string {  // Data1
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyDataFieldPatch) toString2() string {  // Data2
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 // Deprecated: Use NewMyDataFieldPatch().GetData1() instead.
@@ -6365,7 +6365,7 @@ func (x *MyDataEnsureStruct) writeField1(p thrift.Format) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData1NonCompat()
+    item := *x.Data1
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -6385,7 +6385,7 @@ func (x *MyDataEnsureStruct) writeField2(p thrift.Format) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData2NonCompat()
+    item := *x.Data2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6418,16 +6418,16 @@ if err != nil {
 
 func (x *MyDataEnsureStruct) toString1() string {  // Data1
     if x.IsSetData1() {
-        return fmt.Sprintf("%v", *x.GetData1NonCompat())
+        return fmt.Sprintf("%v", *x.Data1)
     }
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyDataEnsureStruct) toString2() string {  // Data2
     if x.IsSetData2() {
-        return fmt.Sprintf("%v", *x.GetData2NonCompat())
+        return fmt.Sprintf("%v", *x.Data2)
     }
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 
@@ -6610,7 +6610,7 @@ func (x *MyDataSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6626,7 +6626,7 @@ func (x *MyDataSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -6658,11 +6658,11 @@ if err != nil {
 }
 
 func (x *MyDataSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *MyDataSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -6958,7 +6958,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField1(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6974,7 +6974,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField2(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -6994,7 +6994,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField3(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7014,7 +7014,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField5(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7034,7 +7034,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField6(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7050,7 +7050,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField7(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -7127,27 +7127,27 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyDataWithCustomDefaultPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().GetAssign() instead.
@@ -7436,7 +7436,7 @@ func (x *MyDataWithCustomDefaultFieldPatch) writeField1(p thrift.Format) error {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1NonCompat()
+    item := x.Data1
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7456,7 +7456,7 @@ func (x *MyDataWithCustomDefaultFieldPatch) writeField2(p thrift.Format) error {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2NonCompat()
+    item := x.Data2
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7490,11 +7490,11 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) toString1() string {  // Data1
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) toString2() string {  // Data2
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().GetData1() instead.
@@ -7701,7 +7701,7 @@ func (x *MyDataWithCustomDefaultEnsureStruct) writeField1(p thrift.Format) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData1NonCompat()
+    item := *x.Data1
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -7721,7 +7721,7 @@ func (x *MyDataWithCustomDefaultEnsureStruct) writeField2(p thrift.Format) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData2NonCompat()
+    item := *x.Data2
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7754,16 +7754,16 @@ if err != nil {
 
 func (x *MyDataWithCustomDefaultEnsureStruct) toString1() string {  // Data1
     if x.IsSetData1() {
-        return fmt.Sprintf("%v", *x.GetData1NonCompat())
+        return fmt.Sprintf("%v", *x.Data1)
     }
-    return fmt.Sprintf("%v", x.GetData1NonCompat())
+    return fmt.Sprintf("%v", x.Data1)
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) toString2() string {  // Data2
     if x.IsSetData2() {
-        return fmt.Sprintf("%v", *x.GetData2NonCompat())
+        return fmt.Sprintf("%v", *x.Data2)
     }
-    return fmt.Sprintf("%v", x.GetData2NonCompat())
+    return fmt.Sprintf("%v", x.Data2)
 }
 
 
@@ -7946,7 +7946,7 @@ func (x *MyDataWithCustomDefaultSafePatch) writeField1(p thrift.Format) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7962,7 +7962,7 @@ func (x *MyDataWithCustomDefaultSafePatch) writeField2(p thrift.Format) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -7994,11 +7994,11 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefaultSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *MyDataWithCustomDefaultSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -8266,7 +8266,7 @@ func (x *InnerUnionPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8282,7 +8282,7 @@ func (x *InnerUnionPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -8302,7 +8302,7 @@ func (x *InnerUnionPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8322,7 +8322,7 @@ func (x *InnerUnionPatch) writeField4(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8342,7 +8342,7 @@ func (x *InnerUnionPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8408,23 +8408,23 @@ if err != nil {
 }
 
 func (x *InnerUnionPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *InnerUnionPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *InnerUnionPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *InnerUnionPatch) toString4() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *InnerUnionPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 // Deprecated: Use NewInnerUnionPatch().GetAssign() instead.
@@ -8669,7 +8669,7 @@ func (x *InnerUnionFieldPatch) writeField1(p thrift.Format) error {  // InnerOpt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInnerOptionNonCompat()
+    item := x.InnerOption
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8692,7 +8692,7 @@ if err != nil {
 }
 
 func (x *InnerUnionFieldPatch) toString1() string {  // InnerOption
-    return fmt.Sprintf("%v", x.GetInnerOptionNonCompat())
+    return fmt.Sprintf("%v", x.InnerOption)
 }
 
 // Deprecated: Use NewInnerUnionFieldPatch().GetInnerOption() instead.
@@ -8865,7 +8865,7 @@ func (x *InnerUnionSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -8881,7 +8881,7 @@ func (x *InnerUnionSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -8913,11 +8913,11 @@ if err != nil {
 }
 
 func (x *InnerUnionSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *InnerUnionSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -9185,7 +9185,7 @@ func (x *MyUnionPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9201,7 +9201,7 @@ func (x *MyUnionPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -9221,7 +9221,7 @@ func (x *MyUnionPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9241,7 +9241,7 @@ func (x *MyUnionPatch) writeField4(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9261,7 +9261,7 @@ func (x *MyUnionPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9327,23 +9327,23 @@ if err != nil {
 }
 
 func (x *MyUnionPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyUnionPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyUnionPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyUnionPatch) toString4() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *MyUnionPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 // Deprecated: Use NewMyUnionPatch().GetAssign() instead.
@@ -9644,7 +9644,7 @@ func (x *MyUnionFieldPatch) writeField1(p thrift.Format) error {  // Option1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption1NonCompat()
+    item := x.Option1
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9664,7 +9664,7 @@ func (x *MyUnionFieldPatch) writeField2(p thrift.Format) error {  // Option2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption2NonCompat()
+    item := x.Option2
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9684,7 +9684,7 @@ func (x *MyUnionFieldPatch) writeField3(p thrift.Format) error {  // Option3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption3NonCompat()
+    item := x.Option3
     if err := item.Write(p); err != nil {
     return err
 }
@@ -9729,15 +9729,15 @@ if err != nil {
 }
 
 func (x *MyUnionFieldPatch) toString1() string {  // Option1
-    return fmt.Sprintf("%v", x.GetOption1NonCompat())
+    return fmt.Sprintf("%v", x.Option1)
 }
 
 func (x *MyUnionFieldPatch) toString2() string {  // Option2
-    return fmt.Sprintf("%v", x.GetOption2NonCompat())
+    return fmt.Sprintf("%v", x.Option2)
 }
 
 func (x *MyUnionFieldPatch) toString3() string {  // Option3
-    return fmt.Sprintf("%v", x.GetOption3NonCompat())
+    return fmt.Sprintf("%v", x.Option3)
 }
 
 // Deprecated: Use NewMyUnionFieldPatch().GetOption1() instead.
@@ -9958,7 +9958,7 @@ func (x *MyUnionSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -9974,7 +9974,7 @@ func (x *MyUnionSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -10006,11 +10006,11 @@ if err != nil {
 }
 
 func (x *MyUnionSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *MyUnionSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -10306,7 +10306,7 @@ func (x *MyStructPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -10322,7 +10322,7 @@ func (x *MyStructPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -10342,7 +10342,7 @@ func (x *MyStructPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -10362,7 +10362,7 @@ func (x *MyStructPatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -10382,7 +10382,7 @@ func (x *MyStructPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -10398,7 +10398,7 @@ func (x *MyStructPatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -10475,27 +10475,27 @@ if err != nil {
 }
 
 func (x *MyStructPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyStructPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *MyStructPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyStructPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewMyStructPatch().GetAssign() instead.
@@ -10775,7 +10775,7 @@ func (x *MyStructField10Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -10791,7 +10791,7 @@ func (x *MyStructField10Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -10825,13 +10825,13 @@ if err != nil {
 
 func (x *MyStructField10Patch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField10Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 
@@ -11016,7 +11016,7 @@ func (x *MyStructField23Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -11032,7 +11032,7 @@ func (x *MyStructField23Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -11066,13 +11066,13 @@ if err != nil {
 
 func (x *MyStructField23Patch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField23Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 
@@ -11313,7 +11313,7 @@ func (x *MyStructField26Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -11340,7 +11340,7 @@ func (x *MyStructField26Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -11356,7 +11356,7 @@ func (x *MyStructField26Patch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -11383,7 +11383,7 @@ func (x *MyStructField26Patch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -11500,19 +11500,19 @@ result := listResult
 }
 
 func (x *MyStructField26Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField26Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField26Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *MyStructField26Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -11784,7 +11784,7 @@ func (x *MyStructField27Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -11811,7 +11811,7 @@ func (x *MyStructField27Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -11827,7 +11827,7 @@ func (x *MyStructField27Patch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -11854,7 +11854,7 @@ func (x *MyStructField27Patch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -11971,19 +11971,19 @@ result := setResult
 }
 
 func (x *MyStructField27Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField27Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField27Patch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 func (x *MyStructField27Patch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -12339,7 +12339,7 @@ func (x *MyStructField28Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12373,7 +12373,7 @@ func (x *MyStructField28Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -12389,7 +12389,7 @@ func (x *MyStructField28Patch) writeField3(p thrift.Format) error {  // PatchPri
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12423,7 +12423,7 @@ func (x *MyStructField28Patch) writeField5(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12457,7 +12457,7 @@ func (x *MyStructField28Patch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12491,7 +12491,7 @@ func (x *MyStructField28Patch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -12518,7 +12518,7 @@ func (x *MyStructField28Patch) writeField9(p thrift.Format) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPutNonCompat()
+    item := x.Put
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12778,31 +12778,31 @@ result := mapResult
 }
 
 func (x *MyStructField28Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField28Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField28Patch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyStructField28Patch) toString5() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 func (x *MyStructField28Patch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyStructField28Patch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 func (x *MyStructField28Patch) toString9() string {  // Put
-    return fmt.Sprintf("%v", x.GetPutNonCompat())
+    return fmt.Sprintf("%v", x.Put)
 }
 
 
@@ -13122,7 +13122,7 @@ func (x *MyStructField29Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -13167,7 +13167,7 @@ func (x *MyStructField29Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -13183,7 +13183,7 @@ func (x *MyStructField29Patch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -13228,7 +13228,7 @@ func (x *MyStructField29Patch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -13447,19 +13447,19 @@ result := listResult
 }
 
 func (x *MyStructField29Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField29Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField29Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *MyStructField29Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -13815,7 +13815,7 @@ func (x *MyStructField30Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13867,7 +13867,7 @@ func (x *MyStructField30Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -13883,7 +13883,7 @@ func (x *MyStructField30Patch) writeField3(p thrift.Format) error {  // PatchPri
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13917,7 +13917,7 @@ func (x *MyStructField30Patch) writeField5(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13969,7 +13969,7 @@ func (x *MyStructField30Patch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14003,7 +14003,7 @@ func (x *MyStructField30Patch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -14030,7 +14030,7 @@ func (x *MyStructField30Patch) writeField9(p thrift.Format) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPutNonCompat()
+    item := x.Put
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14392,31 +14392,31 @@ result := mapResult
 }
 
 func (x *MyStructField30Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField30Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField30Patch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyStructField30Patch) toString5() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 func (x *MyStructField30Patch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyStructField30Patch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 func (x *MyStructField30Patch) toString9() string {  // Put
-    return fmt.Sprintf("%v", x.GetPutNonCompat())
+    return fmt.Sprintf("%v", x.Put)
 }
 
 
@@ -14820,7 +14820,7 @@ func (x *MyStructField30Patch1) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14854,7 +14854,7 @@ func (x *MyStructField30Patch1) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -14870,7 +14870,7 @@ func (x *MyStructField30Patch1) writeField3(p thrift.Format) error {  // PatchPr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14904,7 +14904,7 @@ func (x *MyStructField30Patch1) writeField5(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14938,7 +14938,7 @@ func (x *MyStructField30Patch1) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -14972,7 +14972,7 @@ func (x *MyStructField30Patch1) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -14999,7 +14999,7 @@ func (x *MyStructField30Patch1) writeField9(p thrift.Format) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPutNonCompat()
+    item := x.Put
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -15259,31 +15259,31 @@ result := mapResult
 }
 
 func (x *MyStructField30Patch1) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *MyStructField30Patch1) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *MyStructField30Patch1) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *MyStructField30Patch1) toString5() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 func (x *MyStructField30Patch1) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *MyStructField30Patch1) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 func (x *MyStructField30Patch1) toString9() string {  // Put
-    return fmt.Sprintf("%v", x.GetPutNonCompat())
+    return fmt.Sprintf("%v", x.Put)
 }
 
 
@@ -16424,7 +16424,7 @@ func (x *MyStructFieldPatch) writeField_32(p thrift.Format) error {  // StructWi
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefaultNonCompat()
+    item := x.StructWithCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16444,7 +16444,7 @@ func (x *MyStructFieldPatch) writeField_31(p thrift.Format) error {  // I32WithC
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32WithCustomDefaultNonCompat()
+    item := x.I32WithCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16464,7 +16464,7 @@ func (x *MyStructFieldPatch) writeField_30(p thrift.Format) error {  // MapMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMapNonCompat()
+    item := x.MapMap
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16484,7 +16484,7 @@ func (x *MyStructFieldPatch) writeField_29(p thrift.Format) error {  // ListMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMapNonCompat()
+    item := x.ListMap
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16504,7 +16504,7 @@ func (x *MyStructFieldPatch) writeField_28(p thrift.Format) error {  // OptMapVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapValNonCompat()
+    item := x.OptMapVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16524,7 +16524,7 @@ func (x *MyStructFieldPatch) writeField_27(p thrift.Format) error {  // OptSetVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetValNonCompat()
+    item := x.OptSetVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16544,7 +16544,7 @@ func (x *MyStructFieldPatch) writeField_26(p thrift.Format) error {  // OptListV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListValNonCompat()
+    item := x.OptListVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16564,7 +16564,7 @@ func (x *MyStructFieldPatch) writeField_25(p thrift.Format) error {  // OptLateS
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructValNonCompat()
+    item := x.OptLateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16584,7 +16584,7 @@ func (x *MyStructFieldPatch) writeField_24(p thrift.Format) error {  // OptStruc
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructValNonCompat()
+    item := x.OptStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16604,7 +16604,7 @@ func (x *MyStructFieldPatch) writeField_23(p thrift.Format) error {  // OptEnumV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptEnumValNonCompat()
+    item := x.OptEnumVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16624,7 +16624,7 @@ func (x *MyStructFieldPatch) writeField_22(p thrift.Format) error {  // OptBinar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryValNonCompat()
+    item := x.OptBinaryVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16644,7 +16644,7 @@ func (x *MyStructFieldPatch) writeField_21(p thrift.Format) error {  // OptStrin
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStringValNonCompat()
+    item := x.OptStringVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16664,7 +16664,7 @@ func (x *MyStructFieldPatch) writeField_20(p thrift.Format) error {  // OptDoubl
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptDoubleValNonCompat()
+    item := x.OptDoubleVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16684,7 +16684,7 @@ func (x *MyStructFieldPatch) writeField_19(p thrift.Format) error {  // OptFloat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptFloatValNonCompat()
+    item := x.OptFloatVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16704,7 +16704,7 @@ func (x *MyStructFieldPatch) writeField_18(p thrift.Format) error {  // OptI64Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI64ValNonCompat()
+    item := x.OptI64Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16724,7 +16724,7 @@ func (x *MyStructFieldPatch) writeField_17(p thrift.Format) error {  // OptI32Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI32ValNonCompat()
+    item := x.OptI32Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16744,7 +16744,7 @@ func (x *MyStructFieldPatch) writeField_16(p thrift.Format) error {  // OptI16Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI16ValNonCompat()
+    item := x.OptI16Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16764,7 +16764,7 @@ func (x *MyStructFieldPatch) writeField_15(p thrift.Format) error {  // OptByteV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptByteValNonCompat()
+    item := x.OptByteVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16784,7 +16784,7 @@ func (x *MyStructFieldPatch) writeField_14(p thrift.Format) error {  // OptBoolV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBoolValNonCompat()
+    item := x.OptBoolVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16804,7 +16804,7 @@ func (x *MyStructFieldPatch) writeField_13(p thrift.Format) error {  // LateStru
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructValNonCompat()
+    item := x.LateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16824,7 +16824,7 @@ func (x *MyStructFieldPatch) writeField_12(p thrift.Format) error {  // UnionVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionValNonCompat()
+    item := x.UnionVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16844,7 +16844,7 @@ func (x *MyStructFieldPatch) writeField_11(p thrift.Format) error {  // StructVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructValNonCompat()
+    item := x.StructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16864,7 +16864,7 @@ func (x *MyStructFieldPatch) writeField_10(p thrift.Format) error {  // EnumVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumValNonCompat()
+    item := x.EnumVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16884,7 +16884,7 @@ func (x *MyStructFieldPatch) writeField_9(p thrift.Format) error {  // BinaryVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryValNonCompat()
+    item := x.BinaryVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16904,7 +16904,7 @@ func (x *MyStructFieldPatch) writeField_8(p thrift.Format) error {  // StringVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringValNonCompat()
+    item := x.StringVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16924,7 +16924,7 @@ func (x *MyStructFieldPatch) writeField_7(p thrift.Format) error {  // DoubleVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDoubleValNonCompat()
+    item := x.DoubleVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16944,7 +16944,7 @@ func (x *MyStructFieldPatch) writeField_6(p thrift.Format) error {  // FloatVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatValNonCompat()
+    item := x.FloatVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16964,7 +16964,7 @@ func (x *MyStructFieldPatch) writeField_5(p thrift.Format) error {  // I64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI64ValNonCompat()
+    item := x.I64Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16984,7 +16984,7 @@ func (x *MyStructFieldPatch) writeField_4(p thrift.Format) error {  // I32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32ValNonCompat()
+    item := x.I32Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17004,7 +17004,7 @@ func (x *MyStructFieldPatch) writeField_3(p thrift.Format) error {  // I16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI16ValNonCompat()
+    item := x.I16Val
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17024,7 +17024,7 @@ func (x *MyStructFieldPatch) writeField_2(p thrift.Format) error {  // ByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetByteValNonCompat()
+    item := x.ByteVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17044,7 +17044,7 @@ func (x *MyStructFieldPatch) writeField_1(p thrift.Format) error {  // BoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBoolValNonCompat()
+    item := x.BoolVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17064,7 +17064,7 @@ func (x *MyStructFieldPatch) writeField1(p thrift.Format) error {  // StructWith
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefaultNonCompat()
+    item := x.StructWithFieldCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17439,135 +17439,135 @@ if err != nil {
 }
 
 func (x *MyStructFieldPatch) toString_32() string {  // StructWithCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithCustomDefault)
 }
 
 func (x *MyStructFieldPatch) toString_31() string {  // I32WithCustomDefault
-    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.I32WithCustomDefault)
 }
 
 func (x *MyStructFieldPatch) toString_30() string {  // MapMap
-    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+    return fmt.Sprintf("%v", x.MapMap)
 }
 
 func (x *MyStructFieldPatch) toString_29() string {  // ListMap
-    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+    return fmt.Sprintf("%v", x.ListMap)
 }
 
 func (x *MyStructFieldPatch) toString_28() string {  // OptMapVal
-    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+    return fmt.Sprintf("%v", x.OptMapVal)
 }
 
 func (x *MyStructFieldPatch) toString_27() string {  // OptSetVal
-    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+    return fmt.Sprintf("%v", x.OptSetVal)
 }
 
 func (x *MyStructFieldPatch) toString_26() string {  // OptListVal
-    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+    return fmt.Sprintf("%v", x.OptListVal)
 }
 
 func (x *MyStructFieldPatch) toString_25() string {  // OptLateStructVal
-    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptLateStructVal)
 }
 
 func (x *MyStructFieldPatch) toString_24() string {  // OptStructVal
-    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptStructVal)
 }
 
 func (x *MyStructFieldPatch) toString_23() string {  // OptEnumVal
-    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+    return fmt.Sprintf("%v", x.OptEnumVal)
 }
 
 func (x *MyStructFieldPatch) toString_22() string {  // OptBinaryVal
-    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.OptBinaryVal)
 }
 
 func (x *MyStructFieldPatch) toString_21() string {  // OptStringVal
-    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+    return fmt.Sprintf("%v", x.OptStringVal)
 }
 
 func (x *MyStructFieldPatch) toString_20() string {  // OptDoubleVal
-    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.OptDoubleVal)
 }
 
 func (x *MyStructFieldPatch) toString_19() string {  // OptFloatVal
-    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+    return fmt.Sprintf("%v", x.OptFloatVal)
 }
 
 func (x *MyStructFieldPatch) toString_18() string {  // OptI64Val
-    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI64Val)
 }
 
 func (x *MyStructFieldPatch) toString_17() string {  // OptI32Val
-    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI32Val)
 }
 
 func (x *MyStructFieldPatch) toString_16() string {  // OptI16Val
-    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI16Val)
 }
 
 func (x *MyStructFieldPatch) toString_15() string {  // OptByteVal
-    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+    return fmt.Sprintf("%v", x.OptByteVal)
 }
 
 func (x *MyStructFieldPatch) toString_14() string {  // OptBoolVal
-    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+    return fmt.Sprintf("%v", x.OptBoolVal)
 }
 
 func (x *MyStructFieldPatch) toString_13() string {  // LateStructVal
-    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.LateStructVal)
 }
 
 func (x *MyStructFieldPatch) toString_12() string {  // UnionVal
-    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+    return fmt.Sprintf("%v", x.UnionVal)
 }
 
 func (x *MyStructFieldPatch) toString_11() string {  // StructVal
-    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+    return fmt.Sprintf("%v", x.StructVal)
 }
 
 func (x *MyStructFieldPatch) toString_10() string {  // EnumVal
-    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+    return fmt.Sprintf("%v", x.EnumVal)
 }
 
 func (x *MyStructFieldPatch) toString_9() string {  // BinaryVal
-    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.BinaryVal)
 }
 
 func (x *MyStructFieldPatch) toString_8() string {  // StringVal
-    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+    return fmt.Sprintf("%v", x.StringVal)
 }
 
 func (x *MyStructFieldPatch) toString_7() string {  // DoubleVal
-    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.DoubleVal)
 }
 
 func (x *MyStructFieldPatch) toString_6() string {  // FloatVal
-    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+    return fmt.Sprintf("%v", x.FloatVal)
 }
 
 func (x *MyStructFieldPatch) toString_5() string {  // I64Val
-    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+    return fmt.Sprintf("%v", x.I64Val)
 }
 
 func (x *MyStructFieldPatch) toString_4() string {  // I32Val
-    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+    return fmt.Sprintf("%v", x.I32Val)
 }
 
 func (x *MyStructFieldPatch) toString_3() string {  // I16Val
-    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+    return fmt.Sprintf("%v", x.I16Val)
 }
 
 func (x *MyStructFieldPatch) toString_2() string {  // ByteVal
-    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+    return fmt.Sprintf("%v", x.ByteVal)
 }
 
 func (x *MyStructFieldPatch) toString_1() string {  // BoolVal
-    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+    return fmt.Sprintf("%v", x.BoolVal)
 }
 
 func (x *MyStructFieldPatch) toString1() string {  // StructWithFieldCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithFieldCustomDefault)
 }
 
 // Deprecated: Use NewMyStructFieldPatch().GetStructWithCustomDefault() instead.
@@ -19355,7 +19355,7 @@ func (x *MyStructEnsureStruct) writeField_32(p thrift.Format) error {  // Struct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefaultNonCompat()
+    item := x.StructWithCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19375,7 +19375,7 @@ func (x *MyStructEnsureStruct) writeField_31(p thrift.Format) error {  // I32Wit
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32WithCustomDefaultNonCompat()
+    item := *x.I32WithCustomDefault
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -19395,7 +19395,7 @@ func (x *MyStructEnsureStruct) writeField_30(p thrift.Format) error {  // MapMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMapNonCompat()
+    item := x.MapMap
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -19451,7 +19451,7 @@ func (x *MyStructEnsureStruct) writeField_29(p thrift.Format) error {  // ListMa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMapNonCompat()
+    item := x.ListMap
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -19500,7 +19500,7 @@ func (x *MyStructEnsureStruct) writeField_28(p thrift.Format) error {  // OptMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapValNonCompat()
+    item := x.OptMapVal
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -19538,7 +19538,7 @@ func (x *MyStructEnsureStruct) writeField_27(p thrift.Format) error {  // OptSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetValNonCompat()
+    item := x.OptSetVal
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -19569,7 +19569,7 @@ func (x *MyStructEnsureStruct) writeField_26(p thrift.Format) error {  // OptLis
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListValNonCompat()
+    item := x.OptListVal
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -19600,7 +19600,7 @@ func (x *MyStructEnsureStruct) writeField_25(p thrift.Format) error {  // OptLat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructValNonCompat()
+    item := x.OptLateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19620,7 +19620,7 @@ func (x *MyStructEnsureStruct) writeField_24(p thrift.Format) error {  // OptStr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructValNonCompat()
+    item := x.OptStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19640,7 +19640,7 @@ func (x *MyStructEnsureStruct) writeField_23(p thrift.Format) error {  // OptEnu
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptEnumValNonCompat()
+    item := *x.OptEnumVal
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -19660,7 +19660,7 @@ func (x *MyStructEnsureStruct) writeField_22(p thrift.Format) error {  // OptBin
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryValNonCompat()
+    item := x.OptBinaryVal
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -19680,7 +19680,7 @@ func (x *MyStructEnsureStruct) writeField_21(p thrift.Format) error {  // OptStr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptStringValNonCompat()
+    item := *x.OptStringVal
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -19700,7 +19700,7 @@ func (x *MyStructEnsureStruct) writeField_20(p thrift.Format) error {  // OptDou
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptDoubleValNonCompat()
+    item := *x.OptDoubleVal
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -19720,7 +19720,7 @@ func (x *MyStructEnsureStruct) writeField_19(p thrift.Format) error {  // OptFlo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptFloatValNonCompat()
+    item := *x.OptFloatVal
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -19740,7 +19740,7 @@ func (x *MyStructEnsureStruct) writeField_18(p thrift.Format) error {  // OptI64
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI64ValNonCompat()
+    item := *x.OptI64Val
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -19760,7 +19760,7 @@ func (x *MyStructEnsureStruct) writeField_17(p thrift.Format) error {  // OptI32
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI32ValNonCompat()
+    item := *x.OptI32Val
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -19780,7 +19780,7 @@ func (x *MyStructEnsureStruct) writeField_16(p thrift.Format) error {  // OptI16
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI16ValNonCompat()
+    item := *x.OptI16Val
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -19800,7 +19800,7 @@ func (x *MyStructEnsureStruct) writeField_15(p thrift.Format) error {  // OptByt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptByteValNonCompat()
+    item := *x.OptByteVal
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -19820,7 +19820,7 @@ func (x *MyStructEnsureStruct) writeField_14(p thrift.Format) error {  // OptBoo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptBoolValNonCompat()
+    item := *x.OptBoolVal
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -19840,7 +19840,7 @@ func (x *MyStructEnsureStruct) writeField_13(p thrift.Format) error {  // LateSt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructValNonCompat()
+    item := x.LateStructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19860,7 +19860,7 @@ func (x *MyStructEnsureStruct) writeField_12(p thrift.Format) error {  // UnionV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionValNonCompat()
+    item := x.UnionVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19880,7 +19880,7 @@ func (x *MyStructEnsureStruct) writeField_11(p thrift.Format) error {  // Struct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructValNonCompat()
+    item := x.StructVal
     if err := item.Write(p); err != nil {
     return err
 }
@@ -19900,7 +19900,7 @@ func (x *MyStructEnsureStruct) writeField_10(p thrift.Format) error {  // EnumVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetEnumValNonCompat()
+    item := *x.EnumVal
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -19920,7 +19920,7 @@ func (x *MyStructEnsureStruct) writeField_9(p thrift.Format) error {  // BinaryV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryValNonCompat()
+    item := x.BinaryVal
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -19940,7 +19940,7 @@ func (x *MyStructEnsureStruct) writeField_8(p thrift.Format) error {  // StringV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringValNonCompat()
+    item := *x.StringVal
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -19960,7 +19960,7 @@ func (x *MyStructEnsureStruct) writeField_7(p thrift.Format) error {  // DoubleV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDoubleValNonCompat()
+    item := *x.DoubleVal
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -19980,7 +19980,7 @@ func (x *MyStructEnsureStruct) writeField_6(p thrift.Format) error {  // FloatVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFloatValNonCompat()
+    item := *x.FloatVal
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -20000,7 +20000,7 @@ func (x *MyStructEnsureStruct) writeField_5(p thrift.Format) error {  // I64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI64ValNonCompat()
+    item := *x.I64Val
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -20020,7 +20020,7 @@ func (x *MyStructEnsureStruct) writeField_4(p thrift.Format) error {  // I32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32ValNonCompat()
+    item := *x.I32Val
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -20040,7 +20040,7 @@ func (x *MyStructEnsureStruct) writeField_3(p thrift.Format) error {  // I16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI16ValNonCompat()
+    item := *x.I16Val
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -20060,7 +20060,7 @@ func (x *MyStructEnsureStruct) writeField_2(p thrift.Format) error {  // ByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetByteValNonCompat()
+    item := *x.ByteVal
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -20080,7 +20080,7 @@ func (x *MyStructEnsureStruct) writeField_1(p thrift.Format) error {  // BoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBoolValNonCompat()
+    item := *x.BoolVal
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -20100,7 +20100,7 @@ func (x *MyStructEnsureStruct) writeField1(p thrift.Format) error {  // StructWi
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefaultNonCompat()
+    item := x.StructWithFieldCustomDefault
     if err := item.Write(p); err != nil {
     return err
 }
@@ -20619,192 +20619,192 @@ if err != nil {
 }
 
 func (x *MyStructEnsureStruct) toString_32() string {  // StructWithCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithCustomDefault)
 }
 
 func (x *MyStructEnsureStruct) toString_31() string {  // I32WithCustomDefault
     if x.IsSetI32WithCustomDefault() {
-        return fmt.Sprintf("%v", *x.GetI32WithCustomDefaultNonCompat())
+        return fmt.Sprintf("%v", *x.I32WithCustomDefault)
     }
-    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.I32WithCustomDefault)
 }
 
 func (x *MyStructEnsureStruct) toString_30() string {  // MapMap
-    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+    return fmt.Sprintf("%v", x.MapMap)
 }
 
 func (x *MyStructEnsureStruct) toString_29() string {  // ListMap
-    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+    return fmt.Sprintf("%v", x.ListMap)
 }
 
 func (x *MyStructEnsureStruct) toString_28() string {  // OptMapVal
-    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+    return fmt.Sprintf("%v", x.OptMapVal)
 }
 
 func (x *MyStructEnsureStruct) toString_27() string {  // OptSetVal
-    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+    return fmt.Sprintf("%v", x.OptSetVal)
 }
 
 func (x *MyStructEnsureStruct) toString_26() string {  // OptListVal
-    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+    return fmt.Sprintf("%v", x.OptListVal)
 }
 
 func (x *MyStructEnsureStruct) toString_25() string {  // OptLateStructVal
-    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptLateStructVal)
 }
 
 func (x *MyStructEnsureStruct) toString_24() string {  // OptStructVal
-    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+    return fmt.Sprintf("%v", x.OptStructVal)
 }
 
 func (x *MyStructEnsureStruct) toString_23() string {  // OptEnumVal
     if x.IsSetOptEnumVal() {
-        return fmt.Sprintf("%v", *x.GetOptEnumValNonCompat())
+        return fmt.Sprintf("%v", *x.OptEnumVal)
     }
-    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+    return fmt.Sprintf("%v", x.OptEnumVal)
 }
 
 func (x *MyStructEnsureStruct) toString_22() string {  // OptBinaryVal
-    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.OptBinaryVal)
 }
 
 func (x *MyStructEnsureStruct) toString_21() string {  // OptStringVal
     if x.IsSetOptStringVal() {
-        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
+        return fmt.Sprintf("%v", *x.OptStringVal)
     }
-    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+    return fmt.Sprintf("%v", x.OptStringVal)
 }
 
 func (x *MyStructEnsureStruct) toString_20() string {  // OptDoubleVal
     if x.IsSetOptDoubleVal() {
-        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
+        return fmt.Sprintf("%v", *x.OptDoubleVal)
     }
-    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.OptDoubleVal)
 }
 
 func (x *MyStructEnsureStruct) toString_19() string {  // OptFloatVal
     if x.IsSetOptFloatVal() {
-        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
+        return fmt.Sprintf("%v", *x.OptFloatVal)
     }
-    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+    return fmt.Sprintf("%v", x.OptFloatVal)
 }
 
 func (x *MyStructEnsureStruct) toString_18() string {  // OptI64Val
     if x.IsSetOptI64Val() {
-        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI64Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI64Val)
 }
 
 func (x *MyStructEnsureStruct) toString_17() string {  // OptI32Val
     if x.IsSetOptI32Val() {
-        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI32Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI32Val)
 }
 
 func (x *MyStructEnsureStruct) toString_16() string {  // OptI16Val
     if x.IsSetOptI16Val() {
-        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
+        return fmt.Sprintf("%v", *x.OptI16Val)
     }
-    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+    return fmt.Sprintf("%v", x.OptI16Val)
 }
 
 func (x *MyStructEnsureStruct) toString_15() string {  // OptByteVal
     if x.IsSetOptByteVal() {
-        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
+        return fmt.Sprintf("%v", *x.OptByteVal)
     }
-    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+    return fmt.Sprintf("%v", x.OptByteVal)
 }
 
 func (x *MyStructEnsureStruct) toString_14() string {  // OptBoolVal
     if x.IsSetOptBoolVal() {
-        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
+        return fmt.Sprintf("%v", *x.OptBoolVal)
     }
-    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+    return fmt.Sprintf("%v", x.OptBoolVal)
 }
 
 func (x *MyStructEnsureStruct) toString_13() string {  // LateStructVal
-    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+    return fmt.Sprintf("%v", x.LateStructVal)
 }
 
 func (x *MyStructEnsureStruct) toString_12() string {  // UnionVal
-    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+    return fmt.Sprintf("%v", x.UnionVal)
 }
 
 func (x *MyStructEnsureStruct) toString_11() string {  // StructVal
-    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+    return fmt.Sprintf("%v", x.StructVal)
 }
 
 func (x *MyStructEnsureStruct) toString_10() string {  // EnumVal
     if x.IsSetEnumVal() {
-        return fmt.Sprintf("%v", *x.GetEnumValNonCompat())
+        return fmt.Sprintf("%v", *x.EnumVal)
     }
-    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+    return fmt.Sprintf("%v", x.EnumVal)
 }
 
 func (x *MyStructEnsureStruct) toString_9() string {  // BinaryVal
-    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+    return fmt.Sprintf("%v", x.BinaryVal)
 }
 
 func (x *MyStructEnsureStruct) toString_8() string {  // StringVal
     if x.IsSetStringVal() {
-        return fmt.Sprintf("%v", *x.GetStringValNonCompat())
+        return fmt.Sprintf("%v", *x.StringVal)
     }
-    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+    return fmt.Sprintf("%v", x.StringVal)
 }
 
 func (x *MyStructEnsureStruct) toString_7() string {  // DoubleVal
     if x.IsSetDoubleVal() {
-        return fmt.Sprintf("%v", *x.GetDoubleValNonCompat())
+        return fmt.Sprintf("%v", *x.DoubleVal)
     }
-    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+    return fmt.Sprintf("%v", x.DoubleVal)
 }
 
 func (x *MyStructEnsureStruct) toString_6() string {  // FloatVal
     if x.IsSetFloatVal() {
-        return fmt.Sprintf("%v", *x.GetFloatValNonCompat())
+        return fmt.Sprintf("%v", *x.FloatVal)
     }
-    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+    return fmt.Sprintf("%v", x.FloatVal)
 }
 
 func (x *MyStructEnsureStruct) toString_5() string {  // I64Val
     if x.IsSetI64Val() {
-        return fmt.Sprintf("%v", *x.GetI64ValNonCompat())
+        return fmt.Sprintf("%v", *x.I64Val)
     }
-    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+    return fmt.Sprintf("%v", x.I64Val)
 }
 
 func (x *MyStructEnsureStruct) toString_4() string {  // I32Val
     if x.IsSetI32Val() {
-        return fmt.Sprintf("%v", *x.GetI32ValNonCompat())
+        return fmt.Sprintf("%v", *x.I32Val)
     }
-    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+    return fmt.Sprintf("%v", x.I32Val)
 }
 
 func (x *MyStructEnsureStruct) toString_3() string {  // I16Val
     if x.IsSetI16Val() {
-        return fmt.Sprintf("%v", *x.GetI16ValNonCompat())
+        return fmt.Sprintf("%v", *x.I16Val)
     }
-    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+    return fmt.Sprintf("%v", x.I16Val)
 }
 
 func (x *MyStructEnsureStruct) toString_2() string {  // ByteVal
     if x.IsSetByteVal() {
-        return fmt.Sprintf("%v", *x.GetByteValNonCompat())
+        return fmt.Sprintf("%v", *x.ByteVal)
     }
-    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+    return fmt.Sprintf("%v", x.ByteVal)
 }
 
 func (x *MyStructEnsureStruct) toString_1() string {  // BoolVal
     if x.IsSetBoolVal() {
-        return fmt.Sprintf("%v", *x.GetBoolValNonCompat())
+        return fmt.Sprintf("%v", *x.BoolVal)
     }
-    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+    return fmt.Sprintf("%v", x.BoolVal)
 }
 
 func (x *MyStructEnsureStruct) toString1() string {  // StructWithFieldCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+    return fmt.Sprintf("%v", x.StructWithFieldCustomDefault)
 }
 
 // Deprecated: Use NewMyStructEnsureStruct().GetStructWithCustomDefault() instead.
@@ -21556,7 +21556,7 @@ func (x *MyStructSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -21572,7 +21572,7 @@ func (x *MyStructSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -21604,11 +21604,11 @@ if err != nil {
 }
 
 func (x *MyStructSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *MyStructSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -21904,7 +21904,7 @@ func (x *LateDefStructPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -21920,7 +21920,7 @@ func (x *LateDefStructPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -21940,7 +21940,7 @@ func (x *LateDefStructPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -21960,7 +21960,7 @@ func (x *LateDefStructPatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -21980,7 +21980,7 @@ func (x *LateDefStructPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -21996,7 +21996,7 @@ func (x *LateDefStructPatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -22073,27 +22073,27 @@ if err != nil {
 }
 
 func (x *LateDefStructPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *LateDefStructPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *LateDefStructPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *LateDefStructPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *LateDefStructPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *LateDefStructPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewLateDefStructPatch().GetAssign() instead.
@@ -22556,7 +22556,7 @@ func (x *LateDefStructSafePatch) writeField1(p thrift.Format) error {  // Versio
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -22572,7 +22572,7 @@ func (x *LateDefStructSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -22604,11 +22604,11 @@ if err != nil {
 }
 
 func (x *LateDefStructSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *LateDefStructSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -22904,7 +22904,7 @@ func (x *RecursivePatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -22920,7 +22920,7 @@ func (x *RecursivePatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -22940,7 +22940,7 @@ func (x *RecursivePatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -22960,7 +22960,7 @@ func (x *RecursivePatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -22980,7 +22980,7 @@ func (x *RecursivePatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -22996,7 +22996,7 @@ func (x *RecursivePatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -23073,27 +23073,27 @@ if err != nil {
 }
 
 func (x *RecursivePatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RecursivePatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *RecursivePatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *RecursivePatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *RecursivePatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *RecursivePatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewRecursivePatch().GetAssign() instead.
@@ -23373,7 +23373,7 @@ func (x *RecursiveField1Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -23407,7 +23407,7 @@ func (x *RecursiveField1Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -23468,11 +23468,11 @@ if err != nil {
 }
 
 func (x *RecursiveField1Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RecursiveField1Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 
@@ -23637,7 +23637,7 @@ func (x *RecursiveFieldPatch) writeField_1(p thrift.Format) error {  // Nodes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodesNonCompat()
+    item := x.Nodes
     if err := item.Write(p); err != nil {
     return err
 }
@@ -23660,7 +23660,7 @@ if err != nil {
 }
 
 func (x *RecursiveFieldPatch) toString_1() string {  // Nodes
-    return fmt.Sprintf("%v", x.GetNodesNonCompat())
+    return fmt.Sprintf("%v", x.Nodes)
 }
 
 // Deprecated: Use NewRecursiveFieldPatch().GetNodes() instead.
@@ -23816,7 +23816,7 @@ func (x *RecursiveEnsureStruct) writeField_1(p thrift.Format) error {  // Nodes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodesNonCompat()
+    item := x.Nodes
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -23885,7 +23885,7 @@ result := mapResult
 }
 
 func (x *RecursiveEnsureStruct) toString_1() string {  // Nodes
-    return fmt.Sprintf("%v", x.GetNodesNonCompat())
+    return fmt.Sprintf("%v", x.Nodes)
 }
 
 
@@ -24050,7 +24050,7 @@ func (x *RecursiveSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -24066,7 +24066,7 @@ func (x *RecursiveSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -24098,11 +24098,11 @@ if err != nil {
 }
 
 func (x *RecursiveSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *RecursiveSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -24398,7 +24398,7 @@ func (x *BarPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -24414,7 +24414,7 @@ func (x *BarPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -24434,7 +24434,7 @@ func (x *BarPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -24454,7 +24454,7 @@ func (x *BarPatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -24474,7 +24474,7 @@ func (x *BarPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -24490,7 +24490,7 @@ func (x *BarPatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -24567,27 +24567,27 @@ if err != nil {
 }
 
 func (x *BarPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *BarPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *BarPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *BarPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *BarPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *BarPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewBarPatch().GetAssign() instead.
@@ -24848,7 +24848,7 @@ func (x *BarFieldPatch) writeField_1(p thrift.Format) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoopNonCompat()
+    item := x.Loop
     if err := item.Write(p); err != nil {
     return err
 }
@@ -24871,7 +24871,7 @@ if err != nil {
 }
 
 func (x *BarFieldPatch) toString_1() string {  // Loop
-    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+    return fmt.Sprintf("%v", x.Loop)
 }
 
 // Deprecated: Use NewBarFieldPatch().GetLoop() instead.
@@ -25027,7 +25027,7 @@ func (x *BarEnsureStruct) writeField_1(p thrift.Format) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoopNonCompat()
+    item := x.Loop
     if err := item.Write(p); err != nil {
     return err
 }
@@ -25050,7 +25050,7 @@ if err != nil {
 }
 
 func (x *BarEnsureStruct) toString_1() string {  // Loop
-    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+    return fmt.Sprintf("%v", x.Loop)
 }
 
 // Deprecated: Use NewBarEnsureStruct().GetLoop() instead.
@@ -25223,7 +25223,7 @@ func (x *BarSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -25239,7 +25239,7 @@ func (x *BarSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -25271,11 +25271,11 @@ if err != nil {
 }
 
 func (x *BarSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *BarSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -25459,7 +25459,7 @@ func (x *LoopPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -25475,7 +25475,7 @@ func (x *LoopPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -25508,11 +25508,11 @@ if err != nil {
 }
 
 func (x *LoopPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *LoopPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 // Deprecated: Use NewLoopPatch().GetAssign() instead.
@@ -25701,7 +25701,7 @@ func (x *LoopSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -25717,7 +25717,7 @@ func (x *LoopSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -25749,11 +25749,11 @@ if err != nil {
 }
 
 func (x *LoopSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *LoopSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -26049,7 +26049,7 @@ func (x *RefFieldsPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := item.Write(p); err != nil {
     return err
 }
@@ -26065,7 +26065,7 @@ func (x *RefFieldsPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -26085,7 +26085,7 @@ func (x *RefFieldsPatch) writeField3(p thrift.Format) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPriorNonCompat()
+    item := x.PatchPrior
     if err := item.Write(p); err != nil {
     return err
 }
@@ -26105,7 +26105,7 @@ func (x *RefFieldsPatch) writeField5(p thrift.Format) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsureNonCompat()
+    item := x.Ensure
     if err := item.Write(p); err != nil {
     return err
 }
@@ -26125,7 +26125,7 @@ func (x *RefFieldsPatch) writeField6(p thrift.Format) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchNonCompat()
+    item := x.Patch
     if err := item.Write(p); err != nil {
     return err
 }
@@ -26141,7 +26141,7 @@ func (x *RefFieldsPatch) writeField7(p thrift.Format) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemoveNonCompat()
+    item := x.Remove
     err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
@@ -26218,27 +26218,27 @@ if err != nil {
 }
 
 func (x *RefFieldsPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RefFieldsPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *RefFieldsPatch) toString3() string {  // PatchPrior
-    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+    return fmt.Sprintf("%v", x.PatchPrior)
 }
 
 func (x *RefFieldsPatch) toString5() string {  // Ensure
-    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+    return fmt.Sprintf("%v", x.Ensure)
 }
 
 func (x *RefFieldsPatch) toString6() string {  // Patch
-    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+    return fmt.Sprintf("%v", x.Patch)
 }
 
 func (x *RefFieldsPatch) toString7() string {  // Remove
-    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+    return fmt.Sprintf("%v", x.Remove)
 }
 
 // Deprecated: Use NewRefFieldsPatch().GetAssign() instead.
@@ -26574,7 +26574,7 @@ func (x *RefFieldsField1Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -26601,7 +26601,7 @@ func (x *RefFieldsField1Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -26617,7 +26617,7 @@ func (x *RefFieldsField1Patch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -26644,7 +26644,7 @@ func (x *RefFieldsField1Patch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -26761,19 +26761,19 @@ result := listResult
 }
 
 func (x *RefFieldsField1Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RefFieldsField1Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *RefFieldsField1Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *RefFieldsField1Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -27045,7 +27045,7 @@ func (x *RefFieldsField4Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27072,7 +27072,7 @@ func (x *RefFieldsField4Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -27088,7 +27088,7 @@ func (x *RefFieldsField4Patch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27115,7 +27115,7 @@ func (x *RefFieldsField4Patch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27232,19 +27232,19 @@ result := listResult
 }
 
 func (x *RefFieldsField4Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RefFieldsField4Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *RefFieldsField4Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *RefFieldsField4Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -27516,7 +27516,7 @@ func (x *RefFieldsField7Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27543,7 +27543,7 @@ func (x *RefFieldsField7Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -27559,7 +27559,7 @@ func (x *RefFieldsField7Patch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27586,7 +27586,7 @@ func (x *RefFieldsField7Patch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -27703,19 +27703,19 @@ result := listResult
 }
 
 func (x *RefFieldsField7Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *RefFieldsField7Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *RefFieldsField7Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *RefFieldsField7Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -27968,7 +27968,7 @@ func (x *RefFieldsFieldPatch) writeField1(p thrift.Format) error {  // Unique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUniqueNonCompat()
+    item := x.Unique
     if err := item.Write(p); err != nil {
     return err
 }
@@ -27988,7 +27988,7 @@ func (x *RefFieldsFieldPatch) writeField4(p thrift.Format) error {  // OptUnique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptUniqueNonCompat()
+    item := x.OptUnique
     if err := item.Write(p); err != nil {
     return err
 }
@@ -28008,7 +28008,7 @@ func (x *RefFieldsFieldPatch) writeField7(p thrift.Format) error {  // OptBox
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBoxNonCompat()
+    item := x.OptBox
     if err := item.Write(p); err != nil {
     return err
 }
@@ -28053,15 +28053,15 @@ if err != nil {
 }
 
 func (x *RefFieldsFieldPatch) toString1() string {  // Unique
-    return fmt.Sprintf("%v", x.GetUniqueNonCompat())
+    return fmt.Sprintf("%v", x.Unique)
 }
 
 func (x *RefFieldsFieldPatch) toString4() string {  // OptUnique
-    return fmt.Sprintf("%v", x.GetOptUniqueNonCompat())
+    return fmt.Sprintf("%v", x.OptUnique)
 }
 
 func (x *RefFieldsFieldPatch) toString7() string {  // OptBox
-    return fmt.Sprintf("%v", x.GetOptBoxNonCompat())
+    return fmt.Sprintf("%v", x.OptBox)
 }
 
 // Deprecated: Use NewRefFieldsFieldPatch().GetUnique() instead.
@@ -28427,7 +28427,7 @@ func (x *RefFieldsEnsureStruct) writeField1(p thrift.Format) error {  // Unique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUniqueNonCompat()
+    item := x.Unique
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28458,7 +28458,7 @@ func (x *RefFieldsEnsureStruct) writeField2(p thrift.Format) error {  // SharedC
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSharedConstNonCompat()
+    item := x.SharedConst
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28489,7 +28489,7 @@ func (x *RefFieldsEnsureStruct) writeField3(p thrift.Format) error {  // SharedM
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSharedMustableNonCompat()
+    item := x.SharedMustable
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28520,7 +28520,7 @@ func (x *RefFieldsEnsureStruct) writeField4(p thrift.Format) error {  // OptUniq
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptUniqueNonCompat()
+    item := x.OptUnique
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28551,7 +28551,7 @@ func (x *RefFieldsEnsureStruct) writeField5(p thrift.Format) error {  // OptShar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSharedConstNonCompat()
+    item := x.OptSharedConst
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28582,7 +28582,7 @@ func (x *RefFieldsEnsureStruct) writeField6(p thrift.Format) error {  // OptShar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSharedMustableNonCompat()
+    item := x.OptSharedMustable
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28613,7 +28613,7 @@ func (x *RefFieldsEnsureStruct) writeField7(p thrift.Format) error {  // OptBox
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBoxNonCompat()
+    item := x.OptBox
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -28832,31 +28832,31 @@ result := listResult
 }
 
 func (x *RefFieldsEnsureStruct) toString1() string {  // Unique
-    return fmt.Sprintf("%v", x.GetUniqueNonCompat())
+    return fmt.Sprintf("%v", x.Unique)
 }
 
 func (x *RefFieldsEnsureStruct) toString2() string {  // SharedConst
-    return fmt.Sprintf("%v", x.GetSharedConstNonCompat())
+    return fmt.Sprintf("%v", x.SharedConst)
 }
 
 func (x *RefFieldsEnsureStruct) toString3() string {  // SharedMustable
-    return fmt.Sprintf("%v", x.GetSharedMustableNonCompat())
+    return fmt.Sprintf("%v", x.SharedMustable)
 }
 
 func (x *RefFieldsEnsureStruct) toString4() string {  // OptUnique
-    return fmt.Sprintf("%v", x.GetOptUniqueNonCompat())
+    return fmt.Sprintf("%v", x.OptUnique)
 }
 
 func (x *RefFieldsEnsureStruct) toString5() string {  // OptSharedConst
-    return fmt.Sprintf("%v", x.GetOptSharedConstNonCompat())
+    return fmt.Sprintf("%v", x.OptSharedConst)
 }
 
 func (x *RefFieldsEnsureStruct) toString6() string {  // OptSharedMustable
-    return fmt.Sprintf("%v", x.GetOptSharedMustableNonCompat())
+    return fmt.Sprintf("%v", x.OptSharedMustable)
 }
 
 func (x *RefFieldsEnsureStruct) toString7() string {  // OptBox
-    return fmt.Sprintf("%v", x.GetOptBoxNonCompat())
+    return fmt.Sprintf("%v", x.OptBox)
 }
 
 
@@ -29117,7 +29117,7 @@ func (x *RefFieldsSafePatch) writeField1(p thrift.Format) error {  // Version
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVersionNonCompat()
+    item := x.Version
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -29133,7 +29133,7 @@ func (x *RefFieldsSafePatch) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -29165,11 +29165,11 @@ if err != nil {
 }
 
 func (x *RefFieldsSafePatch) toString1() string {  // Version
-    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+    return fmt.Sprintf("%v", x.Version)
 }
 
 func (x *RefFieldsSafePatch) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 

@@ -50,7 +50,7 @@ func (x *CustomException) writeField1(p thrift.Format) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageNonCompat()
+    item := x.Message
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *CustomException) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.GetMessageNonCompat())
+    return fmt.Sprintf("%v", x.Message)
 }
 
 

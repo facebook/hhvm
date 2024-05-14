@@ -186,7 +186,7 @@ func (x *reqFinderByPlate) writeField1(p thrift.Format) error {  // Plate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPlateNonCompat()
+    item := x.Plate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -209,7 +209,7 @@ if err != nil {
 }
 
 func (x *reqFinderByPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.GetPlateNonCompat())
+    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -360,7 +360,7 @@ func (x *respFinderByPlate) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := item.Write(p); err != nil {
     return err
 }
@@ -383,7 +383,7 @@ if err != nil {
 }
 
 func (x *respFinderByPlate) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
@@ -534,7 +534,7 @@ func (x *reqFinderAliasByPlate) writeField1(p thrift.Format) error {  // Plate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPlateNonCompat()
+    item := x.Plate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -557,7 +557,7 @@ if err != nil {
 }
 
 func (x *reqFinderAliasByPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.GetPlateNonCompat())
+    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -708,7 +708,7 @@ func (x *respFinderAliasByPlate) writeField0(p thrift.Format) error {  // Succes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     err := WriteCar(item, p)
 if err != nil {
     return err
@@ -731,7 +731,7 @@ if err != nil {
 }
 
 func (x *respFinderAliasByPlate) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
@@ -882,7 +882,7 @@ func (x *reqFinderPreviousPlate) writeField1(p thrift.Format) error {  // Plate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPlateNonCompat()
+    item := x.Plate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -905,7 +905,7 @@ if err != nil {
 }
 
 func (x *reqFinderPreviousPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.GetPlateNonCompat())
+    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -1056,7 +1056,7 @@ func (x *respFinderPreviousPlate) writeField0(p thrift.Format) error {  // Succe
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -1080,9 +1080,9 @@ if err != nil {
 
 func (x *respFinderPreviousPlate) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 

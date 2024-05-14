@@ -50,7 +50,7 @@ func (x *Name) writeField1(p thrift.Format) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNameNonCompat()
+    item := x.Name
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.GetNameNonCompat())
+    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -209,7 +209,7 @@ func (x *Tag) writeField1(p thrift.Format) error {  // Tag
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTagNonCompat()
+    item := x.Tag
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -231,7 +231,7 @@ if err != nil {
 }
 
 func (x *Tag) toString1() string {  // Tag
-    return fmt.Sprintf("%v", x.GetTagNonCompat())
+    return fmt.Sprintf("%v", x.Tag)
 }
 
 

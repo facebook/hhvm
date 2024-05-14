@@ -626,7 +626,7 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Format) error {  // R
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRNonCompat()
+    item := x.R
     if err := item.Write(p); err != nil {
     return err
 }
@@ -649,7 +649,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetEntity) toString1() string {  // R
-    return fmt.Sprintf("%v", x.GetRNonCompat())
+    return fmt.Sprintf("%v", x.R)
 }
 
 // Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
@@ -808,7 +808,7 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Format) error {  // Succes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := item.Write(p); err != nil {
     return err
 }
@@ -831,7 +831,7 @@ if err != nil {
 }
 
 func (x *respGetEntityGetEntity) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
@@ -1089,7 +1089,7 @@ func (x *respGetEntityGetBool) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1112,9 +1112,9 @@ if err != nil {
 
 func (x *respGetEntityGetBool) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1365,7 +1365,7 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -1389,9 +1389,9 @@ if err != nil {
 
 func (x *respGetEntityGetByte) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1642,7 +1642,7 @@ func (x *respGetEntityGetI16) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1665,9 +1665,9 @@ if err != nil {
 
 func (x *respGetEntityGetI16) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1918,7 +1918,7 @@ func (x *respGetEntityGetI32) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1941,9 +1941,9 @@ if err != nil {
 
 func (x *respGetEntityGetI32) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -2194,7 +2194,7 @@ func (x *respGetEntityGetI64) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2217,9 +2217,9 @@ if err != nil {
 
 func (x *respGetEntityGetI64) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -2470,7 +2470,7 @@ func (x *respGetEntityGetDouble) writeField0(p thrift.Format) error {  // Succes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2493,9 +2493,9 @@ if err != nil {
 
 func (x *respGetEntityGetDouble) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -2746,7 +2746,7 @@ func (x *respGetEntityGetString) writeField0(p thrift.Format) error {  // Succes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2769,9 +2769,9 @@ if err != nil {
 
 func (x *respGetEntityGetString) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -3022,7 +3022,7 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Format) error {  // Succes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -3044,7 +3044,7 @@ if err != nil {
 }
 
 func (x *respGetEntityGetBinary) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -3294,7 +3294,7 @@ func (x *respGetEntityGetMap) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -3362,7 +3362,7 @@ result := mapResult
 }
 
 func (x *respGetEntityGetMap) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -3612,7 +3612,7 @@ func (x *respGetEntityGetSet) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -3663,7 +3663,7 @@ result := setResult
 }
 
 func (x *respGetEntityGetSet) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -3913,7 +3913,7 @@ func (x *respGetEntityGetList) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := x.Success
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -3964,7 +3964,7 @@ result := listResult
 }
 
 func (x *respGetEntityGetList) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -4147,7 +4147,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Format) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumNeg2NonCompat()
+    item := x.NumNeg2
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4163,7 +4163,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Format) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumNeg1NonCompat()
+    item := x.NumNeg1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4179,7 +4179,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Format) error {  // Nu
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumPosNonCompat()
+    item := x.NumPos
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4221,15 +4221,15 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetLegacyStuff) toString_2() string {  // NumNeg2
-    return fmt.Sprintf("%v", x.GetNumNeg2NonCompat())
+    return fmt.Sprintf("%v", x.NumNeg2)
 }
 
 func (x *reqGetEntityGetLegacyStuff) toString_1() string {  // NumNeg1
-    return fmt.Sprintf("%v", x.GetNumNeg1NonCompat())
+    return fmt.Sprintf("%v", x.NumNeg1)
 }
 
 func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
-    return fmt.Sprintf("%v", x.GetNumPosNonCompat())
+    return fmt.Sprintf("%v", x.NumPos)
 }
 
 
@@ -4412,7 +4412,7 @@ func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4435,9 +4435,9 @@ if err != nil {
 
 func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -4581,7 +4581,7 @@ func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Format) error {  // C
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCtxNonCompat()
+    item := x.Ctx
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4603,7 +4603,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetCtxCollision) toString1() string {  // Ctx
-    return fmt.Sprintf("%v", x.GetCtxNonCompat())
+    return fmt.Sprintf("%v", x.Ctx)
 }
 
 
@@ -4754,7 +4754,7 @@ func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4777,9 +4777,9 @@ if err != nil {
 
 func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -4943,7 +4943,7 @@ func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCtxNonCompat()
+    item := x.Ctx
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4959,7 +4959,7 @@ func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCtx1NonCompat()
+    item := x.Ctx1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4991,11 +4991,11 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetCtx1Collision) toString1() string {  // Ctx
-    return fmt.Sprintf("%v", x.GetCtxNonCompat())
+    return fmt.Sprintf("%v", x.Ctx)
 }
 
 func (x *reqGetEntityGetCtx1Collision) toString2() string {  // Ctx1
-    return fmt.Sprintf("%v", x.GetCtx1NonCompat())
+    return fmt.Sprintf("%v", x.Ctx1)
 }
 
 
@@ -5162,7 +5162,7 @@ func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -5185,9 +5185,9 @@ if err != nil {
 
 func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -5331,7 +5331,7 @@ func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Format) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetContextNonCompat()
+    item := x.Context
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -5353,7 +5353,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetContextCollision) toString1() string {  // Context
-    return fmt.Sprintf("%v", x.GetContextNonCompat())
+    return fmt.Sprintf("%v", x.Context)
 }
 
 
@@ -5504,7 +5504,7 @@ func (x *respGetEntityGetContextCollision) writeField0(p thrift.Format) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -5527,9 +5527,9 @@ if err != nil {
 
 func (x *respGetEntityGetContextCollision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -5673,7 +5673,7 @@ func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Format) error {  // O
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOutNonCompat()
+    item := x.Out
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -5695,7 +5695,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetOutCollision) toString1() string {  // Out
-    return fmt.Sprintf("%v", x.GetOutNonCompat())
+    return fmt.Sprintf("%v", x.Out)
 }
 
 
@@ -5846,7 +5846,7 @@ func (x *respGetEntityGetOutCollision) writeField0(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -5869,9 +5869,9 @@ if err != nil {
 
 func (x *respGetEntityGetOutCollision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -6035,7 +6035,7 @@ func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOutNonCompat()
+    item := x.Out
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -6051,7 +6051,7 @@ func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOut1NonCompat()
+    item := x.Out1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -6083,11 +6083,11 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetOut1Collision) toString1() string {  // Out
-    return fmt.Sprintf("%v", x.GetOutNonCompat())
+    return fmt.Sprintf("%v", x.Out)
 }
 
 func (x *reqGetEntityGetOut1Collision) toString2() string {  // Out1
-    return fmt.Sprintf("%v", x.GetOut1NonCompat())
+    return fmt.Sprintf("%v", x.Out1)
 }
 
 
@@ -6254,7 +6254,7 @@ func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6277,9 +6277,9 @@ if err != nil {
 
 func (x *respGetEntityGetOut1Collision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -6423,7 +6423,7 @@ func (x *reqGetEntityGetInCollision) writeField1(p thrift.Format) error {  // In
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInNonCompat()
+    item := x.In
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -6445,7 +6445,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetInCollision) toString1() string {  // In
-    return fmt.Sprintf("%v", x.GetInNonCompat())
+    return fmt.Sprintf("%v", x.In)
 }
 
 
@@ -6596,7 +6596,7 @@ func (x *respGetEntityGetInCollision) writeField0(p thrift.Format) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6619,9 +6619,9 @@ if err != nil {
 
 func (x *respGetEntityGetInCollision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -6785,7 +6785,7 @@ func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Format) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInNonCompat()
+    item := x.In
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -6801,7 +6801,7 @@ func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Format) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIn1NonCompat()
+    item := x.In1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -6833,11 +6833,11 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetIn1Collision) toString1() string {  // In
-    return fmt.Sprintf("%v", x.GetInNonCompat())
+    return fmt.Sprintf("%v", x.In)
 }
 
 func (x *reqGetEntityGetIn1Collision) toString2() string {  // In1
-    return fmt.Sprintf("%v", x.GetIn1NonCompat())
+    return fmt.Sprintf("%v", x.In1)
 }
 
 
@@ -7004,7 +7004,7 @@ func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7027,9 +7027,9 @@ if err != nil {
 
 func (x *respGetEntityGetIn1Collision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -7173,7 +7173,7 @@ func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Format) error {  // E
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrNonCompat()
+    item := x.Err
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -7195,7 +7195,7 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetErrCollision) toString1() string {  // Err
-    return fmt.Sprintf("%v", x.GetErrNonCompat())
+    return fmt.Sprintf("%v", x.Err)
 }
 
 
@@ -7346,7 +7346,7 @@ func (x *respGetEntityGetErrCollision) writeField0(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7369,9 +7369,9 @@ if err != nil {
 
 func (x *respGetEntityGetErrCollision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -7535,7 +7535,7 @@ func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrNonCompat()
+    item := x.Err
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -7551,7 +7551,7 @@ func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Format) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErr1NonCompat()
+    item := x.Err1
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -7583,11 +7583,11 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetErr1Collision) toString1() string {  // Err
-    return fmt.Sprintf("%v", x.GetErrNonCompat())
+    return fmt.Sprintf("%v", x.Err)
 }
 
 func (x *reqGetEntityGetErr1Collision) toString2() string {  // Err1
-    return fmt.Sprintf("%v", x.GetErr1NonCompat())
+    return fmt.Sprintf("%v", x.Err1)
 }
 
 
@@ -7754,7 +7754,7 @@ func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Format) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7777,9 +7777,9 @@ if err != nil {
 
 func (x *respGetEntityGetErr1Collision) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 

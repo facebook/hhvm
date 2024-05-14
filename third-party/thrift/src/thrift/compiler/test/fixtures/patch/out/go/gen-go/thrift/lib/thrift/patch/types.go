@@ -466,7 +466,7 @@ func (x *BoolPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -482,7 +482,7 @@ func (x *BoolPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -498,7 +498,7 @@ func (x *BoolPatch) writeField9(p thrift.Format) error {  // Invert
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInvertNonCompat()
+    item := x.Invert
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -541,17 +541,17 @@ if err != nil {
 
 func (x *BoolPatch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *BoolPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *BoolPatch) toString9() string {  // Invert
-    return fmt.Sprintf("%v", x.GetInvertNonCompat())
+    return fmt.Sprintf("%v", x.Invert)
 }
 
 
@@ -772,7 +772,7 @@ func (x *BytePatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -788,7 +788,7 @@ func (x *BytePatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -804,7 +804,7 @@ func (x *BytePatch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -849,17 +849,17 @@ if err != nil {
 
 func (x *BytePatch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *BytePatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *BytePatch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -1080,7 +1080,7 @@ func (x *I16Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1096,7 +1096,7 @@ func (x *I16Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1112,7 +1112,7 @@ func (x *I16Patch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1155,17 +1155,17 @@ if err != nil {
 
 func (x *I16Patch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *I16Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *I16Patch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -1386,7 +1386,7 @@ func (x *I32Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1402,7 +1402,7 @@ func (x *I32Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1418,7 +1418,7 @@ func (x *I32Patch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1461,17 +1461,17 @@ if err != nil {
 
 func (x *I32Patch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *I32Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *I32Patch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -1692,7 +1692,7 @@ func (x *I64Patch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1708,7 +1708,7 @@ func (x *I64Patch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1724,7 +1724,7 @@ func (x *I64Patch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1767,17 +1767,17 @@ if err != nil {
 
 func (x *I64Patch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *I64Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *I64Patch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -1998,7 +1998,7 @@ func (x *FloatPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -2014,7 +2014,7 @@ func (x *FloatPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2030,7 +2030,7 @@ func (x *FloatPatch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -2073,17 +2073,17 @@ if err != nil {
 
 func (x *FloatPatch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *FloatPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *FloatPatch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -2304,7 +2304,7 @@ func (x *DoublePatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2320,7 +2320,7 @@ func (x *DoublePatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2336,7 +2336,7 @@ func (x *DoublePatch) writeField8(p thrift.Format) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAddNonCompat()
+    item := x.Add
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2379,17 +2379,17 @@ if err != nil {
 
 func (x *DoublePatch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *DoublePatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *DoublePatch) toString8() string {  // Add
-    return fmt.Sprintf("%v", x.GetAddNonCompat())
+    return fmt.Sprintf("%v", x.Add)
 }
 
 
@@ -2630,7 +2630,7 @@ func (x *StringPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssignNonCompat()
+    item := *x.Assign
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2646,7 +2646,7 @@ func (x *StringPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2662,7 +2662,7 @@ func (x *StringPatch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2678,7 +2678,7 @@ func (x *StringPatch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2731,21 +2731,21 @@ if err != nil {
 
 func (x *StringPatch) toString1() string {  // Assign
     if x.IsSetAssign() {
-        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+        return fmt.Sprintf("%v", *x.Assign)
     }
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *StringPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *StringPatch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *StringPatch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 
@@ -3018,7 +3018,7 @@ func (x *BinaryPatch) writeField1(p thrift.Format) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssignNonCompat()
+    item := x.Assign
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err
@@ -3035,7 +3035,7 @@ func (x *BinaryPatch) writeField2(p thrift.Format) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClearNonCompat()
+    item := x.Clear
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -3051,7 +3051,7 @@ func (x *BinaryPatch) writeField8(p thrift.Format) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrependNonCompat()
+    item := x.Prepend
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err
@@ -3068,7 +3068,7 @@ func (x *BinaryPatch) writeField9(p thrift.Format) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppendNonCompat()
+    item := x.Append
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err
@@ -3121,19 +3121,19 @@ if err != nil {
 }
 
 func (x *BinaryPatch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+    return fmt.Sprintf("%v", x.Assign)
 }
 
 func (x *BinaryPatch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
+    return fmt.Sprintf("%v", x.Clear)
 }
 
 func (x *BinaryPatch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+    return fmt.Sprintf("%v", x.Prepend)
 }
 
 func (x *BinaryPatch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+    return fmt.Sprintf("%v", x.Append)
 }
 
 

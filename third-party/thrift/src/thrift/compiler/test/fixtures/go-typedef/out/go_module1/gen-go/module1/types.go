@@ -471,7 +471,7 @@ func (x *Automobile) writeField1(p thrift.Format) error {  // Plate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPlateNonCompat()
+    item := x.Plate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -492,7 +492,7 @@ func (x *Automobile) writeField2(p thrift.Format) error {  // PreviousPlate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetPreviousPlateNonCompat()
+    item := *x.PreviousPlate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -513,7 +513,7 @@ func (x *Automobile) writeField3(p thrift.Format) error {  // FirstPlate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFirstPlateNonCompat()
+    item := *x.FirstPlate
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -530,7 +530,7 @@ func (x *Automobile) writeField4(p thrift.Format) error {  // Year
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetYearNonCompat()
+    item := x.Year
     err := WriteYear(item, p)
 if err != nil {
     return err
@@ -547,7 +547,7 @@ func (x *Automobile) writeField5(p thrift.Format) error {  // Drivers
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDriversNonCompat()
+    item := x.Drivers
     err := WriteDrivers(item, p)
 if err != nil {
     return err
@@ -564,7 +564,7 @@ func (x *Automobile) writeField6(p thrift.Format) error {  // Accessories
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAccessoriesNonCompat()
+    item := x.Accessories
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -592,7 +592,7 @@ func (x *Automobile) writeField7(p thrift.Format) error {  // PartNames
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPartNamesNonCompat()
+    item := x.PartNames
     if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -739,37 +739,37 @@ result := mapResult
 }
 
 func (x *Automobile) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.GetPlateNonCompat())
+    return fmt.Sprintf("%v", x.Plate)
 }
 
 func (x *Automobile) toString2() string {  // PreviousPlate
     if x.IsSetPreviousPlate() {
-        return fmt.Sprintf("%v", *x.GetPreviousPlateNonCompat())
+        return fmt.Sprintf("%v", *x.PreviousPlate)
     }
-    return fmt.Sprintf("%v", x.GetPreviousPlateNonCompat())
+    return fmt.Sprintf("%v", x.PreviousPlate)
 }
 
 func (x *Automobile) toString3() string {  // FirstPlate
     if x.IsSetFirstPlate() {
-        return fmt.Sprintf("%v", *x.GetFirstPlateNonCompat())
+        return fmt.Sprintf("%v", *x.FirstPlate)
     }
-    return fmt.Sprintf("%v", x.GetFirstPlateNonCompat())
+    return fmt.Sprintf("%v", x.FirstPlate)
 }
 
 func (x *Automobile) toString4() string {  // Year
-    return fmt.Sprintf("%v", x.GetYearNonCompat())
+    return fmt.Sprintf("%v", x.Year)
 }
 
 func (x *Automobile) toString5() string {  // Drivers
-    return fmt.Sprintf("%v", x.GetDriversNonCompat())
+    return fmt.Sprintf("%v", x.Drivers)
 }
 
 func (x *Automobile) toString6() string {  // Accessories
-    return fmt.Sprintf("%v", x.GetAccessoriesNonCompat())
+    return fmt.Sprintf("%v", x.Accessories)
 }
 
 func (x *Automobile) toString7() string {  // PartNames
-    return fmt.Sprintf("%v", x.GetPartNamesNonCompat())
+    return fmt.Sprintf("%v", x.PartNames)
 }
 
 
@@ -1024,7 +1024,7 @@ func (x *MapKey) writeField1(p thrift.Format) error {  // Num
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumNonCompat()
+    item := x.Num
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1040,7 +1040,7 @@ func (x *MapKey) writeField2(p thrift.Format) error {  // Strval
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStrvalNonCompat()
+    item := x.Strval
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1072,11 +1072,11 @@ if err != nil {
 }
 
 func (x *MapKey) toString1() string {  // Num
-    return fmt.Sprintf("%v", x.GetNumNonCompat())
+    return fmt.Sprintf("%v", x.Num)
 }
 
 func (x *MapKey) toString2() string {  // Strval
-    return fmt.Sprintf("%v", x.GetStrvalNonCompat())
+    return fmt.Sprintf("%v", x.Strval)
 }
 
 
@@ -1237,7 +1237,7 @@ func (x *MapContainer) writeField1(p thrift.Format) error {  // Mapval
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapvalNonCompat()
+    item := x.Mapval
     if err := p.WriteMapBegin(thrift.STRUCT, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1306,7 +1306,7 @@ result := mapResult
 }
 
 func (x *MapContainer) toString1() string {  // Mapval
-    return fmt.Sprintf("%v", x.GetMapvalNonCompat())
+    return fmt.Sprintf("%v", x.Mapval)
 }
 
 
@@ -1483,7 +1483,7 @@ func (x *Pair) writeField1(p thrift.Format) error {  // Automobile
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAutomobileNonCompat()
+    item := x.Automobile
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1503,7 +1503,7 @@ func (x *Pair) writeField2(p thrift.Format) error {  // Car
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCarNonCompat()
+    item := x.Car
     err := WriteCar(item, p)
 if err != nil {
     return err
@@ -1537,11 +1537,11 @@ if err != nil {
 }
 
 func (x *Pair) toString1() string {  // Automobile
-    return fmt.Sprintf("%v", x.GetAutomobileNonCompat())
+    return fmt.Sprintf("%v", x.Automobile)
 }
 
 func (x *Pair) toString2() string {  // Car
-    return fmt.Sprintf("%v", x.GetCarNonCompat())
+    return fmt.Sprintf("%v", x.Car)
 }
 
 // Deprecated: Use NewPair().GetAutomobile() instead.
@@ -1746,7 +1746,7 @@ func (x *Collection) writeField1(p thrift.Format) error {  // Automobiles
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAutomobilesNonCompat()
+    item := x.Automobiles
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1773,7 +1773,7 @@ func (x *Collection) writeField2(p thrift.Format) error {  // Cars
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCarsNonCompat()
+    item := x.Cars
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1854,11 +1854,11 @@ result := listResult
 }
 
 func (x *Collection) toString1() string {  // Automobiles
-    return fmt.Sprintf("%v", x.GetAutomobilesNonCompat())
+    return fmt.Sprintf("%v", x.Automobiles)
 }
 
 func (x *Collection) toString2() string {  // Cars
-    return fmt.Sprintf("%v", x.GetCarsNonCompat())
+    return fmt.Sprintf("%v", x.Cars)
 }
 
 

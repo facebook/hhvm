@@ -143,7 +143,7 @@ func (x *Annotation) writeField1(p thrift.Format) error {  // JavaAnnotation
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetJavaAnnotationNonCompat()
+    item := x.JavaAnnotation
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -165,7 +165,7 @@ if err != nil {
 }
 
 func (x *Annotation) toString1() string {  // JavaAnnotation
-    return fmt.Sprintf("%v", x.GetJavaAnnotationNonCompat())
+    return fmt.Sprintf("%v", x.JavaAnnotation)
 }
 
 
@@ -415,7 +415,7 @@ func (x *Adapter) writeField1(p thrift.Format) error {  // AdapterClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdapterClassNameNonCompat()
+    item := x.AdapterClassName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -431,7 +431,7 @@ func (x *Adapter) writeField2(p thrift.Format) error {  // TypeClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeClassNameNonCompat()
+    item := x.TypeClassName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -463,11 +463,11 @@ if err != nil {
 }
 
 func (x *Adapter) toString1() string {  // AdapterClassName
-    return fmt.Sprintf("%v", x.GetAdapterClassNameNonCompat())
+    return fmt.Sprintf("%v", x.AdapterClassName)
 }
 
 func (x *Adapter) toString2() string {  // TypeClassName
-    return fmt.Sprintf("%v", x.GetTypeClassNameNonCompat())
+    return fmt.Sprintf("%v", x.TypeClassName)
 }
 
 
@@ -640,7 +640,7 @@ func (x *Wrapper) writeField1(p thrift.Format) error {  // WrapperClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetWrapperClassNameNonCompat()
+    item := x.WrapperClassName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -656,7 +656,7 @@ func (x *Wrapper) writeField2(p thrift.Format) error {  // TypeClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeClassNameNonCompat()
+    item := x.TypeClassName
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -688,11 +688,11 @@ if err != nil {
 }
 
 func (x *Wrapper) toString1() string {  // WrapperClassName
-    return fmt.Sprintf("%v", x.GetWrapperClassNameNonCompat())
+    return fmt.Sprintf("%v", x.WrapperClassName)
 }
 
 func (x *Wrapper) toString2() string {  // TypeClassName
-    return fmt.Sprintf("%v", x.GetTypeClassNameNonCompat())
+    return fmt.Sprintf("%v", x.TypeClassName)
 }
 
 

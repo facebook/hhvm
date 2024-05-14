@@ -64,7 +64,7 @@ func (x *IncludesAlso) writeField1(p thrift.Format) error {  // Also
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAlsoNonCompat()
+    item := x.Also
     if err := item.Write(p); err != nil {
     return err
 }
@@ -87,7 +87,7 @@ if err != nil {
 }
 
 func (x *IncludesAlso) toString1() string {  // Also
-    return fmt.Sprintf("%v", x.GetAlsoNonCompat())
+    return fmt.Sprintf("%v", x.Also)
 }
 
 // Deprecated: Use NewIncludesAlso().GetAlso() instead.

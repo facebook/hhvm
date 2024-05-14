@@ -50,7 +50,7 @@ func (x *Fiery) writeField1(p thrift.Format) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageNonCompat()
+    item := x.Message
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 func (x *Fiery) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.GetMessageNonCompat())
+    return fmt.Sprintf("%v", x.Message)
 }
 
 
@@ -223,7 +223,7 @@ func (x *Serious) writeField1(p thrift.Format) error {  // Sonnet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSonnetNonCompat()
+    item := *x.Sonnet
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -246,9 +246,9 @@ if err != nil {
 
 func (x *Serious) toString1() string {  // Sonnet
     if x.IsSetSonnet() {
-        return fmt.Sprintf("%v", *x.GetSonnetNonCompat())
+        return fmt.Sprintf("%v", *x.Sonnet)
     }
-    return fmt.Sprintf("%v", x.GetSonnetNonCompat())
+    return fmt.Sprintf("%v", x.Sonnet)
 }
 
 
@@ -409,7 +409,7 @@ func (x *ComplexFieldNames) writeField1(p thrift.Format) error {  // ErrorMessag
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorMessageNonCompat()
+    item := x.ErrorMessage
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -425,7 +425,7 @@ func (x *ComplexFieldNames) writeField2(p thrift.Format) error {  // InternalErr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInternalErrorMessageNonCompat()
+    item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -457,11 +457,11 @@ if err != nil {
 }
 
 func (x *ComplexFieldNames) toString1() string {  // ErrorMessage
-    return fmt.Sprintf("%v", x.GetErrorMessageNonCompat())
+    return fmt.Sprintf("%v", x.ErrorMessage)
 }
 
 func (x *ComplexFieldNames) toString2() string {  // InternalErrorMessage
-    return fmt.Sprintf("%v", x.GetInternalErrorMessageNonCompat())
+    return fmt.Sprintf("%v", x.InternalErrorMessage)
 }
 
 
@@ -637,7 +637,7 @@ func (x *CustomFieldNames) writeField1(p thrift.Format) error {  // ErrorMessage
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorMessageNonCompat()
+    item := x.ErrorMessage
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -653,7 +653,7 @@ func (x *CustomFieldNames) writeField2(p thrift.Format) error {  // InternalErro
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInternalErrorMessageNonCompat()
+    item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -685,11 +685,11 @@ if err != nil {
 }
 
 func (x *CustomFieldNames) toString1() string {  // ErrorMessage
-    return fmt.Sprintf("%v", x.GetErrorMessageNonCompat())
+    return fmt.Sprintf("%v", x.ErrorMessage)
 }
 
 func (x *CustomFieldNames) toString2() string {  // InternalErrorMessage
-    return fmt.Sprintf("%v", x.GetInternalErrorMessageNonCompat())
+    return fmt.Sprintf("%v", x.InternalErrorMessage)
 }
 
 
@@ -865,7 +865,7 @@ func (x *ExceptionWithPrimitiveField) writeField1(p thrift.Format) error {  // M
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageNonCompat()
+    item := x.Message
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -881,7 +881,7 @@ func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Format) error {  // E
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorCodeNonCompat()
+    item := x.ErrorCode
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -913,11 +913,11 @@ if err != nil {
 }
 
 func (x *ExceptionWithPrimitiveField) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.GetMessageNonCompat())
+    return fmt.Sprintf("%v", x.Message)
 }
 
 func (x *ExceptionWithPrimitiveField) toString2() string {  // ErrorCode
-    return fmt.Sprintf("%v", x.GetErrorCodeNonCompat())
+    return fmt.Sprintf("%v", x.ErrorCode)
 }
 
 
@@ -1093,7 +1093,7 @@ func (x *ExceptionWithStructuredAnnotation) writeField1(p thrift.Format) error {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageFieldNonCompat()
+    item := x.MessageField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1109,7 +1109,7 @@ func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Format) error {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorCodeNonCompat()
+    item := x.ErrorCode
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1141,11 +1141,11 @@ if err != nil {
 }
 
 func (x *ExceptionWithStructuredAnnotation) toString1() string {  // MessageField
-    return fmt.Sprintf("%v", x.GetMessageFieldNonCompat())
+    return fmt.Sprintf("%v", x.MessageField)
 }
 
 func (x *ExceptionWithStructuredAnnotation) toString2() string {  // ErrorCode
-    return fmt.Sprintf("%v", x.GetErrorCodeNonCompat())
+    return fmt.Sprintf("%v", x.ErrorCode)
 }
 
 

@@ -377,7 +377,7 @@ func (x *respMyServicePing) writeField1(p thrift.Format) error {  // MyExcept
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyExceptNonCompat()
+    item := x.MyExcept
     if err := item.Write(p); err != nil {
     return err
 }
@@ -400,7 +400,7 @@ if err != nil {
 }
 
 func (x *respMyServicePing) toString1() string {  // MyExcept
-    return fmt.Sprintf("%v", x.GetMyExceptNonCompat())
+    return fmt.Sprintf("%v", x.MyExcept)
 }
 
 // Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
@@ -661,7 +661,7 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Format) error {  // Su
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -684,9 +684,9 @@ if err != nil {
 
 func (x *respMyServiceGetRandomData) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -830,7 +830,7 @@ func (x *reqMyServiceHasDataById) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -852,7 +852,7 @@ if err != nil {
 }
 
 func (x *reqMyServiceHasDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -1003,7 +1003,7 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Format) error {  // Succ
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1026,9 +1026,9 @@ if err != nil {
 
 func (x *respMyServiceHasDataById) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1172,7 +1172,7 @@ func (x *reqMyServiceGoGetDataById) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1194,7 +1194,7 @@ if err != nil {
 }
 
 func (x *reqMyServiceGoGetDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -1345,7 +1345,7 @@ func (x *respMyServiceGoGetDataById) writeField0(p thrift.Format) error {  // Su
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1368,9 +1368,9 @@ if err != nil {
 
 func (x *respMyServiceGoGetDataById) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 
@@ -1534,7 +1534,7 @@ func (x *reqMyServicePutDataById) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1550,7 +1550,7 @@ func (x *reqMyServicePutDataById) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1582,11 +1582,11 @@ if err != nil {
 }
 
 func (x *reqMyServicePutDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 func (x *reqMyServicePutDataById) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -1861,7 +1861,7 @@ func (x *reqMyServiceLobDataById) writeField1(p thrift.Format) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdNonCompat()
+    item := x.Id
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1877,7 +1877,7 @@ func (x *reqMyServiceLobDataById) writeField2(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1909,11 +1909,11 @@ if err != nil {
 }
 
 func (x *reqMyServiceLobDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.GetIdNonCompat())
+    return fmt.Sprintf("%v", x.Id)
 }
 
 func (x *reqMyServiceLobDataById) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -3971,7 +3971,7 @@ func (x *respBadServiceBar) writeField0(p thrift.Format) error {  // Success
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSuccessNonCompat()
+    item := *x.Success
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -3994,9 +3994,9 @@ if err != nil {
 
 func (x *respBadServiceBar) toString0() string {  // Success
     if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+        return fmt.Sprintf("%v", *x.Success)
     }
-    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+    return fmt.Sprintf("%v", x.Success)
 }
 
 

@@ -306,7 +306,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntFieldNonCompat()
+    item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -322,7 +322,7 @@ func (x *MyStruct) writeField2(p thrift.Format) error {  // MyStringField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStringFieldNonCompat()
+    item := x.MyStringField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -342,7 +342,7 @@ func (x *MyStruct) writeField3(p thrift.Format) error {  // MyDataField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyDataFieldNonCompat()
+    item := x.MyDataField
     if err := item.Write(p); err != nil {
     return err
 }
@@ -358,7 +358,7 @@ func (x *MyStruct) writeField4(p thrift.Format) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyEnumNonCompat()
+    item := x.MyEnum
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -374,7 +374,7 @@ func (x *MyStruct) writeField5(p thrift.Format) error {  // Oneway
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOnewayNonCompat()
+    item := x.Oneway
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -390,7 +390,7 @@ func (x *MyStruct) writeField6(p thrift.Format) error {  // Readonly
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReadonlyNonCompat()
+    item := x.Readonly
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -406,7 +406,7 @@ func (x *MyStruct) writeField7(p thrift.Format) error {  // Idempotent
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdempotentNonCompat()
+    item := x.Idempotent
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -422,7 +422,7 @@ func (x *MyStruct) writeField8(p thrift.Format) error {  // FloatSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatSetNonCompat()
+    item := x.FloatSet
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -449,7 +449,7 @@ func (x *MyStruct) writeField9(p thrift.Format) error {  // NoHackCodegenField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNoHackCodegenFieldNonCompat()
+    item := x.NoHackCodegenField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -571,39 +571,39 @@ if err != nil {
 }
 
 func (x *MyStruct) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyIntField)
 }
 
 func (x *MyStruct) toString2() string {  // MyStringField
-    return fmt.Sprintf("%v", x.GetMyStringFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyStringField)
 }
 
 func (x *MyStruct) toString3() string {  // MyDataField
-    return fmt.Sprintf("%v", x.GetMyDataFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyDataField)
 }
 
 func (x *MyStruct) toString4() string {  // MyEnum
-    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+    return fmt.Sprintf("%v", x.MyEnum)
 }
 
 func (x *MyStruct) toString5() string {  // Oneway
-    return fmt.Sprintf("%v", x.GetOnewayNonCompat())
+    return fmt.Sprintf("%v", x.Oneway)
 }
 
 func (x *MyStruct) toString6() string {  // Readonly
-    return fmt.Sprintf("%v", x.GetReadonlyNonCompat())
+    return fmt.Sprintf("%v", x.Readonly)
 }
 
 func (x *MyStruct) toString7() string {  // Idempotent
-    return fmt.Sprintf("%v", x.GetIdempotentNonCompat())
+    return fmt.Sprintf("%v", x.Idempotent)
 }
 
 func (x *MyStruct) toString8() string {  // FloatSet
-    return fmt.Sprintf("%v", x.GetFloatSetNonCompat())
+    return fmt.Sprintf("%v", x.FloatSet)
 }
 
 func (x *MyStruct) toString9() string {  // NoHackCodegenField
-    return fmt.Sprintf("%v", x.GetNoHackCodegenFieldNonCompat())
+    return fmt.Sprintf("%v", x.NoHackCodegenField)
 }
 
 // Deprecated: Use NewMyStruct().GetMyDataField() instead.
@@ -1061,7 +1061,7 @@ func (x *MyUnion) writeField1(p thrift.Format) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyEnumNonCompat()
+    item := *x.MyEnum
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1081,7 +1081,7 @@ func (x *MyUnion) writeField2(p thrift.Format) error {  // MyStruct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStructNonCompat()
+    item := x.MyStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1101,7 +1101,7 @@ func (x *MyUnion) writeField3(p thrift.Format) error {  // MyDataItem
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyDataItemNonCompat()
+    item := x.MyDataItem
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1121,7 +1121,7 @@ func (x *MyUnion) writeField4(p thrift.Format) error {  // FloatSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatSetNonCompat()
+    item := x.FloatSet
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -1206,21 +1206,21 @@ result := setResult
 
 func (x *MyUnion) toString1() string {  // MyEnum
     if x.IsSetMyEnum() {
-        return fmt.Sprintf("%v", *x.GetMyEnumNonCompat())
+        return fmt.Sprintf("%v", *x.MyEnum)
     }
-    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+    return fmt.Sprintf("%v", x.MyEnum)
 }
 
 func (x *MyUnion) toString2() string {  // MyStruct
-    return fmt.Sprintf("%v", x.GetMyStructNonCompat())
+    return fmt.Sprintf("%v", x.MyStruct)
 }
 
 func (x *MyUnion) toString3() string {  // MyDataItem
-    return fmt.Sprintf("%v", x.GetMyDataItemNonCompat())
+    return fmt.Sprintf("%v", x.MyDataItem)
 }
 
 func (x *MyUnion) toString4() string {  // FloatSet
-    return fmt.Sprintf("%v", x.GetFloatSetNonCompat())
+    return fmt.Sprintf("%v", x.FloatSet)
 }
 
 
@@ -1446,7 +1446,7 @@ func (x *ReservedKeyword) writeField1(p thrift.Format) error {  // ReservedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReservedFieldNonCompat()
+    item := x.ReservedField
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1468,7 +1468,7 @@ if err != nil {
 }
 
 func (x *ReservedKeyword) toString1() string {  // ReservedField
-    return fmt.Sprintf("%v", x.GetReservedFieldNonCompat())
+    return fmt.Sprintf("%v", x.ReservedField)
 }
 
 
@@ -1616,7 +1616,7 @@ func (x *UnionToBeRenamed) writeField1(p thrift.Format) error {  // ReservedFiel
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetReservedFieldNonCompat()
+    item := *x.ReservedField
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1639,9 +1639,9 @@ if err != nil {
 
 func (x *UnionToBeRenamed) toString1() string {  // ReservedField
     if x.IsSetReservedField() {
-        return fmt.Sprintf("%v", *x.GetReservedFieldNonCompat())
+        return fmt.Sprintf("%v", *x.ReservedField)
     }
-    return fmt.Sprintf("%v", x.GetReservedFieldNonCompat())
+    return fmt.Sprintf("%v", x.ReservedField)
 }
 
 

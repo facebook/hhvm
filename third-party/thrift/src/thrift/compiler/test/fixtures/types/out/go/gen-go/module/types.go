@@ -768,7 +768,7 @@ func (x *DecoratedStruct) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -790,7 +790,7 @@ if err != nil {
 }
 
 func (x *DecoratedStruct) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -1131,7 +1131,7 @@ func (x *ContainerStruct) writeField2(p thrift.Format) error {  // FieldB
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldBNonCompat()
+    item := x.FieldB
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1158,7 +1158,7 @@ func (x *ContainerStruct) writeField3(p thrift.Format) error {  // FieldC
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldCNonCompat()
+    item := x.FieldC
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1185,7 +1185,7 @@ func (x *ContainerStruct) writeField4(p thrift.Format) error {  // FieldD
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldDNonCompat()
+    item := x.FieldD
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1212,7 +1212,7 @@ func (x *ContainerStruct) writeField5(p thrift.Format) error {  // FieldE
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldENonCompat()
+    item := x.FieldE
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1239,7 +1239,7 @@ func (x *ContainerStruct) writeField6(p thrift.Format) error {  // FieldF
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldFNonCompat()
+    item := x.FieldF
     err := WriteSetI32_7194(item, p)
 if err != nil {
     return err
@@ -1256,7 +1256,7 @@ func (x *ContainerStruct) writeField7(p thrift.Format) error {  // FieldG
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldGNonCompat()
+    item := x.FieldG
     err := WriteMapI32String_1261(item, p)
 if err != nil {
     return err
@@ -1273,7 +1273,7 @@ func (x *ContainerStruct) writeField8(p thrift.Format) error {  // FieldH
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldHNonCompat()
+    item := x.FieldH
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -1290,7 +1290,7 @@ func (x *ContainerStruct) writeField12(p thrift.Format) error {  // FieldA
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldANonCompat()
+    item := x.FieldA
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1483,35 +1483,35 @@ result := listResult
 }
 
 func (x *ContainerStruct) toString2() string {  // FieldB
-    return fmt.Sprintf("%v", x.GetFieldBNonCompat())
+    return fmt.Sprintf("%v", x.FieldB)
 }
 
 func (x *ContainerStruct) toString3() string {  // FieldC
-    return fmt.Sprintf("%v", x.GetFieldCNonCompat())
+    return fmt.Sprintf("%v", x.FieldC)
 }
 
 func (x *ContainerStruct) toString4() string {  // FieldD
-    return fmt.Sprintf("%v", x.GetFieldDNonCompat())
+    return fmt.Sprintf("%v", x.FieldD)
 }
 
 func (x *ContainerStruct) toString5() string {  // FieldE
-    return fmt.Sprintf("%v", x.GetFieldENonCompat())
+    return fmt.Sprintf("%v", x.FieldE)
 }
 
 func (x *ContainerStruct) toString6() string {  // FieldF
-    return fmt.Sprintf("%v", x.GetFieldFNonCompat())
+    return fmt.Sprintf("%v", x.FieldF)
 }
 
 func (x *ContainerStruct) toString7() string {  // FieldG
-    return fmt.Sprintf("%v", x.GetFieldGNonCompat())
+    return fmt.Sprintf("%v", x.FieldG)
 }
 
 func (x *ContainerStruct) toString8() string {  // FieldH
-    return fmt.Sprintf("%v", x.GetFieldHNonCompat())
+    return fmt.Sprintf("%v", x.FieldH)
 }
 
 func (x *ContainerStruct) toString12() string {  // FieldA
-    return fmt.Sprintf("%v", x.GetFieldANonCompat())
+    return fmt.Sprintf("%v", x.FieldA)
 }
 
 
@@ -1768,7 +1768,7 @@ func (x *CppTypeStruct) writeField1(p thrift.Format) error {  // FieldA
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldANonCompat()
+    item := x.FieldA
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1819,7 +1819,7 @@ result := listResult
 }
 
 func (x *CppTypeStruct) toString1() string {  // FieldA
-    return fmt.Sprintf("%v", x.GetFieldANonCompat())
+    return fmt.Sprintf("%v", x.FieldA)
 }
 
 
@@ -1956,7 +1956,7 @@ func (x *VirtualStruct) writeField1(p thrift.Format) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntFieldNonCompat()
+    item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1978,7 +1978,7 @@ if err != nil {
 }
 
 func (x *VirtualStruct) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyIntField)
 }
 
 
@@ -2139,7 +2139,7 @@ func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Format) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetANonCompat()
+    item := x.A
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -2155,7 +2155,7 @@ func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -2189,11 +2189,11 @@ result := MyForwardRefEnum(enumResult)
 }
 
 func (x *MyStructWithForwardRefEnum) toString1() string {  // A
-    return fmt.Sprintf("%v", x.GetANonCompat())
+    return fmt.Sprintf("%v", x.A)
 }
 
 func (x *MyStructWithForwardRefEnum) toString2() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 
@@ -2366,7 +2366,7 @@ func (x *TrivialNumeric) writeField1(p thrift.Format) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetANonCompat()
+    item := x.A
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2382,7 +2382,7 @@ func (x *TrivialNumeric) writeField2(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2414,11 +2414,11 @@ if err != nil {
 }
 
 func (x *TrivialNumeric) toString1() string {  // A
-    return fmt.Sprintf("%v", x.GetANonCompat())
+    return fmt.Sprintf("%v", x.A)
 }
 
 func (x *TrivialNumeric) toString2() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 
@@ -2603,7 +2603,7 @@ func (x *TrivialNestedWithDefault) writeField1(p thrift.Format) error {  // Z
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetZNonCompat()
+    item := x.Z
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2623,7 +2623,7 @@ func (x *TrivialNestedWithDefault) writeField2(p thrift.Format) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNNonCompat()
+    item := x.N
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2656,11 +2656,11 @@ if err != nil {
 }
 
 func (x *TrivialNestedWithDefault) toString1() string {  // Z
-    return fmt.Sprintf("%v", x.GetZNonCompat())
+    return fmt.Sprintf("%v", x.Z)
 }
 
 func (x *TrivialNestedWithDefault) toString2() string {  // N
-    return fmt.Sprintf("%v", x.GetNNonCompat())
+    return fmt.Sprintf("%v", x.N)
 }
 
 // Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
@@ -2849,7 +2849,7 @@ func (x *ComplexString) writeField1(p thrift.Format) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetANonCompat()
+    item := x.A
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2865,7 +2865,7 @@ func (x *ComplexString) writeField2(p thrift.Format) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBNonCompat()
+    item := x.B
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -2943,11 +2943,11 @@ result := mapResult
 }
 
 func (x *ComplexString) toString1() string {  // A
-    return fmt.Sprintf("%v", x.GetANonCompat())
+    return fmt.Sprintf("%v", x.A)
 }
 
 func (x *ComplexString) toString2() string {  // B
-    return fmt.Sprintf("%v", x.GetBNonCompat())
+    return fmt.Sprintf("%v", x.B)
 }
 
 
@@ -3136,7 +3136,7 @@ func (x *ComplexNestedWithDefault) writeField1(p thrift.Format) error {  // Z
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetZNonCompat()
+    item := x.Z
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -3156,7 +3156,7 @@ func (x *ComplexNestedWithDefault) writeField2(p thrift.Format) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNNonCompat()
+    item := x.N
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3189,11 +3189,11 @@ if err != nil {
 }
 
 func (x *ComplexNestedWithDefault) toString1() string {  // Z
-    return fmt.Sprintf("%v", x.GetZNonCompat())
+    return fmt.Sprintf("%v", x.Z)
 }
 
 func (x *ComplexNestedWithDefault) toString2() string {  // N
-    return fmt.Sprintf("%v", x.GetNNonCompat())
+    return fmt.Sprintf("%v", x.N)
 }
 
 // Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
@@ -3434,7 +3434,7 @@ func (x *MinPadding) writeField1(p thrift.Format) error {  // Small
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSmallNonCompat()
+    item := x.Small
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -3450,7 +3450,7 @@ func (x *MinPadding) writeField2(p thrift.Format) error {  // Big
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBigNonCompat()
+    item := x.Big
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -3466,7 +3466,7 @@ func (x *MinPadding) writeField3(p thrift.Format) error {  // Medium
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMediumNonCompat()
+    item := x.Medium
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -3482,7 +3482,7 @@ func (x *MinPadding) writeField4(p thrift.Format) error {  // Biggish
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBiggishNonCompat()
+    item := x.Biggish
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -3498,7 +3498,7 @@ func (x *MinPadding) writeField5(p thrift.Format) error {  // Tiny
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTinyNonCompat()
+    item := x.Tiny
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -3562,23 +3562,23 @@ if err != nil {
 }
 
 func (x *MinPadding) toString1() string {  // Small
-    return fmt.Sprintf("%v", x.GetSmallNonCompat())
+    return fmt.Sprintf("%v", x.Small)
 }
 
 func (x *MinPadding) toString2() string {  // Big
-    return fmt.Sprintf("%v", x.GetBigNonCompat())
+    return fmt.Sprintf("%v", x.Big)
 }
 
 func (x *MinPadding) toString3() string {  // Medium
-    return fmt.Sprintf("%v", x.GetMediumNonCompat())
+    return fmt.Sprintf("%v", x.Medium)
 }
 
 func (x *MinPadding) toString4() string {  // Biggish
-    return fmt.Sprintf("%v", x.GetBiggishNonCompat())
+    return fmt.Sprintf("%v", x.Biggish)
 }
 
 func (x *MinPadding) toString5() string {  // Tiny
-    return fmt.Sprintf("%v", x.GetTinyNonCompat())
+    return fmt.Sprintf("%v", x.Tiny)
 }
 
 
@@ -3859,7 +3859,7 @@ func (x *MinPaddingWithCustomType) writeField1(p thrift.Format) error {  // Smal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSmallNonCompat()
+    item := x.Small
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -3875,7 +3875,7 @@ func (x *MinPaddingWithCustomType) writeField2(p thrift.Format) error {  // Big
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBigNonCompat()
+    item := x.Big
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -3891,7 +3891,7 @@ func (x *MinPaddingWithCustomType) writeField3(p thrift.Format) error {  // Medi
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMediumNonCompat()
+    item := x.Medium
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -3907,7 +3907,7 @@ func (x *MinPaddingWithCustomType) writeField4(p thrift.Format) error {  // Bigg
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBiggishNonCompat()
+    item := x.Biggish
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -3923,7 +3923,7 @@ func (x *MinPaddingWithCustomType) writeField5(p thrift.Format) error {  // Tiny
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTinyNonCompat()
+    item := x.Tiny
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -3987,23 +3987,23 @@ if err != nil {
 }
 
 func (x *MinPaddingWithCustomType) toString1() string {  // Small
-    return fmt.Sprintf("%v", x.GetSmallNonCompat())
+    return fmt.Sprintf("%v", x.Small)
 }
 
 func (x *MinPaddingWithCustomType) toString2() string {  // Big
-    return fmt.Sprintf("%v", x.GetBigNonCompat())
+    return fmt.Sprintf("%v", x.Big)
 }
 
 func (x *MinPaddingWithCustomType) toString3() string {  // Medium
-    return fmt.Sprintf("%v", x.GetMediumNonCompat())
+    return fmt.Sprintf("%v", x.Medium)
 }
 
 func (x *MinPaddingWithCustomType) toString4() string {  // Biggish
-    return fmt.Sprintf("%v", x.GetBiggishNonCompat())
+    return fmt.Sprintf("%v", x.Biggish)
 }
 
 func (x *MinPaddingWithCustomType) toString5() string {  // Tiny
-    return fmt.Sprintf("%v", x.GetTinyNonCompat())
+    return fmt.Sprintf("%v", x.Tiny)
 }
 
 
@@ -4272,7 +4272,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntFieldNonCompat()
+    item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4288,7 +4288,7 @@ func (x *MyStruct) writeField2(p thrift.Format) error {  // MyStringField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStringFieldNonCompat()
+    item := x.MyStringField
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -4304,7 +4304,7 @@ func (x *MyStruct) writeField3(p thrift.Format) error {  // MajorVer
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMajorVerNonCompat()
+    item := x.MajorVer
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4324,7 +4324,7 @@ func (x *MyStruct) writeField4(p thrift.Format) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDataNonCompat()
+    item := x.Data
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4377,19 +4377,19 @@ if err != nil {
 }
 
 func (x *MyStruct) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyIntField)
 }
 
 func (x *MyStruct) toString2() string {  // MyStringField
-    return fmt.Sprintf("%v", x.GetMyStringFieldNonCompat())
+    return fmt.Sprintf("%v", x.MyStringField)
 }
 
 func (x *MyStruct) toString3() string {  // MajorVer
-    return fmt.Sprintf("%v", x.GetMajorVerNonCompat())
+    return fmt.Sprintf("%v", x.MajorVer)
 }
 
 func (x *MyStruct) toString4() string {  // Data
-    return fmt.Sprintf("%v", x.GetDataNonCompat())
+    return fmt.Sprintf("%v", x.Data)
 }
 
 // Deprecated: Use NewMyStruct().GetData() instead.
@@ -4675,7 +4675,7 @@ func (x *Renaming) writeField1(p thrift.Format) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -4697,7 +4697,7 @@ if err != nil {
 }
 
 func (x *Renaming) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 
@@ -4870,7 +4870,7 @@ func (x *AnnotatedTypes) writeField1(p thrift.Format) error {  // BinaryField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryFieldNonCompat()
+    item := x.BinaryField
     err := WriteTBinary_8623(item, p)
 if err != nil {
     return err
@@ -4887,7 +4887,7 @@ func (x *AnnotatedTypes) writeField2(p thrift.Format) error {  // ListField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListFieldNonCompat()
+    item := x.ListField
     err := WriteSomeListOfTypeMap_2468(item, p)
 if err != nil {
     return err
@@ -4920,11 +4920,11 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) toString1() string {  // BinaryField
-    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+    return fmt.Sprintf("%v", x.BinaryField)
 }
 
 func (x *AnnotatedTypes) toString2() string {  // ListField
-    return fmt.Sprintf("%v", x.GetListFieldNonCompat())
+    return fmt.Sprintf("%v", x.ListField)
 }
 
 
@@ -5115,7 +5115,7 @@ func (x *ForwardUsageRoot) writeField1(p thrift.Format) error {  // ForwardUsage
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetForwardUsageStructNonCompat()
+    item := x.ForwardUsageStruct
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5135,7 +5135,7 @@ func (x *ForwardUsageRoot) writeField2(p thrift.Format) error {  // ForwardUsage
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetForwardUsageByRefNonCompat()
+    item := x.ForwardUsageByRef
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5169,11 +5169,11 @@ if err != nil {
 }
 
 func (x *ForwardUsageRoot) toString1() string {  // ForwardUsageStruct
-    return fmt.Sprintf("%v", x.GetForwardUsageStructNonCompat())
+    return fmt.Sprintf("%v", x.ForwardUsageStruct)
 }
 
 func (x *ForwardUsageRoot) toString2() string {  // ForwardUsageByRef
-    return fmt.Sprintf("%v", x.GetForwardUsageByRefNonCompat())
+    return fmt.Sprintf("%v", x.ForwardUsageByRef)
 }
 
 // Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
@@ -5353,7 +5353,7 @@ func (x *ForwardUsageStruct) writeField1(p thrift.Format) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5376,7 +5376,7 @@ if err != nil {
 }
 
 func (x *ForwardUsageStruct) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 // Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
@@ -5532,7 +5532,7 @@ func (x *ForwardUsageByRef) writeField1(p thrift.Format) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFooNonCompat()
+    item := x.Foo
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5555,7 +5555,7 @@ if err != nil {
 }
 
 func (x *ForwardUsageByRef) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.GetFooNonCompat())
+    return fmt.Sprintf("%v", x.Foo)
 }
 
 // Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
@@ -5711,7 +5711,7 @@ func (x *IncompleteMap) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -5780,7 +5780,7 @@ result := mapResult
 }
 
 func (x *IncompleteMap) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -6021,7 +6021,7 @@ func (x *CompleteMap) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -6090,7 +6090,7 @@ result := mapResult
 }
 
 func (x *CompleteMap) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -6331,7 +6331,7 @@ func (x *IncompleteList) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -6383,7 +6383,7 @@ result := listResult
 }
 
 func (x *IncompleteList) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -6624,7 +6624,7 @@ func (x *CompleteList) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -6676,7 +6676,7 @@ result := listResult
 }
 
 func (x *CompleteList) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -6917,7 +6917,7 @@ func (x *AdaptedList) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -6969,7 +6969,7 @@ result := listResult
 }
 
 func (x *AdaptedList) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -7118,7 +7118,7 @@ func (x *AdaptedListDep) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7141,7 +7141,7 @@ if err != nil {
 }
 
 func (x *AdaptedListDep) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 // Deprecated: Use NewAdaptedListDep().GetField() instead.
@@ -7297,7 +7297,7 @@ func (x *DependentAdaptedList) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldNonCompat()
+    item := x.Field
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -7349,7 +7349,7 @@ result := listResult
 }
 
 func (x *DependentAdaptedList) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -7497,7 +7497,7 @@ func (x *DependentAdaptedListDep) writeField1(p thrift.Format) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFieldNonCompat()
+    item := *x.Field
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -7520,9 +7520,9 @@ if err != nil {
 
 func (x *DependentAdaptedListDep) toString1() string {  // Field
     if x.IsSetField() {
-        return fmt.Sprintf("%v", *x.GetFieldNonCompat())
+        return fmt.Sprintf("%v", *x.Field)
     }
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -7804,7 +7804,7 @@ func (x *AllocatorAware) writeField1(p thrift.Format) error {  // AaList
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaListNonCompat()
+    item := x.AaList
     err := WriteListI32_9187(item, p)
 if err != nil {
     return err
@@ -7821,7 +7821,7 @@ func (x *AllocatorAware) writeField2(p thrift.Format) error {  // AaSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaSetNonCompat()
+    item := x.AaSet
     err := WriteSetI32_7070(item, p)
 if err != nil {
     return err
@@ -7838,7 +7838,7 @@ func (x *AllocatorAware) writeField3(p thrift.Format) error {  // AaMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaMapNonCompat()
+    item := x.AaMap
     err := WriteMapI32I32_9565(item, p)
 if err != nil {
     return err
@@ -7855,7 +7855,7 @@ func (x *AllocatorAware) writeField4(p thrift.Format) error {  // AaString
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaStringNonCompat()
+    item := x.AaString
     err := WriteString_5252(item, p)
 if err != nil {
     return err
@@ -7872,7 +7872,7 @@ func (x *AllocatorAware) writeField5(p thrift.Format) error {  // NotAContainer
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNotAContainerNonCompat()
+    item := x.NotAContainer
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7888,7 +7888,7 @@ func (x *AllocatorAware) writeField6(p thrift.Format) error {  // AaUnique
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaUniqueNonCompat()
+    item := x.AaUnique
     err := WriteI32_9314(item, p)
 if err != nil {
     return err
@@ -7905,7 +7905,7 @@ func (x *AllocatorAware) writeField7(p thrift.Format) error {  // AaShared
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAaSharedNonCompat()
+    item := x.AaShared
     err := WriteI32_9314(item, p)
 if err != nil {
     return err
@@ -7988,31 +7988,31 @@ if err != nil {
 }
 
 func (x *AllocatorAware) toString1() string {  // AaList
-    return fmt.Sprintf("%v", x.GetAaListNonCompat())
+    return fmt.Sprintf("%v", x.AaList)
 }
 
 func (x *AllocatorAware) toString2() string {  // AaSet
-    return fmt.Sprintf("%v", x.GetAaSetNonCompat())
+    return fmt.Sprintf("%v", x.AaSet)
 }
 
 func (x *AllocatorAware) toString3() string {  // AaMap
-    return fmt.Sprintf("%v", x.GetAaMapNonCompat())
+    return fmt.Sprintf("%v", x.AaMap)
 }
 
 func (x *AllocatorAware) toString4() string {  // AaString
-    return fmt.Sprintf("%v", x.GetAaStringNonCompat())
+    return fmt.Sprintf("%v", x.AaString)
 }
 
 func (x *AllocatorAware) toString5() string {  // NotAContainer
-    return fmt.Sprintf("%v", x.GetNotAContainerNonCompat())
+    return fmt.Sprintf("%v", x.NotAContainer)
 }
 
 func (x *AllocatorAware) toString6() string {  // AaUnique
-    return fmt.Sprintf("%v", x.GetAaUniqueNonCompat())
+    return fmt.Sprintf("%v", x.AaUnique)
 }
 
 func (x *AllocatorAware) toString7() string {  // AaShared
-    return fmt.Sprintf("%v", x.GetAaSharedNonCompat())
+    return fmt.Sprintf("%v", x.AaShared)
 }
 
 
@@ -8272,7 +8272,7 @@ func (x *AllocatorAware2) writeField1(p thrift.Format) error {  // NotAContainer
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNotAContainerNonCompat()
+    item := x.NotAContainer
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -8292,7 +8292,7 @@ func (x *AllocatorAware2) writeField2(p thrift.Format) error {  // BoxField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBoxFieldNonCompat()
+    item := *x.BoxField
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -8324,14 +8324,14 @@ if err != nil {
 }
 
 func (x *AllocatorAware2) toString1() string {  // NotAContainer
-    return fmt.Sprintf("%v", x.GetNotAContainerNonCompat())
+    return fmt.Sprintf("%v", x.NotAContainer)
 }
 
 func (x *AllocatorAware2) toString2() string {  // BoxField
     if x.IsSetBoxField() {
-        return fmt.Sprintf("%v", *x.GetBoxFieldNonCompat())
+        return fmt.Sprintf("%v", *x.BoxField)
     }
-    return fmt.Sprintf("%v", x.GetBoxFieldNonCompat())
+    return fmt.Sprintf("%v", x.BoxField)
 }
 
 
@@ -8525,7 +8525,7 @@ func (x *TypedefStruct) writeField1(p thrift.Format) error {  // I32Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32FieldNonCompat()
+    item := x.I32Field
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -8541,7 +8541,7 @@ func (x *TypedefStruct) writeField2(p thrift.Format) error {  // IntTypedefField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntTypedefFieldNonCompat()
+    item := x.IntTypedefField
     err := WriteIntTypedef(item, p)
 if err != nil {
     return err
@@ -8558,7 +8558,7 @@ func (x *TypedefStruct) writeField3(p thrift.Format) error {  // UintTypedefFiel
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUintTypedefFieldNonCompat()
+    item := x.UintTypedefField
     err := WriteUintTypedef(item, p)
 if err != nil {
     return err
@@ -8601,15 +8601,15 @@ if err != nil {
 }
 
 func (x *TypedefStruct) toString1() string {  // I32Field
-    return fmt.Sprintf("%v", x.GetI32FieldNonCompat())
+    return fmt.Sprintf("%v", x.I32Field)
 }
 
 func (x *TypedefStruct) toString2() string {  // IntTypedefField
-    return fmt.Sprintf("%v", x.GetIntTypedefFieldNonCompat())
+    return fmt.Sprintf("%v", x.IntTypedefField)
 }
 
 func (x *TypedefStruct) toString3() string {  // UintTypedefField
-    return fmt.Sprintf("%v", x.GetUintTypedefFieldNonCompat())
+    return fmt.Sprintf("%v", x.UintTypedefField)
 }
 
 
@@ -8778,7 +8778,7 @@ func (x *StructWithDoubleUnderscores) writeField1(p thrift.Format) error {  // _
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.Get_FieldNonCompat()
+    item := x._Field
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -8800,7 +8800,7 @@ if err != nil {
 }
 
 func (x *StructWithDoubleUnderscores) toString1() string {  // _Field
-    return fmt.Sprintf("%v", x.Get_FieldNonCompat())
+    return fmt.Sprintf("%v", x._Field)
 }
 
 

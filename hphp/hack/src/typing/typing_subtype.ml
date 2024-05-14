@@ -6099,12 +6099,22 @@ end = struct
          Notably, because we're only doing this logic for unions, we'll still
          intersect with a bare dynamic which is desirable if you were to refine
          something explicitly typed as dynamic
+
+         The above compromise breaks down especially though in the IsNull case
+         because you turn ~T into ~null instead of just null
+         and then handling like for `idx` will trip up on the dynamic
       *)
+      let should_add_dyn_lower_bound_on_true predicate =
+        match predicate with
+        | IsNull -> false
+        (* TODO possibly false too for other singleton types' predicates *)
+        | _ -> true
+      in
       begin
         match TUtils.try_strip_dynamic_from_union env ty_subs with
         | None -> simplify_union_l ty_subs env
         | Some (dyn, ty_subs) ->
-          let simplify_subtype ty_super env =
+          let simplify_dyn_sub_super ty_super env =
             Subtype.(
               simplify
                 ~subtype_env
@@ -6113,8 +6123,11 @@ end = struct
                 ~rhs:{ super_supportdyn = false; super_like; ty_super }
                 env)
           in
-          simplify_subtype ty_false env
-          &&& simplify_subtype ty_true
+          (if should_add_dyn_lower_bound_on_true predicate then
+            simplify_dyn_sub_super ty_true env
+          else
+            (env, TL.valid))
+          &&& simplify_dyn_sub_super ty_false
           &&& simplify_union_l ty_subs
       end
     | _ ->

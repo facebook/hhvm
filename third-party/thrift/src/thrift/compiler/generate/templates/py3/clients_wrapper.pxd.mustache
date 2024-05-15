@@ -37,7 +37,7 @@ from libcpp.vector cimport vector
 
 from folly cimport cFollyFuture, cFollyTry, cFollyUnit
 cimport folly.iobuf as _fbthrift_iobuf
-from thrift.python.common cimport cRpcOptions
+from thrift.py3.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{> common/auto_migrate_prefix}}types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types

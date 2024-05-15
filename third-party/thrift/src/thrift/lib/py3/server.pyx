@@ -34,7 +34,7 @@ from pathlib import Path
 import os
 
 from enum import Enum
-from thrift.python.common import Priority, Headers
+from thrift.py3.common import Priority, Headers
 
 SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
 

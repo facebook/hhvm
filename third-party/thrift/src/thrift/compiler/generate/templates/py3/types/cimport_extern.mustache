@@ -44,7 +44,7 @@ from thrift.py3.types cimport (
     union_field_ref as __union_field_ref,
     get_union_field_value as __get_union_field_value,
 )
-from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+from thrift.py3.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 {{#program:includeNamespaces}}
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}{{> common/auto_migrate_prefix}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{/program:includeNamespaces}}

@@ -15,7 +15,7 @@
 import sys
 cimport cython
 from thrift.py3.exceptions cimport create_py_exception
-from thrift.python.common import Protocol
+from thrift.py3.common import Protocol
 cimport thrift.py3.ssl as thrift_ssl
 from libcpp.string cimport string
 from libc.stdint cimport uint64_t

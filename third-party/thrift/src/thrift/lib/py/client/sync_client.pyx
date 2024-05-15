@@ -28,7 +28,7 @@ from thrift.py.client.exceptions cimport create_py_exception
 from thrift.python.client.request_channel cimport RequestChannel
 from thrift.util.Serializer import serialize, deserialize
 from thrift.Thrift import TApplicationException
-from thrift.python.common cimport cRpcOptions, RpcOptions
+from thrift.py3.common cimport cRpcOptions, RpcOptions
 
 
 cdef class SyncClient:

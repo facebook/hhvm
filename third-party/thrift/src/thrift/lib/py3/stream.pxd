@@ -19,7 +19,7 @@ from folly cimport cFollyExecutor
 from folly.coro cimport cFollyCoroTask
 from folly.optional cimport cOptional
 from folly.async_generator cimport cAsyncGeneratorWrapper, cAsyncGenerator
-from thrift.python.common cimport RpcOptions
+from thrift.py3.common cimport RpcOptions
 from folly cimport cFollyPromise
 from cpython.ref cimport PyObject
 from libc.stdint cimport int32_t

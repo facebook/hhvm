@@ -25,7 +25,7 @@ from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
-from thrift.python.common cimport cRpcOptions, RpcOptions
+from thrift.py3.common cimport cRpcOptions, RpcOptions
 
 cdef string blank_interaction = b""
 

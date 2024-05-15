@@ -17,7 +17,7 @@ from folly cimport cFollyExceptionWrapper, iobuf
 from libc.stdint cimport int16_t, uint32_t
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
-from thrift.python.common cimport RpcOptions
+from thrift.py3.common cimport RpcOptions
 
 from thrift.python.protocol cimport Protocol
 

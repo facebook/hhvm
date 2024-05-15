@@ -19,7 +19,7 @@ from thrift.python.types cimport StructOrUnion as PythonStruct
 import thrift.python.serializer as python_serializer
 from folly.iobuf cimport IOBuf
 cimport folly.iobuf as _fbthrift_iobuf
-from thrift.python.common import Protocol
+from thrift.py3.common import Protocol
 
 
 def serialize(tstruct, protocol=Protocol.COMPACT):

@@ -16,7 +16,7 @@ from cython.operator cimport dereference as deref
 from cpython.exc cimport PyErr_Occurred
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from libcpp.vector cimport vector
-from thrift.python.common import RpcOptions
+from thrift.py3.common import RpcOptions
 from thrift.python.exceptions import Error, LibraryError
 
 from enum import Enum, Flag

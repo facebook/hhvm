@@ -19,7 +19,7 @@ from thrift.py3.types cimport CompiledEnum, Struct
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.server cimport ServiceInterface
 from thrift.py3.client cimport Client
-from thrift.python.common cimport MetadataBox
+from thrift.py3.common cimport MetadataBox
 from apache.thrift.metadata.types cimport (
     ThriftMetadata,
     ThriftStruct,

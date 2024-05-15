@@ -22,7 +22,7 @@ from libcpp.string cimport string
 from libcpp.unordered_map cimport unordered_map
 from libcpp.pair cimport pair
 from thrift.python.client.request_channel cimport cRequestChannel_ptr, cRequestChannel
-from thrift.python.common cimport cRpcOptions
+from thrift.py3.common cimport cRpcOptions
 
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":

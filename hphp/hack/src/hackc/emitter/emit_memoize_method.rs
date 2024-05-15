@@ -241,7 +241,7 @@ fn emit<'a, 'd>(
         false => None,
     };
     let (instrs, decl_vars) =
-        make_memoize_method_code(emitter, env, pos, &hhas_params, args, depr_info)?;
+        make_memoize_method_code(emitter, env, pos, &hhas_params, args, depr_info, &coeffects)?;
     let instrs = emit_pos_then(pos, instrs);
     make_wrapper(
         emitter,
@@ -264,14 +264,23 @@ fn make_memoize_method_code<'a, 'd>(
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
     deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
     {
-        make_memoize_method_no_params_code(emitter, args, deprecation_info)
+        make_memoize_method_no_params_code(emitter, args, deprecation_info, coeffects)
     } else {
-        make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args, deprecation_info)
+        make_memoize_method_with_params_code(
+            emitter,
+            env,
+            pos,
+            hhas_params,
+            args,
+            deprecation_info,
+            coeffects,
+        )
     }
 }
 
@@ -283,6 +292,7 @@ fn make_memoize_method_with_params_code<'a, 'd>(
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
     deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
@@ -356,9 +366,10 @@ fn make_memoize_method_with_params_code<'a, 'd>(
         len: key_count.try_into().unwrap(),
     };
     let ic_stash_local = Local::new((key_count) as usize + first_unnamed_idx);
-    // TODO: add the coeffects to this decision, done in a later diff on this stack
+    // This fn either has IC unoptimizable static coeffects, or has any dynamic coeffects
+    let has_ic_unoptimizable_coeffects: bool = coeffects.has_ic_unoptimizable_coeffects();
     let should_make_ic_inaccessible: bool =
-        !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
+        !should_emit_implicit_context && has_ic_unoptimizable_coeffects;
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
@@ -425,6 +436,7 @@ fn make_memoize_method_no_params_code<'a, 'd>(
     emitter: &mut Emitter<'d>,
     args: &Args<'_, 'a>,
     deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
@@ -446,8 +458,8 @@ fn make_memoize_method_no_params_code<'a, 'd>(
         None,
     );
     let ic_stash_local = Local::new(0);
-    // we are in a no parameter function that sets no zoned IC either, default to IC inaccessible
-    let should_make_ic_inaccessible: bool = true;
+    // we are in a no parameter function that sets no zoned IC either, default to what coeffects suggest
+    let should_make_ic_inaccessible: bool = coeffects.has_ic_unoptimizable_coeffects();
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {

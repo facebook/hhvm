@@ -116,7 +116,7 @@ function get_implicit_context_memo_key()[zoned]: int;
 * Only to be used for tests
 */
 <<__Native("NoRecording")>>
-function get_implicit_context_debug_info()[zoned]: vec<string>;
+function get_implicit_context_debug_info()[]: vec<string>;
 
 
 } // namespace ImplicitContext_Private

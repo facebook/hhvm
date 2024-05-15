@@ -370,8 +370,34 @@ impl Coeffects {
             || self.caller
     }
 
+    fn has_ic_unoptimizable_static_coeffects(&self) -> bool {
+        if self.get_static_coeffects().is_empty() {
+            // no static coeffects means [defaults], which can't be optimized
+            // away for memoization - e.g. requires Inaccessible IC to be set
+            true
+        } else {
+            // Inaccessible IC set can be optimized away if all
+            // static coeffects are within this list
+            return !self.get_static_coeffects().iter().all(|ctx| {
+                matches!(
+                    ctx,
+                    Ctx::LeakSafe
+                        | Ctx::ReadGlobals
+                        | Ctx::Globals
+                        | Ctx::Pure
+                        | Ctx::WriteThisProps
+                        | Ctx::WriteProps
+                )
+            });
+        }
+    }
+
     pub fn has_coeffects_local(&self) -> bool {
         self.has_coeffect_rules() && !self.generator_this()
+    }
+
+    pub fn has_ic_unoptimizable_coeffects(&self) -> bool {
+        self.has_ic_unoptimizable_static_coeffects() || self.has_coeffect_rules()
     }
 
     pub fn is_closure_parent_scope(&self) -> bool {

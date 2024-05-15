@@ -91,9 +91,14 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
+    let coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     let should_emit_implicit_context = hhbc::is_keyed_by_ic_memoize(attributes.iter());
-    // TODO: Also add coeffects in the decision to make ic inaccessible, implemented later in this stack
-    let should_make_ic_inaccessible: bool = !should_emit_implicit_context;
+
+    // This fn either has IC unoptimizable static coeffects, or has any dynamic coeffects
+    let has_ic_unoptimizable_coeffects: bool = coeffects.has_ic_unoptimizable_coeffects();
+    let should_make_ic_inaccessible: bool =
+        !should_emit_implicit_context && has_ic_unoptimizable_coeffects;
+
     let mut env = Env::default(Arc::clone(&fd.namespace)).with_scope(scope);
     let (instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -108,7 +113,6 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         should_emit_implicit_context,
         should_make_ic_inaccessible,
     )?;
-    let coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     let mut body = make_wrapper_body(
         emitter,
         env,

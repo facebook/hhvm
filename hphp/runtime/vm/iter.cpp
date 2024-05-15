@@ -97,7 +97,6 @@ bool IterImpl::checkInvariants(const ArrayData* ad) const {
     assertx(ad->isVanillaDict());
   } else if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
     assertx(ad->isVanillaDict());
-    assertx(ad->size() == VanillaDict::as(ad)->iterLimit());
   } else if (m_nextHelperIdx == IterNextIndex::StructDict) {
     assertx(!ad->isVanilla());
     assertx(isStructDict(BespokeArray::asBespoke(ad)));
@@ -111,8 +110,9 @@ bool IterImpl::checkInvariants(const ArrayData* ad) const {
 
   // Check the consistency of the pos and end fields.
   if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
+    UNUSED auto const dict = VanillaDict::as(ad);
     assertx(m_mixed_elm < m_mixed_end);
-    assertx(m_mixed_end == VanillaDict::as(ad)->data() + ad->size());
+    assertx(m_mixed_end == dict->data() + dict->iterLimit());
   } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
     assertx(m_unaligned_elm < m_unaligned_end);
     assertx(m_unaligned_end == VanillaVec::entries(const_cast<ArrayData*>(ad)) + ad->size());
@@ -247,11 +247,11 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   if (LIKELY(ad->isVanillaDict())) {
     auto const mixed = VanillaDict::as(ad);
-    if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
-      aiter.m_mixed_elm = mixed->data();
-      aiter.m_mixed_end = aiter.m_mixed_elm + size;
+    if (BaseConst) {
+      aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
+      aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
       aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
-      mixed->getArrayElm(0, valOut);
+      tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
@@ -320,11 +320,12 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (ad->isVanillaDict()) {
     auto const mixed = VanillaDict::as(ad);
-    if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
-      aiter.m_mixed_elm = mixed->data();
-      aiter.m_mixed_end = aiter.m_mixed_elm + size;
+    if (BaseConst) {
+      aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
+      aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
       aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
-      mixed->getArrayElm(0, valOut, keyOut);
+      tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
+      tvDup(aiter.m_mixed_elm->getKey(), *keyOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
@@ -493,11 +494,14 @@ template<bool HasKey>
 int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
                                        TypedValue* valOut, TypedValue* keyOut) {
   auto& iter = *unwrap(it);
-  auto const elm = iter.m_mixed_elm + 1;
-  if (elm == iter.m_mixed_end) {
-    iter.kill();
-    return 0;
-  }
+  auto elm = iter.m_mixed_elm;
+
+  do {
+    if ((++elm) == iter.m_mixed_end) {
+      iter.kill();
+      return 0;
+    }
+  } while (UNLIKELY(elm->isTombstone()));
 
   iter.m_mixed_elm = elm;
   setOutputLocal(*elm->datatv(), valOut);

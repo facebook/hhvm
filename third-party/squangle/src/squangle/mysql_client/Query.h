@@ -125,8 +125,18 @@ class QueryOptions {
         attributes_.begin(), attributes_.end());
   }
 
+  QueryOptions& setQueryTimeout(Duration timeout) {
+    queryTimeoutOverride_ = timeout;
+    return *this;
+  }
+
+  const std::optional<Duration>& getQueryTimeout() const {
+    return queryTimeoutOverride_;
+  }
+
  protected:
   QueryAttributes attributes_;
+  std::optional<Duration> queryTimeoutOverride_;
 };
 
 class Query {

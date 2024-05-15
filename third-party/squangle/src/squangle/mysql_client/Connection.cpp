@@ -219,6 +219,9 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginQuery(std::move(conn), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
+  if (const auto& timeoutOverride = options.getQueryTimeout()) {
+    op->setTimeout(*timeoutOverride);
+  }
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -233,6 +236,9 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  if (const auto& timeoutOverride = options.getQueryTimeout()) {
+    op->setTimeout(*timeoutOverride);
+  }
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -247,6 +253,9 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  if (const auto& timeoutOverride = options.getQueryTimeout()) {
+    op->setTimeout(*timeoutOverride);
+  }
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -261,6 +270,9 @@ Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
+  if (const auto& timeoutOverride = options.getQueryTimeout()) {
+    op->setTimeout(*timeoutOverride);
+  }
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -330,6 +342,9 @@ DbMultiQueryResult Connection::multiQuery(
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
+  if (const auto& timeoutOverride = options.getQueryTimeout()) {
+    op->setTimeout(*timeoutOverride);
+  }
   if (cb) {
     op->setCallback(std::move(cb));
   }

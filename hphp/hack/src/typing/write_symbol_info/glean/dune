@@ -6,6 +6,7 @@
 (modules
  util
  fact_id
+ fbthrift
  builtin
  gencode
  hack

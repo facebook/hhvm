@@ -17,7 +17,8 @@
   index_xrefs
   indexer_options
   entrypoint
-  predicate)
+  predicate
+  thrift)
  (libraries
   glean_schema
   ast_provider

@@ -20,6 +20,30 @@ let process_doc_comment
   | None -> fa
   | Some (pos, _doc) -> snd (Add_fact.decl_comment ~path pos decl_ref fa)
 
+let process_thrift_container_comment
+    (thrift_ctx : Thrift.t)
+    (con : ('a, 'b) Aast_defs.class_)
+    (hack_decl : Declaration.t)
+    (fa : Fact_acc.t) : Fact_acc.t =
+  match Fact_acc.get_generated_from fa with
+  | None -> fa
+  | Some thrift_path ->
+    (match Thrift.get_thrift_from_container thrift_ctx ~thrift_path con with
+    | Some thrift_decl -> Add_fact.hack_to_thrift hack_decl thrift_decl fa
+    | None -> fa)
+
+let process_thrift_method_comment
+    (thrift_ctx : Thrift.t)
+    (comment : Aast.doc_comment option)
+    (hack_decl : Hack.Declaration.t)
+    (fa : Fact_acc.t) : Fact_acc.t =
+  match (Fact_acc.get_generated_from fa, comment) with
+  | (Some _, Some (_pos, doc)) ->
+    (match Thrift.get_thrift_from_member thrift_ctx ~doc with
+    | None -> fa
+    | Some thrift_decl -> Add_fact.hack_to_thrift hack_decl thrift_decl fa)
+  | _ -> fa
+
 let process_loc_span
     path (pos : Pos.t) (span : Pos.t) (ref : Declaration.t) (fa : Fact_acc.t) :
     Fact_acc.t =
@@ -37,11 +61,17 @@ let process_decl_loc
     (id : Ast_defs.id_)
     (elem : 'elem)
     (doc : Aast.doc_comment option)
+    ?(thrift_ctx : Thrift.t option)
     (fa : Fact_acc.t) : Fact_id.t * Fact_acc.t =
   let (decl_id, fa) = decl_fun id fa in
   let (_, fa) = defn_fun elem decl_id fa in
   let ref = decl_ref_fun decl_id in
   let fa = process_doc_comment doc path ref fa in
+  let fa =
+    match thrift_ctx with
+    | Some thrift_ctx -> process_thrift_method_comment thrift_ctx doc ref fa
+    | None -> fa
+  in
   let fa = process_loc_span path pos span ref fa in
   (decl_id, fa)
 
@@ -96,11 +126,14 @@ let process_member_cluster mc fa =
        mc.File_info.class_constants
 
 let process_container_decl
-    path source_text con member_clusters (xrefs, all_decls, fa) =
+    thrift_ctx path source_text con member_clusters (xrefs, all_decls, fa) =
   let (con_pos, con_name) = con.c_name in
   let parent_kind = Predicate.get_parent_kind con.c_kind in
   let decl_pred = Predicate.parent_decl_predicate parent_kind in
   let (con_decl_id, fa) = Add_fact.container_decl decl_pred con_name fa in
+  let ref = Predicate.container_ref parent_kind con_decl_id in
+  let fa = process_loc_span path con_pos con.c_span ref fa in
+  let fa = process_thrift_container_comment thrift_ctx con ref fa in
   let (prop_decls, fa) =
     List.fold_right con.c_vars ~init:([], fa) ~f:(fun prop (decls, fa) ->
         let (pos, id) = prop.cv_id in
@@ -115,6 +148,7 @@ let process_container_decl
             id
             prop
             prop.cv_doc_comment
+            ~thrift_ctx
             fa
         in
         (Declaration.Property_ (PropertyDeclaration.Id decl_id) :: decls, fa))
@@ -169,6 +203,7 @@ let process_container_decl
             id
             meth
             meth.m_doc_comment
+            ~thrift_ctx
             fa
         in
         (Declaration.Method (MethodDeclaration.Id decl_id) :: decls, fa))
@@ -198,8 +233,6 @@ let process_container_decl
   let (_, fa) =
     Add_fact.container_defn source_text con con_decl_id members fa
   in
-  let ref = Predicate.container_ref parent_kind con_decl_id in
-  let fa = process_loc_span path con_pos con.c_span ref fa in
   let all_decls = all_decls @ [ref] @ members in
   let fa = process_doc_comment con.c_doc_comment path ref fa in
   (xrefs, all_decls, fa)
@@ -365,11 +398,12 @@ let process_mod_xref fa xrefs (pos, id) =
   (Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type = None }, fa)
 
 let process_tast_decls ~path tast source_text (decls, fa) =
+  let thrift_ctx = Thrift.empty () in
   List.fold tast ~init:(Xrefs.empty, decls, fa) ~f:(fun acc (def, im) ->
       match def with
       | Class en when Util.is_enum_or_enum_class en.c_kind ->
         process_enum_decl path source_text en acc
-      | Class cd -> process_container_decl path source_text cd im acc
+      | Class cd -> process_container_decl thrift_ctx path source_text cd im acc
       | Constant gd -> process_gconst_decl path source_text gd acc
       | Fun fd -> process_func_decl path source_text fd acc
       | Typedef td -> process_typedef_decl path source_text td acc

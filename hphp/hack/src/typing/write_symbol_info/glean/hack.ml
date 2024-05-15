@@ -2553,6 +2553,47 @@ end = struct
   and to_json_value x = Name.to_json x
 end
 
+and HackToThrift: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    from: Declaration.t;
+    to_: Fbthrift.Declaration.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    from: Declaration.t;
+    to_: Fbthrift.Declaration.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {from; to_} = 
+    let fields = [
+      ("from", Declaration.to_json from);
+      ("to", Fbthrift.Declaration.to_json to_);
+    ] in
+    JSON_Object fields
+
+end
+
 and InheritedMembers: sig
   type t =
     | Id of Fact_id.t

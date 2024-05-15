@@ -51,6 +51,7 @@ type hack =
   | GlobalNamespaceAlias
   | IndexerInputsHash
   | TypeInfo
+  | HackToThrift
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
@@ -110,6 +111,7 @@ let hack_to_string = function
   | GlobalNamespaceAlias -> "GlobalNamespaceAlias"
   | IndexerInputsHash -> "IndexerInputsHash"
   | TypeInfo -> "TypeInfo"
+  | HackToThrift -> "HackToThrift"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
@@ -155,6 +157,7 @@ let ordered_all =
     Hack FileCall;
     Hack GlobalNamespaceAlias;
     Hack IndexerInputsHash;
+    Hack HackToThrift;
     Src FileLines;
   ]
 
@@ -246,6 +249,7 @@ module Fact_acc = struct
     factIds: Fact_id.t JsonPredicateMap.t;
     mutable ownership_unit: ownership_unit;
     mutable xrefs: Xrefs.pos_map option;
+    mutable generated_from: string option;
     ownership: bool;
   }
 
@@ -314,10 +318,15 @@ module Fact_acc = struct
       factIds = JsonPredicateMap.empty;
       ownership_unit = None;
       ownership;
+      generated_from = None;
       xrefs = None;
     }
 
   let set_ownership_unit t ou = t.ownership_unit <- ou
+
+  let set_generated_from t from = t.generated_from <- from
+
+  let get_generated_from t = t.generated_from
 
   let owned_facts_to_json ~ownership (predicate, owned_facts) =
     let fact_object ~ou facts =

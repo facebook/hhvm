@@ -690,3 +690,7 @@ let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ fa =
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Gencode GenCode) json fa
+
+let hack_to_thrift hack thrift fa =
+  let json = HackToThrift.({ from = hack; to_ = thrift } |> to_json_key) in
+  Fact_acc.add_fact Predicate.(Hack HackToThrift) json fa |> snd

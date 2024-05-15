@@ -49,6 +49,7 @@ type hack =
   | GlobalNamespaceAlias
   | IndexerInputsHash
   | TypeInfo
+  | HackToThrift
 
 type src = FileLines
 
@@ -99,6 +100,11 @@ module Fact_acc : sig
      which corresponds to fact with no owners. If [ownership] is false,
      the ownership_unit is ignored. *)
   val set_ownership_unit : t -> string option -> unit
+
+  (** set the path of the generating source file if any. To be set for each file *)
+  val set_generated_from : t -> string option -> unit
+
+  val get_generated_from : t -> string option
 
   val set_pos_map : t -> Xrefs.pos_map -> unit
 

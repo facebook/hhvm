@@ -93,9 +93,9 @@ bool IterImpl::checkInvariants(const ArrayData* ad) const {
     assertx(ad->isVanillaVec());
   } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
     assertx(ad->isVanillaVec());
-  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
+  } else if (m_nextHelperIdx == IterNextIndex::VanillaDict) {
     assertx(ad->isVanillaDict());
-  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
+  } else if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
     assertx(ad->isVanillaDict());
     assertx(ad->size() == VanillaDict::as(ad)->iterLimit());
   } else if (m_nextHelperIdx == IterNextIndex::StructDict) {
@@ -110,7 +110,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad) const {
   }
 
   // Check the consistency of the pos and end fields.
-  if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
+  if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
     assertx(m_mixed_elm < m_mixed_end);
     assertx(m_mixed_end == VanillaDict::as(ad)->data() + ad->size());
   } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
@@ -191,26 +191,6 @@ IterImpl* unwrap(Iter* iter) { return &iter->m_iter; }
 
 namespace {
 
-/*
- * iter_value_cell* will store a copy of the current value at the address
- * given by 'out'. iter_value_cell* will increment the refcount of the current
- * value if appropriate.
- */
-
-inline void iter_value_cell_local_impl(Iter* iter,
-                                        TypedValue* out,
-                                        const ArrayData* ad) {
-  auto const& arrIter = *unwrap(iter);
-  tvSet(arrIter.nvSecondLocal(ad), *out);
-}
-
-inline void iter_key_cell_local_impl(Iter* iter,
-                                      TypedValue* out,
-                                      const ArrayData* ad) {
-  auto const& arrIter = *unwrap(iter);
-  tvSet(arrIter.nvFirstLocal(ad), *out);
-}
-
 NEVER_INLINE void clearOutputLocal(TypedValue* local) {
   tvDecRefCountable(local);
   local->m_type = KindOfNull;
@@ -270,13 +250,13 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
       aiter.m_mixed_end = aiter.m_mixed_elm + size;
-      aiter.setArrayNext(IterNextIndex::ArrayMixedPointer);
+      aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
       mixed->getArrayElm(0, valOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_end = mixed->iterLimit();
-    aiter.setArrayNext(IterNextIndex::ArrayMixed);
+    aiter.setArrayNext(IterNextIndex::VanillaDict);
     mixed->getArrayElm(aiter.m_pos, valOut);
     return 1;
   }
@@ -343,13 +323,13 @@ int64_t new_iter_array_key(Iter*       dest,
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
       aiter.m_mixed_end = aiter.m_mixed_elm + size;
-      aiter.setArrayNext(IterNextIndex::ArrayMixedPointer);
+      aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
       mixed->getArrayElm(0, valOut, keyOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_end = mixed->iterLimit();
-    aiter.setArrayNext(IterNextIndex::ArrayMixed);
+    aiter.setArrayNext(IterNextIndex::VanillaDict);
     mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
     return 1;
   }
@@ -396,48 +376,6 @@ int64_t new_iter_object(ObjectData* obj, TypedValue* valOut,
   return 1LL;
 }
 
-// Generic next implementation. This method is used for both value and key-value
-// iterators; for value iterators, keyOut is nullptr.
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-NEVER_INLINE
-int64_t iter_array_next_cold(Iter* iter,
-                             const ArrayData* ad,
-                             TypedValue* valOut,
-                             TypedValue* keyOut) {
-  auto const ai = unwrap(iter);
-  if (ai->nextLocal(ad)) {
-    ai->kill();
-    return 0;
-  }
-  iter_value_cell_local_impl(iter, valOut, ad);
-  if (keyOut) iter_key_cell_local_impl(iter, keyOut, ad);
-  return 1;
-}
-
-uint64_t iter_object_next_impl(ObjectData* obj,
-                               TypedValue* valOut,
-                               TypedValue* keyOut) {
-  obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
-
-  auto const end =
-    !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
-  if (end) return 0LL;
-
-  tvMove(
-    obj->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0).detach(),
-    *valOut
-  );
-
-  if (keyOut) {
-    tvMove(
-      obj->o_invoke_few_args(s_key, RuntimeCoeffects::fixme(), 0).detach(),
-      *keyOut
-    );
-  }
-
-  return 1LL;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // IterNext/IterNextK helpers
 
@@ -461,58 +399,6 @@ ALWAYS_INLINE void setOutputLocal(TypedValue tv, TypedValue* out) {
   tvDup(tv, out);
 }
 
-}
-
-// "virtual" method implementation of *IterNext* for ArrayMixedPointer.
-// Since we know the base is mixed and free of tombstones, we can simply
-// increment the element pointer and compare it to the end pointer.
-//
-// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
-//
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-template<bool HasKey>
-int64_t iter_next_mixed_pointer(Iter* it, TypedValue* valOut,
-                                TypedValue* keyOut, ArrayData* arr) {
-  auto& iter = *unwrap(it);
-  auto const elm = iter.m_mixed_elm + 1;
-  if (elm == iter.m_mixed_end) {
-    iter.kill();
-    return 0;
-  }
-
-  iter.m_mixed_elm = elm;
-  setOutputLocal(*elm->datatv(), valOut);
-  if (HasKey) setOutputLocal(elm->getKey(), keyOut);
-  return 1;
-}
-
-// "virtual" method implementation of *IterNext* for VanillaVec iterators
-// over unaligned typed values. Since these values are stored one after the other,
-// we can just increment the element pointer and compare it to the end pointer.
-//
-// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
-//
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-template<bool HasKey>
-int64_t iter_next_unaligned_pointer(Iter* it, TypedValue* valOut,
-                                    TypedValue* keyOut, ArrayData* ad) {
-  always_assert(!HasKey);
-  assertx(VanillaVec::checkInvariants(ad));
-
-  auto& iter = *unwrap(it);
-  auto const elm = iter.m_unaligned_elm + 1;
-  if (elm == iter.m_unaligned_end) {
-    iter.kill();
-    return 0;
-  }
-
-  iter.m_unaligned_elm = elm;
-  setOutputLocal(*elm, valOut);
-  return 1;
-}
-
-namespace {
-
 // "virtual" method implementation of *IterNext* for VanillaVec iterators.
 // Since we know the array is packed, we just need to increment the position
 // and do a bounds check. The key is the position; for the value, we index.
@@ -521,8 +407,8 @@ namespace {
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
-                              TypedValue* keyOut, ArrayData* ad) {
+int64_t iter_next_vanilla_vec(Iter* it, ArrayData* ad,
+                              TypedValue* valOut, TypedValue* keyOut) {
   auto& iter = *unwrap(it);
   assertx(VanillaVec::checkInvariants(ad));
 
@@ -538,19 +424,44 @@ int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
   return 1;
 }
 
-// "virtual" method implementation of *IterNext* for ArrayMixed iterators.
-// Since we know the array is mixed, we can do "while (elm[pos].isTombstone())"
+// "virtual" method implementation of *IterNext* for VanillaVec iterators over
+// unaligned typed values. Since these values are stored one after the other,
+// we can just increment the element pointer and compare it to the end pointer.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey>
+int64_t iter_next_vanilla_vec_pointer(Iter* it, ArrayData* ad,
+                                      TypedValue* valOut, TypedValue* keyOut) {
+  always_assert(!HasKey);
+  assertx(VanillaVec::checkInvariants(ad));
+
+  auto& iter = *unwrap(it);
+  auto const elm = iter.m_unaligned_elm + 1;
+  if (elm == iter.m_unaligned_end) {
+    iter.kill();
+    return 0;
+  }
+
+  iter.m_unaligned_elm = elm;
+  setOutputLocal(*elm, valOut);
+  return 1;
+}
+
+// "virtual" method implementation of *IterNext* for VanillaDict iterators.
+// Since we know the array type, we can do "while (elm[pos].isTombstone())"
 // inline here, and we can use VanillaDict helpers to extract the key and value.
 //
 // HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_mixed_impl(Iter* it, TypedValue* valOut,
-                             TypedValue* keyOut, ArrayData* arrData) {
+int64_t iter_next_vanilla_dict(Iter* it, ArrayData* ad,
+                               TypedValue* valOut, TypedValue* keyOut) {
   auto& iter     = *unwrap(it);
   ssize_t pos    = iter.getPos();
-  auto const arr = VanillaDict::as(arrData);
+  auto const arr = VanillaDict::as(ad);
 
   do {
     if ((++pos) == iter.getEnd()) {
@@ -571,11 +482,33 @@ int64_t iter_next_mixed_impl(Iter* it, TypedValue* valOut,
   return 1;
 }
 
-// "virtual" method implementation of *IterNext* for StructDict iterators.
-// See iter_next_mixed_impl for docs for template args and return value.
+// "virtual" method implementation of *IterNext* for VanillaDictPointer.
+// Since we know the base is VanillaDict and free of tombstones, we can simply
+// increment the element pointer and compare it to the end pointer.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_struct_dict(Iter* it, TypedValue* valOut,
-                              TypedValue* keyOut, ArrayData* ad) {
+int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
+                                       TypedValue* valOut, TypedValue* keyOut) {
+  auto& iter = *unwrap(it);
+  auto const elm = iter.m_mixed_elm + 1;
+  if (elm == iter.m_mixed_end) {
+    iter.kill();
+    return 0;
+  }
+
+  iter.m_mixed_elm = elm;
+  setOutputLocal(*elm->datatv(), valOut);
+  if constexpr (HasKey) setOutputLocal(elm->getKey(), keyOut);
+  return 1;
+}
+
+// "virtual" method implementation of *IterNext* for StructDict iterators.
+template<bool HasKey>
+int64_t iter_next_struct_dict(Iter* it, ArrayData* ad,
+                              TypedValue* valOut, TypedValue* keyOut) {
   auto& iter = *unwrap(it);
   auto const sad = StructDict::As(ad);
 
@@ -591,110 +524,140 @@ int64_t iter_next_struct_dict(Iter* it, TypedValue* valOut,
   return 1;
 }
 
-}
+// Generic next implementation. This method is used for both value and key-value
+// iterators; for value iterators, keyOut is nullptr.
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey>
+int64_t iter_next_array_generic(Iter* it, const ArrayData* ad,
+                                TypedValue* valOut, TypedValue* keyOut) {
+  auto& iter = *unwrap(it);
+  auto const pos = ad->iter_advance(iter.getPos());
+  if (pos == iter.getEnd()) {
+    iter.kill();
+    return 0;
+  }
 
-int64_t iterNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "iterNextArray: I %p\n", it);
-  return iter_array_next_cold(it, ad, valOut, nullptr);
-}
-
-int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
-  TRACE(2, "iterNextKArray: I %p\n", it);
-  return iter_array_next_cold(it, ad, valOut, keyOut);
-}
-
-int64_t iterNextObject(Iter*, TypedValue*, ArrayData*) {
-  always_assert(false);
-}
-int64_t iterNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
-  always_assert(false);
+  iter.setPos(pos);
+  tvSet(ad->nvGetVal(pos), *valOut);
+  if constexpr (HasKey) tvSet(ad->nvGetKey(pos), *keyOut);
+  return 1;
 }
 
 /*
  * This macro takes a name (e.g. VanillaVec) and a helper that's templated
- * on <bool HasKey> (e.g. iter_next_packed_impl) and produces the two helpers
+ * on <bool HasKey> (e.g. iter_next_vanilla_vec) and produces the two helpers
  * that we'll call from the iter_next dispatch methods below.
  */
-#define VTABLE_METHODS(name, fn)                                          \
-  int64_t iterNext##name(Iter* it, TypedValue* valOut, ArrayData* ad) { \
+#define VTABLE_METHODS(name, fn)                                         \
+  int64_t iterNext##name(Iter* it, ArrayData* ad, TypedValue* valOut) {  \
     TRACE(2, "iterNext" #name ": I %p\n", it);                           \
-    return fn<false>(it, valOut, nullptr, ad);                           \
+    return fn<false>(it, ad, valOut, nullptr);                           \
   }                                                                      \
   int64_t iterNextK##name(                                               \
-      Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) { \
+      Iter* it, ArrayData* ad, TypedValue* valOut, TypedValue* keyOut) { \
     TRACE(2, "iterNextK" #name ": I %p\n", it);                          \
-    return fn<true>(it, valOut, keyOut, ad);                             \
+    return fn<true>(it, ad, valOut, keyOut);                             \
   }                                                                      \
 
-VTABLE_METHODS(VanillaVec,         iter_next_packed_impl);
-VTABLE_METHODS(VanillaVecPointer,  iter_next_unaligned_pointer);
-VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
-VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
+VTABLE_METHODS(VanillaVec,         iter_next_vanilla_vec);
+VTABLE_METHODS(VanillaVecPointer,  iter_next_vanilla_vec_pointer);
+VTABLE_METHODS(VanillaDict,        iter_next_vanilla_dict);
+VTABLE_METHODS(VanillaDictPointer, iter_next_vanilla_dict_pointer);
 VTABLE_METHODS(StructDict,         iter_next_struct_dict);
+VTABLE_METHODS(Array,              iter_next_array_generic);
 
 #undef VTABLE_METHODS
 
-using IterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
-using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
+using IterNextHelper  = int64_t (*)(Iter*, ArrayData*, TypedValue*);
+using IterNextKHelper = int64_t (*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
 // The order of these function pointers must match the order that their
 // corresponding IterNextIndex enum members were declared in.
 
 const IterNextHelper g_iterNextHelpers[] = {
   &iterNextVanillaVec,
-  &iterNextArrayMixed,
+  &iterNextVanillaDict,
   &iterNextArray,
-  &iterNextObject,
-  &iterNextArrayMixedPointer,
+  &iterNextVanillaDictPointer,
   &iterNextVanillaVecPointer,
   &iterNextStructDict,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKVanillaVec,
-  &iterNextKArrayMixed,
+  &iterNextKVanillaDict,
   &iterNextKArray,
-  &iterNextKObject,
-  &iterNextKArrayMixedPointer,
+  &iterNextKVanillaDictPointer,
   &iterNextKVanillaVecPointer,
   &iterNextKStructDict,
 };
 
-int64_t iter_array_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "iter_array_next_ind: I %p\n", iter);
+}
+
+int64_t iter_next_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
+  TRACE(2, "iter_next_array: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   auto const index = unwrap(iter)->getHelperIndex();
   IterNextHelper helper = g_iterNextHelpers[static_cast<uint32_t>(index)];
-  return helper(iter, valOut, ad);
+  return helper(iter, ad, valOut);
 }
 
-int64_t iter_array_next_key_ind(Iter* iter,
-                                TypedValue* valOut,
-                                TypedValue* keyOut,
-                                ArrayData* ad) {
+int64_t iter_next_array_key(Iter* iter,
+                            ArrayData* ad,
+                            TypedValue* valOut,
+                            TypedValue* keyOut) {
   TRACE(2, "iter_array_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
   auto const index = unwrap(iter)->getHelperIndex();
   IterNextKHelper helper = g_iterNextKHelpers[static_cast<uint32_t>(index)];
-  return helper(iter, valOut, keyOut, ad);
+  return helper(iter, ad, valOut, keyOut);
 }
 
-int64_t iter_object_next_ind(TypedValue* valOut, ObjectData* obj) {
-  TRACE(2, "iter_object_next_ind: obj %p\n", obj);
+
+namespace {
+
+uint64_t iter_next_object_impl(ObjectData* obj,
+                               TypedValue* valOut,
+                               TypedValue* keyOut) {
+  obj->o_invoke_few_args(s_next, RuntimeCoeffects::fixme(), 0);
+
+  auto const end =
+    !obj->o_invoke_few_args(s_valid, RuntimeCoeffects::fixme(), 0).toBoolean();
+  if (end) return 0LL;
+
+  tvMove(
+    obj->o_invoke_few_args(s_current, RuntimeCoeffects::fixme(), 0).detach(),
+    *valOut
+  );
+
+  if (keyOut) {
+    tvMove(
+      obj->o_invoke_few_args(s_key, RuntimeCoeffects::fixme(), 0).detach(),
+      *keyOut
+    );
+  }
+
+  return 1LL;
+}
+
+}
+
+int64_t iter_next_object(ObjectData* obj, TypedValue* valOut) {
+  TRACE(2, "iter_next_object: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
-  return iter_object_next_impl(obj, valOut, nullptr);
+  return iter_next_object_impl(obj, valOut, nullptr);
 }
 
-int64_t iter_object_next_key_ind(TypedValue* valOut,
-                                  TypedValue* keyOut,
-                                  ObjectData* obj) {
-  TRACE(2, "iter_object_next_key_ind: obj %p\n", obj);
+int64_t iter_next_object_key(ObjectData* obj,
+                             TypedValue* valOut,
+                             TypedValue* keyOut) {
+  TRACE(2, "iter_next_object_key: obj %p\n", obj);
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
-  return iter_object_next_impl(obj, valOut, keyOut);
+  return iter_next_object_impl(obj, valOut, keyOut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

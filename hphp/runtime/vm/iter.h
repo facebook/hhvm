@@ -36,18 +36,17 @@ struct Iter;
 
 enum class IterNextIndex : uint8_t {
   VanillaVec = 0,
-  ArrayMixed,
+  VanillaDict,
   Array,
-  Object,
 
   // JIT-only "pointer iteration", designed for good specialized code-gen.
   // In pointer iteration, the iterator has a pointer directly into the base.
   //
   // We only use this mode if all the following conditions are met:
   //  - The array is guaranteed to be unchanged during iteration
-  //  - The array is a VanillaDict (a dict or a darray) or VanillaVec storing unaligned tvs
+  //  - The array is a VanillaDict or VanillaVec storing unaligned tvs
   //  - (For dicts) The array is free of tombstones
-  ArrayMixedPointer,
+  VanillaDictPointer,
   VanillaVecPointer,
 
   // Helpers specific to bespoke array-likes.
@@ -124,24 +123,6 @@ struct alignas(16) IterImpl {
   // Pass a non-NULL ad to checkInvariants iff this iterator is local.
   // These invariants hold as long as the iterator hasn't yet reached the end.
   bool checkInvariants(const ArrayData* ad) const;
-
-  bool nextLocal(const ArrayData* ad) {
-    assertx(checkInvariants(ad));
-    m_pos = ad->iter_advance(m_pos);
-    return m_pos == m_end;
-  }
-
-  // TypedValue versions of first. Used by the JIT iterator helpers.
-  // These methods do NOT inc-ref the key before returning it.
-  TypedValue nvFirstLocal(const ArrayData* ad) const {
-    return ad->nvGetKey(m_pos);
-  }
-
-  // TypedValue versions of second. Used by the JIT iterator helpers.
-  // These methods do NOT inc-ref the value before returning it.
-  TypedValue nvSecondLocal(const ArrayData* ad) const {
-    return ad->nvGetVal(m_pos);
-  }
 
   ssize_t getPos() const {
     return m_pos;
@@ -331,10 +312,11 @@ int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-NEVER_INLINE int64_t iter_array_next_ind(Iter*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t iter_array_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
-NEVER_INLINE int64_t iter_object_next_ind(TypedValue*, ObjectData*);
-NEVER_INLINE int64_t iter_object_next_key_ind(TypedValue*, TypedValue*, ObjectData*);
+NEVER_INLINE int64_t iter_next_array(Iter*, ArrayData*, TypedValue*);
+NEVER_INLINE int64_t iter_next_array_key(Iter*, ArrayData*, TypedValue*, TypedValue*);
+
+NEVER_INLINE int64_t iter_next_object(ObjectData*, TypedValue*);
+NEVER_INLINE int64_t iter_next_object_key(ObjectData*, TypedValue*, TypedValue*);
 
 //////////////////////////////////////////////////////////////////////
 

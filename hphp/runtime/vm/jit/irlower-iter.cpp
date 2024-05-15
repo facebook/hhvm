@@ -117,9 +117,9 @@ void implIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
     auto const fp = srcLoc(env, inst, 1).reg();
     auto ret = argGroup(env, inst);
     if (isArr) ret.addr(fp, iterOffset(inst->marker(), extra->iterId));
+    ret.ssa(0);
     ret.addr(fp, localOffset(extra->valId));
     if (isKey) ret.addr(fp, localOffset(extra->keyId));
-    ret.ssa(0);
     return ret;
   }();
 
@@ -160,8 +160,8 @@ int32_t iteratorType(const IterTypeData& data) {
       }
       case KindOfDict: {
         return data.baseConst
-          ? IterNextIndex::ArrayMixedPointer
-          : IterNextIndex::ArrayMixed;
+          ? IterNextIndex::VanillaDictPointer
+          : IterNextIndex::VanillaDict;
       }
       default:
         always_assert(false);
@@ -271,19 +271,19 @@ void cgIterInitObjK(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgIterNextArr(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_array_next_ind));
+  implIterNext(env, inst, CallSpec::direct(iter_next_array));
 }
 
 void cgIterNextArrK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_array_next_key_ind));
+  implIterNext(env, inst, CallSpec::direct(iter_next_array_key));
 }
 
 void cgIterNextObj(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_object_next_ind));
+  implIterNext(env, inst, CallSpec::direct(iter_next_object));
 }
 
 void cgIterNextObjK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_object_next_key_ind));
+  implIterNext(env, inst, CallSpec::direct(iter_next_object_key));
 }
 
 IMPL_OPCODE_CALL(IterExtractBase)

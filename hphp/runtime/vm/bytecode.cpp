@@ -4440,14 +4440,14 @@ OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita,
     if (isArrayLikeType(type(base))) {
       auto const arr = val(base).parr;
       return key
-        ? iter_array_next_key_ind(it, value, key, arr)
-        : iter_array_next_ind(it, value, arr);
+        ? iter_next_array_key(it, arr, value, key)
+        : iter_next_array(it, arr, value);
     }
     assertx(isObjectType(type(base)));
     auto const obj = val(base).pobj;
     return key
-      ? iter_object_next_key_ind(value, key, obj)
-      : iter_object_next_ind(value, obj);
+      ? iter_next_object_key(obj, value, key)
+      : iter_next_object(obj, value);
   }();
 
   if (more) {

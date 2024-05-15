@@ -103,22 +103,13 @@ fn main() {
 }
 
 fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: TempDir) {
-    use oxidized::parser_options::ParserOptions;
+    use oxidized::decl_fold_options::DeclFoldOptions;
     let names = collect_file_or_class_names(opts, &ctx);
 
     let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
         file_provider::DiskProvider::new(Arc::clone(&ctx), Some(hhi_root)),
     );
-    let parser_opts = ParserOptions::default();
-    let parser = DeclParser::new(
-        file_provider,
-        DeclParserOptions::from_parser_options(&parser_opts),
-        parser_opts.deregister_php_stdlib,
-    );
-    let tco = oxidized::global_options::GlobalOptions {
-        po: parser_opts,
-        ..Default::default()
-    };
+    let parser = DeclParser::new(file_provider, DeclParserOptions::default());
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.no_serialize {
         StoreOpts::Unserialized
     } else {
@@ -148,7 +139,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
         },
         opts.naming_table.as_ref(),
         shallow_decl_store,
-        Arc::new(tco),
+        Arc::new(DeclFoldOptions::default()),
         parser,
     );
     if opts.fold {

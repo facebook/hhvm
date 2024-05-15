@@ -78,6 +78,7 @@ pub use gen::classish_positions_types;
 pub use gen::custom_error;
 pub use gen::custom_error_config;
 pub use gen::decl_defs;
+pub use gen::decl_fold_options;
 pub use gen::decl_parser_options;
 pub use gen::decl_reference;
 pub use gen::error_codes;

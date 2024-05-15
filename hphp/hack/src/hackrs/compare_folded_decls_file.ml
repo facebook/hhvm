@@ -360,7 +360,8 @@ let () =
         match
           Decl_folded_class_rupro.fold_classes_in_files
             ~root:(Path.to_string tmpdir)
-            tcopt
+            (DeclFoldOptions.from_global_options tcopt)
+            (DeclParserOptions.from_parser_options popt)
             files
         with
         | Ok rupro_decls -> rupro_decls

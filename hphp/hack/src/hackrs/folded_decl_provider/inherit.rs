@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use hash::IndexMap;
 use indexmap::map::Entry;
-use oxidized::global_options::GlobalOptions;
+use oxidized::decl_fold_options::DeclFoldOptions;
 use pos::ClassConstName;
 use pos::MethodName;
 use pos::PropName;
@@ -230,11 +230,11 @@ impl<R: Reason> Inherited<R> {
 
     fn add_type_consts(
         &mut self,
-        opts: &GlobalOptions,
+        opts: &DeclFoldOptions,
         child: &ShallowClass<R>,
         other_type_consts: IndexMap<TypeConstName, TypeConst<R>>,
     ) {
-        let fix_synthesized = opts.tco_enable_strict_const_semantics > 3;
+        let fix_synthesized = opts.enable_strict_const_semantics > 3;
 
         for (name, mut new_const) in other_type_consts {
             match self.type_consts.entry(name) {
@@ -325,7 +325,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_inherited(&mut self, opts: &GlobalOptions, child: &ShallowClass<R>, other: Self) {
+    fn add_inherited(&mut self, opts: &DeclFoldOptions, child: &ShallowClass<R>, other: Self) {
         let Self {
             substs,
             props,
@@ -361,7 +361,7 @@ impl<R: Reason> Inherited<R> {
 }
 
 struct MemberFolder<'a, R: Reason> {
-    opts: &'a GlobalOptions,
+    opts: &'a DeclFoldOptions,
     child: &'a ShallowClass<R>,
     parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
     members: Inherited<R>,
@@ -614,7 +614,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 
 impl<R: Reason> Inherited<R> {
     pub fn make(
-        opts: &GlobalOptions,
+        opts: &DeclFoldOptions,
         child: &ShallowClass<R>,
         parents: &IndexMap<TypeName, Arc<FoldedClass<R>>>,
     ) -> Result<Self> {

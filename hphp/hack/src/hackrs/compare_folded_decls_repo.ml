@@ -294,7 +294,15 @@ let () =
   let rust_decl_map =
     Decl_folded_class_rupro.partition_and_fold_dir
       ~www_root:(Path.to_string www_root)
-      GlobalOptions.{ default with po = popt }
+      DeclFoldOptions.
+        {
+          everything_sdt = popt.ParserOptions.everything_sdt;
+          implicit_inherit_sdt =
+            GlobalOptions.(default.tco_implicit_inherit_sdt);
+          enable_strict_const_semantics =
+            GlobalOptions.(default.tco_enable_strict_const_semantics);
+        }
+      (DeclParserOptions.from_parser_options popt)
       !num_partitions
       !partition_index
   in

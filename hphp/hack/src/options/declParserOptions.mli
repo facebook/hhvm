@@ -17,9 +17,8 @@ type t = {
   keep_user_attributes: bool;
   include_assignment_values: bool;
   stack_size: int;  (** Stack size to for the parallel workers *)
+  deregister_php_stdlib: bool;
 }
 [@@deriving show]
-
-(*val default : t*)
 
 val from_parser_options : ParserOptions.t -> t

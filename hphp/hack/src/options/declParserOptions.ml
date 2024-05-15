@@ -17,6 +17,7 @@ type t = {
   keep_user_attributes: bool;
   include_assignment_values: bool;
   stack_size: int;
+  deregister_php_stdlib: bool;
 }
 [@@deriving show]
 
@@ -33,6 +34,5 @@ let from_parser_options (popt : ParserOptions.t) =
     keep_user_attributes = popt.keep_user_attributes;
     include_assignment_values = false;
     stack_size = popt.stack_size;
+    deregister_php_stdlib = popt.deregister_php_stdlib;
   }
-
-(*let default = from_parser_options ParserOptions.default*)

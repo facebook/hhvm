@@ -24,9 +24,9 @@ use naming_table::NamingTable;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use oxidized::decl_fold_options::DeclFoldOptions;
 use oxidized::file_info::NameType;
 use oxidized::file_info::Names;
-use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::RelativePath;
@@ -43,7 +43,8 @@ use ty::reason::BReason as BR;
 
 pub struct HhServerProviderBackend {
     path_ctx: Arc<RelativePathCtx>,
-    opts: GlobalOptions,
+    pub fold_opts: DeclFoldOptions,
+    pub parse_opts: DeclParserOptions,
     decl_parser: DeclParser<BR>,
     file_store: Arc<ChangesStore<RelativePath, bstr::BString>>,
     file_provider: Arc<FileProviderWithContext>,
@@ -64,7 +65,8 @@ pub struct HhServerProviderBackend {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub path_ctx: RelativePathCtx,
-    pub opts: GlobalOptions,
+    pub fold_opts: DeclFoldOptions,
+    pub parse_opts: DeclParserOptions,
     pub db_path: Option<PathBuf>,
 }
 
@@ -72,7 +74,8 @@ impl HhServerProviderBackend {
     pub fn new(config: Config) -> Result<Self> {
         let Config {
             path_ctx,
-            opts,
+            fold_opts,
+            parse_opts,
             db_path,
         } = config;
         let path_ctx = Arc::new(path_ctx);
@@ -89,11 +92,7 @@ impl HhServerProviderBackend {
                 disk: DiskProvider::new(Arc::clone(&path_ctx), None),
             },
         });
-        let decl_parser = DeclParser::new(
-            Arc::clone(&file_provider) as _,
-            DeclParserOptions::from_parser_options(&opts.po),
-            opts.po.deregister_php_stdlib,
-        );
+        let decl_parser = DeclParser::new(Arc::clone(&file_provider) as _, parse_opts.clone());
         let naming_table = Arc::new(NamingTableWithContext {
             ctx_is_empty: Arc::clone(&ctx_is_empty),
             fallback: NamingTable::new(db_path)?,
@@ -117,14 +116,15 @@ impl HhServerProviderBackend {
             Arc::new(ChangesStore::new(Arc::clone(&folded_classes_shm) as _));
 
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-            Arc::new(opts.clone()),
+            Arc::new(fold_opts.clone()),
             Arc::clone(&folded_classes_store) as _,
             Arc::clone(&lazy_shallow_decl_provider) as _,
         ));
 
         Ok(Self {
             path_ctx,
-            opts,
+            fold_opts,
+            parse_opts,
             file_store,
             file_provider,
             decl_parser,
@@ -143,7 +143,8 @@ impl HhServerProviderBackend {
         Config {
             path_ctx: (*self.path_ctx).clone(),
             db_path: self.naming_table.fallback.db_path(),
-            opts: self.opts.clone(),
+            fold_opts: self.fold_opts.clone(),
+            parse_opts: self.parse_opts.clone(),
         }
     }
 
@@ -201,7 +202,8 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         root: PathBuf,
         hhi_root: PathBuf,
         tmp: PathBuf,
-        opts: GlobalOptions,
+        fold_opts: DeclFoldOptions,
+        parse_opts: DeclParserOptions,
     ) -> rust_provider_backend_ffi::Backend {
         let path_ctx = RelativePathCtx {
             root,
@@ -211,7 +213,8 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         };
         let backend = Arc::new(HhServerProviderBackend::new(Config {
             path_ctx,
-            opts,
+            fold_opts,
+            parse_opts,
             db_path: None,
         }).unwrap());
         rust_provider_backend_ffi::BackendWrapper::new(backend)

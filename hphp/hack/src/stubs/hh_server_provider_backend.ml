@@ -6,4 +6,4 @@
  *
  *)
 
-let make _ = failwith "unimplemented"
+let make _ _ = failwith "unimplemented"

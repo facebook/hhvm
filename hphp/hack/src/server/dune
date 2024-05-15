@@ -133,6 +133,8 @@
     ci_util
     cgroupprofiler
     custom_error_config
+    decl_fold_options
+    decl_parser_options
     direct_decl_service
     folly_stubs
     hh_server_provider_backend_stubs

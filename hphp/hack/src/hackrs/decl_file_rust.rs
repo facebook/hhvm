@@ -15,6 +15,7 @@ use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hackrs_test_utils::store::populate_shallow_decl_store;
 use jwalk::WalkDir;
+use oxidized::decl_fold_options::DeclFoldOptions;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
@@ -98,16 +99,8 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-    let parser_opts = oxidized::parser_options::ParserOptions::default();
-    let decl_parser = DeclParser::<R>::new(
-        Arc::clone(&file_provider),
-        DeclParserOptions::from_parser_options(&parser_opts),
-        parser_opts.deregister_php_stdlib,
-    );
-    let tco = oxidized::global_options::GlobalOptions {
-        po: parser_opts,
-        ..Default::default()
-    };
+    let decl_parser =
+        DeclParser::<R>::new(Arc::clone(&file_provider), DeclParserOptions::default());
     all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
@@ -117,7 +110,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         StoreOpts::Unserialized,
         opts.naming_table.as_ref(),
         shallow_decl_store,
-        Arc::new(tco),
+        Arc::new(DeclFoldOptions::default()),
         decl_parser.clone(),
     ));
 

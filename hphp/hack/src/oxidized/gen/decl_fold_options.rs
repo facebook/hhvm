@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ffe25b59ff9c1cb92c13187cee02def>>
+// @generated SignedSource<<52902356c4f86d58ecbb508598b19f99>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,16 +35,8 @@ use crate::*;
 )]
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
-pub struct DeclParserOptions {
-    pub auto_namespace_map: Vec<(String, String)>,
-    pub disable_xhp_element_mangling: bool,
-    pub interpret_soft_types_as_like_types: bool,
-    pub enable_xhp_class_modifier: bool,
+pub struct DeclFoldOptions {
+    pub implicit_inherit_sdt: bool,
     pub everything_sdt: bool,
-    pub php5_compat_mode: bool,
-    pub hhvm_compat_mode: bool,
-    pub keep_user_attributes: bool,
-    pub include_assignment_values: bool,
-    pub stack_size: isize,
-    pub deregister_php_stdlib: bool,
+    pub enable_strict_const_semantics: isize,
 }

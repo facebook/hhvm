@@ -27,6 +27,7 @@ impl DeclParserOptions {
             keep_user_attributes: false,
             include_assignment_values: false,
             stack_size: opts.stack_size,
+            deregister_php_stdlib: opts.deregister_php_stdlib,
         }
     }
 }

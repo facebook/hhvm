@@ -84,6 +84,15 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name decl_fold_options)
+ (wrapped false)
+ (modules declFoldOptions)
+ (libraries
+   global_options)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name decl_parser_options)
  (wrapped false)
  (modules declParserOptions)

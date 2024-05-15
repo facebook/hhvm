@@ -94,7 +94,11 @@ let init
       { default with po = popt; GlobalOptions.tco_higher_kinded_types = true }
   in
   (if rust_provider_backend then
-    let backend = Hh_server_provider_backend.make tcopt in
+    let backend =
+      Hh_server_provider_backend.make
+        (DeclFoldOptions.from_global_options tcopt)
+        (DeclParserOptions.from_parser_options tcopt.GlobalOptions.po)
+    in
     Provider_backend.set_rust_backend backend);
   let ctx =
     Provider_context.empty_for_tool

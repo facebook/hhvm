@@ -8,7 +8,7 @@ use std::sync::Arc;
 use eq_modulo_pos::EqModuloPos;
 use hash::IndexMap;
 use hash::IndexSet;
-use oxidized::global_options::GlobalOptions;
+use oxidized::decl_fold_options::DeclFoldOptions;
 use pos::ClassConstName;
 use pos::MethodName;
 use pos::ModuleName;
@@ -56,7 +56,7 @@ mod decl_enum;
 #[derive(Debug)]
 pub struct DeclFolder<'a, R: Reason> {
     /// Options affecting typechecking behaviors.
-    opts: &'a GlobalOptions,
+    opts: &'a DeclFoldOptions,
     /// The class whose folded decl we are producing.
     child: &'a ShallowClass<R>,
     /// The folded decls of all (recursive) ancestors of `child`.
@@ -74,7 +74,7 @@ enum Pass {
 
 impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn decl_class(
-        opts: &'a GlobalOptions,
+        opts: &'a DeclFoldOptions,
         child: &'a ShallowClass<R>,
         parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
         errors: Vec<DeclError<R::Pos>>,
@@ -193,7 +193,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn maybe_add_supportdyn_bound(&self, p: &R::Pos, kind: &mut Typeconst<R>) {
-        if self.opts.po.everything_sdt {
+        if self.opts.everything_sdt {
             if let Typeconst::TCAbstract(AbstractTypeconst {
                 as_constraint: as_constraint @ None,
                 ..
@@ -914,7 +914,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let mut tparams = self.child.tparams.clone();
         decl_enforceability::maybe_add_supportdyn_constraints(
-            &self.opts.po,
+            self.opts,
             Some(self.child),
             self.child.name.pos(),
             &mut tparams,
@@ -947,7 +947,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             // Support both attribute and keyword for now, until typechecker changes are made
             is_internal: self.child.is_internal,
             is_xhp: self.child.is_xhp,
-            support_dynamic_type: self.opts.tco_implicit_inherit_sdt && support_dynamic_type
+            support_dynamic_type: self.opts.implicit_inherit_sdt && support_dynamic_type
                 || self.child.support_dynamic_type
                 || (self.child.user_attributes.iter())
                     .any(|ua| ua.name.id() == *sn::user_attributes::uaDynamicallyReferenced),

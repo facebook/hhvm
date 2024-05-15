@@ -18,7 +18,6 @@ use ty::reason::Reason;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
-    deregister_php_stdlib: bool,
     decl_parser_opts: DeclParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
@@ -27,15 +26,10 @@ pub struct DeclParser<R: Reason> {
 }
 
 impl<R: Reason> DeclParser<R> {
-    pub fn new(
-        file_provider: Arc<dyn FileProvider>,
-        decl_parser_opts: DeclParserOptions,
-        deregister_php_stdlib: bool,
-    ) -> Self {
+    pub fn new(file_provider: Arc<dyn FileProvider>, decl_parser_opts: DeclParserOptions) -> Self {
         Self {
             file_provider,
             decl_parser_opts,
-            deregister_php_stdlib,
             _phantom: PhantomData,
         }
     }
@@ -73,8 +67,8 @@ impl<R: Reason> DeclParser<R> {
         arena: &'a bumpalo::Bump,
     ) -> ParsedFileWithHashes<'a> {
         let prefix = path.prefix();
-        let deregister_php_stdlib_if_hhi = self.deregister_php_stdlib;
         let opts = &self.decl_parser_opts;
+        let deregister_php_stdlib_if_hhi = opts.deregister_php_stdlib;
         let parsed_file =
             direct_decl_parser::parse_decls_for_typechecking(opts, path.into(), text, arena);
         ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, arena)

@@ -2515,7 +2515,11 @@ let decl_and_run_mode
   let popt = tcopt.GlobalOptions.po in
   let ctx =
     if rust_provider_backend then
-      let backend = Hh_server_provider_backend.make tcopt in
+      let backend =
+        Hh_server_provider_backend.make
+          (DeclFoldOptions.from_global_options tcopt)
+          (DeclParserOptions.from_parser_options popt)
+      in
       let () = Provider_backend.set_rust_backend backend in
       Provider_context.empty_for_tool
         ~popt

@@ -2,7 +2,7 @@
 
 :::note
 
-This is the contributor guide to Thrift Patch, meant for someone implementing Thrift Patch features one of the Thrift Languages. If you're looking for a user guide, see [this page](../features/patch/patch.md).
+This is the contributor guide to Thrift Patch, meant for someone implementing Thrift Patch features one of the Thrift Languages. If you're looking for a user guide, see [this page](../fb/features/patch.md).
 
 :::
 

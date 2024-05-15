@@ -141,7 +141,7 @@ module.exports = {
               label: 'Patch',
               link: {
                 type: 'doc',
-                id: 'features/patch/patch',
+                id: 'fb/features/patch',
               },
               items: [...fbInternalOnly(['fb/features/patch-compat'])],
             },

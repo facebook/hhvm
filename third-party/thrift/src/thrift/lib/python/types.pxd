@@ -20,10 +20,13 @@ from libcpp.memory cimport unique_ptr
 
 from thrift.python.protocol cimport Protocol
 
+cdef extern from "<thrift/lib/cpp/protocol/TType.h>" namespace "::apache::thrift::protocol":
+    cdef enum cTType "::apache::thrift::protocol::TType":
+        pass
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
     cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
-        pass
+        cTType type
     cdef struct cStructInfo "::apache::thrift::detail::StructInfo":
         pass
     cpdef enum class FieldQualifier "::apache::thrift::detail::FieldQualifier":

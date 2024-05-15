@@ -86,6 +86,24 @@ cdef class TypeInfoBase:
     cdef const cTypeInfo* get_cTypeInfo(self):
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
+    def same_as(TypeInfoBase self, other):
+        """
+        `TypeInfo` classes are a sort of bridge between Thrift IDL types and Python
+        types. For example, few examples of mapping between Thrift-IDL-type to
+        Python-type are below,
+
+        | Thrift IDL Type  | Python Type |
+        |------------------|-------------|
+        | i32              | int         |
+        | i64              | int         |
+        | float            | float       |
+        | double           | float       |
+
+        `same_as()` returns `True` if the `TypeInfo` class maps the same IDL Thrift
+        type to the same Python type.
+        """
+        raise NotImplementedError("Not implemented on base TypeInfoBase class")
+
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, pytypes):
@@ -110,6 +128,15 @@ cdef class TypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj
 
+    def same_as(TypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, TypeInfo):
+            return False
+
+        return (self.cpp_obj.type == (<TypeInfo>other).cpp_obj.type and
+                self.pytypes == (<TypeInfo>other).pytypes)
 
 cdef class IntegerTypeInfo(TypeInfoBase):
     @staticmethod
@@ -139,6 +166,16 @@ cdef class IntegerTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj
 
+    def same_as(IntegerTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, IntegerTypeInfo):
+            return False
+
+        cdef IntegerTypeInfo other_typeinfo = other
+        return (self.min_value == other_typeinfo.min_value and
+            self.max_value == other_typeinfo.max_value)
 
 cdef class StringTypeInfo(TypeInfoBase):
     @staticmethod
@@ -184,6 +221,11 @@ cdef class StringTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj
 
+    def same_as(StringTypeInfo self, other):
+        if other is self:
+            return True
+
+        return isinstance(other, StringTypeInfo)
 
 cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
@@ -204,6 +246,11 @@ cdef class IOBufTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj
 
+    def same_as(IOBufTypeInfo self, other):
+        if other is self:
+            return True
+
+        return isinstance(other, IOBufTypeInfo)
 
 typeinfo_bool = TypeInfo.create(boolTypeInfo, (pbool,))
 typeinfo_byte = IntegerTypeInfo.create(byteTypeInfo, -128, 127)
@@ -467,6 +514,14 @@ cdef class ListTypeInfo(TypeInfoBase):
 
         return tpl
 
+    def same_as(ListTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, ListTypeInfo):
+            return False
+
+        return self.val_info == (<ListTypeInfo>other).val_info
 
 cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
@@ -506,6 +561,14 @@ cdef class SetTypeInfo(TypeInfoBase):
 
         return frozen_set
 
+    def same_as(SetTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, SetTypeInfo):
+            return False
+
+        return self.val_info == (<SetTypeInfo>other).val_info
 
 cdef class MapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
@@ -560,6 +623,14 @@ cdef class MapTypeInfo(TypeInfoBase):
             key_type_info.to_python_value(k): val_type_info.to_python_value(v) for k, v in values
         }
 
+    def same_as(MapTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, MapTypeInfo):
+            return False
+
+        return self.val_info == (<MapTypeInfo>other).val_info
 
 cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
@@ -618,6 +689,14 @@ cdef class StructTypeInfo(TypeInfoBase):
             raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
         return value
 
+    def same_as(StructTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, StructTypeInfo):
+            return False
+
+        return self._class == (<StructTypeInfo>other)._class
 
 cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
@@ -669,6 +748,14 @@ cdef class EnumTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return &i32TypeInfo
 
+    def same_as(EnumTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, EnumTypeInfo):
+            return False
+
+        return self._class == (<EnumTypeInfo>other)._class
 
 cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
@@ -701,6 +788,18 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return (<TypeInfoBase>self._orig_type_info).get_cTypeInfo()
 
+    def same_as(AdaptedTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, AdaptedTypeInfo):
+            return False
+
+        cdef AdaptedTypeInfo other_typeinfo = other
+        # DO_BEFORE(alperyoney,20240603): Figure out whether `_transitive_annotation`
+        # should be part of the comparison below.
+        return (self._orig_type_info == other_typeinfo._orig_type_info and
+            self._adapter_info == other_typeinfo._adapter_info)
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
     """

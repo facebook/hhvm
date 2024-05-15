@@ -67,6 +67,15 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef to_python_value(self, object struct_tuple):
         return self._mutable_struct_class._fbthrift_create(struct_tuple)
 
+    def same_as(MutableStructTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, MutableStructTypeInfo):
+            return False
+
+        return self._mutable_struct_class == (<MutableStructTypeInfo>other)._mutable_struct_class
+
 
 cdef class MutableListTypeInfo(TypeInfoBase):
     """
@@ -117,3 +126,12 @@ cdef class MutableListTypeInfo(TypeInfoBase):
             the type info (`self.val_info`) attached.
         """
         return MutableList(self.val_info, value)
+
+    def same_as(MutableListTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, MutableListTypeInfo):
+            return False
+
+        return self.val_info == (<MutableListTypeInfo>other).val_info

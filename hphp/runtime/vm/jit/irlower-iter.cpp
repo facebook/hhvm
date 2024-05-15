@@ -82,13 +82,10 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
       args.addr(fp, localOffset(extra->keyId));
     }
 
-    auto const op = [&]{
-      auto const flag = has_flag(extra->flags, IterArgs::Flags::BaseConst);
-      return flag ? IterTypeOp::LocalBaseConst : IterTypeOp::LocalBaseMutable;
-    }();
+    auto const baseConst = has_flag(extra->flags, IterArgs::Flags::BaseConst);
     auto const target = isInitK
-      ? CallSpec::direct(new_iter_array_key_helper(op))
-      : CallSpec::direct(new_iter_array_helper(op));
+      ? CallSpec::direct(new_iter_array_key_helper(baseConst))
+      : CallSpec::direct(new_iter_array_helper(baseConst));
     cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
     return;
   }

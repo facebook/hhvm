@@ -34,8 +34,6 @@ namespace HPHP {
 
 struct Iter;
 
-enum class IterTypeOp { LocalBaseConst, LocalBaseMutable };
-
 enum class IterNextIndex : uint8_t {
   VanillaVec = 0,
   ArrayMixed,
@@ -206,19 +204,13 @@ struct alignas(16) IterImpl {
   }
 
 private:
-  template<IterTypeOp Type>
+  template<bool BaseConst>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<IterTypeOp Type>
+  template<bool BaseConst>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
   friend int64_t new_iter_object(Iter*, ObjectData* obj,
                                  TypedValue* val, TypedValue* key);
-  template<bool HasKey, bool Local>
-  friend int64_t iter_next_packed_pointer(
-    Iter*, TypedValue*, TypedValue*, ArrayData*);
-  template<bool HasKey, bool Local>
-  friend int64_t iter_next_mixed_pointer(
-    Iter*, TypedValue*, TypedValue*, ArrayData*);
 
   // Set the type fields of an array. These fields are packed so that we
   // can set them with a single mov-immediate to the union.
@@ -317,15 +309,16 @@ private:
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
 //
-// For the array helpers, first provide an IterTypeOp to get an IterInit helper
-// to call, then call it. This indirection lets us burn the appropriate helper
-// into the JIT (where we know IterTypeOp statically). For objects, we don't
-// need it because they have reference semantics and do not change identity.
+// For the array helpers, first provide a baseConst flag to get an IterInit
+// helper to call, then call it. This indirection lets us burn the appropriate
+// helper into the JIT (where we know the baseConst flag statically). For
+// objects, we don't need it because they have reference semantics and do not
+// change identity.
 using IterInitArr    = int64_t(*)(Iter*, ArrayData*, TypedValue*);
 using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
-IterInitArr    new_iter_array_helper(IterTypeOp type);
-IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
+IterInitArr    new_iter_array_helper(bool baseConst);
+IterInitArrKey new_iter_array_key_helper(bool baseConst);
 
 int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
 

@@ -4409,22 +4409,17 @@ OPTBLD_INLINE void iopIterBase() {
 
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
                                TypedValue* base, PC targetpc) {
-  auto const op = has_flag(ita.flags, IterArgs::Flags::BaseConst)
-    ? IterTypeOp::LocalBaseConst
-    : IterTypeOp::LocalBaseMutable;
+  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  auto const handleArrayLike = [&](ArrayData* arr, IterTypeOp op) {
-    auto const res = ita.hasKey()
-      ? new_iter_array_key_helper(op)(it, arr, value, key)
-      : new_iter_array_helper(op)(it, arr, value);
-    if (res == 0) pc = targetpc;
-  };
-
   if (isArrayLikeType(type(base))) {
-    handleArrayLike(val(base).parr, op);
+    auto const arr = val(base).parr;
+    auto const res = ita.hasKey()
+      ? new_iter_array_key_helper(baseConst)(it, arr, value, key)
+      : new_iter_array_helper(baseConst)(it, arr, value);
+    if (res == 0) pc = targetpc;
     return;
   }
 

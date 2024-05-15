@@ -218,10 +218,9 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 
 }
 
-template <IterTypeOp Type>
+template <bool BaseConst>
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
-  auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
 
   auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
@@ -289,23 +288,16 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   return 1;
 }
 
-IterInitArr new_iter_array_helper(IterTypeOp type) {
-  switch (type) {
-    case IterTypeOp::LocalBaseConst:
-      return new_iter_array<IterTypeOp::LocalBaseConst>;
-    case IterTypeOp::LocalBaseMutable:
-      return new_iter_array<IterTypeOp::LocalBaseMutable>;
-  }
-  always_assert(false);
+IterInitArr new_iter_array_helper(bool baseConst) {
+  return baseConst ? new_iter_array<true> : new_iter_array<false>;
 }
 
-template<IterTypeOp Type>
+template<bool BaseConst>
 int64_t new_iter_array_key(Iter*       dest,
                            ArrayData*  ad,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
-  auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
 
   auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
@@ -370,14 +362,8 @@ int64_t new_iter_array_key(Iter*       dest,
   return 1;
 }
 
-IterInitArrKey new_iter_array_key_helper(IterTypeOp type) {
-  switch (type) {
-    case IterTypeOp::LocalBaseConst:
-      return new_iter_array_key<IterTypeOp::LocalBaseConst>;
-    case IterTypeOp::LocalBaseMutable:
-      return new_iter_array_key<IterTypeOp::LocalBaseMutable>;
-  }
-  always_assert(false);
+IterInitArrKey new_iter_array_key_helper(bool baseConst) {
+  return baseConst ? new_iter_array_key<true> : new_iter_array_key<false>;
 }
 
 /**

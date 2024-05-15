@@ -286,47 +286,6 @@ func (x *reqServiceFunc) DefaultGetArg3() *Foo {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqServiceFuncBuilder struct {
-    obj *reqServiceFunc
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqServiceFuncBuilder() *reqServiceFuncBuilder {
-    return &reqServiceFuncBuilder{
-        obj: newReqServiceFunc(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqServiceFuncBuilder) Arg1(value StringWithAdapter_7208) *reqServiceFuncBuilder {
-    x.obj.Arg1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqServiceFuncBuilder) Arg2(value string) *reqServiceFuncBuilder {
-    x.obj.Arg2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqServiceFuncBuilder) Arg3(value *Foo) *reqServiceFuncBuilder {
-    x.obj.Arg3 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqServiceFuncBuilder) Emit() *reqServiceFunc {
-    var objCopy reqServiceFunc = *x.obj
-    return &objCopy
-}
 
 func (x *reqServiceFunc) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
@@ -496,33 +455,6 @@ func (x *respServiceFunc) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respServiceFuncBuilder struct {
-    obj *respServiceFunc
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespServiceFuncBuilder() *respServiceFuncBuilder {
-    return &respServiceFuncBuilder{
-        obj: newRespServiceFunc(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respServiceFuncBuilder) Success(value *MyI32_4873) *respServiceFuncBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespServiceFunc().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respServiceFuncBuilder) Emit() *respServiceFunc {
-    var objCopy respServiceFunc = *x.obj
-    return &objCopy
-}
 
 func (x *respServiceFunc) Exception() thrift.WritableException {
     return nil
@@ -812,26 +744,6 @@ func newReqAdapterServiceCount() *reqAdapterServiceCount {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqAdapterServiceCountBuilder struct {
-    obj *reqAdapterServiceCount
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqAdapterServiceCountBuilder() *reqAdapterServiceCountBuilder {
-    return &reqAdapterServiceCountBuilder{
-        obj: newReqAdapterServiceCount(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqAdapterServiceCountBuilder) Emit() *reqAdapterServiceCount {
-    var objCopy reqAdapterServiceCount = *x.obj
-    return &objCopy
-}
 
 func (x *reqAdapterServiceCount) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
@@ -978,33 +890,6 @@ func (x *respAdapterServiceCount) DefaultGetSuccess() *CountingStruct {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respAdapterServiceCountBuilder struct {
-    obj *respAdapterServiceCount
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespAdapterServiceCountBuilder() *respAdapterServiceCountBuilder {
-    return &respAdapterServiceCountBuilder{
-        obj: newRespAdapterServiceCount(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respAdapterServiceCountBuilder) Success(value *CountingStruct) *respAdapterServiceCountBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceCount().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respAdapterServiceCountBuilder) Emit() *respAdapterServiceCount {
-    var objCopy respAdapterServiceCount = *x.obj
-    return &objCopy
-}
 
 func (x *respAdapterServiceCount) Exception() thrift.WritableException {
     return nil
@@ -1164,33 +1049,6 @@ func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqAdapterServiceAdaptedTypesBuilder struct {
-    obj *reqAdapterServiceAdaptedTypes
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqAdapterServiceAdaptedTypesBuilder() *reqAdapterServiceAdaptedTypesBuilder {
-    return &reqAdapterServiceAdaptedTypesBuilder{
-        obj: newReqAdapterServiceAdaptedTypes(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqAdapterServiceAdaptedTypesBuilder) Arg(value *HeapAllocated) *reqAdapterServiceAdaptedTypesBuilder {
-    x.obj.Arg = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqAdapterServiceAdaptedTypesBuilder) Emit() *reqAdapterServiceAdaptedTypes {
-    var objCopy reqAdapterServiceAdaptedTypes = *x.obj
-    return &objCopy
-}
 
 func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
@@ -1346,33 +1204,6 @@ func (x *respAdapterServiceAdaptedTypes) DefaultGetSuccess() *HeapAllocated {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respAdapterServiceAdaptedTypesBuilder struct {
-    obj *respAdapterServiceAdaptedTypes
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespAdapterServiceAdaptedTypesBuilder() *respAdapterServiceAdaptedTypesBuilder {
-    return &respAdapterServiceAdaptedTypesBuilder{
-        obj: newRespAdapterServiceAdaptedTypes(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respAdapterServiceAdaptedTypesBuilder) Success(value *HeapAllocated) *respAdapterServiceAdaptedTypesBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespAdapterServiceAdaptedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respAdapterServiceAdaptedTypesBuilder) Emit() *respAdapterServiceAdaptedTypes {
-    var objCopy respAdapterServiceAdaptedTypes = *x.obj
-    return &objCopy
-}
 
 func (x *respAdapterServiceAdaptedTypes) Exception() thrift.WritableException {
     return nil

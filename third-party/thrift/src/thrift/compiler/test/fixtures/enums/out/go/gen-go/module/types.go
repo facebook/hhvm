@@ -601,54 +601,6 @@ func (x *SomeStruct) toString4() string {  // Tags
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type SomeStructBuilder struct {
-    obj *SomeStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewSomeStructBuilder() *SomeStructBuilder {
-    return &SomeStructBuilder{
-        obj: NewSomeStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SomeStructBuilder) Reasonable(value Metasyntactic) *SomeStructBuilder {
-    x.obj.Reasonable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SomeStructBuilder) Fine(value Metasyntactic) *SomeStructBuilder {
-    x.obj.Fine = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SomeStructBuilder) Questionable(value Metasyntactic) *SomeStructBuilder {
-    x.obj.Questionable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SomeStructBuilder) Tags(value []int32) *SomeStructBuilder {
-    x.obj.Tags = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSomeStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SomeStructBuilder) Emit() *SomeStruct {
-    var objCopy SomeStruct = *x.obj
-    return &objCopy
-}
 
 func (x *SomeStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("SomeStruct"); err != nil {
@@ -970,54 +922,6 @@ func (x *MyStruct) toString6() string {  // Me1T2
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructBuilder struct {
-    obj *MyStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructBuilder() *MyStructBuilder {
-    return &MyStructBuilder{
-        obj: NewMyStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Me2_3(value MyEnum2) *MyStructBuilder {
-    x.obj.Me2_3 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Me3N3(value MyEnum3) *MyStructBuilder {
-    x.obj.Me3N3 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Me1T1(value MyEnum1) *MyStructBuilder {
-    x.obj.Me1T1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Me1T2(value MyEnum1) *MyStructBuilder {
-    x.obj.Me1T2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Emit() *MyStruct {
-    var objCopy MyStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {

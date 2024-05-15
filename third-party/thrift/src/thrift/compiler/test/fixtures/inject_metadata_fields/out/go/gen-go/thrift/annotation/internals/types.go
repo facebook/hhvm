@@ -76,33 +76,6 @@ func (x *InjectMetadataFields) toString1() string {  // Type
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInjectMetadataFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-type InjectMetadataFieldsBuilder struct {
-    obj *InjectMetadataFields
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInjectMetadataFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewInjectMetadataFieldsBuilder() *InjectMetadataFieldsBuilder {
-    return &InjectMetadataFieldsBuilder{
-        obj: NewInjectMetadataFields(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInjectMetadataFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InjectMetadataFieldsBuilder) Type(value string) *InjectMetadataFieldsBuilder {
-    x.obj.Type = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInjectMetadataFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InjectMetadataFieldsBuilder) Emit() *InjectMetadataFields {
-    var objCopy InjectMetadataFields = *x.obj
-    return &objCopy
-}
 
 func (x *InjectMetadataFields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("InjectMetadataFields"); err != nil {

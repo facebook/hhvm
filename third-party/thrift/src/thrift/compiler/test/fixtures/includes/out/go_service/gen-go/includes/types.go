@@ -204,40 +204,6 @@ func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewIncluded().Set<FieldNameFoo>().Set<FieldNameBar>()
-type IncludedBuilder struct {
-    obj *Included
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewIncluded().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewIncludedBuilder() *IncludedBuilder {
-    return &IncludedBuilder{
-        obj: NewIncluded(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewIncluded().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *IncludedBuilder) MyIntField(value int64) *IncludedBuilder {
-    x.obj.MyIntField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewIncluded().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *IncludedBuilder) MyTransitiveField(value *transitive.Foo) *IncludedBuilder {
-    x.obj.MyTransitiveField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewIncluded().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *IncludedBuilder) Emit() *Included {
-    var objCopy Included = *x.obj
-    return &objCopy
-}
 
 func (x *Included) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Included"); err != nil {

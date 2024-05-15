@@ -228,33 +228,6 @@ func (x *MyStructNestedAnnotation) toString1() string {  // Name
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructNestedAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructNestedAnnotationBuilder struct {
-    obj *MyStructNestedAnnotation
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructNestedAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructNestedAnnotationBuilder() *MyStructNestedAnnotationBuilder {
-    return &MyStructNestedAnnotationBuilder{
-        obj: NewMyStructNestedAnnotation(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructNestedAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructNestedAnnotationBuilder) Name(value string) *MyStructNestedAnnotationBuilder {
-    x.obj.Name = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructNestedAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructNestedAnnotationBuilder) Emit() *MyStructNestedAnnotation {
-    var objCopy MyStructNestedAnnotation = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructNestedAnnotation) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructNestedAnnotation"); err != nil {
@@ -346,26 +319,6 @@ func (x *MyUnion) CountSetFieldsMyUnion() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionBuilder struct {
-    obj *MyUnion
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionBuilder() *MyUnionBuilder {
-    return &MyUnionBuilder{
-        obj: NewMyUnion(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Emit() *MyUnion {
-    var objCopy MyUnion = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
@@ -442,26 +395,6 @@ func NewMyException() *MyException {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyException().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyExceptionBuilder struct {
-    obj *MyException
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyException().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyExceptionBuilder() *MyExceptionBuilder {
-    return &MyExceptionBuilder{
-        obj: NewMyException(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyException().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyExceptionBuilder) Emit() *MyException {
-    var objCopy MyException = *x.obj
-    return &objCopy
-}
 
 func (x *MyException) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyException"); err != nil {
@@ -1019,89 +952,6 @@ func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructBuilder struct {
-    obj *MyStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructBuilder() *MyStructBuilder {
-    return &MyStructBuilder{
-        obj: NewMyStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) AbstractName(value string) *MyStructBuilder {
-    x.obj.AbstractName = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
-    x.obj.MajorVer = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) AnnotationWithQuote(value string) *MyStructBuilder {
-    x.obj.AnnotationWithQuote = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Class_(value string) *MyStructBuilder {
-    x.obj.Class_ = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) AnnotationWithTrailingComma(value string) *MyStructBuilder {
-    x.obj.AnnotationWithTrailingComma = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) EmptyAnnotations(value string) *MyStructBuilder {
-    x.obj.EmptyAnnotations = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyEnum(value MyEnum) *MyStructBuilder {
-    x.obj.MyEnum = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) CppTypeAnnotation(value ListString_6884) *MyStructBuilder {
-    x.obj.CppTypeAnnotation = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyUnion(value *MyUnion) *MyStructBuilder {
-    x.obj.MyUnion = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Emit() *MyStruct {
-    var objCopy MyStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
@@ -1356,40 +1206,6 @@ func (x *SecretStruct) toString2() string {  // Password
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSecretStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type SecretStructBuilder struct {
-    obj *SecretStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSecretStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewSecretStructBuilder() *SecretStructBuilder {
-    return &SecretStructBuilder{
-        obj: NewSecretStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSecretStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SecretStructBuilder) Id(value int64) *SecretStructBuilder {
-    x.obj.Id = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSecretStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SecretStructBuilder) Password(value string) *SecretStructBuilder {
-    x.obj.Password = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewSecretStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *SecretStructBuilder) Emit() *SecretStruct {
-    var objCopy SecretStruct = *x.obj
-    return &objCopy
-}
 
 func (x *SecretStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("SecretStruct"); err != nil {

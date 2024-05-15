@@ -337,33 +337,6 @@ func (x *reqNestedContainersMapList) toString1() string {  // Foo
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqNestedContainersMapListBuilder struct {
-    obj *reqNestedContainersMapList
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqNestedContainersMapListBuilder() *reqNestedContainersMapListBuilder {
-    return &reqNestedContainersMapListBuilder{
-        obj: newReqNestedContainersMapList(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersMapListBuilder) Foo(value map[int32][]int32) *reqNestedContainersMapListBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersMapListBuilder) Emit() *reqNestedContainersMapList {
-    var objCopy reqNestedContainersMapList = *x.obj
-    return &objCopy
-}
 
 func (x *reqNestedContainersMapList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
@@ -449,26 +422,6 @@ func newRespNestedContainersMapList() *respNestedContainersMapList {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respNestedContainersMapListBuilder struct {
-    obj *respNestedContainersMapList
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespNestedContainersMapListBuilder() *respNestedContainersMapListBuilder {
-    return &respNestedContainersMapListBuilder{
-        obj: newRespNestedContainersMapList(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respNestedContainersMapListBuilder) Emit() *respNestedContainersMapList {
-    var objCopy respNestedContainersMapList = *x.obj
-    return &objCopy
-}
 
 func (x *respNestedContainersMapList) Exception() thrift.WritableException {
     return nil
@@ -681,33 +634,6 @@ func (x *reqNestedContainersMapSet) toString1() string {  // Foo
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqNestedContainersMapSetBuilder struct {
-    obj *reqNestedContainersMapSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqNestedContainersMapSetBuilder() *reqNestedContainersMapSetBuilder {
-    return &reqNestedContainersMapSetBuilder{
-        obj: newReqNestedContainersMapSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersMapSetBuilder) Foo(value map[int32][]int32) *reqNestedContainersMapSetBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersMapSetBuilder) Emit() *reqNestedContainersMapSet {
-    var objCopy reqNestedContainersMapSet = *x.obj
-    return &objCopy
-}
 
 func (x *reqNestedContainersMapSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
@@ -793,26 +719,6 @@ func newRespNestedContainersMapSet() *respNestedContainersMapSet {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respNestedContainersMapSetBuilder struct {
-    obj *respNestedContainersMapSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespNestedContainersMapSetBuilder() *respNestedContainersMapSetBuilder {
-    return &respNestedContainersMapSetBuilder{
-        obj: newRespNestedContainersMapSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersMapSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respNestedContainersMapSetBuilder) Emit() *respNestedContainersMapSet {
-    var objCopy respNestedContainersMapSet = *x.obj
-    return &objCopy
-}
 
 func (x *respNestedContainersMapSet) Exception() thrift.WritableException {
     return nil
@@ -1025,33 +931,6 @@ func (x *reqNestedContainersListMap) toString1() string {  // Foo
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqNestedContainersListMapBuilder struct {
-    obj *reqNestedContainersListMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqNestedContainersListMapBuilder() *reqNestedContainersListMapBuilder {
-    return &reqNestedContainersListMapBuilder{
-        obj: newReqNestedContainersListMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersListMapBuilder) Foo(value []map[int32]int32) *reqNestedContainersListMapBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersListMapBuilder) Emit() *reqNestedContainersListMap {
-    var objCopy reqNestedContainersListMap = *x.obj
-    return &objCopy
-}
 
 func (x *reqNestedContainersListMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
@@ -1137,26 +1016,6 @@ func newRespNestedContainersListMap() *respNestedContainersListMap {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respNestedContainersListMapBuilder struct {
-    obj *respNestedContainersListMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespNestedContainersListMapBuilder() *respNestedContainersListMapBuilder {
-    return &respNestedContainersListMapBuilder{
-        obj: newRespNestedContainersListMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respNestedContainersListMapBuilder) Emit() *respNestedContainersListMap {
-    var objCopy respNestedContainersListMap = *x.obj
-    return &objCopy
-}
 
 func (x *respNestedContainersListMap) Exception() thrift.WritableException {
     return nil
@@ -1352,33 +1211,6 @@ func (x *reqNestedContainersListSet) toString1() string {  // Foo
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqNestedContainersListSetBuilder struct {
-    obj *reqNestedContainersListSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqNestedContainersListSetBuilder() *reqNestedContainersListSetBuilder {
-    return &reqNestedContainersListSetBuilder{
-        obj: newReqNestedContainersListSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersListSetBuilder) Foo(value [][]int32) *reqNestedContainersListSetBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersListSetBuilder) Emit() *reqNestedContainersListSet {
-    var objCopy reqNestedContainersListSet = *x.obj
-    return &objCopy
-}
 
 func (x *reqNestedContainersListSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
@@ -1464,26 +1296,6 @@ func newRespNestedContainersListSet() *respNestedContainersListSet {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respNestedContainersListSetBuilder struct {
-    obj *respNestedContainersListSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespNestedContainersListSetBuilder() *respNestedContainersListSetBuilder {
-    return &respNestedContainersListSetBuilder{
-        obj: newRespNestedContainersListSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersListSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respNestedContainersListSetBuilder) Emit() *respNestedContainersListSet {
-    var objCopy respNestedContainersListSet = *x.obj
-    return &objCopy
-}
 
 func (x *respNestedContainersListSet) Exception() thrift.WritableException {
     return nil
@@ -1800,33 +1612,6 @@ func (x *reqNestedContainersTurtles) toString1() string {  // Foo
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqNestedContainersTurtlesBuilder struct {
-    obj *reqNestedContainersTurtles
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqNestedContainersTurtlesBuilder() *reqNestedContainersTurtlesBuilder {
-    return &reqNestedContainersTurtlesBuilder{
-        obj: newReqNestedContainersTurtles(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersTurtlesBuilder) Foo(value [][]map[int32]map[int32][]int32) *reqNestedContainersTurtlesBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqNestedContainersTurtlesBuilder) Emit() *reqNestedContainersTurtles {
-    var objCopy reqNestedContainersTurtles = *x.obj
-    return &objCopy
-}
 
 func (x *reqNestedContainersTurtles) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
@@ -1912,26 +1697,6 @@ func newRespNestedContainersTurtles() *respNestedContainersTurtles {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respNestedContainersTurtlesBuilder struct {
-    obj *respNestedContainersTurtles
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespNestedContainersTurtlesBuilder() *respNestedContainersTurtlesBuilder {
-    return &respNestedContainersTurtlesBuilder{
-        obj: newRespNestedContainersTurtles(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespNestedContainersTurtles().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respNestedContainersTurtlesBuilder) Emit() *respNestedContainersTurtles {
-    var objCopy respNestedContainersTurtles = *x.obj
-    return &objCopy
-}
 
 func (x *respNestedContainersTurtles) Exception() thrift.WritableException {
     return nil

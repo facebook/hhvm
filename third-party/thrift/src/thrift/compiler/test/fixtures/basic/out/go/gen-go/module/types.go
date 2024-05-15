@@ -615,89 +615,6 @@ func (x *MyStruct) DefaultGetMyDataField() *MyDataItem {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructBuilder struct {
-    obj *MyStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructBuilder() *MyStructBuilder {
-    return &MyStructBuilder{
-        obj: NewMyStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyIntField(value int64) *MyStructBuilder {
-    x.obj.MyIntField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyStringField(value string) *MyStructBuilder {
-    x.obj.MyStringField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyDataField(value *MyDataItem) *MyStructBuilder {
-    x.obj.MyDataField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MyEnum(value MyEnum) *MyStructBuilder {
-    x.obj.MyEnum = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Oneway(value bool) *MyStructBuilder {
-    x.obj.Oneway = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Readonly(value bool) *MyStructBuilder {
-    x.obj.Readonly = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Idempotent(value bool) *MyStructBuilder {
-    x.obj.Idempotent = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) FloatSet(value []float32) *MyStructBuilder {
-    x.obj.FloatSet = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) NoHackCodegenField(value string) *MyStructBuilder {
-    x.obj.NoHackCodegenField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Emit() *MyStruct {
-    var objCopy MyStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
@@ -852,26 +769,6 @@ func NewMyDataItem() *MyDataItem {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataItem().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataItemBuilder struct {
-    obj *MyDataItem
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataItem().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataItemBuilder() *MyDataItemBuilder {
-    return &MyDataItemBuilder{
-        obj: NewMyDataItem(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataItem().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataItemBuilder) Emit() *MyDataItem {
-    var objCopy MyDataItem = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataItem) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
@@ -1262,54 +1159,6 @@ func (x *MyUnion) CountSetFieldsMyUnion() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionBuilder struct {
-    obj *MyUnion
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionBuilder() *MyUnionBuilder {
-    return &MyUnionBuilder{
-        obj: NewMyUnion(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) MyEnum(value *MyEnum) *MyUnionBuilder {
-    x.obj.MyEnum = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) MyStruct(value *MyStruct) *MyUnionBuilder {
-    x.obj.MyStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) MyDataItem(value *MyDataItem) *MyUnionBuilder {
-    x.obj.MyDataItem = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) FloatSet(value []float32) *MyUnionBuilder {
-    x.obj.FloatSet = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Emit() *MyUnion {
-    var objCopy MyUnion = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
@@ -1472,33 +1321,6 @@ func (x *ReservedKeyword) toString1() string {  // ReservedField
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewReservedKeyword().Set<FieldNameFoo>().Set<FieldNameBar>()
-type ReservedKeywordBuilder struct {
-    obj *ReservedKeyword
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewReservedKeyword().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewReservedKeywordBuilder() *ReservedKeywordBuilder {
-    return &ReservedKeywordBuilder{
-        obj: NewReservedKeyword(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewReservedKeyword().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *ReservedKeywordBuilder) ReservedField(value int32) *ReservedKeywordBuilder {
-    x.obj.ReservedField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewReservedKeyword().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *ReservedKeywordBuilder) Emit() *ReservedKeyword {
-    var objCopy ReservedKeyword = *x.obj
-    return &objCopy
-}
 
 func (x *ReservedKeyword) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
@@ -1658,33 +1480,6 @@ func (x *UnionToBeRenamed) CountSetFieldsUnionToBeRenamed() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewUnionToBeRenamed().Set<FieldNameFoo>().Set<FieldNameBar>()
-type UnionToBeRenamedBuilder struct {
-    obj *UnionToBeRenamed
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewUnionToBeRenamed().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewUnionToBeRenamedBuilder() *UnionToBeRenamedBuilder {
-    return &UnionToBeRenamedBuilder{
-        obj: NewUnionToBeRenamed(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewUnionToBeRenamed().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *UnionToBeRenamedBuilder) ReservedField(value *int32) *UnionToBeRenamedBuilder {
-    x.obj.ReservedField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewUnionToBeRenamed().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *UnionToBeRenamedBuilder) Emit() *UnionToBeRenamed {
-    var objCopy UnionToBeRenamed = *x.obj
-    return &objCopy
-}
 
 func (x *UnionToBeRenamed) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {

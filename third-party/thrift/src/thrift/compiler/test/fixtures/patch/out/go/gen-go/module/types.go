@@ -167,40 +167,6 @@ func (x *MyData) toString2() string {  // Data2
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyData().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataBuilder struct {
-    obj *MyData
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyData().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataBuilder() *MyDataBuilder {
-    return &MyDataBuilder{
-        obj: NewMyData(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyData().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataBuilder) Data1(value string) *MyDataBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyData().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataBuilder) Data2(value int32) *MyDataBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyData().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataBuilder) Emit() *MyData {
-    var objCopy MyData = *x.obj
-    return &objCopy
-}
 
 func (x *MyData) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyData"); err != nil {
@@ -392,40 +358,6 @@ func (x *MyDataWithCustomDefault) toString2() string {  // Data2
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataWithCustomDefaultBuilder struct {
-    obj *MyDataWithCustomDefault
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataWithCustomDefaultBuilder() *MyDataWithCustomDefaultBuilder {
-    return &MyDataWithCustomDefaultBuilder{
-        obj: NewMyDataWithCustomDefault(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultBuilder) Data1(value string) *MyDataWithCustomDefaultBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultBuilder) Data2(value int32) *MyDataWithCustomDefaultBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultBuilder) Emit() *MyDataWithCustomDefault {
-    var objCopy MyDataWithCustomDefault = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataWithCustomDefault) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefault"); err != nil {
@@ -590,33 +522,6 @@ func (x *InnerUnion) CountSetFieldsInnerUnion() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-type InnerUnionBuilder struct {
-    obj *InnerUnion
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewInnerUnionBuilder() *InnerUnionBuilder {
-    return &InnerUnionBuilder{
-        obj: NewInnerUnion(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionBuilder) InnerOption(value []byte) *InnerUnionBuilder {
-    x.obj.InnerOption = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionBuilder) Emit() *InnerUnion {
-    var objCopy InnerUnion = *x.obj
-    return &objCopy
-}
 
 func (x *InnerUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
@@ -920,47 +825,6 @@ func (x *MyUnion) CountSetFieldsMyUnion() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionBuilder struct {
-    obj *MyUnion
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionBuilder() *MyUnionBuilder {
-    return &MyUnionBuilder{
-        obj: NewMyUnion(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Option1(value *string) *MyUnionBuilder {
-    x.obj.Option1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Option2(value *int32) *MyUnionBuilder {
-    x.obj.Option2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Option3(value *InnerUnion) *MyUnionBuilder {
-    x.obj.Option3 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionBuilder) Emit() *MyUnion {
-    var objCopy MyUnion = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
@@ -3341,257 +3205,6 @@ func (x *MyStruct) DefaultGetStructWithFieldCustomDefault() *MyData {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructBuilder struct {
-    obj *MyStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructBuilder() *MyStructBuilder {
-    return &MyStructBuilder{
-        obj: NewMyStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) StructWithCustomDefault(value *MyDataWithCustomDefault) *MyStructBuilder {
-    x.obj.StructWithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) I32WithCustomDefault(value int32) *MyStructBuilder {
-    x.obj.I32WithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) MapMap(value map[string]map[string]int32) *MyStructBuilder {
-    x.obj.MapMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) ListMap(value []map[string]int32) *MyStructBuilder {
-    x.obj.ListMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptMapVal(value map[string]string) *MyStructBuilder {
-    x.obj.OptMapVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptSetVal(value []string) *MyStructBuilder {
-    x.obj.OptSetVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptListVal(value []int16) *MyStructBuilder {
-    x.obj.OptListVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructBuilder {
-    x.obj.OptLateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptStructVal(value *MyData) *MyStructBuilder {
-    x.obj.OptStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptEnumVal(value *MyEnum) *MyStructBuilder {
-    x.obj.OptEnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptBinaryVal(value []byte) *MyStructBuilder {
-    x.obj.OptBinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptStringVal(value *string) *MyStructBuilder {
-    x.obj.OptStringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptDoubleVal(value *float64) *MyStructBuilder {
-    x.obj.OptDoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptFloatVal(value *float32) *MyStructBuilder {
-    x.obj.OptFloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptI64Val(value *int64) *MyStructBuilder {
-    x.obj.OptI64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptI32Val(value *int32) *MyStructBuilder {
-    x.obj.OptI32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptI16Val(value *int16) *MyStructBuilder {
-    x.obj.OptI16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptByteVal(value *int8) *MyStructBuilder {
-    x.obj.OptByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) OptBoolVal(value *bool) *MyStructBuilder {
-    x.obj.OptBoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) LateStructVal(value *LateDefStruct) *MyStructBuilder {
-    x.obj.LateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) UnionVal(value *MyUnion) *MyStructBuilder {
-    x.obj.UnionVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) StructVal(value *MyData) *MyStructBuilder {
-    x.obj.StructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) EnumVal(value MyEnum) *MyStructBuilder {
-    x.obj.EnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) BinaryVal(value []byte) *MyStructBuilder {
-    x.obj.BinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) StringVal(value string) *MyStructBuilder {
-    x.obj.StringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) DoubleVal(value float64) *MyStructBuilder {
-    x.obj.DoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) FloatVal(value float32) *MyStructBuilder {
-    x.obj.FloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) I64Val(value int64) *MyStructBuilder {
-    x.obj.I64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) I32Val(value int32) *MyStructBuilder {
-    x.obj.I32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) I16Val(value int16) *MyStructBuilder {
-    x.obj.I16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) ByteVal(value int8) *MyStructBuilder {
-    x.obj.ByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) BoolVal(value bool) *MyStructBuilder {
-    x.obj.BoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) StructWithFieldCustomDefault(value *MyData) *MyStructBuilder {
-    x.obj.StructWithFieldCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) Emit() *MyStruct {
-    var objCopy MyStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
@@ -3962,26 +3575,6 @@ func NewLateDefStruct() *LateDefStruct {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LateDefStructBuilder struct {
-    obj *LateDefStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLateDefStructBuilder() *LateDefStructBuilder {
-    return &LateDefStructBuilder{
-        obj: NewLateDefStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructBuilder) Emit() *LateDefStruct {
-    var objCopy LateDefStruct = *x.obj
-    return &objCopy
-}
 
 func (x *LateDefStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LateDefStruct"); err != nil {
@@ -4160,33 +3753,6 @@ func (x *Recursive) toString_1() string {  // Nodes
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursive().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursiveBuilder struct {
-    obj *Recursive
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursive().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursiveBuilder() *RecursiveBuilder {
-    return &RecursiveBuilder{
-        obj: NewRecursive(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursive().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveBuilder) Nodes(value map[string]*Recursive) *RecursiveBuilder {
-    x.obj.Nodes = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursive().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveBuilder) Emit() *Recursive {
-    var objCopy Recursive = *x.obj
-    return &objCopy
-}
 
 func (x *Recursive) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Recursive"); err != nil {
@@ -4340,33 +3906,6 @@ func (x *Bar) DefaultGetLoop() *Loop {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-type BarBuilder struct {
-    obj *Bar
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewBarBuilder() *BarBuilder {
-    return &BarBuilder{
-        obj: NewBar(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) Loop(value *Loop) *BarBuilder {
-    x.obj.Loop = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) Emit() *Bar {
-    var objCopy Bar = *x.obj
-    return &objCopy
-}
 
 func (x *Bar) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Bar"); err != nil {
@@ -4520,33 +4059,6 @@ func (x *Loop) DefaultGetBar() *Bar {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoop().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LoopBuilder struct {
-    obj *Loop
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoop().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLoopBuilder() *LoopBuilder {
-    return &LoopBuilder{
-        obj: NewLoop(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoop().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopBuilder) Bar(value *Bar) *LoopBuilder {
-    x.obj.Bar = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoop().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopBuilder) Emit() *Loop {
-    var objCopy Loop = *x.obj
-    return &objCopy
-}
 
 func (x *Loop) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Loop"); err != nil {
@@ -5250,75 +4762,6 @@ func (x *RefFields) toString7() string {  // OptBox
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsBuilder struct {
-    obj *RefFields
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsBuilder() *RefFieldsBuilder {
-    return &RefFieldsBuilder{
-        obj: NewRefFields(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) Unique(value []int32) *RefFieldsBuilder {
-    x.obj.Unique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) SharedConst(value []int32) *RefFieldsBuilder {
-    x.obj.SharedConst = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) SharedMustable(value []int32) *RefFieldsBuilder {
-    x.obj.SharedMustable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) OptUnique(value []int32) *RefFieldsBuilder {
-    x.obj.OptUnique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) OptSharedConst(value []int32) *RefFieldsBuilder {
-    x.obj.OptSharedConst = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) OptSharedMustable(value []int32) *RefFieldsBuilder {
-    x.obj.OptSharedMustable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) OptBox(value []int32) *RefFieldsBuilder {
-    x.obj.OptBox = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsBuilder) Emit() *RefFields {
-    var objCopy RefFields = *x.obj
-    return &objCopy
-}
 
 func (x *RefFields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFields"); err != nil {
@@ -5847,68 +5290,6 @@ func (x *MyDataPatch) DefaultGetPatch() *MyDataFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataPatchBuilder struct {
-    obj *MyDataPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataPatchBuilder() *MyDataPatchBuilder {
-    return &MyDataPatchBuilder{
-        obj: NewMyDataPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Assign(value *MyData) *MyDataPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Clear(value bool) *MyDataPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) PatchPrior(value *MyDataFieldPatch) *MyDataPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Ensure(value *MyDataEnsureStruct) *MyDataPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Patch(value *MyDataFieldPatch) *MyDataPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Remove(value patch.FieldIdList) *MyDataPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataPatchBuilder) Emit() *MyDataPatch {
-    var objCopy MyDataPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataPatch"); err != nil {
@@ -6178,40 +5559,6 @@ func (x *MyDataFieldPatch) DefaultGetData2() *patch.I32Patch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataFieldPatchBuilder struct {
-    obj *MyDataFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataFieldPatchBuilder() *MyDataFieldPatchBuilder {
-    return &MyDataFieldPatchBuilder{
-        obj: NewMyDataFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataFieldPatchBuilder) Data1(value *patch.StringPatch) *MyDataFieldPatchBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataFieldPatchBuilder) Data2(value *patch.I32Patch) *MyDataFieldPatchBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataFieldPatchBuilder) Emit() *MyDataFieldPatch {
-    var objCopy MyDataFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataFieldPatch"); err != nil {
@@ -6433,40 +5780,6 @@ func (x *MyDataEnsureStruct) toString2() string {  // Data2
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataEnsureStructBuilder struct {
-    obj *MyDataEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataEnsureStructBuilder() *MyDataEnsureStructBuilder {
-    return &MyDataEnsureStructBuilder{
-        obj: NewMyDataEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataEnsureStructBuilder) Data1(value *string) *MyDataEnsureStructBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataEnsureStructBuilder) Data2(value *int32) *MyDataEnsureStructBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataEnsureStructBuilder) Emit() *MyDataEnsureStruct {
-    var objCopy MyDataEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataEnsureStruct"); err != nil {
@@ -6666,40 +5979,6 @@ func (x *MyDataSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataSafePatchBuilder struct {
-    obj *MyDataSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataSafePatchBuilder() *MyDataSafePatchBuilder {
-    return &MyDataSafePatchBuilder{
-        obj: NewMyDataSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataSafePatchBuilder) Version(value int32) *MyDataSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataSafePatchBuilder) Data(value []byte) *MyDataSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataSafePatchBuilder) Emit() *MyDataSafePatch {
-    var objCopy MyDataSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataSafePatch"); err != nil {
@@ -7183,68 +6462,6 @@ func (x *MyDataWithCustomDefaultPatch) DefaultGetPatch() *MyDataWithCustomDefaul
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataWithCustomDefaultPatchBuilder struct {
-    obj *MyDataWithCustomDefaultPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataWithCustomDefaultPatchBuilder() *MyDataWithCustomDefaultPatchBuilder {
-    return &MyDataWithCustomDefaultPatchBuilder{
-        obj: NewMyDataWithCustomDefaultPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Assign(value *MyDataWithCustomDefault) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Clear(value bool) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) PatchPrior(value *MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Ensure(value *MyDataWithCustomDefaultEnsureStruct) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Patch(value *MyDataWithCustomDefaultFieldPatch) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Remove(value patch.FieldIdList) *MyDataWithCustomDefaultPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultPatchBuilder) Emit() *MyDataWithCustomDefaultPatch {
-    var objCopy MyDataWithCustomDefaultPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataWithCustomDefaultPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultPatch"); err != nil {
@@ -7514,40 +6731,6 @@ func (x *MyDataWithCustomDefaultFieldPatch) DefaultGetData2() *patch.I32Patch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataWithCustomDefaultFieldPatchBuilder struct {
-    obj *MyDataWithCustomDefaultFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataWithCustomDefaultFieldPatchBuilder() *MyDataWithCustomDefaultFieldPatchBuilder {
-    return &MyDataWithCustomDefaultFieldPatchBuilder{
-        obj: NewMyDataWithCustomDefaultFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultFieldPatchBuilder) Data1(value *patch.StringPatch) *MyDataWithCustomDefaultFieldPatchBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultFieldPatchBuilder) Data2(value *patch.I32Patch) *MyDataWithCustomDefaultFieldPatchBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultFieldPatchBuilder) Emit() *MyDataWithCustomDefaultFieldPatch {
-    var objCopy MyDataWithCustomDefaultFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataWithCustomDefaultFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultFieldPatch"); err != nil {
@@ -7769,40 +6952,6 @@ func (x *MyDataWithCustomDefaultEnsureStruct) toString2() string {  // Data2
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataWithCustomDefaultEnsureStructBuilder struct {
-    obj *MyDataWithCustomDefaultEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataWithCustomDefaultEnsureStructBuilder() *MyDataWithCustomDefaultEnsureStructBuilder {
-    return &MyDataWithCustomDefaultEnsureStructBuilder{
-        obj: NewMyDataWithCustomDefaultEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultEnsureStructBuilder) Data1(value *string) *MyDataWithCustomDefaultEnsureStructBuilder {
-    x.obj.Data1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultEnsureStructBuilder) Data2(value *int32) *MyDataWithCustomDefaultEnsureStructBuilder {
-    x.obj.Data2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultEnsureStructBuilder) Emit() *MyDataWithCustomDefaultEnsureStruct {
-    var objCopy MyDataWithCustomDefaultEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataWithCustomDefaultEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultEnsureStruct"); err != nil {
@@ -8002,40 +7151,6 @@ func (x *MyDataWithCustomDefaultSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyDataWithCustomDefaultSafePatchBuilder struct {
-    obj *MyDataWithCustomDefaultSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyDataWithCustomDefaultSafePatchBuilder() *MyDataWithCustomDefaultSafePatchBuilder {
-    return &MyDataWithCustomDefaultSafePatchBuilder{
-        obj: NewMyDataWithCustomDefaultSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultSafePatchBuilder) Version(value int32) *MyDataWithCustomDefaultSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultSafePatchBuilder) Data(value []byte) *MyDataWithCustomDefaultSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyDataWithCustomDefaultSafePatchBuilder) Emit() *MyDataWithCustomDefaultSafePatch {
-    var objCopy MyDataWithCustomDefaultSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyDataWithCustomDefaultSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultSafePatch"); err != nil {
@@ -8460,61 +7575,6 @@ func (x *InnerUnionPatch) DefaultGetPatch() *InnerUnionFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type InnerUnionPatchBuilder struct {
-    obj *InnerUnionPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewInnerUnionPatchBuilder() *InnerUnionPatchBuilder {
-    return &InnerUnionPatchBuilder{
-        obj: NewInnerUnionPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) Assign(value *InnerUnion) *InnerUnionPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) Clear(value bool) *InnerUnionPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) PatchPrior(value *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) Ensure(value *InnerUnion) *InnerUnionPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) Patch(value *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionPatchBuilder) Emit() *InnerUnionPatch {
-    var objCopy InnerUnionPatch = *x.obj
-    return &objCopy
-}
 
 func (x *InnerUnionPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("InnerUnionPatch"); err != nil {
@@ -8704,33 +7764,6 @@ func (x *InnerUnionFieldPatch) DefaultGetInnerOption() *patch.BinaryPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type InnerUnionFieldPatchBuilder struct {
-    obj *InnerUnionFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewInnerUnionFieldPatchBuilder() *InnerUnionFieldPatchBuilder {
-    return &InnerUnionFieldPatchBuilder{
-        obj: NewInnerUnionFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionFieldPatchBuilder) InnerOption(value *patch.BinaryPatch) *InnerUnionFieldPatchBuilder {
-    x.obj.InnerOption = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionFieldPatchBuilder) Emit() *InnerUnionFieldPatch {
-    var objCopy InnerUnionFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *InnerUnionFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("InnerUnionFieldPatch"); err != nil {
@@ -8921,40 +7954,6 @@ func (x *InnerUnionSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type InnerUnionSafePatchBuilder struct {
-    obj *InnerUnionSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewInnerUnionSafePatchBuilder() *InnerUnionSafePatchBuilder {
-    return &InnerUnionSafePatchBuilder{
-        obj: NewInnerUnionSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionSafePatchBuilder) Version(value int32) *InnerUnionSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionSafePatchBuilder) Data(value []byte) *InnerUnionSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *InnerUnionSafePatchBuilder) Emit() *InnerUnionSafePatch {
-    var objCopy InnerUnionSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *InnerUnionSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("InnerUnionSafePatch"); err != nil {
@@ -9379,61 +8378,6 @@ func (x *MyUnionPatch) DefaultGetPatch() *MyUnionFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionPatchBuilder struct {
-    obj *MyUnionPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionPatchBuilder() *MyUnionPatchBuilder {
-    return &MyUnionPatchBuilder{
-        obj: NewMyUnionPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) Assign(value *MyUnion) *MyUnionPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) Clear(value bool) *MyUnionPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) PatchPrior(value *MyUnionFieldPatch) *MyUnionPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) Ensure(value *MyUnion) *MyUnionPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) Patch(value *MyUnionFieldPatch) *MyUnionPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionPatchBuilder) Emit() *MyUnionPatch {
-    var objCopy MyUnionPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnionPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyUnionPatch"); err != nil {
@@ -9765,47 +8709,6 @@ func (x *MyUnionFieldPatch) DefaultGetOption3() *InnerUnionPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionFieldPatchBuilder struct {
-    obj *MyUnionFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionFieldPatchBuilder() *MyUnionFieldPatchBuilder {
-    return &MyUnionFieldPatchBuilder{
-        obj: NewMyUnionFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionFieldPatchBuilder) Option1(value *patch.StringPatch) *MyUnionFieldPatchBuilder {
-    x.obj.Option1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionFieldPatchBuilder) Option2(value *patch.I32Patch) *MyUnionFieldPatchBuilder {
-    x.obj.Option2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionFieldPatchBuilder) Option3(value *InnerUnionPatch) *MyUnionFieldPatchBuilder {
-    x.obj.Option3 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionFieldPatchBuilder) Emit() *MyUnionFieldPatch {
-    var objCopy MyUnionFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnionFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyUnionFieldPatch"); err != nil {
@@ -10014,40 +8917,6 @@ func (x *MyUnionSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyUnionSafePatchBuilder struct {
-    obj *MyUnionSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyUnionSafePatchBuilder() *MyUnionSafePatchBuilder {
-    return &MyUnionSafePatchBuilder{
-        obj: NewMyUnionSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionSafePatchBuilder) Version(value int32) *MyUnionSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionSafePatchBuilder) Data(value []byte) *MyUnionSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyUnionSafePatchBuilder) Emit() *MyUnionSafePatch {
-    var objCopy MyUnionSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyUnionSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyUnionSafePatch"); err != nil {
@@ -10531,68 +9400,6 @@ func (x *MyStructPatch) DefaultGetPatch() *MyStructFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructPatchBuilder struct {
-    obj *MyStructPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructPatchBuilder() *MyStructPatchBuilder {
-    return &MyStructPatchBuilder{
-        obj: NewMyStructPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Assign(value *MyStruct) *MyStructPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Clear(value bool) *MyStructPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) PatchPrior(value *MyStructFieldPatch) *MyStructPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Ensure(value *MyStructEnsureStruct) *MyStructPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Patch(value *MyStructFieldPatch) *MyStructPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Remove(value patch.FieldIdList) *MyStructPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructPatchBuilder) Emit() *MyStructPatch {
-    var objCopy MyStructPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructPatch"); err != nil {
@@ -10836,40 +9643,6 @@ func (x *MyStructField10Patch) toString2() string {  // Clear
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField10Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField10PatchBuilder struct {
-    obj *MyStructField10Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField10Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField10PatchBuilder() *MyStructField10PatchBuilder {
-    return &MyStructField10PatchBuilder{
-        obj: NewMyStructField10Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField10Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField10PatchBuilder) Assign(value *MyEnum) *MyStructField10PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField10Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField10PatchBuilder) Clear(value bool) *MyStructField10PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField10Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField10PatchBuilder) Emit() *MyStructField10Patch {
-    var objCopy MyStructField10Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField10Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField10Patch"); err != nil {
@@ -11077,40 +9850,6 @@ func (x *MyStructField23Patch) toString2() string {  // Clear
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField23Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField23PatchBuilder struct {
-    obj *MyStructField23Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField23Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField23PatchBuilder() *MyStructField23PatchBuilder {
-    return &MyStructField23PatchBuilder{
-        obj: NewMyStructField23Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField23Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField23PatchBuilder) Assign(value *MyEnum) *MyStructField23PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField23Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField23PatchBuilder) Clear(value bool) *MyStructField23PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField23Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField23PatchBuilder) Emit() *MyStructField23Patch {
-    var objCopy MyStructField23Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField23Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField23Patch"); err != nil {
@@ -11516,54 +10255,6 @@ func (x *MyStructField26Patch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField26PatchBuilder struct {
-    obj *MyStructField26Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField26PatchBuilder() *MyStructField26PatchBuilder {
-    return &MyStructField26PatchBuilder{
-        obj: NewMyStructField26Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField26PatchBuilder) Assign(value []int16) *MyStructField26PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField26PatchBuilder) Clear(value bool) *MyStructField26PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField26PatchBuilder) Prepend(value []int16) *MyStructField26PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField26PatchBuilder) Append(value []int16) *MyStructField26PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField26Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField26PatchBuilder) Emit() *MyStructField26Patch {
-    var objCopy MyStructField26Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField26Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField26Patch"); err != nil {
@@ -11987,54 +10678,6 @@ func (x *MyStructField27Patch) toString8() string {  // Add
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField27PatchBuilder struct {
-    obj *MyStructField27Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField27PatchBuilder() *MyStructField27PatchBuilder {
-    return &MyStructField27PatchBuilder{
-        obj: NewMyStructField27Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField27PatchBuilder) Assign(value []string) *MyStructField27PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField27PatchBuilder) Clear(value bool) *MyStructField27PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField27PatchBuilder) Remove(value []string) *MyStructField27PatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField27PatchBuilder) Add(value []string) *MyStructField27PatchBuilder {
-    x.obj.Add = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField27Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField27PatchBuilder) Emit() *MyStructField27Patch {
-    var objCopy MyStructField27Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField27Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField27Patch"); err != nil {
@@ -12806,75 +11449,6 @@ func (x *MyStructField28Patch) toString9() string {  // Put
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField28PatchBuilder struct {
-    obj *MyStructField28Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField28PatchBuilder() *MyStructField28PatchBuilder {
-    return &MyStructField28PatchBuilder{
-        obj: NewMyStructField28Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Assign(value map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Clear(value bool) *MyStructField28PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) PatchPrior(value map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Add(value map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Add = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Patch(value map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Remove(value []string) *MyStructField28PatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Put(value map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Put = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField28Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField28PatchBuilder) Emit() *MyStructField28Patch {
-    var objCopy MyStructField28Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField28Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField28Patch"); err != nil {
@@ -13463,54 +12037,6 @@ func (x *MyStructField29Patch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField29PatchBuilder struct {
-    obj *MyStructField29Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField29PatchBuilder() *MyStructField29PatchBuilder {
-    return &MyStructField29PatchBuilder{
-        obj: NewMyStructField29Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField29PatchBuilder) Assign(value []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField29PatchBuilder) Clear(value bool) *MyStructField29PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField29PatchBuilder) Prepend(value []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField29PatchBuilder) Append(value []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField29Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField29PatchBuilder) Emit() *MyStructField29Patch {
-    var objCopy MyStructField29Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField29Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField29Patch"); err != nil {
@@ -14420,75 +12946,6 @@ func (x *MyStructField30Patch) toString9() string {  // Put
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField30PatchBuilder struct {
-    obj *MyStructField30Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField30PatchBuilder() *MyStructField30PatchBuilder {
-    return &MyStructField30PatchBuilder{
-        obj: NewMyStructField30Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Assign(value map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Clear(value bool) *MyStructField30PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) PatchPrior(value map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Add(value map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Add = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Patch(value map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Remove(value []string) *MyStructField30PatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Put(value map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Put = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30PatchBuilder) Emit() *MyStructField30Patch {
-    var objCopy MyStructField30Patch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField30Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField30Patch"); err != nil {
@@ -15287,75 +13744,6 @@ func (x *MyStructField30Patch1) toString9() string {  // Put
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructField30Patch1Builder struct {
-    obj *MyStructField30Patch1
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructField30Patch1Builder() *MyStructField30Patch1Builder {
-    return &MyStructField30Patch1Builder{
-        obj: NewMyStructField30Patch1(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Assign(value map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Clear(value bool) *MyStructField30Patch1Builder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) PatchPrior(value map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Add(value map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Add = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Patch(value map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Remove(value []string) *MyStructField30Patch1Builder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Put(value map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Put = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructField30Patch1().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructField30Patch1Builder) Emit() *MyStructField30Patch1 {
-    var objCopy MyStructField30Patch1 = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructField30Patch1) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructField30Patch1"); err != nil {
@@ -17835,257 +16223,6 @@ func (x *MyStructFieldPatch) DefaultGetStructWithFieldCustomDefault() *MyDataPat
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructFieldPatchBuilder struct {
-    obj *MyStructFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructFieldPatchBuilder() *MyStructFieldPatchBuilder {
-    return &MyStructFieldPatchBuilder{
-        obj: NewMyStructFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) StructWithCustomDefault(value *MyDataWithCustomDefaultPatch) *MyStructFieldPatchBuilder {
-    x.obj.StructWithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) I32WithCustomDefault(value *patch.I32Patch) *MyStructFieldPatchBuilder {
-    x.obj.I32WithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) MapMap(value *MyStructField30Patch) *MyStructFieldPatchBuilder {
-    x.obj.MapMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) ListMap(value *MyStructField29Patch) *MyStructFieldPatchBuilder {
-    x.obj.ListMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptMapVal(value *MyStructField28Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptMapVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptSetVal(value *MyStructField27Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptSetVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptListVal(value *MyStructField26Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptListVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptLateStructVal(value *LateDefStructPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptLateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptStructVal(value *MyDataPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptEnumVal(value *MyStructField23Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptEnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptBinaryVal(value *patch.BinaryPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptBinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptStringVal(value *patch.StringPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptStringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptDoubleVal(value *patch.DoublePatch) *MyStructFieldPatchBuilder {
-    x.obj.OptDoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptFloatVal(value *patch.FloatPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptFloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptI64Val(value *patch.I64Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptI32Val(value *patch.I32Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptI16Val(value *patch.I16Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptByteVal(value *patch.BytePatch) *MyStructFieldPatchBuilder {
-    x.obj.OptByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) OptBoolVal(value *patch.BoolPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptBoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) LateStructVal(value *LateDefStructPatch) *MyStructFieldPatchBuilder {
-    x.obj.LateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) UnionVal(value *MyUnionPatch) *MyStructFieldPatchBuilder {
-    x.obj.UnionVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) StructVal(value *MyDataPatch) *MyStructFieldPatchBuilder {
-    x.obj.StructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) EnumVal(value *MyStructField10Patch) *MyStructFieldPatchBuilder {
-    x.obj.EnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) BinaryVal(value *patch.BinaryPatch) *MyStructFieldPatchBuilder {
-    x.obj.BinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) StringVal(value *patch.StringPatch) *MyStructFieldPatchBuilder {
-    x.obj.StringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) DoubleVal(value *patch.DoublePatch) *MyStructFieldPatchBuilder {
-    x.obj.DoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) FloatVal(value *patch.FloatPatch) *MyStructFieldPatchBuilder {
-    x.obj.FloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) I64Val(value *patch.I64Patch) *MyStructFieldPatchBuilder {
-    x.obj.I64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) I32Val(value *patch.I32Patch) *MyStructFieldPatchBuilder {
-    x.obj.I32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) I16Val(value *patch.I16Patch) *MyStructFieldPatchBuilder {
-    x.obj.I16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) ByteVal(value *patch.BytePatch) *MyStructFieldPatchBuilder {
-    x.obj.ByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) BoolVal(value *patch.BoolPatch) *MyStructFieldPatchBuilder {
-    x.obj.BoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) StructWithFieldCustomDefault(value *MyDataPatch) *MyStructFieldPatchBuilder {
-    x.obj.StructWithFieldCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructFieldPatchBuilder) Emit() *MyStructFieldPatch {
-    var objCopy MyStructFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructFieldPatch"); err != nil {
@@ -20883,257 +19020,6 @@ func (x *MyStructEnsureStruct) DefaultGetStructWithFieldCustomDefault() *MyData 
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructEnsureStructBuilder struct {
-    obj *MyStructEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructEnsureStructBuilder() *MyStructEnsureStructBuilder {
-    return &MyStructEnsureStructBuilder{
-        obj: NewMyStructEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) StructWithCustomDefault(value *MyDataWithCustomDefault) *MyStructEnsureStructBuilder {
-    x.obj.StructWithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) I32WithCustomDefault(value *int32) *MyStructEnsureStructBuilder {
-    x.obj.I32WithCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) MapMap(value map[string]map[string]int32) *MyStructEnsureStructBuilder {
-    x.obj.MapMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) ListMap(value []map[string]int32) *MyStructEnsureStructBuilder {
-    x.obj.ListMap = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptMapVal(value map[string]string) *MyStructEnsureStructBuilder {
-    x.obj.OptMapVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptSetVal(value []string) *MyStructEnsureStructBuilder {
-    x.obj.OptSetVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptListVal(value []int16) *MyStructEnsureStructBuilder {
-    x.obj.OptListVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructEnsureStructBuilder {
-    x.obj.OptLateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptStructVal(value *MyData) *MyStructEnsureStructBuilder {
-    x.obj.OptStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptEnumVal(value *MyEnum) *MyStructEnsureStructBuilder {
-    x.obj.OptEnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptBinaryVal(value []byte) *MyStructEnsureStructBuilder {
-    x.obj.OptBinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptStringVal(value *string) *MyStructEnsureStructBuilder {
-    x.obj.OptStringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptDoubleVal(value *float64) *MyStructEnsureStructBuilder {
-    x.obj.OptDoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptFloatVal(value *float32) *MyStructEnsureStructBuilder {
-    x.obj.OptFloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptI64Val(value *int64) *MyStructEnsureStructBuilder {
-    x.obj.OptI64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptI32Val(value *int32) *MyStructEnsureStructBuilder {
-    x.obj.OptI32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptI16Val(value *int16) *MyStructEnsureStructBuilder {
-    x.obj.OptI16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptByteVal(value *int8) *MyStructEnsureStructBuilder {
-    x.obj.OptByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) OptBoolVal(value *bool) *MyStructEnsureStructBuilder {
-    x.obj.OptBoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) LateStructVal(value *LateDefStruct) *MyStructEnsureStructBuilder {
-    x.obj.LateStructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) UnionVal(value *MyUnion) *MyStructEnsureStructBuilder {
-    x.obj.UnionVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) StructVal(value *MyData) *MyStructEnsureStructBuilder {
-    x.obj.StructVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) EnumVal(value *MyEnum) *MyStructEnsureStructBuilder {
-    x.obj.EnumVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) BinaryVal(value []byte) *MyStructEnsureStructBuilder {
-    x.obj.BinaryVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) StringVal(value *string) *MyStructEnsureStructBuilder {
-    x.obj.StringVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) DoubleVal(value *float64) *MyStructEnsureStructBuilder {
-    x.obj.DoubleVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) FloatVal(value *float32) *MyStructEnsureStructBuilder {
-    x.obj.FloatVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) I64Val(value *int64) *MyStructEnsureStructBuilder {
-    x.obj.I64Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) I32Val(value *int32) *MyStructEnsureStructBuilder {
-    x.obj.I32Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) I16Val(value *int16) *MyStructEnsureStructBuilder {
-    x.obj.I16Val = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) ByteVal(value *int8) *MyStructEnsureStructBuilder {
-    x.obj.ByteVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) BoolVal(value *bool) *MyStructEnsureStructBuilder {
-    x.obj.BoolVal = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) StructWithFieldCustomDefault(value *MyData) *MyStructEnsureStructBuilder {
-    x.obj.StructWithFieldCustomDefault = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructEnsureStructBuilder) Emit() *MyStructEnsureStruct {
-    var objCopy MyStructEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructEnsureStruct"); err != nil {
@@ -21612,40 +19498,6 @@ func (x *MyStructSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MyStructSafePatchBuilder struct {
-    obj *MyStructSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMyStructSafePatchBuilder() *MyStructSafePatchBuilder {
-    return &MyStructSafePatchBuilder{
-        obj: NewMyStructSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructSafePatchBuilder) Version(value int32) *MyStructSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructSafePatchBuilder) Data(value []byte) *MyStructSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructSafePatchBuilder) Emit() *MyStructSafePatch {
-    var objCopy MyStructSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *MyStructSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructSafePatch"); err != nil {
@@ -22129,68 +19981,6 @@ func (x *LateDefStructPatch) DefaultGetPatch() *LateDefStructFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LateDefStructPatchBuilder struct {
-    obj *LateDefStructPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLateDefStructPatchBuilder() *LateDefStructPatchBuilder {
-    return &LateDefStructPatchBuilder{
-        obj: NewLateDefStructPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Assign(value *LateDefStruct) *LateDefStructPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Clear(value bool) *LateDefStructPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) PatchPrior(value *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Ensure(value *LateDefStructEnsureStruct) *LateDefStructPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Patch(value *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Remove(value patch.FieldIdList) *LateDefStructPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructPatchBuilder) Emit() *LateDefStructPatch {
-    var objCopy LateDefStructPatch = *x.obj
-    return &objCopy
-}
 
 func (x *LateDefStructPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LateDefStructPatch"); err != nil {
@@ -22318,26 +20108,6 @@ func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LateDefStructFieldPatchBuilder struct {
-    obj *LateDefStructFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLateDefStructFieldPatchBuilder() *LateDefStructFieldPatchBuilder {
-    return &LateDefStructFieldPatchBuilder{
-        obj: NewLateDefStructFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructFieldPatchBuilder) Emit() *LateDefStructFieldPatch {
-    var objCopy LateDefStructFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *LateDefStructFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LateDefStructFieldPatch"); err != nil {
@@ -22411,26 +20181,6 @@ func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LateDefStructEnsureStructBuilder struct {
-    obj *LateDefStructEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLateDefStructEnsureStructBuilder() *LateDefStructEnsureStructBuilder {
-    return &LateDefStructEnsureStructBuilder{
-        obj: NewLateDefStructEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructEnsureStructBuilder) Emit() *LateDefStructEnsureStruct {
-    var objCopy LateDefStructEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *LateDefStructEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LateDefStructEnsureStruct"); err != nil {
@@ -22612,40 +20362,6 @@ func (x *LateDefStructSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LateDefStructSafePatchBuilder struct {
-    obj *LateDefStructSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLateDefStructSafePatchBuilder() *LateDefStructSafePatchBuilder {
-    return &LateDefStructSafePatchBuilder{
-        obj: NewLateDefStructSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructSafePatchBuilder) Version(value int32) *LateDefStructSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructSafePatchBuilder) Data(value []byte) *LateDefStructSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LateDefStructSafePatchBuilder) Emit() *LateDefStructSafePatch {
-    var objCopy LateDefStructSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *LateDefStructSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LateDefStructSafePatch"); err != nil {
@@ -23129,68 +20845,6 @@ func (x *RecursivePatch) DefaultGetPatch() *RecursiveFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursivePatchBuilder struct {
-    obj *RecursivePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursivePatchBuilder() *RecursivePatchBuilder {
-    return &RecursivePatchBuilder{
-        obj: NewRecursivePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Assign(value *Recursive) *RecursivePatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Clear(value bool) *RecursivePatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) PatchPrior(value *RecursiveFieldPatch) *RecursivePatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Ensure(value *RecursiveEnsureStruct) *RecursivePatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Patch(value *RecursiveFieldPatch) *RecursivePatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Remove(value patch.FieldIdList) *RecursivePatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursivePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursivePatchBuilder) Emit() *RecursivePatch {
-    var objCopy RecursivePatch = *x.obj
-    return &objCopy
-}
 
 func (x *RecursivePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RecursivePatch"); err != nil {
@@ -23476,40 +21130,6 @@ func (x *RecursiveField1Patch) toString2() string {  // Clear
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursiveField1PatchBuilder struct {
-    obj *RecursiveField1Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursiveField1PatchBuilder() *RecursiveField1PatchBuilder {
-    return &RecursiveField1PatchBuilder{
-        obj: NewRecursiveField1Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveField1PatchBuilder) Assign(value map[string]*Recursive) *RecursiveField1PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveField1PatchBuilder) Clear(value bool) *RecursiveField1PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveField1PatchBuilder) Emit() *RecursiveField1Patch {
-    var objCopy RecursiveField1Patch = *x.obj
-    return &objCopy
-}
 
 func (x *RecursiveField1Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RecursiveField1Patch"); err != nil {
@@ -23672,33 +21292,6 @@ func (x *RecursiveFieldPatch) DefaultGetNodes() *RecursiveField1Patch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursiveFieldPatchBuilder struct {
-    obj *RecursiveFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursiveFieldPatchBuilder() *RecursiveFieldPatchBuilder {
-    return &RecursiveFieldPatchBuilder{
-        obj: NewRecursiveFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveFieldPatchBuilder) Nodes(value *RecursiveField1Patch) *RecursiveFieldPatchBuilder {
-    x.obj.Nodes = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveFieldPatchBuilder) Emit() *RecursiveFieldPatch {
-    var objCopy RecursiveFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *RecursiveFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RecursiveFieldPatch"); err != nil {
@@ -23889,33 +21482,6 @@ func (x *RecursiveEnsureStruct) toString_1() string {  // Nodes
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursiveEnsureStructBuilder struct {
-    obj *RecursiveEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursiveEnsureStructBuilder() *RecursiveEnsureStructBuilder {
-    return &RecursiveEnsureStructBuilder{
-        obj: NewRecursiveEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveEnsureStructBuilder) Nodes(value map[string]*Recursive) *RecursiveEnsureStructBuilder {
-    x.obj.Nodes = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveEnsureStructBuilder) Emit() *RecursiveEnsureStruct {
-    var objCopy RecursiveEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *RecursiveEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RecursiveEnsureStruct"); err != nil {
@@ -24106,40 +21672,6 @@ func (x *RecursiveSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RecursiveSafePatchBuilder struct {
-    obj *RecursiveSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRecursiveSafePatchBuilder() *RecursiveSafePatchBuilder {
-    return &RecursiveSafePatchBuilder{
-        obj: NewRecursiveSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveSafePatchBuilder) Version(value int32) *RecursiveSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveSafePatchBuilder) Data(value []byte) *RecursiveSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RecursiveSafePatchBuilder) Emit() *RecursiveSafePatch {
-    var objCopy RecursiveSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *RecursiveSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RecursiveSafePatch"); err != nil {
@@ -24623,68 +22155,6 @@ func (x *BarPatch) DefaultGetPatch() *BarFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type BarPatchBuilder struct {
-    obj *BarPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewBarPatchBuilder() *BarPatchBuilder {
-    return &BarPatchBuilder{
-        obj: NewBarPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Assign(value *Bar) *BarPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Clear(value bool) *BarPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) PatchPrior(value *BarFieldPatch) *BarPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Ensure(value *BarEnsureStruct) *BarPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Patch(value *BarFieldPatch) *BarPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Remove(value patch.FieldIdList) *BarPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarPatchBuilder) Emit() *BarPatch {
-    var objCopy BarPatch = *x.obj
-    return &objCopy
-}
 
 func (x *BarPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("BarPatch"); err != nil {
@@ -24883,33 +22353,6 @@ func (x *BarFieldPatch) DefaultGetLoop() *LoopPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type BarFieldPatchBuilder struct {
-    obj *BarFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewBarFieldPatchBuilder() *BarFieldPatchBuilder {
-    return &BarFieldPatchBuilder{
-        obj: NewBarFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarFieldPatchBuilder) Loop(value *LoopPatch) *BarFieldPatchBuilder {
-    x.obj.Loop = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarFieldPatchBuilder) Emit() *BarFieldPatch {
-    var objCopy BarFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *BarFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("BarFieldPatch"); err != nil {
@@ -25062,33 +22505,6 @@ func (x *BarEnsureStruct) DefaultGetLoop() *Loop {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type BarEnsureStructBuilder struct {
-    obj *BarEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewBarEnsureStructBuilder() *BarEnsureStructBuilder {
-    return &BarEnsureStructBuilder{
-        obj: NewBarEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarEnsureStructBuilder) Loop(value *Loop) *BarEnsureStructBuilder {
-    x.obj.Loop = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarEnsureStructBuilder) Emit() *BarEnsureStruct {
-    var objCopy BarEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *BarEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("BarEnsureStruct"); err != nil {
@@ -25279,40 +22695,6 @@ func (x *BarSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type BarSafePatchBuilder struct {
-    obj *BarSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewBarSafePatchBuilder() *BarSafePatchBuilder {
-    return &BarSafePatchBuilder{
-        obj: NewBarSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarSafePatchBuilder) Version(value int32) *BarSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarSafePatchBuilder) Data(value []byte) *BarSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarSafePatchBuilder) Emit() *BarSafePatch {
-    var objCopy BarSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *BarSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("BarSafePatch"); err != nil {
@@ -25524,40 +22906,6 @@ func (x *LoopPatch) DefaultGetAssign() *Loop {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LoopPatchBuilder struct {
-    obj *LoopPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLoopPatchBuilder() *LoopPatchBuilder {
-    return &LoopPatchBuilder{
-        obj: NewLoopPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopPatchBuilder) Assign(value *Loop) *LoopPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopPatchBuilder) Clear(value bool) *LoopPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopPatchBuilder) Emit() *LoopPatch {
-    var objCopy LoopPatch = *x.obj
-    return &objCopy
-}
 
 func (x *LoopPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LoopPatch"); err != nil {
@@ -25757,40 +23105,6 @@ func (x *LoopSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type LoopSafePatchBuilder struct {
-    obj *LoopSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewLoopSafePatchBuilder() *LoopSafePatchBuilder {
-    return &LoopSafePatchBuilder{
-        obj: NewLoopSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopSafePatchBuilder) Version(value int32) *LoopSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopSafePatchBuilder) Data(value []byte) *LoopSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *LoopSafePatchBuilder) Emit() *LoopSafePatch {
-    var objCopy LoopSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *LoopSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("LoopSafePatch"); err != nil {
@@ -26274,68 +23588,6 @@ func (x *RefFieldsPatch) DefaultGetPatch() *RefFieldsFieldPatch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsPatchBuilder struct {
-    obj *RefFieldsPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsPatchBuilder() *RefFieldsPatchBuilder {
-    return &RefFieldsPatchBuilder{
-        obj: NewRefFieldsPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Assign(value *RefFields) *RefFieldsPatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Clear(value bool) *RefFieldsPatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) PatchPrior(value *RefFieldsFieldPatch) *RefFieldsPatchBuilder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Ensure(value *RefFieldsEnsureStruct) *RefFieldsPatchBuilder {
-    x.obj.Ensure = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Patch(value *RefFieldsFieldPatch) *RefFieldsPatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Remove(value patch.FieldIdList) *RefFieldsPatchBuilder {
-    x.obj.Remove = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsPatchBuilder) Emit() *RefFieldsPatch {
-    var objCopy RefFieldsPatch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsPatch"); err != nil {
@@ -26777,54 +24029,6 @@ func (x *RefFieldsField1Patch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsField1PatchBuilder struct {
-    obj *RefFieldsField1Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsField1PatchBuilder() *RefFieldsField1PatchBuilder {
-    return &RefFieldsField1PatchBuilder{
-        obj: NewRefFieldsField1Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField1PatchBuilder) Assign(value []int32) *RefFieldsField1PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField1PatchBuilder) Clear(value bool) *RefFieldsField1PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField1PatchBuilder) Prepend(value []int32) *RefFieldsField1PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField1PatchBuilder) Append(value []int32) *RefFieldsField1PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField1Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField1PatchBuilder) Emit() *RefFieldsField1Patch {
-    var objCopy RefFieldsField1Patch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsField1Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsField1Patch"); err != nil {
@@ -27248,54 +24452,6 @@ func (x *RefFieldsField4Patch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsField4PatchBuilder struct {
-    obj *RefFieldsField4Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsField4PatchBuilder() *RefFieldsField4PatchBuilder {
-    return &RefFieldsField4PatchBuilder{
-        obj: NewRefFieldsField4Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField4PatchBuilder) Assign(value []int32) *RefFieldsField4PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField4PatchBuilder) Clear(value bool) *RefFieldsField4PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField4PatchBuilder) Prepend(value []int32) *RefFieldsField4PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField4PatchBuilder) Append(value []int32) *RefFieldsField4PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField4Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField4PatchBuilder) Emit() *RefFieldsField4Patch {
-    var objCopy RefFieldsField4Patch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsField4Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsField4Patch"); err != nil {
@@ -27719,54 +24875,6 @@ func (x *RefFieldsField7Patch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsField7PatchBuilder struct {
-    obj *RefFieldsField7Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsField7PatchBuilder() *RefFieldsField7PatchBuilder {
-    return &RefFieldsField7PatchBuilder{
-        obj: NewRefFieldsField7Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField7PatchBuilder) Assign(value []int32) *RefFieldsField7PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField7PatchBuilder) Clear(value bool) *RefFieldsField7PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField7PatchBuilder) Prepend(value []int32) *RefFieldsField7PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField7PatchBuilder) Append(value []int32) *RefFieldsField7PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField7Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField7PatchBuilder) Emit() *RefFieldsField7Patch {
-    var objCopy RefFieldsField7Patch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsField7Patch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsField7Patch"); err != nil {
@@ -28089,47 +25197,6 @@ func (x *RefFieldsFieldPatch) DefaultGetOptBox() *RefFieldsField7Patch {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsFieldPatchBuilder struct {
-    obj *RefFieldsFieldPatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsFieldPatchBuilder() *RefFieldsFieldPatchBuilder {
-    return &RefFieldsFieldPatchBuilder{
-        obj: NewRefFieldsFieldPatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) Unique(value *RefFieldsField1Patch) *RefFieldsFieldPatchBuilder {
-    x.obj.Unique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) OptUnique(value *RefFieldsField4Patch) *RefFieldsFieldPatchBuilder {
-    x.obj.OptUnique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) OptBox(value *RefFieldsField7Patch) *RefFieldsFieldPatchBuilder {
-    x.obj.OptBox = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) Emit() *RefFieldsFieldPatch {
-    var objCopy RefFieldsFieldPatch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsFieldPatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsFieldPatch"); err != nil {
@@ -28860,75 +25927,6 @@ func (x *RefFieldsEnsureStruct) toString7() string {  // OptBox
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsEnsureStructBuilder struct {
-    obj *RefFieldsEnsureStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsEnsureStructBuilder() *RefFieldsEnsureStructBuilder {
-    return &RefFieldsEnsureStructBuilder{
-        obj: NewRefFieldsEnsureStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) Unique(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.Unique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) SharedConst(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.SharedConst = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) SharedMustable(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.SharedMustable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) OptUnique(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.OptUnique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) OptSharedConst(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.OptSharedConst = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) OptSharedMustable(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.OptSharedMustable = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) OptBox(value []int32) *RefFieldsEnsureStructBuilder {
-    x.obj.OptBox = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsEnsureStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsEnsureStructBuilder) Emit() *RefFieldsEnsureStruct {
-    var objCopy RefFieldsEnsureStruct = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsEnsureStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsEnsureStruct"); err != nil {
@@ -29173,40 +26171,6 @@ func (x *RefFieldsSafePatch) toString2() string {  // Data
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsSafePatchBuilder struct {
-    obj *RefFieldsSafePatch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsSafePatchBuilder() *RefFieldsSafePatchBuilder {
-    return &RefFieldsSafePatchBuilder{
-        obj: NewRefFieldsSafePatch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsSafePatchBuilder) Version(value int32) *RefFieldsSafePatchBuilder {
-    x.obj.Version = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsSafePatchBuilder) Data(value []byte) *RefFieldsSafePatchBuilder {
-    x.obj.Data = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsSafePatchBuilder) Emit() *RefFieldsSafePatch {
-    var objCopy RefFieldsSafePatch = *x.obj
-    return &objCopy
-}
 
 func (x *RefFieldsSafePatch) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("RefFieldsSafePatch"); err != nil {

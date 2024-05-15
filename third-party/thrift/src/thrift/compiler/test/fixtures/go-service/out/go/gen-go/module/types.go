@@ -76,33 +76,6 @@ func (x *GetEntityRequest) toString1() string {  // Id
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityRequest().Set<FieldNameFoo>().Set<FieldNameBar>()
-type GetEntityRequestBuilder struct {
-    obj *GetEntityRequest
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityRequest().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewGetEntityRequestBuilder() *GetEntityRequestBuilder {
-    return &GetEntityRequestBuilder{
-        obj: NewGetEntityRequest(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityRequest().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *GetEntityRequestBuilder) Id(value string) *GetEntityRequestBuilder {
-    x.obj.Id = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityRequest().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *GetEntityRequestBuilder) Emit() *GetEntityRequest {
-    var objCopy GetEntityRequest = *x.obj
-    return &objCopy
-}
 
 func (x *GetEntityRequest) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
@@ -235,33 +208,6 @@ func (x *GetEntityResponse) toString1() string {  // Entity
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityResponse().Set<FieldNameFoo>().Set<FieldNameBar>()
-type GetEntityResponseBuilder struct {
-    obj *GetEntityResponse
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityResponse().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewGetEntityResponseBuilder() *GetEntityResponseBuilder {
-    return &GetEntityResponseBuilder{
-        obj: NewGetEntityResponse(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityResponse().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *GetEntityResponseBuilder) Entity(value string) *GetEntityResponseBuilder {
-    x.obj.Entity = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGetEntityResponse().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *GetEntityResponseBuilder) Emit() *GetEntityResponse {
-    var objCopy GetEntityResponse = *x.obj
-    return &objCopy
-}
 
 func (x *GetEntityResponse) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("GetEntityResponse"); err != nil {
@@ -590,47 +536,6 @@ func (x *NonComparableStruct) toString3() string {  // Baz
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type NonComparableStructBuilder struct {
-    obj *NonComparableStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewNonComparableStructBuilder() *NonComparableStructBuilder {
-    return &NonComparableStructBuilder{
-        obj: NewNonComparableStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NonComparableStructBuilder) Foo(value string) *NonComparableStructBuilder {
-    x.obj.Foo = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NonComparableStructBuilder) Bar(value []string) *NonComparableStructBuilder {
-    x.obj.Bar = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NonComparableStructBuilder) Baz(value map[*NonComparableStruct]int64) *NonComparableStructBuilder {
-    x.obj.Baz = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNonComparableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NonComparableStructBuilder) Emit() *NonComparableStruct {
-    var objCopy NonComparableStruct = *x.obj
-    return &objCopy
-}
 
 func (x *NonComparableStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("NonComparableStruct"); err != nil {

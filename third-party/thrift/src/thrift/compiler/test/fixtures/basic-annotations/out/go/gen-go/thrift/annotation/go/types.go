@@ -76,33 +76,6 @@ func (x *Name) toString1() string {  // Name
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
-type NameBuilder struct {
-    obj *Name
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewNameBuilder() *NameBuilder {
-    return &NameBuilder{
-        obj: NewName(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NameBuilder) Name(value string) *NameBuilder {
-    x.obj.Name = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NameBuilder) Emit() *Name {
-    var objCopy Name = *x.obj
-    return &objCopy
-}
 
 func (x *Name) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Name"); err != nil {
@@ -235,33 +208,6 @@ func (x *Tag) toString1() string {  // Tag
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
-type TagBuilder struct {
-    obj *Tag
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewTagBuilder() *TagBuilder {
-    return &TagBuilder{
-        obj: NewTag(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *TagBuilder) Tag(value string) *TagBuilder {
-    x.obj.Tag = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *TagBuilder) Emit() *Tag {
-    var objCopy Tag = *x.obj
-    return &objCopy
-}
 
 func (x *Tag) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Tag"); err != nil {

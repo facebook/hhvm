@@ -661,33 +661,6 @@ func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetEntityBuilder struct {
-    obj *reqGetEntityGetEntity
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetEntityBuilder() *reqGetEntityGetEntityBuilder {
-    return &reqGetEntityGetEntityBuilder{
-        obj: newReqGetEntityGetEntity(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetEntityBuilder) R(value *GetEntityRequest) *reqGetEntityGetEntityBuilder {
-    x.obj.R = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetEntityBuilder) Emit() *reqGetEntityGetEntity {
-    var objCopy reqGetEntityGetEntity = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetEntity) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetEntity"); err != nil {
@@ -843,33 +816,6 @@ func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetEntityBuilder struct {
-    obj *respGetEntityGetEntity
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetEntityBuilder() *respGetEntityGetEntityBuilder {
-    return &respGetEntityGetEntityBuilder{
-        obj: newRespGetEntityGetEntity(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetEntityBuilder) Success(value *GetEntityResponse) *respGetEntityGetEntityBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetEntityBuilder) Emit() *respGetEntityGetEntity {
-    var objCopy respGetEntityGetEntity = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetEntity) Exception() thrift.WritableException {
     return nil
@@ -958,26 +904,6 @@ func newReqGetEntityGetBool() *reqGetEntityGetBool {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetBoolBuilder struct {
-    obj *reqGetEntityGetBool
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetBoolBuilder() *reqGetEntityGetBoolBuilder {
-    return &reqGetEntityGetBoolBuilder{
-        obj: newReqGetEntityGetBool(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetBoolBuilder) Emit() *reqGetEntityGetBool {
-    var objCopy reqGetEntityGetBool = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetBool) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetBool"); err != nil {
@@ -1119,33 +1045,6 @@ func (x *respGetEntityGetBool) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetBoolBuilder struct {
-    obj *respGetEntityGetBool
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetBoolBuilder() *respGetEntityGetBoolBuilder {
-    return &respGetEntityGetBoolBuilder{
-        obj: newRespGetEntityGetBool(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetBoolBuilder) Success(value *bool) *respGetEntityGetBoolBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetBoolBuilder) Emit() *respGetEntityGetBool {
-    var objCopy respGetEntityGetBool = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetBool) Exception() thrift.WritableException {
     return nil
@@ -1234,26 +1133,6 @@ func newReqGetEntityGetByte() *reqGetEntityGetByte {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetByteBuilder struct {
-    obj *reqGetEntityGetByte
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetByteBuilder() *reqGetEntityGetByteBuilder {
-    return &reqGetEntityGetByteBuilder{
-        obj: newReqGetEntityGetByte(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetByteBuilder) Emit() *reqGetEntityGetByte {
-    var objCopy reqGetEntityGetByte = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetByte) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetByte"); err != nil {
@@ -1396,33 +1275,6 @@ func (x *respGetEntityGetByte) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetByteBuilder struct {
-    obj *respGetEntityGetByte
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetByteBuilder() *respGetEntityGetByteBuilder {
-    return &respGetEntityGetByteBuilder{
-        obj: newRespGetEntityGetByte(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetByteBuilder) Success(value *int8) *respGetEntityGetByteBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetByteBuilder) Emit() *respGetEntityGetByte {
-    var objCopy respGetEntityGetByte = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetByte) Exception() thrift.WritableException {
     return nil
@@ -1511,26 +1363,6 @@ func newReqGetEntityGetI16() *reqGetEntityGetI16 {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetI16Builder struct {
-    obj *reqGetEntityGetI16
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetI16Builder() *reqGetEntityGetI16Builder {
-    return &reqGetEntityGetI16Builder{
-        obj: newReqGetEntityGetI16(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetI16Builder) Emit() *reqGetEntityGetI16 {
-    var objCopy reqGetEntityGetI16 = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetI16) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI16"); err != nil {
@@ -1672,33 +1504,6 @@ func (x *respGetEntityGetI16) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetI16Builder struct {
-    obj *respGetEntityGetI16
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetI16Builder() *respGetEntityGetI16Builder {
-    return &respGetEntityGetI16Builder{
-        obj: newRespGetEntityGetI16(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI16Builder) Success(value *int16) *respGetEntityGetI16Builder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI16Builder) Emit() *respGetEntityGetI16 {
-    var objCopy respGetEntityGetI16 = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetI16) Exception() thrift.WritableException {
     return nil
@@ -1787,26 +1592,6 @@ func newReqGetEntityGetI32() *reqGetEntityGetI32 {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetI32Builder struct {
-    obj *reqGetEntityGetI32
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetI32Builder() *reqGetEntityGetI32Builder {
-    return &reqGetEntityGetI32Builder{
-        obj: newReqGetEntityGetI32(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetI32Builder) Emit() *reqGetEntityGetI32 {
-    var objCopy reqGetEntityGetI32 = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetI32) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI32"); err != nil {
@@ -1948,33 +1733,6 @@ func (x *respGetEntityGetI32) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetI32Builder struct {
-    obj *respGetEntityGetI32
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetI32Builder() *respGetEntityGetI32Builder {
-    return &respGetEntityGetI32Builder{
-        obj: newRespGetEntityGetI32(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI32Builder) Success(value *int32) *respGetEntityGetI32Builder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI32Builder) Emit() *respGetEntityGetI32 {
-    var objCopy respGetEntityGetI32 = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetI32) Exception() thrift.WritableException {
     return nil
@@ -2063,26 +1821,6 @@ func newReqGetEntityGetI64() *reqGetEntityGetI64 {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetI64Builder struct {
-    obj *reqGetEntityGetI64
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetI64Builder() *reqGetEntityGetI64Builder {
-    return &reqGetEntityGetI64Builder{
-        obj: newReqGetEntityGetI64(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetI64Builder) Emit() *reqGetEntityGetI64 {
-    var objCopy reqGetEntityGetI64 = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetI64) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI64"); err != nil {
@@ -2224,33 +1962,6 @@ func (x *respGetEntityGetI64) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetI64Builder struct {
-    obj *respGetEntityGetI64
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetI64Builder() *respGetEntityGetI64Builder {
-    return &respGetEntityGetI64Builder{
-        obj: newRespGetEntityGetI64(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI64Builder) Success(value *int64) *respGetEntityGetI64Builder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI64Builder) Emit() *respGetEntityGetI64 {
-    var objCopy respGetEntityGetI64 = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetI64) Exception() thrift.WritableException {
     return nil
@@ -2339,26 +2050,6 @@ func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetDoubleBuilder struct {
-    obj *reqGetEntityGetDouble
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetDoubleBuilder() *reqGetEntityGetDoubleBuilder {
-    return &reqGetEntityGetDoubleBuilder{
-        obj: newReqGetEntityGetDouble(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetDoubleBuilder) Emit() *reqGetEntityGetDouble {
-    var objCopy reqGetEntityGetDouble = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetDouble) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetDouble"); err != nil {
@@ -2500,33 +2191,6 @@ func (x *respGetEntityGetDouble) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetDoubleBuilder struct {
-    obj *respGetEntityGetDouble
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetDoubleBuilder() *respGetEntityGetDoubleBuilder {
-    return &respGetEntityGetDoubleBuilder{
-        obj: newRespGetEntityGetDouble(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetDoubleBuilder) Success(value *float64) *respGetEntityGetDoubleBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetDoubleBuilder) Emit() *respGetEntityGetDouble {
-    var objCopy respGetEntityGetDouble = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetDouble) Exception() thrift.WritableException {
     return nil
@@ -2615,26 +2279,6 @@ func newReqGetEntityGetString() *reqGetEntityGetString {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetStringBuilder struct {
-    obj *reqGetEntityGetString
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetStringBuilder() *reqGetEntityGetStringBuilder {
-    return &reqGetEntityGetStringBuilder{
-        obj: newReqGetEntityGetString(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetStringBuilder) Emit() *reqGetEntityGetString {
-    var objCopy reqGetEntityGetString = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetString) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetString"); err != nil {
@@ -2776,33 +2420,6 @@ func (x *respGetEntityGetString) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetStringBuilder struct {
-    obj *respGetEntityGetString
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetStringBuilder() *respGetEntityGetStringBuilder {
-    return &respGetEntityGetStringBuilder{
-        obj: newRespGetEntityGetString(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetStringBuilder) Success(value *string) *respGetEntityGetStringBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetStringBuilder) Emit() *respGetEntityGetString {
-    var objCopy respGetEntityGetString = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetString) Exception() thrift.WritableException {
     return nil
@@ -2891,26 +2508,6 @@ func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetBinaryBuilder struct {
-    obj *reqGetEntityGetBinary
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetBinaryBuilder() *reqGetEntityGetBinaryBuilder {
-    return &reqGetEntityGetBinaryBuilder{
-        obj: newReqGetEntityGetBinary(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetBinaryBuilder) Emit() *reqGetEntityGetBinary {
-    var objCopy reqGetEntityGetBinary = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetBinary) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetBinary"); err != nil {
@@ -3048,33 +2645,6 @@ func (x *respGetEntityGetBinary) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetBinaryBuilder struct {
-    obj *respGetEntityGetBinary
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetBinaryBuilder() *respGetEntityGetBinaryBuilder {
-    return &respGetEntityGetBinaryBuilder{
-        obj: newRespGetEntityGetBinary(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetBinaryBuilder) Success(value []byte) *respGetEntityGetBinaryBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetBinaryBuilder) Emit() *respGetEntityGetBinary {
-    var objCopy respGetEntityGetBinary = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
     return nil
@@ -3163,26 +2733,6 @@ func newReqGetEntityGetMap() *reqGetEntityGetMap {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetMapBuilder struct {
-    obj *reqGetEntityGetMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetMapBuilder() *reqGetEntityGetMapBuilder {
-    return &reqGetEntityGetMapBuilder{
-        obj: newReqGetEntityGetMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetMapBuilder) Emit() *reqGetEntityGetMap {
-    var objCopy reqGetEntityGetMap = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetMap"); err != nil {
@@ -3366,33 +2916,6 @@ func (x *respGetEntityGetMap) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetMapBuilder struct {
-    obj *respGetEntityGetMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetMapBuilder() *respGetEntityGetMapBuilder {
-    return &respGetEntityGetMapBuilder{
-        obj: newRespGetEntityGetMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetMapBuilder) Success(value map[string]string) *respGetEntityGetMapBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetMapBuilder) Emit() *respGetEntityGetMap {
-    var objCopy respGetEntityGetMap = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetMap) Exception() thrift.WritableException {
     return nil
@@ -3481,26 +3004,6 @@ func newReqGetEntityGetSet() *reqGetEntityGetSet {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetSetBuilder struct {
-    obj *reqGetEntityGetSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetSetBuilder() *reqGetEntityGetSetBuilder {
-    return &reqGetEntityGetSetBuilder{
-        obj: newReqGetEntityGetSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetSetBuilder) Emit() *reqGetEntityGetSet {
-    var objCopy reqGetEntityGetSet = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetSet"); err != nil {
@@ -3667,33 +3170,6 @@ func (x *respGetEntityGetSet) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetSetBuilder struct {
-    obj *respGetEntityGetSet
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetSetBuilder() *respGetEntityGetSetBuilder {
-    return &respGetEntityGetSetBuilder{
-        obj: newRespGetEntityGetSet(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetSetBuilder) Success(value []string) *respGetEntityGetSetBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetSetBuilder) Emit() *respGetEntityGetSet {
-    var objCopy respGetEntityGetSet = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetSet) Exception() thrift.WritableException {
     return nil
@@ -3782,26 +3258,6 @@ func newReqGetEntityGetList() *reqGetEntityGetList {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetListBuilder struct {
-    obj *reqGetEntityGetList
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetListBuilder() *reqGetEntityGetListBuilder {
-    return &reqGetEntityGetListBuilder{
-        obj: newReqGetEntityGetList(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetListBuilder) Emit() *reqGetEntityGetList {
-    var objCopy reqGetEntityGetList = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetList"); err != nil {
@@ -3968,33 +3424,6 @@ func (x *respGetEntityGetList) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetListBuilder struct {
-    obj *respGetEntityGetList
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetListBuilder() *respGetEntityGetListBuilder {
-    return &respGetEntityGetListBuilder{
-        obj: newRespGetEntityGetList(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetListBuilder) Success(value []string) *respGetEntityGetListBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetListBuilder) Emit() *respGetEntityGetList {
-    var objCopy respGetEntityGetList = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetList) Exception() thrift.WritableException {
     return nil
@@ -4233,47 +3662,6 @@ func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetLegacyStuffBuilder struct {
-    obj *reqGetEntityGetLegacyStuff
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetLegacyStuffBuilder() *reqGetEntityGetLegacyStuffBuilder {
-    return &reqGetEntityGetLegacyStuffBuilder{
-        obj: newReqGetEntityGetLegacyStuff(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(value int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumNeg2 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg1(value int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumNeg1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(value int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumPos = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetLegacyStuffBuilder) Emit() *reqGetEntityGetLegacyStuff {
-    var objCopy reqGetEntityGetLegacyStuff = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetLegacyStuff"); err != nil {
@@ -4442,33 +3830,6 @@ func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetLegacyStuffBuilder struct {
-    obj *respGetEntityGetLegacyStuff
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetLegacyStuffBuilder() *respGetEntityGetLegacyStuffBuilder {
-    return &respGetEntityGetLegacyStuffBuilder{
-        obj: newRespGetEntityGetLegacyStuff(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetLegacyStuffBuilder) Success(value *int32) *respGetEntityGetLegacyStuffBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetLegacyStuffBuilder) Emit() *respGetEntityGetLegacyStuff {
-    var objCopy respGetEntityGetLegacyStuff = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetLegacyStuff) Exception() thrift.WritableException {
     return nil
@@ -4607,33 +3968,6 @@ func (x *reqGetEntityGetCtxCollision) toString1() string {  // Ctx
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetCtxCollisionBuilder struct {
-    obj *reqGetEntityGetCtxCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetCtxCollisionBuilder() *reqGetEntityGetCtxCollisionBuilder {
-    return &reqGetEntityGetCtxCollisionBuilder{
-        obj: newReqGetEntityGetCtxCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetCtxCollisionBuilder) Ctx(value int64) *reqGetEntityGetCtxCollisionBuilder {
-    x.obj.Ctx = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetCtxCollisionBuilder) Emit() *reqGetEntityGetCtxCollision {
-    var objCopy reqGetEntityGetCtxCollision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetCtxCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetCtxCollision"); err != nil {
@@ -4784,33 +4118,6 @@ func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetCtxCollisionBuilder struct {
-    obj *respGetEntityGetCtxCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetCtxCollisionBuilder() *respGetEntityGetCtxCollisionBuilder {
-    return &respGetEntityGetCtxCollisionBuilder{
-        obj: newRespGetEntityGetCtxCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtxCollisionBuilder) Success(value *int32) *respGetEntityGetCtxCollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtxCollisionBuilder) Emit() *respGetEntityGetCtxCollision {
-    var objCopy respGetEntityGetCtxCollision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetCtxCollision) Exception() thrift.WritableException {
     return nil
@@ -4999,40 +4306,6 @@ func (x *reqGetEntityGetCtx1Collision) toString2() string {  // Ctx1
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetCtx1CollisionBuilder struct {
-    obj *reqGetEntityGetCtx1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetCtx1CollisionBuilder() *reqGetEntityGetCtx1CollisionBuilder {
-    return &reqGetEntityGetCtx1CollisionBuilder{
-        obj: newReqGetEntityGetCtx1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx(value int64) *reqGetEntityGetCtx1CollisionBuilder {
-    x.obj.Ctx = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx1(value int64) *reqGetEntityGetCtx1CollisionBuilder {
-    x.obj.Ctx1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetCtx1CollisionBuilder) Emit() *reqGetEntityGetCtx1Collision {
-    var objCopy reqGetEntityGetCtx1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetCtx1Collision"); err != nil {
@@ -5192,33 +4465,6 @@ func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetCtx1CollisionBuilder struct {
-    obj *respGetEntityGetCtx1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetCtx1CollisionBuilder() *respGetEntityGetCtx1CollisionBuilder {
-    return &respGetEntityGetCtx1CollisionBuilder{
-        obj: newRespGetEntityGetCtx1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtx1CollisionBuilder) Success(value *int32) *respGetEntityGetCtx1CollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtx1CollisionBuilder) Emit() *respGetEntityGetCtx1Collision {
-    var objCopy respGetEntityGetCtx1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetCtx1Collision) Exception() thrift.WritableException {
     return nil
@@ -5357,33 +4603,6 @@ func (x *reqGetEntityGetContextCollision) toString1() string {  // Context
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetContextCollisionBuilder struct {
-    obj *reqGetEntityGetContextCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetContextCollisionBuilder() *reqGetEntityGetContextCollisionBuilder {
-    return &reqGetEntityGetContextCollisionBuilder{
-        obj: newReqGetEntityGetContextCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetContextCollisionBuilder) Context(value int64) *reqGetEntityGetContextCollisionBuilder {
-    x.obj.Context = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetContextCollisionBuilder) Emit() *reqGetEntityGetContextCollision {
-    var objCopy reqGetEntityGetContextCollision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetContextCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetContextCollision"); err != nil {
@@ -5534,33 +4753,6 @@ func (x *respGetEntityGetContextCollision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetContextCollisionBuilder struct {
-    obj *respGetEntityGetContextCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetContextCollisionBuilder() *respGetEntityGetContextCollisionBuilder {
-    return &respGetEntityGetContextCollisionBuilder{
-        obj: newRespGetEntityGetContextCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetContextCollisionBuilder) Success(value *int32) *respGetEntityGetContextCollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetContextCollisionBuilder) Emit() *respGetEntityGetContextCollision {
-    var objCopy respGetEntityGetContextCollision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetContextCollision) Exception() thrift.WritableException {
     return nil
@@ -5699,33 +4891,6 @@ func (x *reqGetEntityGetOutCollision) toString1() string {  // Out
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetOutCollisionBuilder struct {
-    obj *reqGetEntityGetOutCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetOutCollisionBuilder() *reqGetEntityGetOutCollisionBuilder {
-    return &reqGetEntityGetOutCollisionBuilder{
-        obj: newReqGetEntityGetOutCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetOutCollisionBuilder) Out(value int64) *reqGetEntityGetOutCollisionBuilder {
-    x.obj.Out = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetOutCollisionBuilder) Emit() *reqGetEntityGetOutCollision {
-    var objCopy reqGetEntityGetOutCollision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetOutCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetOutCollision"); err != nil {
@@ -5876,33 +5041,6 @@ func (x *respGetEntityGetOutCollision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetOutCollisionBuilder struct {
-    obj *respGetEntityGetOutCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetOutCollisionBuilder() *respGetEntityGetOutCollisionBuilder {
-    return &respGetEntityGetOutCollisionBuilder{
-        obj: newRespGetEntityGetOutCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetOutCollisionBuilder) Success(value *int32) *respGetEntityGetOutCollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetOutCollisionBuilder) Emit() *respGetEntityGetOutCollision {
-    var objCopy respGetEntityGetOutCollision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetOutCollision) Exception() thrift.WritableException {
     return nil
@@ -6091,40 +5229,6 @@ func (x *reqGetEntityGetOut1Collision) toString2() string {  // Out1
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetOut1CollisionBuilder struct {
-    obj *reqGetEntityGetOut1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetOut1CollisionBuilder() *reqGetEntityGetOut1CollisionBuilder {
-    return &reqGetEntityGetOut1CollisionBuilder{
-        obj: newReqGetEntityGetOut1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetOut1CollisionBuilder) Out(value int64) *reqGetEntityGetOut1CollisionBuilder {
-    x.obj.Out = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetOut1CollisionBuilder) Out1(value int64) *reqGetEntityGetOut1CollisionBuilder {
-    x.obj.Out1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetOut1CollisionBuilder) Emit() *reqGetEntityGetOut1Collision {
-    var objCopy reqGetEntityGetOut1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetOut1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetOut1Collision"); err != nil {
@@ -6284,33 +5388,6 @@ func (x *respGetEntityGetOut1Collision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetOut1CollisionBuilder struct {
-    obj *respGetEntityGetOut1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetOut1CollisionBuilder() *respGetEntityGetOut1CollisionBuilder {
-    return &respGetEntityGetOut1CollisionBuilder{
-        obj: newRespGetEntityGetOut1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetOut1CollisionBuilder) Success(value *int32) *respGetEntityGetOut1CollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetOut1CollisionBuilder) Emit() *respGetEntityGetOut1Collision {
-    var objCopy respGetEntityGetOut1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetOut1Collision) Exception() thrift.WritableException {
     return nil
@@ -6449,33 +5526,6 @@ func (x *reqGetEntityGetInCollision) toString1() string {  // In
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetInCollisionBuilder struct {
-    obj *reqGetEntityGetInCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetInCollisionBuilder() *reqGetEntityGetInCollisionBuilder {
-    return &reqGetEntityGetInCollisionBuilder{
-        obj: newReqGetEntityGetInCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetInCollisionBuilder) In(value int64) *reqGetEntityGetInCollisionBuilder {
-    x.obj.In = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetInCollisionBuilder) Emit() *reqGetEntityGetInCollision {
-    var objCopy reqGetEntityGetInCollision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetInCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetInCollision"); err != nil {
@@ -6626,33 +5676,6 @@ func (x *respGetEntityGetInCollision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetInCollisionBuilder struct {
-    obj *respGetEntityGetInCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetInCollisionBuilder() *respGetEntityGetInCollisionBuilder {
-    return &respGetEntityGetInCollisionBuilder{
-        obj: newRespGetEntityGetInCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetInCollisionBuilder) Success(value *int32) *respGetEntityGetInCollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetInCollisionBuilder) Emit() *respGetEntityGetInCollision {
-    var objCopy respGetEntityGetInCollision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetInCollision) Exception() thrift.WritableException {
     return nil
@@ -6841,40 +5864,6 @@ func (x *reqGetEntityGetIn1Collision) toString2() string {  // In1
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetIn1CollisionBuilder struct {
-    obj *reqGetEntityGetIn1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetIn1CollisionBuilder() *reqGetEntityGetIn1CollisionBuilder {
-    return &reqGetEntityGetIn1CollisionBuilder{
-        obj: newReqGetEntityGetIn1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetIn1CollisionBuilder) In(value int64) *reqGetEntityGetIn1CollisionBuilder {
-    x.obj.In = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetIn1CollisionBuilder) In1(value int64) *reqGetEntityGetIn1CollisionBuilder {
-    x.obj.In1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetIn1CollisionBuilder) Emit() *reqGetEntityGetIn1Collision {
-    var objCopy reqGetEntityGetIn1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetIn1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetIn1Collision"); err != nil {
@@ -7034,33 +6023,6 @@ func (x *respGetEntityGetIn1Collision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetIn1CollisionBuilder struct {
-    obj *respGetEntityGetIn1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetIn1CollisionBuilder() *respGetEntityGetIn1CollisionBuilder {
-    return &respGetEntityGetIn1CollisionBuilder{
-        obj: newRespGetEntityGetIn1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetIn1CollisionBuilder) Success(value *int32) *respGetEntityGetIn1CollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetIn1CollisionBuilder) Emit() *respGetEntityGetIn1Collision {
-    var objCopy respGetEntityGetIn1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetIn1Collision) Exception() thrift.WritableException {
     return nil
@@ -7199,33 +6161,6 @@ func (x *reqGetEntityGetErrCollision) toString1() string {  // Err
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetErrCollisionBuilder struct {
-    obj *reqGetEntityGetErrCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetErrCollisionBuilder() *reqGetEntityGetErrCollisionBuilder {
-    return &reqGetEntityGetErrCollisionBuilder{
-        obj: newReqGetEntityGetErrCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetErrCollisionBuilder) Err(value int64) *reqGetEntityGetErrCollisionBuilder {
-    x.obj.Err = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetErrCollisionBuilder) Emit() *reqGetEntityGetErrCollision {
-    var objCopy reqGetEntityGetErrCollision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetErrCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetErrCollision"); err != nil {
@@ -7376,33 +6311,6 @@ func (x *respGetEntityGetErrCollision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetErrCollisionBuilder struct {
-    obj *respGetEntityGetErrCollision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetErrCollisionBuilder() *respGetEntityGetErrCollisionBuilder {
-    return &respGetEntityGetErrCollisionBuilder{
-        obj: newRespGetEntityGetErrCollision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetErrCollisionBuilder) Success(value *int32) *respGetEntityGetErrCollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetErrCollisionBuilder) Emit() *respGetEntityGetErrCollision {
-    var objCopy respGetEntityGetErrCollision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetErrCollision) Exception() thrift.WritableException {
     return nil
@@ -7591,40 +6499,6 @@ func (x *reqGetEntityGetErr1Collision) toString2() string {  // Err1
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqGetEntityGetErr1CollisionBuilder struct {
-    obj *reqGetEntityGetErr1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqGetEntityGetErr1CollisionBuilder() *reqGetEntityGetErr1CollisionBuilder {
-    return &reqGetEntityGetErr1CollisionBuilder{
-        obj: newReqGetEntityGetErr1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetErr1CollisionBuilder) Err(value int64) *reqGetEntityGetErr1CollisionBuilder {
-    x.obj.Err = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetErr1CollisionBuilder) Err1(value int64) *reqGetEntityGetErr1CollisionBuilder {
-    x.obj.Err1 = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqGetEntityGetErr1CollisionBuilder) Emit() *reqGetEntityGetErr1Collision {
-    var objCopy reqGetEntityGetErr1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *reqGetEntityGetErr1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetErr1Collision"); err != nil {
@@ -7784,33 +6658,6 @@ func (x *respGetEntityGetErr1Collision) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respGetEntityGetErr1CollisionBuilder struct {
-    obj *respGetEntityGetErr1Collision
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespGetEntityGetErr1CollisionBuilder() *respGetEntityGetErr1CollisionBuilder {
-    return &respGetEntityGetErr1CollisionBuilder{
-        obj: newRespGetEntityGetErr1Collision(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetErr1CollisionBuilder) Success(value *int32) *respGetEntityGetErr1CollisionBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetErr1CollisionBuilder) Emit() *respGetEntityGetErr1Collision {
-    var objCopy respGetEntityGetErr1Collision = *x.obj
-    return &objCopy
-}
 
 func (x *respGetEntityGetErr1Collision) Exception() thrift.WritableException {
     return nil

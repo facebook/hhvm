@@ -196,33 +196,6 @@ func (x *reqSomeServiceBounceMap) toString1() string {  // M
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqSomeServiceBounceMapBuilder struct {
-    obj *reqSomeServiceBounceMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqSomeServiceBounceMapBuilder() *reqSomeServiceBounceMapBuilder {
-    return &reqSomeServiceBounceMapBuilder{
-        obj: newReqSomeServiceBounceMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqSomeServiceBounceMapBuilder) M(value included.SomeMap) *reqSomeServiceBounceMapBuilder {
-    x.obj.M = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqSomeServiceBounceMapBuilder) Emit() *reqSomeServiceBounceMap {
-    var objCopy reqSomeServiceBounceMap = *x.obj
-    return &objCopy
-}
 
 func (x *reqSomeServiceBounceMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
@@ -370,33 +343,6 @@ func (x *respSomeServiceBounceMap) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respSomeServiceBounceMapBuilder struct {
-    obj *respSomeServiceBounceMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespSomeServiceBounceMapBuilder() *respSomeServiceBounceMapBuilder {
-    return &respSomeServiceBounceMapBuilder{
-        obj: newRespSomeServiceBounceMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respSomeServiceBounceMapBuilder) Success(value included.SomeMap) *respSomeServiceBounceMapBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBounceMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respSomeServiceBounceMapBuilder) Emit() *respSomeServiceBounceMap {
-    var objCopy respSomeServiceBounceMap = *x.obj
-    return &objCopy
-}
 
 func (x *respSomeServiceBounceMap) Exception() thrift.WritableException {
     return nil
@@ -572,33 +518,6 @@ func (x *reqSomeServiceBinaryKeyedMap) toString1() string {  // R
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqSomeServiceBinaryKeyedMapBuilder struct {
-    obj *reqSomeServiceBinaryKeyedMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqSomeServiceBinaryKeyedMapBuilder() *reqSomeServiceBinaryKeyedMapBuilder {
-    return &reqSomeServiceBinaryKeyedMapBuilder{
-        obj: newReqSomeServiceBinaryKeyedMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqSomeServiceBinaryKeyedMapBuilder) R(value []int64) *reqSomeServiceBinaryKeyedMapBuilder {
-    x.obj.R = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqSomeServiceBinaryKeyedMapBuilder) Emit() *reqSomeServiceBinaryKeyedMap {
-    var objCopy reqSomeServiceBinaryKeyedMap = *x.obj
-    return &objCopy
-}
 
 func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqSomeServiceBinaryKeyedMap"); err != nil {
@@ -796,33 +715,6 @@ func (x *respSomeServiceBinaryKeyedMap) toString0() string {  // Success
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respSomeServiceBinaryKeyedMapBuilder struct {
-    obj *respSomeServiceBinaryKeyedMap
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespSomeServiceBinaryKeyedMapBuilder() *respSomeServiceBinaryKeyedMapBuilder {
-    return &respSomeServiceBinaryKeyedMapBuilder{
-        obj: newRespSomeServiceBinaryKeyedMap(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respSomeServiceBinaryKeyedMapBuilder) Success(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMapBuilder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespSomeServiceBinaryKeyedMap().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respSomeServiceBinaryKeyedMapBuilder) Emit() *respSomeServiceBinaryKeyedMap {
-    var objCopy respSomeServiceBinaryKeyedMap = *x.obj
-    return &objCopy
-}
 
 func (x *respSomeServiceBinaryKeyedMap) Exception() thrift.WritableException {
     return nil

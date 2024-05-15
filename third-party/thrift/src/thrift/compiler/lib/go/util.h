@@ -49,7 +49,7 @@ class codegen_data {
   // whether to generate Thrift metadata
   bool gen_metadata = true;
   // whether to generate struct builders
-  bool gen_builders = true;
+  bool gen_builders = false;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.

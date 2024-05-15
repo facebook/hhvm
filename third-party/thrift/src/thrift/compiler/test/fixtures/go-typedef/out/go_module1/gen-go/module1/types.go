@@ -775,75 +775,6 @@ func (x *Automobile) toString7() string {  // PartNames
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-type AutomobileBuilder struct {
-    obj *Automobile
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewAutomobileBuilder() *AutomobileBuilder {
-    return &AutomobileBuilder{
-        obj: NewAutomobile(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) Plate(value Plate) *AutomobileBuilder {
-    x.obj.Plate = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) PreviousPlate(value *Plate) *AutomobileBuilder {
-    x.obj.PreviousPlate = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) FirstPlate(value *Plate) *AutomobileBuilder {
-    x.obj.FirstPlate = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) Year(value Year) *AutomobileBuilder {
-    x.obj.Year = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) Drivers(value Drivers) *AutomobileBuilder {
-    x.obj.Drivers = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) Accessories(value []*Accessory) *AutomobileBuilder {
-    x.obj.Accessories = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) PartNames(value map[int32]*CarPartName) *AutomobileBuilder {
-    x.obj.PartNames = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAutomobile().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AutomobileBuilder) Emit() *Automobile {
-    var objCopy Automobile = *x.obj
-    return &objCopy
-}
 
 func (x *Automobile) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Automobile"); err != nil {
@@ -1080,40 +1011,6 @@ func (x *MapKey) toString2() string {  // Strval
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapKey().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MapKeyBuilder struct {
-    obj *MapKey
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapKey().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMapKeyBuilder() *MapKeyBuilder {
-    return &MapKeyBuilder{
-        obj: NewMapKey(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapKey().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MapKeyBuilder) Num(value int64) *MapKeyBuilder {
-    x.obj.Num = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapKey().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MapKeyBuilder) Strval(value string) *MapKeyBuilder {
-    x.obj.Strval = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapKey().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MapKeyBuilder) Emit() *MapKey {
-    var objCopy MapKey = *x.obj
-    return &objCopy
-}
 
 func (x *MapKey) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MapKey"); err != nil {
@@ -1310,33 +1207,6 @@ func (x *MapContainer) toString1() string {  // Mapval
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapContainer().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MapContainerBuilder struct {
-    obj *MapContainer
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapContainer().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMapContainerBuilder() *MapContainerBuilder {
-    return &MapContainerBuilder{
-        obj: NewMapContainer(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapContainer().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MapContainerBuilder) Mapval(value map[MapKey]string) *MapContainerBuilder {
-    x.obj.Mapval = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMapContainer().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MapContainerBuilder) Emit() *MapContainer {
-    var objCopy MapContainer = *x.obj
-    return &objCopy
-}
 
 func (x *MapContainer) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
@@ -1561,40 +1431,6 @@ func (x *Pair) DefaultGetCar() *Car {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewPair().Set<FieldNameFoo>().Set<FieldNameBar>()
-type PairBuilder struct {
-    obj *Pair
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewPair().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewPairBuilder() *PairBuilder {
-    return &PairBuilder{
-        obj: NewPair(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewPair().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *PairBuilder) Automobile(value *Automobile) *PairBuilder {
-    x.obj.Automobile = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewPair().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *PairBuilder) Car(value *Car) *PairBuilder {
-    x.obj.Car = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewPair().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *PairBuilder) Emit() *Pair {
-    var objCopy Pair = *x.obj
-    return &objCopy
-}
 
 func (x *Pair) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Pair"); err != nil {
@@ -1862,40 +1698,6 @@ func (x *Collection) toString2() string {  // Cars
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCollection().Set<FieldNameFoo>().Set<FieldNameBar>()
-type CollectionBuilder struct {
-    obj *Collection
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCollection().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewCollectionBuilder() *CollectionBuilder {
-    return &CollectionBuilder{
-        obj: NewCollection(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCollection().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *CollectionBuilder) Automobiles(value []*Automobile) *CollectionBuilder {
-    x.obj.Automobiles = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCollection().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *CollectionBuilder) Cars(value []*Car) *CollectionBuilder {
-    x.obj.Cars = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCollection().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *CollectionBuilder) Emit() *Collection {
-    var objCopy Collection = *x.obj
-    return &objCopy
-}
 
 func (x *Collection) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Collection"); err != nil {

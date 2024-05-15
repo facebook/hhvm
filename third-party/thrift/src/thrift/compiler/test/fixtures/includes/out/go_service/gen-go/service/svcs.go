@@ -283,40 +283,6 @@ func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqMyServiceQueryBuilder struct {
-    obj *reqMyServiceQuery
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqMyServiceQueryBuilder() *reqMyServiceQueryBuilder {
-    return &reqMyServiceQueryBuilder{
-        obj: newReqMyServiceQuery(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceQueryBuilder) S(value *module.MyStruct) *reqMyServiceQueryBuilder {
-    x.obj.S = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceQueryBuilder) I(value *includes.Included) *reqMyServiceQueryBuilder {
-    x.obj.I = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceQueryBuilder) Emit() *reqMyServiceQuery {
-    var objCopy reqMyServiceQuery = *x.obj
-    return &objCopy
-}
 
 func (x *reqMyServiceQuery) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
@@ -411,26 +377,6 @@ func newRespMyServiceQuery() *respMyServiceQuery {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respMyServiceQueryBuilder struct {
-    obj *respMyServiceQuery
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespMyServiceQueryBuilder() *respMyServiceQueryBuilder {
-    return &respMyServiceQueryBuilder{
-        obj: newRespMyServiceQuery(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceQuery().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
-    var objCopy respMyServiceQuery = *x.obj
-    return &objCopy
-}
 
 func (x *respMyServiceQuery) Exception() thrift.WritableException {
     return nil
@@ -652,40 +598,6 @@ func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqMyServiceHasArgDocsBuilder struct {
-    obj *reqMyServiceHasArgDocs
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqMyServiceHasArgDocsBuilder() *reqMyServiceHasArgDocsBuilder {
-    return &reqMyServiceHasArgDocsBuilder{
-        obj: newReqMyServiceHasArgDocs(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceHasArgDocsBuilder) S(value *module.MyStruct) *reqMyServiceHasArgDocsBuilder {
-    x.obj.S = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceHasArgDocsBuilder) I(value *includes.Included) *reqMyServiceHasArgDocsBuilder {
-    x.obj.I = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqMyServiceHasArgDocsBuilder) Emit() *reqMyServiceHasArgDocs {
-    var objCopy reqMyServiceHasArgDocs = *x.obj
-    return &objCopy
-}
 
 func (x *reqMyServiceHasArgDocs) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqMyServiceHasArgDocs"); err != nil {
@@ -780,26 +692,6 @@ func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respMyServiceHasArgDocsBuilder struct {
-    obj *respMyServiceHasArgDocs
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespMyServiceHasArgDocsBuilder() *respMyServiceHasArgDocsBuilder {
-    return &respMyServiceHasArgDocsBuilder{
-        obj: newRespMyServiceHasArgDocs(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespMyServiceHasArgDocs().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respMyServiceHasArgDocsBuilder) Emit() *respMyServiceHasArgDocs {
-    var objCopy respMyServiceHasArgDocs = *x.obj
-    return &objCopy
-}
 
 func (x *respMyServiceHasArgDocs) Exception() thrift.WritableException {
     return nil

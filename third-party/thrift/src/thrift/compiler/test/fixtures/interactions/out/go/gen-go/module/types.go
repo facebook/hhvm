@@ -76,33 +76,6 @@ func (x *CustomException) toString1() string {  // Message
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCustomException().Set<FieldNameFoo>().Set<FieldNameBar>()
-type CustomExceptionBuilder struct {
-    obj *CustomException
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCustomException().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewCustomExceptionBuilder() *CustomExceptionBuilder {
-    return &CustomExceptionBuilder{
-        obj: NewCustomException(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCustomException().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *CustomExceptionBuilder) Message(value string) *CustomExceptionBuilder {
-    x.obj.Message = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewCustomException().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *CustomExceptionBuilder) Emit() *CustomException {
-    var objCopy CustomException = *x.obj
-    return &objCopy
-}
 
 func (x *CustomException) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {

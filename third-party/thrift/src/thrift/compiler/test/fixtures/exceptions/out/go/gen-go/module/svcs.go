@@ -189,26 +189,6 @@ func newReqRaiserDoBland() *reqRaiserDoBland {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqRaiserDoBlandBuilder struct {
-    obj *reqRaiserDoBland
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqRaiserDoBlandBuilder() *reqRaiserDoBlandBuilder {
-    return &reqRaiserDoBlandBuilder{
-        obj: newReqRaiserDoBland(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqRaiserDoBlandBuilder) Emit() *reqRaiserDoBland {
-    var objCopy reqRaiserDoBland = *x.obj
-    return &objCopy
-}
 
 func (x *reqRaiserDoBland) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
@@ -285,26 +265,6 @@ func newRespRaiserDoBland() *respRaiserDoBland {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respRaiserDoBlandBuilder struct {
-    obj *respRaiserDoBland
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespRaiserDoBlandBuilder() *respRaiserDoBlandBuilder {
-    return &respRaiserDoBlandBuilder{
-        obj: newRespRaiserDoBland(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoBland().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserDoBlandBuilder) Emit() *respRaiserDoBland {
-    var objCopy respRaiserDoBland = *x.obj
-    return &objCopy
-}
 
 func (x *respRaiserDoBland) Exception() thrift.WritableException {
     return nil
@@ -384,26 +344,6 @@ func newReqRaiserDoRaise() *reqRaiserDoRaise {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqRaiserDoRaiseBuilder struct {
-    obj *reqRaiserDoRaise
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqRaiserDoRaiseBuilder() *reqRaiserDoRaiseBuilder {
-    return &reqRaiserDoRaiseBuilder{
-        obj: newReqRaiserDoRaise(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqRaiserDoRaiseBuilder) Emit() *reqRaiserDoRaise {
-    var objCopy reqRaiserDoRaise = *x.obj
-    return &objCopy
-}
 
 func (x *reqRaiserDoRaise) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
@@ -690,47 +630,6 @@ func (x *respRaiserDoRaise) DefaultGetS() *Serious {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respRaiserDoRaiseBuilder struct {
-    obj *respRaiserDoRaise
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespRaiserDoRaiseBuilder() *respRaiserDoRaiseBuilder {
-    return &respRaiserDoRaiseBuilder{
-        obj: newRespRaiserDoRaise(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserDoRaiseBuilder) B(value *Banal) *respRaiserDoRaiseBuilder {
-    x.obj.B = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserDoRaiseBuilder) F(value *Fiery) *respRaiserDoRaiseBuilder {
-    x.obj.F = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserDoRaiseBuilder) S(value *Serious) *respRaiserDoRaiseBuilder {
-    x.obj.S = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserDoRaise().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserDoRaiseBuilder) Emit() *respRaiserDoRaise {
-    var objCopy respRaiserDoRaise = *x.obj
-    return &objCopy
-}
 
 func (x *respRaiserDoRaise) Exception() thrift.WritableException {
     if x.B != nil {
@@ -846,26 +745,6 @@ func newReqRaiserGet200() *reqRaiserGet200 {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqRaiserGet200Builder struct {
-    obj *reqRaiserGet200
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqRaiserGet200Builder() *reqRaiserGet200Builder {
-    return &reqRaiserGet200Builder{
-        obj: newReqRaiserGet200(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqRaiserGet200Builder) Emit() *reqRaiserGet200 {
-    var objCopy reqRaiserGet200 = *x.obj
-    return &objCopy
-}
 
 func (x *reqRaiserGet200) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
@@ -1007,33 +886,6 @@ func (x *respRaiserGet200) toString0() string {  // Success
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respRaiserGet200Builder struct {
-    obj *respRaiserGet200
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespRaiserGet200Builder() *respRaiserGet200Builder {
-    return &respRaiserGet200Builder{
-        obj: newRespRaiserGet200(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet200Builder) Success(value *string) *respRaiserGet200Builder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet200().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet200Builder) Emit() *respRaiserGet200 {
-    var objCopy respRaiserGet200 = *x.obj
-    return &objCopy
-}
 
 func (x *respRaiserGet200) Exception() thrift.WritableException {
     return nil
@@ -1122,26 +974,6 @@ func newReqRaiserGet500() *reqRaiserGet500 {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-type reqRaiserGet500Builder struct {
-    obj *reqRaiserGet500
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newReqRaiserGet500Builder() *reqRaiserGet500Builder {
-    return &reqRaiserGet500Builder{
-        obj: newReqRaiserGet500(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newReqRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *reqRaiserGet500Builder) Emit() *reqRaiserGet500 {
-    var objCopy reqRaiserGet500 = *x.obj
-    return &objCopy
-}
 
 func (x *reqRaiserGet500) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
@@ -1493,54 +1325,6 @@ func (x *respRaiserGet500) DefaultGetS() *Serious {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-type respRaiserGet500Builder struct {
-    obj *respRaiserGet500
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func newRespRaiserGet500Builder() *respRaiserGet500Builder {
-    return &respRaiserGet500Builder{
-        obj: newRespRaiserGet500(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet500Builder) Success(value *string) *respRaiserGet500Builder {
-    x.obj.Success = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet500Builder) F(value *Fiery) *respRaiserGet500Builder {
-    x.obj.F = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet500Builder) B(value *Banal) *respRaiserGet500Builder {
-    x.obj.B = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet500Builder) S(value *Serious) *respRaiserGet500Builder {
-    x.obj.S = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g newRespRaiserGet500().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respRaiserGet500Builder) Emit() *respRaiserGet500 {
-    var objCopy respRaiserGet500 = *x.obj
-    return &objCopy
-}
 
 func (x *respRaiserGet500) Exception() thrift.WritableException {
     if x.F != nil {

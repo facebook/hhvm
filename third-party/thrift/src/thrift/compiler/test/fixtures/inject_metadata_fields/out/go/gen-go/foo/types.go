@@ -206,47 +206,6 @@ func (x *Fields) toString102() string {  // InjectedUnstructuredAnnotationField
 
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-type FieldsBuilder struct {
-    obj *Fields
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewFieldsBuilder() *FieldsBuilder {
-    return &FieldsBuilder{
-        obj: NewFields(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FieldsBuilder) InjectedField(value string) *FieldsBuilder {
-    x.obj.InjectedField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FieldsBuilder) InjectedStructuredAnnotationField(value *string) *FieldsBuilder {
-    x.obj.InjectedStructuredAnnotationField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FieldsBuilder) InjectedUnstructuredAnnotationField(value *string) *FieldsBuilder {
-    x.obj.InjectedUnstructuredAnnotationField = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FieldsBuilder) Emit() *Fields {
-    var objCopy Fields = *x.obj
-    return &objCopy
-}
 
 func (x *Fields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Fields"); err != nil {

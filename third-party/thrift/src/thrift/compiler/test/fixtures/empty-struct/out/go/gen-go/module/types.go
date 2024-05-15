@@ -26,26 +26,6 @@ func NewEmpty() *Empty {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewEmpty().Set<FieldNameFoo>().Set<FieldNameBar>()
-type EmptyBuilder struct {
-    obj *Empty
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewEmpty().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewEmptyBuilder() *EmptyBuilder {
-    return &EmptyBuilder{
-        obj: NewEmpty(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewEmpty().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *EmptyBuilder) Emit() *Empty {
-    var objCopy Empty = *x.obj
-    return &objCopy
-}
 
 func (x *Empty) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
@@ -128,26 +108,6 @@ func (x *Nada) CountSetFieldsNada() int {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNada().Set<FieldNameFoo>().Set<FieldNameBar>()
-type NadaBuilder struct {
-    obj *Nada
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNada().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewNadaBuilder() *NadaBuilder {
-    return &NadaBuilder{
-        obj: NewNada(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNada().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NadaBuilder) Emit() *Nada {
-    var objCopy Nada = *x.obj
-    return &objCopy
-}
 
 func (x *Nada) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {

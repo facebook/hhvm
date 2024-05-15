@@ -26,26 +26,6 @@ func NewAlso() *Also {
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
-type AlsoBuilder struct {
-    obj *Also
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewAlsoBuilder() *AlsoBuilder {
-    return &AlsoBuilder{
-        obj: NewAlso(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AlsoBuilder) Emit() *Also {
-    var objCopy Also = *x.obj
-    return &objCopy
-}
 
 func (x *Also) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Also"); err != nil {

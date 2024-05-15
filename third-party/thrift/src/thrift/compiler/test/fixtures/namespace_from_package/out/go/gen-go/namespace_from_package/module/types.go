@@ -76,33 +76,6 @@ func (x *Foo) toString1() string {  // MyInt
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-type FooBuilder struct {
-    obj *Foo
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewFooBuilder() *FooBuilder {
-    return &FooBuilder{
-        obj: NewFoo(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) MyInt(value int64) *FooBuilder {
-    x.obj.MyInt = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) Emit() *Foo {
-    var objCopy Foo = *x.obj
-    return &objCopy
-}
 
 func (x *Foo) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Foo"); err != nil {

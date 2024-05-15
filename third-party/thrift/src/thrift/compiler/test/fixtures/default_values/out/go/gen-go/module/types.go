@@ -76,33 +76,6 @@ func (x *TrivialStruct) toString1() string {  // IntValue
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTrivialStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-type TrivialStructBuilder struct {
-    obj *TrivialStruct
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTrivialStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewTrivialStructBuilder() *TrivialStructBuilder {
-    return &TrivialStructBuilder{
-        obj: NewTrivialStruct(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTrivialStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *TrivialStructBuilder) IntValue(value int32) *TrivialStructBuilder {
-    x.obj.IntValue = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewTrivialStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *TrivialStructBuilder) Emit() *TrivialStruct {
-    var objCopy TrivialStruct = *x.obj
-    return &objCopy
-}
 
 func (x *TrivialStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TrivialStruct"); err != nil {
@@ -562,68 +535,6 @@ func (x *StructWithNoCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStr
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-type StructWithNoCustomDefaultValuesBuilder struct {
-    obj *StructWithNoCustomDefaultValues
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewStructWithNoCustomDefaultValuesBuilder() *StructWithNoCustomDefaultValuesBuilder {
-    return &StructWithNoCustomDefaultValuesBuilder{
-        obj: NewStructWithNoCustomDefaultValues(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) UnqualifiedInteger(value int32) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.UnqualifiedInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) OptionalInteger(value *int32) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.OptionalInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) RequiredInteger(value int32) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.RequiredInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) UnqualifiedStruct(value *TrivialStruct) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.UnqualifiedStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) OptionalStruct(value *TrivialStruct) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.OptionalStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) RequiredStruct(value *TrivialStruct) *StructWithNoCustomDefaultValuesBuilder {
-    x.obj.RequiredStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithNoCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithNoCustomDefaultValuesBuilder) Emit() *StructWithNoCustomDefaultValues {
-    var objCopy StructWithNoCustomDefaultValues = *x.obj
-    return &objCopy
-}
 
 func (x *StructWithNoCustomDefaultValues) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("StructWithNoCustomDefaultValues"); err != nil {
@@ -1139,68 +1050,6 @@ func (x *StructWithCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStruc
 }
 
 
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-type StructWithCustomDefaultValuesBuilder struct {
-    obj *StructWithCustomDefaultValues
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewStructWithCustomDefaultValuesBuilder() *StructWithCustomDefaultValuesBuilder {
-    return &StructWithCustomDefaultValuesBuilder{
-        obj: NewStructWithCustomDefaultValues(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) UnqualifiedInteger(value int32) *StructWithCustomDefaultValuesBuilder {
-    x.obj.UnqualifiedInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) OptionalInteger(value *int32) *StructWithCustomDefaultValuesBuilder {
-    x.obj.OptionalInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) RequiredInteger(value int32) *StructWithCustomDefaultValuesBuilder {
-    x.obj.RequiredInteger = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) UnqualifiedStruct(value *TrivialStruct) *StructWithCustomDefaultValuesBuilder {
-    x.obj.UnqualifiedStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) OptionalStruct(value *TrivialStruct) *StructWithCustomDefaultValuesBuilder {
-    x.obj.OptionalStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) RequiredStruct(value *TrivialStruct) *StructWithCustomDefaultValuesBuilder {
-    x.obj.RequiredStruct = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewStructWithCustomDefaultValues().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *StructWithCustomDefaultValuesBuilder) Emit() *StructWithCustomDefaultValues {
-    var objCopy StructWithCustomDefaultValues = *x.obj
-    return &objCopy
-}
 
 func (x *StructWithCustomDefaultValues) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("StructWithCustomDefaultValues"); err != nil {

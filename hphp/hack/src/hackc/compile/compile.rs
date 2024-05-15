@@ -567,6 +567,7 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::LateinitWithDefault(_) => todo!(),
         NastCheckError::MissingAssign(_) => todo!(),
         NastCheckError::ModuleOutsideAllowedDirs { .. } => todo!(),
+        NastCheckError::CloneReturnType(_) => todo!(),
     }
 }
 

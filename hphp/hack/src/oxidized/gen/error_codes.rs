@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a1a1a685ccc2f557e2cdfb902710829>>
+// @generated SignedSource<<9f845fb8456b2fe46b5ebeb0bbcfb2a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -239,6 +239,7 @@ pub enum NastCheck {
     SoftInternalWithoutInternal = 3102,
     #[rust_to_ocaml(name = "Module_outside_allowed_dirs")]
     ModuleOutsideAllowedDirs = 3103,
+    CloneReturnType = 3104,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);

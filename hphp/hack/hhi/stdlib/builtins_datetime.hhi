@@ -362,7 +362,7 @@ class DateTimeImmutable implements DateTimeInterface {
     DateTime $datetime,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getLastErrors(): DateTimeErrors;
-  public function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __clone(): void;
 }
 
 class DateTimeZone {

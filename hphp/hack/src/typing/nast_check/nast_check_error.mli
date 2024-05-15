@@ -187,5 +187,6 @@ type t =
       md_file: string;
       pkg_pos: Pos.t;
     }
+  | Clone_return_type of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

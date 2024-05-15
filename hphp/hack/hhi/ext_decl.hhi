@@ -550,7 +550,7 @@ namespace HH {
     )[]: ?ExtDeclAttribute;
 
     // Prevent cloning
-    final public function __clone(): this;
+    final public function __clone(): void;
 
     public function __toString()[]: string;
   }

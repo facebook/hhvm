@@ -595,7 +595,7 @@ namespace HH {
     )[]: ?ExtDeclAttribute;
 
     // Prevent cloning
-    final public function __clone(): this {
+    final public function __clone(): void {
       throw new \BadMethodCallException(
         'Trying to clone an uncloneable object of class FileDecls',
       );

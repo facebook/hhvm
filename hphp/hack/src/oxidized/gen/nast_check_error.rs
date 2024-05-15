@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27c49643c412fa577066fb1cf7ecfe03>>
+// @generated SignedSource<<e93e38d68eb63c610e40c8b7bbd32d2a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -305,4 +305,6 @@ pub enum NastCheckError {
         md_file: String,
         pkg_pos: pos::Pos,
     },
+    #[rust_to_ocaml(name = "Clone_return_type")]
+    CloneReturnType(pos::Pos),
 }

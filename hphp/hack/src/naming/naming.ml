@@ -174,6 +174,8 @@ let passes =
     Naming_validate_toplevel_statement.pass on_error;
     (* Validate use of `optional` in function type hints *)
     Naming_validate_function_hint_optional_parameters.pass on_error;
+    (* Validate that return type of __clone is void *)
+    Naming_validate_clone_return_hint.pass on_error;
   ]
 
 (* If we don't delegate to Rust, then all naming passes are done here in OCaml.

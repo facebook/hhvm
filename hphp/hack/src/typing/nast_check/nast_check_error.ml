@@ -188,6 +188,7 @@ type t =
       md_file: string;
       pkg_pos: Pos.t;
     }
+  | Clone_return_type of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make_err
@@ -824,6 +825,14 @@ let module_outside_allowed_dirs md_name md_pos md_file pkg_pos =
         Printf.sprintf "But %s is in %s" md_name md_file );
     ]
 
+let clone_return_type pos =
+  User_error.make_err
+    Error_code.(to_enum CloneReturnType)
+    ( pos,
+      "The return type of `__clone` should be void. `__clone` is called to mutate the new object side-effect-fully"
+    )
+    []
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -917,3 +926,4 @@ let to_user_error = function
   | Missing_assign pos -> missing_assign pos
   | Module_outside_allowed_dirs { md_pos; md_name; md_file; pkg_pos } ->
     module_outside_allowed_dirs md_name md_pos md_file pkg_pos
+  | Clone_return_type pos -> clone_return_type pos

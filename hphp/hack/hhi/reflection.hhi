@@ -169,7 +169,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isDeprecated()[]: bool;
   public function getExtension()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getExtensionName()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public function hasReturnType()[]: bool;
   public function getReturnType()[]: ?ReflectionType;
   public function getReifiedTypeParamInfo()[]: varray<darray<string, bool>>;
@@ -265,7 +265,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
 class ReflectionParameter implements Reflector {
   public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public static function export(
     HH\FIXME\MISSING_PARAM_TYPE $function,
     HH\FIXME\MISSING_PARAM_TYPE $parameter,
@@ -326,7 +326,7 @@ class ReflectionProperty implements Reflector {
   public HH\FIXME\MISSING_PROP_TYPE $name = '';
   public HH\FIXME\MISSING_PROP_TYPE $class = '';
 
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public static function export(
     HH\FIXME\MISSING_PARAM_TYPE $class,
     HH\FIXME\MISSING_PARAM_TYPE $name,
@@ -366,7 +366,7 @@ class ReflectionExtension implements Reflector {
 
   public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public static function export(
     HH\FIXME\MISSING_PARAM_TYPE $name,
     HH\FIXME\MISSING_PARAM_TYPE $return = false,
@@ -385,7 +385,7 @@ class ReflectionExtension implements Reflector {
 
 class ReflectionTypeConstant implements Reflector {
 
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public static function export(
     HH\FIXME\MISSING_PARAM_TYPE $class,
     string $name,
@@ -405,7 +405,7 @@ class ReflectionTypeConstant implements Reflector {
 }
 
 class ReflectionTypeAlias implements Reflector {
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   final public function __construct(string $name)[];
   public function __toString()[]: string;
   public function getTypeStructure()[]: darray<arraykey, mixed>;
@@ -423,7 +423,7 @@ class ReflectionTypeAlias implements Reflector {
 }
 
 class ReflectionType implements IPureStringishObject {
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   public function __construct(
     ?Reflector $param_or_ret = null,
     darray<arraykey, mixed> $type_hint_info = dict[],
@@ -434,7 +434,7 @@ class ReflectionType implements IPureStringishObject {
 }
 
 class ReflectionFile implements Reflector {
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   final public function __construct(string $name)[];
   public function __toString()[]: string;
   public function getName()[]: string;
@@ -448,7 +448,7 @@ class ReflectionFile implements Reflector {
 }
 
 class ReflectionModule implements Reflector {
-  private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  private function __clone(): void;
   final public function __construct(string $name)[];
   public function __toString()[]: string;
   public function getName()[]: string;

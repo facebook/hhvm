@@ -18,7 +18,7 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
   public function valid(): bool;
   public function key(): HH\FIXME\MISSING_RETURN_TYPE;
   public function current(): ~Tv;
-  protected function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
+  protected function __clone(): void;
   public function call__(
     HH\FIXME\MISSING_PARAM_TYPE $func,
     HH\FIXME\MISSING_PARAM_TYPE $params,

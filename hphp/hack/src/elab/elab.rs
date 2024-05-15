@@ -464,6 +464,8 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         Box::<passes::validate_expr_list::ValidateExprListPass>::default(),
 
         Box::<passes::validate_like_hint::ValidateLikeHintPass>::default(),
+
+        Box::<passes::validate_clone_return_type::ValidateCloneReturnType>::default(),
     ]};
 
     node.transform(&env, &mut passes);

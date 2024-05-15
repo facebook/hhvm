@@ -204,7 +204,7 @@ class ThreadLocalBatcher : public Batcher<Hash> {
       std::shared_ptr<SelfCert> signer,
       CertificateVerifyContext context)
       : Batcher<Hash>(numMsgThreshold, signer, context), epoch_([=]() {
-          return new typename Batcher<Hash>::EpochData(numMsgThreshold);
+          return typename Batcher<Hash>::EpochData(numMsgThreshold);
         }) {}
 
   typename Batcher<Hash>::BatchResult addMessageAndSign(

@@ -104,6 +104,8 @@ void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
     std::unique_ptr<folly::IOBuf> endOfData) {
   auto appProto = transport_->getApplicationProtocol();
   auto plaintextTransport = moveToPlaintext(transport_.get());
+  tinfo_.securityType = plaintextTransport->getSecurityProtocol();
+
   detail::setSockOptStopTLS(*plaintextTransport);
   // The server initiates the close, which means the client will be the first
   // to successfully terminate tls and return the socket back to the caller.

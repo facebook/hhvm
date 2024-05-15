@@ -90,6 +90,11 @@ struct rust_codegen_options {
 
   // Whether to generate Thrift metadata for structs or not.
   bool gen_metadata = true;
+
+  // Determines whether or not to generate `fbthrift::conformance::AnyRegistry`
+  // initialization functions (c.f. `t_mstch_cpp2_generator::generate_program()`
+  // https://fburl.com/code/np814p6y). Enabled by `--gen rust:any`.
+  bool any_registry_initialization_enabled = false;
 };
 
 enum class FieldKind { Box, Arc, Inline };
@@ -2361,6 +2366,8 @@ void t_mstch_rust_generator::generate_program() {
     assert(options_.serde);
   }
 
+  options_.any_registry_initialization_enabled = has_option("any");
+
   parse_include_srcs(
       options_.types_include_srcs, get_option("types_include_srcs"));
   parse_include_srcs(
@@ -2570,6 +2577,7 @@ THRIFT_REGISTER_GENERATOR(
     "Rust",
     "    serde:           Derive serde Serialize/Deserialize traits for types\n"
     "    noserver:        Don't emit server code\n"
+    "    any:             Generate \"any registry\" initialization functions\n"
     "    deprecated_default_enum_min_i32:\n"
     "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"
     "    deprecated_optional_with_default_is_some:\n"

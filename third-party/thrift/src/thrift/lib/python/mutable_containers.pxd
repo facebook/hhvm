@@ -17,3 +17,11 @@ from thrift.python.types cimport TypeInfoBase
 cdef class MutableList:
     cdef TypeInfoBase _val_typeinfo
     cdef list _list_data
+
+cdef class MutableSet:
+    cdef TypeInfoBase _val_typeinfo
+    cdef set _set_data
+
+cdef class MutableSetIterator:
+    cdef TypeInfoBase _val_typeinfo
+    cdef object _iter

@@ -33,7 +33,7 @@ from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.python.stream cimport ClientBufferedStream
-from thrift.py3.common cimport cRpcOptions, RpcOptions
+from thrift.python.common cimport cRpcOptions, RpcOptions
 
 @cython.auto_pickle(False)
 cdef class AsyncClient:

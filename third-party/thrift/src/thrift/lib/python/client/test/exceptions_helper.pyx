@@ -17,7 +17,7 @@ import asyncio
 from folly cimport cFollyExceptionWrapper
 from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
-from thrift.py3.common cimport RpcOptions
+from thrift.python.common cimport RpcOptions
 
 from thrift.python.exceptions cimport cTTransportException, addHandler, removeAllHandlers
 

@@ -402,7 +402,7 @@ inline void* setList(void* object) {
 class ListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return PyTuple_GET_SIZE(toPyObject(object));
+    return (std::uint32_t)PyTuple_GET_SIZE(toPyObject(object));
   }
 
   static void clear(void* object) { setContainer(object); }
@@ -453,7 +453,7 @@ class ListTypeInfo {
 class MutableListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return PyList_GET_SIZE(toPyObject(object));
+    return (std::uint32_t)PyList_GET_SIZE(toPyObject(object));
   }
 
   static void clear(void* object) { setList(object); }
@@ -501,7 +501,7 @@ template <typename T>
 class SetTypeInfoTemplate {
  public:
   static std::uint32_t size(const void* object) {
-    return PySet_GET_SIZE(toPyObject(object));
+    return (std::uint32_t)PySet_GET_SIZE(toPyObject(object));
   }
 
   static void clear(void* object) { T::clear(object); }
@@ -645,7 +645,7 @@ using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler>;
 class MapTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return PyTuple_GET_SIZE(toPyObject(object));
+    return (std::uint32_t)PyTuple_GET_SIZE(toPyObject(object));
   }
 
   static void clear(void* object) { setContainer(object); }

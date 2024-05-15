@@ -117,9 +117,12 @@ struct UnionExt {
   int (*getActiveId)(const void* /* object */);
   void (*setActiveId)(void* /* object */, int /* fieldId */);
 
+  FOLLY_PUSH_WARNING
+  FOLLY_CLANG_DISABLE_WARNING("-Wc99-extensions")
   // Value initialized using placement new into the member.
   // Generated code should order this list by fields key order.
   VoidFuncPtr initMember[];
+  FOLLY_POP_WARNING
 };
 
 // Templatized version to const initialize with the exact array length.
@@ -149,6 +152,8 @@ struct StructInfo {
   // Use for other languages to pass in additional information.
   const void* customExt;
 
+  FOLLY_PUSH_WARNING
+  FOLLY_CLANG_DISABLE_WARNING("-Wc99-extensions")
   /**
    * Holds `numFields` entries.
    *
@@ -156,6 +161,7 @@ struct StructInfo {
    * `StructInfo`, so this field MUST be the last in this struct.
    */
   FieldInfo fieldInfos[];
+  FOLLY_POP_WARNING
 };
 
 // Templatized version to const initialize with the exact array length.

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ThriftServer.h"
 #include <fcntl.h>
 #include <signal.h>
 
@@ -596,11 +597,16 @@ void ThriftServer::setup() {
   VLOG(1) << "libevent " << folly::EventBase::getLibeventVersion() << " method "
           << serveEventBase->getLibeventMethod();
 
-  if (THRIFT_FLAG(enable_rotation_for_in_memory_ticket_seeds) &&
-      shouldScheduleInMemoryTicketSeeds()) {
-    fizzConfig_.supportedPskModes = {
-        fizz::PskKeyExchangeMode::psk_ke, fizz::PskKeyExchangeMode::psk_dhe_ke};
-    scheduleInMemoryTicketSeeds();
+  switch (getEffectiveTicketSeedStrategy()) {
+    case EffectiveTicketSeedStrategy::IN_MEMORY_WITH_ROTATION:
+      fizzConfig_.supportedPskModes = {
+          fizz::PskKeyExchangeMode::psk_ke,
+          fizz::PskKeyExchangeMode::psk_dhe_ke};
+      scheduleInMemoryTicketSeeds();
+      break;
+    case EffectiveTicketSeedStrategy::IN_MEMORY:
+    case EffectiveTicketSeedStrategy::FILE:
+      break;
   }
 
   try {
@@ -1877,10 +1883,18 @@ void ThriftServer::watchTicketPathForChanges(const std::string& ticketPath) {
   });
 }
 
-bool ThriftServer::shouldScheduleInMemoryTicketSeeds() {
-  return tlsCredWatcher_.withRLock([](auto& credWatcher) {
-    return !(credWatcher && credWatcher->hasTicketPathToWatch());
+EffectiveTicketSeedStrategy ThriftServer::getEffectiveTicketSeedStrategy()
+    const {
+  bool readFromFile = tlsCredWatcher_.withRLock([](auto& credWatcher) {
+    return credWatcher && credWatcher->hasTicketPathToWatch();
   });
+  if (readFromFile) {
+    return EffectiveTicketSeedStrategy::FILE;
+  }
+  if (!THRIFT_FLAG(enable_rotation_for_in_memory_ticket_seeds)) {
+    return EffectiveTicketSeedStrategy::IN_MEMORY;
+  }
+  return EffectiveTicketSeedStrategy::IN_MEMORY_WITH_ROTATION;
 }
 
 void ThriftServer::scheduleInMemoryTicketSeeds() {

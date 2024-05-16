@@ -128,6 +128,12 @@ class ThriftRocketServerHandler;
 
 enum class SSLPolicy { DISABLED, PERMITTED, REQUIRED };
 
+enum class EffectiveTicketSeedStrategy {
+  IN_MEMORY,
+  IN_MEMORY_WITH_ROTATION,
+  FILE
+};
+
 typedef wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>
     Pipeline;
 
@@ -2376,7 +2382,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   /* In memory ticket seeds should not be scheduled if watchTicketPathForChange
    * has already been called. Otherwise we should schedule in memory ticket
    * seeds */
-  bool shouldScheduleInMemoryTicketSeeds();
+  EffectiveTicketSeedStrategy getEffectiveTicketSeedStrategy() const;
 
   void setFastOpenOptions(bool enableTFO, uint32_t fastOpenQueueSize) {
     enableTFO_ = enableTFO;

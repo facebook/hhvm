@@ -8887,7 +8887,6 @@ end = struct
   let closure_make
       ?el
       ?ret_ty
-      ?(check_escapes = true)
       ~supportdyn
       ~closure_class_name
       ~should_invalidate_fakes
@@ -8925,14 +8924,11 @@ end = struct
       (* After the body of the function is checked, erase all the type parameters
          created from the env and the return type. *)
       let (env, ret_ty) =
-        if check_escapes then
-          Typing_escape.refresh_env_and_type
-            ~remove:escaping
-            ~pos:lambda_pos
-            env
-            ft.ft_ret
-        else
-          (env, ft.ft_ret)
+        Typing_escape.refresh_env_and_type
+          ~remove:escaping
+          ~pos:lambda_pos
+          env
+          ft.ft_ret
       in
       (env, (te, { ft with ft_ret = ret_ty }, support_dynamic_type))
     in

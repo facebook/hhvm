@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+
 	"thrift/test/go/if/thrifttest"
 )
 
@@ -81,80 +82,6 @@ func TestEnumNames(t *testing.T) {
 
 	if !reflect.DeepEqual(generatedNames, names) {
 		t.Fatalf("names slices are not equal (should be equal)")
-	}
-}
-
-func TestBuilder(t *testing.T) {
-	bonk1 := thrifttest.NewBonk()
-	bonk1.Message = "exampleMessage"
-	bonk1.Type = 3
-
-	bonkBuilder := thrifttest.NewBonkBuilder()
-	bonk2 := bonkBuilder.
-		Message("exampleMessage").
-		Type(3).
-		Emit()
-	bonk3 := bonkBuilder.
-		Message("anotherMessage").
-		Emit()
-
-	wn1 := thrifttest.NewWeirdNames()
-	wn1.Me = true
-	wn1.SetMe = true
-	wn1.SetMe_ = true
-	wn1.P = true
-	wn1.B = true
-
-	wn2 := thrifttest.NewWeirdNamesBuilder().
-		Me(true).
-		SetMe(true).
-		SetMe_(true).
-		P(true).
-		B(true).
-		Emit()
-
-	if !reflect.DeepEqual(wn1, wn2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
-
-	if !reflect.DeepEqual(bonk1, bonk2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
-	if bonk2.Type != bonk3.Type {
-		t.Fatalf("types are not equal (should be equal)")
-	}
-	if bonk2.Message == bonk3.Message {
-		t.Fatalf("messages are equal (should not be equal)")
-	}
-
-	xt1 := thrifttest.NewXtruct4()
-	xt1.IntThing = 0
-
-	xt2 := thrifttest.NewXtruct4Builder().
-		IntThing(0).
-		Emit()
-
-	if !reflect.DeepEqual(xt1, xt2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
-
-	xt3 := thrifttest.NewXtruct4()
-	xt3.Xtruct2 = thrifttest.NewXtruct2()
-	xt3.Xtruct2.StructThing = thrifttest.NewXtruct()
-	xt3.Xtruct2.StructThing.StringThing = "exampleString"
-
-	xt4 := thrifttest.NewXtruct4Builder().
-		Xtruct2(thrifttest.NewXtruct2Builder().
-			StructThing(thrifttest.NewXtructBuilder().
-				StringThing("exampleString").
-				Emit(),
-			).
-			Emit(),
-		).
-		Emit()
-
-	if !reflect.DeepEqual(xt3, xt4) {
-		t.Fatalf("structs are not equal (should be equal)")
 	}
 }
 

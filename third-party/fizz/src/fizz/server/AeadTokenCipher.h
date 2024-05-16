@@ -10,8 +10,6 @@
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Hkdf.h>
-#include <fizz/crypto/Sha256.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/record/Types.h>
 #include <fizz/server/TokenCipher.h>
 #include <folly/Optional.h>

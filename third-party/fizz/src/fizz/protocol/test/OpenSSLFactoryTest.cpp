@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/test/HandshakeTest.h>
 
 namespace fizz {
@@ -17,7 +17,7 @@ class OpenSSLFactoryHandshakeTest : public HandshakeTest,
 
 TEST_P(OpenSSLFactoryHandshakeTest, openssl_factory_handshake_test) {
   auto namedGroup = GetParam();
-  auto factory = std::make_shared<OpenSSLFactory>();
+  auto factory = std::make_shared<openssl::OpenSSLFactory>();
   clientContext_->setFactory(factory);
   serverContext_->setFactory(factory);
   clientContext_->setSupportedGroups({namedGroup});

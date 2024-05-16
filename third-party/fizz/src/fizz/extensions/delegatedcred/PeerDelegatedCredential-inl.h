@@ -16,14 +16,14 @@ template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::InternalPeerCert::InternalPeerCert(
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey)
-    : OpenSSLPeerCertImpl<T>(std::move(cert)) {
-  if (CertUtils::getKeyType(pubKey) != T) {
+    : openssl::OpenSSLPeerCertImpl<T>(std::move(cert)) {
+  if (openssl::CertUtils::getKeyType(pubKey) != T) {
     throw std::runtime_error("Key and credential type don't match");
   }
   signature_.setKey(std::move(pubKey));
 }
 
-template <KeyType T>
+template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey,

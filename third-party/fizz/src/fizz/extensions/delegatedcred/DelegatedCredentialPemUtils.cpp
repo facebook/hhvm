@@ -34,7 +34,8 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
     std::string combinedPemData) {
   auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(
       folly::StringPiece(combinedPemData));
-  auto privKey = fizz::CertUtils::readPrivateKeyFromBuffer(combinedPemData);
+  auto privKey =
+      fizz::openssl::CertUtils::readPrivateKeyFromBuffer(combinedPemData);
   auto credDataPtr = combinedPemData.find(kDCHeader);
   auto credDataEndPtr = combinedPemData.find(kDCFooter);
   if (!(credDataPtr != std::string::npos &&
@@ -60,7 +61,8 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
   }
   // Note we currently only support P256 this will throw if there is a mismatch
   // in the delegated creds expected verification aglorithm
-  return std::make_unique<SelfDelegatedCredentialImpl<KeyType::P256>>(
+  return std::make_unique<
+      SelfDelegatedCredentialImpl<fizz::openssl::KeyType::P256>>(
       std::move(certs), std::move(privKey), std::move(*cred));
 }
 } // namespace extensions

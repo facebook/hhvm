@@ -28,9 +28,3 @@ Include this file to use openssl features.
 #include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <folly/io/IOBuf.h>
-
-#define CREATE_FIZZ_FN_ALIAS(newname, oldname)   \
-  template <typename... Args>                    \
-  auto newname(Args&&... args) {                 \
-    return oldname(std::forward<Args>(args)...); \
-  }

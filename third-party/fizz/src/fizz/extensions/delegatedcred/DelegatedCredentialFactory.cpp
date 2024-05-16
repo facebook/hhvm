@@ -29,7 +29,7 @@ std::unique_ptr<PeerCert> makeCredential(
         AlertDescription::illegal_parameter);
   }
 
-  switch (CertUtils::getKeyType(pubKey)) {
+  switch (openssl::CertUtils::getKeyType(pubKey)) {
     case openssl::KeyType::RSA:
       return std::make_unique<
           PeerDelegatedCredentialImpl<openssl::KeyType::RSA>>(

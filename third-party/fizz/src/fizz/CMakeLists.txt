@@ -121,11 +121,11 @@ set(FIZZ_HEADER_DIRS
   compression
   crypto
   crypto/aead
+  crypto/exchange
+  crypto/hpke
   crypto/signature
   crypto/openssl
   experimental/crypto/exchange
-  crypto/exchange
-  crypto/hpke
   experimental/ktls
   experimental/util
   extensions/delegatedcred

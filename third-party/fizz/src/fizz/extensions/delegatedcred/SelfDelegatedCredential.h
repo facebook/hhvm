@@ -9,7 +9,6 @@
 #pragma once
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 
 namespace fizz {
 namespace extensions {

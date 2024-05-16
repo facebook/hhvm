@@ -10,7 +10,6 @@
 
 #include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/protocol/OpenSSLFactory.h>
 
 namespace fizz {
 namespace extensions {

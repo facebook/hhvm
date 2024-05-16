@@ -8,10 +8,10 @@
 
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
-#include <fizz/protocol/CertUtils.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
-#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <folly/String.h>
 
 using namespace folly;
@@ -22,7 +22,7 @@ namespace test {
 struct RSATest;
 
 struct P256Test {
-  static constexpr KeyType Type = KeyType::P256;
+  static constexpr openssl::KeyType Type = openssl::KeyType::P256;
   static constexpr SignatureScheme Scheme =
       SignatureScheme::ecdsa_secp256r1_sha256;
 
@@ -30,7 +30,7 @@ struct P256Test {
 };
 
 struct P384Test {
-  static constexpr KeyType Type = KeyType::P384;
+  static constexpr openssl::KeyType Type = openssl::KeyType::P384;
   static constexpr SignatureScheme Scheme =
       SignatureScheme::ecdsa_secp384r1_sha384;
 
@@ -38,7 +38,7 @@ struct P384Test {
 };
 
 struct P521Test {
-  static constexpr KeyType Type = KeyType::P521;
+  static constexpr openssl::KeyType Type = openssl::KeyType::P521;
   static constexpr SignatureScheme Scheme =
       SignatureScheme::ecdsa_secp521r1_sha512;
 
@@ -46,14 +46,14 @@ struct P521Test {
 };
 
 struct RSATest {
-  static constexpr KeyType Type = KeyType::RSA;
+  static constexpr openssl::KeyType Type = openssl::KeyType::RSA;
   static constexpr SignatureScheme Scheme = SignatureScheme::rsa_pss_sha256;
 
   using Invalid = P256Test;
 };
 
 struct Ed25519Test {
-  static constexpr KeyType Type = KeyType::ED25519;
+  static constexpr openssl::KeyType Type = openssl::KeyType::ED25519;
   static constexpr SignatureScheme Scheme = SignatureScheme::ed25519;
 
   using Invalid = P256Test;
@@ -142,7 +142,7 @@ TEST(CertTest, GetIdentity) {
   auto key = getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
       std::move(key), std::move(certs));
   EXPECT_EQ(certificate.getIdentity(), "Fizz");
   EXPECT_EQ(certificate.getAltIdentities().size(), 0);
@@ -153,7 +153,7 @@ TEST(CertTest, GetAltIdentity) {
   auto key = getPrivateKey(kRSAKey);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  OpenSSLSelfCertImpl<KeyType::RSA> certificate(
+  openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> certificate(
       std::move(key), std::move(certs));
   EXPECT_EQ(certificate.getIdentity(), "Fizz");
   auto alts = certificate.getAltIdentities();
@@ -168,7 +168,7 @@ TEST(CertTest, GetCertMessage) {
   auto key = getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
       std::move(key), std::move(certs));
   auto msg = certificate.getCertMessage();
   ASSERT_EQ(msg.certificate_list.size(), 1);
@@ -187,7 +187,7 @@ TEST(CertTest, GetCertMessage) {
 TEST(CertTest, PrepareSignData) {
   std::array<uint8_t, 32> toBeSigned;
   memset(toBeSigned.data(), 1, toBeSigned.size());
-  auto out = CertUtils::prepareSignData(
+  auto out = openssl::CertUtils::prepareSignData(
       CertificateVerifyContext::Server, folly::range(toBeSigned));
   auto hex = hexlify(out->moveToFbString());
   std::string expected =
@@ -202,34 +202,37 @@ TEST(CertTest, PrepareSignData) {
 
 TEST(CertTest, MakePeerCertEmpty) {
   EXPECT_THROW(
-      CertUtils::makePeerCert(IOBuf::copyBuffer("")), std::runtime_error);
+      openssl::CertUtils::makePeerCert(IOBuf::copyBuffer("")),
+      std::runtime_error);
 }
 
 TEST(CertTest, MakePeerCertJunk) {
   EXPECT_THROW(
-      CertUtils::makePeerCert(IOBuf::copyBuffer("blah")), std::runtime_error);
+      openssl::CertUtils::makePeerCert(IOBuf::copyBuffer("blah")),
+      std::runtime_error);
 }
 
 TEST(CertTest, PeerCertGetX509) {
-  OpenSSLPeerCertImpl<KeyType::P256> peerCert(getCert(kP256Certificate));
+  openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
+      getCert(kP256Certificate));
   auto x509 = peerCert.getX509();
   EXPECT_NE(x509.get(), nullptr);
 }
 
 TEST(CertTest, GetIdentityLogic) {
-  auto selfCert = CertUtils::makeSelfCert(
+  auto selfCert = openssl::CertUtils::makeSelfCert(
       kCertWithNoCNButWithSANs.str(), kCertWithNoCNButWithSANsKey.str(), "");
   EXPECT_EQ("O = interop runner", selfCert->getIdentity());
 
-  auto peerCert =
-      CertUtils::makePeerCert(fizz::test::getCert(kCertWithNoCNButWithSANs));
+  auto peerCert = openssl::CertUtils::makePeerCert(
+      fizz::test::getCert(kCertWithNoCNButWithSANs));
   EXPECT_EQ("O = interop runner", peerCert->getIdentity());
 }
 
 TYPED_TEST(CertTestTyped, MatchingCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> certificate(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
       getKey<TypeParam>(), std::move(certs));
 }
 
@@ -237,7 +240,7 @@ TYPED_TEST(CertTestTyped, MismatchedCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
   EXPECT_THROW(
-      OpenSSLSelfCertImpl<TypeParam::Type> certificate(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
           getKey<typename TypeParam::Invalid>(), std::move(certs)),
       std::runtime_error);
 }
@@ -245,7 +248,7 @@ TYPED_TEST(CertTestTyped, MismatchedCert) {
 TYPED_TEST(CertTestTyped, SigSchemes) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> certificate(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
       getKey<TypeParam>(), std::move(certs));
 
   std::vector<SignatureScheme> expected{TypeParam::Scheme};
@@ -253,10 +256,10 @@ TYPED_TEST(CertTestTyped, SigSchemes) {
 }
 
 TYPED_TEST(CertTestTyped, TestSignVerify) {
-  OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
+  openssl::OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
   StringPiece tbs{"ToBeSigned"};
@@ -270,10 +273,10 @@ TYPED_TEST(CertTestTyped, TestSignVerify) {
 }
 
 TYPED_TEST(CertTestTyped, TestSignVerifyBitFlip) {
-  OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
+  openssl::OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
   StringPiece tbs{"ToBeSigned"};
@@ -290,10 +293,10 @@ TYPED_TEST(CertTestTyped, TestSignVerifyBitFlip) {
 }
 
 TYPED_TEST(CertTestTyped, TestSignVerifyWrongSize) {
-  OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
+  openssl::OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
   StringPiece tbs{"ToBeSigned"};
@@ -310,10 +313,10 @@ TYPED_TEST(CertTestTyped, TestSignVerifyWrongSize) {
 }
 
 TYPED_TEST(CertTestTyped, TestVerifyWrongScheme) {
-  OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
+  openssl::OpenSSLPeerCertImpl<TypeParam::Type> peerCert(getCert<TypeParam>());
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
   StringPiece tbs{"ToBeSigned"};
@@ -331,11 +334,11 @@ TYPED_TEST(CertTestTyped, TestVerifyWrongScheme) {
 TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  auto msg = CertUtils::getCertMessage(certs, nullptr);
-  OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
+  auto msg = openssl::CertUtils::getCertMessage(certs, nullptr);
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
-  auto peerCert = CertUtils::makePeerCert(
+  auto peerCert = openssl::CertUtils::makePeerCert(
       std::move(msg.certificate_list.front().cert_data));
 
   StringPiece tbs{"ToBeSigned"};

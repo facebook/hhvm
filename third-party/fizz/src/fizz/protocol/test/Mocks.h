@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/crypto/aead/test/Mocks.h>
 #include <fizz/crypto/exchange/test/Mocks.h>
 #include <fizz/crypto/test/Mocks.h>
@@ -16,7 +17,6 @@
 #include <fizz/protocol/CertificateVerifier.h>
 #include <fizz/protocol/HandshakeContext.h>
 #include <fizz/protocol/KeyScheduler.h>
-#include <fizz/protocol/OpenSSLFactory.h>
 #include <fizz/protocol/Types.h>
 #include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/record/test/Mocks.h>
@@ -215,7 +215,7 @@ class MockCertificateVerifier : public CertificateVerifier {
       (const));
 };
 
-class MockFactory : public OpenSSLFactory {
+class MockFactory : public openssl::OpenSSLFactory {
  public:
   MOCK_METHOD(
       std::unique_ptr<PlaintextReadRecordLayer>,
@@ -338,7 +338,7 @@ class MockFactory : public OpenSSLFactory {
   }
 };
 
-class MockAsyncKexFactory : public OpenSSLFactory {
+class MockAsyncKexFactory : public openssl::OpenSSLFactory {
  public:
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,

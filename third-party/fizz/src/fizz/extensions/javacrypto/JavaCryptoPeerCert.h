@@ -9,7 +9,6 @@
 #pragma once
 
 #include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/crypto/signature/Signature.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/record/Types.h>
 #include <jni.h>

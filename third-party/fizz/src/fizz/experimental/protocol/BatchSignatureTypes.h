@@ -9,7 +9,6 @@
 #pragma once
 
 #include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/crypto/Sha256.h>
 #include <fizz/record/Types.h>
 
 namespace fizz {

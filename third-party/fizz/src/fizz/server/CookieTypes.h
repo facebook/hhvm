@@ -8,7 +8,6 @@
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Hkdf.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/protocol/Types.h>
 #include <fizz/server/AeadCookieCipher.h>
 

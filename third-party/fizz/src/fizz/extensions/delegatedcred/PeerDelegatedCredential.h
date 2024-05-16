@@ -10,19 +10,19 @@
 
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/protocol/OpenSSLPeerCertImpl.h>
 #include <fizz/protocol/clock/SystemClock.h>
 
 namespace fizz {
 namespace extensions {
 
+// This is a base class purely to differentiate between the common
 // peer cert impl, in case a cast is needed at some higher layer.
 class PeerDelegatedCredential : public PeerCert {
  public:
   virtual ~PeerDelegatedCredential() = default;
 };
 
-template <KeyType T>
+template <openssl::KeyType T>
 class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
  public:
   PeerDelegatedCredentialImpl(
@@ -54,7 +54,7 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
   }
 
  private:
-  class InternalPeerCert : public OpenSSLPeerCertImpl<T> {
+  class InternalPeerCert : public openssl::OpenSSLPeerCertImpl<T> {
    public:
     ~InternalPeerCert() override = default;
 
@@ -62,8 +62,8 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
         folly::ssl::X509UniquePtr cert,
         folly::ssl::EvpPkeyUniquePtr pubKey);
 
-    using OpenSSLPeerCertImpl<T>::signature_;
-    using OpenSSLPeerCertImpl<T>::cert_;
+    using openssl::OpenSSLPeerCertImpl<T>::signature_;
+    using openssl::OpenSSLPeerCertImpl<T>::cert_;
   };
   InternalPeerCert peerCertImpl_;
   DelegatedCredential credential_;

@@ -49,8 +49,8 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 // We don't want JIT iterators to take up too much space on the stack.
-static_assert(sizeof(IterImpl) == 32, "");
-static_assert(sizeof(Iter) == 32, "");
+static_assert(sizeof(IterImpl) == 16, "");
+static_assert(sizeof(Iter) == 16, "");
 
 using bespoke::StructDict;
 
@@ -82,51 +82,9 @@ std::string show(IterSpecialization type) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool IterImpl::checkInvariants(const ArrayData* ad) const {
-  TRACE(3, "IterImpl::checkInvariants: %lx %lx %lx (ad = %lx)\n",
-        size_t(m_typeFields), m_pos, m_end, uintptr_t(ad));
-
-  assertx(ad != nullptr);
-
-  // Check that array's vtable index is compatible with the array's layout.
-  if (m_nextHelperIdx == IterNextIndex::VanillaVec) {
-    assertx(ad->isVanillaVec());
-  } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
-    assertx(ad->isVanillaVec());
-  } else if (m_nextHelperIdx == IterNextIndex::VanillaDict) {
-    assertx(ad->isVanillaDict());
-  } else if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
-    assertx(ad->isVanillaDict());
-  } else if (m_nextHelperIdx == IterNextIndex::StructDict) {
-    assertx(!ad->isVanilla());
-    assertx(isStructDict(BespokeArray::asBespoke(ad)));
-  } else {
-    // We'd like to assert the converse, too: a packed or mixed array should
-    // a next helper that makes use of its layout. However, this condition
-    // can fail: e.g. an APC array base can be promoted to a packed or mixed
-    // array, with iteration still using array-generic code.
-    assertx(m_nextHelperIdx == IterNextIndex::Array);
-  }
-
-  // Check the consistency of the pos and end fields.
-  if (m_nextHelperIdx == IterNextIndex::VanillaDictPointer) {
-    UNUSED auto const dict = VanillaDict::as(ad);
-    assertx(m_mixed_elm < m_mixed_end);
-    assertx(m_mixed_end == dict->data() + dict->iterLimit());
-  } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
-    assertx(m_unaligned_elm < m_unaligned_end);
-    assertx(m_unaligned_end == VanillaVec::entries(const_cast<ArrayData*>(ad)) + ad->size());
-  } else {
-    assertx(m_pos < m_end);
-    assertx(m_end == ad->iter_end());
-  }
-  return true;
-}
-
 void IterImpl::kill() {
   if (!debug) return;
   // IterImpl is not POD, so we memset each POD field separately.
-  memset(&m_typeFields, kIterTrashFill, sizeof(m_typeFields));
   memset(&m_pos, kIterTrashFill, sizeof(m_pos));
   memset(&m_end, kIterTrashFill, sizeof(m_end));
 }
@@ -221,7 +179,6 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     if (isStructDict(bad)) {
       aiter.m_pos = 0;
       aiter.m_end = size;
-      aiter.setArrayNext(IterNextIndex::StructDict);
       auto const sad = StructDict::As(ad);
       tvDup(StructDict::GetPosVal(sad, 0), *valOut);
       return 1;
@@ -234,13 +191,11 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       // tvs because there is no associated key we need to track.
       aiter.m_unaligned_elm = VanillaVec::entries(ad);
       aiter.m_unaligned_end = aiter.m_unaligned_elm + size;
-      aiter.setArrayNext(IterNextIndex::VanillaVecPointer);
       tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
       return 1;
     }
     aiter.m_pos = 0;
     aiter.m_end = size;
-    aiter.setArrayNext(IterNextIndex::VanillaVec);
     tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     return 1;
   }
@@ -250,20 +205,17 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     if (BaseConst) {
       aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
       aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
-      aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
       tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_end = mixed->iterLimit();
-    aiter.setArrayNext(IterNextIndex::VanillaDict);
     mixed->getArrayElm(aiter.m_pos, valOut);
     return 1;
   }
 
   aiter.m_pos = ad->iter_begin();
   aiter.m_end = ad->iter_end();
-  aiter.setArrayNext(IterNextIndex::Array);
   tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
   return 1;
 }
@@ -301,7 +253,6 @@ int64_t new_iter_array_key(Iter*       dest,
     if (isStructDict(bad)) {
       aiter.m_pos = 0;
       aiter.m_end = size;
-      aiter.setArrayNext(IterNextIndex::StructDict);
       auto const sad = StructDict::As(ad);
       tvDup(StructDict::GetPosVal(sad, 0), *valOut);
       tvCopy(StructDict::GetPosKey(sad, 0), *keyOut);
@@ -312,7 +263,6 @@ int64_t new_iter_array_key(Iter*       dest,
   if (ad->isVanillaVec()) {
     aiter.m_pos = 0;
     aiter.m_end = size;
-    aiter.setArrayNext(IterNextIndex::VanillaVec);
     tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     tvCopy(make_tv<KindOfInt64>(0), *keyOut);
     return 1;
@@ -323,21 +273,18 @@ int64_t new_iter_array_key(Iter*       dest,
     if (BaseConst) {
       aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
       aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
-      aiter.setArrayNext(IterNextIndex::VanillaDictPointer);
       tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
       tvDup(aiter.m_mixed_elm->getKey(), *keyOut);
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_end = mixed->iterLimit();
-    aiter.setArrayNext(IterNextIndex::VanillaDict);
     mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
     return 1;
   }
 
   aiter.m_pos = ad->iter_begin();
   aiter.m_end = ad->iter_end();
-  aiter.setArrayNext(IterNextIndex::Array);
   tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
   tvDup(ad->nvGetKey(aiter.m_pos), *keyOut);
   return 1;
@@ -410,8 +357,8 @@ ALWAYS_INLINE void setOutputLocal(TypedValue tv, TypedValue* out) {
 template<bool HasKey>
 int64_t iter_next_vanilla_vec(Iter* it, ArrayData* ad,
                               TypedValue* valOut, TypedValue* keyOut) {
+  assertx(ad->isVanillaVec());
   auto& iter = *unwrap(it);
-  assertx(VanillaVec::checkInvariants(ad));
 
   ssize_t pos = iter.getPos() + 1;
   if (UNLIKELY(pos == iter.getEnd())) {
@@ -435,8 +382,8 @@ int64_t iter_next_vanilla_vec(Iter* it, ArrayData* ad,
 template<bool HasKey>
 int64_t iter_next_vanilla_vec_pointer(Iter* it, ArrayData* ad,
                                       TypedValue* valOut, TypedValue* keyOut) {
+  assertx(ad->isVanillaVec());
   always_assert(!HasKey);
-  assertx(VanillaVec::checkInvariants(ad));
 
   auto& iter = *unwrap(it);
   auto const elm = iter.m_unaligned_elm + 1;
@@ -460,6 +407,7 @@ int64_t iter_next_vanilla_vec_pointer(Iter* it, ArrayData* ad,
 template<bool HasKey>
 int64_t iter_next_vanilla_dict(Iter* it, ArrayData* ad,
                                TypedValue* valOut, TypedValue* keyOut) {
+  assertx(ad->isVanillaDict());
   auto& iter     = *unwrap(it);
   ssize_t pos    = iter.getPos();
   auto const arr = VanillaDict::as(ad);
@@ -493,6 +441,7 @@ int64_t iter_next_vanilla_dict(Iter* it, ArrayData* ad,
 template<bool HasKey>
 int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
                                        TypedValue* valOut, TypedValue* keyOut) {
+  assertx(ad->isVanillaDict());
   auto& iter = *unwrap(it);
   auto elm = iter.m_mixed_elm;
 
@@ -552,7 +501,6 @@ int64_t iter_next_array_generic(Iter* it, const ArrayData* ad,
 template<bool BaseConst>
 int64_t iter_next_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "iter_next_array: I %p\n", iter);
-  assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
 
   switch (ad->kind()) {
@@ -585,7 +533,6 @@ int64_t iter_next_array_key(Iter* iter,
                             TypedValue* valOut,
                             TypedValue* keyOut) {
   TRACE(2, "iter_array_next_key_ind: I %p\n", iter);
-  assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
 

@@ -515,7 +515,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckFuncNeedsCoverage:
   case CheckInit:
   case CheckInitMem:
-  case CheckIter:
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
@@ -907,7 +906,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StImplicitContext:
   case StIterEnd:
   case StIterPos:
-  case StIterType:
   case StLoc:
   case StLocMeta:
   case StLocRange:

@@ -868,21 +868,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return iter_effects(inst, fp, key | val);
   }
 
-  case CheckIter: {
-    auto const iter = inst.extra<CheckIter>()->iterId;
-    return may_load_store(aiter_type(inst.src(0), iter), AEmpty);
-  }
-
   case LdIterPos:
     return PureLoad { aiter_pos(inst.src(0), iterId(inst)) };
 
   case LdIterEnd:
     return PureLoad { aiter_end(inst.src(0), iterId(inst)) };
-
-  case StIterType: {
-    auto const iter = inst.extra<StIterType>()->iterId;
-    return PureStore { aiter_type(inst.src(0), iter), nullptr };
-  }
 
   case StIterPos:
     return PureStore { aiter_pos(inst.src(0), iterId(inst)), inst.src(1) };

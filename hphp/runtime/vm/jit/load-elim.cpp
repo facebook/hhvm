@@ -328,12 +328,6 @@ void clear_everything(Local& env) {
   env.state.avail.reset();
 }
 
-// Construct an immediate that represents all of an iterator's type fields.
-int64_t iter_type_immediate(const IterTypeData& data) {
-  return static_cast<uint32_t>(data.type.as_byte) << 16 |
-         static_cast<uint32_t>(data.layout.toUint16());
-}
-
 TrackedLoc* find_tracked(State& state,
                          Optional<ALocMeta> meta) {
   if (!meta) return nullptr;
@@ -540,18 +534,6 @@ Flags handle_general_effects(Local& env,
 
       case CheckMROProp:
         return handleCheck(Type::cns(true));
-
-      case CheckIter: {
-        assertx(m.inout == AEmpty);
-        assertx(m.backtrace.empty());
-        auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-        if (!meta || !env.state.avail[meta->index]) return std::nullopt;
-        auto const& type = env.state.tracked[meta->index].knownType;
-        if (!type.hasConstVal(TInt)) return std::nullopt;
-        auto const value = iter_type_immediate(*inst.extra<CheckIter>());
-        auto const match = type.intVal() == value;
-        return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
-      }
 
       case InitSProps: {
         auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
@@ -973,15 +955,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertStk:
     flags = handle_assert(env, inst);
     break;
-  case StIterType: {
-    // StIterType stores an immediate to the iter's type fields. We construct a
-    // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
-    auto const extra = inst.extra<StIterType>();
-    auto const value = iter_type_immediate(*extra);
-    auto const acls = canonicalize(AliasClass(aiter_type(inst.src(0), extra->iterId)));
-    store(env, acls, env.global.unit.cns(value));
-    break;
-  }
   case EndInlining:
     if (Cfg::HHIR::InliningAssertMemoryEffects) {
       assertx(inst.src(0)->inst()->is(BeginInlining));

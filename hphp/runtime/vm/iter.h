@@ -138,24 +138,7 @@ struct alignas(16) IterImpl {
   // In debug builds, this method will overwrite the iterator with garbage.
   void kill();
 
-  // Used by native code and by the JIT to pack the m_typeFields components.
-  static uint32_t packTypeFields(IterNextIndex index) {
-    return static_cast<uint32_t>(index) << 24;
-  }
-  static uint32_t packTypeFields(
-      IterNextIndex index, IterSpecialization spec, uint16_t layout) {
-    return static_cast<uint32_t>(index) << 24 |
-           static_cast<uint32_t>(spec.as_byte) << 16 |
-           static_cast<uint32_t>(layout);
-  }
-
   // JIT helpers used for specializing iterators.
-  static constexpr size_t typeOffset() {
-    return offsetof(IterImpl, m_typeFields);
-  }
-  static constexpr size_t typeSize() {
-    return sizeof(m_typeFields);
-  }
   static constexpr size_t posOffset() {
     return offsetof(IterImpl, m_pos);
   }
@@ -169,17 +152,6 @@ struct alignas(16) IterImpl {
     return sizeof(m_end);
   }
 
-  // When we specialize an iterator, we must *set* all m_type components (so as
-  // to be compatible with native helpers) but we only need to check this byte.
-  static constexpr size_t specializationOffset() {
-    return offsetof(IterImpl, m_specialization);
-  }
-
-  // ObjectData bases have this additional bit set; ArrayData bases do not.
-  static constexpr intptr_t objectBaseTag() {
-    return 0b1;
-  }
-
 private:
   template<bool BaseConst>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
@@ -189,24 +161,7 @@ private:
   friend int64_t new_iter_object(Iter*, ObjectData* obj,
                                  TypedValue* val, TypedValue* key);
 
-  // Set the type fields of an array. These fields are packed so that we
-  // can set them with a single mov-immediate to the union.
-  void setArrayNext(IterNextIndex index) {
-    m_typeFields = packTypeFields(index);
-    assertx(m_nextHelperIdx == index);
-    assertx(!m_specialization.specialized);
-  }
-
 public:
-  // This field is a union so new_iter_array can set it in one instruction.
-  union {
-    struct {
-      uint16_t m_layout;
-      IterSpecialization m_specialization;
-      IterNextIndex m_nextHelperIdx;
-    };
-    uint32_t m_typeFields;
-  };
   // Current position.
   // For the pointer iteration types, we use the appropriate pointers instead.
   union {

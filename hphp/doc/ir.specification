@@ -190,11 +190,6 @@ Instruction set
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| CheckIter<iterId,iterType>, ND, S(FramePtr), B
-
-  Check that specialization type of the given iterator `iterId` on the frame S0
-  is `iterType`; if it is not, branch to block B.
-
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
@@ -958,9 +953,9 @@ To string conversions:
 | LdIterEnd<iterId>, D(Int), S(FramePtr), NF
 
   Load the specified field of the iterator at `iterId`. These ops should only
-  be generated for iterators known to have a specialized type (via CheckIter)
-  and the values interpreted accordingly. If the iterator type is pointer based,
-  use IntAsPtrToElem to obtain the pointer.
+  be generated for iterators known to have a specialized type and the values
+  interpreted accordingly. If the iterator type is pointer based, use
+  IntAsPtrToElem to obtain the pointer.
 
 | LdFrameThis, DParam(Obj), S(FramePtr), NF
 
@@ -1825,19 +1820,14 @@ ReqBindJmp and CallFuncEntry.
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
 
-| StIterType<iterId,iterType>, ND, S(FramePtr), NF
-
-  Sets the type of the iterator at `iterId` to `iterType`. This type must be a
-  specialized type. Also sets auxiliary fields (like next helper index).
-
 | StIterPos<iterId>, ND, S(FramePtr) S(Int), NF
 
 | StIterEnd<iterId>, ND, S(FramePtr) S(Int), NF
 
   Store S1 to the given field of the iterator at `iterId`. These ops should only
-  be generated for iterators known to have a specialized type (via CheckIter)
-  and the values interpreted accordingly. If the iterator type is pointer based,
-  use PtrToElemAsInt to convert the pointer to an integer.
+  be generated for iterators known to have a specialized type and the values
+  interpreted accordingly. If the iterator type is pointer based, use
+  PtrToElemAsInt to convert the pointer to an integer.
 
 | StStk<offset>, ND, S(StkPtr) S(Cell), NF
 

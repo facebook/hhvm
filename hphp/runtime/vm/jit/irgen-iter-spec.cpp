@@ -556,13 +556,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   iterClear(env, data.valId);
   if (data.hasKey()) iterClear(env, data.keyId);
 
-  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const id = IterId(data.iterId);
-  auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
-  auto const ty = IterTypeData(
-    data.iterId, baseDT, accessor.iter_type, accessor.layout, baseConst,
-    data.hasKey());
-  gen(env, StIterType, ty, fp(env));
   auto const endPos = accessor.getPos(env, arr, size);
   gen(env, StIterEnd, id, fp(env), posAsInt(env, accessor, endPos));
   gen(env, Jmp, header, accessor.getPos(env, arr, cns(env, 0)));
@@ -609,19 +603,7 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
                          SSATmp* base) {
-  auto const exit = makeExitSlow(env);
-  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
-  auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
-  auto const type = IterTypeData(
-    data.iterId, baseDT, accessor.iter_type, accessor.layout, baseConst,
-    data.hasKey());
-  gen(env, CheckIter, exit, type, fp(env));
-
-  // For LocalBaseMutable iterators specialized on bespoke array-like bases,
-  // we unfortunately need to check the layout again at each IterNext.
-  if (!baseConst && type.type.bespoke) {
-    gen(env, CheckType, exit, accessor.arr_type, base);
-  }
+  accessor.checkBase(env, base, makeExitSlow(env));
 
   auto const asIterPosType = [&](SSATmp* iterPos) {
     if (!accessor.is_ptr_iter) return iterPos;

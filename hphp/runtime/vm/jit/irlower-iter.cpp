@@ -142,56 +142,6 @@ Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
   return fp[iterOffset(inst->marker(), extra->iterId)];
 }
 
-int32_t iteratorType(const IterTypeData& data) {
-  auto const nextHelperIndex = [&]{
-    if (data.type.bespoke) {
-      if (!data.baseConst) return IterNextIndex::Array;
-      if (data.layout.is_struct()) return IterNextIndex::StructDict;
-      return IterNextIndex::Array;
-    }
-    switch (data.baseType) {
-      case KindOfVec: {
-        auto is_ptr_iter = data.baseConst
-                        && !data.outputKey
-                        && VanillaVec::stores_unaligned_typed_values;
-        return is_ptr_iter
-          ? IterNextIndex::VanillaVecPointer
-          : IterNextIndex::VanillaVec;
-      }
-      case KindOfDict: {
-        return data.baseConst
-          ? IterNextIndex::VanillaDictPointer
-          : IterNextIndex::VanillaDict;
-      }
-      default:
-        always_assert(false);
-    }
-  }();
-
-  auto const type = IterImpl::packTypeFields(
-      nextHelperIndex, data.type, data.layout.toUint16());
-  return safe_cast<int32_t>(type);
-}
-
-}
-
-void cgCheckIter(IRLS& env, const IRInstruction* inst) {
-  static_assert(sizeof(IterSpecialization) == 1, "");
-  auto const iter = iteratorPtr(env, inst, inst->extra<CheckIter>());
-  auto const data = inst->extra<CheckIter>();
-  auto const type = data->type;
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-
-  // For bespoke specialized iterators, we have to check both the type byte
-  // and the ArrayLayout. For vanilla iterators, we can check the type alone.
-  if (type.bespoke) {
-    auto const full_type = iteratorType(*data);
-    v << cmplim{full_type, iter + IterImpl::typeOffset(), sf};
-  } else {
-    v << cmpbim{type.as_byte, iter + IterImpl::specializationOffset(), sf};
-  }
-  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 void cgLdIterPos(IRLS& env, const IRInstruction* inst) {
@@ -206,13 +156,6 @@ void cgLdIterEnd(IRLS& env, const IRInstruction* inst) {
   auto const dst  = dstLoc(env, inst, 0).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<LdIterEnd>());
   vmain(env) << load{iter + IterImpl::endOffset(), dst};
-}
-
-void cgStIterType(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::typeSize() == 4, "");
-  auto const type = iteratorType(*inst->extra<StIterType>());
-  auto const iter = iteratorPtr(env, inst, inst->extra<StIterType>());
-  vmain(env) << storeli{type, iter + IterImpl::typeOffset()};
 }
 
 void cgStIterPos(IRLS& env, const IRInstruction* inst) {

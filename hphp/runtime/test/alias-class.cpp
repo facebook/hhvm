@@ -397,13 +397,12 @@ TEST(AliasClass, IterUnion) {
   }
 
   {
-    AliasClass const iterB0 = aiter_type(FP, 0);
     AliasClass const iterP0 = aiter_pos(FP, 0);
     AliasClass const iterE0 = aiter_end(FP, 0);
     AliasClass const iterP1 = aiter_pos(FP, 1);
 
     // All the alias classes should be distinct to start.
-    auto const classes = std::vector{iterB0, iterP0, iterE0, iterP1};
+    auto const classes = std::vector{iterP0, iterE0, iterP1};
     for (auto const cls1 : classes) {
       for (auto const cls2 : classes) {
         if (cls1 == cls2) continue;
@@ -411,21 +410,19 @@ TEST(AliasClass, IterUnion) {
       }
     }
 
-    auto const u1 = iterB0 | iterP0;
-    EXPECT_TRUE(iterB0 <= u1);
+    auto const u1 = iterP0 | iterE0;
     EXPECT_TRUE(iterP0 <= u1);
-    EXPECT_FALSE(iterE0 <= u1);
+    EXPECT_TRUE(iterE0 <= u1);
     EXPECT_FALSE(iterP1 <= u1);
     EXPECT_TRUE(u1 <= AIterAny);
 
     EXPECT_TRUE(u1.iter());
     EXPECT_TRUE(u1.is_iter());
 
-    auto const u2 = iterB0 | iterP1;
+    auto const u2 = iterE0 | iterP1;
     EXPECT_FALSE(iterP0 <= u2);
-    EXPECT_TRUE(iterB0 <= u2);
+    EXPECT_TRUE(iterE0 <= u2);
     EXPECT_TRUE(iterP1 <= u2);
-    EXPECT_FALSE(iterE0 <= u2);
     EXPECT_TRUE(u2 <= AIterAny);
 
     EXPECT_TRUE(u1.iter());
@@ -446,30 +443,30 @@ TEST(AliasClass, IterUnion) {
 
   {
     AliasClass const iterP0 = aiter_pos(FP, 0);
-    AliasClass const iterB0 = aiter_type(FP, 0);
+    AliasClass const iterE0 = aiter_end(FP, 0);
     AliasClass const iterP1 = aiter_pos(FP, 1);
-    AliasClass const iterB1 = aiter_type(FP, 1);
+    AliasClass const iterE1 = aiter_end(FP, 1);
 
     EXPECT_FALSE(iterP0.maybe(iterP1));
-    EXPECT_FALSE(iterB0.maybe(iterB1));
+    EXPECT_FALSE(iterE0.maybe(iterE1));
 
-    auto const u1 = iterP0 | iterB0;
-    auto const u2 = iterP1 | iterB1;
+    auto const u1 = iterP0 | iterE0;
+    auto const u2 = iterP1 | iterE1;
     EXPECT_FALSE(u1 == u2);
     EXPECT_FALSE(u1.maybe(u2));
     EXPECT_FALSE(u1 <= u2);
     EXPECT_FALSE(u2 <= u1);
 
-    EXPECT_TRUE(iterB1 <= u2);
+    EXPECT_TRUE(iterE1 <= u2);
     EXPECT_TRUE(iterP1 <= u2);
     EXPECT_FALSE(iterP0 <= u2);
-    EXPECT_FALSE(iterB0 <= u2);
+    EXPECT_FALSE(iterE0 <= u2);
 
     auto const u3 = u1 | iterP1;
     EXPECT_TRUE(u3.iter());
     EXPECT_TRUE(iterP1 <= u3);
     EXPECT_TRUE(iterP0 <= u3);
-    EXPECT_TRUE(iterB0 <= u3);
+    EXPECT_TRUE(iterE0 <= u3);
     EXPECT_TRUE(u1 <= u3);
     EXPECT_TRUE(u2.maybe(u3));
 

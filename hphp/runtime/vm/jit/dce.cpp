@@ -338,7 +338,6 @@ bool canDCE(const IRInstruction& inst) {
   case StStkMeta:
   case StStkRange:
   case StOutValue:
-  case CheckIter:
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
@@ -467,7 +466,6 @@ bool canDCE(const IRInstruction& inst) {
   case StImplicitContext:
   case StMem:
   case StMemMeta:
-  case StIterType:
   case StIterEnd:
   case StIterPos:
   case StLoc:

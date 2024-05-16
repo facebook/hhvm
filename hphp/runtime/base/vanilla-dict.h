@@ -351,8 +351,6 @@ private:
 
 public:
 
-  uint32_t iterLimit() const { return m_used; }
-
   // Fetch a value and optional key (if keyPos != nullptr), given an
   // iterator pos.  Get the value cell, and initialize keyOut.
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;

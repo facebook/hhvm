@@ -314,6 +314,7 @@ struct HashTable : HashTableCommon {
   // Iteration
   /////////////////////////////////////////////////////////////////////////////
   ssize_t getIterBeginNotEmpty() const;
+  uint32_t iterLimit() const { return m_used; }
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);

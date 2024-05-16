@@ -201,16 +201,30 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   }
 
   if (LIKELY(ad->isVanillaDict())) {
-    auto const mixed = VanillaDict::as(ad);
+    auto const dict = VanillaDict::as(ad);
     if (BaseConst) {
-      aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
-      aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
-      tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
+      aiter.m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
+      aiter.m_dict_end = dict->data() + dict->iterLimit();
+      tvDup(*aiter.m_dict_elm->datatv(), *valOut);
       return 1;
     }
-    aiter.m_pos = mixed->getIterBeginNotEmpty();
-    aiter.m_end = mixed->iterLimit();
-    mixed->getArrayElm(aiter.m_pos, valOut);
+    aiter.m_pos = dict->getIterBeginNotEmpty();
+    aiter.m_end = dict->iterLimit();
+    dict->getArrayElm(aiter.m_pos, valOut);
+    return 1;
+  }
+
+  if (LIKELY(ad->isVanillaKeyset())) {
+    auto const keyset = VanillaKeyset::asSet(ad);
+    if (BaseConst) {
+      aiter.m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
+      aiter.m_keyset_end = keyset->data() + keyset->iterLimit();
+      tvDup(*aiter.m_keyset_elm->datatv(), *valOut);
+      return 1;
+    }
+    aiter.m_pos = keyset->getIterBeginNotEmpty();
+    aiter.m_end = keyset->iterLimit();
+    tvDup(*keyset->data()[aiter.m_pos].datatv(), *valOut);
     return 1;
   }
 
@@ -269,17 +283,33 @@ int64_t new_iter_array_key(Iter*       dest,
   }
 
   if (ad->isVanillaDict()) {
-    auto const mixed = VanillaDict::as(ad);
+    auto const dict = VanillaDict::as(ad);
     if (BaseConst) {
-      aiter.m_mixed_elm = mixed->data() + mixed->getIterBeginNotEmpty();
-      aiter.m_mixed_end = mixed->data() + mixed->iterLimit();
-      tvDup(*aiter.m_mixed_elm->datatv(), *valOut);
-      tvDup(aiter.m_mixed_elm->getKey(), *keyOut);
+      aiter.m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
+      aiter.m_dict_end = dict->data() + dict->iterLimit();
+      tvDup(*aiter.m_dict_elm->datatv(), *valOut);
+      tvDup(aiter.m_dict_elm->getKey(), *keyOut);
       return 1;
     }
-    aiter.m_pos = mixed->getIterBeginNotEmpty();
-    aiter.m_end = mixed->iterLimit();
-    mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
+    aiter.m_pos = dict->getIterBeginNotEmpty();
+    aiter.m_end = dict->iterLimit();
+    dict->getArrayElm(aiter.m_pos, valOut, keyOut);
+    return 1;
+  }
+
+  if (ad->isVanillaKeyset()) {
+    auto const keyset = VanillaKeyset::asSet(ad);
+    if (BaseConst) {
+      aiter.m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
+      aiter.m_keyset_end = keyset->data() + keyset->iterLimit();
+      tvDup(*aiter.m_keyset_elm->datatv(), *valOut);
+      tvDup(*valOut, *keyOut);
+      return 1;
+    }
+    aiter.m_pos = keyset->getIterBeginNotEmpty();
+    aiter.m_end = keyset->iterLimit();
+    tvDup(*keyset->data()[aiter.m_pos].datatv(), *valOut);
+    tvDup(*valOut, *keyOut);
     return 1;
   }
 
@@ -443,18 +473,75 @@ int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
                                        TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaDict());
   auto& iter = *unwrap(it);
-  auto elm = iter.m_mixed_elm;
+  auto elm = iter.m_dict_elm;
 
   do {
-    if ((++elm) == iter.m_mixed_end) {
+    if ((++elm) == iter.m_dict_end) {
       iter.kill();
       return 0;
     }
   } while (UNLIKELY(elm->isTombstone()));
 
-  iter.m_mixed_elm = elm;
+  iter.m_dict_elm = elm;
   setOutputLocal(*elm->datatv(), valOut);
   if constexpr (HasKey) setOutputLocal(elm->getKey(), keyOut);
+  return 1;
+}
+
+// "virtual" method implementation of *IterNext* for VanillaKeyset iterators.
+// Since we know the array type, we can do "while (elm[pos].isTombstone())"
+// inline here, and we can use VanillaKeyset helpers to extract the key and
+// value.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey>
+int64_t iter_next_vanilla_keyset(Iter* it, ArrayData* ad,
+                                 TypedValue* valOut, TypedValue* keyOut) {
+  assertx(ad->isVanillaKeyset());
+  auto& iter     = *unwrap(it);
+  ssize_t pos    = iter.getPos();
+  auto const arr = VanillaKeyset::asSet(ad);
+
+  do {
+    if ((++pos) == iter.getEnd()) {
+      iter.kill();
+      return 0;
+    }
+  } while (UNLIKELY(arr->data()[pos].isTombstone()));
+
+  iter.setPos(pos);
+  setOutputLocal(*arr->data()[pos].datatv(), valOut);
+  if constexpr (HasKey) setOutputLocal(*valOut, keyOut);
+  return 1;
+}
+
+// "virtual" method implementation of *IterNext* for VanillaKeysetPointer.
+// Since we know the base is VanillaKeyset and free of tombstones, we can simply
+// increment the element pointer and compare it to the end pointer.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey>
+int64_t iter_next_vanilla_keyset_pointer(Iter* it, ArrayData* ad,
+                                         TypedValue* valOut,
+                                         TypedValue* keyOut) {
+  assertx(ad->isVanillaKeyset());
+  auto& iter = *unwrap(it);
+  auto elm = iter.m_keyset_elm;
+
+  do {
+    if ((++elm) == iter.m_keyset_end) {
+      iter.kill();
+      return 0;
+    }
+  } while (UNLIKELY(elm->isTombstone()));
+
+  iter.m_keyset_elm = elm;
+  setOutputLocal(*elm->datatv(), valOut);
+  if constexpr (HasKey) setOutputLocal(*valOut, keyOut);
   return 1;
 }
 
@@ -512,6 +599,10 @@ int64_t iter_next_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
       return BaseConst
         ? iter_next_vanilla_dict_pointer<false>(iter, ad, valOut, nullptr)
         : iter_next_vanilla_dict<false>(iter, ad, valOut, nullptr);
+    case ArrayData::kKeysetKind:
+      return BaseConst
+        ? iter_next_vanilla_keyset_pointer<false>(iter, ad, valOut, nullptr)
+        : iter_next_vanilla_keyset<false>(iter, ad, valOut, nullptr);
     case ArrayData::kBespokeDictKind: {
       auto const bad = BespokeArray::asBespoke(ad);
       return isStructDict(bad)
@@ -519,7 +610,6 @@ int64_t iter_next_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
         : iter_next_array_generic<false>(iter, ad, valOut, nullptr);
     }
     case ArrayData::kBespokeVecKind:
-    case ArrayData::kKeysetKind:
     case ArrayData::kBespokeKeysetKind:
       return iter_next_array_generic<false>(iter, ad, valOut, nullptr);
     case ArrayData::kNumKinds:
@@ -543,6 +633,10 @@ int64_t iter_next_array_key(Iter* iter,
       return BaseConst
         ? iter_next_vanilla_dict_pointer<true>(iter, ad, valOut, keyOut)
         : iter_next_vanilla_dict<true>(iter, ad, valOut, keyOut);
+    case ArrayData::kKeysetKind:
+      return BaseConst
+        ? iter_next_vanilla_keyset_pointer<true>(iter, ad, valOut, keyOut)
+        : iter_next_vanilla_keyset<true>(iter, ad, valOut, keyOut);
     case ArrayData::kBespokeDictKind: {
       auto const bad = BespokeArray::asBespoke(ad);
       return isStructDict(bad)
@@ -550,7 +644,6 @@ int64_t iter_next_array_key(Iter* iter,
         : iter_next_array_generic<true>(iter, ad, valOut, keyOut);
     }
     case ArrayData::kBespokeVecKind:
-    case ArrayData::kKeysetKind:
     case ArrayData::kBespokeKeysetKind:
       return iter_next_array_generic<true>(iter, ad, valOut, keyOut);
     case ArrayData::kNumKinds:

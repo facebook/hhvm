@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/unaligned-typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/type-scan.h"
@@ -167,21 +168,25 @@ public:
   union {
     size_t m_pos;
     UnalignedTypedValue* m_unaligned_elm;
-    VanillaDictElm* m_mixed_elm;
+    VanillaDictElm* m_dict_elm;
+    VanillaKeysetElm* m_keyset_elm;
   };
   union {
     size_t m_end;
     UnalignedTypedValue* m_unaligned_end;
-    VanillaDictElm* m_mixed_end;
+    VanillaDictElm* m_dict_end;
+    VanillaKeysetElm* m_keyset_end;
   };
 
-  // These elements are always referenced via the base local.
-  // of this iterator or in a local. (If we weren't using pointer iteration, we
-  // would track elements by index, not by pointer, but GC would still work.)
-  TYPE_SCAN_IGNORE_FIELD(m_mixed_end);
-  TYPE_SCAN_IGNORE_FIELD(m_unaligned_end);
-  TYPE_SCAN_IGNORE_FIELD(m_mixed_elm);
+  // These elements are always referenced via the base local. (If we weren't
+  // using pointer iteration, we would track elements by index, not by pointer,
+  // but GC would still work.)
   TYPE_SCAN_IGNORE_FIELD(m_unaligned_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_dict_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_keyset_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_unaligned_end);
+  TYPE_SCAN_IGNORE_FIELD(m_dict_end);
+  TYPE_SCAN_IGNORE_FIELD(m_keyset_end);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

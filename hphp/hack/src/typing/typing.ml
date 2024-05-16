@@ -7721,7 +7721,12 @@ end = struct
             ~hint_pos:None
             ~is_async:false
       in
-      let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
+      let env =
+        if env.in_lambda || env.in_try then
+          LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit
+        else
+          LEnv.drop_cont env C.Next
+      in
       (env, Aast.Return None)
     | Return (Some e) ->
       let env = Typing_return.check_inout_return pos env in
@@ -7776,7 +7781,12 @@ end = struct
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let ty_mismatch_opt = mk_ty_mismatch_opt rty return_type ty_err_opt in
-      let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
+      let env =
+        if env.in_lambda || env.in_try then
+          LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit
+        else
+          LEnv.drop_cont env C.Next
+      in
       (env, Aast.Return (Some (hole_on_ty_mismatch ~ty_mismatch_opt te)))
     | Do (b, e) ->
       (* NOTE: leaks scope as currently implemented; this matches

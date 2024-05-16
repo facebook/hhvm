@@ -35,6 +35,7 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
+  in_lambda: bool;
   in_expr_tree: expr_tree_env option;
   inside_constructor: bool;
   checked: Tast.check_status;
@@ -84,6 +85,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;
     in_try = false;
+    in_lambda = false;
     in_expr_tree = None;
     inside_constructor = false;
     checked = Tast.COnce;

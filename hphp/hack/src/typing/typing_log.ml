@@ -587,6 +587,7 @@ let env_as_value env =
     tracing_info = _;
     in_loop;
     in_try;
+    in_lambda;
     in_expr_tree;
     inside_constructor;
     checked;
@@ -608,6 +609,7 @@ let env_as_value env =
       ("genv", genv_as_value env genv);
       ("in_loop", bool_as_value in_loop);
       ("in_try", bool_as_value in_try);
+      ("in_lambda", bool_as_value in_lambda);
       ("in_expr_tree", in_expr_tree_as_value env in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
       ("checked", checked_as_value checked);

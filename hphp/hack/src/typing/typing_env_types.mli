@@ -42,6 +42,7 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
+  in_lambda: bool;
   in_expr_tree: expr_tree_env option;
       (** If set to Some(_), then we are performing type checking within a
           expression tree. *)

@@ -1469,9 +1469,12 @@ let closure env f =
   let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
   let outer_check_status = env.checked in
+  let old_in_lambda = env.in_lambda in
+  let env = { env with in_lambda = true } in
   (* Typing *)
   let (env, ret) = f env in
   (* Restore the environment fields that were clobbered *)
+  let env = { env with in_lambda = old_in_lambda } in
   let env = { env with lenv = old_lenv } in
   let env = set_params env old_params in
   let env = set_return env old_return in

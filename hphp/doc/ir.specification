@@ -2834,13 +2834,13 @@ ReqBindJmp and CallFuncEntry.
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.
 
-| LdPtrIterKey<T>, DParam(Int|Str), S(PtrToElem), NF
+| LdPtrIterKey<T>, DPtrIterKey, S(Dict) S(PtrToElem), NF
 
-| LdPtrIterVal<T>, DParam(InitCell), S(PtrToElem), NF
+| LdPtrIterVal<T>, DPtrIterVal, S(ArrLike) S(PtrToElem), NF
 
-  Loads the key or val from the array element pointed to by S0. S0 must be a
-  valid elm; that is, it can't point to the end of the array data. LdPtrIterKey
-  can only be used for VanillaDictElms, but LdPtrIterVal supports
+  Loads the key or val from the array S0 containing an element pointed to by S1.
+  S1 must be a valid elm; that is, it can't point to the end of the array data.
+  LdPtrIterKey can only be used for VanillaDictElms, but LdPtrIterVal supports
   UnalignedTypedValues, VanillaDictElms and VanillaKeysetElms.
 
   T is used to type the result. For LdPtrIterKey, it must be a valid type for

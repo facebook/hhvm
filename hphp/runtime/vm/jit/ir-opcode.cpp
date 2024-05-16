@@ -53,6 +53,8 @@ TRACE_SET_MOD(hhir);
 #define DBespokeElemUninit   HasDest
 #define DBespokePosKey HasDest
 #define DBespokePosVal HasDest
+#define DPtrIterKey    HasDest
+#define DPtrIterVal    HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
 #define DModified(n)   HasDest
@@ -131,6 +133,8 @@ OpInfo g_opInfo[] = {
 #undef DBespokeElem
 #undef DBespokePosKey
 #undef DBespokePosVal
+#undef DPtrIterKey
+#undef DPtrIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem

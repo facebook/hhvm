@@ -537,6 +537,8 @@ using TypeNames::TCA;
 #define DBespokeElem
 #define DBespokePosKey
 #define DBespokePosVal
+#define DPtrIterKey
+#define DPtrIterVal
 #define DVecElem
 #define DDictElem
 #define DModified(n)
@@ -604,6 +606,8 @@ using TypeNames::TCA;
 #undef DBespokeElem
 #undef DBespokePosKey
 #undef DBespokePosVal
+#undef DPtrIterKey
+#undef DPtrIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DModified

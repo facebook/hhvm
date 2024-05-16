@@ -280,15 +280,9 @@ struct VecAccessor : public Accessor {
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    if (is_ptr_iter) {
-      auto const valType = arrLikeElemType(
-        arr_type,
-        TInt,
-        curClass(env)
-      ).first;
-      return gen(env, LdPtrIterVal, valType, elm);
-    }
-    return gen(env, LdVecElem, arr, elm);
+    return is_ptr_iter
+      ? gen(env, LdPtrIterVal, TInitCell, arr, elm)
+      : gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
@@ -326,16 +320,11 @@ struct DictAccessor : public Accessor {
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, LdPtrIterKey, key_jit_type, elm);
+    return gen(env, LdPtrIterKey, key_jit_type, arr, elm);
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    auto const valType = arrLikeElemType(
-      is_ptr_iter ? arr_type : arr->type(),
-      key_jit_type,
-      curClass(env)
-    ).first;
-    return gen(env, LdPtrIterVal, valType, elm);
+    return gen(env, LdPtrIterVal, TInitCell, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
@@ -384,12 +373,7 @@ struct KeysetAccessor : public Accessor {
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    auto const valType = arrLikeElemType(
-      is_ptr_iter ? arr_type : arr->type(),
-      TInt | TStr,
-      curClass(env)
-    ).first;
-    return gen(env, LdPtrIterVal, valType, elm);
+    return gen(env, LdPtrIterVal, TInt | TStr, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
@@ -614,9 +598,7 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
                            const IterArgs& data, const Type& value_type,
                            Block* body, uint32_t baseLocalId) {
   auto const pos = phiIterPos(env, accessor);
-  auto const arr = accessor.is_ptr_iter
-    ? nullptr
-    : iterBase(env, accessor, data, baseLocalId);
+  auto const arr = iterBase(env, accessor, data, baseLocalId);
 
   auto const finish = [&](SSATmp* elm, SSATmp* val) {
     auto const keyed = data.hasKey();

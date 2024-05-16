@@ -774,7 +774,7 @@ void cgAdvanceVecPtrIter(IRLS& env, const IRInstruction* inst) {
 
 void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
   static_assert(sizeof(VanillaDictElm::hash_t) == 4, "");
-  auto const elm = srcLoc(env, inst, 0).reg();
+  auto const elm = srcLoc(env, inst, 1).reg();
   auto const dst = dstLoc(env, inst, 0);
 
   auto& v = vmain(env);
@@ -790,7 +790,7 @@ void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
 void cgLdPtrIterVal(IRLS& env, const IRInstruction* inst) {
   static_assert(VanillaDictElm::dataOff() == 0, "");
   static_assert(TVOFF(m_data) == 0, "");
-  auto const elm = srcLoc(env, inst, 0).reg();
+  auto const elm = srcLoc(env, inst, 1).reg();
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), elm[0]);
 }
 

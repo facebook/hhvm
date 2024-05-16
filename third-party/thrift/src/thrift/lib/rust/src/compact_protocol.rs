@@ -67,7 +67,7 @@ pub enum CType {
 
 impl TryFrom<i8> for CType {
     type Error = anyhow::Error;
-
+    #[inline]
     fn try_from(v: i8) -> Result<Self> {
         let ret = match v {
             0 => CType::Stop,
@@ -111,6 +111,7 @@ impl From<CType> for TType {
 }
 
 impl From<TType> for CType {
+    #[inline]
     fn from(tty: TType) -> CType {
         match tty {
             TType::Stop => CType::Stop,
@@ -132,6 +133,7 @@ impl From<TType> for CType {
 }
 
 impl From<bool> for CType {
+    #[inline]
     fn from(b: bool) -> CType {
         if b { CType::BoolTrue } else { CType::BoolFalse }
     }
@@ -169,6 +171,7 @@ struct EncState {
 }
 
 impl EncState {
+    #[inline]
     fn new() -> Self {
         EncState {
             idxstack: Vec::new(),
@@ -177,23 +180,28 @@ impl EncState {
         }
     }
 
+    #[inline]
     fn struct_begin(&mut self) {
         self.idxstack.push(self.lastidx);
         self.lastidx = 0;
     }
 
+    #[inline]
     fn struct_end(&mut self) {
         self.lastidx = self.idxstack.pop().expect("struct stack underrun");
     }
 
+    #[inline]
     fn field_begin(&mut self, tty: TType, idx: i16) {
         self.field = Some((tty, idx));
     }
 
+    #[inline]
     fn field_get(&mut self) -> Option<(TType, i16)> {
         self.field.take()
     }
 
+    #[inline]
     fn field_end(&mut self) {
         debug_assert!(
             // the field was consumed during the write, or
@@ -203,6 +211,7 @@ impl EncState {
         )
     }
 
+    #[inline]
     fn in_field(&self) -> bool {
         self.field.is_some()
     }
@@ -234,6 +243,7 @@ where
 
     const PROTOCOL_ID: ProtocolID = ProtocolID::CompactProtocol;
 
+    #[inline]
     fn serializer<SZ, SER>(size: SZ, ser: SER) -> <Self::Serializer as ProtocolWriter>::Final
     where
         SZ: FnOnce(&mut Self::Sizer),
@@ -262,10 +272,12 @@ where
         buf.finish()
     }
 
+    #[inline]
     fn deserializer(buf: F::DecBuf) -> Self::Deserializer {
         CompactProtocolDeserializer::new(buf)
     }
 
+    #[inline]
     fn into_buffer(deser: Self::Deserializer) -> F::DecBuf {
         deser.into_inner()
     }
@@ -275,6 +287,7 @@ impl<B> CompactProtocolSerializer<B>
 where
     B: BufMutExt,
 {
+    #[inline]
     pub fn with_buffer(buffer: B) -> Self {
         Self {
             state: EncState::new(),
@@ -284,6 +297,7 @@ where
         }
     }
 
+    #[inline]
     pub fn into_inner(self) -> B {
         self.buffer
     }
@@ -306,6 +320,7 @@ where
     /// If we've just got a write_field_begin, then this will emit an appropriate field begin
     /// record to the wire. If we haven't then it's a no-op. This is used to defer emitting
     /// the field header until we get the field value, mostly to handle the strangeness of bool.
+    #[inline]
     fn write_field_id(&mut self, cty: CType) {
         match self.state.field_get() {
             None => {}
@@ -326,6 +341,7 @@ where
     }
 
     /// Common code for writing the start of a sequence of elements, used for lists and sets
+    #[inline]
     fn write_sequence(&mut self, elem_type: TType, size: usize) {
         assert!(
             self.container_limit.map_or(true, |lim| size < lim),
@@ -349,6 +365,7 @@ where
 impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     type Final = B::Final; // Our final form is whatever the buffer produces
 
+    #[inline]
     fn write_message_begin(&mut self, name: &str, msgtype: MessageType, seqid: u32) {
         let msgtype = msgtype as u8;
         self.buffer.put_u8(PROTOCOL_ID);
@@ -388,6 +405,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
         self.buffer.put_u8(CType::Stop as u8)
     }
 
+    #[inline]
     fn write_map_begin(&mut self, key_type: TType, value_type: TType, size: usize) {
         assert!(
             self.container_limit.map_or(true, |lim| size < lim),
@@ -415,6 +433,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     #[inline]
     fn write_map_end(&mut self) {}
 
+    #[inline]
     fn write_list_begin(&mut self, elem_type: TType, size: usize) {
         assert!(self.container_limit.map_or(true, |lim| size < lim));
         self.write_field_id(CType::List);
@@ -427,6 +446,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     #[inline]
     fn write_list_end(&mut self) {}
 
+    #[inline]
     fn write_set_begin(&mut self, elem_type: TType, size: usize) {
         self.write_field_id(CType::Set);
         self.write_sequence(elem_type, size);
@@ -435,8 +455,10 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     #[inline]
     fn write_set_value_begin(&mut self) {}
 
+    #[inline]
     fn write_set_end(&mut self) {}
 
+    #[inline]
     fn write_bool(&mut self, value: bool) {
         // If we're in a field then we need to encode the bool value as the field's type.
         // Otherwise we just emit it as a byte, but still using the field type values as
@@ -450,31 +472,37 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
         }
     }
 
+    #[inline]
     fn write_byte(&mut self, value: i8) {
         self.write_field_id(CType::Byte);
         self.buffer.put_i8(value)
     }
 
+    #[inline]
     fn write_i16(&mut self, value: i16) {
         self.write_field_id(CType::I16);
         self.write_varint_i16(value)
     }
 
+    #[inline]
     fn write_i32(&mut self, value: i32) {
         self.write_field_id(CType::I32);
         self.write_varint_i32(value)
     }
 
+    #[inline]
     fn write_i64(&mut self, value: i64) {
         self.write_field_id(CType::I64);
         self.write_varint_i64(value)
     }
 
+    #[inline]
     fn write_double(&mut self, value: f64) {
         self.write_field_id(CType::Double);
         self.buffer.put_f64(value)
     }
 
+    #[inline]
     fn write_float(&mut self, value: f32) {
         self.write_field_id(CType::Float);
         self.buffer.put_f32(value)
@@ -485,6 +513,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
         self.write_binary(value.as_bytes());
     }
 
+    #[inline]
     fn write_binary(&mut self, value: &[u8]) {
         let size = value.len();
         assert!(
@@ -499,12 +528,14 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
         self.buffer.put_slice(value)
     }
 
+    #[inline]
     fn finish(self) -> B::Final {
         self.buffer.finalize()
     }
 }
 
 impl<B: BufExt> CompactProtocolDeserializer<B> {
+    #[inline]
     pub fn new(buffer: B) -> Self {
         CompactProtocolDeserializer {
             state: EncState::new(),
@@ -515,10 +546,12 @@ impl<B: BufExt> CompactProtocolDeserializer<B> {
         }
     }
 
+    #[inline]
     pub fn into_inner(self) -> B {
         self.buffer
     }
 
+    #[inline]
     fn peek_bytes(&self, len: usize) -> Option<&[u8]> {
         if self.buffer.chunk().len() >= len {
             Some(&self.buffer.chunk()[..len])
@@ -527,19 +560,23 @@ impl<B: BufExt> CompactProtocolDeserializer<B> {
         }
     }
 
+    #[inline]
     fn read_varint_u64(&mut self) -> Result<u64> {
         varint::read_u64(&mut self.buffer)
     }
 
+    #[inline]
     fn read_varint_i64(&mut self) -> Result<i64> {
         self.read_varint_u64().map(varint::unzigzag)
     }
 
+    #[inline]
     fn read_varint_i32(&mut self) -> Result<i32> {
         self.read_varint_i64()
             .and_then(|v| i32::try_from(v).map_err(|_| ProtocolError::InvalidValue.into()))
     }
 
+    #[inline]
     fn read_varint_i16(&mut self) -> Result<i16> {
         self.read_varint_i64()
             .and_then(|v| i16::try_from(v).map_err(|_| (ProtocolError::InvalidValue).into()))
@@ -547,6 +584,7 @@ impl<B: BufExt> CompactProtocolDeserializer<B> {
 }
 
 impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
+    #[inline]
     fn read_message_begin<F, T>(&mut self, msgfn: F) -> Result<(T, MessageType, u32)>
     where
         F: FnOnce(&[u8]) -> T,
@@ -587,10 +625,12 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok((name, msgty, seqid))
     }
 
+    #[inline]
     fn read_message_end(&mut self) -> Result<()> {
         Ok(())
     }
 
+    #[inline]
     fn read_struct_begin<F, T>(&mut self, namefn: F) -> Result<T>
     where
         F: FnOnce(&[u8]) -> T,
@@ -599,11 +639,13 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(namefn(&[]))
     }
 
+    #[inline]
     fn read_struct_end(&mut self) -> Result<()> {
         self.state.struct_end();
         Ok(())
     }
 
+    #[inline]
     fn read_field_begin<F, T>(&mut self, fieldfn: F, _fields: &[Field]) -> Result<(T, TType, i16)>
     where
         F: FnOnce(&[u8]) -> T,
@@ -631,10 +673,12 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok((f, tty, idx))
     }
 
+    #[inline]
     fn read_field_end(&mut self) -> Result<()> {
         Ok(())
     }
 
+    #[inline]
     fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)> {
         let size = self.read_varint_u64()? as usize;
 
@@ -667,10 +711,12 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(())
     }
 
+    #[inline]
     fn read_map_end(&mut self) -> Result<()> {
         Ok(())
     }
 
+    #[inline]
     fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)> {
         let szty = self.read_byte()?;
         let cty = CType::try_from(szty & 0x0f)?;
@@ -699,10 +745,12 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(())
     }
 
+    #[inline]
     fn read_list_end(&mut self) -> Result<()> {
         Ok(())
     }
 
+    #[inline]
     fn read_set_begin(&mut self) -> Result<(TType, Option<usize>)> {
         self.read_list_begin()
     }
@@ -717,10 +765,12 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(())
     }
 
+    #[inline]
     fn read_set_end(&mut self) -> Result<()> {
         Ok(())
     }
 
+    #[inline]
     fn read_bool(&mut self) -> Result<bool> {
         // If we're in a bool field then take the value from that, otherwise
         // read it as a byte from the wire.
@@ -735,36 +785,43 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(cty == CType::BoolTrue)
     }
 
+    #[inline]
     fn read_byte(&mut self) -> Result<i8> {
         ensure_err!(self.buffer.remaining() >= 1, ProtocolError::EOF);
 
         Ok(self.buffer.get_i8())
     }
 
+    #[inline]
     fn read_i16(&mut self) -> Result<i16> {
         self.read_varint_i16()
     }
 
+    #[inline]
     fn read_i32(&mut self) -> Result<i32> {
         self.read_varint_i32()
     }
 
+    #[inline]
     fn read_i64(&mut self) -> Result<i64> {
         self.read_varint_i64()
     }
 
+    #[inline]
     fn read_double(&mut self) -> Result<f64> {
         ensure_err!(self.buffer.remaining() >= 8, ProtocolError::EOF);
 
         Ok(self.buffer.get_f64())
     }
 
+    #[inline]
     fn read_float(&mut self) -> Result<f32> {
         ensure_err!(self.buffer.remaining() >= 4, ProtocolError::EOF);
 
         Ok(self.buffer.get_f32())
     }
 
+    #[inline]
     fn read_string(&mut self) -> Result<String> {
         let vec = self.read_binary::<Vec<u8>>()?;
 
@@ -772,6 +829,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
             .map_err(|utf8_error| anyhow!("deserializing `string` from Thrift compact protocol got invalid utf-8, you need to use `binary` instead: {utf8_error}"))
     }
 
+    #[inline]
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V> {
         let received_len = self.read_varint_u64()? as usize;
         ensure_err!(
@@ -785,6 +843,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
 }
 
 /// How large an item will be when `serialize()` is called
+#[inline]
 pub fn serialize_size<T>(v: &T) -> usize
 where
     T: Serialize<CompactProtocolSerializer<SizeCounter>>,
@@ -802,6 +861,7 @@ where
 /// Serialize a Thrift value using the compact protocol to a pre-allocated buffer.
 /// This will panic if the buffer is not large enough. A buffer at least as
 /// large as the return value of `serialize_size` will not panic.
+#[inline]
 pub fn serialize_to_buffer<T>(v: T, buffer: BytesMut) -> CompactProtocolSerializer<BytesMut>
 where
     T: Serialize<CompactProtocolSerializer<BytesMut>>,
@@ -835,6 +895,7 @@ where
 }
 
 /// Serialize a Thrift value using the compact protocol.
+#[inline]
 pub fn serialize<T>(v: T) -> Bytes
 where
     T: Serialize<CompactProtocolSerializer<SizeCounter>>
@@ -857,6 +918,7 @@ impl<T> DeserializeSlice for T where
 }
 
 /// Deserialize a Thrift blob using the compact protocol.
+#[inline]
 pub fn deserialize<T, B, C>(b: B) -> Result<T>
 where
     B: Into<DeserializeSource<C>>,

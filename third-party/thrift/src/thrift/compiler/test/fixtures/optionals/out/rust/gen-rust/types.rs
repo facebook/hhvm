@@ -215,6 +215,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Color
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Color");
         p.write_field_begin("red", ::fbthrift::TType::Double, 1);
@@ -238,6 +239,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Color
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("alpha", ::fbthrift::TType::Double, 4),
@@ -345,6 +347,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Vehicle
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Vehicle");
         p.write_field_begin("color", ::fbthrift::TType::Struct, 1);
@@ -379,6 +382,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Vehicle
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("color", ::fbthrift::TType::Struct, 1),
@@ -502,6 +506,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Person
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Person");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1);
@@ -559,6 +564,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Person
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("address", ::fbthrift::TType::String, 4),

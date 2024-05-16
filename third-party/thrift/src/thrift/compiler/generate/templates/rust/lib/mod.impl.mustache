@@ -48,6 +48,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             p.write_set_begin(
                 <{{#type:set_elem_type}}{{>lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE,
@@ -65,6 +66,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
             let mut set = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
@@ -100,6 +102,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             p.write_map_begin(
                 <{{#type:key_type}}{{>lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE,
@@ -120,6 +123,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
@@ -157,6 +161,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.as_slice().write(p)
         }
@@ -166,6 +171,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
@@ -191,6 +197,7 @@
         P: ::fbthrift::ProtocolWriter,
         {{>lib/type}}: ::fbthrift::Serialize<P>,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.write(p)
         }
@@ -201,6 +208,7 @@
         P: ::fbthrift::ProtocolReader,
         {{>lib/type}}: ::fbthrift::Deserialize<P>,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
           Ok(LocalImpl({{>lib/type}}::read(p)?))
         }
@@ -215,6 +223,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             p.write_set_begin(
                 <{{#type:set_elem_type}}{{>lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE,
@@ -232,6 +241,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
             let mut set = <{{>lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
@@ -267,6 +277,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             p.write_map_begin(
                 <{{#type:key_type}}{{>lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE,
@@ -287,6 +298,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <{{>lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
@@ -324,6 +336,7 @@
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.as_slice().write(p)
         }
@@ -333,6 +346,7 @@
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
@@ -358,6 +372,7 @@
         P: ::fbthrift::ProtocolWriter,
         {{>lib/annfieldtype}}: ::fbthrift::Serialize<P>,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.write(p)
         }
@@ -368,6 +383,7 @@
         P: ::fbthrift::ProtocolReader,
         {{>lib/annfieldtype}}: ::fbthrift::Deserialize<P>,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
           Ok(LocalImpl({{>lib/annfieldtype}}::read(p)?))
         }

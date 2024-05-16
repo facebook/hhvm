@@ -71,6 +71,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Foo
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Foo");
         p.write_field_begin("field1", ::fbthrift::TType::I32, 3);
@@ -91,6 +92,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Foo
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 3),
@@ -197,6 +199,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Foo2
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Foo2");
         p.write_field_begin("field1", ::fbthrift::TType::I32, 3);
@@ -217,6 +220,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Foo2
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 3),

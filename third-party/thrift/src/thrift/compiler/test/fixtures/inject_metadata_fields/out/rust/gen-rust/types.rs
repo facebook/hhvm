@@ -89,6 +89,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Fields
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Fields");
         p.write_field_begin("injected_field", ::fbthrift::TType::String, 100);
@@ -103,6 +104,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Fields
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, 100),
@@ -184,6 +186,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedToEmptyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedToEmptyStruct");
         p.write_field_begin("injected_field", ::fbthrift::TType::String, -1100);
@@ -198,6 +201,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FieldsInjectedToEmptyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
@@ -291,6 +295,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedToStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedToStruct");
         p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
@@ -308,6 +313,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FieldsInjectedToStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
@@ -411,6 +417,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedWithIncludedStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedWithIncludedStruct");
         p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
@@ -438,6 +445,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FieldsInjectedWithIncludedStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),

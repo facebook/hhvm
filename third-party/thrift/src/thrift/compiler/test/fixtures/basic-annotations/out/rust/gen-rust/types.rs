@@ -243,6 +243,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStructNestedAnnotation
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStructNestedAnnotation");
         p.write_field_begin("name", ::fbthrift::TType::String, 1);
@@ -257,6 +258,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStructNestedAnnotation
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("name", ::fbthrift::TType::String, 1),
@@ -320,6 +322,7 @@ impl<P> ::fbthrift::Serialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
@@ -334,6 +337,7 @@ impl<P> ::fbthrift::Deserialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -451,6 +455,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyException
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyException");
         p.write_field_stop();
@@ -462,6 +467,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyException
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -591,6 +597,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_begin("major", ::fbthrift::TType::I64, 2);
@@ -629,6 +636,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("abstract", ::fbthrift::TType::String, 1),
@@ -858,6 +866,7 @@ impl<P> ::fbthrift::Serialize<P> for self::SecretStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("SecretStruct");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1);
@@ -875,6 +884,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::SecretStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("id", ::fbthrift::TType::I64, 1),

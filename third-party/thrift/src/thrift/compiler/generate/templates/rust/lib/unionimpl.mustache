@@ -40,6 +40,7 @@ impl<P> ::fbthrift::Serialize<P> for {{struct:rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("{{struct:name}}");
         match self {{>lib/block}}{{!
@@ -69,6 +70,7 @@ impl<P> ::fbthrift::Deserialize<P> for {{struct:rust_name}}
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             {{#struct:fields_by_name}}

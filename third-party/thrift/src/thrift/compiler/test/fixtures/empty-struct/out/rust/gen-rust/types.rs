@@ -54,6 +54,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Empty
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Empty");
         p.write_field_stop();
@@ -65,6 +66,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Empty
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -122,6 +124,7 @@ impl<P> ::fbthrift::Serialize<P> for Nada
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Nada");
         match self {
@@ -136,6 +139,7 @@ impl<P> ::fbthrift::Deserialize<P> for Nada
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];

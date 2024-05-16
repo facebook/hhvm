@@ -354,6 +354,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_begin("MyIntField", ::fbthrift::TType::I64, 1);
@@ -392,6 +393,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("MyDataField", ::fbthrift::TType::Struct, 3),
@@ -545,6 +547,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyDataItem
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyDataItem");
         p.write_field_stop();
@@ -556,6 +559,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyDataItem
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -619,6 +623,7 @@ impl<P> ::fbthrift::Serialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
@@ -653,6 +658,7 @@ impl<P> ::fbthrift::Deserialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("floatSet", ::fbthrift::TType::Set, 4),
@@ -788,6 +794,7 @@ impl<P> ::fbthrift::Serialize<P> for self::ReservedKeyword
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("ReservedKeyword");
         p.write_field_begin("reserved_field", ::fbthrift::TType::I32, 1);
@@ -802,6 +809,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::ReservedKeyword
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
@@ -901,6 +909,7 @@ impl<P> ::fbthrift::Serialize<P> for UnionToBeRenamed
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("UnionToBeRenamed");
         match self {
@@ -920,6 +929,7 @@ impl<P> ::fbthrift::Deserialize<P> for UnionToBeRenamed
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),

@@ -94,6 +94,7 @@ impl<P> ::fbthrift::Serialize<P> for ComplexUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("ComplexUnion");
         match self {
@@ -138,6 +139,7 @@ impl<P> ::fbthrift::Deserialize<P> for ComplexUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intListValue", ::fbthrift::TType::List, 2),
@@ -265,6 +267,7 @@ impl<P> ::fbthrift::Serialize<P> for ListUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("ListUnion");
         match self {
@@ -289,6 +292,7 @@ impl<P> ::fbthrift::Deserialize<P> for ListUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intListValue", ::fbthrift::TType::List, 2),
@@ -374,6 +378,7 @@ impl<P> ::fbthrift::Serialize<P> for DataUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("DataUnion");
         match self {
@@ -398,6 +403,7 @@ impl<P> ::fbthrift::Deserialize<P> for DataUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binaryData", ::fbthrift::TType::String, 1),
@@ -505,6 +511,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Val
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Val");
         p.write_field_begin("strVal", ::fbthrift::TType::String, 1);
@@ -525,6 +532,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Val
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intVal", ::fbthrift::TType::I32, 2),
@@ -600,6 +608,7 @@ impl<P> ::fbthrift::Serialize<P> for ValUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("ValUnion");
         match self {
@@ -624,6 +633,7 @@ impl<P> ::fbthrift::Deserialize<P> for ValUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("v1", ::fbthrift::TType::Struct, 1),
@@ -709,6 +719,7 @@ impl<P> ::fbthrift::Serialize<P> for VirtualComplexUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("VirtualComplexUnion");
         match self {
@@ -733,6 +744,7 @@ impl<P> ::fbthrift::Deserialize<P> for VirtualComplexUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("thingOne", ::fbthrift::TType::String, 1),
@@ -836,6 +848,7 @@ impl<P> ::fbthrift::Serialize<P> for self::NonCopyableStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("NonCopyableStruct");
         p.write_field_begin("num", ::fbthrift::TType::I64, 1);
@@ -850,6 +863,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::NonCopyableStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("num", ::fbthrift::TType::I64, 1),
@@ -913,6 +927,7 @@ impl<P> ::fbthrift::Serialize<P> for NonCopyableUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("NonCopyableUnion");
         match self {
@@ -932,6 +947,7 @@ impl<P> ::fbthrift::Deserialize<P> for NonCopyableUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("s", ::fbthrift::TType::Struct, 1),

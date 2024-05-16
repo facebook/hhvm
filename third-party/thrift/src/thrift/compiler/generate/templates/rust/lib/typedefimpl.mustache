@@ -31,6 +31,7 @@ impl<P> ::fbthrift::Serialize<P> for {{typedef:rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         {{program:crate}}::r#impl::write(&self.0, p)
     }
@@ -40,6 +41,7 @@ impl<P> ::fbthrift::Deserialize<P> for {{typedef:rust_name}}
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         {{program:crate}}::r#impl::read(p).map({{typedef:rust_name}})
     }
@@ -52,6 +54,7 @@ impl<P> ::fbthrift::Serialize<P> for {{typedef:rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         {{#typedef:has_adapter?}}{{!
         }}{{>lib/adapter/qualified}}::to_thrift(&self.0).write(p){{!
@@ -66,6 +69,7 @@ impl<P> ::fbthrift::Deserialize<P> for {{typedef:rust_name}}
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         {{#typedef:has_adapter?}}{{!
         }}{{>lib/adapter/qualified}}::from_thrift({{!

@@ -495,6 +495,7 @@ impl<P> ::fbthrift::Serialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
@@ -519,6 +520,7 @@ impl<P> ::fbthrift::Deserialize<P> for MyUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("aString", ::fbthrift::TType::String, 2),
@@ -624,6 +626,7 @@ impl<P> ::fbthrift::Serialize<P> for NonTriviallyDestructibleUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("NonTriviallyDestructibleUnion");
         match self {
@@ -643,6 +646,7 @@ impl<P> ::fbthrift::Deserialize<P> for NonTriviallyDestructibleUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 1),
@@ -764,6 +768,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyField
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyField");
         if let ::std::option::Option::Some(some) = &self.opt_value {
@@ -808,6 +813,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyField
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("enum_value", ::fbthrift::TType::I32, 5),
@@ -1031,6 +1037,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         if let ::std::option::Option::Some(some) = &self.opt_ref {
@@ -1053,6 +1060,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("opt_ref", ::fbthrift::TType::Struct, 1),
@@ -1180,6 +1188,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithUnion
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithUnion");
         p.write_field_begin("u", ::fbthrift::TType::Struct, 1);
@@ -1200,6 +1209,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithUnion
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("aDouble", ::fbthrift::TType::Double, 2),
@@ -1313,6 +1323,7 @@ impl<P> ::fbthrift::Serialize<P> for self::RecursiveStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("RecursiveStruct");
         if let ::std::option::Option::Some(some) = &self.mes {
@@ -1329,6 +1340,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::RecursiveStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("mes", ::fbthrift::TType::List, 1),
@@ -1429,6 +1441,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithContainers
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithContainers");
         p.write_field_begin("list_ref", ::fbthrift::TType::List, 1);
@@ -1458,6 +1471,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithContainers
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("list_ref", ::fbthrift::TType::List, 1),
@@ -1633,6 +1647,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithSharedConst
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithSharedConst");
         if let ::std::option::Option::Some(some) = &self.opt_shared_const {
@@ -1655,6 +1670,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithSharedConst
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("opt_shared_const", ::fbthrift::TType::Struct, 1),
@@ -1776,6 +1792,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Empty
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Empty");
         p.write_field_stop();
@@ -1787,6 +1804,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Empty
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -1866,6 +1884,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithRef
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithRef");
         p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
@@ -1888,6 +1907,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithRef
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
@@ -2015,6 +2035,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithBox
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithBox");
         if let ::std::option::Option::Some(some) = &self.a {
@@ -2041,6 +2062,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithBox
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("a", ::fbthrift::TType::String, 1),
@@ -2163,6 +2185,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithInternBox
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithInternBox");
         p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
@@ -2180,6 +2203,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithInternBox
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
@@ -2287,6 +2311,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithTerseInternBox
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithTerseInternBox");
         p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
@@ -2304,6 +2329,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithTerseInternBox
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
@@ -2442,6 +2468,7 @@ impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithInternBox
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("AdaptedStructWithInternBox");
         p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
@@ -2459,6 +2486,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithInternBox
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
@@ -2602,6 +2630,7 @@ impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithTerseInternBox
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("AdaptedStructWithTerseInternBox");
         p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
@@ -2619,6 +2648,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithTerseInternBox
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
@@ -2795,6 +2825,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeUnique
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithRefTypeUnique");
         p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
@@ -2817,6 +2848,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeUnique
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
@@ -2944,6 +2976,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeShared
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithRefTypeShared");
         p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
@@ -2966,6 +2999,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeShared
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
@@ -3093,6 +3127,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeSharedConst
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithRefTypeSharedConst");
         p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
@@ -3115,6 +3150,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeSharedConst
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
@@ -3238,6 +3274,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithRefAndAnnotCppNoexceptMoveC
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithRefAndAnnotCppNoexceptMoveCtor");
         p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
@@ -3252,6 +3289,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefAndAnnotCppNoexceptMov
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
@@ -3351,6 +3389,7 @@ impl<P> ::fbthrift::Serialize<P> for self::StructWithString
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithString");
         p.write_field_begin("def_unique_string_ref", ::fbthrift::TType::String, 1);
@@ -3377,6 +3416,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::StructWithString
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("def_shared_string_const_ref", ::fbthrift::TType::String, 3),

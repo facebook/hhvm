@@ -187,6 +187,7 @@ impl<P> ::fbthrift::Serialize<P> for number
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         self.0.write(p)
     }
@@ -196,6 +197,7 @@ impl<P> ::fbthrift::Deserialize<P> for number
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         ::fbthrift::Deserialize::read(p).map(number)
     }
@@ -235,6 +237,7 @@ impl<P> ::fbthrift::Serialize<P> for self::A
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("A");
         p.write_field_begin("useless_field", ::fbthrift::TType::I32, 1);
@@ -249,6 +252,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::A
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("useless_field", ::fbthrift::TType::I32, 1),
@@ -312,6 +316,7 @@ impl<P> ::fbthrift::Serialize<P> for U
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("U");
         match self {
@@ -336,6 +341,7 @@ impl<P> ::fbthrift::Deserialize<P> for U
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("i", ::fbthrift::TType::I32, 1),
@@ -439,6 +445,7 @@ impl<P> ::fbthrift::Serialize<P> for self::Bang
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Bang");
         p.write_field_begin("message", ::fbthrift::TType::String, 1);
@@ -453,6 +460,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::Bang
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),

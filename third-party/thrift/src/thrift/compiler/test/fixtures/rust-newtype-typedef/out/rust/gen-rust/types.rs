@@ -48,6 +48,7 @@ impl<P> ::fbthrift::Serialize<P> for MapType
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         crate::r#impl::write(&self.0, p)
     }
@@ -57,6 +58,7 @@ impl<P> ::fbthrift::Deserialize<P> for MapType
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         crate::r#impl::read(p).map(MapType)
     }
@@ -69,6 +71,7 @@ impl<P> ::fbthrift::Serialize<P> for BinType
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         crate::r#impl::write(&self.0, p)
     }
@@ -78,6 +81,7 @@ impl<P> ::fbthrift::Deserialize<P> for BinType
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         crate::r#impl::read(p).map(BinType)
     }
@@ -91,6 +95,7 @@ impl<P> ::fbthrift::Serialize<P> for BytesType
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         self.0.write(p)
     }
@@ -100,6 +105,7 @@ impl<P> ::fbthrift::Deserialize<P> for BytesType
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         ::fbthrift::Deserialize::read(p).map(BytesType)
     }
@@ -151,6 +157,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_begin("the_map", ::fbthrift::TType::Map, 1);
@@ -183,6 +190,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("doublefloaty", ::fbthrift::TType::Double, 7),
@@ -307,6 +315,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.as_slice().write(p)
         }
@@ -316,6 +325,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
@@ -337,6 +347,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             self.0.as_slice().write(p)
         }
@@ -346,6 +357,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
@@ -367,6 +379,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolWriter,
     {
+        #[inline]
         fn write(&self, p: &mut P) {
             p.write_map_begin(
                 <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE,
@@ -387,6 +400,7 @@ pub(crate) mod r#impl {
     where
         P: ::fbthrift::ProtocolReader,
     {
+        #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <crate::types::MapType>::with_capacity(len.unwrap_or_default());

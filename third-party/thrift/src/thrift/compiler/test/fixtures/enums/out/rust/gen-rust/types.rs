@@ -990,6 +990,7 @@ impl<P> ::fbthrift::Serialize<P> for self::SomeStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("SomeStruct");
         p.write_field_begin("reasonable", ::fbthrift::TType::I32, 1);
@@ -1013,6 +1014,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::SomeStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("fine", ::fbthrift::TType::I32, 2),
@@ -1124,6 +1126,7 @@ impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_begin("me2_3", ::fbthrift::TType::I32, 1);
@@ -1147,6 +1150,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("me1_t1", ::fbthrift::TType::I32, 4),

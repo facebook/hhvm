@@ -122,6 +122,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FooStreamEx
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FooStreamEx");
         p.write_field_stop();
@@ -133,6 +134,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FooStreamEx
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -206,6 +208,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FooEx
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FooEx");
         p.write_field_stop();
@@ -217,6 +220,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FooEx
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
@@ -290,6 +294,7 @@ impl<P> ::fbthrift::Serialize<P> for self::FooEx2
 where
     P: ::fbthrift::ProtocolWriter,
 {
+    #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("FooEx2");
         p.write_field_stop();
@@ -301,6 +306,7 @@ impl<P> ::fbthrift::Deserialize<P> for self::FooEx2
 where
     P: ::fbthrift::ProtocolReader,
 {
+    #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];

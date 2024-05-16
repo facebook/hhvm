@@ -15,10 +15,10 @@
  */
 
 #include <stdexcept>
-#include <folly/VirtualExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/MeteredExecutor.h>
 #include <folly/executors/ThreadPoolExecutor.h>
+#include <folly/executors/VirtualExecutor.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 
 namespace apache::thrift {

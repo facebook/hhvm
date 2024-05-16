@@ -37,9 +37,9 @@
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
 #include <folly/TokenBucket.h>
-#include <folly/VirtualExecutor.h>
 #include <folly/dynamic.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/executors/VirtualExecutor.h>
 #include <folly/experimental/PrimaryPtr.h>
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/experimental/observer/Observer.h>

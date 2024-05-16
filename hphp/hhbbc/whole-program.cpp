@@ -597,7 +597,10 @@ void analyze_constants(Index& index) {
     scheduler.registerUnit(unit);
   }
 
-  auto const run = [&] (AnalysisInput input) -> coro::Task<void> {
+  auto const run = [&] (AnalysisInput input,
+                        CoroLatch& latch) -> coro::Task<void> {
+    auto guard = folly::makeGuard([&] { latch.count_down(); });
+
     co_await coro::co_reschedule_on_current_executor;
 
     if (input.empty()) co_return;
@@ -611,39 +614,58 @@ void analyze_constants(Index& index) {
       index.configRef().getCopy()
     );
 
-    // Run the job
+    auto classNames = input.classNames();
+    auto cinfoNames = input.cinfoNames();
+    auto minfoNames = input.minfoNames();
+    auto funcNames = input.funcNames();
+    auto unitNames = input.unitNames();
+    auto tuple = input.toTuple(std::move(inputMeta));
+
+    // Signal we're done touching the Index.
+    guard.dismiss();
+    latch.count_down();
+
     auto outputs = co_await index.client().exec(
       s_analyzeConstantsJob,
       std::move(config),
-      singleton_vec(input.toTuple(std::move(inputMeta))),
+      singleton_vec(std::move(tuple)),
       std::move(metadata)
     );
+
+    // Run the job
     always_assert(outputs.size() == 1);
     auto& [clsRefs, funcRefs, unitRefs,
            clsBCRefs, funcBCRefs,
            cinfoRefs, finfoRefs,
            minfoRefs, metaRef] = outputs[0];
 
+    // We cannot call scheduler.record below until all co-routines have called
+    // input.toTuple (record modifies the Index and toTuple reads from it), so
+    // block here until the latch is cleared. Technically we only need to wait
+    // on this before scheduler.record, but by doing this before the load, we
+    // avoid blocking while holding onto a lot of memory.
+    co_await latch.wait();
+
     auto meta = co_await index.client().load(std::move(metaRef));
 
-    auto classNames = input.classNames();
-    auto cinfoNames = input.cinfoNames();
-    auto minfoNames = input.minfoNames();
+    funcNames.erase(
+      std::remove_if(
+        begin(funcNames),
+        end(funcNames),
+        [&] (SString n) { return meta.removedFuncs.count(n); }
+      ),
+      end(funcNames)
+    );
+
     always_assert(clsRefs.size() == classNames.size());
     always_assert(clsBCRefs.size() == classNames.size());
     always_assert(cinfoRefs.size() == cinfoNames.size());
     always_assert(minfoRefs.size() == minfoNames.size());
     always_assert(meta.classDeps.size() == classNames.size());
-
-    auto funcNames = from(input.funcNames())
-      | filter([&] (SString n) { return !meta.removedFuncs.count(n); })
-      | as<std::vector>();
     always_assert(funcRefs.size() == funcNames.size());
     always_assert(funcBCRefs.size() == funcNames.size());
     always_assert(finfoRefs.size() == funcNames.size());
     always_assert(meta.funcDeps.size() == funcNames.size());
-
-    auto unitNames = input.unitNames();
     always_assert(unitRefs.size() == unitNames.size());
 
     // Inform the scheduler
@@ -675,7 +697,7 @@ void analyze_constants(Index& index) {
       folly::sformat("round {} -- {} work items", round, workItems)
     };
     // Get the work buckets from the scheduler.
-    auto const work = [&] {
+    auto work = [&] {
       trace_time trace2{
         "analyze constants schedule",
         folly::sformat("round {}", round)
@@ -695,11 +717,14 @@ void analyze_constants(Index& index) {
         folly::sformat("round {}", round)
       };
       trace2.ignore_client_stats();
+
+      CoroLatch latch{work.size()};
       coro::blockingWait(coro::collectAllRange(
         from(work)
           | move
-          | map([&] (AnalysisInput input) {
-              return run(std::move(input)).scheduleOn(index.executor().sticky());
+          | map([&] (AnalysisInput&& input) {
+              return run(std::move(input), latch)
+                .scheduleOn(index.executor().sticky());
             })
           | as<std::vector>()
       ));

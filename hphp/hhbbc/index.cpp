@@ -6395,42 +6395,50 @@ private:
   // same analysis.
 
   bool allowed(FuncClsUnit fc, Class c, bool bytecode) const {
+    auto& cache = bytecode ? allowCacheBC : allowCache;
+    if (auto const b = folly::get_ptr(cache, fc, c.name)) return *b;
+
     auto const a = folly::get_ptr(allows, fc);
     assertx(a);
     assertx(a->process->contains(index.bucketIdx));
-    if (auto const cls = folly::get_default(index.classes, c.name)) {
-      auto const canon = canonicalize(*cls);
-      if (auto const c2 = canon.cls()) {
-        auto const ca = folly::get_ptr(allows, c2);
+
+    auto const b = [&] {
+      if (auto const cls = folly::get_default(index.classes, c.name)) {
+        auto const canon = canonicalize(*cls);
+        if (auto const c2 = canon.cls()) {
+          auto const ca = folly::get_ptr(allows, c2);
+          assertx(ca);
+          assertx(ca->present->contains(index.bucketIdx));
+          return a->process->isSubset(
+            bytecode ? *ca->withBC : *ca->present
+          );
+        }
+        if (auto const f = canon.func()) {
+          auto const fa = folly::get_ptr(allows, f);
+          assertx(fa);
+          assertx(fa->present->contains(index.bucketIdx));
+          return a->process->isSubset(
+            bytecode ? *fa->withBC : *fa->present
+          );
+        }
+        always_assert(false);
+      }
+      if (auto const ta = folly::get_ptr(index.typeAliases, c.name)) {
+        auto const ua = folly::get_ptr(allows, ta->second);
+        assertx(ua);
+        assertx(ua->present->contains(index.bucketIdx));
+        return a->process->isSubset(*ua->present);
+      }
+      if (index.badClasses.count(c.name)) {
+        auto const ca = folly::get_ptr(badClassAllows, c.name);
         assertx(ca);
         assertx(ca->present->contains(index.bucketIdx));
-        return a->process->isSubset(
-          bytecode ? *ca->withBC : *ca->present
-        );
+        return a->process->isSubset(*ca->present);
       }
-      if (auto const f = canon.func()) {
-        auto const fa = folly::get_ptr(allows, f);
-        assertx(fa);
-        assertx(fa->present->contains(index.bucketIdx));
-        return a->process->isSubset(
-          bytecode ? *fa->withBC : *fa->present
-        );
-      }
-      always_assert(false);
-    }
-    if (auto const ta = folly::get_ptr(index.typeAliases, c.name)) {
-      auto const ua = folly::get_ptr(allows, ta->second);
-      assertx(ua);
-      assertx(ua->present->contains(index.bucketIdx));
-      return a->process->isSubset(*ua->present);
-    }
-    if (index.badClasses.count(c.name)) {
-      auto const ca = folly::get_ptr(badClassAllows, c.name);
-      assertx(ca);
-      assertx(ca->present->contains(index.bucketIdx));
-      return a->process->isSubset(*ca->present);
-    }
-    return false;
+      return false;
+    }();
+    cache[fc][c.name] = b;
+    return b;
   }
 
   bool allowed(FuncClsUnit fc, Func f, bool bytecode) const {
@@ -6604,6 +6612,13 @@ private:
   hphp_fast_map<const php::Const*, FuncClsUnitSet> clsConstants;
   hphp_fast_map<const php::Constant*, FuncClsUnitSet> constants;
   hphp_fast_map<const php::Class*, FuncClsUnitSet> anyClsConstants;
+
+  // We do a lot of permission checks on the same items, so cache the
+  // results.
+  mutable hphp_fast_map<FuncClsUnit, TSStringToOneT<bool>,
+                        FuncClsUnitHasher> allowCache;
+  mutable hphp_fast_map<FuncClsUnit, TSStringToOneT<bool>,
+                        FuncClsUnitHasher> allowCacheBC;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -9108,6 +9123,11 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
         std::adjacent_find(uninstantiable.begin(), uninstantiable.end()) ==
         uninstantiable.end()
       );
+
+      bucket.shrink_to_fit();
+      depOut.shrink_to_fit();
+      uninstantiable.shrink_to_fit();
+
       return HierarchicalWorkBucket{
         std::move(bucket),
         std::move(depOut),
@@ -20648,68 +20668,162 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
 
 namespace {
 
-template <typename V, typename H, typename E, typename C>
+template <typename H, typename V, typename E, typename F, typename C>
 std::vector<SString>
-map_to_sorted_key_vec(const hphp_fast_map<SString, V, H, E>& m,
-                      const C& c) {
+map_to_sorted_key_vec(
+  const hphp_fast_map<SString, V, H, E>& m,
+  const F& f,
+  const C& c
+) {
   std::vector<SString> keys;
   keys.reserve(m.size());
-  for (auto const& [k, _] : m) keys.emplace_back(k);
+  for (auto const& [k, v] : m) {
+    if (!f(v)) continue;
+    keys.emplace_back(k);
+  }
   std::sort(begin(keys), end(keys), c);
+  keys.shrink_to_fit();
   return keys;
-}
-
-template <typename V, typename H, typename E, typename C>
-std::vector<V> map_to_sorted_vec(const hphp_fast_map<SString, V, H, E>& m,
-                                 const C& c) {
-  auto const keys = map_to_sorted_key_vec(m, c);
-  std::vector<V> out;
-  out.reserve(keys.size());
-  for (auto const k : keys) out.emplace_back(m.at(k));
-  return out;
 }
 
 }
 
 std::vector<SString> AnalysisInput::classNames() const {
-  return map_to_sorted_key_vec(classes, string_data_lt_type{});
+  return map_to_sorted_key_vec(
+    classes,
+    [] (Kind k) { return any(k & Kind::Rep); },
+    string_data_lt_type{}
+  );
 }
 
 std::vector<SString> AnalysisInput::funcNames() const {
-  return map_to_sorted_key_vec(funcs, string_data_lt_func{});
+  return map_to_sorted_key_vec(
+    funcs,
+    [] (Kind k) { return any(k & Kind::Rep); },
+    string_data_lt_func{}
+  );
 }
 
 std::vector<SString> AnalysisInput::unitNames() const {
-  return map_to_sorted_key_vec(units, string_data_lt{});
+  return map_to_sorted_key_vec(
+    units,
+    [] (Kind k) { return any(k & Kind::Rep); },
+    string_data_lt{}
+  );
 }
 
 std::vector<SString> AnalysisInput::cinfoNames() const {
-  using namespace folly::gen;
-  return from(classNames())
-    | filter([&] (SString n) { return (bool)cinfos.count(n); })
-    | as<std::vector>();
+  return map_to_sorted_key_vec(
+    classes,
+    [] (Kind k) { return any(k & Kind::Rep) && any(k & Kind::Info); },
+    string_data_lt_type{}
+  );
 }
 
 std::vector<SString> AnalysisInput::minfoNames() const {
-  using namespace folly::gen;
-  return from(classNames())
-    | filter([&] (SString n) { return (bool)minfos.count(n); })
-    | as<std::vector>();
+  return map_to_sorted_key_vec(
+    classes,
+    [] (Kind k) { return any(k & Kind::Rep) && any(k & Kind::MInfo); },
+    string_data_lt_type{}
+  );
 }
 
-AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) const {
-  return Tuple{
-    map_to_sorted_vec(classes, string_data_lt_type{}),
-    map_to_sorted_vec(funcs, string_data_lt_func{}),
-    map_to_sorted_vec(units, string_data_lt{}),
-    map_to_sorted_vec(classBC, string_data_lt_type{}),
-    map_to_sorted_vec(funcBC, string_data_lt_func{}),
-    map_to_sorted_vec(cinfos, string_data_lt_type{}),
-    map_to_sorted_vec(finfos, string_data_lt_func{}),
-    map_to_sorted_vec(minfos, string_data_lt_type{}),
-    map_to_sorted_vec(depClasses, string_data_lt_type{}),
-    map_to_sorted_vec(depFuncs, string_data_lt_func{}),
-    map_to_sorted_vec(depUnits, string_data_lt{}),
+AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) {
+  auto const sort = [] (auto const& m, auto const& c) {
+    return map_to_sorted_key_vec(m, [] (Kind) { return true; }, c);
+  };
+
+  UniquePtrRefVec<php::Class> outClasses;
+  UniquePtrRefVec<php::ClassBytecode> outClassBC;
+  RefVec<AnalysisIndexCInfo> outCInfos;
+  RefVec<AnalysisIndexMInfo> outMInfos;
+  UniquePtrRefVec<php::Class> outDepClasses;
+
+  for (auto const n : sort(classes, string_data_lt_type{})) {
+    auto const k = classes.at(n);
+    if (any(k & Kind::Rep)) {
+      outClasses.emplace_back(index->classRefs.at(n));
+    }
+    if (any(k & Kind::Bytecode)) {
+      outClassBC.emplace_back(index->classBytecodeRefs.at(n));
+    }
+    if (any(k & Kind::Info)) {
+      outCInfos.emplace_back(
+        index->classInfoRefs.at(n).cast<AnalysisIndexCInfo>()
+      );
+    }
+    if (any(k & Kind::MInfo)) {
+      outMInfos.emplace_back(
+        index->uninstantiableClsMethRefs.at(n).cast<AnalysisIndexMInfo>()
+      );
+    }
+    if (any(k & Kind::Dep)) {
+      outDepClasses.emplace_back(index->classRefs.at(n));
+    }
+  }
+  decltype(classes){}.swap(classes);
+  outClasses.shrink_to_fit();
+  outClassBC.shrink_to_fit();
+  outCInfos.shrink_to_fit();
+  outMInfos.shrink_to_fit();
+  outDepClasses.shrink_to_fit();
+
+  UniquePtrRefVec<php::Func> outFuncs;
+  UniquePtrRefVec<php::FuncBytecode> outFuncBC;
+  RefVec<AnalysisIndexFInfo> outFInfos;
+  UniquePtrRefVec<php::Func> outDepFuncs;
+
+  for (auto const n : sort(funcs, string_data_lt_func{})) {
+    auto const k = funcs.at(n);
+    if (any(k & Kind::Rep)) {
+      outFuncs.emplace_back(index->funcRefs.at(n));
+    }
+    if (any(k & Kind::Bytecode)) {
+      outFuncBC.emplace_back(index->funcBytecodeRefs.at(n));
+    }
+    if (any(k & Kind::Info)) {
+      outFInfos.emplace_back(
+        index->funcInfoRefs.at(n).cast<AnalysisIndexFInfo>()
+      );
+    }
+    if (any(k & Kind::Dep)) {
+      outDepFuncs.emplace_back(index->funcRefs.at(n));
+    }
+  }
+  decltype(funcs){}.swap(funcs);
+  outFuncs.shrink_to_fit();
+  outFuncBC.shrink_to_fit();
+  outFInfos.shrink_to_fit();
+  outDepFuncs.shrink_to_fit();
+
+  UniquePtrRefVec<php::Unit> outUnits;
+  UniquePtrRefVec<php::Unit> outDepUnits;
+
+  for (auto const n : sort(units, string_data_lt{})) {
+    auto const k = units.at(n);
+    if (any(k & Kind::Rep)) {
+      outUnits.emplace_back(index->unitRefs.at(n));
+    }
+    if (any(k & Kind::Dep)) {
+      outDepUnits.emplace_back(index->unitRefs.at(n));
+    }
+  }
+  decltype(units){}.swap(units);
+  outUnits.shrink_to_fit();
+  outDepUnits.shrink_to_fit();
+
+  return Tuple {
+    std::move(outClasses),
+    std::move(outFuncs),
+    std::move(outUnits),
+    std::move(outClassBC),
+    std::move(outFuncBC),
+    std::move(outCInfos),
+    std::move(outFInfos),
+    std::move(outMInfos),
+    std::move(outDepClasses),
+    std::move(outDepFuncs),
+    std::move(outDepUnits),
     std::move(meta)
   };
 }
@@ -21844,16 +21958,17 @@ void AnalysisScheduler::addClassToInput(SString name,
                                         AnalysisInput& input) const {
   FTRACE(4, "AnalysisScheduler: adding class {} to input\n", name);
 
-  input.classes.emplace(name, index.m_data->classRefs.at(name));
-  input.classBC.emplace(name, index.m_data->classBytecodeRefs.at(name));
-  if (auto const ref = folly::get_ptr(index.m_data->classInfoRefs, name)) {
-    input.cinfos.emplace(name, ref->cast<AnalysisIndexCInfo>());
-  } else if (auto const ref =
-             folly::get_ptr(index.m_data->uninstantiableClsMethRefs, name)) {
-    input.minfos.emplace(name, ref->cast<AnalysisIndexMInfo>());
+  using K = AnalysisInput::Kind;
+  auto k = K::Rep | K::Bytecode;
+  if (index.m_data->classInfoRefs.count(name)) {
+    k |= K::Info;
+  } else if (index.m_data->uninstantiableClsMethRefs.count(name)) {
+    k |= K::MInfo;
   } else {
     input.meta.badClasses.emplace(name);
   }
+  input.classes[name] |= k;
+
   if (!input.m_key) input.m_key = name;
 }
 
@@ -21861,12 +21976,8 @@ void AnalysisScheduler::addFuncToInput(SString name,
                                        AnalysisInput& input) const {
   FTRACE(4, "AnalysisScheduler: adding func {} to input\n", name);
 
-  input.funcs.emplace(name, index.m_data->funcRefs.at(name));
-  input.funcBC.emplace(name, index.m_data->funcBytecodeRefs.at(name));
-  input.finfos.emplace(
-    name,
-    index.m_data->funcInfoRefs.at(name).cast<AnalysisIndexFInfo>()
-  );
+  using K = AnalysisInput::Kind;
+  input.funcs[name] |= (K::Rep | K::Bytecode | K::Info);
   if (!input.m_key) input.m_key = name;
 
   auto const& closures = folly::get_default(index.m_data->funcToClosures, name);
@@ -21876,7 +21987,8 @@ void AnalysisScheduler::addFuncToInput(SString name,
 void AnalysisScheduler::addUnitToInput(SString name,
                                        AnalysisInput& input) const {
   FTRACE(4, "AnalysisScheduler: adding unit {} to input\n", name);
-  input.units.emplace(name, index.m_data->unitRefs.at(name));
+  using K = AnalysisInput::Kind;
+  input.units[name] |= K::Rep;
   if (!input.m_key) input.m_key = name;
 }
 
@@ -21885,13 +21997,16 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
                                            bool addBytecode,
                                            AnalysisInput& input,
                                            bool fromClosureCtx) const {
+  using K = AnalysisInput::Kind;
+
   if (auto const unit =
       folly::get_default(index.m_data->typeAliasToUnit, cls)) {
     addDepUnitToInput(unit, depSrc, input);
     return;
   }
 
-  if (input.classes.count(cls)) return;
+  auto const old = folly::get_default(input.classes, cls);
+  if (any(old & K::Rep)) return;
 
   auto const badClass = [&] {
     if (input.meta.badClasses.emplace(cls).second) {
@@ -21911,32 +22026,31 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
   }
   assertx(!index.m_data->closureToClass.count(cls));
 
-  if (input.depClasses.emplace(cls, *clsRef).second) {
+  if (any(old & K::Dep)) {
+    if (!addBytecode || any(old & K::Bytecode)) return;
+  } else {
     FTRACE(
       4, "AnalysisScheduler: adding class {} to {} dep inputs\n",
       cls, depSrc
     );
-  } else if (!addBytecode || input.classBC.count(cls)) {
-    return;
+    input.classes[cls] |= K::Dep;
   }
 
   if (auto const r = folly::get_ptr(index.m_data->classInfoRefs, cls)) {
-    input.cinfos.emplace(cls, r->cast<AnalysisIndexCInfo>());
+    input.classes[cls] |= K::Info;
   } else if (auto const r =
              folly::get_ptr(index.m_data->uninstantiableClsMethRefs, cls)) {
-    input.minfos.emplace(cls, r->cast<AnalysisIndexMInfo>());
+    input.classes[cls] |= K::MInfo;
   } else {
     badClass();
   }
 
-  if (addBytecode) {
-    if (input.classBC.emplace(cls,
-                              index.m_data->classBytecodeRefs.at(cls)).second) {
-      FTRACE(
-        4, "AnalysisScheduler: adding class {} bytecode to {} dep inputs\n",
-        cls, depSrc
-      );
-    }
+  if (addBytecode && !any(old & K::Bytecode)) {
+    FTRACE(
+      4, "AnalysisScheduler: adding class {} bytecode to {} dep inputs\n",
+      cls, depSrc
+    );
+    input.classes[cls] |= K::Bytecode;
   }
 
   addDepUnitToInput(index.m_data->classToUnit.at(cls), depSrc, input);
@@ -21959,7 +22073,11 @@ void AnalysisScheduler::addDepFuncToInput(SString func,
                                           Type type,
                                           AnalysisInput& input) const {
   assertx(type != Type::None);
-  if (input.funcs.count(func)) return;
+
+  using K = AnalysisInput::Kind;
+
+  auto const old = folly::get_default(input.funcs, func);
+  if (any(old & K::Rep)) return;
 
   auto const funcRef = folly::get_ptr(index.m_data->funcRefs, func);
   if (!funcRef) {
@@ -21970,28 +22088,23 @@ void AnalysisScheduler::addDepFuncToInput(SString func,
     return;
   }
 
-  if (input.depFuncs.emplace(func, *funcRef).second) {
+  if (any(old & K::Dep)) {
+    if (!(type & Type::Bytecode) || any(old & K::Bytecode)) return;
+  } else {
     FTRACE(
       4, "AnalysisScheduler: adding func {} to {} dep inputs\n",
       func, depSrc
     );
-  } else if (!(type & Type::Bytecode) || input.funcBC.count(func)) {
-    return;
+    input.funcs[func] |= K::Dep;
   }
 
-  input.finfos.emplace(
-    func,
-    index.m_data->funcInfoRefs.at(func).cast<AnalysisIndexFInfo>()
-  );
-
-  if (type & Type::Bytecode) {
-    if (input.funcBC.emplace(func,
-                             index.m_data->funcBytecodeRefs.at(func)).second) {
-      FTRACE(
-        4, "AnalysisScheduler: adding func {} bytecode to {} dep inputs\n",
-        func, depSrc
-      );
-    }
+  input.funcs[func] |= K::Info;
+  if ((type & Type::Bytecode) && !any(old & K::Bytecode)) {
+    FTRACE(
+      4, "AnalysisScheduler: adding func {} bytecode to {} dep inputs\n",
+      func, depSrc
+    );
+    input.funcs[func] |= K::Bytecode;
   }
 
   addDepUnitToInput(index.m_data->funcToUnit.at(func), depSrc, input);
@@ -22030,12 +22143,12 @@ void AnalysisScheduler::addDepConstantToInput(SString cns,
 void AnalysisScheduler::addDepUnitToInput(SString unit,
                                           SString depSrc,
                                           AnalysisInput& input) const {
-  if (input.units.count(unit)) return;
-  if (!input.depUnits.emplace(unit, index.m_data->unitRefs.at(unit)).second) {
-    return;
-  }
+  using K = AnalysisInput::Kind;
+  auto const old = folly::get_default(input.units, unit);
+  if (any(old & (K::Rep | K::Dep))) return;
   FTRACE(4, "AnalysisScheduler: adding unit {} to {} dep inputs\n",
          unit, depSrc);
+  input.units[unit] |= K::Dep;
 }
 
 void AnalysisScheduler::addTraceDepToInput(const DepState& d,
@@ -22146,13 +22259,30 @@ void AnalysisScheduler::addDepsToInput(const DepState& deps,
 // For every input in the AnalysisInput, add any associated
 // dependencies for those inputs.
 void AnalysisScheduler::addAllDepsToInput(AnalysisInput& input) const {
-  for (auto const& [name, _] : input.classes) {
+  using K = AnalysisInput::Kind;
+
+  auto const names = [] (auto const& m) {
+    using namespace folly::gen;
+    return from(m)
+      | map([] (auto const& p) { return p.first; })
+      | as<std::vector>();
+  };
+
+  // We can't just iterate over the containers because addDepsToInput
+  // may add elements to them.
+  for (auto const name : names(input.classes)) {
+    auto const k = input.classes.at(name);
+    if (!any(k & K::Rep)) continue;
     addDepsToInput(classState.at(name).depState, input);
   }
-  for (auto const& [name, _] : input.funcs) {
+  for (auto const name : names(input.funcs)) {
+    auto const k = input.funcs.at(name);
+    if (!any(k & K::Rep)) continue;
     addDepsToInput(funcState.at(name).depState, input);
   }
-  for (auto const& [name, _] : input.units) {
+  for (auto const name : names(input.units)) {
+    auto const k = input.units.at(name);
+    if (!any(k & K::Rep)) continue;
     addDepsToInput(unitState.at(name).depState, input);
   }
 
@@ -22185,7 +22315,7 @@ template <typename F>
 void AnalysisScheduler::onTransitiveDep(SString name,
                                         const DepState& state,
                                         const F& f) const {
-  if (state.deps.empty() || workItems() >= 4000000) return;
+  if (state.deps.empty()) return;
   auto const& d = state.deps;
   auto const& i = *index.m_data;
 
@@ -22848,6 +22978,7 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
       // Make an AnalysisInput by adding all the appropriate inputs
       // for each TraceState and dependencies.
       AnalysisInput input;
+      input.index = index.m_data.get();
       input.meta.bucketIdx = idx;
 
       for (auto const item : b.classes) {
@@ -22903,6 +23034,8 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
 
       InputsAndUntracked out;
 
+      using K = AnalysisInput::Kind;
+
       // Record untracked items. These are inputs to this bucket which
       // do not have TraceState. They must be dealt with differently
       // later on.
@@ -22916,7 +23049,8 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
         std::vector<SString> out;
 
         if constexpr (!std::is_same_v<D1, std::nullptr_t>) {
-          for (auto const& [n, _] : i1) {
+          for (auto const& [n, k] : i1) {
+            if (!any(k & K::Dep)) continue;
             if (std::invoke(t, this, n)) continue;
             if (!s.try_emplace(n).second) continue;
             out.emplace_back(n);
@@ -22934,19 +23068,19 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
 
       using A = AnalysisScheduler;
       out.untrackedClasses = untracked(
-        input.depClasses,
+        input.classes,
         input.meta.badClasses,
         seenClasses,
         &A::traceForClass
       );
       out.untrackedFuncs = untracked(
-        input.depFuncs,
+        input.funcs,
         input.meta.badFuncs,
         seenFuncs,
         &A::traceForFunc
       );
       out.untrackedUnits = untracked(
-        input.depUnits,
+        input.units,
         nullptr,
         seenUnits,
         &A::traceForUnit
@@ -23004,6 +23138,11 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
     }
   );
 
+  combined.inputs.shrink_to_fit();
+  combined.untrackedClasses.shrink_to_fit();
+  combined.untrackedFuncs.shrink_to_fit();
+  combined.untrackedUnits.shrink_to_fit();
+  combined.badConstants.shrink_to_fit();
   return combined;
 }
 
@@ -23011,6 +23150,7 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
 // determine how different items can utilize information from another.
 void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
   using A = AnalysisInput;
+  using K = A::Kind;
 
   auto const onClass = [&] (SString name,
                             A::BucketSet& present,
@@ -23018,20 +23158,21 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
                             A::BucketSet& process) {
     for (size_t i = 0, size = inputs.inputs.size(); i < size; ++i) {
       auto const& input = inputs.inputs[i];
-      if (input.classes.count(name)) {
-        assertx(input.classBC.count(name));
+      auto const k = folly::get_default(input.classes, name);
+      if (any(k & K::Rep)) {
+        assertx(any(k & K::Bytecode));
         present.add(i);
         process.add(i);
       }
-      if (input.depClasses.count(name)) {
+      if (any(k & K::Dep)) {
         present.add(i);
         if (input.meta.classDeps.count(name) ||
             input.meta.processDepCls.count(name)) {
-          assertx(input.classBC.count(name));
+          assertx(any(k & K::Bytecode));
           process.add(i);
         }
       }
-      if (input.classBC.count(name)) withBC.add(i);
+      if (any(k & K::Bytecode)) withBC.add(i);
       if (input.meta.badClasses.count(name)) present.add(i);
     }
   };
@@ -23042,20 +23183,21 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
                            A::BucketSet& process) {
     for (size_t i = 0, size = inputs.inputs.size(); i < size; ++i) {
       auto const& input = inputs.inputs[i];
-      if (input.funcs.count(name)) {
-        assertx(input.funcBC.count(name));
+      auto const k = folly::get_default(input.funcs, name);
+      if (any(k & K::Rep)) {
+        assertx(any(k & K::Bytecode));
         present.add(i);
         process.add(i);
       }
-      if (input.depFuncs.count(name)) {
+      if (any(k & K::Dep)) {
         present.add(i);
         if (input.meta.funcDeps.count(name) ||
             input.meta.processDepFunc.count(name)) {
-          assertx(input.funcBC.count(name));
+          assertx(any(k & K::Bytecode));
           process.add(i);
         }
       }
-      if (input.funcBC.count(name)) withBC.add(i);
+      if (any(k & K::Bytecode)) withBC.add(i);
       if (input.meta.badFuncs.count(name)) present.add(i);
     }
   };
@@ -23066,11 +23208,12 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
                            A::BucketSet& process) {
     for (size_t i = 0, size = inputs.inputs.size(); i < size; ++i) {
       auto const& input = inputs.inputs[i];
-      if (input.units.count(name)) {
+      auto const k = folly::get_default(input.units, name);
+      if (any(k & K::Rep)) {
         present.add(i);
         process.add(i);
       }
-      if (input.depUnits.count(name)) {
+      if (any(k & K::Dep)) {
         present.add(i);
         if (input.meta.unitDeps.count(name) ||
             input.meta.processDepUnit.count(name)) {
@@ -23177,10 +23320,10 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
     }
   );
 
-  inputs.untrackedClasses.clear();
-  inputs.untrackedFuncs.clear();
-  inputs.untrackedUnits.clear();
-  inputs.badConstants.clear();
+  decltype(inputs.untrackedClasses){}.swap(inputs.untrackedClasses);
+  decltype(inputs.untrackedFuncs){}.swap(inputs.untrackedFuncs);
+  decltype(inputs.untrackedUnits){}.swap(inputs.untrackedUnits);
+  decltype(inputs.badConstants){}.swap(inputs.badConstants);
 }
 
 // Eighth pass: Store BucketSets in each AnalysisInput's metadata.
@@ -23193,6 +23336,11 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
        assertx(i < buckets.size());
        auto& bucket = buckets[i].b;
 
+       TSStringSet seenClasses;
+       FSStringSet seenFuncs;
+       SStringSet seenUnits;
+       SStringSet seenBadConstants;
+
        for (auto const item : bucket.classes) {
          auto& state = traceState.at(item);
          assertx(!state.depStates.empty());
@@ -23202,19 +23350,16 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
          for (auto const d : state.depStates) {
            switch (d->kind) {
              case DepState::Func:
-               always_assert(
-                 input.meta.funcBuckets.emplace(d->name, state.buckets).second
-               );
+               always_assert(seenFuncs.emplace(d->name).second);
+               input.meta.funcBuckets.emplace_back(d->name, state.buckets);
                break;
              case DepState::Class:
-               always_assert(
-                 input.meta.classBuckets.emplace(d->name, state.buckets).second
-               );
+               always_assert(seenClasses.emplace(d->name).second);
+               input.meta.classBuckets.emplace_back(d->name, state.buckets);
                break;
              case DepState::Unit:
-               always_assert(
-                 input.meta.unitBuckets.emplace(d->name, state.buckets).second
-               );
+               always_assert(seenUnits.emplace(d->name).second);
+               input.meta.unitBuckets.emplace_back(d->name, state.buckets);
                break;
            }
          }
@@ -23243,89 +23388,89 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
          for (auto const d : s->depStates) {
            switch (d->kind) {
              case DepState::Func:
-               always_assert(
-                 input.meta.funcBuckets.emplace(d->name, s->buckets).second
-               );
+               always_assert(seenFuncs.emplace(d->name).second);
+               input.meta.funcBuckets.emplace_back(d->name, s->buckets);
                break;
              case DepState::Class:
-               always_assert(
-                 input.meta.classBuckets.emplace(d->name, s->buckets).second
-               );
+               always_assert(seenClasses.emplace(d->name).second);
+               input.meta.classBuckets.emplace_back(d->name, s->buckets);
                break;
              case DepState::Unit:
-               always_assert(
-                 input.meta.unitBuckets.emplace(d->name, s->buckets).second
-               );
+               always_assert(seenUnits.emplace(d->name).second);
+               input.meta.unitBuckets.emplace_back(d->name, s->buckets);
                break;
            }
          }
        }
 
-       for (auto const& [name, _] : input.depClasses) {
+       using K = AnalysisInput::Kind;
+
+       for (auto const& [name, k] : input.classes) {
+         if (!any(k & K::Dep)) continue;
          if (auto const b = folly::get_ptr(untracked.classes, name)) {
            assertx(!traceForClass(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.classBuckets.emplace(name, *b).second);
-         } else if (!input.meta.classBuckets.count(name)) {
+           always_assert(seenClasses.emplace(name).second);
+           input.meta.classBuckets.emplace_back(name, *b);
+         } else if (!seenClasses.count(name)) {
            auto const t = traceForClass(name);
            always_assert_flog(
              t, "{} is on input dep classes, but has no tracking state",
              name
            );
-           always_assert(
-             input.meta.classBuckets.emplace(name, t->buckets).second
-           );
+           input.meta.classBuckets.emplace_back(name, t->buckets);
            assertx(t->buckets.present->contains(i));
          }
        }
-       for (auto const& [name, _] : input.depFuncs) {
+       for (auto const& [name, k] : input.funcs) {
+         if (!any(k & K::Dep)) continue;
          if (auto const b = folly::get_ptr(untracked.funcs, name)) {
            assertx(!traceForFunc(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.funcBuckets.emplace(name, *b).second);
-         } else if (!input.meta.funcBuckets.count(name)) {
+           always_assert(seenFuncs.emplace(name).second);
+           input.meta.funcBuckets.emplace_back(name, *b);
+         } else if (!seenFuncs.count(name)) {
            auto const t = traceForFunc(name);
            always_assert_flog(
              t, "{} is on input dep funcs, but has no tracking state",
              name
            );
-           always_assert(
-             input.meta.funcBuckets.emplace(name, t->buckets).second
-           );
+           input.meta.funcBuckets.emplace_back(name, t->buckets);
            assertx(t->buckets.present->contains(i));
          }
        }
-       for (auto const& [name, _] : input.depUnits) {
+       for (auto const& [name, k] : input.units) {
+         if (!any(k & K::Dep)) continue;
          if (auto const b = folly::get_ptr(untracked.units, name)) {
            assertx(!traceForUnit(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.unitBuckets.emplace(name, *b).second);
-         } else if (!input.meta.unitBuckets.count(name)) {
+           always_assert(seenUnits.emplace(name).second);
+           input.meta.unitBuckets.emplace_back(name, *b);
+         } else if (!seenUnits.count(name)) {
            auto const t = traceForUnit(name);
            always_assert_flog(
              t, "{} is on input dep units, but has no tracking state",
              name
            );
-           always_assert(
-             input.meta.unitBuckets.emplace(name, t->buckets).second
-           );
+           input.meta.unitBuckets.emplace_back(name, t->buckets);
            assertx(t->buckets.present->contains(i));
          }
        }
 
        for (auto const name : input.meta.badClasses) {
-         if (input.meta.classBuckets.count(name)) continue;
+         if (seenClasses.count(name)) continue;
          if (auto const b = folly::get_ptr(untracked.classes, name)) {
            assertx(!traceForClass(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.classBuckets.emplace(name, *b).second);
+           always_assert(seenClasses.emplace(name).second);
+           input.meta.classBuckets.emplace_back(name, *b);
          } else {
            auto const t = traceForClass(name);
            always_assert_flog(
              t, "{} is on input bad classes, but has no tracking state",
              name
            );
-           input.meta.classBuckets.emplace(name, t->buckets);
+           input.meta.classBuckets.emplace_back(name, t->buckets);
            assertx(t->buckets.present->contains(i));
          }
        }
@@ -23333,38 +23478,71 @@ void AnalysisScheduler::tracePass8(std::vector<Bucket> buckets,
          if (auto const b = folly::get_ptr(untracked.funcs, name)) {
            assertx(!traceForFunc(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.funcBuckets.emplace(name, *b).second);
-         } else if (!input.meta.funcBuckets.count(name)) {
+           always_assert(seenFuncs.emplace(name).second);
+           input.meta.funcBuckets.emplace_back(name, *b);
+         } else if (!seenFuncs.count(name)) {
            auto const t = traceForFunc(name);
            always_assert_flog(
              t, "{} is on input bad funcs, but has no tracking state",
              name
            );
-           always_assert(
-             input.meta.funcBuckets.emplace(name, t->buckets).second
-           );
+           input.meta.funcBuckets.emplace_back(name, t->buckets);
          }
        }
        for (auto const name : input.meta.badConstants) {
          if (auto const b = folly::get_ptr(untracked.badConstants, name)) {
            assertx(!traceForConstant(name));
            assertx(b->present->contains(i));
-           always_assert(input.meta.badConstantBuckets.emplace(name, *b).second);
+           always_assert(seenBadConstants.emplace(name).second);
+           input.meta.badConstantBuckets.emplace_back(name, *b);
          } else {
            auto const t = traceForConstant(name);
            always_assert_flog(
              t, "{} is on input bad constants, but has no tracking state",
              name
            );
-           always_assert(
-             input.meta.badConstantBuckets.emplace(name, t->buckets).second
-           );
+           always_assert(seenBadConstants.emplace(name).second);
+           input.meta.badConstantBuckets.emplace_back(name, t->buckets);
            assertx(t->buckets.present->contains(i));
          }
        }
 
-       bucket.classes.clear();
-       bucket.deps.clear();
+       std::sort(
+         begin(input.meta.classBuckets),
+         end(input.meta.classBuckets),
+         [] (auto const& p1, auto const& p2) {
+           return string_data_lt_type{}(p1.first, p2.first);
+         }
+       );
+       std::sort(
+         begin(input.meta.funcBuckets),
+         end(input.meta.funcBuckets),
+         [] (auto const& p1, auto const& p2) {
+           return string_data_lt_func{}(p1.first, p2.first);
+         }
+       );
+       std::sort(
+         begin(input.meta.unitBuckets),
+         end(input.meta.unitBuckets),
+         [] (auto const& p1, auto const& p2) {
+           return string_data_lt{}(p1.first, p2.first);
+         }
+       );
+       std::sort(
+         begin(input.meta.badConstantBuckets),
+         end(input.meta.badConstantBuckets),
+         [] (auto const& p1, auto const& p2) {
+           return string_data_lt{}(p1.first, p2.first);
+         }
+       );
+
+       input.meta.classBuckets.shrink_to_fit();
+       input.meta.funcBuckets.shrink_to_fit();
+       input.meta.unitBuckets.shrink_to_fit();
+       input.meta.badConstantBuckets.shrink_to_fit();
+       decltype(bucket.classes){}.swap(bucket.classes);
+       decltype(bucket.deps){}.swap(bucket.deps);
+
        return nullptr;
     }
   );
@@ -23378,10 +23556,13 @@ void AnalysisScheduler::tracePass9(const std::vector<AnalysisInput>& inputs) {
   FSStringToOneT<size_t> funcs;
   SStringToOneT<size_t> units;
 
+  using K = AnalysisInput::Kind;
+
   // Every class/func/unit on an AnalysisInput should only be one
   // AnalysisInput.
   for (auto const& i : inputs) {
-    for (auto const& [n, _] : i.classes) {
+    for (auto const& [n, k] : i.classes) {
+      if (!any(k & K::Rep)) continue;
       auto const [it, e] = classes.try_emplace(n, i.meta.bucketIdx);
       always_assert_flog(
         e,
@@ -23389,7 +23570,8 @@ void AnalysisScheduler::tracePass9(const std::vector<AnalysisInput>& inputs) {
         n, it->second, i.meta.bucketIdx
       );
     }
-    for (auto const& [n, _] : i.funcs) {
+    for (auto const& [n, k] : i.funcs) {
+      if (!any(k & K::Rep)) continue;
       auto const [it, e] = funcs.try_emplace(n, i.meta.bucketIdx);
       if (e) continue;
       always_assert_flog(
@@ -23398,7 +23580,8 @@ void AnalysisScheduler::tracePass9(const std::vector<AnalysisInput>& inputs) {
         n, it->second, i.meta.bucketIdx
       );
     }
-    for (auto const& [n, _] : i.units) {
+    for (auto const& [n, k] : i.units) {
+      if (!any(k & K::Rep)) continue;
       auto const [it, e] = units.try_emplace(n, i.meta.bucketIdx);
       if (e) continue;
       always_assert_flog(
@@ -23410,23 +23593,26 @@ void AnalysisScheduler::tracePass9(const std::vector<AnalysisInput>& inputs) {
 
     // Dep class/funcs/units can be in multiple AnalysisInputs, but
     // can't appear more than once in the same AnalysisInput.
-    for (auto const& [n,  _] : i.depClasses) {
+    for (auto const& [n,  k] : i.classes) {
+      if (!any(k & K::Dep)) continue;
       always_assert_flog(
-        !i.classes.count(n),
+        !any(folly::get_default(i.classes, n) & K::Rep),
         "Class {} is in both classes and depClasses in bucket {}\n",
         n, i.meta.bucketIdx
       );
     }
-    for (auto const& [n,  _] : i.depFuncs) {
+    for (auto const& [n,  k] : i.funcs) {
+      if (!any(k & K::Dep)) continue;
       always_assert_flog(
-        !i.funcs.count(n),
+        !any(folly::get_default(i.funcs, n) & K::Rep),
         "Func {} is in both funcs and depFuncs in bucket {}\n",
         n, i.meta.bucketIdx
       );
     }
-    for (auto const& [n,  _] : i.depUnits) {
+    for (auto const& [n,  k] : i.units) {
+      if (!any(k & K::Dep)) continue;
       always_assert_flog(
-        !i.units.count(n),
+        !any(folly::get_default(i.units, n) & K::Rep),
         "Unit {} is in both units and depUnits in bucket {}\n",
         n, i.meta.bucketIdx
       );
@@ -23435,24 +23621,24 @@ void AnalysisScheduler::tracePass9(const std::vector<AnalysisInput>& inputs) {
     // Ditto for "bad" classes or funcs.
     for (auto const n : i.meta.badClasses) {
       always_assert_flog(
-        !i.classes.count(n),
+        !any(folly::get_default(i.classes, n) & K::Rep),
         "Class {} is in both classes and badClasses in bucket {}\n",
         n, i.meta.bucketIdx
       );
       always_assert_flog(
-        !i.depClasses.count(n),
+        !any(folly::get_default(i.classes, n) & K::Dep),
         "Class {} is in both depClasses and badClasses in bucket {}\n",
         n, i.meta.bucketIdx
       );
     }
     for (auto const n : i.meta.badFuncs) {
       always_assert_flog(
-        !i.funcs.count(n),
+        !any(folly::get_default(i.funcs, n) & K::Rep),
         "Func {} is in both funcs and badFuncs in bucket {}\n",
         n, i.meta.bucketIdx
       );
       always_assert_flog(
-        !i.depFuncs.count(n),
+        !any(folly::get_default(i.funcs, n) & K::Dep),
         "Func {} is in both depFuncs and badFuncs in bucket {}\n",
         n, i.meta.bucketIdx
       );

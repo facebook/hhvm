@@ -2170,6 +2170,12 @@ private:
 // exposing implementation details. These are produced from
 // AnalysisScheduler::schedule().
 struct AnalysisInput {
+  AnalysisInput() = default;
+  AnalysisInput(const AnalysisInput&) = delete;
+  AnalysisInput(AnalysisInput&&) = default;
+  AnalysisInput& operator=(const AnalysisInput&) = delete;
+  AnalysisInput& operator=(AnalysisInput&&) = default;
+
   std::vector<SString> classNames() const;
   std::vector<SString> funcNames() const;
   std::vector<SString> unitNames() const;
@@ -2222,6 +2228,12 @@ struct AnalysisInput {
   };
 
   struct Meta {
+    Meta() = default;
+    Meta(const Meta&) = delete;
+    Meta(Meta&&) = default;
+    Meta& operator=(const Meta&) = delete;
+    Meta& operator=(Meta&&) = default;
+
     TSStringSet badClasses;
     FSStringSet badFuncs;
     SStringSet badConstants;
@@ -2229,10 +2241,11 @@ struct AnalysisInput {
     FSStringToOneT<AnalysisDeps> funcDeps;
     SStringToOneT<AnalysisDeps> unitDeps;
 
-    TSStringToOneT<BucketPresence> classBuckets;
-    FSStringToOneT<BucketPresence> funcBuckets;
-    SStringToOneT<BucketPresence> unitBuckets;
-    SStringToOneT<BucketPresence> badConstantBuckets;
+    using BucketVec = std::vector<std::pair<SString, BucketPresence>>;
+    BucketVec classBuckets;
+    BucketVec funcBuckets;
+    BucketVec unitBuckets;
+    BucketVec badConstantBuckets;
 
     TSStringSet processDepCls;
     FSStringSet processDepFunc;
@@ -2250,10 +2263,10 @@ struct AnalysisInput {
         (classDeps, string_data_lt_type{})
         (funcDeps, string_data_lt_func{})
         (unitDeps, string_data_lt{})
-        (classBuckets, string_data_lt_type{})
-        (funcBuckets, string_data_lt_func{})
-        (unitBuckets, string_data_lt{})
-        (badConstantBuckets, string_data_lt{})
+        (classBuckets)
+        (funcBuckets)
+        (unitBuckets)
+        (badConstantBuckets)
         (processDepCls, string_data_lt_type{})
         (processDepFunc, string_data_lt_func{})
         (processDepUnit, string_data_lt{})
@@ -2278,29 +2291,42 @@ struct AnalysisInput {
     UniquePtrRefVec<php::Unit>,
     extern_worker::Ref<Meta>
   >;
-  Tuple toTuple(extern_worker::Ref<Meta>) const;
+  Tuple toTuple(extern_worker::Ref<Meta>);
 private:
   SString m_key{nullptr};
+  const Index::IndexData* index{nullptr};
 
-  TSStringToOneT<UniquePtrRef<php::Class>> classes;
-  FSStringToOneT<UniquePtrRef<php::Func>> funcs;
-  SStringToOneT<UniquePtrRef<php::Unit>> units;
+  enum class Kind : uint8_t {
+    None     = 0,
+    Rep      = (1 << 0),
+    Bytecode = (1 << 1),
+    Info     = (1 << 2),
+    Dep      = (1 << 3),
+    MInfo    = (1 << 4)
+  };
+  TSStringToOneT<Kind> classes;
+  FSStringToOneT<Kind> funcs;
+  SStringToOneT<Kind> units;
 
-  TSStringToOneT<UniquePtrRef<php::ClassBytecode>> classBC;
-  FSStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBC;
-
-  TSStringToOneT<extern_worker::Ref<AnalysisIndexCInfo>> cinfos;
-  FSStringToOneT<extern_worker::Ref<AnalysisIndexFInfo>> finfos;
-  TSStringToOneT<extern_worker::Ref<AnalysisIndexMInfo>> minfos;
-
-  TSStringToOneT<UniquePtrRef<php::Class>> depClasses;
-  FSStringToOneT<UniquePtrRef<php::Func>> depFuncs;
-  SStringToOneT<UniquePtrRef<php::Unit>> depUnits;
+  friend Kind operator|(Kind k1, Kind k2) {
+    return Kind((uint8_t)k1 | (uint8_t)k2);
+  }
+  friend Kind& operator|=(Kind& k1, Kind k2) {
+    return (k1 = Kind((uint8_t)k1 | (uint8_t)k2));
+  }
+  friend Kind operator&(Kind k1, Kind k2) {
+    return Kind((uint8_t)k1 & (uint8_t)k2);
+  }
+  friend bool any(Kind);
 
   Meta meta;
 
   friend struct AnalysisScheduler;
 };
+
+inline bool any(AnalysisInput::Kind k) {
+  return k != AnalysisInput::Kind::None;
+}
 
 std::string show(const AnalysisInput::BucketPresence&);
 

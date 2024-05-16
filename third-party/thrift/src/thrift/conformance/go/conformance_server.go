@@ -196,19 +196,19 @@ func (h *dataConformanceServiceHandler) RoundTrip(ctx context.Context, roundTrip
 
 // newRoundTripResponse wraps the response thrift.Any inside a RoundTripResponse.
 func newRoundTripResponse(response *thrift_any.Any) *serialization.RoundTripResponse {
-	resp := serialization.NewRoundTripResponseBuilder()
-	resp.Value(response)
-	return resp.Emit()
+	resp := serialization.NewRoundTripResponse().
+		SetValue(response)
+	return resp
 }
 
 // newResponse creates a new response Any from the request Any using new serialized data.
 func newResponse(request *thrift_any.Any, data []byte) *thrift_any.Any {
-	respAny := thrift_any.NewAnyBuilder()
-	respAny.Data(data)
-	respAny.CustomProtocol(request.CustomProtocol)
-	respAny.Protocol(request.Protocol)
-	respAny.Type(request.Type)
-	return respAny.Emit()
+	respAny := thrift_any.NewAny().
+		SetData(data).
+		SetCustomProtocol(request.CustomProtocol).
+		SetProtocol(request.Protocol).
+		SetType(request.Type)
+	return respAny
 }
 
 // serialize serializes a thrift.Struct with a target protocol to be stored inside a thrift.Any.

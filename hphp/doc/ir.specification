@@ -2817,13 +2817,17 @@ ReqBindJmp and CallFuncEntry.
 
 | GetDictPtrIter, D(PtrToElem), S(Dict) S(Int), NF
 
+| GetKeysetPtrIter, D(PtrToElem), S(Keyset) S(Int), NF
+
 | GetVecPtrIter, D(PtrToElem), S(Vec) S(Int), NF
 
-  Returns a pointer to the elm S1 of a vanilla dict or vec S0. S1 does not need
-  to be a valid array position; for example, it may equal the size of the array
-  (so that the "elm" returned is the pointer-iteration end for S0).
+  Returns a pointer to the elm S1 of a vanilla dict, keyset or vec S0. S1 does
+  not need to be a valid array position; for example, it may equal the size of
+  the array (so that the "elm" returned is the pointer-iteration end for S0).
 
 | AdvanceDictPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
+
+| AdvanceKeysetPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
 | AdvanceVecPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
@@ -2836,7 +2840,8 @@ ReqBindJmp and CallFuncEntry.
 
   Loads the key or val from the array element pointed to by S0. S0 must be a
   valid elm; that is, it can't point to the end of the array data. LdPtrIterKey
-  can only be used for mixed elms, but LdPtrIterVal supports mixed and packed.
+  can only be used for VanillaDictElms, but LdPtrIterVal supports
+  UnalignedTypedValues, VanillaDictElms and VanillaKeysetElms.
 
   T is used to type the result. For LdPtrIterKey, it must be a valid type for
   the array's keys - i.e., a subtype of TInt|TStr.
@@ -3542,6 +3547,11 @@ fields of that struct for holding intermediate values.
 
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
+
+| KeysetIterEnd, D(Int), S(Keyset), NF
+
+  Returns the "end" iterator position for the given keyset. Unlike the "last"
+  iterator position, the end is never a valid iterator position.
 
 | IsLegacyArrLike, D(Bool), S(Vec|Dict), LA
 

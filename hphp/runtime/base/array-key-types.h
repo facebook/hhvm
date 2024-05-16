@@ -50,6 +50,10 @@ struct ArrayKeyTypes {
     return m_bits == other.m_bits;
   }
 
+  ArrayKeyTypes operator|(ArrayKeyTypes other) const {
+    return FromBits(m_bits | other.m_bits);
+  }
+
   /*
    * A variety of getters for the key-types bitset. Because of our conservative
    * tracking, "may have" functions may return false positive, and "must have"

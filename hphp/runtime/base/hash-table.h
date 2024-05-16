@@ -189,6 +189,9 @@ struct HashTable : HashTableCommon {
   static constexpr ptrdiff_t usedOff() {
     return offsetof(ArrayType, m_used);
   }
+  static constexpr ptrdiff_t usedSize() {
+    return sizeof(m_used);
+  }
   static constexpr ptrdiff_t scaleOff() {
     return offsetof(ArrayType, m_scale);
   }

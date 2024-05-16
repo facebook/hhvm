@@ -349,6 +349,56 @@ private:
   Type key_jit_type;
 };
 
+struct KeysetAccessor : public Accessor {
+  explicit KeysetAccessor(bool baseConst) {
+    is_ptr_iter = baseConst;
+    arr_type = TKeyset;
+    if (allowBespokeArrayLikes()) {
+      arr_type = arr_type.narrowToVanilla();
+    }
+    layout = ArrayLayout::Vanilla();
+  }
+
+  SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
+    auto const keyset = gen(env, CheckType, exit, arr_type, base);
+
+    // Side-exit if there are tombstones.
+    auto const size = gen(env, CountKeyset, keyset);
+    auto const used = gen(env, KeysetIterEnd, keyset);
+    auto const same = gen(env, EqInt, size, used);
+    gen(env, JmpZero, exit, same);
+
+    return keyset;
+  }
+
+  SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
+    return is_ptr_iter ? gen(env, GetKeysetPtrIter, arr, idx) : idx;
+  }
+
+  SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
+    return is_ptr_iter ? pos : gen(env, GetKeysetPtrIter, arr, pos);
+  }
+
+  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    return getVal(env, arr, elm);
+  }
+
+  SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    auto const valType = arrLikeElemType(
+      is_ptr_iter ? arr_type : arr->type(),
+      TInt | TStr,
+      curClass(env)
+    ).first;
+    return gen(env, LdPtrIterVal, valType, elm);
+  }
+
+  SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
+    return is_ptr_iter
+      ? gen(env, AdvanceKeysetPtrIter, IterOffsetData{offset}, pos)
+      : gen(env, AddInt, cns(env, offset), pos);
+  }
+};
+
 struct BespokeAccessor : public Accessor {
   explicit BespokeAccessor(Type baseType) {
     is_ptr_iter = false;
@@ -400,12 +450,16 @@ std::unique_ptr<Accessor> getAccessor(
   }
 
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
-  if (baseDT == KindOfVec) {
-    return std::make_unique<VecAccessor>(baseConst, data.hasKey());
-  } else if (baseDT == KindOfDict) {
-    return std::make_unique<DictAccessor>(baseConst, keyTypes);
+  switch (baseDT) {
+    case KindOfVec:
+      return std::make_unique<VecAccessor>(baseConst, data.hasKey());
+    case KindOfDict:
+      return std::make_unique<DictAccessor>(baseConst, keyTypes);
+    case KindOfKeyset:
+      return std::make_unique<KeysetAccessor>(baseConst);
+    default:
+      always_assert(false);
   }
-  always_assert(false);
 }
 
 //////////////////////////////////////////////////////////////////////

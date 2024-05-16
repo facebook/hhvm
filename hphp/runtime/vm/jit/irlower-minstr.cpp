@@ -518,6 +518,13 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgKeysetIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(VanillaKeyset::usedSize() == 4);
+  auto const keyset = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  vmain(env) << loadzlq{keyset[VanillaKeyset::usedOff()], dst};
+}
+
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const mask = ~inst->extra<CheckDictKeys>()->keyTypes.toBits();
@@ -683,6 +690,7 @@ void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
     }
   }
 
+  static_assert(sizeof(VanillaDict::Elm) == 24);
   auto const px3 = v.makeReg();
   v << lea{pos[pos * 2], px3};
   v << lea{arr[px3 * 8 + VanillaDict::dataOff()], dst};
@@ -695,6 +703,37 @@ void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const extra = inst->extra<AdvanceDictPtrIter>();
   auto const delta = extra->offset * int32_t(sizeof(VanillaDictElm));
+  v << addqi{delta, src, dst, v.makeReg()};
+}
+
+void cgGetKeysetPtrIter(IRLS& env, const IRInstruction* inst) {
+  auto const pos_tmp = inst->src(1);
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const pos = srcLoc(env, inst, 1).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  if (pos_tmp->hasConstVal(TInt)) {
+    auto const offset = VanillaKeyset::elmOff(pos_tmp->intVal());
+    if (deltaFits(offset, sz::dword)) {
+      v << addqi{safe_cast<int32_t>(offset), arr, dst, v.makeReg()};
+      return;
+    }
+  }
+
+  static_assert(sizeof(VanillaKeyset::Elm) == 16);
+  auto const px16 = v.makeReg();
+  v << shlqi{4, pos, px16, v.makeReg()};
+  v << lea{arr[px16 + VanillaKeyset::dataOff()], dst};
+}
+
+void cgAdvanceKeysetPtrIter(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const extra = inst->extra<AdvanceKeysetPtrIter>();
+  auto const delta = extra->offset * int32_t(sizeof(VanillaKeysetElm));
   v << addqi{delta, src, dst, v.makeReg()};
 }
 
@@ -715,6 +754,7 @@ void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
     }
   }
 
+  static_assert(sizeof(UnalignedTypedValue) == 9);
   auto const px9 = v.makeReg();
   v << lea{pos[pos * 8], px9};
   v << lea{arr[px9 + VanillaVec::entriesOffset()], dst};

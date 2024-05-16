@@ -84,6 +84,12 @@ ALWAYS_INLINE UnalignedTypedValue* VanillaVec::entries(ArrayData* arr) {
   return reinterpret_cast<UnalignedTypedValue*>(arr + 1);
 }
 
+ALWAYS_INLINE
+const UnalignedTypedValue* VanillaVec::entries(const ArrayData* arr) {
+  assertx(stores_unaligned_typed_values);
+  return reinterpret_cast<const UnalignedTypedValue*>(arr + 1);
+}
+
 ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
   return sizeof(ArrayData);
 }

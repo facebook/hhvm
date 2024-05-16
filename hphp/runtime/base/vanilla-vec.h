@@ -136,6 +136,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   // This method can only be called if `stores_unaligned_typed_values` is true.
   static UnalignedTypedValue* entries(ArrayData*);
+  static const UnalignedTypedValue* entries(const ArrayData*);
 
   // This method can be called for any layout, to get a layout start offset.
   static ptrdiff_t entriesOffset();

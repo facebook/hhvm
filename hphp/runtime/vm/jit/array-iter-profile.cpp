@@ -42,9 +42,11 @@ ArrayKeyTypes getArrayKeyTypes(const ArrayData* arr) {
     case ArrayData::kDictKind:
       return VanillaDict::as(arr)->keyTypes();
 
-    case ArrayData::kBespokeDictKind:
     case ArrayData::kKeysetKind:
     case ArrayData::kBespokeKeysetKind:
+      return ArrayKeyTypes::Ints() | ArrayKeyTypes::Strs();
+
+    case ArrayData::kBespokeDictKind:
       return ArrayKeyTypes::Any();
 
     case ArrayData::kNumKinds:

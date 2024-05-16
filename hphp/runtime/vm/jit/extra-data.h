@@ -2939,6 +2939,7 @@ X(StLoc,                        LocalId);
 X(StLocMeta,                    LocalId);
 X(StLocRange,                   LocalIdRange);
 X(AdvanceDictPtrIter,           IterOffsetData);
+X(AdvanceKeysetPtrIter,         IterOffsetData);
 X(AdvanceVecPtrIter,            IterOffsetData);
 X(StFrameFunc,                  FuncData);
 X(StIterPos,                    IterId);

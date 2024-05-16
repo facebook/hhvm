@@ -3088,6 +3088,27 @@ SSATmp* simplifyGetDictPtrIter(State& env, const IRInstruction* inst) {
   return cns(env, Type::cns(elm, outputType(inst)));
 }
 
+SSATmp* simplifyGetKeysetPtrIter(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!arr->hasConstVal(TArrLike)) return nullptr;
+  if (!idx->hasConstVal(TInt)) return nullptr;
+  auto const ad  = VanillaKeyset::asSet(arr->arrLikeVal());
+  auto const elm = ad->data() + idx->intVal();
+  return cns(env, Type::cns(elm, outputType(inst)));
+}
+
+SSATmp* simplifyGetVecPtrIter(State& env, const IRInstruction* inst) {
+  assertx(VanillaVec::stores_unaligned_typed_values);
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!arr->hasConstVal(TArrLike)) return nullptr;
+  if (!idx->hasConstVal(TInt)) return nullptr;
+  auto const entries = VanillaVec::entries(arr->arrLikeVal());
+  auto const elm = entries + idx->intVal();
+  return cns(env, Type::cns(elm, outputType(inst)));
+}
+
 SSATmp* simplifyCheckDictKeys(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return mergeBranchDests(env, inst);
@@ -3217,6 +3238,17 @@ X(CountDict)
 X(CountKeyset)
 
 #undef X
+
+SSATmp* simplifyKeysetIterEnd(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+
+  if (arr->hasConstVal()) {
+    auto const keyset = VanillaKeyset::asSet(arr->type().arrLikeVal());
+    return cns(env, keyset->iterLimit());
+  }
+
+  return nullptr;
+}
 
 // Simplify generic bespoke getters, either based on the DataType (often we
 // can make simplifications for all varrays and vecs) or specific layout.
@@ -4074,6 +4106,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(CountVec)
       X(CountDict)
       X(CountKeyset)
+      X(KeysetIterEnd)
       X(DecRef)
       X(DecRefNZ)
       X(DefLabel)
@@ -4225,6 +4258,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(KeysetGetQuiet)
       X(KeysetGetK)
       X(GetDictPtrIter)
+      X(GetKeysetPtrIter)
+      X(GetVecPtrIter)
       X(CheckDictKeys)
       X(CheckDictOffset)
       X(CheckKeysetOffset)

@@ -479,6 +479,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AddNewElemVec:
   case AddOffset:
   case AdvanceDictPtrIter:
+  case AdvanceKeysetPtrIter:
   case AdvanceVecPtrIter:
   case AllocBespokeStructDict:
   case AllocInitROM:
@@ -643,6 +644,7 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncHasReifiedGenerics:
   case GenericRetDecRefs:
   case GetDictPtrIter:
+  case GetKeysetPtrIter:
   case GetMemoKeyScalar:
   case GetTime:
   case GetTimeNs:
@@ -703,6 +705,7 @@ bool opcodeMayRaise(Opcode opc) {
   case KeysetGetQuiet:
   case KeysetIdx:
   case KeysetIsset:
+  case KeysetIterEnd:
   case KeysetLast:
   case KillActRec:
   case KillIter:

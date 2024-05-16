@@ -253,6 +253,7 @@ bool canDCE(const IRInstruction& inst) {
   case DictLastKey:
   case KeysetFirst:
   case KeysetLast:
+  case KeysetIterEnd:
   case GetTime:
   case GetTimeNs:
   case Select:
@@ -270,8 +271,10 @@ bool canDCE(const IRInstruction& inst) {
   case AllocStructDict:
   case AllocVec:
   case GetDictPtrIter:
+  case GetKeysetPtrIter:
   case GetVecPtrIter:
   case AdvanceDictPtrIter:
+  case AdvanceKeysetPtrIter:
   case AdvanceVecPtrIter:
   case LdPtrIterKey:
   case LdPtrIterVal:

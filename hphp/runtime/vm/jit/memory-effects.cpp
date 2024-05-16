@@ -1516,6 +1516,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddInt:
   case AddOffset:
   case AdvanceDictPtrIter:
+  case AdvanceKeysetPtrIter:
   case AdvanceVecPtrIter:
   case AndInt:
   case AssertType:
@@ -1550,6 +1551,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqPtrIter:
   case ExitPrologue:
   case GetDictPtrIter:
+  case GetKeysetPtrIter:
   case GetVecPtrIter:
   case GteBool:
   case GteInt:
@@ -1558,6 +1560,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Jmp:
   case JmpNZero:
   case JmpZero:
+  case KeysetIterEnd:
   case LdPropAddr:
   case LdStkAddr:
   case LdVecElemAddr:

@@ -4,7 +4,7 @@ class GlobIterator extends FilesystemIterator
   implements SeekableIterator, Countable {
 
   public function __construct($path, $flags = null) {
-    if (is_null($flags)) {
+    if ($flags is null) {
       $flags = FilesystemIterator::KEY_AS_PATHNAME |
         FilesystemIterator::CURRENT_AS_FILEINFO;
     }

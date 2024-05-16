@@ -357,7 +357,7 @@ class RecursiveIteratorIterator implements OuterIterator {
   public function getSubIterator($level = null)
   {
     $currentLevel = count($this->iterators)-1;
-    if (is_null($level)) {
+    if ($level is null) {
       $level = $currentLevel;
     }
     if ($level < 0 || $level > $currentLevel) {

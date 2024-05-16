@@ -26,7 +26,7 @@ function _filter_var_array_single($value, $filter, $options = dict[]) {
   if ($flags & FILTER_REQUIRE_SCALAR && HH\is_any_array($ret)) {
     return false;
   }
-  if ($flags & FILTER_REQUIRE_ARRAY && is_null($ret)) {
+  if ($flags & FILTER_REQUIRE_ARRAY && $ret is null) {
     return vec[];
   }
 

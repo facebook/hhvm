@@ -104,7 +104,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   No value is returned.
    */
   public function __construct($func, $param, $info = null)[] {
-    if (is_null($func) && is_null($param)) {
+    if ($func is null && $param is null) {
       if ($info !== null) {
         $this->info = $info;
         $this->name = $info['name'];

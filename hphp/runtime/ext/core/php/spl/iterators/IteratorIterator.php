@@ -140,7 +140,7 @@ class IteratorIterator implements OuterIterator {
     if (!$check || $this->iterator->valid()) {
       $this->current = $this->iterator->current();
       $key = $this->iterator->key();
-      $this->key = is_null($key) ? $this->position : $key;
+      $this->key = $key is null ? $this->position : $key;
       return true;
     } else {
       $this->current = null;

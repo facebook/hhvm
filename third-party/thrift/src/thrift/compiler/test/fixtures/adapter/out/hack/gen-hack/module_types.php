@@ -2460,7 +2460,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
           $_val0 ==> $_val0
             |> \facebook\thrift\test\Foo::__fromShape($$),
         ) |> new Vector($$),
-      Shapes::idx($shape, 'optionalStructListField') === null ? null : ($shape['optionalStructListField']
+      Shapes::idx($shape, 'optionalStructListField') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val1 ==> $_val1
@@ -2468,7 +2468,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ) |> new Vector($$)),
       Shapes::idx($shape, 'unionField'),
       Shapes::idx($shape, 'optionalUnionField'),
-      Shapes::idx($shape, 'adaptedStructField') === null ? null : (\facebook\thrift\test\DirectlyAdapted::__fromShape($shape['adaptedStructField'])),
+      Shapes::idx($shape, 'adaptedStructField') |> $$ === null ? null : (\facebook\thrift\test\DirectlyAdapted::__fromShape($$)),
     );
   }
 
@@ -3461,7 +3461,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'a') === null ? null : (\facebook\thrift\test\A::__fromShape($shape['a'])),
+      Shapes::idx($shape, 'a') |> $$ === null ? null : (\facebook\thrift\test\A::__fromShape($$)),
     );
   }
 
@@ -5820,7 +5820,7 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\facebook\thrift\test\AdaptTemplatedTestStruct::__fromShape($shape['adaptedStruct'])),
+      Shapes::idx($shape, 'adaptedStruct') |> $$ === null ? null : (\facebook\thrift\test\AdaptTemplatedTestStruct::__fromShape($$)),
     );
   }
 
@@ -6581,10 +6581,10 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($shape['adaptedStruct'])),
-      Shapes::idx($shape, 'adaptedTypedef') === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($shape['adaptedTypedef'])),
-      Shapes::idx($shape, 'directlyAdapted') === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['directlyAdapted'])),
-      Shapes::idx($shape, 'typedefOfAdapted') === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['typedefOfAdapted'])),
+      Shapes::idx($shape, 'adaptedStruct') |> $$ === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($$)),
+      Shapes::idx($shape, 'adaptedTypedef') |> $$ === null ? null : (\facebook\thrift\test\AdaptedStruct::__fromShape($$)),
+      Shapes::idx($shape, 'directlyAdapted') |> $$ === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($$)),
+      Shapes::idx($shape, 'typedefOfAdapted') |> $$ === null ? null : (\facebook\thrift\test\DirectlyAdaptedStruct::__fromShape($$)),
     );
   }
 
@@ -6722,7 +6722,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') === null ? null : (\facebook\thrift\test\CircularStruct::__fromShape($shape['field'])),
+      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\CircularStruct::__fromShape($$)),
     );
   }
 
@@ -6866,7 +6866,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') === null ? null : (\facebook\thrift\test\CircularAdaptee::__fromShape($shape['field'])),
+      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\CircularAdaptee::__fromShape($$)),
     );
   }
 
@@ -6999,7 +6999,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'reordered_dependent_adapted') === null ? null : (\facebook\thrift\test\DeclaredAfterStruct::__fromShape($shape['reordered_dependent_adapted'])),
+      Shapes::idx($shape, 'reordered_dependent_adapted') |> $$ === null ? null : (\facebook\thrift\test\DeclaredAfterStruct::__fromShape($$)),
     );
   }
 
@@ -7527,7 +7527,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'ptr') === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($shape['ptr'])),
+      Shapes::idx($shape, 'ptr') |> $$ === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($$)),
     );
   }
 

@@ -136,7 +136,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'a'),
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_string') |> $$ === null ? null : ($$ |> new Map($$)),
     );
   }
 
@@ -745,15 +745,15 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_i32'] |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ($shape['map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_string') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_i32') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val0 ==> $_val0
             |> A::__fromShape($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val2 ==> $_val2
@@ -763,12 +763,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Vector($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_map_of_string_to_i32']
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val3 ==> $_val3 |> new Map($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val5 ==> $_val5
@@ -778,8 +778,8 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Map($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'list_of_string') === null ? null : ($shape['list_of_string'] |> new Vector($$)),
-      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
+      Shapes::idx($shape, 'list_of_string') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val7 ==> $_val7
@@ -789,7 +789,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Map($$),
         ) |> new Vector($$)),
-      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val10 ==> $_val10
@@ -1462,15 +1462,15 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_i32'] |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ($shape['map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_string') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_i32') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val0 ==> $_val0
             |> A::__fromShape($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val2 ==> $_val2
@@ -1480,12 +1480,12 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Vector($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_map_of_string_to_i32']
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val3 ==> $_val3 |> new Map($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val5 ==> $_val5
@@ -1495,8 +1495,8 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Map($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'list_of_string') === null ? null : ($shape['list_of_string'] |> new Vector($$)),
-      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
+      Shapes::idx($shape, 'list_of_string') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val7 ==> $_val7
@@ -1506,7 +1506,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ) |> new Map($$),
         ) |> new Vector($$)),
-      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val10 ==> $_val10

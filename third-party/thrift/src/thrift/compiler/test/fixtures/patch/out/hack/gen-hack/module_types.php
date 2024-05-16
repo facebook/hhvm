@@ -743,7 +743,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return new static(
       Shapes::idx($shape, 'option1'),
       Shapes::idx($shape, 'option2'),
-      Shapes::idx($shape, 'option3') === null ? null : (\test\fixtures\patch\InnerUnion::__fromShape($shape['option3'])),
+      Shapes::idx($shape, 'option3') |> $$ === null ? null : (\test\fixtures\patch\InnerUnion::__fromShape($$)),
     );
   }
 
@@ -1931,9 +1931,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $shape['stringVal'],
       $shape['binaryVal'],
       Shapes::idx($shape, 'enumVal'),
-      Shapes::idx($shape, 'structVal') === null ? null : (\test\fixtures\patch\MyData::__fromShape($shape['structVal'])),
-      Shapes::idx($shape, 'unionVal') === null ? null : (\test\fixtures\patch\MyUnion::__fromShape($shape['unionVal'])),
-      Shapes::idx($shape, 'lateStructVal') === null ? null : (\test\fixtures\patch\LateDefStruct::__fromShape($shape['lateStructVal'])),
+      Shapes::idx($shape, 'structVal') |> $$ === null ? null : (\test\fixtures\patch\MyData::__fromShape($$)),
+      Shapes::idx($shape, 'unionVal') |> $$ === null ? null : (\test\fixtures\patch\MyUnion::__fromShape($$)),
+      Shapes::idx($shape, 'lateStructVal') |> $$ === null ? null : (\test\fixtures\patch\LateDefStruct::__fromShape($$)),
       Shapes::idx($shape, 'optBoolVal'),
       Shapes::idx($shape, 'optByteVal'),
       Shapes::idx($shape, 'optI16Val'),
@@ -1944,11 +1944,11 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       Shapes::idx($shape, 'optStringVal'),
       Shapes::idx($shape, 'optBinaryVal'),
       Shapes::idx($shape, 'optEnumVal'),
-      Shapes::idx($shape, 'optStructVal') === null ? null : (\test\fixtures\patch\MyData::__fromShape($shape['optStructVal'])),
-      Shapes::idx($shape, 'optLateStructVal') === null ? null : (\test\fixtures\patch\LateDefStruct::__fromShape($shape['optLateStructVal'])),
-      Shapes::idx($shape, 'optListVal') === null ? null : ($shape['optListVal'] |> new Vector($$)),
-      Shapes::idx($shape, 'optSetVal') === null ? null : (new Set(Keyset\keys($shape['optSetVal']))),
-      Shapes::idx($shape, 'optMapVal') === null ? null : ($shape['optMapVal'] |> new Map($$)),
+      Shapes::idx($shape, 'optStructVal') |> $$ === null ? null : (\test\fixtures\patch\MyData::__fromShape($$)),
+      Shapes::idx($shape, 'optLateStructVal') |> $$ === null ? null : (\test\fixtures\patch\LateDefStruct::__fromShape($$)),
+      Shapes::idx($shape, 'optListVal') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'optSetVal') |> $$ === null ? null : (new Set(Keyset\keys($$))),
+      Shapes::idx($shape, 'optMapVal') |> $$ === null ? null : ($$ |> new Map($$)),
       $shape['listMap']
         |> Vec\map(
           $$,
@@ -1960,8 +1960,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
           $_val1 ==> $_val1 |> new Map($$),
         ) |> new Map($$),
       $shape['i32WithCustomDefault'],
-      Shapes::idx($shape, 'structWithCustomDefault') === null ? null : (\test\fixtures\patch\MyDataWithCustomDefault::__fromShape($shape['structWithCustomDefault'])),
-      Shapes::idx($shape, 'structWithFieldCustomDefault') === null ? null : (\test\fixtures\patch\MyData::__fromShape($shape['structWithFieldCustomDefault'])),
+      Shapes::idx($shape, 'structWithCustomDefault') |> $$ === null ? null : (\test\fixtures\patch\MyDataWithCustomDefault::__fromShape($$)),
+      Shapes::idx($shape, 'structWithFieldCustomDefault') |> $$ === null ? null : (\test\fixtures\patch\MyData::__fromShape($$)),
     );
   }
 
@@ -2600,7 +2600,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'loop') === null ? null : (\test\fixtures\patch\Loop::__fromShape($shape['loop'])),
+      Shapes::idx($shape, 'loop') |> $$ === null ? null : (\test\fixtures\patch\Loop::__fromShape($$)),
     );
   }
 
@@ -2737,7 +2737,7 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'bar') === null ? null : (\test\fixtures\patch\Bar::__fromShape($shape['bar'])),
+      Shapes::idx($shape, 'bar') |> $$ === null ? null : (\test\fixtures\patch\Bar::__fromShape($$)),
     );
   }
 
@@ -3176,10 +3176,10 @@ class RefFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
       $shape['unique'] |> new Vector($$),
       $shape['shared_const'] |> new Vector($$),
       $shape['shared_mustable'] |> new Vector($$),
-      Shapes::idx($shape, 'opt_unique') === null ? null : ($shape['opt_unique'] |> new Vector($$)),
-      Shapes::idx($shape, 'opt_shared_const') === null ? null : ($shape['opt_shared_const'] |> new Vector($$)),
-      Shapes::idx($shape, 'opt_shared_mustable') === null ? null : ($shape['opt_shared_mustable'] |> new Vector($$)),
-      Shapes::idx($shape, 'opt_box') === null ? null : ($shape['opt_box'] |> new Vector($$)),
+      Shapes::idx($shape, 'opt_unique') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'opt_shared_const') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'opt_shared_mustable') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'opt_box') |> $$ === null ? null : ($$ |> new Vector($$)),
     );
   }
 

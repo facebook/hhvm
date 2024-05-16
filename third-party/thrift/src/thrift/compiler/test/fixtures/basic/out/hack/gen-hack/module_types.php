@@ -331,7 +331,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     return new static(
       $shape['MyIntField'],
       $shape['MyStringField'],
-      Shapes::idx($shape, 'MyDataField') === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($shape['MyDataField'])),
+      Shapes::idx($shape, 'MyDataField') |> $$ === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($$)),
       Shapes::idx($shape, 'myEnum'),
       $shape['oneway'],
       $shape['readonly'],
@@ -718,8 +718,8 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'myEnum'),
-      Shapes::idx($shape, 'myStruct') === null ? null : (\test\fixtures\basic\MyStruct::__fromShape($shape['myStruct'])),
-      Shapes::idx($shape, 'myDataItem') === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($shape['myDataItem'])),
+      Shapes::idx($shape, 'myStruct') |> $$ === null ? null : (\test\fixtures\basic\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'myDataItem') |> $$ === null ? null : (\test\fixtures\basic\MyDataItem::__fromShape($$)),
     );
   }
 

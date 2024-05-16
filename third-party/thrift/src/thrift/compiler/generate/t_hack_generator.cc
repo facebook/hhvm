@@ -129,6 +129,8 @@ class t_hack_generator : public t_concat_generator {
     protected_unions_ = option_is_specified(options, "protected_unions");
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
+    shapes_use_pipe_structure_ =
+        option_is_specified(options, "shapes_use_pipe_structure");
 
     auto [_, ns_type_] = get_namespace(program_);
     has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
@@ -1192,6 +1194,11 @@ class t_hack_generator : public t_concat_generator {
    * True to generate type aliases for typedefs defined
    */
   bool typedef_;
+
+  /**
+   * Use pipes in __fromShape implementation to avoid repeated indexing
+   */
+  bool shapes_use_pipe_structure_;
 
   bool has_hack_namespace;
 
@@ -3429,8 +3436,14 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
+    bool use_pipe = tstruct->is_union() || nullable;
+
     std::stringstream source;
-    source << "$shape['" << field.name() << "']";
+    if (shapes_use_pipe_structure_ && use_pipe) {
+      source << "$$";
+    } else {
+      source << "$shape['" << field.name() << "']";
+    }
 
     std::stringstream inner;
     bool is_simple_shape_index = true;
@@ -3462,9 +3475,12 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     std::stringstream val;
     indent(val);
-    if (tstruct->is_union() || nullable) {
+    if (use_pipe) {
       val << "Shapes::idx($shape, '" << field.name() << "')";
       if (!is_simple_shape_index) {
+        if (shapes_use_pipe_structure_) {
+          val << " |> $$";
+        }
         val << " === null ? null : (" << inner.str() << ")";
       }
     } else {
@@ -7566,6 +7582,8 @@ THRIFT_REGISTER_GENERATOR(
     "mutable counterparts.\n"
     "    typedef          Generate type aliases for all the types defined\n"
     "    enum_transparenttype Use transparent typing for Hack enums: 'enum "
-    "FooBar: int as int'.\n");
+    "FooBar: int as int'.\n"
+    "    shapes_use_pipe_structure Use pipes in __fromShape implementation "
+    "to avoid repeated indexing.\n");
 
 } // namespace apache::thrift::compiler

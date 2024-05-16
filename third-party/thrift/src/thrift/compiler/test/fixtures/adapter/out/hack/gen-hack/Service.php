@@ -303,7 +303,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     return new static(
       $shape['arg1'],
       $shape['arg2'],
-      Shapes::idx($shape, 'arg3') === null ? null : (\facebook\thrift\test\Foo::__fromShape($shape['arg3'])),
+      Shapes::idx($shape, 'arg3') |> $$ === null ? null : (\facebook\thrift\test\Foo::__fromShape($$)),
     );
   }
 

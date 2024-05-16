@@ -446,7 +446,7 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'arg') === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($shape['arg'])),
+      Shapes::idx($shape, 'arg') |> $$ === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($$)),
     );
   }
 

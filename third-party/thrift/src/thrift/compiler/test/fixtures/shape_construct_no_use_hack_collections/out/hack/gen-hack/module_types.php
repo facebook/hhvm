@@ -474,7 +474,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
       Shapes::idx($shape, 'double_value'),
       Shapes::idx($shape, 'list_of_strings'),
       Shapes::idx($shape, 'map_of_string_to_ints'),
-      Shapes::idx($shape, 'struct_foo') === null ? null : (Foo::__fromShape($shape['struct_foo'])),
+      Shapes::idx($shape, 'struct_foo') |> $$ === null ? null : (Foo::__fromShape($$)),
     );
   }
 
@@ -972,8 +972,8 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'foo_struct') === null ? null : (Foo::__fromShape($shape['foo_struct'])),
-      Shapes::idx($shape, 'union_value') === null ? null : (TestUnion::__fromShape($shape['union_value'])),
+      Shapes::idx($shape, 'foo_struct') |> $$ === null ? null : (Foo::__fromShape($$)),
+      Shapes::idx($shape, 'union_value') |> $$ === null ? null : (TestUnion::__fromShape($$)),
       $shape['list_of_struct_foo']
         |> Vec\map(
           $$,

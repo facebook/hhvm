@@ -450,7 +450,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
           $$,
           $_val1 ==> $_val1 |> new Map($$),
         ) |> new Map($$),
-      Shapes::idx($shape, 'optional_map_of_map_of_sets') === null ? null : ($shape['optional_map_of_map_of_sets']
+      Shapes::idx($shape, 'optional_map_of_map_of_sets') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val2 ==> $_val2 |> new Map($$),

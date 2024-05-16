@@ -1005,10 +1005,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       Shapes::idx($shape, 'string_field'),
       Shapes::idx($shape, 'binary_field'),
       Shapes::idx($shape, 'enum_field'),
-      Shapes::idx($shape, 'list_field') === null ? null : ($shape['list_field'] |> new Vector($$)),
-      Shapes::idx($shape, 'set_field') === null ? null : (new Set(Keyset\keys($shape['set_field']))),
-      Shapes::idx($shape, 'map_field') === null ? null : ($shape['map_field'] |> new Map($$)),
-      Shapes::idx($shape, 'struct_field') === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($shape['struct_field'])),
+      Shapes::idx($shape, 'list_field') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'set_field') |> $$ === null ? null : (new Set(Keyset\keys($$))),
+      Shapes::idx($shape, 'map_field') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
     );
   }
 
@@ -1817,8 +1817,8 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       $shape['list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['set_field'])),
       $shape['map_field'] |> new Map($$),
-      Shapes::idx($shape, 'struct_field') === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($shape['struct_field'])),
-      Shapes::idx($shape, 'union_field') === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($shape['union_field'])),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
     );
   }
 
@@ -3075,8 +3075,8 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $shape['terse_list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['terse_set_field'])),
       $shape['terse_map_field'] |> new Map($$),
-      Shapes::idx($shape, 'terse_struct_field') === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($shape['terse_struct_field'])),
-      Shapes::idx($shape, 'terse_union_field') === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($shape['terse_union_field'])),
+      Shapes::idx($shape, 'terse_struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'terse_union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
       $shape['bool_field'],
       $shape['byte_field'],
       $shape['short_field'],
@@ -3090,8 +3090,8 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $shape['list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['set_field'])),
       $shape['map_field'] |> new Map($$),
-      Shapes::idx($shape, 'struct_field') === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($shape['struct_field'])),
-      Shapes::idx($shape, 'union_field') === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($shape['union_field'])),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
     );
   }
 
@@ -3870,7 +3870,7 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStruct
       $shape['list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['set_field'])),
       $shape['map_field'] |> new Map($$),
-      Shapes::idx($shape, 'struct_field') === null ? null : (\facebook\thrift\test\terse_write\MyStructWithCustomDefault::__fromShape($shape['struct_field'])),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStructWithCustomDefault::__fromShape($$)),
     );
   }
 

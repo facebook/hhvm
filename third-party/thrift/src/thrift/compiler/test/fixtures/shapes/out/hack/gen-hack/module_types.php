@@ -2051,7 +2051,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'just_an_A') === null ? null : (\test\fixtures\A::__fromShape($shape['just_an_A'])),
+      Shapes::idx($shape, 'just_an_A') |> $$ === null ? null : (\test\fixtures\A::__fromShape($$)),
       new Set(Keyset\keys($shape['set_of_i32'])),
       $shape['list_of_i32'] |> new Vector($$),
       $shape['list_of_string'] |> new Vector($$),
@@ -2129,24 +2129,24 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
             ) |> new Map($$),
         ) |> new Vector($$),
       Shapes::idx($shape, 'just_an_enum'),
-      Shapes::idx($shape, 'just_a_union') === null ? null : (\test\fixtures\Union::__fromShape($shape['just_a_union'])),
-      Shapes::idx($shape, 'optional_just_an_A') === null ? null : (\test\fixtures\A::__fromShape($shape['optional_just_an_A'])),
-      Shapes::idx($shape, 'optional_set_of_i32') === null ? null : (new Set(Keyset\keys($shape['optional_set_of_i32']))),
-      Shapes::idx($shape, 'optional_list_of_i32') === null ? null : ($shape['optional_list_of_i32'] |> new Vector($$)),
-      Shapes::idx($shape, 'optional_list_of_string') === null ? null : ($shape['optional_list_of_string'] |> new Vector($$)),
-      Shapes::idx($shape, 'optional_map_of_string_to_i32') === null ? null : ($shape['optional_map_of_string_to_i32'] |> new Map($$)),
-      Shapes::idx($shape, 'optional_map_of_string_to_A') === null ? null : ($shape['optional_map_of_string_to_A']
+      Shapes::idx($shape, 'just_a_union') |> $$ === null ? null : (\test\fixtures\Union::__fromShape($$)),
+      Shapes::idx($shape, 'optional_just_an_A') |> $$ === null ? null : (\test\fixtures\A::__fromShape($$)),
+      Shapes::idx($shape, 'optional_set_of_i32') |> $$ === null ? null : (new Set(Keyset\keys($$))),
+      Shapes::idx($shape, 'optional_list_of_i32') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'optional_list_of_string') |> $$ === null ? null : ($$ |> new Vector($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_i32') |> $$ === null ? null : ($$ |> new Map($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val14 ==> $_val14
             |> \test\fixtures\A::__fromShape($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32') === null ? null : ($shape['optional_map_of_string_to_list_of_i32']
+      Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val15 ==> $_val15 |> new Vector($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'optional_map_of_string_to_list_of_A') === null ? null : ($shape['optional_map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'optional_map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val17 ==> $_val17
@@ -2156,7 +2156,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> \test\fixtures\A::__fromShape($$),
             ) |> new Vector($$),
         ) |> new Map($$)),
-      Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32') === null ? null : ($shape['optional_map_of_string_to_set_of_i32']
+      Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val18 ==> $_val18
@@ -2168,7 +2168,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       $shape['i32_with_default_value'],
       $shape['double_with_default_value'],
       Shapes::idx($shape, 'enum_with_default_value'),
-      Shapes::idx($shape, 'A_with_default_value') === null ? null : (\test\fixtures\A::__fromShape($shape['A_with_default_value'])),
+      Shapes::idx($shape, 'A_with_default_value') |> $$ === null ? null : (\test\fixtures\A::__fromShape($$)),
       new Set(Keyset\keys($shape['set_of_i32_with_default_value'])),
       $shape['map_of_i32_to_string_with_default_value'] |> new Map($$),
       $shape['list_of_string_with_default_value'] |> new Vector($$),

@@ -760,7 +760,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $shape['empty_annotations'],
       Shapes::idx($shape, 'my_enum'),
       $shape['cpp_type_annotation'] |> new Vector($$),
-      Shapes::idx($shape, 'my_union') === null ? null : (MyUnion::__fromShape($shape['my_union'])),
+      Shapes::idx($shape, 'my_union') |> $$ === null ? null : (MyUnion::__fromShape($$)),
     );
   }
 

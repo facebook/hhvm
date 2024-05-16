@@ -302,7 +302,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['arg1'],
-      Shapes::idx($shape, 'arg2') === null ? null : (MyStruct::__fromShape($shape['arg2'])),
+      Shapes::idx($shape, 'arg2') |> $$ === null ? null : (MyStruct::__fromShape($$)),
     );
   }
 

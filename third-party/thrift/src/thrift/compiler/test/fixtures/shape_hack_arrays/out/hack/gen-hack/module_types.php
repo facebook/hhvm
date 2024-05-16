@@ -1463,13 +1463,13 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     return new static(
       Shapes::idx($shape, 'map_of_string_to_string'),
       Shapes::idx($shape, 'map_of_string_to_i32'),
-      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ($shape['map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val0 ==> $_val0
             |> A::__fromShape($$),
         )),
-      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val2 ==> $_val2
@@ -1480,7 +1480,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
             ),
         )),
       Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32'),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Dict\map(
           $$,
           $_val4 ==> $_val4
@@ -1491,7 +1491,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
             ),
         )),
       Shapes::idx($shape, 'list_of_string'),
-      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
+      Shapes::idx($shape, 'list_of_map_of_string_to_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val6 ==> $_val6
@@ -1501,7 +1501,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                 |> A::__fromShape($$),
             ),
         )),
-      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
+      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') |> $$ === null ? null : ($$
         |> Vec\map(
           $$,
           $_val9 ==> $_val9

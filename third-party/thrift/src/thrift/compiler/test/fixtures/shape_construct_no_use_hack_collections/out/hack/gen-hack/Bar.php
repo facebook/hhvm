@@ -443,7 +443,7 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
       $shape['a'],
       $shape['b'],
       $shape['c'],
-      Shapes::idx($shape, 'd') === null ? null : (Foo::__fromShape($shape['d'])),
+      Shapes::idx($shape, 'd') |> $$ === null ? null : (Foo::__fromShape($$)),
       $shape['e'],
     );
   }

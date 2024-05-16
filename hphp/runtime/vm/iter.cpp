@@ -198,7 +198,7 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 
 }
 
-template <bool BaseConst>
+template<bool BaseConst>
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
 
@@ -547,66 +547,39 @@ int64_t iter_next_array_generic(Iter* it, const ArrayData* ad,
   return 1;
 }
 
-/*
- * This macro takes a name (e.g. VanillaVec) and a helper that's templated
- * on <bool HasKey> (e.g. iter_next_vanilla_vec) and produces the two helpers
- * that we'll call from the iter_next dispatch methods below.
- */
-#define VTABLE_METHODS(name, fn)                                         \
-  int64_t iterNext##name(Iter* it, ArrayData* ad, TypedValue* valOut) {  \
-    TRACE(2, "iterNext" #name ": I %p\n", it);                           \
-    return fn<false>(it, ad, valOut, nullptr);                           \
-  }                                                                      \
-  int64_t iterNextK##name(                                               \
-      Iter* it, ArrayData* ad, TypedValue* valOut, TypedValue* keyOut) { \
-    TRACE(2, "iterNextK" #name ": I %p\n", it);                          \
-    return fn<true>(it, ad, valOut, keyOut);                             \
-  }                                                                      \
-
-VTABLE_METHODS(VanillaVec,         iter_next_vanilla_vec);
-VTABLE_METHODS(VanillaVecPointer,  iter_next_vanilla_vec_pointer);
-VTABLE_METHODS(VanillaDict,        iter_next_vanilla_dict);
-VTABLE_METHODS(VanillaDictPointer, iter_next_vanilla_dict_pointer);
-VTABLE_METHODS(StructDict,         iter_next_struct_dict);
-VTABLE_METHODS(Array,              iter_next_array_generic);
-
-#undef VTABLE_METHODS
-
-using IterNextHelper  = int64_t (*)(Iter*, ArrayData*, TypedValue*);
-using IterNextKHelper = int64_t (*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
-
-// The order of these function pointers must match the order that their
-// corresponding IterNextIndex enum members were declared in.
-
-const IterNextHelper g_iterNextHelpers[] = {
-  &iterNextVanillaVec,
-  &iterNextVanillaDict,
-  &iterNextArray,
-  &iterNextVanillaDictPointer,
-  &iterNextVanillaVecPointer,
-  &iterNextStructDict,
-};
-
-const IterNextKHelper g_iterNextKHelpers[] = {
-  &iterNextKVanillaVec,
-  &iterNextKVanillaDict,
-  &iterNextKArray,
-  &iterNextKVanillaDictPointer,
-  &iterNextKVanillaVecPointer,
-  &iterNextKStructDict,
-};
-
 }
 
+template<bool BaseConst>
 int64_t iter_next_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "iter_next_array: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
-  auto const index = unwrap(iter)->getHelperIndex();
-  IterNextHelper helper = g_iterNextHelpers[static_cast<uint32_t>(index)];
-  return helper(iter, ad, valOut);
+
+  switch (ad->kind()) {
+    case ArrayData::kVecKind:
+      return BaseConst && VanillaVec::stores_unaligned_typed_values
+        ? iter_next_vanilla_vec_pointer<false>(iter, ad, valOut, nullptr)
+        : iter_next_vanilla_vec<false>(iter, ad, valOut, nullptr);
+    case ArrayData::kDictKind:
+      return BaseConst
+        ? iter_next_vanilla_dict_pointer<false>(iter, ad, valOut, nullptr)
+        : iter_next_vanilla_dict<false>(iter, ad, valOut, nullptr);
+    case ArrayData::kBespokeDictKind: {
+      auto const bad = BespokeArray::asBespoke(ad);
+      return isStructDict(bad)
+        ? iter_next_struct_dict<false>(iter, ad, valOut, nullptr)
+        : iter_next_array_generic<false>(iter, ad, valOut, nullptr);
+    }
+    case ArrayData::kBespokeVecKind:
+    case ArrayData::kKeysetKind:
+    case ArrayData::kBespokeKeysetKind:
+      return iter_next_array_generic<false>(iter, ad, valOut, nullptr);
+    case ArrayData::kNumKinds:
+      not_reached();
+  }
 }
 
+template<bool BaseConst>
 int64_t iter_next_array_key(Iter* iter,
                             ArrayData* ad,
                             TypedValue* valOut,
@@ -615,10 +588,37 @@ int64_t iter_next_array_key(Iter* iter,
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
   assertx(tvIsPlausible(*keyOut));
-  auto const index = unwrap(iter)->getHelperIndex();
-  IterNextKHelper helper = g_iterNextKHelpers[static_cast<uint32_t>(index)];
-  return helper(iter, ad, valOut, keyOut);
+
+  switch (ad->kind()) {
+    case ArrayData::kVecKind:
+      return iter_next_vanilla_vec<true>(iter, ad, valOut, keyOut);
+    case ArrayData::kDictKind:
+      return BaseConst
+        ? iter_next_vanilla_dict_pointer<true>(iter, ad, valOut, keyOut)
+        : iter_next_vanilla_dict<true>(iter, ad, valOut, keyOut);
+    case ArrayData::kBespokeDictKind: {
+      auto const bad = BespokeArray::asBespoke(ad);
+      return isStructDict(bad)
+        ? iter_next_struct_dict<true>(iter, ad, valOut, keyOut)
+        : iter_next_array_generic<true>(iter, ad, valOut, keyOut);
+    }
+    case ArrayData::kBespokeVecKind:
+    case ArrayData::kKeysetKind:
+    case ArrayData::kBespokeKeysetKind:
+      return iter_next_array_generic<true>(iter, ad, valOut, keyOut);
+    case ArrayData::kNumKinds:
+      not_reached();
+  }
 }
+
+template
+int64_t iter_next_array<false>(Iter*, ArrayData*, TypedValue*);
+template
+int64_t iter_next_array<true>(Iter*, ArrayData*, TypedValue*);
+template
+int64_t iter_next_array_key<false>(Iter*, ArrayData*, TypedValue*, TypedValue*);
+template
+int64_t iter_next_array_key<true>(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
 
 namespace {

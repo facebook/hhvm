@@ -138,10 +138,6 @@ struct alignas(16) IterImpl {
   // In debug builds, this method will overwrite the iterator with garbage.
   void kill();
 
-  IterNextIndex getHelperIndex() {
-    return m_nextHelperIdx;
-  }
-
   // Used by native code and by the JIT to pack the m_typeFields components.
   static uint32_t packTypeFields(IterNextIndex index) {
     return static_cast<uint32_t>(index) << 24;
@@ -312,7 +308,9 @@ int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
+template<bool BaseConst>
 NEVER_INLINE int64_t iter_next_array(Iter*, ArrayData*, TypedValue*);
+template<bool BaseConst>
 NEVER_INLINE int64_t iter_next_array_key(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
 NEVER_INLINE int64_t iter_next_object(ObjectData*, TypedValue*);

@@ -271,11 +271,19 @@ void cgIterInitObjK(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgIterNextArr(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_next_array));
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const target = has_flag(flags, IterArgs::Flags::BaseConst)
+    ? CallSpec::direct(iter_next_array<true>)
+    : CallSpec::direct(iter_next_array<false>);
+  implIterNext(env, inst, target);
 }
 
 void cgIterNextArrK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_next_array_key));
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const target = has_flag(flags, IterArgs::Flags::BaseConst)
+    ? CallSpec::direct(iter_next_array_key<true>)
+    : CallSpec::direct(iter_next_array_key<false>);
+  implIterNext(env, inst, target);
 }
 
 void cgIterNextObj(IRLS& env, const IRInstruction* inst) {

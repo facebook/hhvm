@@ -4409,12 +4409,12 @@ OPTBLD_INLINE void iopIterBase() {
 
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
                                TypedValue* base, PC targetpc) {
-  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
   auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
   if (isArrayLikeType(type(base))) {
+    auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
     auto const arr = val(base).parr;
     auto const res = ita.hasKey()
       ? new_iter_array_key_helper(baseConst)(it, arr, value, key)
@@ -4438,10 +4438,15 @@ OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita,
 
   auto const more = [&] {
     if (isArrayLikeType(type(base))) {
+      auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
       auto const arr = val(base).parr;
       return key
-        ? iter_next_array_key(it, arr, value, key)
-        : iter_next_array(it, arr, value);
+        ? baseConst
+          ? iter_next_array_key<true>(it, arr, value, key)
+          : iter_next_array_key<false>(it, arr, value, key)
+        : baseConst
+          ? iter_next_array<true>(it, arr, value)
+          : iter_next_array<false>(it, arr, value);
     }
     assertx(isObjectType(type(base)));
     auto const obj = val(base).pobj;

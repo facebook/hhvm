@@ -5,7 +5,11 @@ Errors:
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\C");
-      c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:14-18], Hthis))]; tp_reified = Erased; tp_user_attributes = [] }];
+      c_tparams =
+      [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([3:9-10], (Happly (([3:9-10], "\\HH\\supportdyn"), [([3:9-10], Hmixed)])))); (Constraint_as, ([3:14-18], Hthis))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
       c_typeconsts = [];
@@ -20,16 +24,17 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [7:1-9:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
        c_name = ([7:16-17], "\\C");
        c_tparams =
-       [{ tp_variance = Invariant; tp_name = ([7:18-19], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([7:23-30], (Haccess (([7:23-27], Hthis), [([7:29-30], "X")]))))]; 
+       [{ tp_variance = Invariant; tp_name = ([7:18-19], "T"); tp_parameters = [];
+          tp_constraints =
+          [(Constraint_as, ([7:18-19], (Happly (([7:18-19], "\\HH\\supportdyn"), [([7:18-19], Hmixed)])))); (Constraint_as, ([7:23-30], (Haccess (([7:23-27], Hthis), [([7:29-30], "X")]))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
@@ -44,7 +49,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None })
+       c_user_attributes = [{ ua_name = ([7:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })
   ]

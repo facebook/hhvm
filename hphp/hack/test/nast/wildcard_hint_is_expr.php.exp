@@ -9,13 +9,18 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-12], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [4:1-6:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-       c_name = ([4:13-18], "\\BBBBB"); c_tparams = [{ tp_variance = Covariant; tp_name = ([4:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_name = ([4:13-18], "\\BBBBB");
+       c_tparams =
+       [{ tp_variance = Covariant; tp_name = ([4:20-21], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([4:20-21], (Happly (([4:20-21], "\\HH\\supportdyn"), [([4:20-21], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = [([4:31-36], (Happly (([4:31-36], "\\AAAAA"), [])))]; 
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = [];
@@ -30,9 +35,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([4:13-18], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -57,7 +62,7 @@
                 [([Pos.none], Noop)])));
              ([12:3-16], (Return (Some ((), [12:10-15], False))))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-31], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

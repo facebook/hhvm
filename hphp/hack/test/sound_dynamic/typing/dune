@@ -25,7 +25,6 @@
    --fallback-expect-extension
    .exp
    --flags
-   --enable-sound-dynamic-type
    --out-extension
    .legacy_decl.out)))
 
@@ -56,7 +55,6 @@
    --fallback-expect-extension
    .exp
    --flags
-   --enable-sound-dynamic-type
    --out-extension
    .legacy_decl.out
    --error-format

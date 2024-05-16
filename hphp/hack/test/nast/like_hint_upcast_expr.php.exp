@@ -9,7 +9,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [];
+      c_user_attributes = [{ ua_name = ([4:7-8], "__SupportDynamicType"); ua_params = [] }];
       c_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-52], (String "upcast_expression"))] }];
          fa_namespace =
@@ -38,7 +38,7 @@
        { f_span = [6:1-8:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([6:43-47], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([6:32-37], Hmixed))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([6:32-37], (Happly (([6:32-37], "\\HH\\supportdyn"), [([6:32-37], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [6:38-40]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -54,7 +54,7 @@
                       rhs = ((), [7:8-20], (Upcast (((), [7:8-10], (Lvar ([7:8-10], $x))), ([7:18-20], (Hlike ([7:19-20], (Happly (([7:19-20], "\\A"), [])))))))) }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-31], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

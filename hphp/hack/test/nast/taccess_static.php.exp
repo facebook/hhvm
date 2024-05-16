@@ -10,8 +10,8 @@ Errors:
       { f_span = [6:1-2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([6:1-2], (Happly (([6:1-2], "\\HH\\Awaitable"), [([6:1-2], (Hprim Tvoid))]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:1-2], (Expr ((), [6:1-2], (Id ([6:1-2], "\\}")))))] }; 
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([6:1-2], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [3:1-5:56]; c_annotation = (); c_mode = Mstrict; c_final = false; 
@@ -38,7 +38,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None })
+       c_user_attributes = [{ ua_name = ([3:7-10], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })
   ]

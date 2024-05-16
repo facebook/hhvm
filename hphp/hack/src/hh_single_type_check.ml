@@ -290,7 +290,6 @@ let parse_options () =
   let sharedmem_config = ref SharedMem.default_config in
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
-  let everything_sdt = ref false in
   let custom_hhi_path = ref None in
   let force_allow_builtins_in_custom_hhi_path = ref false in
   let explicit_consistent_constructors = ref 0 in
@@ -558,7 +557,6 @@ let parse_options () =
         Arg.Unit
           (fun () ->
             set_bool_ enable_sound_dynamic ();
-            set_bool_ everything_sdt ();
             set_bool_ always_pessimise_return ();
             set_bool_ consider_type_const_enforceable ();
             set_bool_ enable_supportdyn_hint ()),
@@ -567,7 +565,6 @@ let parse_options () =
         Arg.Unit
           (fun () ->
             set_bool_ enable_sound_dynamic ();
-            set_bool_ everything_sdt ();
             set_bool_ enable_supportdyn_hint ()),
         " Enables implicit pessimisation" );
       ( "--explicit-pess",
@@ -721,10 +718,6 @@ let parse_options () =
       ( "--enable-sealed-subclasses",
         Arg.Set enforce_sealed_subclasses,
         " Require all __Sealed arguments to be subclasses" );
-      ( "--everything-sdt",
-        Arg.Set everything_sdt,
-        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
-      );
       ( "--custom-hhi-path",
         Arg.String (fun s -> custom_hhi_path := Some s),
         " Use custom hhis" );
@@ -849,10 +842,6 @@ let parse_options () =
         config
         |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
         |> Option.map ~f:comma_string_to_iset;
-      everything_sdt :=
-        config
-        |> Config_file.Getters.bool_opt "everything_sdt"
-        |> Option.value ~default:!everything_sdt;
       enable_sound_dynamic :=
         config
         |> Config_file.Getters.bool_opt "enable_sound_dynamic_type"
@@ -907,7 +896,7 @@ let parse_options () =
         auto_namespace_map = !auto_namespace_map >?? default.auto_namespace_map;
         deregister_php_stdlib =
           !deregister_attributes >?? default.deregister_php_stdlib;
-        everything_sdt = !everything_sdt;
+        everything_sdt = true;
         enable_class_level_where_clauses = !enable_class_level_where_clauses;
         union_intersection_type_hints = !union_intersection_type_hints;
         disallow_silence = !disallow_silence;

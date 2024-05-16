@@ -16,6 +16,7 @@
    .php
    --flags
    --count-imprecise-types
+   --config everything_sdt=false
    --error-format
    plain)))
 

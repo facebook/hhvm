@@ -15,8 +15,8 @@
           --program %{exe:../../src/hh_single_type_check.exe}
           --batch
       --flags
-      --enable-sound-dynamic-type
-      --error-format plain)))
+      --error-format plain
+      --config everything_sdt=false)))
 
 (rule
     (alias typecheck_w_timeout)
@@ -36,5 +36,5 @@
           --timeout 20
       --verbose
       --flags
-      --enable-sound-dynamic-type
-      --error-format plain)))
+      --error-format plain
+      --config everything_sdt=false)))

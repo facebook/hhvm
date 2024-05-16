@@ -4,8 +4,13 @@
       c_name = ([3:7-10], "\\ABC");
       c_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:11-13], "T1");
-         tp_parameters = [{ tp_variance = Invariant; tp_name = ([3:14-16], "T2"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-         tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+         tp_parameters =
+         [{ tp_variance = Invariant; tp_name = ([3:14-16], "T2"); tp_parameters = [];
+            tp_constraints = [(Constraint_as, ([3:14-16], (Happly (([3:14-16], "\\HH\\supportdyn"), [([3:14-16], Hmixed)]))))]; 
+            tp_reified = Erased; tp_user_attributes = [] }
+           ];
+         tp_constraints = [(Constraint_as, ([3:11-13], (Happly (([3:11-13], "\\HH\\supportdyn"), [([3:11-13], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
         ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
@@ -45,7 +50,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None })
+      c_user_attributes = [{ ua_name = ([3:7-10], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None })
   ]

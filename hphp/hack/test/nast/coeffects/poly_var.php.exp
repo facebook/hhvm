@@ -16,12 +16,16 @@
         f_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))]));
         f_unsafe_ctxs = (Some ([5:2-9], [([5:3-8], (Haccess (([5:3-5], (Hvar "$f")), [([5:7-8], "C")])))])); 
         f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
-        f_user_attributes = []; f_external = false; f_doc_comment = None };
+        f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
       fd_tparams =
-      [{ tp_variance = Invariant; tp_name = ([4:5-7], "T/$f"); tp_parameters = []; 
-         tp_constraints = [(Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))]; 
+      [{ tp_variance = Invariant; tp_name = ([4:5-7], "T/$f"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([4:5-7], (Happly (([4:5-7], "\\HH\\supportdyn"), [([4:5-7], Hmixed)])))); (Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))];
          tp_reified = Erased; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([5:3-8], "T/[$f::C]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        { tp_variance = Invariant; tp_name = ([5:3-8], "T/[$f::C]"); 
+          tp_parameters = []; tp_constraints = [(Constraint_as, ([5:3-8], (Happly (([5:3-8], "\\HH\\supportdyn"), [([5:3-8], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+        ];
       fd_where_constraints = [(([5:3-8], (Habstr ("T/[$f::C]", []))), Constraint_eq, ([5:3-8], (Haccess (([4:5-7], (Habstr ("T/$f", []))), [([5:7-8], "C")]))))] })
   ]

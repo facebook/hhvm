@@ -475,10 +475,6 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
-      ( "--everything-sdt",
-        Arg.Set everything_sdt,
-        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
-      );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -531,7 +527,6 @@ let () =
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
       ignored_flag "--enable-sealed-subclasses";
-      ignored_flag "--enable-sound-dynamic-type";
       ignored_arg "--explicit-consistent-constructors";
       ignored_arg "--require-types-class-consts";
       ignored_flag "--skip-tast-checks";

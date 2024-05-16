@@ -1,20 +1,32 @@
 [(Typedef
     { t_annotation = (); t_name = ([4:11-14], "\\CT1");
       t_tparams =
-      [{ tp_variance = Covariant; tp_name = ([4:16-18], "T1"); tp_parameters = []; tp_constraints = [(Constraint_as, ([4:22-30], (Hprim Tarraykey)))]; tp_reified = Erased; tp_user_attributes = [] };
-        { tp_variance = Contravariant; tp_name = ([4:33-35], "T2"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([4:37-38], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-      t_as_constraint = (Some ([4:43-50], Hnonnull)); t_super_constraint = None;
+      [{ tp_variance = Covariant; tp_name = ([4:16-18], "T1"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([4:16-18], (Happly (([4:16-18], "\\HH\\supportdyn"), [([4:16-18], Hmixed)])))); (Constraint_as, ([4:22-30], (Hprim Tarraykey)))]; 
+         tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Contravariant; tp_name = ([4:33-35], "T2"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([4:33-35], (Happly (([4:33-35], "\\HH\\supportdyn"), [([4:33-35], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([4:37-38], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([4:37-38], (Happly (([4:37-38], "\\HH\\supportdyn"), [([4:37-38], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      t_as_constraint = (Some ([4:43-50], (Happly (([4:43-50], "\\HH\\supportdyn"), [([4:43-50], Hnonnull)])))); 
+      t_super_constraint = None;
       t_kind =
       ([4:53-83],
        (Hunion
           [([4:53-63], (Happly (([4:53-59], "\\HH\\keyset"), [([4:60-62], (Habstr ("T1", [])))])));
             ([4:66-83],
-             (Hfun
-                { hf_is_readonly = None; hf_param_tys = [([4:76-78], (Habstr ("T2", [])))]; 
-                  hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
-                  hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:81-82], (Habstr ("T", []))); 
-                  hf_is_readonly_return = None }))
+             (Happly (([4:66-83], "\\HH\\supportdyn"),
+                [([4:66-83],
+                  (Hfun
+                     { hf_is_readonly = None; hf_param_tys = [([4:76-78], (Habstr ("T2", [])))];
+                       hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
+                       hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:81-82], (Hlike ([4:81-82], (Habstr ("T", []))))); 
+                       hf_is_readonly_return = None }))
+                  ]
+                )))
             ]));
       t_user_attributes = [];
       t_file_attributes =
@@ -54,7 +66,8 @@
        t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([8:11-14], "\\CT3"); t_tparams = []; 
-       t_as_constraint = None; t_super_constraint = None; t_kind = ([8:17-30], (Hunion [([8:17-23], (Hprim Tstring)); ([8:26-30], (Hprim Tbool))])); 
+       t_as_constraint = (Some ([8:11-14], (Happly (([8:11-14], "\\HH\\supportdyn"), [([8:11-14], Hmixed)])))); 
+       t_super_constraint = None; t_kind = ([8:17-30], (Hunion [([8:17-23], (Hprim Tstring)); ([8:26-30], (Hprim Tbool))])); 
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-45], (String "case_types"))] }];

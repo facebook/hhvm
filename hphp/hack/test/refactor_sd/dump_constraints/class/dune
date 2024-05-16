@@ -15,7 +15,6 @@
    --in-extension
    .php
    --flags
-   --enable-sound-dynamic-type
    --refactor-sound-dynamic
    dump
    Class

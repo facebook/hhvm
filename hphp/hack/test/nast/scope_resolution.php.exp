@@ -48,8 +48,8 @@ Errors:
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([4:17-23], (Hprim Tstring)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((), [5:10-17], (String "class")))))] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [7:1-17:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
@@ -72,8 +72,15 @@ Errors:
           cv_type =
           ((),
            (Some ([10:17-34],
-                  (Hfun
-                     { hf_is_readonly = None; hf_param_tys = []; hf_param_info = []; hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([10:30-33], (Hprim Tint)); hf_is_readonly_return = None }))));
+                  (Happly (([10:17-34], "\\HH\\supportdyn"),
+                     [([10:17-34],
+                       (Hfun
+                          { hf_is_readonly = None; hf_param_tys = []; 
+                            hf_param_info = []; hf_variadic_ty = None; 
+                            hf_ctxs = None; hf_return_ty = ([10:30-33], (Hlike ([10:30-33], (Hprim Tint)))); 
+                            hf_is_readonly_return = None }))
+                       ]
+                     )))));
           cv_id = ([10:35-37], "_"); cv_expr = (Some ((), [10:40-53], (FunctionPointer ((FP_class_const (((), [10:40-44], CIself), ([10:46-51], "class"))), [])))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
           cv_span = [10:35-53] }
@@ -100,9 +107,9 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([7:13-16], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -222,8 +229,8 @@ Errors:
                   (Call { func = ((), [100:4-103:4], (Class_const (((), [100:4-7], (CI ([100:4-7], "\\Foo"))), ([100:10-102:4], "very $wow")))); targs = []; args = []; unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([20:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -407,8 +414,8 @@ Errors:
                        targs = []; args = []; unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([107:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -631,7 +638,7 @@ Errors:
                        targs = []; args = []; unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([157:10-23], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

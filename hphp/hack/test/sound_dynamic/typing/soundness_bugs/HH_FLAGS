@@ -1,1 +1,2 @@
---enable-sound-dynamic-type --union-intersection-type-hints
+--union-intersection-type-hints
+--config everything_sdt=false

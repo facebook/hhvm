@@ -486,6 +486,11 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let ty_datetime = MakeType.datetime (Reason.Rcomp p) in
     let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.Rcomp p) in
     let ty_dynamic = MakeType.dynamic (Reason.Rcomp p) in
+    let ty_all =
+      MakeType.union
+        (Reason.Rcomp p)
+        [ty_num; ty_string; ty_datetime; ty_datetimeimmutable; ty_dynamic]
+    in
     let both_sub ty =
       Typing_subtype.can_sub_type env ty1 ty
       && Typing_subtype.can_sub_type env ty2 ty
@@ -512,6 +517,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                   (Reason.Rcomp p)
                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]))
     then
+      (* There is definitely an error if we get here *)
       let ty1 = lazy (Typing_expand.fully_expand env ty1)
       and ty2 = lazy (Typing_expand.fully_expand env ty2) in
       let tys1 = Lazy.map ty1 ~f:(fun ty -> (ty, Typing_print.error env ty))
@@ -529,7 +535,35 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                  right =
                    Lazy.map tys2 ~f:(fun (ty2, tys2) ->
                        Reason.to_string ("This is " ^ tys2) (get_reason ty2));
-               }));
+               })
+    else
+      (* If we get here, there might be an error that was obscured by can_subtype returning
+         true on an unresolved type variables. Insist that each type is separately allowed.
+         This leaves the potential of letting two acceptable, but incompatible types through. *)
+      let (env, err1) =
+        Typing_subtype.sub_type
+          env
+          ty1
+          ty_all
+          (Some
+             Typing_error.Reasons_callback.(
+               with_code
+                 (unify_error_at p)
+                 ~code:Typing_error.Error_code.ComparisonInvalidTypes))
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
+      let (env, err2) =
+        Typing_subtype.sub_type
+          env
+          ty2
+          ty_all
+          (Some
+             Typing_error.Reasons_callback.(
+               with_code
+                 (unify_error_at p)
+                 ~code:Typing_error.Error_code.ComparisonInvalidTypes))
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2);
     make_result env te1 None te2 None ty_result
   | Ast_defs.Dot ->
     (* A bit weird, this one:

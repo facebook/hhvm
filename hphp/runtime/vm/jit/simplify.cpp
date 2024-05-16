@@ -624,7 +624,7 @@ SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   if (str->hasConstVal() && (cls->hasConstVal(TCls) || cls->isA(TNullptr))) {
     auto const sval = str->strVal();
     auto const cval = cls->hasConstVal(TCls) ? cls->clsVal() : nullptr;
-    auto const result = Class::lookupUniqueInContext(sval, cval, nullptr);
+    auto const result = Class::lookupKnown(sval, cval);
     if (result) return cns(env, result);
   }
   return nullptr;
@@ -1888,8 +1888,10 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto const cls2 = Class::lookupUniqueInContext(
-      src2->strVal(), inst->ctx(), nullptr);
+  // We only emit InstanceOfIface if we checked that we could trust the class.
+  // Just grab it from the named-entity map.
+  auto const ne = NamedType::getOrCreate(src2->strVal());
+  auto const cls2 = ne->clsList();
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
@@ -3557,7 +3559,7 @@ SSATmp* simplifyLookupClsRDS(State& env, const IRInstruction* inst) {
   }
   if (str->hasConstVal()) {
     auto const sval = str->strVal();
-    auto const result = Class::lookupUniqueInContext(sval, nullptr, nullptr);
+    auto const result = Class::lookupKnown(sval, nullptr);
     if (result) return cns(env, result);
   }
   return nullptr;

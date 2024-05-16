@@ -82,7 +82,7 @@ void exactClsCns(IRGS& env,
   // or a parent of the current context, and this constant is a scalar
   // constant, we can just compile it to a literal.
   auto cnsType = TInitCell;
-  if (classIsTrusted(env, cls)) {
+  if (classIsKnown(env, cls)) {
     Slot ignore;
     if (auto const tv = cls->cnsNameToTV(cnsNameStr, ignore)) {
       if (type(tv) != KindOfUninit) {

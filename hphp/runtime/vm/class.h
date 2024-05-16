@@ -1504,15 +1504,12 @@ public:
    *
    * Return nullptr if there is no such class.
    */
-  static const Class* lookupUniqueInContext(const NamedType* ne,
-                                            const Class* ctx,
-                                            const Unit* unit);
-  static const Class* lookupUniqueInContext(const StringData* name,
-                                            const Class* ctx,
-                                            const Unit* unit);
-  static const Class* lookupUniqueInContext(const Class* cls,
-                                            const Class* ctx,
-                                            const Unit* unit);
+  static const Class* lookupKnown(const NamedType* ne,
+                                  const Class* ctx);
+  static const Class* lookupKnown(const StringData* name,
+                                  const Class* ctx);
+  static const Class* lookupKnown(const Class* cls,
+                                  const Class* ctx);
 
   /*
    * Same as Class::load but also checks for module boundary violations

@@ -658,17 +658,20 @@ inline SSATmp* ldCtxCls(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Other common helpers
 
-inline const Class* lookupUniqueClass(IRGS& env,
-                                      const StringData* name,
-                                      bool trustUnit = false) {
-  // TODO: Once top level code is entirely dead it should be safe to always
-  // trust the unit.
-  return Class::lookupUniqueInContext(
-    name, curClass(env), trustUnit ? curUnit(env) : nullptr);
+inline const Class* lookupKnownWithUnit(IRGS& env, const Class* cls) {
+  auto const unit = curUnit(env);
+  if (cls && cls->preClass()->unit() == unit) return cls;
+  return Class::lookupKnown(cls, curClass(env));
 }
 
-inline bool classIsTrusted(IRGS& env, const Class* cls) {
-  return Class::lookupUniqueInContext(cls, curClass(env), nullptr) != nullptr;
+inline const Class* lookupKnownWithUnit(IRGS& env, const StringData* name) {
+  auto const ne = NamedType::getOrCreate(name);
+  auto const cls = ne->clsList();
+  return lookupKnownWithUnit(env, cls);
+}
+
+inline bool classIsKnown(IRGS& env, const Class* cls) {
+  return lookupKnownWithUnit(env, cls) != nullptr;
 }
 
 inline SSATmp* ldCls(IRGS& env,
@@ -679,7 +682,7 @@ inline SSATmp* ldCls(IRGS& env,
   if (lazyClassOrName->hasConstVal()) {
     auto const cnameStr = isLazy ? lazyClassOrName->lclsVal().name() :
                                    lazyClassOrName->strVal();
-    auto const cls = lookupUniqueClass(env, cnameStr);
+    auto const cls = lookupKnownWithUnit(env, cnameStr);
     if (cls) {
       return cns(env, cls);
     } else {

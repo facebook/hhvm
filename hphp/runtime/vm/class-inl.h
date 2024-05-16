@@ -772,27 +772,23 @@ inline Class* Class::lookup(const StringData* name) {
  *     a non-strict subtype of cls. If cls changes, ctx will be
  *     re-loaded and re-jitted anyways, so we can trust cls.
  */
-inline const Class* Class::lookupUniqueInContext(const Class* cls,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
+inline const Class* Class::lookupKnown(const Class* cls,
+                                       const Class* ctx) {
   if (UNLIKELY(cls == nullptr)) return nullptr;
   if (cls->attrs() & AttrPersistent) return cls;
-  if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
   return ctx->classof(cls) ? cls : nullptr;
 }
 
-inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
+inline const Class* Class::lookupKnown(const NamedType* ne,
+                                       const Class* ctx) {
   Class* cls = ne->clsList();
-  return lookupUniqueInContext(cls, ctx, unit);
+  return lookupKnown(cls, ctx);
 }
 
-inline const Class* Class::lookupUniqueInContext(const StringData* name,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
-  return lookupUniqueInContext(NamedType::getOrCreate(name), ctx, unit);
+inline const Class* Class::lookupKnown(const StringData* name,
+                                       const Class* ctx) {
+  return lookupKnown(NamedType::getOrCreate(name), ctx);
 }
 
 inline Class* Class::load(const StringData* name) {

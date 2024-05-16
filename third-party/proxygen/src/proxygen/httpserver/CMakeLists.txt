@@ -250,7 +250,6 @@ file(
     *.h
 )
 list(FILTER PROXYGEN_HTTPSERVER_HEADERS_TOINSTALL EXCLUDE REGEX tests/)
-list(FILTER PROXYGEN_HTTPSERVER_HEADERS_TOINSTALL EXCLUDE REGEX samples/)
 foreach(header ${PROXYGEN_HTTPSERVER_HEADERS_TOINSTALL})
     get_filename_component(header_dir ${header} DIRECTORY)
     install(FILES ${header} DESTINATION include/proxygen/httpserver/${header_dir})

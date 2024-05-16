@@ -1,10 +1,10 @@
 defaults memo_no_param hash: %Inaccessible%
 defaults memo_single_param hash: %Inaccessible%
-memo_with_leak_safe_zero_param hash: NULL
-memo_with_leak_safe_single_param hash: NULL
-memo_with_pure_zero_param hash: NULL
-memo_with_pure_single_param hash: NULL
-no_param_with_leaksafe_only hash: NULL
+memo_with_leak_safe_zero_param hash: %Inaccessible%
+memo_with_leak_safe_single_param hash: %Inaccessible%
+memo_with_pure_zero_param hash: %Inaccessible%
+memo_with_pure_single_param hash: %Inaccessible%
+no_param_with_leaksafe_only hash: %Inaccessible%
 no_param_with_leaksafe_and_defaults hash: %Inaccessible%
 no_param_with_leaksafe_local_only hash: %Inaccessible%
 no_param_with_leaksafe_shallow_only hash: %Inaccessible%

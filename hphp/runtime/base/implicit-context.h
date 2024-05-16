@@ -67,7 +67,7 @@ static Variant getBlameVectors();
 struct Saver {
   Saver() {
     m_context = *ImplicitContext::activeCtx;
-    *ImplicitContext::activeCtx = nullptr;
+    *ImplicitContext::activeCtx = *ImplicitContext::inaccessibleCtx;
   }
   ~Saver() {
     *ImplicitContext::activeCtx = m_context;

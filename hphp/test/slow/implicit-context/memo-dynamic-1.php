@@ -36,17 +36,27 @@ function f(bool $has_ctx) :mixed{
     "memo_soft_ic_inaccessible",
   ];
   foreach ($v as $f) {
-    if ($has_ctx) {
-      echo "  Before: " . ClassContext::getContext()->name() . "\n";
+    try {
+      if ($has_ctx) {
+        echo "  Before: " . ClassContext::getContext()->name() . "\n";
+      }
+    } catch (InvalidOperationException $e) {
+      echo $f . " failed with: " . $e->getMessage() . "\n";
     }
+
     try {
       $f();
       echo $f . " passed\n";
     } catch (Exception $e) {
       echo $f . " failed with: " . $e->getMessage() . "\n";
     }
-    if ($has_ctx) {
-      echo "  After: " . ClassContext::getContext()->name() . "\n";
+
+    try {
+      if ($has_ctx) {
+        echo "  After: " . ClassContext::getContext()->name() . "\n";
+      }
+    } catch (InvalidOperationException $e) {
+      echo $f . " failed with: " . $e->getMessage() . "\n";
     }
     echo "------------------------\n";
   }

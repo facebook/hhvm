@@ -28,11 +28,11 @@ function mici(): void {
 
 <<__EntryPoint>>
 function main(): void {
-  expect(HH\ImplicitContext\State::NULL);
+  expect(HH\ImplicitContext\State::INACCESSIBLE);
   IntContext::set(
     0,
     () ==> expect(HH\ImplicitContext\State::VALUE),
   );
-  expect(HH\ImplicitContext\State::NULL);
+  expect(HH\ImplicitContext\State::INACCESSIBLE);
   mici();
 }

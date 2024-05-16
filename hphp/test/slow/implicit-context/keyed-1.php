@@ -3,7 +3,7 @@
 function dump_ctx_data() :mixed{
   try {
     echo ClassContext::getContext()->name() . "\n";
-  } catch (Exception $e) {
+  } catch (InvalidOperationException $e) {
     echo $e->getMessage() . "\n";
   }
 }

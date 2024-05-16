@@ -30,6 +30,8 @@ memo_soft_ic_inaccessible passed
 ------------------------
 memo_normal passed
 ------------------------
+string(14) "%%Inaccessible%%"
+
 memo_keyed passed
 ------------------------
 memo_ic_inaccessible passed

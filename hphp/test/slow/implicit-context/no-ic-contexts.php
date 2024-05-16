@@ -3,24 +3,28 @@
 <<__Memoize>>
 function memo_with_leak_safe_zero_param()[leak_safe]: void {
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info() ?? 'NULL';
+  $hash = HH\Lib\Str\join($hash, ", ");
   echo "memo_with_leak_safe_zero_param hash: $hash\n";
 }
 
 <<__Memoize>>
 function memo_with_leak_safe_single_param($a)[leak_safe]: void {
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info() ?? 'NULL';
+  $hash = HH\Lib\Str\join($hash, ", ");
   echo "memo_with_leak_safe_single_param hash: $hash\n";
 }
 
 <<__Memoize>>
 function memo_with_pure_zero_param()[]: void {
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info() ?? 'NULL';
+  $hash = HH\Lib\Str\join($hash, ", ");
   echo "memo_with_pure_zero_param hash: $hash\n";
 }
 
 <<__Memoize>>
 function memo_with_pure_single_param($a)[]: void {
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info() ?? 'NULL';
+  $hash = HH\Lib\Str\join($hash, ", ");
   echo "memo_with_pure_single_param hash: $hash\n";
 }
 
@@ -52,6 +56,7 @@ function fn_with_leak_safe() [leak_safe]: void  {
 <<__Memoize>>
 function no_param_with_leaksafe_only()[leak_safe]: void {
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info() ?? 'NULL';
+  $hash = HH\Lib\Str\join($hash, ", ");
   echo "no_param_with_leaksafe_only hash: $hash";
   echo "\n";
 }

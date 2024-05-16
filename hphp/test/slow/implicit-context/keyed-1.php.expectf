@@ -1,17 +1,21 @@
 >>>>> from null
-  Before: Expected nonnull, got null
-Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
+Implicit context is set to inaccessible
 Hash:
-NULL
+vec(1) {
+  string(14) "%%Inaccessible%%"
+}
 memoNoArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
-  Before: Expected nonnull, got null
-Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
+Implicit context is set to inaccessible
 Hash:
-NULL
+vec(1) {
+  string(14) "%%Inaccessible%%"
+}
 memoWithArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
 >>>>> from value
   Before: C
@@ -36,20 +40,10 @@ memoWithArg passed
 ------------------------
 >>>>> from inaccessible
   Before: Implicit context is set to inaccessible
-Implicit context is set to inaccessible
-Hash:
-vec(1) {
-  string(14) "%%Inaccessible%%"
-}
 memoNoArg passed
   After: Implicit context is set to inaccessible
 ------------------------
   Before: Implicit context is set to inaccessible
-Implicit context is set to inaccessible
-Hash:
-vec(1) {
-  string(14) "%%Inaccessible%%"
-}
 memoWithArg passed
   After: Implicit context is set to inaccessible
 ------------------------
@@ -63,14 +57,14 @@ memoWithArg passed
   After: Implicit context is set to inaccessible
 ------------------------
 >>>>> from soft run with
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 memoNoArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 memoWithArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
 >>>>> final report
-No arg ran: 3 times
-With arg ran: 3 times
+No arg ran: 2 times
+With arg ran: 2 times

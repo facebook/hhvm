@@ -1,21 +1,21 @@
 >>>>> from null
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
 vec(1) {
   string(14) "%Inaccessible%"
 }
 memoNoArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
 vec(1) {
   string(14) "%Inaccessible%"
 }
 memoWithArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
 >>>>> from value
   Before: C
@@ -45,13 +45,13 @@ memoWithArg passed
   After: Implicit context is set to inaccessible
 ------------------------
 >>>>> from soft run with
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 memoNoArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
-  Before: Expected nonnull, got null
+  Before: Implicit context is set to inaccessible
 memoWithArg passed
-  After: Expected nonnull, got null
+  After: Implicit context is set to inaccessible
 ------------------------
 >>>>> final report
 No arg ran: 1 times

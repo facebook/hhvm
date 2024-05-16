@@ -7,31 +7,35 @@ abstract final class IntContext extends HH\ImplicitContext {
     return parent::runWith($context, $f);
   }
   public static function getContext()[zoned]: ?int {
-    return parent::get();
+    try {
+      return parent::get();
+    } catch (InvalidOperationException $e) {
+      echo $e->getMessage() . "\n";;
+    }
   }
 }
 
 function g()[defaults] :mixed{
   $context = IntContext::getContext() ?? 'null';
-  echo "in g context is $context \n";
+  echo "in g context is $context\n";
 }
 
 function h_exception()[defaults] :mixed{
   $context = IntContext::getContext() ?? 'null';
-  echo "in h_exception context is $context \n";
+  echo "in h_exception context is $context\n";
   echo "throwing exception from h_exception()\n";
   throw new Exception();
 }
 
 function f()[zoned] :mixed{
   $context = IntContext::getContext() ?? 'null';
-  echo "in f context is $context \n";
+  echo "in f context is $context\n";
   HH\Coeffects\backdoor(g<>);
   $context = IntContext::getContext() ?? 'null';
-  echo "back in f context is $context \n";
+  echo "back in f context is $context\n";
   try { HH\Coeffects\backdoor(h_exception<>); } catch (Exception $_) {}
   $context = IntContext::getContext() ?? 'null';
-  echo "back in f context is $context \n";
+  echo "back in f context is $context\n";
 }
 
 <<__EntryPoint>>

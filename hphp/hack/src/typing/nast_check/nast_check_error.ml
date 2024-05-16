@@ -182,12 +182,6 @@ type t =
     }
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
-  | Module_outside_allowed_dirs of {
-      md_pos: Pos.t;
-      md_name: string;
-      md_file: string;
-      pkg_pos: Pos.t;
-    }
   | Clone_return_type of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
@@ -811,20 +805,6 @@ let missing_assign pos =
     (pos, "Please assign a value")
     []
 
-let module_outside_allowed_dirs md_name md_pos md_file pkg_pos =
-  User_error.make_err
-    Error_code.(to_enum Module_outside_allowed_dirs)
-    ( md_pos,
-      Printf.sprintf
-        "Module %s must be inside the allowed directories list"
-        (Markdown_lite.md_codify md_name) )
-    [
-      ( Pos_or_decl.of_raw_pos pkg_pos,
-        "The allowed directories list is defined here" );
-      ( Pos_or_decl.of_raw_pos md_pos,
-        Printf.sprintf "But %s is in %s" md_name md_file );
-    ]
-
 let clone_return_type pos =
   User_error.make_err
     Error_code.(to_enum CloneReturnType)
@@ -924,6 +904,4 @@ let to_user_error = function
     read_before_write (pos, member_name)
   | Lateinit_with_default pos -> lateinit_with_default pos
   | Missing_assign pos -> missing_assign pos
-  | Module_outside_allowed_dirs { md_pos; md_name; md_file; pkg_pos } ->
-    module_outside_allowed_dirs md_name md_pos md_file pkg_pos
   | Clone_return_type pos -> clone_return_type pos

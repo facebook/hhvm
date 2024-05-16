@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f845fb8456b2fe46b5ebeb0bbcfb2a4>>
+// @generated SignedSource<<66fdb4de0bac1fcb5a61348e15a293ea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -237,8 +237,6 @@ pub enum NastCheck {
     RefinementInTypeStruct = 3101,
     #[rust_to_ocaml(name = "Soft_internal_without_internal")]
     SoftInternalWithoutInternal = 3102,
-    #[rust_to_ocaml(name = "Module_outside_allowed_dirs")]
-    ModuleOutsideAllowedDirs = 3103,
     CloneReturnType = 3104,
 }
 impl TrivialDrop for NastCheck {}

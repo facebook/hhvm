@@ -40,7 +40,7 @@ impl PackageInfo {
 
         // absolutize allow directories relative to config file's parent directory
         for (_, package) in config.packages.iter_mut() {
-            if let Some(dirs) = &mut package.allow_directories {
+            if let Some(dirs) = &mut package.include_paths {
                 dirs.clone().iter().for_each(|d| {
                     let mut dir = dirs.take(d).unwrap();
                     let span = dir.span();
@@ -60,7 +60,7 @@ impl PackageInfo {
                         abs_path.push("*");
                     }
                     if !path_exists {
-                        errors.push(Error::invalid_allow_directory(abs_path.clone(), span));
+                        errors.push(Error::invalid_include_path(abs_path.clone(), span));
                     }
                     *dir.get_mut() = abs_path.to_string_lossy().into_owned();
                     dirs.insert(dir);
@@ -271,52 +271,52 @@ mod test {
     }
 
     #[test]
-    fn test_allow_directories1() {
+    fn test_include_paths1() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
         let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
-        let allow_dirs = info.packages()["foo"].allow_directories.as_ref().unwrap();
-        assert_eq!(allow_dirs.len(), 2);
+        let included_dirs = info.packages()["foo"].include_paths.as_ref().unwrap();
+        assert_eq!(included_dirs.len(), 2);
         assert!(
             Regex::new(&format!(r#".*{}/tests/foo"#, SRCDIR.to_string_lossy()))
                 .unwrap()
-                .is_match(allow_dirs[0].get_ref())
+                .is_match(included_dirs[0].get_ref())
         );
         assert!(
             Regex::new(&format!(r#".*{}/tests/foo/*"#, SRCDIR.to_string_lossy()))
                 .unwrap()
-                .is_match(allow_dirs[1].get_ref())
+                .is_match(included_dirs[1].get_ref())
         );
     }
 
     #[test]
-    fn test_allow_directories2() {
+    fn test_include_paths2() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
         let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
-        let allow_dirs = info.packages()["bar"].allow_directories.as_ref().unwrap();
-        assert_eq!(allow_dirs.len(), 3);
+        let included_dirs = info.packages()["bar"].include_paths.as_ref().unwrap();
+        assert_eq!(included_dirs.len(), 3);
 
         // ../* -> <FBCODE>/hphp/hack/src/package/*
         assert!(
             Regex::new(&format!(r#".*{}/*"#, SRCDIR.to_string_lossy()))
                 .unwrap()
-                .is_match(allow_dirs[0].get_ref())
+                .is_match(included_dirs[0].get_ref())
         );
         // ../tests -> <FBCODE>/hphp/hack/src/package/tests
         assert!(
             Regex::new(&format!(r#".*{}/tests"#, SRCDIR.to_string_lossy()))
                 .unwrap()
-                .is_match(allow_dirs[1].get_ref())
+                .is_match(included_dirs[1].get_ref())
         );
         // bar* -> <FBCODE>/hphp/hack/src/package/tests/bar*
         assert!(
             Regex::new(&format!(r#".*{}/tests/bar*"#, SRCDIR.to_string_lossy()))
                 .unwrap()
-                .is_match(allow_dirs[2].get_ref())
+                .is_match(included_dirs[2].get_ref())
         );
     }
 
     #[test]
-    fn test_allow_directories_error() {
+    fn test_include_paths_error() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
         let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
 
@@ -328,15 +328,15 @@ mod test {
 
         let expected = [
             format!(
-                r#"allow_directory .*{}/tests/bar\* does not exist"#,
+                r#"include_path .*{}/tests/bar\* does not exist"#,
                 SRCDIR.to_string_lossy()
             ),
             format!(
-                r#"allow_directory .*{}/tests/foo does not exist"#,
+                r#"include_path .*{}/tests/foo does not exist"#,
                 SRCDIR.to_string_lossy()
             ),
             format!(
-                r#"allow_directory .*{}/tests/foo/\* does not exist"#,
+                r#"include_path .*{}/tests/foo/\* does not exist"#,
                 SRCDIR.to_string_lossy()
             ),
         ];

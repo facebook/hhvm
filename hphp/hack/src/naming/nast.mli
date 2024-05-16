@@ -154,7 +154,6 @@ type defs = {
   typedefs: (FileInfo.id * typedef) list;
   constants: (FileInfo.id * gconst) list;
   modules: (FileInfo.id * module_def) list;
-  module_membership: (FileInfo.id * sid) option;
   stmts: (FileInfo.id * stmt) list;
 }
 

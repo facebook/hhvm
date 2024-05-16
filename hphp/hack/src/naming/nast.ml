@@ -193,7 +193,6 @@ type defs = {
   typedefs: (FileInfo.id * typedef) list;
   constants: (FileInfo.id * gconst) list;
   modules: (FileInfo.id * module_def) list;
-  module_membership: (FileInfo.id * sid) option;
   stmts: (FileInfo.id * stmt) list;
 }
 
@@ -223,9 +222,6 @@ let get_defs (ast : program) : defs =
           | Module md ->
             let md = (FileInfo.pos_full (to_id md.md_name), md) in
             ({ defs with modules = md :: defs.modules }, stmt_count)
-          | SetModule sm ->
-            let sm = (FileInfo.pos_full (to_id sm), sm) in
-            ({ defs with module_membership = Some sm }, stmt_count)
           | Stmt st ->
             let pos = fst st in
             let id = "#stmt_" ^ string_of_int stmt_count in
@@ -233,7 +229,8 @@ let get_defs (ast : program) : defs =
             ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
           | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
           | NamespaceUse _
-          | SetNamespaceEnv _ ->
+          | SetNamespaceEnv _
+          | SetModule _ ->
             (defs, stmt_count)
           | FileAttributes _ -> (defs, stmt_count)))
   in
@@ -244,7 +241,6 @@ let get_defs (ast : program) : defs =
         typedefs = [];
         constants = [];
         modules = [];
-        module_membership = None;
         stmts = [];
       },
       0 )

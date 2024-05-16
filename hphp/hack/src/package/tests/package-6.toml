@@ -2,11 +2,11 @@
 
 [packages.foo]
 uses = ["x.*"]
-allow_directories=["foo", "foo/*", "./foo", "./foo/*"] # well-formed but nonexistent paths
+include_paths=["foo", "foo/*", "./foo", "./foo/*"] # well-formed but nonexistent paths
 
 [packages.bar]
 uses = ["y.*"]
-allow_directories=[
+include_paths=[
     "../tests",  # ok
     "../*",      # ok
     "bar*",      # ill-formed and nonexistent

@@ -84,7 +84,7 @@ pub fn package_info_to_vec(
                 uses: convert_many(&package.uses),
                 includes: convert_many(&package.includes),
                 soft_includes: convert_many(&package.soft_includes),
-                allow_directories: convert_many(&package.allow_directories),
+                include_paths: convert_many(&package.include_paths),
             }
         })
         .collect();

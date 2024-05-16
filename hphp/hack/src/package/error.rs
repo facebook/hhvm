@@ -26,7 +26,7 @@ pub enum Error {
         missing_pkgs: Vec<Spanned<String>>,
         soft: bool,
     },
-    InvalidAllowDirectory {
+    InvalidIncludePath {
         abs_path: PathBuf,
         span: (usize, usize),
     },
@@ -49,9 +49,9 @@ impl Error {
         }
     }
 
-    pub fn invalid_allow_directory(abs_path: PathBuf, span: Range<usize>) -> Self {
+    pub fn invalid_include_path(abs_path: PathBuf, span: Range<usize>) -> Self {
         let Range { start, end } = span;
-        Self::InvalidAllowDirectory {
+        Self::InvalidIncludePath {
             abs_path,
             span: (start, end),
         }
@@ -76,7 +76,7 @@ impl Error {
             Self::DuplicateUse { span, .. }
             | Self::UndefinedInclude { span, .. }
             | Self::IncompleteDeployment { span, .. }
-            | Self::InvalidAllowDirectory { span, .. } => *span,
+            | Self::InvalidIncludePath { span, .. } => *span,
         }
     }
 
@@ -118,8 +118,8 @@ impl Display for Error {
                     }
                 }
             }
-            Self::InvalidAllowDirectory { abs_path, .. } => {
-                write!(f, "allow_directory {} does not exist", abs_path.display())?;
+            Self::InvalidIncludePath { abs_path, .. } => {
+                write!(f, "include_path {} does not exist", abs_path.display())?;
             }
         };
         Ok(())

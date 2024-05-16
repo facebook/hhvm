@@ -12,7 +12,7 @@ type t = {
   uses: pos_id list;
   includes: pos_id list;
   soft_includes: pos_id list;
-  allow_directories: pos_id list;
+  include_paths: pos_id list;
 }
 [@@deriving eq, show]
 
@@ -28,7 +28,3 @@ val get_package_name : t -> string
 val get_package_pos : t -> Pos.t
 
 val relationship : t -> t -> package_relationship
-
-val module_in_allowed_dirs : t -> Path.t -> bool
-
-val get_allow_directories_span : t -> Pos.t

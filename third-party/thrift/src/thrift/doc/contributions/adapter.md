@@ -1,7 +1,7 @@
 # Thrift Adapter
 
 Thrift Adapter supports two conversions.
-- Conversion from [standard type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types)
+- Conversion from [standard type](../glossary/kinds-of-types#default-target-types) to [adapted type](../glossary/kinds-of-types#adapted-types)
 - Conversion from adapted type to standard type
 A conforming implementation **should** name these conversion `fromThrift` (or `fromThriftField` for Field Adapter) and `toThrift` for consistency.
 

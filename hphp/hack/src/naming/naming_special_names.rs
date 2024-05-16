@@ -321,6 +321,8 @@ pub mod user_attributes {
 
     pub const STRICT_SWITCH: &str = "__StrictSwitch";
 
+    pub const PACKAGE_OVERRIDE: &str = "__PackageOverride";
+
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB
     }
@@ -358,6 +360,10 @@ pub mod user_attributes {
 
     pub fn is_cross_package(name: &str) -> bool {
         name == CROSS_PACKAGE
+    }
+
+    pub fn is_package_override(name: &str) -> bool {
+        name == PACKAGE_OVERRIDE
     }
 }
 

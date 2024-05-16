@@ -1266,3 +1266,6 @@ pub const nested_expression_tree_name: Error = Cow::Borrowed(
 pub const top_level_expression_tree_name: Error = Cow::Borrowed(
     "Top-level expression trees must provide the DSL name (including at the top-level of a nested lambda).",
 );
+
+pub const invalid_package_override: Error =
+    Cow::Borrowed("Package override must specify exactly one package name.");

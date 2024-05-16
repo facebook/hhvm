@@ -381,6 +381,8 @@ module UserAttributes = struct
   let uaUnsafeAllowMultipleInstantiations =
     "__UNSAFE_AllowMultipleInstantiations"
 
+  let uaPackageOverride = "__PackageOverride"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -789,6 +791,13 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Enables strict switch checking for all switches in function or method.";
+            } );
+          ( uaPackageOverride,
+            {
+              contexts = [file];
+              autocomplete = true;
+              doc =
+                "Overrides the PACKAGES.toml declaration, grouping the file into the specified package.";
             } );
         ])
 

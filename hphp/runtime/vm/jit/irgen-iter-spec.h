@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/array-key-types.h"
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -37,7 +38,7 @@ struct IRGS;
 // loop entry block -> SpecializedIterator struct in IRGS. See cpp for details.
 struct SpecializedIterator {
   ArrayLayout layout;
-  IterSpecialization iter_type;
+  ArrayKeyTypes keyTypes;
   Block* header;
   Block* footer;
 };

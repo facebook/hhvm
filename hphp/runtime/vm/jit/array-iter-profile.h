@@ -29,9 +29,7 @@ namespace HPHP::jit {
 /*
  * Target profile for the distribution of array types seen by a given iterator.
  *
- * We aim to identify the best IterSpecialization for that iterator, along with
- * some stats about how long the arrays we iterate over are on average and how
- * many arrays we'd fail to specialize given that specialization.
+ * We aim to identify the best key and value types for that iterator.
  */
 struct ArrayIterProfile {
   /*

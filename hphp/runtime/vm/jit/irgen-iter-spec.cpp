@@ -217,7 +217,6 @@ const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
 struct Accessor {
   Type arr_type;
   bool is_ptr_iter;
-  IterSpecialization iter_type;
   ArrayLayout layout = ArrayLayout::Top();
 
   virtual ~Accessor() {}
@@ -249,7 +248,6 @@ struct Accessor {
 
 struct VecAccessor : public Accessor {
   explicit VecAccessor(
-    IterSpecialization specialization,
     bool baseConst,
     bool outputKey
   ) {
@@ -260,7 +258,6 @@ struct VecAccessor : public Accessor {
       arr_type = arr_type.narrowToVanilla();
     }
     layout = ArrayLayout::Vanilla();
-    iter_type = specialization;
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
@@ -302,16 +299,15 @@ struct VecAccessor : public Accessor {
 };
 
 struct DictAccessor : public Accessor {
-  explicit DictAccessor(IterSpecialization specialization, bool baseConst) {
+  explicit DictAccessor(bool baseConst, ArrayKeyTypes keyTypes) {
     is_ptr_iter = baseConst;
     arr_type = TDict;
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    key_types = specialization.keyTypes();
-    specialization.keyTypes().toJitType(key_jit_type);
+    key_types = keyTypes;
+    key_types.toJitType(key_jit_type);
     layout = ArrayLayout::Vanilla();
-    iter_type = specialization;
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
@@ -354,12 +350,10 @@ private:
 };
 
 struct BespokeAccessor : public Accessor {
-  explicit BespokeAccessor(
-      IterSpecialization specialization, Type baseType) {
+  explicit BespokeAccessor(Type baseType) {
     is_ptr_iter = false;
     arr_type = baseType;
     layout = baseType.arrSpec().layout();
-    iter_type = specialization;
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
@@ -396,20 +390,20 @@ struct BespokeAccessor : public Accessor {
 
 std::unique_ptr<Accessor> getAccessor(
     DataType baseDT,
-    IterSpecialization type,
+    ArrayKeyTypes keyTypes,
     ArrayLayout layout,
     const IterArgs& data
 ) {
   if (!layout.vanilla()) {
     auto const baseType = Type(baseDT).narrowToLayout(layout);
-    return std::make_unique<BespokeAccessor>(type, baseType);
+    return std::make_unique<BespokeAccessor>(baseType);
   }
 
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
   if (baseDT == KindOfVec) {
-    return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
+    return std::make_unique<VecAccessor>(baseConst, data.hasKey());
   } else if (baseDT == KindOfDict) {
-    return std::make_unique<DictAccessor>(type, baseConst);
+    return std::make_unique<DictAccessor>(baseConst, keyTypes);
   }
   always_assert(false);
 }
@@ -656,15 +650,12 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
+  auto const keyTypes = profiledResult.key_types;
 
-  if (profiledResult.key_types.mayIncludeTombstone()) {
+  if (keyTypes.mayIncludeTombstone()) {
     FTRACE(2, "Failure to specialize IterInit: may include tombstones.\n");
     return false;
   }
-
-  auto iter_type = IterSpecialization::generic();
-  iter_type.specialized = true;
-  iter_type.setKeyTypes(profiledResult.key_types);
 
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
@@ -674,12 +665,11 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
     assertx(sl.layouts.size() == 1);
     return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
   }();
-  iter_type.bespoke = layout.bespoke();
-  auto const accessor = getAccessor(baseDT, iter_type, layout, data);
+  auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
 
   // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
-         show(iter_type), layout.describe());
+         keyTypes.show(), layout.describe());
   if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
     FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
     return false;
@@ -697,7 +687,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
     : nullptr;
   auto const compat =
     iter &&
-    iter->iter_type.as_byte == iter_type.as_byte &&
+    iter->keyTypes == keyTypes &&
     iter->layout == layout;
 
   auto const header = compat
@@ -712,7 +702,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
 
     if (!iter) {
       // The first emitted specialization is likely the best one.
-      auto const def = SpecializedIterator{layout, iter_type, header, nullptr};
+      auto const def = SpecializedIterator{layout, keyTypes, header, nullptr};
       env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
     }
   }
@@ -732,9 +722,8 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   if (!env.iters.contains(iterKey)) return false;
 
   auto const iter = env.iters[iterKey].get();
-  if (!iter->iter_type.specialized) return false;
   auto const accessor =
-    getAccessor(baseDT, iter->iter_type, iter->layout, data);
+    getAccessor(baseDT, iter->keyTypes, iter->layout, data);
   if (!base->type().maybe(accessor->arr_type)) return false;
 
   assertx(iter->header != nullptr);

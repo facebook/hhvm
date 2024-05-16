@@ -54,47 +54,6 @@ enum class IterNextIndex : uint8_t {
   StructDict,
 };
 
-// For iterator specialization, we pack all the information we need to generate
-// specialized code in a single byte so that we can check it in one comparison.
-//
-// This byte should be 0 for unspecialized iterators, as created by calling the
-// normal IterImpl constructor instead of using a specialized initializer.
-struct IterSpecialization {
-  // Returns a generic (unspecialized) IterSpecialization value.
-  static IterSpecialization generic() {
-    IterSpecialization result;
-    result.as_byte = 0;
-    assertx(!result.specialized);
-    return result;
-  }
-
-  ArrayKeyTypes keyTypes() const {
-    assertx(specialized);
-    return ArrayKeyTypes::FromBits(key_types);
-  }
-  void setKeyTypes(ArrayKeyTypes keyTypes) {
-    assertx(specialized);
-    key_types = keyTypes.toBits();
-  }
-
-  union {
-    uint8_t as_byte;
-    struct {
-      uint8_t key_types: 4;  // bit encoding of ArrayKeyTypes
-
-      // When we JIT a specialized iterator, we set `specialized` to true,
-      bool specialized: 1;
-      bool bespoke: 1;
-
-      // 2 free bits
-      bool padding: 2;
-    };
-  };
-};
-
-// Debugging output.
-std::string show(IterSpecialization type);
-
 /*
  * Iterator over an array, a collection, or an object implementing the Hack
  * Iterator interface. This iterator is used by the JIT and its usage is

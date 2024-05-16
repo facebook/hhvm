@@ -75,13 +75,6 @@ bool isStructDict(const BespokeArray* bad) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(IterSpecialization type) {
-  if (!type.specialized) return "Unspecialized";
-  return type.keyTypes().show();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void IterImpl::kill() {
   if (!debug) return;
   // IterImpl is not POD, so we memset each POD field separately.

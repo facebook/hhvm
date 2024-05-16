@@ -6,7 +6,7 @@
 #
 
 from apache.thrift.metadata.types cimport cThriftMetadata
-from thrift.py3.common cimport (
+from thrift.python.common cimport (
     cThriftMetadata as __fbthrift_cThriftMetadata,
 )
 

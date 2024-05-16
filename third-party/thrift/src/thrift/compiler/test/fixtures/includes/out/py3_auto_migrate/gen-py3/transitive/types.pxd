@@ -29,7 +29,7 @@ from thrift.py3.types cimport (
     union_field_ref as __union_field_ref,
     get_union_field_value as __get_union_field_value,
 )
-from thrift.py3.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_metadata.h" namespace "apache::thrift::detail::md":

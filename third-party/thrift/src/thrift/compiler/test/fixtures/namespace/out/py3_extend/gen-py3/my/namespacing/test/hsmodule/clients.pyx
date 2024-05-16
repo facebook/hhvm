@@ -30,7 +30,7 @@ cimport thrift.py3.types
 from thrift.py3.types cimport make_unique
 import thrift.py3.client
 cimport thrift.py3.client
-from thrift.py3.common cimport (
+from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     cThriftServiceMetadataResponse as __fbthrift_cThriftServiceMetadataResponse,
     ServiceMetadata,

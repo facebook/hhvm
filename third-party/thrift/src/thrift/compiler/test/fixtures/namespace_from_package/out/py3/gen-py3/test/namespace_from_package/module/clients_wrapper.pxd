@@ -21,7 +21,7 @@ from libcpp.vector cimport vector
 
 from folly cimport cFollyFuture, cFollyTry, cFollyUnit
 cimport folly.iobuf as _fbthrift_iobuf
-from thrift.py3.common cimport cRpcOptions
+from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport test.namespace_from_package.module.types as _test_namespace_from_package_module_types

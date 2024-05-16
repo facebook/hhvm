@@ -36,7 +36,7 @@ from folly cimport (
   cFollyUnit,
   c_unit,
 )
-from thrift.py3.common cimport (
+from thrift.python.common cimport (
     cThriftServiceMetadataResponse as __fbthrift_cThriftServiceMetadataResponse,
     ServiceMetadata,
     MetadataBox as __MetadataBox,

@@ -26,7 +26,7 @@ from thrift.py3.exceptions cimport cTException
 cimport folly.iobuf as _fbthrift_iobuf
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
-from thrift.py3.std_libcpp cimport string_view as __cstring_view
+from thrift.python.std_libcpp cimport string_view as __cstring_view
 from thrift.py3.types cimport (
     bstring,
     bytes_to_string,

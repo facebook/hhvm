@@ -30,12 +30,12 @@ from thrift.py3.types cimport (
     union_field_ref as __union_field_ref,
     get_union_field_value as __get_union_field_value,
 )
-from thrift.py3.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport module0.types as _module0_types
 cimport module1.types as _module1_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
-from thrift.py3.common cimport (
+from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     MetadataBox as __MetadataBox,
 )

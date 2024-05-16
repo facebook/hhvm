@@ -251,6 +251,8 @@ type t = {
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
+  tco_package_v2: bool;
+      (** Option to bypass package boundary violation errors to enable v0 of intern-prod separation *)
 }
 [@@deriving eq, show]
 
@@ -355,6 +357,7 @@ val set :
   ?hack_warnings:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
+  ?tco_package_v2:bool ->
   t ->
   t
 

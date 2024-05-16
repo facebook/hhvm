@@ -141,6 +141,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_disallow_direct_superglobals_refs: false,
     hack_warnings: false,
     tco_allowed_files_for_module_declarations: vec![],
+    tco_package_v2: false,
 };
 
 impl GlobalOptions<'static> {

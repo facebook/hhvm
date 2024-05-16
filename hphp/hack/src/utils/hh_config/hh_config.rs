@@ -421,6 +421,7 @@ impl HhConfig {
             tco_extended_reasons:  default.tco_extended_reasons,
             hack_warnings: hhconfig.get_bool_or("hack_warnings", default.hack_warnings)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
+            tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
         };
         let mut c = Self {
             local_config,

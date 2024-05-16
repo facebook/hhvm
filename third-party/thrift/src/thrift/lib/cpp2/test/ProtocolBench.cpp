@@ -21,6 +21,7 @@
 
 #include <glog/logging.h>
 #include <folly/Benchmark.h>
+#include <folly/BenchmarkUtil.h>
 #include <folly/Optional.h>
 #include <folly/init/Init.h>
 #include <folly/portability/GFlags.h>
@@ -91,9 +92,11 @@ void writeBench(size_t iters, Counter&&) {
   while (iters--) {
     if constexpr (kSerializerMethod == SerializerMethod::Object) {
       auto q = protocol::serializeObject<GetWriter<Serializer>>(obj);
+      folly::doNotOptimizeAway(q);
     } else {
       IOBufQueue q;
       Serializer::serialize(strct, &q);
+      folly::doNotOptimizeAway(q);
     }
   }
   susp.rehire();
@@ -117,9 +120,11 @@ void readBench(size_t iters, Counter&& counter) {
   while (iters--) {
     if constexpr (kSerializerMethod == SerializerMethod::Object) {
       auto obj = protocol::parseObject<GetReader<Serializer>>(*buf);
+      folly::doNotOptimizeAway(obj);
     } else {
       Struct data;
       Serializer::deserialize(buf.get(), data);
+      folly::doNotOptimizeAway(data);
     }
   }
   susp.rehire();

@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_handlers.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_types.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
+#include <thrift/lib/cpp2/util/gtest/Matcher.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::test;
@@ -426,4 +427,23 @@ TEST(CursorSerializer, NestedStructWrite) {
   auto obj = wrapper.deserialize();
   EXPECT_EQ(obj.union_field()->getType(), Inner::Type::__EMPTY__);
   EXPECT_THAT(*obj.list_field(), ElementsAre(42));
+}
+
+TEST(CursorSerializer, CursorWriteInContainer) {
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+  auto listWriter = writer.beginWrite<ident::set_nested_field>();
+  auto setWriter = listWriter.beginWrite();
+  auto innerWriter = setWriter.beginWrite();
+  innerWriter.write<ident::string_field>("foo");
+  setWriter.endWrite(std::move(innerWriter));
+  listWriter.endWrite(std::move(setWriter));
+  writer.endWrite(std::move(listWriter));
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  LOG(INFO) << debugStringViaEncode(obj);
+  EXPECT_THAT(
+      *obj.set_nested_field(),
+      Contains(Contains(IsThriftUnionWith<ident::string_field>(Eq("foo")))));
 }

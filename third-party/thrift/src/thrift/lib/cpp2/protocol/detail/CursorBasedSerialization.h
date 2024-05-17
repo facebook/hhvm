@@ -56,10 +56,10 @@ struct ContainerTraits;
 template <typename VTag>
 struct ContainerTraits<type::list<VTag>> {
   using ElementType = type::native_type<VTag>;
-  using ValueTag = VTag;
+  using ElementTag = VTag;
   // This is initializer_list becuase that's what skip_n accepts.
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
-      op::typeTagToTType<ValueTag>};
+      op::typeTagToTType<ElementTag>};
 
   static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
     op::encode<VTag>(protocol, value);
@@ -68,9 +68,9 @@ struct ContainerTraits<type::list<VTag>> {
 template <typename KTag>
 struct ContainerTraits<type::set<KTag>> {
   using ElementType = type::native_type<KTag>;
-  using KeyTag = KTag;
+  using ElementTag = KTag;
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
-      op::typeTagToTType<KeyTag>};
+      op::typeTagToTType<ElementTag>};
 
   static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
     op::encode<KTag>(protocol, value);

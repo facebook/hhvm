@@ -761,8 +761,10 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
 
   FieldId fieldId_{0};
 
-  template <typename U>
+  template <typename>
   friend class StructuredCursorWriter;
+  template <typename>
+  friend class ContainerCursorWriter;
   friend class CursorSerializationWrapper<T>;
   friend struct detail::DefaultValueWriter<Tag>;
 };
@@ -780,17 +782,81 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
  */
 template <typename Tag>
 class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
+  using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
+  using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
+  template <typename CTag, typename OwnTag>
+  using enable_cursor_for = std::enable_if_t<
+      (type::is_a_v<OwnTag, type::list_c> ||
+       type::is_a_v<OwnTag, type::set_c>) &&
+          type::is_a_v<ElementTag, CTag>,
+      int>;
+
  public:
-  void write(const typename detail::ContainerTraits<Tag>::ElementType& val) {
+  void write(const ElementType& val) {
+    checkState(State::Active);
     ++n;
     detail::ContainerTraits<Tag>::write(protocol_, val);
+  }
+
+  /**
+   * Allows writing containers whose size isn't known until afterwards.
+   * Less efficient than using write().
+   * See the ContainerCursorWriter docblock for example usage.
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+  template <
+      typename...,
+      typename U = Tag,
+      enable_cursor_for<type::container_c, U> = 0>
+  ContainerCursorWriter<ElementTag> beginWrite() {
+    checkState(State::Active);
+    state_ = State::Child;
+    return ContainerCursorWriter<ElementTag>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endWrite(ContainerCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    ++n;
+    state_ = State::Active;
+  }
+
+  /**
+   * structured types
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+  template <
+      typename...,
+      typename U = Tag,
+      enable_cursor_for<type::structured_c, U> = 0>
+  StructuredCursorWriter<ElementTag> beginWrite() {
+    checkState(State::Active);
+    state_ = State::Child;
+    return StructuredCursorWriter<ElementTag>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endWrite(StructuredCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    ++n;
+    state_ = State::Active;
   }
 
  private:
   explicit ContainerCursorWriter(BinaryProtocolWriter&& p);
 
-  template <typename T>
+  template <typename>
   friend class StructuredCursorWriter;
+  template <typename>
+  friend class ContainerCursorWriter;
 
   void finalize() { DelayedSizeCursorWriter::finalize(n); }
 
@@ -860,10 +926,10 @@ ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter&& p)
     : DelayedSizeCursorWriter(std::move(p)) {
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     protocol_.writeByte(
-        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>);
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
     protocol_.writeByte(
-        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>);
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
     protocol_.writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>);
@@ -908,7 +974,7 @@ ContainerCursorReader<Tag>::ContainerCursorReader(BinaryProtocolReader&& p)
     TType type;
     protocol_.readListBegin(type, remaining_);
     if (type !=
-        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>) {
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>) {
       folly::throw_exception<std::runtime_error>(
           "Unexpected element type in list");
     }
@@ -916,7 +982,7 @@ ContainerCursorReader<Tag>::ContainerCursorReader(BinaryProtocolReader&& p)
     TType type;
     protocol_.readSetBegin(type, remaining_);
     if (type !=
-        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>) {
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>) {
       folly::throw_exception<std::runtime_error>(
           "Unexpected element type in set");
     }
@@ -965,10 +1031,10 @@ void ContainerCursorReader<Tag>::read() {
   DCHECK_GT(remaining_, 0);
 
   if constexpr (type::is_a_v<Tag, type::list_c>) {
-    op::decode<typename detail::ContainerTraits<Tag>::ValueTag>(
+    op::decode<typename detail::ContainerTraits<Tag>::ElementTag>(
         protocol_, lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
-    op::decode<typename detail::ContainerTraits<Tag>::KeyTag>(
+    op::decode<typename detail::ContainerTraits<Tag>::ElementTag>(
         protocol_, lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
     op::decode<typename detail::ContainerTraits<Tag>::KeyTag>(

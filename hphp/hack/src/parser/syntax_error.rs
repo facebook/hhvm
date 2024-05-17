@@ -1269,3 +1269,11 @@ pub const top_level_expression_tree_name: Error = Cow::Borrowed(
 
 pub const invalid_package_override: Error =
     Cow::Borrowed("Package override must specify exactly one package name.");
+
+pub fn no_continue_in_finally(blk_token: TokenKind, stmt_token: TokenKind) -> Error {
+    Cow::Owned(format!(
+        "`{};` is not allowed as a top-level statement in a `{}` block",
+        stmt_token.to_string(),
+        blk_token.to_string()
+    ))
+}

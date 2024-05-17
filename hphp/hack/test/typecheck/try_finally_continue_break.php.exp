@@ -1,0 +1,4 @@
+ERROR: File "try_finally_continue_break.php", line 8, characters 7-15:
+`continue;` is not allowed as a top-level statement in a `finally` block (Parsing[1002])
+ERROR: File "try_finally_continue_break.php", line 9, characters 7-12:
+`break;` is not allowed as a top-level statement in a `finally` block (Parsing[1002])

@@ -2872,6 +2872,22 @@ fn p_throw_stmt<'a>(
     Ok(new(pos, S_::mk_throw(p_expr(&c.expression, env)?)))
 }
 
+fn check_continue_break<'a>(env: &mut Env<'a>, blk_kind: TK, blk: &ast::Block) {
+    blk.iter().for_each(|ast::Stmt(p_, stmt_)| match stmt_ {
+        ast::Stmt_::Continue => raise_parsing_error_pos(
+            p_,
+            env,
+            &syntax_error::no_continue_in_finally(blk_kind, TK::Continue),
+        ),
+        ast::Stmt_::Break => raise_parsing_error_pos(
+            p_,
+            env,
+            &syntax_error::no_continue_in_finally(blk_kind, TK::Break),
+        ),
+        _ => (),
+    });
+}
+
 fn p_try_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
@@ -2881,10 +2897,11 @@ fn p_try_stmt<'a>(
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
+    let try_blk = p_block(false, &c.compound_statement, env)?;
     Ok(new(
         pos,
         S_::mk_try(
-            p_block(false, &c.compound_statement, env)?,
+            try_blk,
             could_map(&c.catch_clauses, env, |n, e| match &n.children {
                 CatchClause(c) => Ok(ast::Catch(
                     pos_name(&c.type_, e)?,
@@ -4163,6 +4180,7 @@ fn p_finally_block<'a>(
 ) -> Result<ast::FinallyBlock> {
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
     if let ast::Stmt_::Block(box (_, blk)) = stmt_ {
+        check_continue_break(env, TK::Finally, &blk);
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
             return Ok(Default::default());
         }

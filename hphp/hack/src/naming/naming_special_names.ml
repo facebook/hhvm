@@ -960,8 +960,6 @@ end
 module StdlibFunctions = struct
   let is_array = "\\is_array"
 
-  let is_null = "\\is_null"
-
   let get_class = "\\get_class"
 
   let array_filter = "\\array_filter"

@@ -7280,21 +7280,6 @@ end = struct
         ~errs:None
         ~reason:(Reason.Rwitness p)
         ~predicate:IsNull
-    | Aast.Call
-        {
-          func = (_, _, Aast.Id (_, f));
-          args = [(_, te)];
-          unpacked_arg = None;
-          _;
-        }
-      when String.equal SN.StdlibFunctions.is_null f ->
-      branch_for_type_switch
-        env
-        ~p
-        ~ivar:te
-        ~errs:None
-        ~reason:(Reason.Rwitness p)
-        ~predicate:IsNull
     | Aast.Hole (e, _, _, _) -> condition_dual env e
     | Aast.Is (ivar, hint) -> begin
       let ((env, ty_err_opt), hint_ty) =

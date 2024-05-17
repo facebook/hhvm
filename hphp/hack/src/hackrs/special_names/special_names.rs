@@ -441,7 +441,6 @@ pub mod stdlib_functions {
     use super::*;
 
     pub static is_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ARRAY);
-    pub static is_null: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_NULL);
     pub static get_class: Lazy<FunName> = lazy!(sn::std_lib_functions::GET_CLASS);
     pub static array_filter: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_FILTER);
     pub static call_user_func: Lazy<FunName> = lazy!(sn::std_lib_functions::CALL_USER_FUNC);
@@ -457,7 +456,6 @@ pub mod stdlib_functions {
     pub fn iter() -> impl Iterator<Item = FunName> {
         [
             *is_array,
-            *is_null,
             *get_class,
             *array_filter,
             *call_user_func,

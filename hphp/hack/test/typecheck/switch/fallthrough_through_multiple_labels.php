@@ -1,6 +1,6 @@
 <?hh
 
-function wut(int $v) : int {
+function wut(int $v): int {
   $s = shape('k' => 42);
   switch ($v) {
     case 10:
@@ -8,7 +8,6 @@ function wut(int $v) : int {
       $s['k'] = 'hello';
       // FALLTHROUGH
     case 20:
-      // FALLTHROUGH
     case 30:
       return $s['k'];
   }

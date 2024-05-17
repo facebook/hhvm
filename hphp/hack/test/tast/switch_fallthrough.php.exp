@@ -38,7 +38,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                       unpacked_arg = None }))));
             ([7:3-35:4],
              (Switch (((int), [7:11-13], (Lvar ([7:11-13], $x))),
-                [(((int), [8:10-11], (Int "0")), []);
+                [(((int), [8:10-11], (Int "0")), [([Pos.none], Fallthrough)]);
                   (((int), [10:10-11], (Int "1")),
                    [([12:7-19],
                      (Expr

@@ -406,7 +406,17 @@ and stmt env acc st =
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)
     (* NOTE: 'default' never fallthough *)
-    let cl_body = List.filter cl ~f:case_has_body in
+    let case_is_empty_or_exactly_fallthrough ((_, b) : (_, _) Aast.case) =
+      match b with
+      | [(_, Fallthrough)]
+      | [] ->
+        true
+      | _ -> false
+    in
+    let cl_body =
+      List.filter cl ~f:(fun case ->
+          not @@ case_is_empty_or_exactly_fallthrough case)
+    in
     let cl = List.map cl_body ~f:(case acc) in
     let cdfl = dfl |> Option.map ~f:(default_case acc) in
     let c = S.inter_list cl in
@@ -632,8 +642,6 @@ and expr_ env acc p e =
   | Package _ -> acc
 
 and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
-
-and case_has_body ((_, b) : (_, _) Aast.case) = not (List.is_empty b)
 
 and stmt_match_arm env acc { sma_pat = _; sma_body } = block env acc sma_body
 

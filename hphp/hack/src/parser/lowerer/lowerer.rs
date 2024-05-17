@@ -3157,7 +3157,13 @@ fn p_switch_stmt_<'a>(
         match &n.children {
             CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
                 p_expr(&c.expression, e)?,
-                Default::default(),
+                // inject a fallthrough for all not-last labels
+                // (last ones get overwritten in p_section)
+                {
+                    let mut blk = ast::Block::default();
+                    blk.push(new(e.mk_none_pos(), S_::Fallthrough));
+                    blk
+                },
             ))),
             DefaultLabel(_) => Ok(aast::GenCase::Default(aast::DefaultCase(
                 p_pos(n, e),

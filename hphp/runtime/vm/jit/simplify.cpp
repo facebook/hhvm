@@ -3247,6 +3247,9 @@ SSATmp* simplifyKeysetIterEnd(State& env, const IRInstruction* inst) {
     return cns(env, keyset->iterLimit());
   }
 
+  // Static keysets do not have tombstones.
+  if (arr->isA(TStaticKeyset)) return gen(env, CountKeyset, arr);
+
   return nullptr;
 }
 
@@ -3402,6 +3405,9 @@ SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
   if (arr->isA(TDict) && spec.is_struct()) {
     return gen(env, CountDict, arr);
   }
+
+  // Static arrays do not have tombstones.
+  if (arr->isA(TStaticArrLike)) return gen(env, Count, arr);
 
   return nullptr;
 }

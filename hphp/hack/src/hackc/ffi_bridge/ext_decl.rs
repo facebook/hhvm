@@ -463,6 +463,7 @@ fn get_attributes(arr: &[&UserAttribute<'_>], name: &str) -> Vec<ExtDeclAttribut
                     _ => String::from("__ext_decl_unknown"),
                 })
                 .collect(),
+            raw_val: str_or_empty(t.raw_val),
         })
         .collect()
 }

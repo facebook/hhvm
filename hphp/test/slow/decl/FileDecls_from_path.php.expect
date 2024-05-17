@@ -206,7 +206,7 @@ NULL
 NULL
 === Attributes
 vec(2) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(12) "MyAttribute2"
     ["args"]=>
@@ -214,8 +214,10 @@ vec(2) {
       string(1) "a"
       string(1) "b"
     }
+    ["raw_val"]=>
+    string(7) ""a","b""
   }
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(12) "MyAttribute1"
     ["args"]=>
@@ -223,9 +225,11 @@ vec(2) {
       string(1) "a"
       string(1) "b"
     }
+    ["raw_val"]=>
+    string(7) ""a","b""
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(12) "MyAttribute1"
   ["args"]=>
@@ -233,6 +237,8 @@ dict(2) {
     string(1) "a"
     string(1) "b"
   }
+  ["raw_val"]=>
+  string(7) ""a","b""
 }
 NULL
 NULL
@@ -359,39 +365,51 @@ NULL
 NULL
 === File Attributes
 vec(1) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(15) "MyFileAttribute"
     ["args"]=>
     vec(1) {
       string(3) "123"
     }
+    ["raw_val"]=>
+    string(3) "123"
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(15) "MyFileAttribute"
   ["args"]=>
   vec(1) {
     string(3) "123"
   }
+  ["raw_val"]=>
+  string(3) "123"
 }
 NULL
 NULL
 === Complex Attributes
-dict(1) {
+dict(2) {
   ["name"]=>
   string(12) "ComplexAttr1"
+  ["raw_val"]=>
+  string(21) "dict['type' => '3pd']"
 }
-dict(1) {
+dict(2) {
   ["name"]=>
   string(12) "ComplexAttr2"
+  ["raw_val"]=>
+  string(12) "vec[1, 2, 3]"
 }
-dict(1) {
+dict(2) {
   ["name"]=>
   string(12) "ComplexAttr3"
+  ["raw_val"]=>
+  string(17) "shape('k' => 'v')"
 }
-dict(1) {
+dict(2) {
   ["name"]=>
   string(12) "ComplexAttr4"
+  ["raw_val"]=>
+  string(15) "keyset[1, 2, 3]"
 }

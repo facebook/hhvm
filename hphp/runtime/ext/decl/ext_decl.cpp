@@ -92,6 +92,7 @@ const StaticString s_imports("imports");
 const StaticString s_exports("exports");
 const StaticString s_methods("methods");
 const StaticString s_args("args");
+const StaticString s_raw_val("raw_val");
 const StaticString s_subtypes("subtypes");
 const StaticString s_value("value");
 
@@ -286,6 +287,7 @@ Array populateAttributes(const rust::Vec<hackc::ExtDeclAttribute>& attrs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(attr.name));
     maybeSet(info, attr.args, s_args, populateStringArray);
+    maybeSet(info, attr.raw_val, s_raw_val, rustToString);
     arr.append(info);
   }
   return arr.toArray();

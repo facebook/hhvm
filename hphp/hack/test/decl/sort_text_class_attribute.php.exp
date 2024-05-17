@@ -58,7 +58,7 @@
        sc_methods = [];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([2:3-25], "__AutocompleteSortText");
-          ua_params = [(Typing_defs_core.String "XYZ")] }
+          ua_params = [(Typing_defs_core.String "XYZ")]; ua_raw_val = None }
          ];
        sc_enum_type = None; sc_docs_url = None }));
   ("\\DEF",

@@ -27,10 +27,12 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
-       [{ Typing_defs_core.ua_name = ([3:18-21], "\\Bar"); ua_params = [] };
+       [{ Typing_defs_core.ua_name = ([3:18-21], "\\Bar"); ua_params = [];
+          ua_raw_val = None };
          { Typing_defs_core.ua_name = ([3:3-6], "\\Foo");
            ua_params =
-           [(Typing_defs_core.String "a"); (Typing_defs_core.String "b")] }
+           [(Typing_defs_core.String "a"); (Typing_defs_core.String "b")];
+           ua_raw_val = None }
          ];
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([4:10-16]), (Tprim Tstring));

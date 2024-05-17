@@ -106,7 +106,7 @@
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([6:3-14], "__PHPStdLib");
-           ua_params = [] }
+           ua_params = []; ua_raw_val = None }
           ];
         sc_enum_type = None; sc_docs_url = None }))
   ]

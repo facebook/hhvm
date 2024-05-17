@@ -187,6 +187,7 @@ let user_attribute_param_to_string = function
 type user_attribute = {
   ua_name: pos_id;
   ua_params: user_attribute_param list;
+  ua_raw_val: string option;
 }
 [@@deriving eq, hash, show]
 
@@ -970,8 +971,8 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | 0 -> String.compare s1 s2
     | n -> n
   and user_attribute_compare ua1 ua2 =
-    let { ua_name = name1; ua_params = params1 } = ua1 in
-    let { ua_name = name2; ua_params = params2 } = ua2 in
+    let { ua_name = name1; ua_params = params1; _ } = ua1 in
+    let { ua_name = name2; ua_params = params2; _ } = ua2 in
     match String.compare (snd name1) (snd name2) with
     | 0 -> List.compare user_attribute_param_compare params1 params2
     | n -> n

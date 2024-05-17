@@ -55,6 +55,7 @@ and aast_user_attribute_to_decl_user_attribute
           | (_, _, Aast.String s) -> Some (Typing_defs_core.String s)
           | (_, _, Aast.Int i) -> Some (Typing_defs_core.Int i)
           | _ -> None);
+    ua_raw_val = None;
   }
 
 and aast_contexts_to_decl_capability env ctxs default_pos :

@@ -34,7 +34,8 @@
             php_std_lib = false; support_dynamic_type = false };
           sm_attributes =
           [{ Typing_defs_core.ua_name = ([4:5-8], "\\Foo");
-             ua_params = [(Typing_defs_core.String "hi there")] }
+             ua_params = [(Typing_defs_core.String "hi there")];
+             ua_raw_val = None }
             ];
           sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([8:19-26], "attrInt");
@@ -61,7 +62,8 @@
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([7:5-8], "\\Foo");
               ua_params =
-              [(Typing_defs_core.Int "0x42"); (Typing_defs_core.Int "123")] }
+              [(Typing_defs_core.Int "0x42"); (Typing_defs_core.Int "123")];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([11:19-30], "attrECLabel");
@@ -89,8 +91,8 @@
            [{ Typing_defs_core.ua_name = ([10:5-8], "\\Foo");
               ua_params =
               [(Typing_defs_core.EnumClassLabel "Label1");
-                (Typing_defs_core.EnumClassLabel "Label2")]
-              }
+                (Typing_defs_core.EnumClassLabel "Label2")];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([14:19-30], "attrClsName");
@@ -116,7 +118,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([13:5-8], "\\Foo");
-              ua_params = [(Typing_defs_core.Classname "\\SomeClass")] }
+              ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([17:19-30], "attrCompute");
@@ -141,8 +144,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
-           [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = []
-              }
+           [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = [];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([20:19-29], "attrConcat");
@@ -168,7 +171,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([19:5-8], "\\Foo");
-              ua_params = [(Typing_defs_core.String "barBaz")] }
+              ua_params = [(Typing_defs_core.String "barBaz")];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([23:19-26], "attrVec");
@@ -193,8 +197,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
-           [{ Typing_defs_core.ua_name = ([22:5-8], "\\Foo"); ua_params = []
-              }
+           [{ Typing_defs_core.ua_name = ([22:5-8], "\\Foo"); ua_params = [];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([26:19-27], "attrDict");
@@ -219,8 +223,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
-           [{ Typing_defs_core.ua_name = ([25:5-8], "\\Foo"); ua_params = []
-              }
+           [{ Typing_defs_core.ua_name = ([25:5-8], "\\Foo"); ua_params = [];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([29:19-29], "attrKeyset");
@@ -245,8 +249,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
-           [{ Typing_defs_core.ua_name = ([28:5-8], "\\Foo"); ua_params = []
-              }
+           [{ Typing_defs_core.ua_name = ([28:5-8], "\\Foo"); ua_params = [];
+              ua_raw_val = None }
              ];
            sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([32:19-28], "attrShape");
@@ -271,8 +275,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
-           [{ Typing_defs_core.ua_name = ([31:5-8], "\\Foo"); ua_params = []
-              }
+           [{ Typing_defs_core.ua_name = ([31:5-8], "\\Foo"); ua_params = [];
+              ua_raw_val = None }
              ];
            sm_sort_text = None }
          ];

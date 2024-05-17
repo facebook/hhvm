@@ -35,7 +35,7 @@ function main(): void {
     }
   }
 
-  <<MyAttribute("a","b")>>
+  <<MyAttribute("a","b", shape("shapekey"=>dict["dictkey"=>"someval"]))>>
   class MyClass {
     const type MyTypeAlias = dict<string, MyClass>;
     const type MySimpleTypeAlias = ?int;

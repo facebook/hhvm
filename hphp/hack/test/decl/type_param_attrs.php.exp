@@ -51,9 +51,10 @@
            tp_name = ([7:36-38], "T1"); tp_tparams = []; tp_constraints = [];
            tp_reified = Reified;
            tp_user_attributes =
-           [{ Typing_defs_core.ua_name = ([7:26-27], "\\A"); ua_params = [] };
+           [{ Typing_defs_core.ua_name = ([7:26-27], "\\A"); ua_params = [];
+              ua_raw_val = None };
              { Typing_defs_core.ua_name = ([7:11-24], "__Enforceable");
-               ua_params = [] }
+               ua_params = []; ua_raw_val = None }
              ]
            }
           ];

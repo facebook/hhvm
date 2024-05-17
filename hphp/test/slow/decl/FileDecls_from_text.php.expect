@@ -27,6 +27,7 @@ File: dict [
             'a',
             'b',
           ],
+          'raw_val' => '"a","b", shape("shapekey"=>dict["dictkey"=>"someval"])',
         ],
       ],
       'methods' => 
@@ -66,6 +67,7 @@ File: dict [
                 'Some Message',
                 '10000',
               ],
+              'raw_val' => '"Some Message", 10000',
             ],
           ],
           'signature' => 

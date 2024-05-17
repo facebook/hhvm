@@ -732,7 +732,8 @@ let diff_enum_types
 
 let diff_enum_type_options = diff_options ~diff:diff_enum_types
 
-let user_attribute_name_value { Typing_defs.ua_name = (_, name); ua_params } =
+let user_attribute_name_value { Typing_defs.ua_name = (_, name); ua_params; _ }
+    =
   (name, ua_params)
 
 let diff_user_attribute_params

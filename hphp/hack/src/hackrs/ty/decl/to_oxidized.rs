@@ -47,6 +47,7 @@ impl<'a, P: Pos> ToOxidized<'a> for UserAttribute<P> {
         arena.alloc(obr::typing_defs::UserAttribute {
             name: self.name.to_oxidized(arena),
             params: self.params.to_oxidized(arena),
+            raw_val: self.raw_val.as_deref().to_oxidized(arena),
         })
     }
 }

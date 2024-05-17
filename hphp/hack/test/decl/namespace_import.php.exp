@@ -57,7 +57,8 @@
         sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([18:5-13], "__Sealed");
-           ua_params = [(Typing_defs_core.Classname "\\NS1\\NS2\\C")] }
+           ua_params = [(Typing_defs_core.Classname "\\NS1\\NS2\\C")];
+           ua_raw_val = None }
           ];
         sc_enum_type = None; sc_docs_url = None }))
   ]

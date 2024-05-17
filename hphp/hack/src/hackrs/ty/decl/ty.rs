@@ -151,6 +151,7 @@ walkable!(UserAttributeParam);
 pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
     pub params: Box<[UserAttributeParam]>,
+    pub raw_val: Option<String>,
 }
 
 impl<P> UserAttribute<P> {

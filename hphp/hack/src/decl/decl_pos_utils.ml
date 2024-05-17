@@ -255,8 +255,8 @@ struct
       ttc_is_ctx = tc.ttc_is_ctx;
     }
 
-  and user_attribute { ua_name; ua_params } =
-    { ua_name = positioned_id ua_name; ua_params }
+  and user_attribute { ua_name; ua_params; _ } =
+    { ua_name = positioned_id ua_name; ua_params; ua_raw_val = None }
 
   and type_param t =
     {

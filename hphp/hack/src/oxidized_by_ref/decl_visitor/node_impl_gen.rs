@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80a04c9ccd13f2a2e2bb72eae26ca2a0>>
+// @generated SignedSource<<95c4e780d33168fd0966bdf61b4e79ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -418,11 +418,15 @@ impl<'a> Node<'a> for UserAttribute<'a> {
             UserAttribute {
                 name: ref __binding_0,
                 params: ref __binding_1,
+                raw_val: ref __binding_2,
             } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
             }
         }
     }

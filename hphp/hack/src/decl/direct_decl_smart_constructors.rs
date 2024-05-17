@@ -855,6 +855,7 @@ pub struct UserAttributeNode<'a> {
     params: &'a [AttributeParam<'a>],
     /// This is only used for __Deprecated attribute message and CIPP parameters
     string_literal_param: Option<(&'a Pos<'a>, &'a BStr)>,
+    raw_val: Option<&'a str>,
 }
 
 mod fixed_width_token {
@@ -1136,6 +1137,7 @@ impl<'a> Node<'a> {
                 name: Id(_pos, attr_name),
                 params: [],
                 string_literal_param: None,
+                raw_val: None,
             }) => attr_name == name,
             _ => false,
         })
@@ -1224,6 +1226,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
                 AttributeParam::String(_, s) => UAP::String(s),
                 AttributeParam::Int(i) => UAP::Int(i),
             })),
+            raw_val: attr.raw_val,
         })
     }
 
@@ -5144,6 +5147,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
             name: (name.0, "__EnumClass"),
             params: &[],
+            raw_val: None,
         }));
         // Match ordering of attributes produced by the OCaml decl parser (even
         // though it's the reverse of the syntactic ordering).
@@ -5545,9 +5549,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     fn make_constructor_call(
         &mut self,
         name: Self::Output,
-        _left_paren: Self::Output,
+        left_paren: Self::Output,
         args: Self::Output,
-        _right_paren: Self::Output,
+        right_paren: Self::Output,
     ) -> Self::Output {
         let unqualified_name = match self.expect_name(name) {
             Some(name) => name,
@@ -5599,10 +5603,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             AttributeParam::String(pos, s) => Some((pos, s)),
             _ => None,
         });
+        let raw_val = self.opts.include_assignment_values.then(|| {
+            self.str_from_utf8(self.source_text.source_text().sub(
+                self.get_pos(left_paren).end_offset(),
+                self.get_pos(right_paren).start_offset() - self.get_pos(left_paren).end_offset(),
+            ))
+            .trim()
+        });
         Node::Attribute(self.alloc(UserAttributeNode {
             name,
             params,
             string_literal_param,
+            raw_val,
         }))
     }
 

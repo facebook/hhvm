@@ -76,6 +76,7 @@ namespace HH {
   type ExtDeclAttribute = shape(
     'name' => string,
     ?'args' => vec<string>,
+    ?'raw_val' => string,
   );
 
   type ExtDeclTypeConstraint = shape(

@@ -208,7 +208,7 @@ NULL
 NULL
 === Attributes
 vec(2) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(12) "MyAttribute2"
     ["args"]=>
@@ -216,8 +216,10 @@ vec(2) {
       string(1) "a"
       string(1) "b"
     }
+    ["raw_val"]=>
+    string(7) ""a","b""
   }
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(12) "MyAttribute1"
     ["args"]=>
@@ -225,9 +227,11 @@ vec(2) {
       string(1) "a"
       string(1) "b"
     }
+    ["raw_val"]=>
+    string(7) ""a","b""
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(12) "MyAttribute1"
   ["args"]=>
@@ -235,6 +239,8 @@ dict(2) {
     string(1) "a"
     string(1) "b"
   }
+  ["raw_val"]=>
+  string(7) ""a","b""
 }
 NULL
 NULL
@@ -381,22 +387,26 @@ NULL
 NULL
 === File Attributes
 vec(1) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(15) "MyFileAttribute"
     ["args"]=>
     vec(1) {
       string(3) "123"
     }
+    ["raw_val"]=>
+    string(3) "123"
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(15) "MyFileAttribute"
   ["args"]=>
   vec(1) {
     string(3) "123"
   }
+  ["raw_val"]=>
+  string(3) "123"
 }
 NULL
 NULL

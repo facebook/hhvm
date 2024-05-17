@@ -90,6 +90,7 @@ mod ffi {
     pub struct ExtDeclAttribute {
         name: String,
         args: Vec<String>,
+        raw_val: String,
     }
 
     #[derive(Debug, PartialEq)]

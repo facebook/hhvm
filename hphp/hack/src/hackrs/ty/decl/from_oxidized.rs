@@ -90,6 +90,7 @@ impl<P: Pos> From<&obr::typing_defs::UserAttribute<'_>> for ty::UserAttribute<P>
         Self {
             name: attr.name.into(),
             params: (attr.params.iter()).map(Into::into).collect(),
+            raw_val: attr.raw_val.map(Into::into),
         }
     }
 }

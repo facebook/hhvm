@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99b31f08f72fbca3cf3c2dde0ad1a864>>
+// @generated SignedSource<<1a46ecd3a387e94c5e5a3c0b56c9ded9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -332,6 +332,7 @@ pub enum UserAttributeParam {
 pub struct UserAttribute {
     pub name: PosId,
     pub params: Vec<UserAttributeParam>,
+    pub raw_val: Option<String>,
 }
 
 #[derive(

@@ -64,11 +64,6 @@ namespace apache::thrift::util {
  * concurrent code, this might be impossible to ensure. This is why it's
  * considered unsafe.
  *
- * For unsafeReset(), the only remaining IntrusiveSharedPtr owner can release
- * (and therefore delete) the pointed-to object concurrently to a reset() call.
- * This is why it's considered unsafe. reset(std::nullptr_t) is provided
- * (without renaming) because this special case is always safe.
- *
  * The embedded control block has some implications on the capabilities:
  *   - No std::weak_ptr equivalent — the control block's lifetime is confined by
  *     the pointed-to object, which means that weak references are

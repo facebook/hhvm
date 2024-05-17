@@ -122,6 +122,11 @@ struct SSLContextConfig {
     certificates.emplace_back(cert, key);
   }
 
+  void setDelegatedCredential(const std::string& credPath) {
+    delegatedCredentials.clear();
+    addDelegatedCredential(credPath);
+  }
+
   void addDelegatedCredential(const std::string& credPath) {
     delegatedCredentials.emplace_back(DelegatedCredInfo{credPath});
   }

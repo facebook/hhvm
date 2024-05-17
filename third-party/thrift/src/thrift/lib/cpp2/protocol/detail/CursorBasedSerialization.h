@@ -36,6 +36,8 @@ class ContainerCursorIterator;
 
 template <typename T>
 class StructuredCursorWriter;
+template <typename Tag>
+class ContainerCursorWriter;
 class StringCursorWriter;
 
 namespace detail {
@@ -58,6 +60,10 @@ struct ContainerTraits<type::list<VTag>> {
   // This is initializer_list becuase that's what skip_n accepts.
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<ValueTag>};
+
+  static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
+    op::encode<VTag>(protocol, value);
+  }
 };
 template <typename KTag>
 struct ContainerTraits<type::set<KTag>> {
@@ -65,6 +71,10 @@ struct ContainerTraits<type::set<KTag>> {
   using KeyTag = KTag;
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<KeyTag>};
+
+  static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
+    op::encode<KTag>(protocol, value);
+  }
 };
 template <typename KTag, typename VTag>
 struct ContainerTraits<type::map<KTag, VTag>> {
@@ -74,7 +84,14 @@ struct ContainerTraits<type::map<KTag, VTag>> {
   using ValueTag = VTag;
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<KeyTag>, op::typeTagToTType<ValueTag>};
+
+  static void write(BinaryProtocolWriter& protocol, const ElementType& key) {
+    op::encode<KTag>(protocol, key.first);
+    op::encode<VTag>(protocol, key.second);
+  }
 };
+template <typename Tag, typename Type>
+struct ContainerTraits<type::cpp_type<Type, Tag>> : ContainerTraits<Tag> {};
 
 class BaseCursorReader {
  protected:

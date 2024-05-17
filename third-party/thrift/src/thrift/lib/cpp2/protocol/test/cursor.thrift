@@ -35,6 +35,7 @@ struct Struct {
   3: Inner union_field;
   4: list<byte> list_field;
   5: list<set<string>> set_nested_field;
+  @cpp.Type{template = "std::unordered_map"}
   6: map<byte, byte> map_field;
 }
 

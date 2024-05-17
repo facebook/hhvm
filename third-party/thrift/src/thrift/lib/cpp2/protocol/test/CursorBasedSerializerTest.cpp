@@ -389,3 +389,21 @@ TEST(CursorSerializer, StringWrite) {
   EXPECT_EQ(*wrapper.deserialize().string_field(), "foo");
   EXPECT_EQ(*wrapper.deserialize().i32_field(), 42);
 }
+
+TEST(CursorSerializer, ContainerWrite) {
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+  auto list = writer.beginWrite<ident::list_field>();
+  list.write('a');
+  list.write('b');
+  list.write('c');
+  writer.endWrite(std::move(list));
+
+  auto map = std::unordered_map<int8_t, int8_t>{{'a', 'b'}, {'c', 'd'}};
+  writer.write<ident::map_field>(map);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_THAT(*obj.list_field(), UnorderedElementsAreArray({'a', 'b', 'c'}));
+  EXPECT_EQ(*obj.map_field(), map);
+}

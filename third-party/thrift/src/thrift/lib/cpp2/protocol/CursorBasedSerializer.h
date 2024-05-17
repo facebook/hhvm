@@ -607,6 +607,41 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     state_ = State::Active;
   }
 
+  /** containers */
+
+  template <
+      typename Ident,
+      typename Container,
+      enable_for<type::container_c, Ident> = 0>
+  void write(const Container& value) {
+    writeField<Ident>(
+        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+  }
+
+  /** Allows writing containers whose size isn't known until afterwards.
+   * Less efficient than using write().
+   * See the ContainerCursorWriter docblock for example usage.
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+
+  template <typename Ident, enable_for<type::container_c, Ident> = 0>
+  ContainerCursorWriter<type_tag<Ident>> beginWrite() {
+    beforeWriteField<Ident>();
+    state_ = State::Child;
+    return ContainerCursorWriter<type_tag<Ident>>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endWrite(ContainerCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    afterWriteField();
+    state_ = State::Active;
+  }
+
  private:
   explicit StructuredCursorWriter(folly::IOBufQueue& q)
       : StructuredCursorWriter([&] {
@@ -705,6 +740,36 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
 };
 
 /**
+ * Allows writing containers whose size is not known in advance.
+ * Ex:
+ *  StructuredCursorWriter writer;
+ *  auto child = writer.beginWrite<ident::list_field>();
+ *  folly::coro::AsyncGenerator<int32_t> gen = ...;
+ *  while (auto val = co_await gen.next()) {
+ *    child.write(*val);
+ *  }
+ *  writer.endWrite(std::move(child));
+ */
+template <typename Tag>
+class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
+ public:
+  void write(const typename detail::ContainerTraits<Tag>::ElementType& val) {
+    ++n;
+    detail::ContainerTraits<Tag>::write(protocol_, val);
+  }
+
+ private:
+  explicit ContainerCursorWriter(BinaryProtocolWriter&& p);
+
+  template <typename T>
+  friend class StructuredCursorWriter;
+
+  void finalize() { DelayedSizeCursorWriter::finalize(n); }
+
+  int32_t n = 0;
+};
+
+/**
  * Adapter (for use with `@cpp.Adapter` annotation) that permits using this
  * serialization with Thrift RPC.
  */
@@ -761,6 +826,26 @@ class CursorSerializationAdapter {
 };
 
 // End public API
+
+template <typename Tag>
+ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter&& p)
+    : DelayedSizeCursorWriter(std::move(p)) {
+  if constexpr (type::is_a_v<Tag, type::list_c>) {
+    protocol_.writeByte(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>);
+  } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+    protocol_.writeByte(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>);
+  } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+    protocol_.writeByte(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>);
+    protocol_.writeByte(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>);
+  } else {
+    static_assert(!sizeof(Tag), "unexpected tag");
+  }
+  writeSize();
+}
 
 template <typename Tag, bool Contiguous>
 template <

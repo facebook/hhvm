@@ -642,6 +642,34 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     state_ = State::Active;
   }
 
+  /** structured types
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+
+  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  StructuredCursorWriter<type_tag<Ident>> beginWrite() {
+    beforeWriteField<Ident>();
+    state_ = State::Child;
+    return StructuredCursorWriter<type_tag<Ident>>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endWrite(StructuredCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    afterWriteField();
+    state_ = State::Active;
+  }
+
+  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  void write(const native_type<Ident>& value) {
+    writeField<Ident>(
+        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+  }
+
  private:
   explicit StructuredCursorWriter(folly::IOBufQueue& q)
       : StructuredCursorWriter([&] {

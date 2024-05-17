@@ -407,3 +407,23 @@ TEST(CursorSerializer, ContainerWrite) {
   EXPECT_THAT(*obj.list_field(), UnorderedElementsAreArray({'a', 'b', 'c'}));
   EXPECT_EQ(*obj.map_field(), map);
 }
+
+TEST(CursorSerializer, NestedStructWrite) {
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+  auto innerWriter = writer.beginWrite<ident::union_field>();
+
+  // Can't use parent writer while child writer is active.
+  EXPECT_THAT(
+      [&] { writer.write<ident::list_field>(std::array<int8_t, 1>{42}); },
+      ThrowsMessage<std::runtime_error>("Child writer not passed to endWrite"));
+
+  // endWrite in the middle of writing the child skips to the end.
+  writer.endWrite(std::move(innerWriter));
+  writer.write<ident::list_field>(std::array<int8_t, 1>{42});
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(obj.union_field()->getType(), Inner::Type::__EMPTY__);
+  EXPECT_THAT(*obj.list_field(), ElementsAre(42));
+}

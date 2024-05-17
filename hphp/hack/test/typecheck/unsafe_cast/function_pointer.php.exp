@@ -1,0 +1,2 @@
+ERROR: File "function_pointer.php", line 7, characters 15-34:
+`HH\FIXME\UNSAFE_CAST` cannot be used as a function pointer (Naming[2105])

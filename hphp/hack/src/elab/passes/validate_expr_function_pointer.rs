@@ -9,6 +9,7 @@ use nast::Class_;
 use nast::Expr_;
 use nast::Hint;
 use nast::Hint_;
+use nast::Id;
 use oxidized::ast::FunctionPtrId;
 
 use crate::prelude::*;
@@ -35,6 +36,16 @@ impl Pass for ValidateExprFunctionPointerPass {
 
     fn on_ty_expr__bottom_up(&mut self, env: &Env, expr: &mut Expr_) -> ControlFlow<()> {
         match &expr {
+            Expr_::FunctionPointer(box (FunctionPtrId::FPId(Id(pos, name)), _)) => {
+                // If this comes up more often, we may consider partitioning pseudofunctions
+                // into hhi-defined and non-hhi-defined, then just error on all of the hhi-defined ones.
+                if name == naming_special_names_rust::pseudo_functions::UNSAFE_CAST {
+                    env.emit_error(NamingError::InvalidFunPointer {
+                        pos: pos.clone(),
+                        name: name.to_string(),
+                    });
+                }
+            }
             Expr_::FunctionPointer(box (
                 FunctionPtrId::FPClassConst(ClassId(_, pos, class_id_), (_, meth_name)),
                 _,

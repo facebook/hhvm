@@ -574,7 +574,7 @@ let invalid_fun_pointer pos name =
   User_error.make_err
     Error_code.(to_enum InvalidFunPointer)
     ( pos,
-      Format.sprintf "Unbound global function: %s is not a valid name for fun()"
+      Format.sprintf "%s cannot be used as a function pointer"
       @@ Markdown_lite.md_codify
       @@ Render.strip_ns name )
     []

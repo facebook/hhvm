@@ -78,6 +78,15 @@ struct Numerics {
   4: float flt;
 }
 
+struct OutOfOrder {
+  5: i16 field1;
+  1: i16 field2;
+  12: i16 field3 = 1;
+  7: i16 field4;
+  4: i16 field5;
+  11: optional i16 field6;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

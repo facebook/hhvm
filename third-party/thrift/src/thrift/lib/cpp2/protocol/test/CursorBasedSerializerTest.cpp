@@ -245,3 +245,119 @@ TEST(CursorSerializer, NestedStructRead) {
   EXPECT_EQ(outerReader.read<ident::dessert>(), 3);
   wrapper.endRead(std::move(outerReader));
 }
+
+TEST(CursorSerializer, QualifierWrite) {
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::opt>(3);
+  writer.write<ident::unq>(1);
+  writer.write<ident::terse>(2);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 3);
+  EXPECT_EQ(*obj.unq(), 1);
+  EXPECT_EQ(*obj.terse(), 2);
+  auto serializedLen = wrapper.serializedData().computeChainDataLength();
+
+  // Skipping an optional field decreases serialized size.
+  writer = wrapper.beginWrite();
+  writer.write<ident::unq>(1);
+  writer.write<ident::terse>(2);
+  wrapper.endWrite(std::move(writer));
+
+  obj = wrapper.deserialize();
+  EXPECT_FALSE(obj.opt());
+  EXPECT_EQ(*obj.unq(), 1);
+  EXPECT_EQ(*obj.terse(), 2);
+  EXPECT_LT(wrapper.serializedData().computeChainDataLength(), serializedLen);
+
+  // Setting a terse field to its intrinsic default decreases serialized size.
+  writer = wrapper.beginWrite();
+  writer.write<ident::opt>(3);
+  writer.write<ident::unq>(1);
+  writer.write<ident::terse>(0);
+  wrapper.endWrite(std::move(writer));
+
+  obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 3);
+  EXPECT_EQ(*obj.unq(), 1);
+  EXPECT_EQ(*obj.terse(), 0);
+  EXPECT_LT(wrapper.serializedData().computeChainDataLength(), serializedLen);
+}
+
+TEST(CursorSerializer, WriteWithSkip) {
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::i32_field>(42);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_FALSE(obj.string_field());
+  EXPECT_EQ(*obj.i32_field(), 42);
+  EXPECT_TRUE(empty(*obj.union_field()));
+  EXPECT_TRUE(obj.list_field()->empty());
+
+  CursorSerializationWrapper<Meal> wrapperWithDefaults;
+  auto writerWithDefaults = wrapperWithDefaults.beginWrite();
+  writerWithDefaults.write<ident::main>(1);
+  wrapperWithDefaults.endWrite(std::move(writerWithDefaults));
+
+  auto meal = wrapperWithDefaults.deserialize();
+  EXPECT_EQ(*meal.appetizer(), 1);
+  EXPECT_EQ(*meal.main(), 1);
+  EXPECT_EQ(*meal.dessert(), 3);
+  CursorSerializationWrapper<OutOfOrder> oooWrapper;
+  auto oooWriter = oooWrapper.beginWrite();
+  oooWriter.write<ident::field5>(2);
+  oooWrapper.endWrite(std::move(oooWriter));
+
+  // Ensure we've actually written the skipped fields.
+  BinaryProtocolReader reader;
+  reader.setInput(&oooWrapper.serializedData());
+  std::string name;
+  reader.readStructBegin(name);
+
+  auto checkField = [&](int16_t expectedId, int16_t expectedVal) {
+    int16_t id;
+    int16_t val;
+    apache::thrift::protocol::TType type;
+    reader.readFieldBegin(name, type, id);
+    reader.readI16(val);
+    reader.readFieldEnd();
+    EXPECT_EQ(id, expectedId);
+    EXPECT_EQ(val, expectedVal);
+  };
+
+  checkField(1, 0);
+  checkField(4, 2); // field5
+  checkField(5, 0);
+  checkField(7, 0);
+  checkField(12, 1);
+}
+
+TEST(CursorSerializer, UnionWrite) {
+  CursorSerializationWrapper<Stringish> wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::string_field>("foo");
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.string_field_ref(), "foo");
+}
+
+TEST(CursorSerializer, NumericWrite) {
+  CursorSerializationWrapper<Numerics> wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::int16>(1);
+  writer.write<ident::uint32>(2);
+  writer.write<ident::enm>(E::B);
+  writer.write<ident::flt>(3.0);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.int16(), 1);
+  EXPECT_EQ(*obj.uint32(), 2);
+  EXPECT_EQ(*obj.enm(), E::B);
+  EXPECT_FLOAT_EQ(*obj.flt(), 3.0);
+}

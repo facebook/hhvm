@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <initializer_list>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
@@ -98,6 +99,16 @@ class CursorSerializationWrapper {
   template <bool Contiguous>
   void endRead(StructuredCursorReader<Tag, Contiguous>&& reader) const {
     reader.finalize();
+  }
+
+  /** Cursor write path */
+  StructuredCursorWriter<Tag> beginWrite() {
+    serializedData_.reset();
+    return StructuredCursorWriter<Tag>(queue_);
+  }
+  void endWrite(StructuredCursorWriter<Tag>&& writer) {
+    writer.finalize();
+    serializedData_ = queue_.move();
   }
 
   /** Access to serialized data */
@@ -276,7 +287,6 @@ class StructuredCursorReader : detail::BaseCursorReader {
     return static_cast<typename T::Type>(readState_.fieldId);
   }
 
-  // End public API
  private:
   explicit StructuredCursorReader(const folly::IOBuf& c)
       : StructuredCursorReader([&] {
@@ -415,7 +425,6 @@ class ContainerCursorReader : detail::BaseCursorReader {
     return remaining();
   }
 
-  // End public API
  private:
   explicit ContainerCursorReader(BinaryProtocolReader&& p);
   ContainerCursorReader() { remaining_ = 0; }
@@ -493,6 +502,143 @@ class ContainerCursorIterator {
 
  private:
   ContainerCursorReader<Tag>* reader_ = nullptr;
+};
+
+/**
+ * Cursor serializer for Thrift structs and unions.
+ * Typically constructed from a CursorSerializationWrapper.
+ */
+template <typename Tag>
+class StructuredCursorWriter : detail::BaseCursorWriter {
+  static_assert(
+      type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
+  using T = type::native_type<Tag>;
+
+  template <typename Ident>
+  using type_tag = op::get_type_tag<T, Ident>;
+  template <typename Ident>
+  using native_type = op::get_native_type<T, Ident>;
+
+  template <typename TypeClass, typename Ident>
+  using enable_for =
+      typename std::enable_if_t<type::is_a_v<type_tag<Ident>, TypeClass>, int>;
+
+ public:
+  /** numeric types */
+
+  template <typename Ident, enable_for<type::number_c, Ident> = 0>
+  void write(native_type<Ident> value) {
+    writeField<Ident>(
+        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+  }
+
+  /** string/binary */
+
+  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  void write(const folly::IOBuf& value) {
+    writeField<Ident>([&] { protocol_.writeBinary(value); }, value);
+  }
+
+  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  void write(std::string_view value) {
+    writeField<Ident>([&] { protocol_.writeBinary(value); }, value);
+  }
+
+ private:
+  explicit StructuredCursorWriter(folly::IOBufQueue& q)
+      : StructuredCursorWriter([&] {
+          BinaryProtocolWriter writer(SHARE_EXTERNAL_BUFFER);
+          writer.setOutput(&q);
+          return writer;
+        }()) {}
+  explicit StructuredCursorWriter(BinaryProtocolWriter&& p)
+      : BaseCursorWriter(std::move(p)) {
+    protocol_.writeStructBegin(nullptr);
+  }
+
+  void finalize() {
+    checkState(State::Active);
+    visitSkippedFields<FieldId{std::numeric_limits<int16_t>::max()}>();
+    protocol_.writeFieldStop();
+    protocol_.writeStructEnd();
+    state_ = State::Done;
+  }
+
+  template <typename Ident, bool skipWrite = false>
+  void beforeWriteField() {
+    checkState(State::Active);
+
+    using field_id = op::get_field_id<T, Ident>;
+    static_assert(field_id::value > FieldId{0}, "FieldId must be positive");
+    static_assert(
+        field_id::value < FieldId{std::numeric_limits<int16_t>::max()},
+        "Preventing overflow");
+    if (field_id::value <= fieldId_) {
+      folly::throw_exception<std::runtime_error>("Writing field out of order");
+    }
+    if (is_thrift_union_v<T> && fieldId_ != FieldId{0}) {
+      folly::throw_exception<std::runtime_error>(
+          "Writing multiple fields to union");
+    }
+
+    visitSkippedFields<field_id::value>();
+
+    fieldId_ = field_id::value;
+    if (skipWrite) {
+      return;
+    }
+    protocol_.writeFieldBegin(
+        nullptr,
+        op::typeTagToTType<type_tag<Ident>>,
+        folly::to_underlying(field_id::value));
+  }
+
+  void afterWriteField() { protocol_.writeFieldEnd(); }
+
+  template <typename Ident, typename F, typename U>
+  void writeField(F&& f, U& value) {
+    // Apply terse write optimization.
+    if constexpr (type::is_terse_field_v<T, Ident>) {
+      if (op::isEmpty<type_tag<Ident>>(value)) {
+        beforeWriteField<Ident, /* skipWrite */ true>();
+        return;
+      }
+    }
+
+    beforeWriteField<Ident>();
+    f();
+    afterWriteField();
+  }
+
+  template <FieldId MaxFieldId>
+  void visitSkippedFields() {
+    if constexpr (is_thrift_union_v<T>) {
+      return;
+    }
+
+    // Fast path: consecutive fields
+    if (detail::increment(fieldId_) == MaxFieldId) {
+      return;
+    }
+
+    // Slow path: iterate fields between fieldId_ and MaxFieldId.
+    const auto& fieldWriters = detail::DefaultValueWriter<Tag>::fields;
+    for (auto itr = std::lower_bound(
+             fieldWriters.begin(),
+             fieldWriters.end(),
+             decltype(*fieldWriters.begin()){detail::increment(fieldId_)});
+         itr != fieldWriters.end() && itr->id < MaxFieldId;
+         ++itr) {
+      (itr->write)(*this);
+    }
+  }
+
+  FieldId fieldId_{0};
+
+  template <typename U>
+  friend class StructuredCursorWriter;
+  friend class CursorSerializationWrapper<T>;
+  friend struct detail::DefaultValueWriter<Tag>;
 };
 
 /**

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <string.h>
 #include <array>
 #include <utility>
 
@@ -35,6 +36,7 @@ class ContainerCursorIterator;
 
 template <typename T>
 class StructuredCursorWriter;
+class StringCursorWriter;
 
 namespace detail {
 
@@ -265,5 +267,33 @@ inline constexpr FieldId increment(FieldId id) {
   assert(folly::to_underlying(id) + 1 > folly::to_underlying(id));
   return static_cast<FieldId>(folly::to_underlying(id) + 1);
 }
+
+/** Supports writing containers whose size is not known until after
+ * serialization. */
+class DelayedSizeCursorWriter : public BaseCursorWriter {
+ protected:
+  void* size_;
+
+  constexpr static size_t kSizeLen = 4;
+
+  explicit DelayedSizeCursorWriter(BinaryProtocolWriter&& p)
+      : BaseCursorWriter(std::move(p)) {}
+
+  void writeSize() {
+    static_assert(
+        std::is_same_v<decltype(protocol_), BinaryProtocolWriter>,
+        "Using internals of binary protocol.");
+    size_ = protocol_.ensure(kSizeLen);
+    protocol_.advance(kSizeLen);
+  }
+
+  void finalize(int32_t actualSize) {
+    checkState(State::Active);
+    state_ = State::Done;
+    actualSize = folly::Endian::big(actualSize);
+    memcpy(size_, &actualSize, kSizeLen);
+  }
+};
+
 } // namespace detail
 } // namespace apache::thrift

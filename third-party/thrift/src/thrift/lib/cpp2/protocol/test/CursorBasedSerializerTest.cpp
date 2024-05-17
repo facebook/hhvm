@@ -361,3 +361,31 @@ TEST(CursorSerializer, NumericWrite) {
   EXPECT_EQ(*obj.enm(), E::B);
   EXPECT_FLOAT_EQ(*obj.flt(), 3.0);
 }
+
+TEST(CursorSerializer, StringWrite) {
+  StructCursor wrapper;
+
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::string_field>(std::string_view("foo"));
+  wrapper.endWrite(std::move(writer));
+  EXPECT_EQ(*wrapper.deserialize().string_field(), "foo");
+
+  writer = wrapper.beginWrite();
+  writer.write<ident::string_field>(std::string("foo"));
+  wrapper.endWrite(std::move(writer));
+  EXPECT_EQ(*wrapper.deserialize().string_field(), "foo");
+
+  writer = wrapper.beginWrite();
+  writer.write<ident::string_field>(*folly::IOBuf::copyBuffer("foo"));
+  wrapper.endWrite(std::move(writer));
+  EXPECT_EQ(*wrapper.deserialize().string_field(), "foo");
+
+  writer = wrapper.beginWrite();
+  auto str = writer.beginWrite<ident::string_field>(12);
+  memcpy(str.writeableData(), "foo", 3);
+  writer.endWrite(std::move(str), 3);
+  writer.write<ident::i32_field>(42);
+  wrapper.endWrite(std::move(writer));
+  EXPECT_EQ(*wrapper.deserialize().string_field(), "foo");
+  EXPECT_EQ(*wrapper.deserialize().i32_field(), 42);
+}

@@ -153,6 +153,9 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   // Get last n bytes we just wrote
   folly::io::Cursor tail(size_t n);
 
+  uint8_t* ensure(size_t n);
+  void advance(size_t n);
+
  private:
   static void checkBinarySize(uint64_t size);
   template <bool kWriteSize>

@@ -229,6 +229,15 @@ inline folly::io::Cursor BinaryProtocolWriter::tail(size_t n) {
   return {cursor, n};
 }
 
+inline uint8_t* BinaryProtocolWriter::ensure(size_t n) {
+  out_.ensure(n);
+  return out_.writableData();
+}
+
+inline void BinaryProtocolWriter::advance(size_t n) {
+  out_.append(n);
+}
+
 /**
  * Functions that return the serialized size
  */

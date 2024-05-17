@@ -505,6 +505,46 @@ class ContainerCursorIterator {
 };
 
 /**
+ * Allows writing strings whose size is not known exactly until after
+ * serialization is complete (e.g. for compression).
+ * An upper bound on the size must be known. Accessing more than `maxSize` bytes
+ * into `writeableData()` is undefined behavior (ASAN crash / data corruption).
+ * Gives access to a contiguous buffer for writing into.
+ * Ex:
+ *  StructuredCursorWriter writer;
+ *  std::string uncompressedData = ...;
+ *  auto maxSize = uncompressedData.size();
+ *  auto child = writer.beginWrite<ident::binary_field>(maxSize);
+ *  int32_t cSize = ZSTD_compress(child.writeableData(), maxSize,
+ *                                uncompressedData.c_str(), maxSize, 1);
+ *  writer.endWrite(std::move(child), cSize);
+ */
+class StringCursorWriter : detail::DelayedSizeCursorWriter {
+ public:
+  uint8_t* writeableData() {
+    checkState(State::Active);
+    return data_;
+  }
+
+ private:
+  StringCursorWriter(BinaryProtocolWriter&& p, int32_t maxSize)
+      : DelayedSizeCursorWriter(std::move(p)) {
+    writeSize();
+    data_ = protocol_.ensure(maxSize);
+  }
+
+  void finalize(int32_t actualSize) {
+    DelayedSizeCursorWriter::finalize(actualSize);
+    protocol_.advance(actualSize);
+  }
+
+  uint8_t* data_;
+
+  template <typename T>
+  friend class StructuredCursorWriter;
+};
+
+/**
  * Cursor serializer for Thrift structs and unions.
  * Typically constructed from a CursorSerializationWrapper.
  */
@@ -542,6 +582,29 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   void write(std::string_view value) {
     writeField<Ident>([&] { protocol_.writeBinary(value); }, value);
+  }
+
+  /** Allows writing strings whose size isn't known until afterwards.
+   * See the StringCursorWriter docblock for example usage.
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+
+  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  StringCursorWriter beginWrite(int32_t maxSize) {
+    beforeWriteField<Ident>();
+    state_ = State::Child;
+    StringCursorWriter child{std::move(protocol_), maxSize};
+    return child;
+  }
+
+  void endWrite(StringCursorWriter&& child, int32_t actualSize) {
+    checkState(State::Child);
+    child.finalize(actualSize);
+    protocol_ = std::move(child.protocol_);
+    afterWriteField();
+    state_ = State::Active;
   }
 
  private:

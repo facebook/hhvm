@@ -7473,8 +7473,7 @@ end = struct
       | _ -> (prop_env, None, List.rev remain))
 
   let prop_to_env ty_sub ty_super env prop on_error =
-    let (env, ty_err_opt, props') = tell ty_sub ty_super env prop on_error in
-    let env = Env.add_subtype_prop env (TL.conj_list props') in
+    let (env, ty_err_opt, _props') = tell ty_sub ty_super env prop on_error in
     (env, ty_err_opt)
 end
 

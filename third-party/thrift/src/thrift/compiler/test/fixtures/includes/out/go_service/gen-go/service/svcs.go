@@ -243,7 +243,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 
@@ -254,7 +254,7 @@ if err != nil {
     return err
 }
 
-    x.SetINonCompat(result)
+    x.I = &result
     return nil
 }
 
@@ -558,7 +558,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 
@@ -569,7 +569,7 @@ if err != nil {
     return err
 }
 
-    x.SetINonCompat(result)
+    x.I = &result
     return nil
 }
 

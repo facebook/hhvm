@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -271,7 +271,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -281,7 +281,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnderlyingNameNonCompat(result)
+    x.UnderlyingName = result
     return nil
 }
 
@@ -291,7 +291,7 @@ if err != nil {
     return err
 }
 
-    x.SetExtraNamespaceNonCompat(result)
+    x.ExtraNamespace = result
     return nil
 }
 
@@ -449,7 +449,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -581,7 +581,7 @@ if err != nil {
     return err
 }
 
-    x.SetReasonNonCompat(result)
+    x.Reason = result
     return nil
 }
 
@@ -749,7 +749,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -759,7 +759,7 @@ if err != nil {
     return err
 }
 
-    x.SetReasonNonCompat(result)
+    x.Reason = result
     return nil
 }
 
@@ -941,7 +941,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAttributesNonCompat(result)
+    x.Attributes = result
     return nil
 }
 
@@ -1073,7 +1073,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -1242,7 +1242,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAttributesNonCompat(result)
+    x.Attributes = result
     return nil
 }
 

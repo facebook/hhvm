@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 

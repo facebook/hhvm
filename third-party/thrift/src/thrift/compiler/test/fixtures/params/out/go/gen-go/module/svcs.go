@@ -328,7 +328,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 
@@ -625,7 +625,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 
@@ -922,7 +922,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 
@@ -1202,7 +1202,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 
@@ -1603,7 +1603,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 

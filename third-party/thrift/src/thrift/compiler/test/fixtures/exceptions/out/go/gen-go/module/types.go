@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageNonCompat(result)
+    x.Message = result
     return nil
 }
 
@@ -213,7 +213,7 @@ if err != nil {
     return err
 }
 
-    x.SetSonnetNonCompat(result)
+    x.Sonnet = &result
     return nil
 }
 
@@ -388,7 +388,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorMessageNonCompat(result)
+    x.ErrorMessage = result
     return nil
 }
 
@@ -398,7 +398,7 @@ if err != nil {
     return err
 }
 
-    x.SetInternalErrorMessageNonCompat(result)
+    x.InternalErrorMessage = result
     return nil
 }
 
@@ -582,7 +582,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorMessageNonCompat(result)
+    x.ErrorMessage = result
     return nil
 }
 
@@ -592,7 +592,7 @@ if err != nil {
     return err
 }
 
-    x.SetInternalErrorMessageNonCompat(result)
+    x.InternalErrorMessage = result
     return nil
 }
 
@@ -776,7 +776,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageNonCompat(result)
+    x.Message = result
     return nil
 }
 
@@ -786,7 +786,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorCodeNonCompat(result)
+    x.ErrorCode = result
     return nil
 }
 
@@ -970,7 +970,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageFieldNonCompat(result)
+    x.MessageField = result
     return nil
 }
 
@@ -980,7 +980,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrorCodeNonCompat(result)
+    x.ErrorCode = result
     return nil
 }
 

@@ -455,7 +455,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -465,7 +465,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -475,7 +475,7 @@ if err != nil {
     return err
 }
 
-    x.SetInvertNonCompat(result)
+    x.Invert = result
     return nil
 }
 
@@ -721,7 +721,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -731,7 +731,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -742,7 +742,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -987,7 +987,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -997,7 +997,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -1007,7 +1007,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -1252,7 +1252,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -1262,7 +1262,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -1272,7 +1272,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -1517,7 +1517,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -1527,7 +1527,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -1537,7 +1537,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -1782,7 +1782,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -1792,7 +1792,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -1802,7 +1802,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -2047,7 +2047,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -2057,7 +2057,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -2067,7 +2067,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -2348,7 +2348,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -2358,7 +2358,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -2368,7 +2368,7 @@ if err != nil {
     return err
 }
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -2378,7 +2378,7 @@ if err != nil {
     return err
 }
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -2691,7 +2691,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -2701,7 +2701,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -2711,7 +2711,7 @@ if err != nil {
     return err
 }
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -2721,7 +2721,7 @@ if err != nil {
     return err
 }
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 

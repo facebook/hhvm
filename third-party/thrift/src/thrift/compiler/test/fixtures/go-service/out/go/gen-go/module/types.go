@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -199,7 +199,7 @@ if err != nil {
     return err
 }
 
-    x.SetEntityNonCompat(result)
+    x.Entity = result
     return nil
 }
 
@@ -452,7 +452,7 @@ if err != nil {
     return err
 }
 
-    x.SetFooNonCompat(result)
+    x.Foo = result
     return nil
 }
 
@@ -480,7 +480,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetBarNonCompat(result)
+    x.Bar = result
     return nil
 }
 
@@ -519,7 +519,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetBazNonCompat(result)
+    x.Baz = result
     return nil
 }
 

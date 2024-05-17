@@ -153,7 +153,7 @@ if err != nil {
     return err
 }
 
-    x.SetInt1NonCompat(result)
+    x.Int1 = result
     return nil
 }
 
@@ -299,7 +299,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 

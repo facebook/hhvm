@@ -868,7 +868,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolFieldNonCompat(result)
+    x.BoolField = &result
     return nil
 }
 
@@ -879,7 +879,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteFieldNonCompat(result)
+    x.ByteField = &result
     return nil
 }
 
@@ -889,7 +889,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortFieldNonCompat(result)
+    x.ShortField = &result
     return nil
 }
 
@@ -899,7 +899,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntFieldNonCompat(result)
+    x.IntField = &result
     return nil
 }
 
@@ -909,7 +909,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongFieldNonCompat(result)
+    x.LongField = &result
     return nil
 }
 
@@ -919,7 +919,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatFieldNonCompat(result)
+    x.FloatField = &result
     return nil
 }
 
@@ -929,7 +929,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleFieldNonCompat(result)
+    x.DoubleField = &result
     return nil
 }
 
@@ -939,7 +939,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = &result
     return nil
 }
 
@@ -949,7 +949,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryFieldNonCompat(result)
+    x.BinaryField = result
     return nil
 }
 
@@ -960,7 +960,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumFieldNonCompat(result)
+    x.EnumField = &result
     return nil
 }
 
@@ -988,7 +988,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListFieldNonCompat(result)
+    x.ListField = result
     return nil
 }
 
@@ -1016,7 +1016,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetFieldNonCompat(result)
+    x.SetField = result
     return nil
 }
 
@@ -1054,7 +1054,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapFieldNonCompat(result)
+    x.MapField = result
     return nil
 }
 
@@ -1065,7 +1065,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructFieldNonCompat(result)
+    x.StructField = &result
     return nil
 }
 
@@ -1464,7 +1464,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    x.Field1 = result
     return nil
 }
 
@@ -2196,7 +2196,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolFieldNonCompat(result)
+    x.BoolField = result
     return nil
 }
 
@@ -2207,7 +2207,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteFieldNonCompat(result)
+    x.ByteField = result
     return nil
 }
 
@@ -2217,7 +2217,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortFieldNonCompat(result)
+    x.ShortField = result
     return nil
 }
 
@@ -2227,7 +2227,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntFieldNonCompat(result)
+    x.IntField = result
     return nil
 }
 
@@ -2237,7 +2237,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongFieldNonCompat(result)
+    x.LongField = result
     return nil
 }
 
@@ -2247,7 +2247,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatFieldNonCompat(result)
+    x.FloatField = result
     return nil
 }
 
@@ -2257,7 +2257,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleFieldNonCompat(result)
+    x.DoubleField = result
     return nil
 }
 
@@ -2267,7 +2267,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = result
     return nil
 }
 
@@ -2277,7 +2277,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryFieldNonCompat(result)
+    x.BinaryField = result
     return nil
 }
 
@@ -2288,7 +2288,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumFieldNonCompat(result)
+    x.EnumField = result
     return nil
 }
 
@@ -2316,7 +2316,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListFieldNonCompat(result)
+    x.ListField = result
     return nil
 }
 
@@ -2344,7 +2344,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetFieldNonCompat(result)
+    x.SetField = result
     return nil
 }
 
@@ -2382,7 +2382,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapFieldNonCompat(result)
+    x.MapField = result
     return nil
 }
 
@@ -2393,7 +2393,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructFieldNonCompat(result)
+    x.StructField = &result
     return nil
 }
 
@@ -2404,7 +2404,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionFieldNonCompat(result)
+    x.UnionField = &result
     return nil
 }
 
@@ -3970,7 +3970,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseBoolFieldNonCompat(result)
+    x.TerseBoolField = result
     return nil
 }
 
@@ -3981,7 +3981,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseByteFieldNonCompat(result)
+    x.TerseByteField = result
     return nil
 }
 
@@ -3991,7 +3991,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseShortFieldNonCompat(result)
+    x.TerseShortField = result
     return nil
 }
 
@@ -4001,7 +4001,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseIntFieldNonCompat(result)
+    x.TerseIntField = result
     return nil
 }
 
@@ -4011,7 +4011,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseLongFieldNonCompat(result)
+    x.TerseLongField = result
     return nil
 }
 
@@ -4021,7 +4021,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseFloatFieldNonCompat(result)
+    x.TerseFloatField = result
     return nil
 }
 
@@ -4031,7 +4031,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseDoubleFieldNonCompat(result)
+    x.TerseDoubleField = result
     return nil
 }
 
@@ -4041,7 +4041,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseStringFieldNonCompat(result)
+    x.TerseStringField = result
     return nil
 }
 
@@ -4051,7 +4051,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseBinaryFieldNonCompat(result)
+    x.TerseBinaryField = result
     return nil
 }
 
@@ -4062,7 +4062,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetTerseEnumFieldNonCompat(result)
+    x.TerseEnumField = result
     return nil
 }
 
@@ -4090,7 +4090,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetTerseListFieldNonCompat(result)
+    x.TerseListField = result
     return nil
 }
 
@@ -4118,7 +4118,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetTerseSetFieldNonCompat(result)
+    x.TerseSetField = result
     return nil
 }
 
@@ -4156,7 +4156,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetTerseMapFieldNonCompat(result)
+    x.TerseMapField = result
     return nil
 }
 
@@ -4167,7 +4167,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseStructFieldNonCompat(result)
+    x.TerseStructField = &result
     return nil
 }
 
@@ -4177,7 +4177,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolFieldNonCompat(result)
+    x.BoolField = result
     return nil
 }
 
@@ -4188,7 +4188,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteFieldNonCompat(result)
+    x.ByteField = result
     return nil
 }
 
@@ -4198,7 +4198,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortFieldNonCompat(result)
+    x.ShortField = result
     return nil
 }
 
@@ -4208,7 +4208,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntFieldNonCompat(result)
+    x.IntField = result
     return nil
 }
 
@@ -4218,7 +4218,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongFieldNonCompat(result)
+    x.LongField = result
     return nil
 }
 
@@ -4228,7 +4228,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatFieldNonCompat(result)
+    x.FloatField = result
     return nil
 }
 
@@ -4238,7 +4238,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleFieldNonCompat(result)
+    x.DoubleField = result
     return nil
 }
 
@@ -4248,7 +4248,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = result
     return nil
 }
 
@@ -4258,7 +4258,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryFieldNonCompat(result)
+    x.BinaryField = result
     return nil
 }
 
@@ -4269,7 +4269,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumFieldNonCompat(result)
+    x.EnumField = result
     return nil
 }
 
@@ -4297,7 +4297,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListFieldNonCompat(result)
+    x.ListField = result
     return nil
 }
 
@@ -4325,7 +4325,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetFieldNonCompat(result)
+    x.SetField = result
     return nil
 }
 
@@ -4363,7 +4363,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapFieldNonCompat(result)
+    x.MapField = result
     return nil
 }
 
@@ -4374,7 +4374,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructFieldNonCompat(result)
+    x.StructField = &result
     return nil
 }
 
@@ -4385,7 +4385,7 @@ if err != nil {
     return err
 }
 
-    x.SetTerseUnionFieldNonCompat(result)
+    x.TerseUnionField = &result
     return nil
 }
 
@@ -4396,7 +4396,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionFieldNonCompat(result)
+    x.UnionField = &result
     return nil
 }
 
@@ -5509,7 +5509,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolFieldNonCompat(result)
+    x.BoolField = result
     return nil
 }
 
@@ -5520,7 +5520,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteFieldNonCompat(result)
+    x.ByteField = result
     return nil
 }
 
@@ -5530,7 +5530,7 @@ if err != nil {
     return err
 }
 
-    x.SetShortFieldNonCompat(result)
+    x.ShortField = result
     return nil
 }
 
@@ -5540,7 +5540,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntFieldNonCompat(result)
+    x.IntField = result
     return nil
 }
 
@@ -5550,7 +5550,7 @@ if err != nil {
     return err
 }
 
-    x.SetLongFieldNonCompat(result)
+    x.LongField = result
     return nil
 }
 
@@ -5560,7 +5560,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatFieldNonCompat(result)
+    x.FloatField = result
     return nil
 }
 
@@ -5570,7 +5570,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleFieldNonCompat(result)
+    x.DoubleField = result
     return nil
 }
 
@@ -5580,7 +5580,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = result
     return nil
 }
 
@@ -5590,7 +5590,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryFieldNonCompat(result)
+    x.BinaryField = result
     return nil
 }
 
@@ -5601,7 +5601,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumFieldNonCompat(result)
+    x.EnumField = result
     return nil
 }
 
@@ -5629,7 +5629,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListFieldNonCompat(result)
+    x.ListField = result
     return nil
 }
 
@@ -5657,7 +5657,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSetFieldNonCompat(result)
+    x.SetField = result
     return nil
 }
 
@@ -5695,7 +5695,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapFieldNonCompat(result)
+    x.MapField = result
     return nil
 }
 
@@ -5706,7 +5706,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructFieldNonCompat(result)
+    x.StructField = &result
     return nil
 }
 
@@ -6089,7 +6089,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    x.Field1 = result
     return nil
 }
 
@@ -6099,7 +6099,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2NonCompat(result)
+    x.Field2 = result
     return nil
 }
 
@@ -6109,7 +6109,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3NonCompat(result)
+    x.Field3 = result
     return nil
 }
 
@@ -6267,7 +6267,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    x.Field1 = result
     return nil
 }
 
@@ -6399,7 +6399,7 @@ if err != nil {
     return err
 }
 
-    x.SetMsgNonCompat(result)
+    x.Msg = result
     return nil
 }
 

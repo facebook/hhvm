@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntNonCompat(result)
+    x.MyInt = result
     return nil
 }
 

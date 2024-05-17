@@ -244,7 +244,7 @@ if err != nil {
     return err
 }
 
-    x.SetRedNonCompat(result)
+    x.Red = result
     return nil
 }
 
@@ -254,7 +254,7 @@ if err != nil {
     return err
 }
 
-    x.SetGreenNonCompat(result)
+    x.Green = result
     return nil
 }
 
@@ -264,7 +264,7 @@ if err != nil {
     return err
 }
 
-    x.SetBlueNonCompat(result)
+    x.Blue = result
     return nil
 }
 
@@ -274,7 +274,7 @@ if err != nil {
     return err
 }
 
-    x.SetAlphaNonCompat(result)
+    x.Alpha = result
     return nil
 }
 
@@ -647,7 +647,7 @@ if err != nil {
     return err
 }
 
-    x.SetColorNonCompat(result)
+    x.Color = &result
     return nil
 }
 
@@ -657,7 +657,7 @@ if err != nil {
     return err
 }
 
-    x.SetLicensePlateNonCompat(result)
+    x.LicensePlate = &result
     return nil
 }
 
@@ -667,7 +667,7 @@ if err != nil {
     return err
 }
 
-    x.SetDescriptionNonCompat(result)
+    x.Description = &result
     return nil
 }
 
@@ -677,7 +677,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = &result
     return nil
 }
 
@@ -687,7 +687,7 @@ if err != nil {
     return err
 }
 
-    x.SetHasACNonCompat(result)
+    x.HasAC = &result
     return nil
 }
 
@@ -1350,7 +1350,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -1360,7 +1360,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -1370,7 +1370,7 @@ if err != nil {
     return err
 }
 
-    x.SetAgeNonCompat(result)
+    x.Age = &result
     return nil
 }
 
@@ -1380,7 +1380,7 @@ if err != nil {
     return err
 }
 
-    x.SetAddressNonCompat(result)
+    x.Address = &result
     return nil
 }
 
@@ -1391,7 +1391,7 @@ if err != nil {
     return err
 }
 
-    x.SetFavoriteColorNonCompat(result)
+    x.FavoriteColor = &result
     return nil
 }
 
@@ -1419,7 +1419,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetFriendsNonCompat(result)
+    x.Friends = result
     return nil
 }
 
@@ -1429,7 +1429,7 @@ if err != nil {
     return err
 }
 
-    x.SetBestFriendNonCompat(result)
+    x.BestFriend = &result
     return nil
 }
 
@@ -1468,7 +1468,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPetNamesNonCompat(result)
+    x.PetNames = result
     return nil
 }
 
@@ -1479,7 +1479,7 @@ if err != nil {
 }
 result := Animal(enumResult)
 
-    x.SetAfraidOfAnimalNonCompat(result)
+    x.AfraidOfAnimal = &result
     return nil
 }
 
@@ -1508,7 +1508,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetVehiclesNonCompat(result)
+    x.Vehicles = result
     return nil
 }
 

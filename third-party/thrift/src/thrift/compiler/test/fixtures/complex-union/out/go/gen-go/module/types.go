@@ -408,7 +408,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntValueNonCompat(result)
+    x.IntValue = &result
     return nil
 }
 
@@ -436,7 +436,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIntListValueNonCompat(result)
+    x.IntListValue = result
     return nil
 }
 
@@ -464,7 +464,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetStringListValueNonCompat(result)
+    x.StringListValue = result
     return nil
 }
 
@@ -474,7 +474,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringValueNonCompat(result)
+    x.StringValue = &result
     return nil
 }
 
@@ -484,7 +484,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefValueNonCompat(result)
+    x.TypedefValue = result
     return nil
 }
 
@@ -494,7 +494,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringRefNonCompat(result)
+    x.StringRef = &result
     return nil
 }
 
@@ -831,7 +831,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIntListValueNonCompat(result)
+    x.IntListValue = result
     return nil
 }
 
@@ -859,7 +859,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetStringListValueNonCompat(result)
+    x.StringListValue = result
     return nil
 }
 
@@ -1080,7 +1080,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryDataNonCompat(result)
+    x.BinaryData = result
     return nil
 }
 
@@ -1090,7 +1090,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringDataNonCompat(result)
+    x.StringData = &result
     return nil
 }
 
@@ -1338,7 +1338,7 @@ if err != nil {
     return err
 }
 
-    x.SetStrValNonCompat(result)
+    x.StrVal = result
     return nil
 }
 
@@ -1348,7 +1348,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntValNonCompat(result)
+    x.IntVal = result
     return nil
 }
 
@@ -1358,7 +1358,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefValueNonCompat(result)
+    x.TypedefValue = result
     return nil
 }
 
@@ -1575,7 +1575,7 @@ if err != nil {
     return err
 }
 
-    x.SetV1NonCompat(result)
+    x.V1 = &result
     return nil
 }
 
@@ -1586,7 +1586,7 @@ if err != nil {
     return err
 }
 
-    x.SetV2NonCompat(result)
+    x.V2 = &result
     return nil
 }
 
@@ -1823,7 +1823,7 @@ if err != nil {
     return err
 }
 
-    x.SetThingOneNonCompat(result)
+    x.ThingOne = &result
     return nil
 }
 
@@ -1833,7 +1833,7 @@ if err != nil {
     return err
 }
 
-    x.SetThingTwoNonCompat(result)
+    x.ThingTwo = &result
     return nil
 }
 
@@ -2004,7 +2004,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNonCompat(result)
+    x.Num = result
     return nil
 }
 
@@ -2148,7 +2148,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 

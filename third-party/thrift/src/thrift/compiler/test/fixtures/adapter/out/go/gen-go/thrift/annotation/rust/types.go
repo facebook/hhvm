@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -710,7 +710,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -842,7 +842,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -1011,7 +1011,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetDerivesNonCompat(result)
+    x.Derives = result
     return nil
 }
 
@@ -1143,7 +1143,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnyhowToApplicationExnNonCompat(result)
+    x.AnyhowToApplicationExn = result
     return nil
 }
 

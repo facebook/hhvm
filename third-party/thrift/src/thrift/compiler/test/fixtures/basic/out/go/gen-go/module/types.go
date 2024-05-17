@@ -466,7 +466,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntFieldNonCompat(result)
+    x.MyIntField = result
     return nil
 }
 
@@ -476,7 +476,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyStringFieldNonCompat(result)
+    x.MyStringField = result
     return nil
 }
 
@@ -487,7 +487,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyDataFieldNonCompat(result)
+    x.MyDataField = &result
     return nil
 }
 
@@ -498,7 +498,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetMyEnumNonCompat(result)
+    x.MyEnum = result
     return nil
 }
 
@@ -508,7 +508,7 @@ if err != nil {
     return err
 }
 
-    x.SetOnewayNonCompat(result)
+    x.Oneway = result
     return nil
 }
 
@@ -518,7 +518,7 @@ if err != nil {
     return err
 }
 
-    x.SetReadonlyNonCompat(result)
+    x.Readonly = result
     return nil
 }
 
@@ -528,7 +528,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdempotentNonCompat(result)
+    x.Idempotent = result
     return nil
 }
 
@@ -556,7 +556,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetFloatSetNonCompat(result)
+    x.FloatSet = result
     return nil
 }
 
@@ -566,7 +566,7 @@ if err != nil {
     return err
 }
 
-    x.SetNoHackCodegenFieldNonCompat(result)
+    x.NoHackCodegenField = result
     return nil
 }
 
@@ -1047,7 +1047,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetMyEnumNonCompat(result)
+    x.MyEnum = &result
     return nil
 }
 
@@ -1058,7 +1058,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyStructNonCompat(result)
+    x.MyStruct = &result
     return nil
 }
 
@@ -1069,7 +1069,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyDataItemNonCompat(result)
+    x.MyDataItem = &result
     return nil
 }
 
@@ -1097,7 +1097,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetFloatSetNonCompat(result)
+    x.FloatSet = result
     return nil
 }
 
@@ -1312,7 +1312,7 @@ if err != nil {
     return err
 }
 
-    x.SetReservedFieldNonCompat(result)
+    x.ReservedField = result
     return nil
 }
 
@@ -1455,7 +1455,7 @@ if err != nil {
     return err
 }
 
-    x.SetReservedFieldNonCompat(result)
+    x.ReservedField = &result
     return nil
 }
 

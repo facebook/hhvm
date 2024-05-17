@@ -567,7 +567,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = &result
     return nil
 }
 
@@ -578,7 +578,7 @@ if err != nil {
     return err
 }
 
-    x.SetFNonCompat(result)
+    x.F = &result
     return nil
 }
 
@@ -589,7 +589,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 
@@ -873,7 +873,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1243,7 +1243,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1254,7 +1254,7 @@ if err != nil {
     return err
 }
 
-    x.SetFNonCompat(result)
+    x.F = &result
     return nil
 }
 
@@ -1265,7 +1265,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = &result
     return nil
 }
 
@@ -1276,7 +1276,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 

@@ -425,7 +425,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 
@@ -435,7 +435,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = result
     return nil
 }
 
@@ -463,7 +463,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetCNonCompat(result)
+    x.C = result
     return nil
 }
 
@@ -682,7 +682,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -693,7 +693,7 @@ if err != nil {
     return err
 }
 
-    x.SetBangNonCompat(result)
+    x.Bang = &result
     return nil
 }
 

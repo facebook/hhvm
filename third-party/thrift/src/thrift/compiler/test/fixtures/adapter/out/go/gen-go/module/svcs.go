@@ -240,7 +240,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg1NonCompat(result)
+    x.Arg1 = result
     return nil
 }
 
@@ -250,7 +250,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg2NonCompat(result)
+    x.Arg2 = result
     return nil
 }
 
@@ -261,7 +261,7 @@ if err != nil {
     return err
 }
 
-    x.SetArg3NonCompat(result)
+    x.Arg3 = &result
     return nil
 }
 
@@ -442,7 +442,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -873,7 +873,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1032,7 +1032,7 @@ if err != nil {
     return err
 }
 
-    x.SetArgNonCompat(result)
+    x.Arg = &result
     return nil
 }
 
@@ -1187,7 +1187,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 

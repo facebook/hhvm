@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeNonCompat(result)
+    x.Type = result
     return nil
 }
 

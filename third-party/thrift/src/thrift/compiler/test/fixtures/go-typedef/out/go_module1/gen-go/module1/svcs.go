@@ -204,7 +204,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlateNonCompat(result)
+    x.Plate = result
     return nil
 }
 
@@ -351,7 +351,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -498,7 +498,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlateNonCompat(result)
+    x.Plate = result
     return nil
 }
 
@@ -645,7 +645,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -792,7 +792,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlateNonCompat(result)
+    x.Plate = result
     return nil
 }
 
@@ -939,7 +939,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 

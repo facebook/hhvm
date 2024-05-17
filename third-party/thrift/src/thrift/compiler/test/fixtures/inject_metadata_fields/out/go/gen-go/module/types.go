@@ -69,7 +69,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedFieldNonCompat(result)
+    x.InjectedField = result
     return nil
 }
 
@@ -201,7 +201,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedFieldNonCompat(result)
+    x.InjectedField = result
     return nil
 }
 
@@ -369,7 +369,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedFieldNonCompat(result)
+    x.InjectedField = result
     return nil
 }
 
@@ -379,7 +379,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = result
     return nil
 }
 
@@ -654,7 +654,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedUnstructuredAnnotationFieldNonCompat(result)
+    x.InjectedUnstructuredAnnotationField = &result
     return nil
 }
 
@@ -664,7 +664,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedStructuredAnnotationFieldNonCompat(result)
+    x.InjectedStructuredAnnotationField = &result
     return nil
 }
 
@@ -674,7 +674,7 @@ if err != nil {
     return err
 }
 
-    x.SetInjectedFieldNonCompat(result)
+    x.InjectedField = result
     return nil
 }
 
@@ -684,7 +684,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringFieldNonCompat(result)
+    x.StringField = result
     return nil
 }
 

@@ -213,7 +213,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -381,7 +381,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -391,7 +391,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeHintNonCompat(result)
+    x.TypeHint = result
     return nil
 }
 
@@ -536,7 +536,7 @@ if err != nil {
     return err
 }
 
-    x.SetSerializeNonCompat(result)
+    x.Serialize = result
     return nil
 }
 

@@ -169,7 +169,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIncludedFieldNonCompat(result)
+    x.MyIncludedField = &result
     return nil
 }
 
@@ -180,7 +180,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyOtherIncludedFieldNonCompat(result)
+    x.MyOtherIncludedField = &result
     return nil
 }
 
@@ -190,7 +190,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIncludedIntNonCompat(result)
+    x.MyIncludedInt = result
     return nil
 }
 

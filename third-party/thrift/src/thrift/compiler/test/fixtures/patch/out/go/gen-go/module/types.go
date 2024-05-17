@@ -144,7 +144,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = result
     return nil
 }
 
@@ -154,7 +154,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = result
     return nil
 }
 
@@ -335,7 +335,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = result
     return nil
 }
 
@@ -345,7 +345,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = result
     return nil
 }
 
@@ -501,7 +501,7 @@ if err != nil {
     return err
 }
 
-    x.SetInnerOptionNonCompat(result)
+    x.InnerOption = result
     return nil
 }
 
@@ -753,7 +753,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption1NonCompat(result)
+    x.Option1 = &result
     return nil
 }
 
@@ -763,7 +763,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption2NonCompat(result)
+    x.Option2 = &result
     return nil
 }
 
@@ -774,7 +774,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption3NonCompat(result)
+    x.Option3 = &result
     return nil
 }
 
@@ -2480,7 +2480,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefaultNonCompat(result)
+    x.StructWithCustomDefault = &result
     return nil
 }
 
@@ -2490,7 +2490,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefaultNonCompat(result)
+    x.I32WithCustomDefault = result
     return nil
 }
 
@@ -2556,7 +2556,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapMapNonCompat(result)
+    x.MapMap = result
     return nil
 }
 
@@ -2612,7 +2612,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListMapNonCompat(result)
+    x.ListMap = result
     return nil
 }
 
@@ -2650,7 +2650,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetOptMapValNonCompat(result)
+    x.OptMapVal = result
     return nil
 }
 
@@ -2678,7 +2678,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetOptSetValNonCompat(result)
+    x.OptSetVal = result
     return nil
 }
 
@@ -2706,7 +2706,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptListValNonCompat(result)
+    x.OptListVal = result
     return nil
 }
 
@@ -2717,7 +2717,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructValNonCompat(result)
+    x.OptLateStructVal = &result
     return nil
 }
 
@@ -2728,7 +2728,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructValNonCompat(result)
+    x.OptStructVal = &result
     return nil
 }
 
@@ -2739,7 +2739,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetOptEnumValNonCompat(result)
+    x.OptEnumVal = &result
     return nil
 }
 
@@ -2749,7 +2749,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryValNonCompat(result)
+    x.OptBinaryVal = result
     return nil
 }
 
@@ -2759,7 +2759,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringValNonCompat(result)
+    x.OptStringVal = &result
     return nil
 }
 
@@ -2769,7 +2769,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleValNonCompat(result)
+    x.OptDoubleVal = &result
     return nil
 }
 
@@ -2779,7 +2779,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatValNonCompat(result)
+    x.OptFloatVal = &result
     return nil
 }
 
@@ -2789,7 +2789,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64ValNonCompat(result)
+    x.OptI64Val = &result
     return nil
 }
 
@@ -2799,7 +2799,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32ValNonCompat(result)
+    x.OptI32Val = &result
     return nil
 }
 
@@ -2809,7 +2809,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16ValNonCompat(result)
+    x.OptI16Val = &result
     return nil
 }
 
@@ -2820,7 +2820,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteValNonCompat(result)
+    x.OptByteVal = &result
     return nil
 }
 
@@ -2830,7 +2830,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolValNonCompat(result)
+    x.OptBoolVal = &result
     return nil
 }
 
@@ -2841,7 +2841,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructValNonCompat(result)
+    x.LateStructVal = &result
     return nil
 }
 
@@ -2852,7 +2852,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionValNonCompat(result)
+    x.UnionVal = &result
     return nil
 }
 
@@ -2863,7 +2863,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructValNonCompat(result)
+    x.StructVal = &result
     return nil
 }
 
@@ -2874,7 +2874,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumValNonCompat(result)
+    x.EnumVal = result
     return nil
 }
 
@@ -2884,7 +2884,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryValNonCompat(result)
+    x.BinaryVal = result
     return nil
 }
 
@@ -2894,7 +2894,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringValNonCompat(result)
+    x.StringVal = result
     return nil
 }
 
@@ -2904,7 +2904,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleValNonCompat(result)
+    x.DoubleVal = result
     return nil
 }
 
@@ -2914,7 +2914,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatValNonCompat(result)
+    x.FloatVal = result
     return nil
 }
 
@@ -2924,7 +2924,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64ValNonCompat(result)
+    x.I64Val = result
     return nil
 }
 
@@ -2934,7 +2934,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32ValNonCompat(result)
+    x.I32Val = result
     return nil
 }
 
@@ -2944,7 +2944,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16ValNonCompat(result)
+    x.I16Val = result
     return nil
 }
 
@@ -2955,7 +2955,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteValNonCompat(result)
+    x.ByteVal = result
     return nil
 }
 
@@ -2965,7 +2965,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolValNonCompat(result)
+    x.BoolVal = result
     return nil
 }
 
@@ -2976,7 +2976,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefaultNonCompat(result)
+    x.StructWithFieldCustomDefault = &result
     return nil
 }
 
@@ -3744,7 +3744,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetNodesNonCompat(result)
+    x.Nodes = result
     return nil
 }
 
@@ -3889,7 +3889,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoopNonCompat(result)
+    x.Loop = &result
     return nil
 }
 
@@ -4042,7 +4042,7 @@ if err != nil {
     return err
 }
 
-    x.SetBarNonCompat(result)
+    x.Bar = &result
     return nil
 }
 
@@ -4561,7 +4561,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetUniqueNonCompat(result)
+    x.Unique = result
     return nil
 }
 
@@ -4589,7 +4589,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetSharedConstNonCompat(result)
+    x.SharedConst = result
     return nil
 }
 
@@ -4617,7 +4617,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetSharedMustableNonCompat(result)
+    x.SharedMustable = result
     return nil
 }
 
@@ -4645,7 +4645,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptUniqueNonCompat(result)
+    x.OptUnique = result
     return nil
 }
 
@@ -4673,7 +4673,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptSharedConstNonCompat(result)
+    x.OptSharedConst = result
     return nil
 }
 
@@ -4701,7 +4701,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptSharedMustableNonCompat(result)
+    x.OptSharedMustable = result
     return nil
 }
 
@@ -4729,7 +4729,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptBoxNonCompat(result)
+    x.OptBox = result
     return nil
 }
 
@@ -5176,7 +5176,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -5186,7 +5186,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -5197,7 +5197,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -5208,7 +5208,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -5219,7 +5219,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -5229,7 +5229,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -5519,7 +5519,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = &result
     return nil
 }
 
@@ -5530,7 +5530,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = &result
     return nil
 }
 
@@ -5749,7 +5749,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = &result
     return nil
 }
 
@@ -5759,7 +5759,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = &result
     return nil
 }
 
@@ -5956,7 +5956,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -5966,7 +5966,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -6348,7 +6348,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -6358,7 +6358,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -6369,7 +6369,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -6380,7 +6380,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -6391,7 +6391,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -6401,7 +6401,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -6691,7 +6691,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = &result
     return nil
 }
 
@@ -6702,7 +6702,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = &result
     return nil
 }
 
@@ -6921,7 +6921,7 @@ if err != nil {
     return err
 }
 
-    x.SetData1NonCompat(result)
+    x.Data1 = &result
     return nil
 }
 
@@ -6931,7 +6931,7 @@ if err != nil {
     return err
 }
 
-    x.SetData2NonCompat(result)
+    x.Data2 = &result
     return nil
 }
 
@@ -7128,7 +7128,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -7138,7 +7138,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -7475,7 +7475,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -7485,7 +7485,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -7496,7 +7496,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -7507,7 +7507,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -7518,7 +7518,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -7747,7 +7747,7 @@ if err != nil {
     return err
 }
 
-    x.SetInnerOptionNonCompat(result)
+    x.InnerOption = &result
     return nil
 }
 
@@ -7931,7 +7931,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -7941,7 +7941,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -8278,7 +8278,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -8288,7 +8288,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -8299,7 +8299,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -8310,7 +8310,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -8321,7 +8321,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -8646,7 +8646,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption1NonCompat(result)
+    x.Option1 = &result
     return nil
 }
 
@@ -8657,7 +8657,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption2NonCompat(result)
+    x.Option2 = &result
     return nil
 }
 
@@ -8668,7 +8668,7 @@ if err != nil {
     return err
 }
 
-    x.SetOption3NonCompat(result)
+    x.Option3 = &result
     return nil
 }
 
@@ -8894,7 +8894,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -8904,7 +8904,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -9286,7 +9286,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -9296,7 +9296,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -9307,7 +9307,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -9318,7 +9318,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -9329,7 +9329,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -9339,7 +9339,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -9616,7 +9616,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -9626,7 +9626,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -9823,7 +9823,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -9833,7 +9833,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -10168,7 +10168,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -10178,7 +10178,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -10206,7 +10206,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -10234,7 +10234,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -10591,7 +10591,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -10601,7 +10601,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -10629,7 +10629,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -10657,7 +10657,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -11224,7 +11224,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -11234,7 +11234,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -11273,7 +11273,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = result
     return nil
 }
 
@@ -11311,7 +11311,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -11350,7 +11350,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchNonCompat(result)
+    x.Patch = result
     return nil
 }
 
@@ -11378,7 +11378,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -11416,7 +11416,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPutNonCompat(result)
+    x.Put = result
     return nil
 }
 
@@ -11894,7 +11894,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -11904,7 +11904,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -11960,7 +11960,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -12016,7 +12016,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -12665,7 +12665,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -12675,7 +12675,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -12714,7 +12714,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = result
     return nil
 }
 
@@ -12780,7 +12780,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -12819,7 +12819,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchNonCompat(result)
+    x.Patch = result
     return nil
 }
 
@@ -12847,7 +12847,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -12913,7 +12913,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPutNonCompat(result)
+    x.Put = result
     return nil
 }
 
@@ -13519,7 +13519,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -13529,7 +13529,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -13568,7 +13568,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = result
     return nil
 }
 
@@ -13606,7 +13606,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAddNonCompat(result)
+    x.Add = result
     return nil
 }
 
@@ -13645,7 +13645,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPatchNonCompat(result)
+    x.Patch = result
     return nil
 }
 
@@ -13673,7 +13673,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -13711,7 +13711,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPutNonCompat(result)
+    x.Put = result
     return nil
 }
 
@@ -15470,7 +15470,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefaultNonCompat(result)
+    x.StructWithCustomDefault = &result
     return nil
 }
 
@@ -15481,7 +15481,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefaultNonCompat(result)
+    x.I32WithCustomDefault = &result
     return nil
 }
 
@@ -15492,7 +15492,7 @@ if err != nil {
     return err
 }
 
-    x.SetMapMapNonCompat(result)
+    x.MapMap = &result
     return nil
 }
 
@@ -15503,7 +15503,7 @@ if err != nil {
     return err
 }
 
-    x.SetListMapNonCompat(result)
+    x.ListMap = &result
     return nil
 }
 
@@ -15514,7 +15514,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptMapValNonCompat(result)
+    x.OptMapVal = &result
     return nil
 }
 
@@ -15525,7 +15525,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptSetValNonCompat(result)
+    x.OptSetVal = &result
     return nil
 }
 
@@ -15536,7 +15536,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptListValNonCompat(result)
+    x.OptListVal = &result
     return nil
 }
 
@@ -15547,7 +15547,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructValNonCompat(result)
+    x.OptLateStructVal = &result
     return nil
 }
 
@@ -15558,7 +15558,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructValNonCompat(result)
+    x.OptStructVal = &result
     return nil
 }
 
@@ -15569,7 +15569,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptEnumValNonCompat(result)
+    x.OptEnumVal = &result
     return nil
 }
 
@@ -15580,7 +15580,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryValNonCompat(result)
+    x.OptBinaryVal = &result
     return nil
 }
 
@@ -15591,7 +15591,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringValNonCompat(result)
+    x.OptStringVal = &result
     return nil
 }
 
@@ -15602,7 +15602,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleValNonCompat(result)
+    x.OptDoubleVal = &result
     return nil
 }
 
@@ -15613,7 +15613,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatValNonCompat(result)
+    x.OptFloatVal = &result
     return nil
 }
 
@@ -15624,7 +15624,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64ValNonCompat(result)
+    x.OptI64Val = &result
     return nil
 }
 
@@ -15635,7 +15635,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32ValNonCompat(result)
+    x.OptI32Val = &result
     return nil
 }
 
@@ -15646,7 +15646,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16ValNonCompat(result)
+    x.OptI16Val = &result
     return nil
 }
 
@@ -15657,7 +15657,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteValNonCompat(result)
+    x.OptByteVal = &result
     return nil
 }
 
@@ -15668,7 +15668,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolValNonCompat(result)
+    x.OptBoolVal = &result
     return nil
 }
 
@@ -15679,7 +15679,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructValNonCompat(result)
+    x.LateStructVal = &result
     return nil
 }
 
@@ -15690,7 +15690,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionValNonCompat(result)
+    x.UnionVal = &result
     return nil
 }
 
@@ -15701,7 +15701,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructValNonCompat(result)
+    x.StructVal = &result
     return nil
 }
 
@@ -15712,7 +15712,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnumValNonCompat(result)
+    x.EnumVal = &result
     return nil
 }
 
@@ -15723,7 +15723,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryValNonCompat(result)
+    x.BinaryVal = &result
     return nil
 }
 
@@ -15734,7 +15734,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringValNonCompat(result)
+    x.StringVal = &result
     return nil
 }
 
@@ -15745,7 +15745,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleValNonCompat(result)
+    x.DoubleVal = &result
     return nil
 }
 
@@ -15756,7 +15756,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatValNonCompat(result)
+    x.FloatVal = &result
     return nil
 }
 
@@ -15767,7 +15767,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64ValNonCompat(result)
+    x.I64Val = &result
     return nil
 }
 
@@ -15778,7 +15778,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32ValNonCompat(result)
+    x.I32Val = &result
     return nil
 }
 
@@ -15789,7 +15789,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16ValNonCompat(result)
+    x.I16Val = &result
     return nil
 }
 
@@ -15800,7 +15800,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteValNonCompat(result)
+    x.ByteVal = &result
     return nil
 }
 
@@ -15811,7 +15811,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolValNonCompat(result)
+    x.BoolVal = &result
     return nil
 }
 
@@ -15822,7 +15822,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefaultNonCompat(result)
+    x.StructWithFieldCustomDefault = &result
     return nil
 }
 
@@ -18255,7 +18255,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefaultNonCompat(result)
+    x.StructWithCustomDefault = &result
     return nil
 }
 
@@ -18265,7 +18265,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32WithCustomDefaultNonCompat(result)
+    x.I32WithCustomDefault = &result
     return nil
 }
 
@@ -18331,7 +18331,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapMapNonCompat(result)
+    x.MapMap = result
     return nil
 }
 
@@ -18387,7 +18387,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetListMapNonCompat(result)
+    x.ListMap = result
     return nil
 }
 
@@ -18425,7 +18425,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetOptMapValNonCompat(result)
+    x.OptMapVal = result
     return nil
 }
 
@@ -18453,7 +18453,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetOptSetValNonCompat(result)
+    x.OptSetVal = result
     return nil
 }
 
@@ -18481,7 +18481,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptListValNonCompat(result)
+    x.OptListVal = result
     return nil
 }
 
@@ -18492,7 +18492,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptLateStructValNonCompat(result)
+    x.OptLateStructVal = &result
     return nil
 }
 
@@ -18503,7 +18503,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStructValNonCompat(result)
+    x.OptStructVal = &result
     return nil
 }
 
@@ -18514,7 +18514,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetOptEnumValNonCompat(result)
+    x.OptEnumVal = &result
     return nil
 }
 
@@ -18524,7 +18524,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBinaryValNonCompat(result)
+    x.OptBinaryVal = result
     return nil
 }
 
@@ -18534,7 +18534,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptStringValNonCompat(result)
+    x.OptStringVal = &result
     return nil
 }
 
@@ -18544,7 +18544,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptDoubleValNonCompat(result)
+    x.OptDoubleVal = &result
     return nil
 }
 
@@ -18554,7 +18554,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptFloatValNonCompat(result)
+    x.OptFloatVal = &result
     return nil
 }
 
@@ -18564,7 +18564,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI64ValNonCompat(result)
+    x.OptI64Val = &result
     return nil
 }
 
@@ -18574,7 +18574,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI32ValNonCompat(result)
+    x.OptI32Val = &result
     return nil
 }
 
@@ -18584,7 +18584,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptI16ValNonCompat(result)
+    x.OptI16Val = &result
     return nil
 }
 
@@ -18595,7 +18595,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptByteValNonCompat(result)
+    x.OptByteVal = &result
     return nil
 }
 
@@ -18605,7 +18605,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoolValNonCompat(result)
+    x.OptBoolVal = &result
     return nil
 }
 
@@ -18616,7 +18616,7 @@ if err != nil {
     return err
 }
 
-    x.SetLateStructValNonCompat(result)
+    x.LateStructVal = &result
     return nil
 }
 
@@ -18627,7 +18627,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionValNonCompat(result)
+    x.UnionVal = &result
     return nil
 }
 
@@ -18638,7 +18638,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructValNonCompat(result)
+    x.StructVal = &result
     return nil
 }
 
@@ -18649,7 +18649,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetEnumValNonCompat(result)
+    x.EnumVal = &result
     return nil
 }
 
@@ -18659,7 +18659,7 @@ if err != nil {
     return err
 }
 
-    x.SetBinaryValNonCompat(result)
+    x.BinaryVal = result
     return nil
 }
 
@@ -18669,7 +18669,7 @@ if err != nil {
     return err
 }
 
-    x.SetStringValNonCompat(result)
+    x.StringVal = &result
     return nil
 }
 
@@ -18679,7 +18679,7 @@ if err != nil {
     return err
 }
 
-    x.SetDoubleValNonCompat(result)
+    x.DoubleVal = &result
     return nil
 }
 
@@ -18689,7 +18689,7 @@ if err != nil {
     return err
 }
 
-    x.SetFloatValNonCompat(result)
+    x.FloatVal = &result
     return nil
 }
 
@@ -18699,7 +18699,7 @@ if err != nil {
     return err
 }
 
-    x.SetI64ValNonCompat(result)
+    x.I64Val = &result
     return nil
 }
 
@@ -18709,7 +18709,7 @@ if err != nil {
     return err
 }
 
-    x.SetI32ValNonCompat(result)
+    x.I32Val = &result
     return nil
 }
 
@@ -18719,7 +18719,7 @@ if err != nil {
     return err
 }
 
-    x.SetI16ValNonCompat(result)
+    x.I16Val = &result
     return nil
 }
 
@@ -18730,7 +18730,7 @@ if err != nil {
     return err
 }
 
-    x.SetByteValNonCompat(result)
+    x.ByteVal = &result
     return nil
 }
 
@@ -18740,7 +18740,7 @@ if err != nil {
     return err
 }
 
-    x.SetBoolValNonCompat(result)
+    x.BoolVal = &result
     return nil
 }
 
@@ -18751,7 +18751,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructWithFieldCustomDefaultNonCompat(result)
+    x.StructWithFieldCustomDefault = &result
     return nil
 }
 
@@ -19475,7 +19475,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -19485,7 +19485,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -19867,7 +19867,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -19877,7 +19877,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -19888,7 +19888,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -19899,7 +19899,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -19910,7 +19910,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -19920,7 +19920,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -20339,7 +20339,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -20349,7 +20349,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -20731,7 +20731,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -20741,7 +20741,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -20752,7 +20752,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -20763,7 +20763,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -20774,7 +20774,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -20784,7 +20784,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -21107,7 +21107,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -21117,7 +21117,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -21275,7 +21275,7 @@ if err != nil {
     return err
 }
 
-    x.SetNodesNonCompat(result)
+    x.Nodes = &result
     return nil
 }
 
@@ -21473,7 +21473,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetNodesNonCompat(result)
+    x.Nodes = result
     return nil
 }
 
@@ -21649,7 +21649,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -21659,7 +21659,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -22041,7 +22041,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -22051,7 +22051,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -22062,7 +22062,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -22073,7 +22073,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -22084,7 +22084,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -22094,7 +22094,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -22336,7 +22336,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoopNonCompat(result)
+    x.Loop = &result
     return nil
 }
 
@@ -22488,7 +22488,7 @@ if err != nil {
     return err
 }
 
-    x.SetLoopNonCompat(result)
+    x.Loop = &result
     return nil
 }
 
@@ -22672,7 +22672,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -22682,7 +22682,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -22875,7 +22875,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -22885,7 +22885,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -23082,7 +23082,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -23092,7 +23092,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -23474,7 +23474,7 @@ if err != nil {
     return err
 }
 
-    x.SetAssignNonCompat(result)
+    x.Assign = &result
     return nil
 }
 
@@ -23484,7 +23484,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -23495,7 +23495,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchPriorNonCompat(result)
+    x.PatchPrior = &result
     return nil
 }
 
@@ -23506,7 +23506,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnsureNonCompat(result)
+    x.Ensure = &result
     return nil
 }
 
@@ -23517,7 +23517,7 @@ if err != nil {
     return err
 }
 
-    x.SetPatchNonCompat(result)
+    x.Patch = &result
     return nil
 }
 
@@ -23527,7 +23527,7 @@ if err != nil {
     return err
 }
 
-    x.SetRemoveNonCompat(result)
+    x.Remove = result
     return nil
 }
 
@@ -23942,7 +23942,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -23952,7 +23952,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -23980,7 +23980,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -24008,7 +24008,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -24365,7 +24365,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -24375,7 +24375,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -24403,7 +24403,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -24431,7 +24431,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -24788,7 +24788,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAssignNonCompat(result)
+    x.Assign = result
     return nil
 }
 
@@ -24798,7 +24798,7 @@ if err != nil {
     return err
 }
 
-    x.SetClearNonCompat(result)
+    x.Clear = result
     return nil
 }
 
@@ -24826,7 +24826,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetPrependNonCompat(result)
+    x.Prepend = result
     return nil
 }
 
@@ -24854,7 +24854,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAppendNonCompat(result)
+    x.Append = result
     return nil
 }
 
@@ -25134,7 +25134,7 @@ if err != nil {
     return err
 }
 
-    x.SetUniqueNonCompat(result)
+    x.Unique = &result
     return nil
 }
 
@@ -25145,7 +25145,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptUniqueNonCompat(result)
+    x.OptUnique = &result
     return nil
 }
 
@@ -25156,7 +25156,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptBoxNonCompat(result)
+    x.OptBox = &result
     return nil
 }
 
@@ -25726,7 +25726,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetUniqueNonCompat(result)
+    x.Unique = result
     return nil
 }
 
@@ -25754,7 +25754,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetSharedConstNonCompat(result)
+    x.SharedConst = result
     return nil
 }
 
@@ -25782,7 +25782,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetSharedMustableNonCompat(result)
+    x.SharedMustable = result
     return nil
 }
 
@@ -25810,7 +25810,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptUniqueNonCompat(result)
+    x.OptUnique = result
     return nil
 }
 
@@ -25838,7 +25838,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptSharedConstNonCompat(result)
+    x.OptSharedConst = result
     return nil
 }
 
@@ -25866,7 +25866,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptSharedMustableNonCompat(result)
+    x.OptSharedMustable = result
     return nil
 }
 
@@ -25894,7 +25894,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetOptBoxNonCompat(result)
+    x.OptBox = result
     return nil
 }
 
@@ -26148,7 +26148,7 @@ if err != nil {
     return err
 }
 
-    x.SetVersionNonCompat(result)
+    x.Version = result
     return nil
 }
 
@@ -26158,7 +26158,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 

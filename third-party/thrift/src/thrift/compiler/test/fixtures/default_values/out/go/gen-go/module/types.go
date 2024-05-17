@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetIntValueNonCompat(result)
+    x.IntValue = result
     return nil
 }
 
@@ -425,7 +425,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnqualifiedIntegerNonCompat(result)
+    x.UnqualifiedInteger = result
     return nil
 }
 
@@ -435,7 +435,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalIntegerNonCompat(result)
+    x.OptionalInteger = &result
     return nil
 }
 
@@ -445,7 +445,7 @@ if err != nil {
     return err
 }
 
-    x.SetRequiredIntegerNonCompat(result)
+    x.RequiredInteger = result
     return nil
 }
 
@@ -456,7 +456,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnqualifiedStructNonCompat(result)
+    x.UnqualifiedStruct = &result
     return nil
 }
 
@@ -467,7 +467,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalStructNonCompat(result)
+    x.OptionalStruct = &result
     return nil
 }
 
@@ -478,7 +478,7 @@ if err != nil {
     return err
 }
 
-    x.SetRequiredStructNonCompat(result)
+    x.RequiredStruct = &result
     return nil
 }
 
@@ -940,7 +940,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnqualifiedIntegerNonCompat(result)
+    x.UnqualifiedInteger = result
     return nil
 }
 
@@ -950,7 +950,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalIntegerNonCompat(result)
+    x.OptionalInteger = &result
     return nil
 }
 
@@ -960,7 +960,7 @@ if err != nil {
     return err
 }
 
-    x.SetRequiredIntegerNonCompat(result)
+    x.RequiredInteger = result
     return nil
 }
 
@@ -971,7 +971,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnqualifiedStructNonCompat(result)
+    x.UnqualifiedStruct = &result
     return nil
 }
 
@@ -982,7 +982,7 @@ if err != nil {
     return err
 }
 
-    x.SetOptionalStructNonCompat(result)
+    x.OptionalStruct = &result
     return nil
 }
 
@@ -993,7 +993,7 @@ if err != nil {
     return err
 }
 
-    x.SetRequiredStructNonCompat(result)
+    x.RequiredStruct = &result
     return nil
 }
 

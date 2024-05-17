@@ -375,7 +375,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyExceptNonCompat(result)
+    x.MyExcept = &result
     return nil
 }
 
@@ -611,7 +611,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -753,7 +753,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -899,7 +899,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1041,7 +1041,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -1187,7 +1187,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1365,7 +1365,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -1375,7 +1375,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -1638,7 +1638,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -1648,7 +1648,7 @@ if err != nil {
     return err
 }
 
-    x.SetDataNonCompat(result)
+    x.Data = result
     return nil
 }
 
@@ -3498,7 +3498,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 

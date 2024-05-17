@@ -172,7 +172,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyIntFieldNonCompat(result)
+    x.MyIntField = result
     return nil
 }
 
@@ -183,7 +183,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyTransitiveFieldNonCompat(result)
+    x.MyTransitiveField = &result
     return nil
 }
 

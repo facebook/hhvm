@@ -103,7 +103,7 @@ if err != nil {
     return err
 }
 
-    x.SetInventoryIdNonCompat(result)
+    x.InventoryId = result
     return nil
 }
 
@@ -113,7 +113,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -294,7 +294,7 @@ if err != nil {
     return err
 }
 
-    x.SetInventoryIdNonCompat(result)
+    x.InventoryId = result
     return nil
 }
 
@@ -304,7 +304,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 

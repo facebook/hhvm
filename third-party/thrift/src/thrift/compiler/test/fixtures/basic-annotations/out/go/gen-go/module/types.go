@@ -219,7 +219,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -821,7 +821,7 @@ if err != nil {
     return err
 }
 
-    x.SetAbstractNameNonCompat(result)
+    x.AbstractName = result
     return nil
 }
 
@@ -831,7 +831,7 @@ if err != nil {
     return err
 }
 
-    x.SetMajorVerNonCompat(result)
+    x.MajorVer = result
     return nil
 }
 
@@ -841,7 +841,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnnotationWithQuoteNonCompat(result)
+    x.AnnotationWithQuote = result
     return nil
 }
 
@@ -851,7 +851,7 @@ if err != nil {
     return err
 }
 
-    x.SetClass_NonCompat(result)
+    x.Class_ = result
     return nil
 }
 
@@ -861,7 +861,7 @@ if err != nil {
     return err
 }
 
-    x.SetAnnotationWithTrailingCommaNonCompat(result)
+    x.AnnotationWithTrailingComma = result
     return nil
 }
 
@@ -871,7 +871,7 @@ if err != nil {
     return err
 }
 
-    x.SetEmptyAnnotationsNonCompat(result)
+    x.EmptyAnnotations = result
     return nil
 }
 
@@ -882,7 +882,7 @@ if err != nil {
 }
 result := MyEnum(enumResult)
 
-    x.SetMyEnumNonCompat(result)
+    x.MyEnum = result
     return nil
 }
 
@@ -892,7 +892,7 @@ if err != nil {
     return err
 }
 
-    x.SetCppTypeAnnotationNonCompat(result)
+    x.CppTypeAnnotation = result
     return nil
 }
 
@@ -903,7 +903,7 @@ if err != nil {
     return err
 }
 
-    x.SetMyUnionNonCompat(result)
+    x.MyUnion = &result
     return nil
 }
 
@@ -1183,7 +1183,7 @@ if err != nil {
     return err
 }
 
-    x.SetIdNonCompat(result)
+    x.Id = result
     return nil
 }
 
@@ -1193,7 +1193,7 @@ if err != nil {
     return err
 }
 
-    x.SetPasswordNonCompat(result)
+    x.Password = result
     return nil
 }
 

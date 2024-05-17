@@ -311,7 +311,7 @@ if err != nil {
     return err
 }
 
-    x.SetUriNonCompat(result)
+    x.Uri = &result
     return nil
 }
 
@@ -321,7 +321,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeHashPrefixSha2_256NonCompat(result)
+    x.TypeHashPrefixSha2_256 = result
     return nil
 }
 
@@ -331,7 +331,7 @@ if err != nil {
     return err
 }
 
-    x.SetScopedNameNonCompat(result)
+    x.ScopedName = &result
     return nil
 }
 
@@ -1282,7 +1282,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetBoolTypeNonCompat(result)
+    x.BoolType = &result
     return nil
 }
 
@@ -1293,7 +1293,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetByteTypeNonCompat(result)
+    x.ByteType = &result
     return nil
 }
 
@@ -1304,7 +1304,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI16TypeNonCompat(result)
+    x.I16Type = &result
     return nil
 }
 
@@ -1315,7 +1315,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI32TypeNonCompat(result)
+    x.I32Type = &result
     return nil
 }
 
@@ -1326,7 +1326,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetI64TypeNonCompat(result)
+    x.I64Type = &result
     return nil
 }
 
@@ -1337,7 +1337,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetFloatTypeNonCompat(result)
+    x.FloatType = &result
     return nil
 }
 
@@ -1348,7 +1348,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetDoubleTypeNonCompat(result)
+    x.DoubleType = &result
     return nil
 }
 
@@ -1359,7 +1359,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetStringTypeNonCompat(result)
+    x.StringType = &result
     return nil
 }
 
@@ -1370,7 +1370,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetBinaryTypeNonCompat(result)
+    x.BinaryType = &result
     return nil
 }
 
@@ -1381,7 +1381,7 @@ if err != nil {
     return err
 }
 
-    x.SetEnumTypeNonCompat(result)
+    x.EnumType = &result
     return nil
 }
 
@@ -1392,7 +1392,7 @@ if err != nil {
     return err
 }
 
-    x.SetStructTypeNonCompat(result)
+    x.StructType = &result
     return nil
 }
 
@@ -1403,7 +1403,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnionTypeNonCompat(result)
+    x.UnionType = &result
     return nil
 }
 
@@ -1414,7 +1414,7 @@ if err != nil {
     return err
 }
 
-    x.SetExceptionTypeNonCompat(result)
+    x.ExceptionType = &result
     return nil
 }
 
@@ -1425,7 +1425,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetListTypeNonCompat(result)
+    x.ListType = &result
     return nil
 }
 
@@ -1436,7 +1436,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetSetTypeNonCompat(result)
+    x.SetType = &result
     return nil
 }
 
@@ -1447,7 +1447,7 @@ if err != nil {
 }
 result := Void(enumResult)
 
-    x.SetMapTypeNonCompat(result)
+    x.MapType = &result
     return nil
 }
 
@@ -1458,7 +1458,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypedefTypeNonCompat(result)
+    x.TypedefType = &result
     return nil
 }
 

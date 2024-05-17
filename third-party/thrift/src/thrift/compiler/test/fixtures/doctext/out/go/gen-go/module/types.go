@@ -156,7 +156,7 @@ if err != nil {
     return err
 }
 
-    x.SetUselessFieldNonCompat(result)
+    x.UselessField = result
     return nil
 }
 
@@ -346,7 +346,7 @@ if err != nil {
     return err
 }
 
-    x.SetINonCompat(result)
+    x.I = &result
     return nil
 }
 
@@ -356,7 +356,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 
@@ -527,7 +527,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageNonCompat(result)
+    x.Message = result
     return nil
 }
 

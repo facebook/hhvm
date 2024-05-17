@@ -195,7 +195,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -205,7 +205,7 @@ if err != nil {
     return err
 }
 
-    x.SetTemplateNonCompat(result)
+    x.Template = result
     return nil
 }
 
@@ -351,7 +351,7 @@ if err != nil {
 }
 result := RefType(enumResult)
 
-    x.SetTypeNonCompat(result)
+    x.Type = result
     return nil
 }
 
@@ -483,7 +483,7 @@ if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.Value = result
     return nil
 }
 
@@ -615,7 +615,7 @@ if err != nil {
     return err
 }
 
-    x.SetRefNonCompat(result)
+    x.Ref = result
     return nil
 }
 
@@ -964,7 +964,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -974,7 +974,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdaptedTypeNonCompat(result)
+    x.AdaptedType = result
     return nil
 }
 
@@ -984,7 +984,7 @@ if err != nil {
     return err
 }
 
-    x.SetUnderlyingNameNonCompat(result)
+    x.UnderlyingName = result
     return nil
 }
 
@@ -994,7 +994,7 @@ if err != nil {
     return err
 }
 
-    x.SetExtraNamespaceNonCompat(result)
+    x.ExtraNamespace = result
     return nil
 }
 
@@ -1004,7 +1004,7 @@ if err != nil {
     return err
 }
 
-    x.SetMoveOnlyNonCompat(result)
+    x.MoveOnly = result
     return nil
 }
 
@@ -1188,7 +1188,7 @@ if err != nil {
     return err
 }
 
-    x.SetAtomicNonCompat(result)
+    x.Atomic = result
     return nil
 }
 
@@ -1648,7 +1648,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -1658,7 +1658,7 @@ if err != nil {
     return err
 }
 
-    x.SetNoinlineNonCompat(result)
+    x.Noinline = result
     return nil
 }
 
@@ -1877,7 +1877,7 @@ if err != nil {
 }
 result := EnumUnderlyingType(enumResult)
 
-    x.SetTypeNonCompat(result)
+    x.Type = result
     return nil
 }
 

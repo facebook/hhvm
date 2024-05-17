@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -199,7 +199,7 @@ if err != nil {
     return err
 }
 
-    x.SetTagNonCompat(result)
+    x.Tag = result
     return nil
 }
 

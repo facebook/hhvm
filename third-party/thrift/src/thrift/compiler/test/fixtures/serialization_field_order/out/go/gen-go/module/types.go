@@ -139,7 +139,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2NonCompat(result)
+    x.Field2 = result
     return nil
 }
 
@@ -149,7 +149,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3NonCompat(result)
+    x.Field3 = result
     return nil
 }
 
@@ -159,7 +159,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    x.Field1 = result
     return nil
 }
 
@@ -389,7 +389,7 @@ if err != nil {
     return err
 }
 
-    x.SetField2NonCompat(result)
+    x.Field2 = result
     return nil
 }
 
@@ -399,7 +399,7 @@ if err != nil {
     return err
 }
 
-    x.SetField3NonCompat(result)
+    x.Field3 = result
     return nil
 }
 
@@ -409,7 +409,7 @@ if err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    x.Field1 = result
     return nil
 }
 

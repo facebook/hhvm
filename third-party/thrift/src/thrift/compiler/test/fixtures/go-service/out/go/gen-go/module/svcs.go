@@ -644,7 +644,7 @@ if err != nil {
     return err
 }
 
-    x.SetRNonCompat(result)
+    x.R = &result
     return nil
 }
 
@@ -799,7 +799,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1032,7 +1032,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1262,7 +1262,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1491,7 +1491,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1720,7 +1720,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -1949,7 +1949,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -2178,7 +2178,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -2407,7 +2407,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -2636,7 +2636,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 
@@ -2907,7 +2907,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 
@@ -3161,7 +3161,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 
@@ -3415,7 +3415,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 
@@ -3625,7 +3625,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNeg2NonCompat(result)
+    x.NumNeg2 = result
     return nil
 }
 
@@ -3635,7 +3635,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNeg1NonCompat(result)
+    x.NumNeg1 = result
     return nil
 }
 
@@ -3645,7 +3645,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumPosNonCompat(result)
+    x.NumPos = result
     return nil
 }
 
@@ -3817,7 +3817,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -3959,7 +3959,7 @@ if err != nil {
     return err
 }
 
-    x.SetCtxNonCompat(result)
+    x.Ctx = result
     return nil
 }
 
@@ -4105,7 +4105,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -4283,7 +4283,7 @@ if err != nil {
     return err
 }
 
-    x.SetCtxNonCompat(result)
+    x.Ctx = result
     return nil
 }
 
@@ -4293,7 +4293,7 @@ if err != nil {
     return err
 }
 
-    x.SetCtx1NonCompat(result)
+    x.Ctx1 = result
     return nil
 }
 
@@ -4452,7 +4452,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -4594,7 +4594,7 @@ if err != nil {
     return err
 }
 
-    x.SetContextNonCompat(result)
+    x.Context = result
     return nil
 }
 
@@ -4740,7 +4740,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -4882,7 +4882,7 @@ if err != nil {
     return err
 }
 
-    x.SetOutNonCompat(result)
+    x.Out = result
     return nil
 }
 
@@ -5028,7 +5028,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -5206,7 +5206,7 @@ if err != nil {
     return err
 }
 
-    x.SetOutNonCompat(result)
+    x.Out = result
     return nil
 }
 
@@ -5216,7 +5216,7 @@ if err != nil {
     return err
 }
 
-    x.SetOut1NonCompat(result)
+    x.Out1 = result
     return nil
 }
 
@@ -5375,7 +5375,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -5517,7 +5517,7 @@ if err != nil {
     return err
 }
 
-    x.SetInNonCompat(result)
+    x.In = result
     return nil
 }
 
@@ -5663,7 +5663,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -5841,7 +5841,7 @@ if err != nil {
     return err
 }
 
-    x.SetInNonCompat(result)
+    x.In = result
     return nil
 }
 
@@ -5851,7 +5851,7 @@ if err != nil {
     return err
 }
 
-    x.SetIn1NonCompat(result)
+    x.In1 = result
     return nil
 }
 
@@ -6010,7 +6010,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -6152,7 +6152,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrNonCompat(result)
+    x.Err = result
     return nil
 }
 
@@ -6298,7 +6298,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 
@@ -6476,7 +6476,7 @@ if err != nil {
     return err
 }
 
-    x.SetErrNonCompat(result)
+    x.Err = result
     return nil
 }
 
@@ -6486,7 +6486,7 @@ if err != nil {
     return err
 }
 
-    x.SetErr1NonCompat(result)
+    x.Err1 = result
     return nil
 }
 
@@ -6645,7 +6645,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = &result
     return nil
 }
 

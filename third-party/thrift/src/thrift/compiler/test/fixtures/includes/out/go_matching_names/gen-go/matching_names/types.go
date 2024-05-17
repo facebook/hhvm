@@ -82,7 +82,7 @@ if err != nil {
     return err
 }
 
-    x.SetAlsoNonCompat(result)
+    x.Also = &result
     return nil
 }
 

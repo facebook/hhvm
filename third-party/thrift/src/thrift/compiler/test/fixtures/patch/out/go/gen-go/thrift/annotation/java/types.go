@@ -140,7 +140,7 @@ if err != nil {
     return err
 }
 
-    x.SetJavaAnnotationNonCompat(result)
+    x.JavaAnnotation = result
     return nil
 }
 
@@ -381,7 +381,7 @@ if err != nil {
     return err
 }
 
-    x.SetAdapterClassNameNonCompat(result)
+    x.AdapterClassName = result
     return nil
 }
 
@@ -391,7 +391,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeClassNameNonCompat(result)
+    x.TypeClassName = result
     return nil
 }
 
@@ -572,7 +572,7 @@ if err != nil {
     return err
 }
 
-    x.SetWrapperClassNameNonCompat(result)
+    x.WrapperClassName = result
     return nil
 }
 
@@ -582,7 +582,7 @@ if err != nil {
     return err
 }
 
-    x.SetTypeClassNameNonCompat(result)
+    x.TypeClassName = result
     return nil
 }
 

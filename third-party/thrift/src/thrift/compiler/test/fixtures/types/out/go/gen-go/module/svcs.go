@@ -187,7 +187,7 @@ if err != nil {
     return err
 }
 
-    x.SetMNonCompat(result)
+    x.M = result
     return nil
 }
 
@@ -334,7 +334,7 @@ if err != nil {
     return err
 }
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 
@@ -509,7 +509,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetRNonCompat(result)
+    x.R = result
     return nil
 }
 
@@ -706,7 +706,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetSuccessNonCompat(result)
+    x.Success = result
     return nil
 }
 

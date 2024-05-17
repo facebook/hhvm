@@ -530,7 +530,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetReasonableNonCompat(result)
+    x.Reasonable = result
     return nil
 }
 
@@ -541,7 +541,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetFineNonCompat(result)
+    x.Fine = result
     return nil
 }
 
@@ -552,7 +552,7 @@ if err != nil {
 }
 result := Metasyntactic(enumResult)
 
-    x.SetQuestionableNonCompat(result)
+    x.Questionable = result
     return nil
 }
 
@@ -580,7 +580,7 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetTagsNonCompat(result)
+    x.Tags = result
     return nil
 }
 
@@ -868,7 +868,7 @@ if err != nil {
 }
 result := MyEnum2(enumResult)
 
-    x.SetMe2_3NonCompat(result)
+    x.Me2_3 = result
     return nil
 }
 
@@ -879,7 +879,7 @@ if err != nil {
 }
 result := MyEnum3(enumResult)
 
-    x.SetMe3N3NonCompat(result)
+    x.Me3N3 = result
     return nil
 }
 
@@ -890,7 +890,7 @@ if err != nil {
 }
 result := MyEnum1(enumResult)
 
-    x.SetMe1T1NonCompat(result)
+    x.Me1T1 = result
     return nil
 }
 
@@ -901,7 +901,7 @@ if err != nil {
 }
 result := MyEnum1(enumResult)
 
-    x.SetMe1T2NonCompat(result)
+    x.Me1T2 = result
     return nil
 }
 

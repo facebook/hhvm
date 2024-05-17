@@ -539,7 +539,7 @@ if err != nil {
     return err
 }
 
-    x.SetWeeksNonCompat(result)
+    x.Weeks = result
     return nil
 }
 
@@ -549,7 +549,7 @@ if err != nil {
     return err
 }
 
-    x.SetTitleNonCompat(result)
+    x.Title = result
     return nil
 }
 
@@ -560,7 +560,7 @@ if err != nil {
 }
 result := Company(enumResult)
 
-    x.SetEmployerNonCompat(result)
+    x.Employer = &result
     return nil
 }
 
@@ -570,7 +570,7 @@ if err != nil {
     return err
 }
 
-    x.SetCompensationNonCompat(result)
+    x.Compensation = &result
     return nil
 }
 
@@ -580,7 +580,7 @@ if err != nil {
     return err
 }
 
-    x.SetSchoolNonCompat(result)
+    x.School = &result
     return nil
 }
 
@@ -812,7 +812,7 @@ if err != nil {
     return err
 }
 
-    x.SetMinNonCompat(result)
+    x.Min = result
     return nil
 }
 
@@ -822,7 +822,7 @@ if err != nil {
     return err
 }
 
-    x.SetMaxNonCompat(result)
+    x.Max = result
     return nil
 }
 
@@ -1003,7 +1003,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 
@@ -1013,7 +1013,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = result
     return nil
 }
 
@@ -1297,7 +1297,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 
@@ -1307,7 +1307,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = result
     return nil
 }
 
@@ -1318,7 +1318,7 @@ if err != nil {
     return err
 }
 
-    x.SetCNonCompat(result)
+    x.C = &result
     return nil
 }
 
@@ -1346,7 +1346,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetDNonCompat(result)
+    x.D = result
     return nil
 }
 
@@ -1609,7 +1609,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 
@@ -1619,7 +1619,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = result
     return nil
 }
 
@@ -1630,7 +1630,7 @@ if err != nil {
     return err
 }
 
-    x.SetCNonCompat(result)
+    x.C = &result
     return nil
 }
 
@@ -1890,7 +1890,7 @@ if err != nil {
     return err
 }
 
-    x.SetANonCompat(result)
+    x.A = result
     return nil
 }
 
@@ -1900,7 +1900,7 @@ if err != nil {
     return err
 }
 
-    x.SetBNonCompat(result)
+    x.B = &result
     return nil
 }
 
@@ -1911,7 +1911,7 @@ if err != nil {
     return err
 }
 
-    x.SetCNonCompat(result)
+    x.C = &result
     return nil
 }
 
@@ -2135,7 +2135,7 @@ if err != nil {
     return err
 }
 
-    x.SetINonCompat(result)
+    x.I = &result
     return nil
 }
 
@@ -2145,7 +2145,7 @@ if err != nil {
     return err
 }
 
-    x.SetDNonCompat(result)
+    x.D = &result
     return nil
 }
 
@@ -2468,7 +2468,7 @@ if err != nil {
     return err
 }
 
-    x.SetINonCompat(result)
+    x.I = &result
     return nil
 }
 
@@ -2478,7 +2478,7 @@ if err != nil {
     return err
 }
 
-    x.SetDNonCompat(result)
+    x.D = &result
     return nil
 }
 
@@ -2489,7 +2489,7 @@ if err != nil {
     return err
 }
 
-    x.SetSNonCompat(result)
+    x.S = &result
     return nil
 }
 
@@ -2500,7 +2500,7 @@ if err != nil {
     return err
 }
 
-    x.SetUNonCompat(result)
+    x.U = &result
     return nil
 }
 

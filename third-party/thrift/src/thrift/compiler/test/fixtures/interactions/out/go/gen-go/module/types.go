@@ -67,7 +67,7 @@ if err != nil {
     return err
 }
 
-    x.SetMessageNonCompat(result)
+    x.Message = result
     return nil
 }
 

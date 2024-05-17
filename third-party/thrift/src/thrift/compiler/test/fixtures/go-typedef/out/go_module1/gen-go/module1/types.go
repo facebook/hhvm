@@ -628,7 +628,7 @@ if err != nil {
     return err
 }
 
-    x.SetPlateNonCompat(result)
+    x.Plate = result
     return nil
 }
 
@@ -638,7 +638,7 @@ if err != nil {
     return err
 }
 
-    x.SetPreviousPlateNonCompat(result)
+    x.PreviousPlate = &result
     return nil
 }
 
@@ -648,7 +648,7 @@ if err != nil {
     return err
 }
 
-    x.SetFirstPlateNonCompat(result)
+    x.FirstPlate = &result
     return nil
 }
 
@@ -658,7 +658,7 @@ if err != nil {
     return err
 }
 
-    x.SetYearNonCompat(result)
+    x.Year = result
     return nil
 }
 
@@ -668,7 +668,7 @@ if err != nil {
     return err
 }
 
-    x.SetDriversNonCompat(result)
+    x.Drivers = result
     return nil
 }
 
@@ -696,7 +696,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAccessoriesNonCompat(result)
+    x.Accessories = result
     return nil
 }
 
@@ -734,7 +734,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetPartNamesNonCompat(result)
+    x.PartNames = result
     return nil
 }
 
@@ -988,7 +988,7 @@ if err != nil {
     return err
 }
 
-    x.SetNumNonCompat(result)
+    x.Num = result
     return nil
 }
 
@@ -998,7 +998,7 @@ if err != nil {
     return err
 }
 
-    x.SetStrvalNonCompat(result)
+    x.Strval = result
     return nil
 }
 
@@ -1198,7 +1198,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetMapvalNonCompat(result)
+    x.Mapval = result
     return nil
 }
 
@@ -1392,7 +1392,7 @@ if err != nil {
     return err
 }
 
-    x.SetAutomobileNonCompat(result)
+    x.Automobile = &result
     return nil
 }
 
@@ -1402,7 +1402,7 @@ if err != nil {
     return err
 }
 
-    x.SetCarNonCompat(result)
+    x.Car = &result
     return nil
 }
 
@@ -1657,7 +1657,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetAutomobilesNonCompat(result)
+    x.Automobiles = result
     return nil
 }
 
@@ -1685,7 +1685,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetCarsNonCompat(result)
+    x.Cars = result
     return nil
 }
 

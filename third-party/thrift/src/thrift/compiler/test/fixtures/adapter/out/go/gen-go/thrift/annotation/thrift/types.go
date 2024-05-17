@@ -288,7 +288,7 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetIdsNonCompat(result)
+    x.Ids = result
     return nil
 }
 
@@ -326,7 +326,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetIdRangesNonCompat(result)
+    x.IdRanges = result
     return nil
 }
 
@@ -471,7 +471,7 @@ if err != nil {
     return err
 }
 
-    x.SetFieldNameNonCompat(result)
+    x.FieldName = result
     return nil
 }
 
@@ -1041,7 +1041,7 @@ if err != nil {
     return err
 }
 
-    x.SetNameNonCompat(result)
+    x.Name = result
     return nil
 }
 
@@ -1319,7 +1319,7 @@ if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.Value = result
     return nil
 }
 
@@ -1452,7 +1452,7 @@ if err != nil {
 }
 result := RpcPriority(enumResult)
 
-    x.SetLevelNonCompat(result)
+    x.Level = result
     return nil
 }
 
@@ -1638,7 +1638,7 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetItemsNonCompat(result)
+    x.Items = result
     return nil
 }
 

@@ -928,7 +928,7 @@ void logSettings() {
   StructuredLog::log("hhvm_runtime_options", ent);
 }
 
-InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ProcessInit);
+InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ServerInit);
 
 }
 

@@ -47,7 +47,7 @@ type MyRootChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyRootChannelClientInterface = &MyRootChannelClient{}
+var _ MyRootChannelClientInterface = (*MyRootChannelClient)(nil)
 
 func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootChannelClient {
     return &MyRootChannelClient{
@@ -64,8 +64,8 @@ type MyRootClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyRootClientInterface = &MyRootClient{}
-var _ MyRootContextClientInterface = &MyRootClient{}
+var _ MyRootClientInterface = (*MyRootClient)(nil)
+var _ MyRootContextClientInterface = (*MyRootClient)(nil)
 
 func NewMyRootClient(prot thrift.Protocol) *MyRootClient {
     return &MyRootClient{
@@ -101,7 +101,7 @@ func (c *MyRootClient) DoRootContext(ctx context.Context) (error) {
 type reqMyRootDoRoot struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyRootDoRoot{}
+var _ thrift.Struct = (*reqMyRootDoRoot)(nil)
 
 // Deprecated: MyRootDoRootArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
@@ -176,8 +176,8 @@ func (x *reqMyRootDoRoot) String() string {
 type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyRootDoRoot{}
-var _ thrift.WritableResult = &respMyRootDoRoot{}
+var _ thrift.Struct = (*respMyRootDoRoot)(nil)
+var _ thrift.WritableResult = (*respMyRootDoRoot)(nil)
 
 // Deprecated: MyRootDoRootResultDeprecated is deprecated, since it is supposed to be internal.
 type MyRootDoRootResultDeprecated = respMyRootDoRoot
@@ -261,7 +261,7 @@ type MyRootProcessor struct {
     handler            MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyRootProcessor{}
+var _ thrift.ProcessorContext = (*MyRootProcessor)(nil)
 
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     p := &MyRootProcessor{
@@ -307,7 +307,7 @@ type procFuncMyRootDoRoot struct {
     handler MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyRootDoRoot{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyRootDoRoot)(nil)
 
 func (p *procFuncMyRootDoRoot) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyRootDoRoot()
@@ -386,7 +386,7 @@ type MyNodeChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyNodeChannelClientInterface = &MyNodeChannelClient{}
+var _ MyNodeChannelClientInterface = (*MyNodeChannelClient)(nil)
 
 func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeChannelClient {
     return &MyNodeChannelClient{
@@ -406,8 +406,8 @@ type MyNodeClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyNodeClientInterface = &MyNodeClient{}
-var _ MyNodeContextClientInterface = &MyNodeClient{}
+var _ MyNodeClientInterface = (*MyNodeClient)(nil)
+var _ MyNodeContextClientInterface = (*MyNodeClient)(nil)
 
 func NewMyNodeClient(prot thrift.Protocol) *MyNodeClient {
     return &MyNodeClient{
@@ -444,7 +444,7 @@ func (c *MyNodeClient) DoMidContext(ctx context.Context) (error) {
 type reqMyNodeDoMid struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyNodeDoMid{}
+var _ thrift.Struct = (*reqMyNodeDoMid)(nil)
 
 // Deprecated: MyNodeDoMidArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyNodeDoMidArgsDeprecated = reqMyNodeDoMid
@@ -519,8 +519,8 @@ func (x *reqMyNodeDoMid) String() string {
 type respMyNodeDoMid struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyNodeDoMid{}
-var _ thrift.WritableResult = &respMyNodeDoMid{}
+var _ thrift.Struct = (*respMyNodeDoMid)(nil)
+var _ thrift.WritableResult = (*respMyNodeDoMid)(nil)
 
 // Deprecated: MyNodeDoMidResultDeprecated is deprecated, since it is supposed to be internal.
 type MyNodeDoMidResultDeprecated = respMyNodeDoMid
@@ -603,7 +603,7 @@ type MyNodeProcessor struct {
     *MyRootProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyNodeProcessor{}
+var _ thrift.ProcessorContext = (*MyNodeProcessor)(nil)
 
 func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     p := &MyNodeProcessor{
@@ -624,7 +624,7 @@ type procFuncMyNodeDoMid struct {
     handler MyNode
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyNodeDoMid{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyNodeDoMid)(nil)
 
 func (p *procFuncMyNodeDoMid) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyNodeDoMid()
@@ -703,7 +703,7 @@ type MyLeafChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyLeafChannelClientInterface = &MyLeafChannelClient{}
+var _ MyLeafChannelClientInterface = (*MyLeafChannelClient)(nil)
 
 func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafChannelClient {
     return &MyLeafChannelClient{
@@ -723,8 +723,8 @@ type MyLeafClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyLeafClientInterface = &MyLeafClient{}
-var _ MyLeafContextClientInterface = &MyLeafClient{}
+var _ MyLeafClientInterface = (*MyLeafClient)(nil)
+var _ MyLeafContextClientInterface = (*MyLeafClient)(nil)
 
 func NewMyLeafClient(prot thrift.Protocol) *MyLeafClient {
     return &MyLeafClient{
@@ -761,7 +761,7 @@ func (c *MyLeafClient) DoLeafContext(ctx context.Context) (error) {
 type reqMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyLeafDoLeaf{}
+var _ thrift.Struct = (*reqMyLeafDoLeaf)(nil)
 
 // Deprecated: MyLeafDoLeafArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
@@ -836,8 +836,8 @@ func (x *reqMyLeafDoLeaf) String() string {
 type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyLeafDoLeaf{}
-var _ thrift.WritableResult = &respMyLeafDoLeaf{}
+var _ thrift.Struct = (*respMyLeafDoLeaf)(nil)
+var _ thrift.WritableResult = (*respMyLeafDoLeaf)(nil)
 
 // Deprecated: MyLeafDoLeafResultDeprecated is deprecated, since it is supposed to be internal.
 type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
@@ -920,7 +920,7 @@ type MyLeafProcessor struct {
     *MyNodeProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyLeafProcessor{}
+var _ thrift.ProcessorContext = (*MyLeafProcessor)(nil)
 
 func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p := &MyLeafProcessor{
@@ -941,7 +941,7 @@ type procFuncMyLeafDoLeaf struct {
     handler MyLeaf
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyLeafDoLeaf{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyLeafDoLeaf)(nil)
 
 func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyLeafDoLeaf()

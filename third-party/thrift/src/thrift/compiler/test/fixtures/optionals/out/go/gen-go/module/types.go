@@ -92,7 +92,7 @@ type Color struct {
     Alpha float64 `thrift:"alpha,4" json:"alpha" db:"alpha"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Color{}
+var _ thrift.Struct = (*Color)(nil)
 
 func NewColor() *Color {
     return (&Color{}).
@@ -402,7 +402,7 @@ type Vehicle struct {
     HasAC *bool `thrift:"hasAC,5,optional" json:"hasAC,omitempty" db:"hasAC"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Vehicle{}
+var _ thrift.Struct = (*Vehicle)(nil)
 
 func NewVehicle() *Vehicle {
     return (&Vehicle{}).
@@ -857,7 +857,7 @@ type Person struct {
     Vehicles []*Vehicle `thrift:"vehicles,10,optional" json:"vehicles,omitempty" db:"vehicles"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Person{}
+var _ thrift.Struct = (*Person)(nil)
 
 func NewPerson() *Person {
     return (&Person{}).

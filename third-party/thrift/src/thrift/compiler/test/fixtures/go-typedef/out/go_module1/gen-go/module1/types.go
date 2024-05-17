@@ -288,7 +288,7 @@ type Automobile struct {
     PartNames map[int32]*CarPartName `thrift:"PartNames,7" json:"PartNames" db:"PartNames"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Automobile{}
+var _ thrift.Struct = (*Automobile)(nil)
 
 func NewAutomobile() *Automobile {
     return (&Automobile{}).
@@ -906,7 +906,7 @@ type MapKey struct {
     Strval string `thrift:"strval,2" json:"strval" db:"strval"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MapKey{}
+var _ thrift.Struct = (*MapKey)(nil)
 
 func NewMapKey() *MapKey {
     return (&MapKey{}).
@@ -1096,7 +1096,7 @@ type MapContainer struct {
     Mapval map[MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MapContainer{}
+var _ thrift.Struct = (*MapContainer)(nil)
 
 func NewMapContainer() *MapContainer {
     return (&MapContainer{}).
@@ -1284,7 +1284,7 @@ type Pair struct {
     Car *Car `thrift:"car,2" json:"car" db:"car"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Pair{}
+var _ thrift.Struct = (*Pair)(nil)
 
 func NewPair() *Pair {
     return (&Pair{}).
@@ -1517,7 +1517,7 @@ type Collection struct {
     Cars []*Car `thrift:"cars,2" json:"cars" db:"cars"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Collection{}
+var _ thrift.Struct = (*Collection)(nil)
 
 func NewCollection() *Collection {
     return (&Collection{}).

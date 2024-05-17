@@ -22,7 +22,7 @@ type Foo struct {
     Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Foo{}
+var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
     return (&Foo{}).
@@ -272,7 +272,7 @@ type Foo2 struct {
     Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Foo2{}
+var _ thrift.Struct = (*Foo2)(nil)
 
 func NewFoo2() *Foo2 {
     return (&Foo2{}).

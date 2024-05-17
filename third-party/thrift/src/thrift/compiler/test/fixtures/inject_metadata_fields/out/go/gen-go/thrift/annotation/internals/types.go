@@ -20,7 +20,7 @@ type InjectMetadataFields struct {
     Type string `thrift:"type,1" json:"type" db:"type"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InjectMetadataFields{}
+var _ thrift.Struct = (*InjectMetadataFields)(nil)
 
 func NewInjectMetadataFields() *InjectMetadataFields {
     return (&InjectMetadataFields{}).

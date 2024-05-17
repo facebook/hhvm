@@ -59,7 +59,7 @@ type NestedContainersChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ NestedContainersChannelClientInterface = &NestedContainersChannelClient{}
+var _ NestedContainersChannelClientInterface = (*NestedContainersChannelClient)(nil)
 
 func NewNestedContainersChannelClient(channel thrift.RequestChannel) *NestedContainersChannelClient {
     return &NestedContainersChannelClient{
@@ -76,8 +76,8 @@ type NestedContainersClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ NestedContainersClientInterface = &NestedContainersClient{}
-var _ NestedContainersContextClientInterface = &NestedContainersClient{}
+var _ NestedContainersClientInterface = (*NestedContainersClient)(nil)
+var _ NestedContainersContextClientInterface = (*NestedContainersClient)(nil)
 
 func NewNestedContainersClient(prot thrift.Protocol) *NestedContainersClient {
     return &NestedContainersClient{
@@ -195,7 +195,7 @@ type reqNestedContainersMapList struct {
     Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqNestedContainersMapList{}
+var _ thrift.Struct = (*reqNestedContainersMapList)(nil)
 
 // Deprecated: NestedContainersMapListArgsDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersMapListArgsDeprecated = reqNestedContainersMapList
@@ -411,8 +411,8 @@ func (x *reqNestedContainersMapList) String() string {
 type respNestedContainersMapList struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respNestedContainersMapList{}
-var _ thrift.WritableResult = &respNestedContainersMapList{}
+var _ thrift.Struct = (*respNestedContainersMapList)(nil)
+var _ thrift.WritableResult = (*respNestedContainersMapList)(nil)
 
 // Deprecated: NestedContainersMapListResultDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersMapListResultDeprecated = respNestedContainersMapList
@@ -492,7 +492,7 @@ type reqNestedContainersMapSet struct {
     Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqNestedContainersMapSet{}
+var _ thrift.Struct = (*reqNestedContainersMapSet)(nil)
 
 // Deprecated: NestedContainersMapSetArgsDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersMapSetArgsDeprecated = reqNestedContainersMapSet
@@ -708,8 +708,8 @@ func (x *reqNestedContainersMapSet) String() string {
 type respNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respNestedContainersMapSet{}
-var _ thrift.WritableResult = &respNestedContainersMapSet{}
+var _ thrift.Struct = (*respNestedContainersMapSet)(nil)
+var _ thrift.WritableResult = (*respNestedContainersMapSet)(nil)
 
 // Deprecated: NestedContainersMapSetResultDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersMapSetResultDeprecated = respNestedContainersMapSet
@@ -789,7 +789,7 @@ type reqNestedContainersListMap struct {
     Foo []map[int32]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqNestedContainersListMap{}
+var _ thrift.Struct = (*reqNestedContainersListMap)(nil)
 
 // Deprecated: NestedContainersListMapArgsDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersListMapArgsDeprecated = reqNestedContainersListMap
@@ -1005,8 +1005,8 @@ func (x *reqNestedContainersListMap) String() string {
 type respNestedContainersListMap struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respNestedContainersListMap{}
-var _ thrift.WritableResult = &respNestedContainersListMap{}
+var _ thrift.Struct = (*respNestedContainersListMap)(nil)
+var _ thrift.WritableResult = (*respNestedContainersListMap)(nil)
 
 // Deprecated: NestedContainersListMapResultDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersListMapResultDeprecated = respNestedContainersListMap
@@ -1086,7 +1086,7 @@ type reqNestedContainersListSet struct {
     Foo [][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqNestedContainersListSet{}
+var _ thrift.Struct = (*reqNestedContainersListSet)(nil)
 
 // Deprecated: NestedContainersListSetArgsDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersListSetArgsDeprecated = reqNestedContainersListSet
@@ -1285,8 +1285,8 @@ func (x *reqNestedContainersListSet) String() string {
 type respNestedContainersListSet struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respNestedContainersListSet{}
-var _ thrift.WritableResult = &respNestedContainersListSet{}
+var _ thrift.Struct = (*respNestedContainersListSet)(nil)
+var _ thrift.WritableResult = (*respNestedContainersListSet)(nil)
 
 // Deprecated: NestedContainersListSetResultDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersListSetResultDeprecated = respNestedContainersListSet
@@ -1366,7 +1366,7 @@ type reqNestedContainersTurtles struct {
     Foo [][]map[int32]map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqNestedContainersTurtles{}
+var _ thrift.Struct = (*reqNestedContainersTurtles)(nil)
 
 // Deprecated: NestedContainersTurtlesArgsDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersTurtlesArgsDeprecated = reqNestedContainersTurtles
@@ -1686,8 +1686,8 @@ func (x *reqNestedContainersTurtles) String() string {
 type respNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respNestedContainersTurtles{}
-var _ thrift.WritableResult = &respNestedContainersTurtles{}
+var _ thrift.Struct = (*respNestedContainersTurtles)(nil)
+var _ thrift.WritableResult = (*respNestedContainersTurtles)(nil)
 
 // Deprecated: NestedContainersTurtlesResultDeprecated is deprecated, since it is supposed to be internal.
 type NestedContainersTurtlesResultDeprecated = respNestedContainersTurtles
@@ -1771,7 +1771,7 @@ type NestedContainersProcessor struct {
     handler            NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &NestedContainersProcessor{}
+var _ thrift.ProcessorContext = (*NestedContainersProcessor)(nil)
 
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
     p := &NestedContainersProcessor{
@@ -1825,7 +1825,7 @@ type procFuncNestedContainersMapList struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapList{}
+var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersMapList)(nil)
 
 func (p *procFuncNestedContainersMapList) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapList()
@@ -1876,7 +1876,7 @@ type procFuncNestedContainersMapSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapSet{}
+var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersMapSet)(nil)
 
 func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapSet()
@@ -1927,7 +1927,7 @@ type procFuncNestedContainersListMap struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListMap{}
+var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersListMap)(nil)
 
 func (p *procFuncNestedContainersListMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListMap()
@@ -1978,7 +1978,7 @@ type procFuncNestedContainersListSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListSet{}
+var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersListSet)(nil)
 
 func (p *procFuncNestedContainersListSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListSet()
@@ -2029,7 +2029,7 @@ type procFuncNestedContainersTurtles struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersTurtles{}
+var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersTurtles)(nil)
 
 func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersTurtles()

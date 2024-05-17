@@ -20,7 +20,7 @@ type CustomException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CustomException{}
+var _ thrift.Struct = (*CustomException)(nil)
 
 func NewCustomException() *CustomException {
     return (&CustomException{}).

@@ -47,7 +47,7 @@ type TestServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ TestServiceChannelClientInterface = &TestServiceChannelClient{}
+var _ TestServiceChannelClientInterface = (*TestServiceChannelClient)(nil)
 
 func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceChannelClient {
     return &TestServiceChannelClient{
@@ -64,8 +64,8 @@ type TestServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ TestServiceClientInterface = &TestServiceClient{}
-var _ TestServiceContextClientInterface = &TestServiceClient{}
+var _ TestServiceClientInterface = (*TestServiceClient)(nil)
+var _ TestServiceContextClientInterface = (*TestServiceClient)(nil)
 
 func NewTestServiceClient(prot thrift.Protocol) *TestServiceClient {
     return &TestServiceClient{
@@ -103,7 +103,7 @@ type reqTestServiceInit struct {
     Int1 int64 `thrift:"int1,1" json:"int1" db:"int1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqTestServiceInit{}
+var _ thrift.Struct = (*reqTestServiceInit)(nil)
 
 // Deprecated: TestServiceInitArgsDeprecated is deprecated, since it is supposed to be internal.
 type TestServiceInitArgsDeprecated = reqTestServiceInit
@@ -237,8 +237,8 @@ type respTestServiceInit struct {
     Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respTestServiceInit{}
-var _ thrift.WritableResult = &respTestServiceInit{}
+var _ thrift.Struct = (*respTestServiceInit)(nil)
+var _ thrift.WritableResult = (*respTestServiceInit)(nil)
 
 // Deprecated: TestServiceInitResultDeprecated is deprecated, since it is supposed to be internal.
 type TestServiceInitResultDeprecated = respTestServiceInit
@@ -395,7 +395,7 @@ type TestServiceProcessor struct {
     handler            TestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &TestServiceProcessor{}
+var _ thrift.ProcessorContext = (*TestServiceProcessor)(nil)
 
 func NewTestServiceProcessor(handler TestService) *TestServiceProcessor {
     p := &TestServiceProcessor{
@@ -441,7 +441,7 @@ type procFuncTestServiceInit struct {
     handler TestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncTestServiceInit{}
+var _ thrift.ProcessorFunctionContext = (*procFuncTestServiceInit)(nil)
 
 func (p *procFuncTestServiceInit) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqTestServiceInit()

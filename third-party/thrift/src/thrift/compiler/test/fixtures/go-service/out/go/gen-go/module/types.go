@@ -20,7 +20,7 @@ type GetEntityRequest struct {
     Id string `thrift:"id,1" json:"id" db:"id"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &GetEntityRequest{}
+var _ thrift.Struct = (*GetEntityRequest)(nil)
 
 func NewGetEntityRequest() *GetEntityRequest {
     return (&GetEntityRequest{}).
@@ -152,7 +152,7 @@ type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &GetEntityResponse{}
+var _ thrift.Struct = (*GetEntityResponse)(nil)
 
 func NewGetEntityResponse() *GetEntityResponse {
     return (&GetEntityResponse{}).
@@ -286,7 +286,7 @@ type NonComparableStruct struct {
     Baz map[*NonComparableStruct]int64 `thrift:"baz,3" json:"baz" db:"baz"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &NonComparableStruct{}
+var _ thrift.Struct = (*NonComparableStruct)(nil)
 
 func NewNonComparableStruct() *NonComparableStruct {
     return (&NonComparableStruct{}).

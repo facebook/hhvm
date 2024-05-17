@@ -19,7 +19,7 @@ var _ = thrift.ZERO
 type Py3Hidden struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Py3Hidden{}
+var _ thrift.Struct = (*Py3Hidden)(nil)
 
 func NewPy3Hidden() *Py3Hidden {
     return (&Py3Hidden{})
@@ -92,7 +92,7 @@ func (x *Py3Hidden) String() string {
 type Flags struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Flags{}
+var _ thrift.Struct = (*Flags)(nil)
 
 func NewFlags() *Flags {
     return (&Flags{})
@@ -166,7 +166,7 @@ type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Name{}
+var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
     return (&Name{}).
@@ -299,7 +299,7 @@ type Adapter struct {
     TypeHint string `thrift:"typeHint,2" json:"typeHint" db:"typeHint"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Adapter{}
+var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
@@ -489,7 +489,7 @@ type UseCAPI struct {
     Serialize bool `thrift:"serialize,1" json:"serialize" db:"serialize"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &UseCAPI{}
+var _ thrift.Struct = (*UseCAPI)(nil)
 
 func NewUseCAPI() *UseCAPI {
     return (&UseCAPI{}).

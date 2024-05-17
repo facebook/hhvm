@@ -56,7 +56,7 @@ type RaiserChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ RaiserChannelClientInterface = &RaiserChannelClient{}
+var _ RaiserChannelClientInterface = (*RaiserChannelClient)(nil)
 
 func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserChannelClient {
     return &RaiserChannelClient{
@@ -73,8 +73,8 @@ type RaiserClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ RaiserClientInterface = &RaiserClient{}
-var _ RaiserContextClientInterface = &RaiserClient{}
+var _ RaiserClientInterface = (*RaiserClient)(nil)
+var _ RaiserContextClientInterface = (*RaiserClient)(nil)
 
 func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
     return &RaiserClient{
@@ -179,7 +179,7 @@ func (c *RaiserClient) Get500Context(ctx context.Context) (string, error) {
 type reqRaiserDoBland struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqRaiserDoBland{}
+var _ thrift.Struct = (*reqRaiserDoBland)(nil)
 
 // Deprecated: RaiserDoBlandArgsDeprecated is deprecated, since it is supposed to be internal.
 type RaiserDoBlandArgsDeprecated = reqRaiserDoBland
@@ -254,8 +254,8 @@ func (x *reqRaiserDoBland) String() string {
 type respRaiserDoBland struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respRaiserDoBland{}
-var _ thrift.WritableResult = &respRaiserDoBland{}
+var _ thrift.Struct = (*respRaiserDoBland)(nil)
+var _ thrift.WritableResult = (*respRaiserDoBland)(nil)
 
 // Deprecated: RaiserDoBlandResultDeprecated is deprecated, since it is supposed to be internal.
 type RaiserDoBlandResultDeprecated = respRaiserDoBland
@@ -334,7 +334,7 @@ func (x *respRaiserDoBland) String() string {
 type reqRaiserDoRaise struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqRaiserDoRaise{}
+var _ thrift.Struct = (*reqRaiserDoRaise)(nil)
 
 // Deprecated: RaiserDoRaiseArgsDeprecated is deprecated, since it is supposed to be internal.
 type RaiserDoRaiseArgsDeprecated = reqRaiserDoRaise
@@ -412,8 +412,8 @@ type respRaiserDoRaise struct {
     S *Serious `thrift:"s,3,optional" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respRaiserDoRaise{}
-var _ thrift.WritableResult = &respRaiserDoRaise{}
+var _ thrift.Struct = (*respRaiserDoRaise)(nil)
+var _ thrift.WritableResult = (*respRaiserDoRaise)(nil)
 
 // Deprecated: RaiserDoRaiseResultDeprecated is deprecated, since it is supposed to be internal.
 type RaiserDoRaiseResultDeprecated = respRaiserDoRaise
@@ -735,7 +735,7 @@ func (x *respRaiserDoRaise) String() string {
 type reqRaiserGet200 struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqRaiserGet200{}
+var _ thrift.Struct = (*reqRaiserGet200)(nil)
 
 // Deprecated: RaiserGet200ArgsDeprecated is deprecated, since it is supposed to be internal.
 type RaiserGet200ArgsDeprecated = reqRaiserGet200
@@ -811,8 +811,8 @@ type respRaiserGet200 struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respRaiserGet200{}
-var _ thrift.WritableResult = &respRaiserGet200{}
+var _ thrift.Struct = (*respRaiserGet200)(nil)
+var _ thrift.WritableResult = (*respRaiserGet200)(nil)
 
 // Deprecated: RaiserGet200ResultDeprecated is deprecated, since it is supposed to be internal.
 type RaiserGet200ResultDeprecated = respRaiserGet200
@@ -964,7 +964,7 @@ func (x *respRaiserGet200) String() string {
 type reqRaiserGet500 struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqRaiserGet500{}
+var _ thrift.Struct = (*reqRaiserGet500)(nil)
 
 // Deprecated: RaiserGet500ArgsDeprecated is deprecated, since it is supposed to be internal.
 type RaiserGet500ArgsDeprecated = reqRaiserGet500
@@ -1043,8 +1043,8 @@ type respRaiserGet500 struct {
     S *Serious `thrift:"s,3,optional" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respRaiserGet500{}
-var _ thrift.WritableResult = &respRaiserGet500{}
+var _ thrift.Struct = (*respRaiserGet500)(nil)
+var _ thrift.WritableResult = (*respRaiserGet500)(nil)
 
 // Deprecated: RaiserGet500ResultDeprecated is deprecated, since it is supposed to be internal.
 type RaiserGet500ResultDeprecated = respRaiserGet500
@@ -1444,7 +1444,7 @@ type RaiserProcessor struct {
     handler            Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &RaiserProcessor{}
+var _ thrift.ProcessorContext = (*RaiserProcessor)(nil)
 
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
     p := &RaiserProcessor{
@@ -1496,7 +1496,7 @@ type procFuncRaiserDoBland struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncRaiserDoBland{}
+var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoBland)(nil)
 
 func (p *procFuncRaiserDoBland) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoBland()
@@ -1546,7 +1546,7 @@ type procFuncRaiserDoRaise struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncRaiserDoRaise{}
+var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoRaise)(nil)
 
 func (p *procFuncRaiserDoRaise) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoRaise()
@@ -1620,7 +1620,7 @@ type procFuncRaiserGet200 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncRaiserGet200{}
+var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet200)(nil)
 
 func (p *procFuncRaiserGet200) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet200()
@@ -1671,7 +1671,7 @@ type procFuncRaiserGet500 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncRaiserGet500{}
+var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet500)(nil)
 
 func (p *procFuncRaiserGet500) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet500()

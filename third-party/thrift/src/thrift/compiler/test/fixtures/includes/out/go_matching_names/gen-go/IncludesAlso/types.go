@@ -19,7 +19,7 @@ var _ = thrift.ZERO
 type Also struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Also{}
+var _ thrift.Struct = (*Also)(nil)
 
 func NewAlso() *Also {
     return (&Also{})

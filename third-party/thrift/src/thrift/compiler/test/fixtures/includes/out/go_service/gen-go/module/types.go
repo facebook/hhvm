@@ -24,7 +24,7 @@ type MyStruct struct {
     MyIncludedInt includes.IncludedInt64 `thrift:"MyIncludedInt,3" json:"MyIncludedInt" db:"MyIncludedInt"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).

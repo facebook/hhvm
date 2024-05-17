@@ -47,7 +47,7 @@ type FooServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooServiceChannelClientInterface = &FooServiceChannelClient{}
+var _ FooServiceChannelClientInterface = (*FooServiceChannelClient)(nil)
 
 func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceChannelClient {
     return &FooServiceChannelClient{
@@ -64,8 +64,8 @@ type FooServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ FooServiceClientInterface = &FooServiceClient{}
-var _ FooServiceContextClientInterface = &FooServiceClient{}
+var _ FooServiceClientInterface = (*FooServiceClient)(nil)
+var _ FooServiceContextClientInterface = (*FooServiceClient)(nil)
 
 func NewFooServiceClient(prot thrift.Protocol) *FooServiceClient {
     return &FooServiceClient{
@@ -101,7 +101,7 @@ func (c *FooServiceClient) SimpleRPCContext(ctx context.Context) (error) {
 type reqFooServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqFooServiceSimpleRPC{}
+var _ thrift.Struct = (*reqFooServiceSimpleRPC)(nil)
 
 // Deprecated: FooServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
 type FooServiceSimpleRPCArgsDeprecated = reqFooServiceSimpleRPC
@@ -176,8 +176,8 @@ func (x *reqFooServiceSimpleRPC) String() string {
 type respFooServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respFooServiceSimpleRPC{}
-var _ thrift.WritableResult = &respFooServiceSimpleRPC{}
+var _ thrift.Struct = (*respFooServiceSimpleRPC)(nil)
+var _ thrift.WritableResult = (*respFooServiceSimpleRPC)(nil)
 
 // Deprecated: FooServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
 type FooServiceSimpleRPCResultDeprecated = respFooServiceSimpleRPC
@@ -261,7 +261,7 @@ type FooServiceProcessor struct {
     handler            FooService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &FooServiceProcessor{}
+var _ thrift.ProcessorContext = (*FooServiceProcessor)(nil)
 
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
     p := &FooServiceProcessor{
@@ -307,7 +307,7 @@ type procFuncFooServiceSimpleRPC struct {
     handler FooService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncFooServiceSimpleRPC{}
+var _ thrift.ProcessorFunctionContext = (*procFuncFooServiceSimpleRPC)(nil)
 
 func (p *procFuncFooServiceSimpleRPC) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqFooServiceSimpleRPC()
@@ -378,7 +378,7 @@ type FB303ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FB303ServiceChannelClientInterface = &FB303ServiceChannelClient{}
+var _ FB303ServiceChannelClientInterface = (*FB303ServiceChannelClient)(nil)
 
 func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceChannelClient {
     return &FB303ServiceChannelClient{
@@ -395,8 +395,8 @@ type FB303ServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ FB303ServiceClientInterface = &FB303ServiceClient{}
-var _ FB303ServiceContextClientInterface = &FB303ServiceClient{}
+var _ FB303ServiceClientInterface = (*FB303ServiceClient)(nil)
+var _ FB303ServiceContextClientInterface = (*FB303ServiceClient)(nil)
 
 func NewFB303ServiceClient(prot thrift.Protocol) *FB303ServiceClient {
     return &FB303ServiceClient{
@@ -434,7 +434,7 @@ type reqFB303ServiceSimpleRPC struct {
     IntParameter int32 `thrift:"int_parameter,1" json:"int_parameter" db:"int_parameter"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
+var _ thrift.Struct = (*reqFB303ServiceSimpleRPC)(nil)
 
 // Deprecated: FB303ServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
 type FB303ServiceSimpleRPCArgsDeprecated = reqFB303ServiceSimpleRPC
@@ -568,8 +568,8 @@ type respFB303ServiceSimpleRPC struct {
     Success *ReservedKeyword `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
-var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
+var _ thrift.Struct = (*respFB303ServiceSimpleRPC)(nil)
+var _ thrift.WritableResult = (*respFB303ServiceSimpleRPC)(nil)
 
 // Deprecated: FB303ServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
 type FB303ServiceSimpleRPCResultDeprecated = respFB303ServiceSimpleRPC
@@ -731,7 +731,7 @@ type FB303ServiceProcessor struct {
     handler            FB303Service
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &FB303ServiceProcessor{}
+var _ thrift.ProcessorContext = (*FB303ServiceProcessor)(nil)
 
 func NewFB303ServiceProcessor(handler FB303Service) *FB303ServiceProcessor {
     p := &FB303ServiceProcessor{
@@ -777,7 +777,7 @@ type procFuncFB303ServiceSimpleRPC struct {
     handler FB303Service
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncFB303ServiceSimpleRPC{}
+var _ thrift.ProcessorFunctionContext = (*procFuncFB303ServiceSimpleRPC)(nil)
 
 func (p *procFuncFB303ServiceSimpleRPC) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqFB303ServiceSimpleRPC()
@@ -877,7 +877,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -894,8 +894,8 @@ type MyServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = &MyServiceClient{}
-var _ MyServiceContextClientInterface = &MyServiceClient{}
+var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -1105,7 +1105,7 @@ func (c *MyServiceClient) RpcSkippedCodegenContext(ctx context.Context) (error) 
 type reqMyServicePing struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServicePing{}
+var _ thrift.Struct = (*reqMyServicePing)(nil)
 
 // Deprecated: MyServicePingArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServicePingArgsDeprecated = reqMyServicePing
@@ -1180,8 +1180,8 @@ func (x *reqMyServicePing) String() string {
 type respMyServicePing struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServicePing{}
-var _ thrift.WritableResult = &respMyServicePing{}
+var _ thrift.Struct = (*respMyServicePing)(nil)
+var _ thrift.WritableResult = (*respMyServicePing)(nil)
 
 // Deprecated: MyServicePingResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServicePingResultDeprecated = respMyServicePing
@@ -1260,7 +1260,7 @@ func (x *respMyServicePing) String() string {
 type reqMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceGetRandomData{}
+var _ thrift.Struct = (*reqMyServiceGetRandomData)(nil)
 
 // Deprecated: MyServiceGetRandomDataArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceGetRandomDataArgsDeprecated = reqMyServiceGetRandomData
@@ -1336,8 +1336,8 @@ type respMyServiceGetRandomData struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceGetRandomData{}
-var _ thrift.WritableResult = &respMyServiceGetRandomData{}
+var _ thrift.Struct = (*respMyServiceGetRandomData)(nil)
+var _ thrift.WritableResult = (*respMyServiceGetRandomData)(nil)
 
 // Deprecated: MyServiceGetRandomDataResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceGetRandomDataResultDeprecated = respMyServiceGetRandomData
@@ -1490,7 +1490,7 @@ type reqMyServiceSink struct {
     Sink int64 `thrift:"sink,1" json:"sink" db:"sink"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceSink{}
+var _ thrift.Struct = (*reqMyServiceSink)(nil)
 
 // Deprecated: MyServiceSinkArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceSinkArgsDeprecated = reqMyServiceSink
@@ -1623,8 +1623,8 @@ func (x *reqMyServiceSink) String() string {
 type respMyServiceSink struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceSink{}
-var _ thrift.WritableResult = &respMyServiceSink{}
+var _ thrift.Struct = (*respMyServiceSink)(nil)
+var _ thrift.WritableResult = (*respMyServiceSink)(nil)
 
 // Deprecated: MyServiceSinkResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceSinkResultDeprecated = respMyServiceSink
@@ -1705,7 +1705,7 @@ type reqMyServicePutDataById struct {
     Data string `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServicePutDataById{}
+var _ thrift.Struct = (*reqMyServicePutDataById)(nil)
 
 // Deprecated: MyServicePutDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServicePutDataByIdArgsDeprecated = reqMyServicePutDataById
@@ -1896,8 +1896,8 @@ func (x *reqMyServicePutDataById) String() string {
 type respMyServicePutDataById struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServicePutDataById{}
-var _ thrift.WritableResult = &respMyServicePutDataById{}
+var _ thrift.Struct = (*respMyServicePutDataById)(nil)
+var _ thrift.WritableResult = (*respMyServicePutDataById)(nil)
 
 // Deprecated: MyServicePutDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServicePutDataByIdResultDeprecated = respMyServicePutDataById
@@ -1977,7 +1977,7 @@ type reqMyServiceHasDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceHasDataById{}
+var _ thrift.Struct = (*reqMyServiceHasDataById)(nil)
 
 // Deprecated: MyServiceHasDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceHasDataByIdArgsDeprecated = reqMyServiceHasDataById
@@ -2111,8 +2111,8 @@ type respMyServiceHasDataById struct {
     Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceHasDataById{}
-var _ thrift.WritableResult = &respMyServiceHasDataById{}
+var _ thrift.Struct = (*respMyServiceHasDataById)(nil)
+var _ thrift.WritableResult = (*respMyServiceHasDataById)(nil)
 
 // Deprecated: MyServiceHasDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceHasDataByIdResultDeprecated = respMyServiceHasDataById
@@ -2265,7 +2265,7 @@ type reqMyServiceGetDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceGetDataById{}
+var _ thrift.Struct = (*reqMyServiceGetDataById)(nil)
 
 // Deprecated: MyServiceGetDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceGetDataByIdArgsDeprecated = reqMyServiceGetDataById
@@ -2399,8 +2399,8 @@ type respMyServiceGetDataById struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceGetDataById{}
-var _ thrift.WritableResult = &respMyServiceGetDataById{}
+var _ thrift.Struct = (*respMyServiceGetDataById)(nil)
+var _ thrift.WritableResult = (*respMyServiceGetDataById)(nil)
 
 // Deprecated: MyServiceGetDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceGetDataByIdResultDeprecated = respMyServiceGetDataById
@@ -2553,7 +2553,7 @@ type reqMyServiceDeleteDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceDeleteDataById{}
+var _ thrift.Struct = (*reqMyServiceDeleteDataById)(nil)
 
 // Deprecated: MyServiceDeleteDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceDeleteDataByIdArgsDeprecated = reqMyServiceDeleteDataById
@@ -2686,8 +2686,8 @@ func (x *reqMyServiceDeleteDataById) String() string {
 type respMyServiceDeleteDataById struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceDeleteDataById{}
-var _ thrift.WritableResult = &respMyServiceDeleteDataById{}
+var _ thrift.Struct = (*respMyServiceDeleteDataById)(nil)
+var _ thrift.WritableResult = (*respMyServiceDeleteDataById)(nil)
 
 // Deprecated: MyServiceDeleteDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceDeleteDataByIdResultDeprecated = respMyServiceDeleteDataById
@@ -2768,7 +2768,7 @@ type reqMyServiceLobDataById struct {
     Data string `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceLobDataById{}
+var _ thrift.Struct = (*reqMyServiceLobDataById)(nil)
 
 // Deprecated: MyServiceLobDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceLobDataByIdArgsDeprecated = reqMyServiceLobDataById
@@ -2959,8 +2959,8 @@ func (x *reqMyServiceLobDataById) String() string {
 type respMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceLobDataById{}
-var _ thrift.WritableResult = &respMyServiceLobDataById{}
+var _ thrift.Struct = (*respMyServiceLobDataById)(nil)
+var _ thrift.WritableResult = (*respMyServiceLobDataById)(nil)
 
 // Deprecated: MyServiceLobDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceLobDataByIdResultDeprecated = respMyServiceLobDataById
@@ -3039,7 +3039,7 @@ func (x *respMyServiceLobDataById) String() string {
 type reqMyServiceInvalidReturnForHack struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
+var _ thrift.Struct = (*reqMyServiceInvalidReturnForHack)(nil)
 
 // Deprecated: MyServiceInvalidReturnForHackArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceInvalidReturnForHackArgsDeprecated = reqMyServiceInvalidReturnForHack
@@ -3115,8 +3115,8 @@ type respMyServiceInvalidReturnForHack struct {
     Success []float32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
-var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
+var _ thrift.Struct = (*respMyServiceInvalidReturnForHack)(nil)
+var _ thrift.WritableResult = (*respMyServiceInvalidReturnForHack)(nil)
 
 // Deprecated: MyServiceInvalidReturnForHackResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceInvalidReturnForHackResultDeprecated = respMyServiceInvalidReturnForHack
@@ -3293,7 +3293,7 @@ func (x *respMyServiceInvalidReturnForHack) String() string {
 type reqMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceRpcSkippedCodegen{}
+var _ thrift.Struct = (*reqMyServiceRpcSkippedCodegen)(nil)
 
 // Deprecated: MyServiceRpcSkippedCodegenArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceRpcSkippedCodegenArgsDeprecated = reqMyServiceRpcSkippedCodegen
@@ -3368,8 +3368,8 @@ func (x *reqMyServiceRpcSkippedCodegen) String() string {
 type respMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceRpcSkippedCodegen{}
-var _ thrift.WritableResult = &respMyServiceRpcSkippedCodegen{}
+var _ thrift.Struct = (*respMyServiceRpcSkippedCodegen)(nil)
+var _ thrift.WritableResult = (*respMyServiceRpcSkippedCodegen)(nil)
 
 // Deprecated: MyServiceRpcSkippedCodegenResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceRpcSkippedCodegenResultDeprecated = respMyServiceRpcSkippedCodegen
@@ -3453,7 +3453,7 @@ type MyServiceProcessor struct {
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -3517,7 +3517,7 @@ type procFuncMyServicePing struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServicePing{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePing)(nil)
 
 func (p *procFuncMyServicePing) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePing()
@@ -3567,7 +3567,7 @@ type procFuncMyServiceGetRandomData struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceGetRandomData{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceGetRandomData)(nil)
 
 func (p *procFuncMyServiceGetRandomData) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGetRandomData()
@@ -3618,7 +3618,7 @@ type procFuncMyServiceSink struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceSink{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceSink)(nil)
 
 func (p *procFuncMyServiceSink) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceSink()
@@ -3669,7 +3669,7 @@ type procFuncMyServicePutDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServicePutDataById{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePutDataById)(nil)
 
 func (p *procFuncMyServicePutDataById) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePutDataById()
@@ -3720,7 +3720,7 @@ type procFuncMyServiceHasDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceHasDataById{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceHasDataById)(nil)
 
 func (p *procFuncMyServiceHasDataById) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasDataById()
@@ -3772,7 +3772,7 @@ type procFuncMyServiceGetDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceGetDataById{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceGetDataById)(nil)
 
 func (p *procFuncMyServiceGetDataById) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGetDataById()
@@ -3824,7 +3824,7 @@ type procFuncMyServiceDeleteDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceDeleteDataById{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceDeleteDataById)(nil)
 
 func (p *procFuncMyServiceDeleteDataById) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceDeleteDataById()
@@ -3875,7 +3875,7 @@ type procFuncMyServiceLobDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceLobDataById{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceLobDataById)(nil)
 
 func (p *procFuncMyServiceLobDataById) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceLobDataById()
@@ -3925,7 +3925,7 @@ type procFuncMyServiceInvalidReturnForHack struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceInvalidReturnForHack{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceInvalidReturnForHack)(nil)
 
 func (p *procFuncMyServiceInvalidReturnForHack) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceInvalidReturnForHack()
@@ -3976,7 +3976,7 @@ type procFuncMyServiceRpcSkippedCodegen struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceRpcSkippedCodegen{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceRpcSkippedCodegen)(nil)
 
 func (p *procFuncMyServiceRpcSkippedCodegen) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceRpcSkippedCodegen()
@@ -4050,7 +4050,7 @@ type DbMixedStackArgumentsChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DbMixedStackArgumentsChannelClientInterface = &DbMixedStackArgumentsChannelClient{}
+var _ DbMixedStackArgumentsChannelClientInterface = (*DbMixedStackArgumentsChannelClient)(nil)
 
 func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMixedStackArgumentsChannelClient {
     return &DbMixedStackArgumentsChannelClient{
@@ -4067,8 +4067,8 @@ type DbMixedStackArgumentsClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}
-var _ DbMixedStackArgumentsContextClientInterface = &DbMixedStackArgumentsClient{}
+var _ DbMixedStackArgumentsClientInterface = (*DbMixedStackArgumentsClient)(nil)
+var _ DbMixedStackArgumentsContextClientInterface = (*DbMixedStackArgumentsClient)(nil)
 
 func NewDbMixedStackArgumentsClient(prot thrift.Protocol) *DbMixedStackArgumentsClient {
     return &DbMixedStackArgumentsClient{
@@ -4126,7 +4126,7 @@ type reqDbMixedStackArgumentsGetDataByKey0 struct {
     Key string `thrift:"key,1" json:"key" db:"key"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
+var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey0)(nil)
 
 // Deprecated: DbMixedStackArgumentsGetDataByKey0ArgsDeprecated is deprecated, since it is supposed to be internal.
 type DbMixedStackArgumentsGetDataByKey0ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey0
@@ -4260,8 +4260,8 @@ type respDbMixedStackArgumentsGetDataByKey0 struct {
     Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
-var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey0{}
+var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
+var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey0)(nil)
 
 // Deprecated: DbMixedStackArgumentsGetDataByKey0ResultDeprecated is deprecated, since it is supposed to be internal.
 type DbMixedStackArgumentsGetDataByKey0ResultDeprecated = respDbMixedStackArgumentsGetDataByKey0
@@ -4410,7 +4410,7 @@ type reqDbMixedStackArgumentsGetDataByKey1 struct {
     Key string `thrift:"key,1" json:"key" db:"key"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
+var _ thrift.Struct = (*reqDbMixedStackArgumentsGetDataByKey1)(nil)
 
 // Deprecated: DbMixedStackArgumentsGetDataByKey1ArgsDeprecated is deprecated, since it is supposed to be internal.
 type DbMixedStackArgumentsGetDataByKey1ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey1
@@ -4544,8 +4544,8 @@ type respDbMixedStackArgumentsGetDataByKey1 struct {
     Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}
-var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey1{}
+var _ thrift.Struct = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
+var _ thrift.WritableResult = (*respDbMixedStackArgumentsGetDataByKey1)(nil)
 
 // Deprecated: DbMixedStackArgumentsGetDataByKey1ResultDeprecated is deprecated, since it is supposed to be internal.
 type DbMixedStackArgumentsGetDataByKey1ResultDeprecated = respDbMixedStackArgumentsGetDataByKey1
@@ -4698,7 +4698,7 @@ type DbMixedStackArgumentsProcessor struct {
     handler            DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &DbMixedStackArgumentsProcessor{}
+var _ thrift.ProcessorContext = (*DbMixedStackArgumentsProcessor)(nil)
 
 func NewDbMixedStackArgumentsProcessor(handler DbMixedStackArguments) *DbMixedStackArgumentsProcessor {
     p := &DbMixedStackArgumentsProcessor{
@@ -4746,7 +4746,7 @@ type procFuncDbMixedStackArgumentsGetDataByKey0 struct {
     handler DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncDbMixedStackArgumentsGetDataByKey0{}
+var _ thrift.ProcessorFunctionContext = (*procFuncDbMixedStackArgumentsGetDataByKey0)(nil)
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqDbMixedStackArgumentsGetDataByKey0()
@@ -4798,7 +4798,7 @@ type procFuncDbMixedStackArgumentsGetDataByKey1 struct {
     handler DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncDbMixedStackArgumentsGetDataByKey1{}
+var _ thrift.ProcessorFunctionContext = (*procFuncDbMixedStackArgumentsGetDataByKey1)(nil)
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqDbMixedStackArgumentsGetDataByKey1()

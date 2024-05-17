@@ -19,7 +19,7 @@ var _ = thrift.ZERO
 type Mutable struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Mutable{}
+var _ thrift.Struct = (*Mutable)(nil)
 
 func NewMutable() *Mutable {
     return (&Mutable{})
@@ -93,7 +93,7 @@ type Annotation struct {
     JavaAnnotation string `thrift:"java_annotation,1" json:"java_annotation" db:"java_annotation"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Annotation{}
+var _ thrift.Struct = (*Annotation)(nil)
 
 func NewAnnotation() *Annotation {
     return (&Annotation{}).
@@ -224,7 +224,7 @@ func (x *Annotation) String() string {
 type BinaryString struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BinaryString{}
+var _ thrift.Struct = (*BinaryString)(nil)
 
 func NewBinaryString() *BinaryString {
     return (&BinaryString{})
@@ -299,7 +299,7 @@ type Adapter struct {
     TypeClassName string `thrift:"typeClassName,2" json:"typeClassName" db:"typeClassName"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Adapter{}
+var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
@@ -490,7 +490,7 @@ type Wrapper struct {
     TypeClassName string `thrift:"typeClassName,2" json:"typeClassName" db:"typeClassName"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Wrapper{}
+var _ thrift.Struct = (*Wrapper)(nil)
 
 func NewWrapper() *Wrapper {
     return (&Wrapper{}).
@@ -679,7 +679,7 @@ func (x *Wrapper) String() string {
 type Recursive struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Recursive{}
+var _ thrift.Struct = (*Recursive)(nil)
 
 func NewRecursive() *Recursive {
     return (&Recursive{})
@@ -752,7 +752,7 @@ func (x *Recursive) String() string {
 type FieldUseUnmangledName struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldUseUnmangledName{}
+var _ thrift.Struct = (*FieldUseUnmangledName)(nil)
 
 func NewFieldUseUnmangledName() *FieldUseUnmangledName {
     return (&FieldUseUnmangledName{})

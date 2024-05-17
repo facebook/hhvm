@@ -110,7 +110,7 @@ type GetEntityChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ GetEntityChannelClientInterface = &GetEntityChannelClient{}
+var _ GetEntityChannelClientInterface = (*GetEntityChannelClient)(nil)
 
 func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityChannelClient {
     return &GetEntityChannelClient{
@@ -127,8 +127,8 @@ type GetEntityClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ GetEntityClientInterface = &GetEntityClient{}
-var _ GetEntityContextClientInterface = &GetEntityClient{}
+var _ GetEntityClientInterface = (*GetEntityClient)(nil)
+var _ GetEntityContextClientInterface = (*GetEntityClient)(nil)
 
 func NewGetEntityClient(prot thrift.Protocol) *GetEntityClient {
     return &GetEntityClient{
@@ -581,7 +581,7 @@ type reqGetEntityGetEntity struct {
     R *GetEntityRequest `thrift:"r,1" json:"r" db:"r"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetEntity{}
+var _ thrift.Struct = (*reqGetEntityGetEntity)(nil)
 
 // Deprecated: GetEntityGetEntityArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetEntityArgsDeprecated = reqGetEntityGetEntity
@@ -736,8 +736,8 @@ type respGetEntityGetEntity struct {
     Success *GetEntityResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetEntity{}
-var _ thrift.WritableResult = &respGetEntityGetEntity{}
+var _ thrift.Struct = (*respGetEntityGetEntity)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetEntity)(nil)
 
 // Deprecated: GetEntityGetEntityResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetEntityResultDeprecated = respGetEntityGetEntity
@@ -894,7 +894,7 @@ func (x *respGetEntityGetEntity) String() string {
 type reqGetEntityGetBool struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetBool{}
+var _ thrift.Struct = (*reqGetEntityGetBool)(nil)
 
 // Deprecated: GetEntityGetBoolArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetBoolArgsDeprecated = reqGetEntityGetBool
@@ -970,8 +970,8 @@ type respGetEntityGetBool struct {
     Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetBool{}
-var _ thrift.WritableResult = &respGetEntityGetBool{}
+var _ thrift.Struct = (*respGetEntityGetBool)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetBool)(nil)
 
 // Deprecated: GetEntityGetBoolResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetBoolResultDeprecated = respGetEntityGetBool
@@ -1123,7 +1123,7 @@ func (x *respGetEntityGetBool) String() string {
 type reqGetEntityGetByte struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetByte{}
+var _ thrift.Struct = (*reqGetEntityGetByte)(nil)
 
 // Deprecated: GetEntityGetByteArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetByteArgsDeprecated = reqGetEntityGetByte
@@ -1199,8 +1199,8 @@ type respGetEntityGetByte struct {
     Success *int8 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetByte{}
-var _ thrift.WritableResult = &respGetEntityGetByte{}
+var _ thrift.Struct = (*respGetEntityGetByte)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetByte)(nil)
 
 // Deprecated: GetEntityGetByteResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetByteResultDeprecated = respGetEntityGetByte
@@ -1353,7 +1353,7 @@ func (x *respGetEntityGetByte) String() string {
 type reqGetEntityGetI16 struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetI16{}
+var _ thrift.Struct = (*reqGetEntityGetI16)(nil)
 
 // Deprecated: GetEntityGetI16ArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI16ArgsDeprecated = reqGetEntityGetI16
@@ -1429,8 +1429,8 @@ type respGetEntityGetI16 struct {
     Success *int16 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetI16{}
-var _ thrift.WritableResult = &respGetEntityGetI16{}
+var _ thrift.Struct = (*respGetEntityGetI16)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetI16)(nil)
 
 // Deprecated: GetEntityGetI16ResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI16ResultDeprecated = respGetEntityGetI16
@@ -1582,7 +1582,7 @@ func (x *respGetEntityGetI16) String() string {
 type reqGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetI32{}
+var _ thrift.Struct = (*reqGetEntityGetI32)(nil)
 
 // Deprecated: GetEntityGetI32ArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI32ArgsDeprecated = reqGetEntityGetI32
@@ -1658,8 +1658,8 @@ type respGetEntityGetI32 struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetI32{}
-var _ thrift.WritableResult = &respGetEntityGetI32{}
+var _ thrift.Struct = (*respGetEntityGetI32)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetI32)(nil)
 
 // Deprecated: GetEntityGetI32ResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI32ResultDeprecated = respGetEntityGetI32
@@ -1811,7 +1811,7 @@ func (x *respGetEntityGetI32) String() string {
 type reqGetEntityGetI64 struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetI64{}
+var _ thrift.Struct = (*reqGetEntityGetI64)(nil)
 
 // Deprecated: GetEntityGetI64ArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI64ArgsDeprecated = reqGetEntityGetI64
@@ -1887,8 +1887,8 @@ type respGetEntityGetI64 struct {
     Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetI64{}
-var _ thrift.WritableResult = &respGetEntityGetI64{}
+var _ thrift.Struct = (*respGetEntityGetI64)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetI64)(nil)
 
 // Deprecated: GetEntityGetI64ResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetI64ResultDeprecated = respGetEntityGetI64
@@ -2040,7 +2040,7 @@ func (x *respGetEntityGetI64) String() string {
 type reqGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetDouble{}
+var _ thrift.Struct = (*reqGetEntityGetDouble)(nil)
 
 // Deprecated: GetEntityGetDoubleArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetDoubleArgsDeprecated = reqGetEntityGetDouble
@@ -2116,8 +2116,8 @@ type respGetEntityGetDouble struct {
     Success *float64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetDouble{}
-var _ thrift.WritableResult = &respGetEntityGetDouble{}
+var _ thrift.Struct = (*respGetEntityGetDouble)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetDouble)(nil)
 
 // Deprecated: GetEntityGetDoubleResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetDoubleResultDeprecated = respGetEntityGetDouble
@@ -2269,7 +2269,7 @@ func (x *respGetEntityGetDouble) String() string {
 type reqGetEntityGetString struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetString{}
+var _ thrift.Struct = (*reqGetEntityGetString)(nil)
 
 // Deprecated: GetEntityGetStringArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetStringArgsDeprecated = reqGetEntityGetString
@@ -2345,8 +2345,8 @@ type respGetEntityGetString struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetString{}
-var _ thrift.WritableResult = &respGetEntityGetString{}
+var _ thrift.Struct = (*respGetEntityGetString)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetString)(nil)
 
 // Deprecated: GetEntityGetStringResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetStringResultDeprecated = respGetEntityGetString
@@ -2498,7 +2498,7 @@ func (x *respGetEntityGetString) String() string {
 type reqGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetBinary{}
+var _ thrift.Struct = (*reqGetEntityGetBinary)(nil)
 
 // Deprecated: GetEntityGetBinaryArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetBinaryArgsDeprecated = reqGetEntityGetBinary
@@ -2574,8 +2574,8 @@ type respGetEntityGetBinary struct {
     Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetBinary{}
-var _ thrift.WritableResult = &respGetEntityGetBinary{}
+var _ thrift.Struct = (*respGetEntityGetBinary)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetBinary)(nil)
 
 // Deprecated: GetEntityGetBinaryResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetBinaryResultDeprecated = respGetEntityGetBinary
@@ -2723,7 +2723,7 @@ func (x *respGetEntityGetBinary) String() string {
 type reqGetEntityGetMap struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetMap{}
+var _ thrift.Struct = (*reqGetEntityGetMap)(nil)
 
 // Deprecated: GetEntityGetMapArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetMapArgsDeprecated = reqGetEntityGetMap
@@ -2799,8 +2799,8 @@ type respGetEntityGetMap struct {
     Success map[string]string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetMap{}
-var _ thrift.WritableResult = &respGetEntityGetMap{}
+var _ thrift.Struct = (*respGetEntityGetMap)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetMap)(nil)
 
 // Deprecated: GetEntityGetMapResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetMapResultDeprecated = respGetEntityGetMap
@@ -2994,7 +2994,7 @@ func (x *respGetEntityGetMap) String() string {
 type reqGetEntityGetSet struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetSet{}
+var _ thrift.Struct = (*reqGetEntityGetSet)(nil)
 
 // Deprecated: GetEntityGetSetArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetSetArgsDeprecated = reqGetEntityGetSet
@@ -3070,8 +3070,8 @@ type respGetEntityGetSet struct {
     Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetSet{}
-var _ thrift.WritableResult = &respGetEntityGetSet{}
+var _ thrift.Struct = (*respGetEntityGetSet)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetSet)(nil)
 
 // Deprecated: GetEntityGetSetResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetSetResultDeprecated = respGetEntityGetSet
@@ -3248,7 +3248,7 @@ func (x *respGetEntityGetSet) String() string {
 type reqGetEntityGetList struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetList{}
+var _ thrift.Struct = (*reqGetEntityGetList)(nil)
 
 // Deprecated: GetEntityGetListArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetListArgsDeprecated = reqGetEntityGetList
@@ -3324,8 +3324,8 @@ type respGetEntityGetList struct {
     Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetList{}
-var _ thrift.WritableResult = &respGetEntityGetList{}
+var _ thrift.Struct = (*respGetEntityGetList)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetList)(nil)
 
 // Deprecated: GetEntityGetListResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetListResultDeprecated = respGetEntityGetList
@@ -3505,7 +3505,7 @@ type reqGetEntityGetLegacyStuff struct {
     NumPos int64 `thrift:"numPos,1" json:"numPos" db:"numPos"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
+var _ thrift.Struct = (*reqGetEntityGetLegacyStuff)(nil)
 
 // Deprecated: GetEntityGetLegacyStuffArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetLegacyStuffArgsDeprecated = reqGetEntityGetLegacyStuff
@@ -3755,8 +3755,8 @@ type respGetEntityGetLegacyStuff struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
-var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
+var _ thrift.Struct = (*respGetEntityGetLegacyStuff)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetLegacyStuff)(nil)
 
 // Deprecated: GetEntityGetLegacyStuffResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetLegacyStuffResultDeprecated = respGetEntityGetLegacyStuff
@@ -3909,7 +3909,7 @@ type reqGetEntityGetCtxCollision struct {
     Ctx int64 `thrift:"ctx,1" json:"ctx" db:"ctx"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetCtxCollision{}
+var _ thrift.Struct = (*reqGetEntityGetCtxCollision)(nil)
 
 // Deprecated: GetEntityGetCtxCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetCtxCollisionArgsDeprecated = reqGetEntityGetCtxCollision
@@ -4043,8 +4043,8 @@ type respGetEntityGetCtxCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetCtxCollision{}
-var _ thrift.WritableResult = &respGetEntityGetCtxCollision{}
+var _ thrift.Struct = (*respGetEntityGetCtxCollision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetCtxCollision)(nil)
 
 // Deprecated: GetEntityGetCtxCollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetCtxCollisionResultDeprecated = respGetEntityGetCtxCollision
@@ -4198,7 +4198,7 @@ type reqGetEntityGetCtx1Collision struct {
     Ctx1 int64 `thrift:"ctx1,2" json:"ctx1" db:"ctx1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetCtx1Collision{}
+var _ thrift.Struct = (*reqGetEntityGetCtx1Collision)(nil)
 
 // Deprecated: GetEntityGetCtx1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetCtx1CollisionArgsDeprecated = reqGetEntityGetCtx1Collision
@@ -4390,8 +4390,8 @@ type respGetEntityGetCtx1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetCtx1Collision{}
-var _ thrift.WritableResult = &respGetEntityGetCtx1Collision{}
+var _ thrift.Struct = (*respGetEntityGetCtx1Collision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetCtx1Collision)(nil)
 
 // Deprecated: GetEntityGetCtx1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetCtx1CollisionResultDeprecated = respGetEntityGetCtx1Collision
@@ -4544,7 +4544,7 @@ type reqGetEntityGetContextCollision struct {
     Context int64 `thrift:"context,1" json:"context" db:"context"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetContextCollision{}
+var _ thrift.Struct = (*reqGetEntityGetContextCollision)(nil)
 
 // Deprecated: GetEntityGetContextCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetContextCollisionArgsDeprecated = reqGetEntityGetContextCollision
@@ -4678,8 +4678,8 @@ type respGetEntityGetContextCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetContextCollision{}
-var _ thrift.WritableResult = &respGetEntityGetContextCollision{}
+var _ thrift.Struct = (*respGetEntityGetContextCollision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetContextCollision)(nil)
 
 // Deprecated: GetEntityGetContextCollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetContextCollisionResultDeprecated = respGetEntityGetContextCollision
@@ -4832,7 +4832,7 @@ type reqGetEntityGetOutCollision struct {
     Out int64 `thrift:"out,1" json:"out" db:"out"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetOutCollision{}
+var _ thrift.Struct = (*reqGetEntityGetOutCollision)(nil)
 
 // Deprecated: GetEntityGetOutCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetOutCollisionArgsDeprecated = reqGetEntityGetOutCollision
@@ -4966,8 +4966,8 @@ type respGetEntityGetOutCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetOutCollision{}
-var _ thrift.WritableResult = &respGetEntityGetOutCollision{}
+var _ thrift.Struct = (*respGetEntityGetOutCollision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetOutCollision)(nil)
 
 // Deprecated: GetEntityGetOutCollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetOutCollisionResultDeprecated = respGetEntityGetOutCollision
@@ -5121,7 +5121,7 @@ type reqGetEntityGetOut1Collision struct {
     Out1 int64 `thrift:"out1,2" json:"out1" db:"out1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetOut1Collision{}
+var _ thrift.Struct = (*reqGetEntityGetOut1Collision)(nil)
 
 // Deprecated: GetEntityGetOut1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetOut1CollisionArgsDeprecated = reqGetEntityGetOut1Collision
@@ -5313,8 +5313,8 @@ type respGetEntityGetOut1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetOut1Collision{}
-var _ thrift.WritableResult = &respGetEntityGetOut1Collision{}
+var _ thrift.Struct = (*respGetEntityGetOut1Collision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetOut1Collision)(nil)
 
 // Deprecated: GetEntityGetOut1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetOut1CollisionResultDeprecated = respGetEntityGetOut1Collision
@@ -5467,7 +5467,7 @@ type reqGetEntityGetInCollision struct {
     In int64 `thrift:"in,1" json:"in" db:"in"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetInCollision{}
+var _ thrift.Struct = (*reqGetEntityGetInCollision)(nil)
 
 // Deprecated: GetEntityGetInCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetInCollisionArgsDeprecated = reqGetEntityGetInCollision
@@ -5601,8 +5601,8 @@ type respGetEntityGetInCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetInCollision{}
-var _ thrift.WritableResult = &respGetEntityGetInCollision{}
+var _ thrift.Struct = (*respGetEntityGetInCollision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetInCollision)(nil)
 
 // Deprecated: GetEntityGetInCollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetInCollisionResultDeprecated = respGetEntityGetInCollision
@@ -5756,7 +5756,7 @@ type reqGetEntityGetIn1Collision struct {
     In1 int64 `thrift:"in1,2" json:"in1" db:"in1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetIn1Collision{}
+var _ thrift.Struct = (*reqGetEntityGetIn1Collision)(nil)
 
 // Deprecated: GetEntityGetIn1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetIn1CollisionArgsDeprecated = reqGetEntityGetIn1Collision
@@ -5948,8 +5948,8 @@ type respGetEntityGetIn1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetIn1Collision{}
-var _ thrift.WritableResult = &respGetEntityGetIn1Collision{}
+var _ thrift.Struct = (*respGetEntityGetIn1Collision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetIn1Collision)(nil)
 
 // Deprecated: GetEntityGetIn1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetIn1CollisionResultDeprecated = respGetEntityGetIn1Collision
@@ -6102,7 +6102,7 @@ type reqGetEntityGetErrCollision struct {
     Err int64 `thrift:"err,1" json:"err" db:"err"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetErrCollision{}
+var _ thrift.Struct = (*reqGetEntityGetErrCollision)(nil)
 
 // Deprecated: GetEntityGetErrCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetErrCollisionArgsDeprecated = reqGetEntityGetErrCollision
@@ -6236,8 +6236,8 @@ type respGetEntityGetErrCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetErrCollision{}
-var _ thrift.WritableResult = &respGetEntityGetErrCollision{}
+var _ thrift.Struct = (*respGetEntityGetErrCollision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetErrCollision)(nil)
 
 // Deprecated: GetEntityGetErrCollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetErrCollisionResultDeprecated = respGetEntityGetErrCollision
@@ -6391,7 +6391,7 @@ type reqGetEntityGetErr1Collision struct {
     Err1 int64 `thrift:"err1,2" json:"err1" db:"err1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqGetEntityGetErr1Collision{}
+var _ thrift.Struct = (*reqGetEntityGetErr1Collision)(nil)
 
 // Deprecated: GetEntityGetErr1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetErr1CollisionArgsDeprecated = reqGetEntityGetErr1Collision
@@ -6583,8 +6583,8 @@ type respGetEntityGetErr1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respGetEntityGetErr1Collision{}
-var _ thrift.WritableResult = &respGetEntityGetErr1Collision{}
+var _ thrift.Struct = (*respGetEntityGetErr1Collision)(nil)
+var _ thrift.WritableResult = (*respGetEntityGetErr1Collision)(nil)
 
 // Deprecated: GetEntityGetErr1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
 type GetEntityGetErr1CollisionResultDeprecated = respGetEntityGetErr1Collision
@@ -6741,7 +6741,7 @@ type GetEntityProcessor struct {
     handler            GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &GetEntityProcessor{}
+var _ thrift.ProcessorContext = (*GetEntityProcessor)(nil)
 
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p := &GetEntityProcessor{
@@ -6829,7 +6829,7 @@ type procFuncGetEntityGetEntity struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetEntity{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetEntity)(nil)
 
 func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetEntity()
@@ -6881,7 +6881,7 @@ type procFuncGetEntityGetBool struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBool{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetBool)(nil)
 
 func (p *procFuncGetEntityGetBool) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBool()
@@ -6932,7 +6932,7 @@ type procFuncGetEntityGetByte struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetByte{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetByte)(nil)
 
 func (p *procFuncGetEntityGetByte) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetByte()
@@ -6983,7 +6983,7 @@ type procFuncGetEntityGetI16 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI16{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetI16)(nil)
 
 func (p *procFuncGetEntityGetI16) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI16()
@@ -7034,7 +7034,7 @@ type procFuncGetEntityGetI32 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI32{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetI32)(nil)
 
 func (p *procFuncGetEntityGetI32) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI32()
@@ -7085,7 +7085,7 @@ type procFuncGetEntityGetI64 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI64{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetI64)(nil)
 
 func (p *procFuncGetEntityGetI64) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI64()
@@ -7136,7 +7136,7 @@ type procFuncGetEntityGetDouble struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetDouble{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetDouble)(nil)
 
 func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetDouble()
@@ -7187,7 +7187,7 @@ type procFuncGetEntityGetString struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetString{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetString)(nil)
 
 func (p *procFuncGetEntityGetString) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetString()
@@ -7238,7 +7238,7 @@ type procFuncGetEntityGetBinary struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBinary{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetBinary)(nil)
 
 func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBinary()
@@ -7289,7 +7289,7 @@ type procFuncGetEntityGetMap struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetMap{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetMap)(nil)
 
 func (p *procFuncGetEntityGetMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetMap()
@@ -7340,7 +7340,7 @@ type procFuncGetEntityGetSet struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetSet{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetSet)(nil)
 
 func (p *procFuncGetEntityGetSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetSet()
@@ -7391,7 +7391,7 @@ type procFuncGetEntityGetList struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetList{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetList)(nil)
 
 func (p *procFuncGetEntityGetList) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetList()
@@ -7442,7 +7442,7 @@ type procFuncGetEntityGetLegacyStuff struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetLegacyStuff{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetLegacyStuff)(nil)
 
 func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetLegacyStuff()
@@ -7494,7 +7494,7 @@ type procFuncGetEntityGetCtxCollision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtxCollision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetCtxCollision)(nil)
 
 func (p *procFuncGetEntityGetCtxCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetCtxCollision()
@@ -7546,7 +7546,7 @@ type procFuncGetEntityGetCtx1Collision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtx1Collision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetCtx1Collision)(nil)
 
 func (p *procFuncGetEntityGetCtx1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetCtx1Collision()
@@ -7598,7 +7598,7 @@ type procFuncGetEntityGetContextCollision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetContextCollision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetContextCollision)(nil)
 
 func (p *procFuncGetEntityGetContextCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetContextCollision()
@@ -7650,7 +7650,7 @@ type procFuncGetEntityGetOutCollision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOutCollision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetOutCollision)(nil)
 
 func (p *procFuncGetEntityGetOutCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetOutCollision()
@@ -7702,7 +7702,7 @@ type procFuncGetEntityGetOut1Collision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOut1Collision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetOut1Collision)(nil)
 
 func (p *procFuncGetEntityGetOut1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetOut1Collision()
@@ -7754,7 +7754,7 @@ type procFuncGetEntityGetInCollision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetInCollision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetInCollision)(nil)
 
 func (p *procFuncGetEntityGetInCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetInCollision()
@@ -7806,7 +7806,7 @@ type procFuncGetEntityGetIn1Collision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetIn1Collision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetIn1Collision)(nil)
 
 func (p *procFuncGetEntityGetIn1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetIn1Collision()
@@ -7858,7 +7858,7 @@ type procFuncGetEntityGetErrCollision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErrCollision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetErrCollision)(nil)
 
 func (p *procFuncGetEntityGetErrCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetErrCollision()
@@ -7910,7 +7910,7 @@ type procFuncGetEntityGetErr1Collision struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErr1Collision{}
+var _ thrift.ProcessorFunctionContext = (*procFuncGetEntityGetErr1Collision)(nil)
 
 func (p *procFuncGetEntityGetErr1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetErr1Collision()

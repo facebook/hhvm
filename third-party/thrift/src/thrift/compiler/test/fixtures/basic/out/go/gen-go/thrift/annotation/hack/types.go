@@ -20,7 +20,7 @@ type FieldWrapper struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldWrapper{}
+var _ thrift.Struct = (*FieldWrapper)(nil)
 
 func NewFieldWrapper() *FieldWrapper {
     return (&FieldWrapper{}).
@@ -154,7 +154,7 @@ type Wrapper struct {
     ExtraNamespace string `thrift:"extraNamespace,3" json:"extraNamespace" db:"extraNamespace"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Wrapper{}
+var _ thrift.Struct = (*Wrapper)(nil)
 
 func NewWrapper() *Wrapper {
     return (&Wrapper{}).
@@ -402,7 +402,7 @@ type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Adapter{}
+var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
@@ -534,7 +534,7 @@ type SkipCodegen struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &SkipCodegen{}
+var _ thrift.Struct = (*SkipCodegen)(nil)
 
 func NewSkipCodegen() *SkipCodegen {
     return (&SkipCodegen{}).
@@ -667,7 +667,7 @@ type Name struct {
     Reason string `thrift:"reason,2" json:"reason" db:"reason"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Name{}
+var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
     return (&Name{}).
@@ -857,7 +857,7 @@ type UnionEnumAttributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &UnionEnumAttributes{}
+var _ thrift.Struct = (*UnionEnumAttributes)(nil)
 
 func NewUnionEnumAttributes() *UnionEnumAttributes {
     return (&UnionEnumAttributes{}).
@@ -1026,7 +1026,7 @@ type StructTrait struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructTrait{}
+var _ thrift.Struct = (*StructTrait)(nil)
 
 func NewStructTrait() *StructTrait {
     return (&StructTrait{}).
@@ -1158,7 +1158,7 @@ type Attributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Attributes{}
+var _ thrift.Struct = (*Attributes)(nil)
 
 func NewAttributes() *Attributes {
     return (&Attributes{}).
@@ -1326,7 +1326,7 @@ func (x *Attributes) String() string {
 type StructAsTrait struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructAsTrait{}
+var _ thrift.Struct = (*StructAsTrait)(nil)
 
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})
@@ -1399,7 +1399,7 @@ func (x *StructAsTrait) String() string {
 type ModuleInternal struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ModuleInternal{}
+var _ thrift.Struct = (*ModuleInternal)(nil)
 
 func NewModuleInternal() *ModuleInternal {
     return (&ModuleInternal{})

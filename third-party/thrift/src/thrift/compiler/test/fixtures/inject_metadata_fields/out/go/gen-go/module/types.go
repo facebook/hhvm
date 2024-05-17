@@ -22,7 +22,7 @@ type Fields struct {
     InjectedField string `thrift:"injected_field,100" json:"injected_field" db:"injected_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Fields{}
+var _ thrift.Struct = (*Fields)(nil)
 
 func NewFields() *Fields {
     return (&Fields{}).
@@ -154,7 +154,7 @@ type FieldsInjectedToEmptyStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldsInjectedToEmptyStruct{}
+var _ thrift.Struct = (*FieldsInjectedToEmptyStruct)(nil)
 
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
     return (&FieldsInjectedToEmptyStruct{}).
@@ -287,7 +287,7 @@ type FieldsInjectedToStruct struct {
     StringField string `thrift:"string_field,1" json:"string_field" db:"string_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldsInjectedToStruct{}
+var _ thrift.Struct = (*FieldsInjectedToStruct)(nil)
 
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
     return (&FieldsInjectedToStruct{}).
@@ -480,7 +480,7 @@ type FieldsInjectedWithIncludedStruct struct {
     StringField string `thrift:"string_field,1" json:"string_field" db:"string_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldsInjectedWithIncludedStruct{}
+var _ thrift.Struct = (*FieldsInjectedWithIncludedStruct)(nil)
 
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
     return (&FieldsInjectedWithIncludedStruct{}).

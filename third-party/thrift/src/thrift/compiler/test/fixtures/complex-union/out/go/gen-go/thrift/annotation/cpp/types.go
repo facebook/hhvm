@@ -113,7 +113,7 @@ type Type struct {
     Template string `thrift:"template,2" json:"template" db:"template"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Type{}
+var _ thrift.Struct = (*Type)(nil)
 
 func NewType() *Type {
     return (&Type{}).
@@ -303,7 +303,7 @@ type Ref struct {
     Type RefType `thrift:"type,1" json:"type" db:"type"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Ref{}
+var _ thrift.Struct = (*Ref)(nil)
 
 func NewRef() *Ref {
     return (&Ref{}).
@@ -436,7 +436,7 @@ type Name struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Name{}
+var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
     return (&Name{}).
@@ -568,7 +568,7 @@ type Lazy struct {
     Ref bool `thrift:"ref,1" json:"ref" db:"ref"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Lazy{}
+var _ thrift.Struct = (*Lazy)(nil)
 
 func NewLazy() *Lazy {
     return (&Lazy{}).
@@ -699,7 +699,7 @@ func (x *Lazy) String() string {
 type DisableLazyChecksum struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DisableLazyChecksum{}
+var _ thrift.Struct = (*DisableLazyChecksum)(nil)
 
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
@@ -777,7 +777,7 @@ type Adapter struct {
     MoveOnly bool `thrift:"moveOnly,5" json:"moveOnly" db:"moveOnly"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Adapter{}
+var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
@@ -1141,7 +1141,7 @@ type PackIsset struct {
     Atomic bool `thrift:"atomic,1" json:"atomic" db:"atomic"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &PackIsset{}
+var _ thrift.Struct = (*PackIsset)(nil)
 
 func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
@@ -1272,7 +1272,7 @@ func (x *PackIsset) String() string {
 type MinimizePadding struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MinimizePadding{}
+var _ thrift.Struct = (*MinimizePadding)(nil)
 
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
@@ -1345,7 +1345,7 @@ func (x *MinimizePadding) String() string {
 type TriviallyRelocatable struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TriviallyRelocatable{}
+var _ thrift.Struct = (*TriviallyRelocatable)(nil)
 
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
@@ -1418,7 +1418,7 @@ func (x *TriviallyRelocatable) String() string {
 type ScopedEnumAsUnionType struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ScopedEnumAsUnionType{}
+var _ thrift.Struct = (*ScopedEnumAsUnionType)(nil)
 
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
@@ -1491,7 +1491,7 @@ func (x *ScopedEnumAsUnionType) String() string {
 type StrongType struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StrongType{}
+var _ thrift.Struct = (*StrongType)(nil)
 
 func NewStrongType() *StrongType {
     return (&StrongType{})
@@ -1566,7 +1566,7 @@ type FieldInterceptor struct {
     Noinline bool `thrift:"noinline,2" json:"noinline" db:"noinline"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldInterceptor{}
+var _ thrift.Struct = (*FieldInterceptor)(nil)
 
 func NewFieldInterceptor() *FieldInterceptor {
     return (&FieldInterceptor{}).
@@ -1755,7 +1755,7 @@ func (x *FieldInterceptor) String() string {
 type UseOpEncode struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &UseOpEncode{}
+var _ thrift.Struct = (*UseOpEncode)(nil)
 
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
@@ -1829,7 +1829,7 @@ type EnumType struct {
     Type EnumUnderlyingType `thrift:"type,1" json:"type" db:"type"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &EnumType{}
+var _ thrift.Struct = (*EnumType)(nil)
 
 func NewEnumType() *EnumType {
     return (&EnumType{}).
@@ -1961,7 +1961,7 @@ func (x *EnumType) String() string {
 type Frozen2Exclude struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Frozen2Exclude{}
+var _ thrift.Struct = (*Frozen2Exclude)(nil)
 
 func NewFrozen2Exclude() *Frozen2Exclude {
     return (&Frozen2Exclude{})
@@ -2034,7 +2034,7 @@ func (x *Frozen2Exclude) String() string {
 type Frozen2RequiresCompleteContainerParams struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Frozen2RequiresCompleteContainerParams{}
+var _ thrift.Struct = (*Frozen2RequiresCompleteContainerParams)(nil)
 
 func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContainerParams {
     return (&Frozen2RequiresCompleteContainerParams{})
@@ -2107,7 +2107,7 @@ func (x *Frozen2RequiresCompleteContainerParams) String() string {
 type ProcessInEbThreadUnsafe struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ProcessInEbThreadUnsafe{}
+var _ thrift.Struct = (*ProcessInEbThreadUnsafe)(nil)
 
 func NewProcessInEbThreadUnsafe() *ProcessInEbThreadUnsafe {
     return (&ProcessInEbThreadUnsafe{})
@@ -2180,7 +2180,7 @@ func (x *ProcessInEbThreadUnsafe) String() string {
 type RuntimeAnnotation struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RuntimeAnnotation{}
+var _ thrift.Struct = (*RuntimeAnnotation)(nil)
 
 func NewRuntimeAnnotation() *RuntimeAnnotation {
     return (&RuntimeAnnotation{})
@@ -2253,7 +2253,7 @@ func (x *RuntimeAnnotation) String() string {
 type UseCursorSerialization struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &UseCursorSerialization{}
+var _ thrift.Struct = (*UseCursorSerialization)(nil)
 
 func NewUseCursorSerialization() *UseCursorSerialization {
     return (&UseCursorSerialization{})

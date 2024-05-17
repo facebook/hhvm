@@ -50,7 +50,7 @@ type CChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ CChannelClientInterface = &CChannelClient{}
+var _ CChannelClientInterface = (*CChannelClient)(nil)
 
 func NewCChannelClient(channel thrift.RequestChannel) *CChannelClient {
     return &CChannelClient{
@@ -67,8 +67,8 @@ type CClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ CClientInterface = &CClient{}
-var _ CContextClientInterface = &CClient{}
+var _ CClientInterface = (*CClient)(nil)
+var _ CContextClientInterface = (*CClient)(nil)
 
 func NewCClient(prot thrift.Protocol) *CClient {
     return &CClient{
@@ -128,7 +128,7 @@ func (c *CClient) ThingContext(ctx context.Context, a int32, b string, c []int32
 type reqCF struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqCF{}
+var _ thrift.Struct = (*reqCF)(nil)
 
 // Deprecated: CFArgsDeprecated is deprecated, since it is supposed to be internal.
 type CFArgsDeprecated = reqCF
@@ -203,8 +203,8 @@ func (x *reqCF) String() string {
 type respCF struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respCF{}
-var _ thrift.WritableResult = &respCF{}
+var _ thrift.Struct = (*respCF)(nil)
+var _ thrift.WritableResult = (*respCF)(nil)
 
 // Deprecated: CFResultDeprecated is deprecated, since it is supposed to be internal.
 type CFResultDeprecated = respCF
@@ -286,7 +286,7 @@ type reqCThing struct {
     C []int32 `thrift:"c,3" json:"c" db:"c"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqCThing{}
+var _ thrift.Struct = (*reqCThing)(nil)
 
 // Deprecated: CThingArgsDeprecated is deprecated, since it is supposed to be internal.
 type CThingArgsDeprecated = reqCThing
@@ -574,8 +574,8 @@ type respCThing struct {
     Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respCThing{}
-var _ thrift.WritableResult = &respCThing{}
+var _ thrift.Struct = (*respCThing)(nil)
+var _ thrift.WritableResult = (*respCThing)(nil)
 
 // Deprecated: CThingResultDeprecated is deprecated, since it is supposed to be internal.
 type CThingResultDeprecated = respCThing
@@ -813,7 +813,7 @@ type CProcessor struct {
     handler            C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &CProcessor{}
+var _ thrift.ProcessorContext = (*CProcessor)(nil)
 
 func NewCProcessor(handler C) *CProcessor {
     p := &CProcessor{
@@ -861,7 +861,7 @@ type procFuncCF struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncCF{}
+var _ thrift.ProcessorFunctionContext = (*procFuncCF)(nil)
 
 func (p *procFuncCF) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqCF()
@@ -911,7 +911,7 @@ type procFuncCThing struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncCThing{}
+var _ thrift.ProcessorFunctionContext = (*procFuncCThing)(nil)
 
 func (p *procFuncCThing) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqCThing()

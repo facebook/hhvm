@@ -54,7 +54,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -71,8 +71,8 @@ type MyServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = &MyServiceClient{}
-var _ MyServiceContextClientInterface = &MyServiceClient{}
+var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -133,7 +133,7 @@ type reqMyServiceQuery struct {
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceQuery{}
+var _ thrift.Struct = (*reqMyServiceQuery)(nil)
 
 // Deprecated: MyServiceQueryArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceQueryArgsDeprecated = reqMyServiceQuery
@@ -366,8 +366,8 @@ func (x *reqMyServiceQuery) String() string {
 type respMyServiceQuery struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceQuery{}
-var _ thrift.WritableResult = &respMyServiceQuery{}
+var _ thrift.Struct = (*respMyServiceQuery)(nil)
+var _ thrift.WritableResult = (*respMyServiceQuery)(nil)
 
 // Deprecated: MyServiceQueryResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceQueryResultDeprecated = respMyServiceQuery
@@ -448,7 +448,7 @@ type reqMyServiceHasArgDocs struct {
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceHasArgDocs{}
+var _ thrift.Struct = (*reqMyServiceHasArgDocs)(nil)
 
 // Deprecated: MyServiceHasArgDocsArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceHasArgDocsArgsDeprecated = reqMyServiceHasArgDocs
@@ -681,8 +681,8 @@ func (x *reqMyServiceHasArgDocs) String() string {
 type respMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceHasArgDocs{}
-var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
+var _ thrift.Struct = (*respMyServiceHasArgDocs)(nil)
+var _ thrift.WritableResult = (*respMyServiceHasArgDocs)(nil)
 
 // Deprecated: MyServiceHasArgDocsResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceHasArgDocsResultDeprecated = respMyServiceHasArgDocs
@@ -766,7 +766,7 @@ type MyServiceProcessor struct {
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -814,7 +814,7 @@ type procFuncMyServiceQuery struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceQuery{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceQuery)(nil)
 
 func (p *procFuncMyServiceQuery) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceQuery()
@@ -865,7 +865,7 @@ type procFuncMyServiceHasArgDocs struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceHasArgDocs{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceHasArgDocs)(nil)
 
 func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasArgDocs()

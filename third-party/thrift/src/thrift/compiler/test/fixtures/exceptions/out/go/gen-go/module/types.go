@@ -20,7 +20,7 @@ type Fiery struct {
     Message string `thrift:"message,1,required" json:"message" db:"message"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Fiery{}
+var _ thrift.Struct = (*Fiery)(nil)
 
 func NewFiery() *Fiery {
     return (&Fiery{}).
@@ -155,7 +155,7 @@ type Serious struct {
     Sonnet *string `thrift:"sonnet,1,optional" json:"sonnet,omitempty" db:"sonnet"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Serious{}
+var _ thrift.Struct = (*Serious)(nil)
 
 func NewSerious() *Serious {
     return (&Serious{})
@@ -306,7 +306,7 @@ type ComplexFieldNames struct {
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ComplexFieldNames{}
+var _ thrift.Struct = (*ComplexFieldNames)(nil)
 
 func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{}).
@@ -500,7 +500,7 @@ type CustomFieldNames struct {
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CustomFieldNames{}
+var _ thrift.Struct = (*CustomFieldNames)(nil)
 
 func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{}).
@@ -694,7 +694,7 @@ type ExceptionWithPrimitiveField struct {
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ExceptionWithPrimitiveField{}
+var _ thrift.Struct = (*ExceptionWithPrimitiveField)(nil)
 
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{}).
@@ -888,7 +888,7 @@ type ExceptionWithStructuredAnnotation struct {
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ExceptionWithStructuredAnnotation{}
+var _ thrift.Struct = (*ExceptionWithStructuredAnnotation)(nil)
 
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{}).
@@ -1080,7 +1080,7 @@ func (x *ExceptionWithStructuredAnnotation) Error() string {
 type Banal struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Banal{}
+var _ thrift.Struct = (*Banal)(nil)
 
 func NewBanal() *Banal {
     return (&Banal{})

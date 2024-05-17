@@ -20,7 +20,7 @@ type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Name{}
+var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
     return (&Name{}).
@@ -151,7 +151,7 @@ func (x *Name) String() string {
 type Copy struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Copy{}
+var _ thrift.Struct = (*Copy)(nil)
 
 func NewCopy() *Copy {
     return (&Copy{})
@@ -224,7 +224,7 @@ func (x *Copy) String() string {
 type RequestContext struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RequestContext{}
+var _ thrift.Struct = (*RequestContext)(nil)
 
 func NewRequestContext() *RequestContext {
     return (&RequestContext{})
@@ -297,7 +297,7 @@ func (x *RequestContext) String() string {
 type Arc struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Arc{}
+var _ thrift.Struct = (*Arc)(nil)
 
 func NewArc() *Arc {
     return (&Arc{})
@@ -370,7 +370,7 @@ func (x *Arc) String() string {
 type Box struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Box{}
+var _ thrift.Struct = (*Box)(nil)
 
 func NewBox() *Box {
     return (&Box{})
@@ -443,7 +443,7 @@ func (x *Box) String() string {
 type Exhaustive struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Exhaustive{}
+var _ thrift.Struct = (*Exhaustive)(nil)
 
 func NewExhaustive() *Exhaustive {
     return (&Exhaustive{})
@@ -516,7 +516,7 @@ func (x *Exhaustive) String() string {
 type Ord struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Ord{}
+var _ thrift.Struct = (*Ord)(nil)
 
 func NewOrd() *Ord {
     return (&Ord{})
@@ -589,7 +589,7 @@ func (x *Ord) String() string {
 type NewType_ struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &NewType_{}
+var _ thrift.Struct = (*NewType_)(nil)
 
 func NewNewType_() *NewType_ {
     return (&NewType_{})
@@ -663,7 +663,7 @@ type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Type{}
+var _ thrift.Struct = (*Type)(nil)
 
 func NewType() *Type {
     return (&Type{}).
@@ -795,7 +795,7 @@ type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Adapter{}
+var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
     return (&Adapter{}).
@@ -927,7 +927,7 @@ type Derive struct {
     Derives []string `thrift:"derives,1" json:"derives" db:"derives"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Derive{}
+var _ thrift.Struct = (*Derive)(nil)
 
 func NewDerive() *Derive {
     return (&Derive{}).
@@ -1096,7 +1096,7 @@ type ServiceExn struct {
     AnyhowToApplicationExn bool `thrift:"anyhow_to_application_exn,1" json:"anyhow_to_application_exn" db:"anyhow_to_application_exn"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ServiceExn{}
+var _ thrift.Struct = (*ServiceExn)(nil)
 
 func NewServiceExn() *ServiceExn {
     return (&ServiceExn{}).

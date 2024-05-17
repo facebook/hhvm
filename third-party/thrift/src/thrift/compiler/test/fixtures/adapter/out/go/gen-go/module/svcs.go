@@ -47,7 +47,7 @@ type ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ServiceChannelClientInterface = &ServiceChannelClient{}
+var _ ServiceChannelClientInterface = (*ServiceChannelClient)(nil)
 
 func NewServiceChannelClient(channel thrift.RequestChannel) *ServiceChannelClient {
     return &ServiceChannelClient{
@@ -64,8 +64,8 @@ type ServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ ServiceClientInterface = &ServiceClient{}
-var _ ServiceContextClientInterface = &ServiceClient{}
+var _ ServiceClientInterface = (*ServiceClient)(nil)
+var _ ServiceContextClientInterface = (*ServiceClient)(nil)
 
 func NewServiceClient(prot thrift.Protocol) *ServiceClient {
     return &ServiceClient{
@@ -107,7 +107,7 @@ type reqServiceFunc struct {
     Arg3 *Foo `thrift:"arg3,3" json:"arg3" db:"arg3"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqServiceFunc{}
+var _ thrift.Struct = (*reqServiceFunc)(nil)
 
 // Deprecated: ServiceFuncArgsDeprecated is deprecated, since it is supposed to be internal.
 type ServiceFuncArgsDeprecated = reqServiceFunc
@@ -379,8 +379,8 @@ type respServiceFunc struct {
     Success *MyI32_4873 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respServiceFunc{}
-var _ thrift.WritableResult = &respServiceFunc{}
+var _ thrift.Struct = (*respServiceFunc)(nil)
+var _ thrift.WritableResult = (*respServiceFunc)(nil)
 
 // Deprecated: ServiceFuncResultDeprecated is deprecated, since it is supposed to be internal.
 type ServiceFuncResultDeprecated = respServiceFunc
@@ -538,7 +538,7 @@ type ServiceProcessor struct {
     handler            Service
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &ServiceProcessor{}
+var _ thrift.ProcessorContext = (*ServiceProcessor)(nil)
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
     p := &ServiceProcessor{
@@ -584,7 +584,7 @@ type procFuncServiceFunc struct {
     handler Service
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncServiceFunc{}
+var _ thrift.ProcessorFunctionContext = (*procFuncServiceFunc)(nil)
 
 func (p *procFuncServiceFunc) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqServiceFunc()
@@ -660,7 +660,7 @@ type AdapterServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ AdapterServiceChannelClientInterface = &AdapterServiceChannelClient{}
+var _ AdapterServiceChannelClientInterface = (*AdapterServiceChannelClient)(nil)
 
 func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *AdapterServiceChannelClient {
     return &AdapterServiceChannelClient{
@@ -677,8 +677,8 @@ type AdapterServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ AdapterServiceClientInterface = &AdapterServiceClient{}
-var _ AdapterServiceContextClientInterface = &AdapterServiceClient{}
+var _ AdapterServiceClientInterface = (*AdapterServiceClient)(nil)
+var _ AdapterServiceContextClientInterface = (*AdapterServiceClient)(nil)
 
 func NewAdapterServiceClient(prot thrift.Protocol) *AdapterServiceClient {
     return &AdapterServiceClient{
@@ -734,7 +734,7 @@ func (c *AdapterServiceClient) AdaptedTypesContext(ctx context.Context, arg *Hea
 type reqAdapterServiceCount struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqAdapterServiceCount{}
+var _ thrift.Struct = (*reqAdapterServiceCount)(nil)
 
 // Deprecated: AdapterServiceCountArgsDeprecated is deprecated, since it is supposed to be internal.
 type AdapterServiceCountArgsDeprecated = reqAdapterServiceCount
@@ -810,8 +810,8 @@ type respAdapterServiceCount struct {
     Success *CountingStruct `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respAdapterServiceCount{}
-var _ thrift.WritableResult = &respAdapterServiceCount{}
+var _ thrift.Struct = (*respAdapterServiceCount)(nil)
+var _ thrift.WritableResult = (*respAdapterServiceCount)(nil)
 
 // Deprecated: AdapterServiceCountResultDeprecated is deprecated, since it is supposed to be internal.
 type AdapterServiceCountResultDeprecated = respAdapterServiceCount
@@ -969,7 +969,7 @@ type reqAdapterServiceAdaptedTypes struct {
     Arg *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
+var _ thrift.Struct = (*reqAdapterServiceAdaptedTypes)(nil)
 
 // Deprecated: AdapterServiceAdaptedTypesArgsDeprecated is deprecated, since it is supposed to be internal.
 type AdapterServiceAdaptedTypesArgsDeprecated = reqAdapterServiceAdaptedTypes
@@ -1124,8 +1124,8 @@ type respAdapterServiceAdaptedTypes struct {
     Success *HeapAllocated `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
-var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
+var _ thrift.Struct = (*respAdapterServiceAdaptedTypes)(nil)
+var _ thrift.WritableResult = (*respAdapterServiceAdaptedTypes)(nil)
 
 // Deprecated: AdapterServiceAdaptedTypesResultDeprecated is deprecated, since it is supposed to be internal.
 type AdapterServiceAdaptedTypesResultDeprecated = respAdapterServiceAdaptedTypes
@@ -1287,7 +1287,7 @@ type AdapterServiceProcessor struct {
     handler            AdapterService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &AdapterServiceProcessor{}
+var _ thrift.ProcessorContext = (*AdapterServiceProcessor)(nil)
 
 func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {
     p := &AdapterServiceProcessor{
@@ -1335,7 +1335,7 @@ type procFuncAdapterServiceCount struct {
     handler AdapterService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncAdapterServiceCount{}
+var _ thrift.ProcessorFunctionContext = (*procFuncAdapterServiceCount)(nil)
 
 func (p *procFuncAdapterServiceCount) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqAdapterServiceCount()
@@ -1386,7 +1386,7 @@ type procFuncAdapterServiceAdaptedTypes struct {
     handler AdapterService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncAdapterServiceAdaptedTypes{}
+var _ thrift.ProcessorFunctionContext = (*procFuncAdapterServiceAdaptedTypes)(nil)
 
 func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqAdapterServiceAdaptedTypes()

@@ -19,7 +19,7 @@ var _ = thrift.ZERO
 type Transitive struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Transitive{}
+var _ thrift.Struct = (*Transitive)(nil)
 
 func NewTransitive() *Transitive {
     return (&Transitive{})
@@ -92,7 +92,7 @@ func (x *Transitive) String() string {
 type Program struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Program{}
+var _ thrift.Struct = (*Program)(nil)
 
 func NewProgram() *Program {
     return (&Program{})
@@ -165,7 +165,7 @@ func (x *Program) String() string {
 type Struct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Struct{}
+var _ thrift.Struct = (*Struct)(nil)
 
 func NewStruct() *Struct {
     return (&Struct{})
@@ -238,7 +238,7 @@ func (x *Struct) String() string {
 type Union struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Union{}
+var _ thrift.Struct = (*Union)(nil)
 
 func NewUnion() *Union {
     return (&Union{})
@@ -311,7 +311,7 @@ func (x *Union) String() string {
 type Exception struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Exception{}
+var _ thrift.Struct = (*Exception)(nil)
 
 func NewException() *Exception {
     return (&Exception{})
@@ -384,7 +384,7 @@ func (x *Exception) String() string {
 type Field struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Field{}
+var _ thrift.Struct = (*Field)(nil)
 
 func NewField() *Field {
     return (&Field{})
@@ -457,7 +457,7 @@ func (x *Field) String() string {
 type Typedef struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Typedef{}
+var _ thrift.Struct = (*Typedef)(nil)
 
 func NewTypedef() *Typedef {
     return (&Typedef{})
@@ -530,7 +530,7 @@ func (x *Typedef) String() string {
 type Service struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Service{}
+var _ thrift.Struct = (*Service)(nil)
 
 func NewService() *Service {
     return (&Service{})
@@ -603,7 +603,7 @@ func (x *Service) String() string {
 type Interaction struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Interaction{}
+var _ thrift.Struct = (*Interaction)(nil)
 
 func NewInteraction() *Interaction {
     return (&Interaction{})
@@ -676,7 +676,7 @@ func (x *Interaction) String() string {
 type Function struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Function{}
+var _ thrift.Struct = (*Function)(nil)
 
 func NewFunction() *Function {
     return (&Function{})
@@ -749,7 +749,7 @@ func (x *Function) String() string {
 type EnumValue struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &EnumValue{}
+var _ thrift.Struct = (*EnumValue)(nil)
 
 func NewEnumValue() *EnumValue {
     return (&EnumValue{})
@@ -822,7 +822,7 @@ func (x *EnumValue) String() string {
 type Const struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Const{}
+var _ thrift.Struct = (*Const)(nil)
 
 func NewConst() *Const {
     return (&Const{})
@@ -895,7 +895,7 @@ func (x *Const) String() string {
 type Enum struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Enum{}
+var _ thrift.Struct = (*Enum)(nil)
 
 func NewEnum() *Enum {
     return (&Enum{})
@@ -968,7 +968,7 @@ func (x *Enum) String() string {
 type Structured struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Structured{}
+var _ thrift.Struct = (*Structured)(nil)
 
 func NewStructured() *Structured {
     return (&Structured{})
@@ -1041,7 +1041,7 @@ func (x *Structured) String() string {
 type Interface struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Interface{}
+var _ thrift.Struct = (*Interface)(nil)
 
 func NewInterface() *Interface {
     return (&Interface{})
@@ -1114,7 +1114,7 @@ func (x *Interface) String() string {
 type RootDefinition struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RootDefinition{}
+var _ thrift.Struct = (*RootDefinition)(nil)
 
 func NewRootDefinition() *RootDefinition {
     return (&RootDefinition{})
@@ -1187,7 +1187,7 @@ func (x *RootDefinition) String() string {
 type Definition struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Definition{}
+var _ thrift.Struct = (*Definition)(nil)
 
 func NewDefinition() *Definition {
     return (&Definition{})

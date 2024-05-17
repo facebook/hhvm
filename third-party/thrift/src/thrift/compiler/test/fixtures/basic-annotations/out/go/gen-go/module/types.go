@@ -172,7 +172,7 @@ type MyStructNestedAnnotation struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructNestedAnnotation{}
+var _ thrift.Struct = (*MyStructNestedAnnotation)(nil)
 
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
     return (&MyStructNestedAnnotation{}).
@@ -303,7 +303,7 @@ func (x *MyStructNestedAnnotation) String() string {
 type MyUnion struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnion{}
+var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -388,7 +388,7 @@ func (x *MyUnion) String() string {
 type MyException struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyException{}
+var _ thrift.Struct = (*MyException)(nil)
 
 func NewMyException() *MyException {
     return (&MyException{})
@@ -473,7 +473,7 @@ type MyStruct struct {
     MyUnion *MyUnion `thrift:"my_union,9" json:"my_union" db:"my_union"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -1101,7 +1101,7 @@ type SecretStruct struct {
     Password string `thrift:"password,2" json:"password" db:"password"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &SecretStruct{}
+var _ thrift.Struct = (*SecretStruct)(nil)
 
 func NewSecretStruct() *SecretStruct {
     return (&SecretStruct{}).

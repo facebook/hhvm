@@ -20,7 +20,7 @@ type TrivialStruct struct {
     IntValue int32 `thrift:"int_value,1" json:"int_value" db:"int_value"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TrivialStruct{}
+var _ thrift.Struct = (*TrivialStruct)(nil)
 
 func NewTrivialStruct() *TrivialStruct {
     return (&TrivialStruct{}).
@@ -157,7 +157,7 @@ type StructWithNoCustomDefaultValues struct {
     RequiredStruct *TrivialStruct `thrift:"required_struct,6,required" json:"required_struct" db:"required_struct"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructWithNoCustomDefaultValues{}
+var _ thrift.Struct = (*StructWithNoCustomDefaultValues)(nil)
 
 func NewStructWithNoCustomDefaultValues() *StructWithNoCustomDefaultValues {
     return (&StructWithNoCustomDefaultValues{}).
@@ -661,7 +661,7 @@ type StructWithCustomDefaultValues struct {
     RequiredStruct *TrivialStruct `thrift:"required_struct,6,required" json:"required_struct" db:"required_struct"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructWithCustomDefaultValues{}
+var _ thrift.Struct = (*StructWithCustomDefaultValues)(nil)
 
 func NewStructWithCustomDefaultValues() *StructWithCustomDefaultValues {
     return (&StructWithCustomDefaultValues{}).

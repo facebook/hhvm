@@ -1237,7 +1237,7 @@ type MyAnnotation struct {
     Color Color `thrift:"color,2" json:"color" db:"color"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyAnnotation{}
+var _ thrift.Struct = (*MyAnnotation)(nil)
 
 func NewMyAnnotation() *MyAnnotation {
     return (&MyAnnotation{}).
@@ -1440,7 +1440,7 @@ type Foo struct {
     DoubleAdaptedField DoubleTypedefI64 `thrift:"doubleAdaptedField,11" json:"doubleAdaptedField" db:"doubleAdaptedField"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Foo{}
+var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
     return (&Foo{}).
@@ -2228,7 +2228,7 @@ type Baz struct {
     LongField *MyI64 `thrift:"longField,9" json:"longField,omitempty" db:"longField"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Baz{}
+var _ thrift.Struct = (*Baz)(nil)
 
 func NewBaz() *Baz {
     return (&Baz{})
@@ -2693,7 +2693,7 @@ type Bar struct {
     AdaptedStructField *DirectlyAdapted `thrift:"adaptedStructField,7" json:"adaptedStructField" db:"adaptedStructField"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Bar{}
+var _ thrift.Struct = (*Bar)(nil)
 
 func NewBar() *Bar {
     return (&Bar{}).
@@ -3355,7 +3355,7 @@ type DirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DirectlyAdapted{}
+var _ thrift.Struct = (*DirectlyAdapted)(nil)
 
 func NewDirectlyAdapted() *DirectlyAdapted {
     return (&DirectlyAdapted{}).
@@ -3487,7 +3487,7 @@ type IndependentDirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IndependentDirectlyAdapted{}
+var _ thrift.Struct = (*IndependentDirectlyAdapted)(nil)
 
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
     return (&IndependentDirectlyAdapted{}).
@@ -3622,7 +3622,7 @@ type StructWithFieldAdapter struct {
     OptBoxedField *int32 `thrift:"opt_boxed_field,4,optional" json:"opt_boxed_field,omitempty" db:"opt_boxed_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructWithFieldAdapter{}
+var _ thrift.Struct = (*StructWithFieldAdapter)(nil)
 
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
     return (&StructWithFieldAdapter{}).
@@ -3960,7 +3960,7 @@ type TerseAdaptedFields struct {
     SetField []int32 `thrift:"set_field,3" json:"set_field" db:"set_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TerseAdaptedFields{}
+var _ thrift.Struct = (*TerseAdaptedFields)(nil)
 
 func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{}).
@@ -4245,7 +4245,7 @@ type B struct {
     A *AdaptedA `thrift:"a,1" json:"a" db:"a"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &B{}
+var _ thrift.Struct = (*B)(nil)
 
 func NewB() *B {
     return (&B{}).
@@ -4397,7 +4397,7 @@ func (x *B) String() string {
 type A struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &A{}
+var _ thrift.Struct = (*A)(nil)
 
 func NewA() *A {
     return (&A{})
@@ -4471,7 +4471,7 @@ type Config struct {
     Path string `thrift:"path,1" json:"path" db:"path"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Config{}
+var _ thrift.Struct = (*Config)(nil)
 
 func NewConfig() *Config {
     return (&Config{}).
@@ -4604,7 +4604,7 @@ type MyStruct struct {
     SetString SetWithAdapter `thrift:"set_string,2" json:"set_string" db:"set_string"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -4812,7 +4812,7 @@ type AdaptTestStruct struct {
     BinaryData []byte `thrift:"binary_data,10" json:"binary_data" db:"binary_data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptTestStruct{}
+var _ thrift.Struct = (*AdaptTestStruct)(nil)
 
 func NewAdaptTestStruct() *AdaptTestStruct {
     return (&AdaptTestStruct{}).
@@ -5508,7 +5508,7 @@ type AdaptTemplatedTestStruct struct {
     DoubleTypedefBool DoubleTypedefBool `thrift:"doubleTypedefBool,22" json:"doubleTypedefBool" db:"doubleTypedefBool"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptTemplatedTestStruct{}
+var _ thrift.Struct = (*AdaptTemplatedTestStruct)(nil)
 
 func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
     return (&AdaptTemplatedTestStruct{}).
@@ -7150,7 +7150,7 @@ type AdaptTemplatedNestedTestStruct struct {
     AdaptedStruct *AdaptTemplatedTestStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
+var _ thrift.Struct = (*AdaptTemplatedNestedTestStruct)(nil)
 
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{}).
@@ -7304,7 +7304,7 @@ type AdaptTestUnion struct {
     Custom CustomProtocolType `thrift:"custom,2" json:"custom,omitempty" db:"custom"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptTestUnion{}
+var _ thrift.Struct = (*AdaptTestUnion)(nil)
 
 func NewAdaptTestUnion() *AdaptTestUnion {
     return (&AdaptTestUnion{})
@@ -7540,7 +7540,7 @@ type AdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptedStruct{}
+var _ thrift.Struct = (*AdaptedStruct)(nil)
 
 func NewAdaptedStruct() *AdaptedStruct {
     return (&AdaptedStruct{}).
@@ -7672,7 +7672,7 @@ type DirectlyAdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DirectlyAdaptedStruct{}
+var _ thrift.Struct = (*DirectlyAdaptedStruct)(nil)
 
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
     return (&DirectlyAdaptedStruct{}).
@@ -7807,7 +7807,7 @@ type StructFieldAdaptedStruct struct {
     TypedefOfAdapted *TypedefOfDirect `thrift:"typedefOfAdapted,4" json:"typedefOfAdapted" db:"typedefOfAdapted"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructFieldAdaptedStruct{}
+var _ thrift.Struct = (*StructFieldAdaptedStruct)(nil)
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{}).
@@ -8197,7 +8197,7 @@ type CircularAdaptee struct {
     Field *CircularStruct `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CircularAdaptee{}
+var _ thrift.Struct = (*CircularAdaptee)(nil)
 
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{}).
@@ -8350,7 +8350,7 @@ type CircularStruct struct {
     Field *AdaptedCircularAdaptee `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CircularStruct{}
+var _ thrift.Struct = (*CircularStruct)(nil)
 
 func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
@@ -8502,7 +8502,7 @@ type ReorderedStruct struct {
     ReorderedDependentAdapted *DeclaredAfterStruct `thrift:"reordered_dependent_adapted,1" json:"reordered_dependent_adapted" db:"reordered_dependent_adapted"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ReorderedStruct{}
+var _ thrift.Struct = (*ReorderedStruct)(nil)
 
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{}).
@@ -8654,7 +8654,7 @@ func (x *ReorderedStruct) String() string {
 type DeclaredAfterStruct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DeclaredAfterStruct{}
+var _ thrift.Struct = (*DeclaredAfterStruct)(nil)
 
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
@@ -8728,7 +8728,7 @@ type RenamedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RenamedStruct{}
+var _ thrift.Struct = (*RenamedStruct)(nil)
 
 func NewRenamedStruct() *RenamedStruct {
     return (&RenamedStruct{}).
@@ -8860,7 +8860,7 @@ type SameNamespaceStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &SameNamespaceStruct{}
+var _ thrift.Struct = (*SameNamespaceStruct)(nil)
 
 func NewSameNamespaceStruct() *SameNamespaceStruct {
     return (&SameNamespaceStruct{}).
@@ -8991,7 +8991,7 @@ func (x *SameNamespaceStruct) String() string {
 type HeapAllocated struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &HeapAllocated{}
+var _ thrift.Struct = (*HeapAllocated)(nil)
 
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
@@ -9065,7 +9065,7 @@ type MoveOnly struct {
     Ptr *HeapAllocated `thrift:"ptr,1" json:"ptr" db:"ptr"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MoveOnly{}
+var _ thrift.Struct = (*MoveOnly)(nil)
 
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{}).
@@ -9218,7 +9218,7 @@ type AlsoMoveOnly struct {
     Ptr int64 `thrift:"ptr,1" json:"ptr" db:"ptr"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AlsoMoveOnly{}
+var _ thrift.Struct = (*AlsoMoveOnly)(nil)
 
 func NewAlsoMoveOnly() *AlsoMoveOnly {
     return (&AlsoMoveOnly{}).
@@ -9349,7 +9349,7 @@ func (x *AlsoMoveOnly) String() string {
 type ApplyAdapter struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ApplyAdapter{}
+var _ thrift.Struct = (*ApplyAdapter)(nil)
 
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
@@ -9422,7 +9422,7 @@ func (x *ApplyAdapter) String() string {
 type TransitiveAdapted struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TransitiveAdapted{}
+var _ thrift.Struct = (*TransitiveAdapted)(nil)
 
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
@@ -9498,7 +9498,7 @@ type CountingStruct struct {
     RegularString *string `thrift:"regularString,3,optional" json:"regularString,omitempty" db:"regularString"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CountingStruct{}
+var _ thrift.Struct = (*CountingStruct)(nil)
 
 func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
@@ -9792,7 +9792,7 @@ type Person struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Person{}
+var _ thrift.Struct = (*Person)(nil)
 
 func NewPerson() *Person {
     return (&Person{}).
@@ -9924,7 +9924,7 @@ type Person2 struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Person2{}
+var _ thrift.Struct = (*Person2)(nil)
 
 func NewPerson2() *Person2 {
     return (&Person2{}).

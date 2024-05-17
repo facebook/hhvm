@@ -97,7 +97,7 @@ type ComplexUnion struct {
     StringRef *string `thrift:"stringRef,14" json:"stringRef,omitempty" db:"stringRef"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ComplexUnion{}
+var _ thrift.Struct = (*ComplexUnion)(nil)
 
 func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{})
@@ -687,7 +687,7 @@ type ListUnion struct {
     StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ListUnion{}
+var _ thrift.Struct = (*ListUnion)(nil)
 
 func NewListUnion() *ListUnion {
     return (&ListUnion{})
@@ -976,7 +976,7 @@ type DataUnion struct {
     StringData *string `thrift:"stringData,2" json:"stringData,omitempty" db:"stringData"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DataUnion{}
+var _ thrift.Struct = (*DataUnion)(nil)
 
 func NewDataUnion() *DataUnion {
     return (&DataUnion{})
@@ -1212,7 +1212,7 @@ type Val struct {
     TypedefValue ContainerTypedef `thrift:"typedefValue,9" json:"typedefValue" db:"typedefValue"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Val{}
+var _ thrift.Struct = (*Val)(nil)
 
 func NewVal() *Val {
     return (&Val{}).
@@ -1470,7 +1470,7 @@ type ValUnion struct {
     V2 *Val `thrift:"v2,2" json:"v2,omitempty" db:"v2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ValUnion{}
+var _ thrift.Struct = (*ValUnion)(nil)
 
 func NewValUnion() *ValUnion {
     return (&ValUnion{})
@@ -1719,7 +1719,7 @@ type VirtualComplexUnion struct {
     ThingTwo *string `thrift:"thingTwo,2" json:"thingTwo,omitempty" db:"thingTwo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &VirtualComplexUnion{}
+var _ thrift.Struct = (*VirtualComplexUnion)(nil)
 
 func NewVirtualComplexUnion() *VirtualComplexUnion {
     return (&VirtualComplexUnion{})
@@ -1957,7 +1957,7 @@ type NonCopyableStruct struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &NonCopyableStruct{}
+var _ thrift.Struct = (*NonCopyableStruct)(nil)
 
 func NewNonCopyableStruct() *NonCopyableStruct {
     return (&NonCopyableStruct{}).
@@ -2089,7 +2089,7 @@ type NonCopyableUnion struct {
     S *NonCopyableStruct `thrift:"s,1" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &NonCopyableUnion{}
+var _ thrift.Struct = (*NonCopyableUnion)(nil)
 
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{})

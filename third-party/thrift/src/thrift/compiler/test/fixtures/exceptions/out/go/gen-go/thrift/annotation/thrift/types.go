@@ -68,7 +68,7 @@ func RpcPriorityFromString(s string) (RpcPriority, error) {
 type Experimental struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Experimental{}
+var _ thrift.Struct = (*Experimental)(nil)
 
 func NewExperimental() *Experimental {
     return (&Experimental{})
@@ -143,7 +143,7 @@ type ReserveIds struct {
     IdRanges map[int32]int32 `thrift:"id_ranges,2" json:"id_ranges" db:"id_ranges"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ReserveIds{}
+var _ thrift.Struct = (*ReserveIds)(nil)
 
 func NewReserveIds() *ReserveIds {
     return (&ReserveIds{}).
@@ -424,7 +424,7 @@ type RequiresBackwardCompatibility struct {
     FieldName bool `thrift:"field_name,1" json:"field_name" db:"field_name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RequiresBackwardCompatibility{}
+var _ thrift.Struct = (*RequiresBackwardCompatibility)(nil)
 
 func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
     return (&RequiresBackwardCompatibility{}).
@@ -555,7 +555,7 @@ func (x *RequiresBackwardCompatibility) String() string {
 type TerseWrite struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TerseWrite{}
+var _ thrift.Struct = (*TerseWrite)(nil)
 
 func NewTerseWrite() *TerseWrite {
     return (&TerseWrite{})
@@ -628,7 +628,7 @@ func (x *TerseWrite) String() string {
 type Box struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Box{}
+var _ thrift.Struct = (*Box)(nil)
 
 func NewBox() *Box {
     return (&Box{})
@@ -701,7 +701,7 @@ func (x *Box) String() string {
 type Mixin struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Mixin{}
+var _ thrift.Struct = (*Mixin)(nil)
 
 func NewMixin() *Mixin {
     return (&Mixin{})
@@ -774,7 +774,7 @@ func (x *Mixin) String() string {
 type SerializeInFieldIdOrder struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &SerializeInFieldIdOrder{}
+var _ thrift.Struct = (*SerializeInFieldIdOrder)(nil)
 
 func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
     return (&SerializeInFieldIdOrder{})
@@ -847,7 +847,7 @@ func (x *SerializeInFieldIdOrder) String() string {
 type BitmaskEnum struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BitmaskEnum{}
+var _ thrift.Struct = (*BitmaskEnum)(nil)
 
 func NewBitmaskEnum() *BitmaskEnum {
     return (&BitmaskEnum{})
@@ -920,7 +920,7 @@ func (x *BitmaskEnum) String() string {
 type ExceptionMessage struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ExceptionMessage{}
+var _ thrift.Struct = (*ExceptionMessage)(nil)
 
 func NewExceptionMessage() *ExceptionMessage {
     return (&ExceptionMessage{})
@@ -994,7 +994,7 @@ type GenerateRuntimeSchema struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &GenerateRuntimeSchema{}
+var _ thrift.Struct = (*GenerateRuntimeSchema)(nil)
 
 func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
     return (&GenerateRuntimeSchema{}).
@@ -1125,7 +1125,7 @@ func (x *GenerateRuntimeSchema) String() string {
 type InternBox struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InternBox{}
+var _ thrift.Struct = (*InternBox)(nil)
 
 func NewInternBox() *InternBox {
     return (&InternBox{})
@@ -1198,7 +1198,7 @@ func (x *InternBox) String() string {
 type Serial struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Serial{}
+var _ thrift.Struct = (*Serial)(nil)
 
 func NewSerial() *Serial {
     return (&Serial{})
@@ -1272,7 +1272,7 @@ type Uri struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Uri{}
+var _ thrift.Struct = (*Uri)(nil)
 
 func NewUri() *Uri {
     return (&Uri{}).
@@ -1404,7 +1404,7 @@ type Priority struct {
     Level RpcPriority `thrift:"level,1" json:"level" db:"level"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Priority{}
+var _ thrift.Struct = (*Priority)(nil)
 
 func NewPriority() *Priority {
     return (&Priority{}).
@@ -1537,7 +1537,7 @@ type DeprecatedUnvalidatedAnnotations struct {
     Items map[string]string `thrift:"items,1" json:"items" db:"items"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DeprecatedUnvalidatedAnnotations{}
+var _ thrift.Struct = (*DeprecatedUnvalidatedAnnotations)(nil)
 
 func NewDeprecatedUnvalidatedAnnotations() *DeprecatedUnvalidatedAnnotations {
     return (&DeprecatedUnvalidatedAnnotations{}).

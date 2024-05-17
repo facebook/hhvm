@@ -85,7 +85,7 @@ func MyEnumFromString(s string) (MyEnum, error) {
 type MyStruct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
@@ -172,7 +172,7 @@ type MyUnion struct {
     StructField *MyStruct `thrift:"struct_field,14" json:"struct_field,omitempty" db:"struct_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnion{}
+var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -1417,7 +1417,7 @@ type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructWithCustomDefault{}
+var _ thrift.Struct = (*MyStructWithCustomDefault)(nil)
 
 func NewMyStructWithCustomDefault() *MyStructWithCustomDefault {
     return (&MyStructWithCustomDefault{}).
@@ -1563,7 +1563,7 @@ type StructLevelTerseStruct struct {
     UnionField *MyUnion `thrift:"union_field,15" json:"union_field" db:"union_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructLevelTerseStruct{}
+var _ thrift.Struct = (*StructLevelTerseStruct)(nil)
 
 func NewStructLevelTerseStruct() *StructLevelTerseStruct {
     return (&StructLevelTerseStruct{}).
@@ -2716,7 +2716,7 @@ type FieldLevelTerseStruct struct {
     UnionField *MyUnion `thrift:"union_field,30" json:"union_field" db:"union_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FieldLevelTerseStruct{}
+var _ thrift.Struct = (*FieldLevelTerseStruct)(nil)
 
 func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
     return (&FieldLevelTerseStruct{}).
@@ -4903,7 +4903,7 @@ type TerseStructWithCustomDefault struct {
     StructField *MyStructWithCustomDefault `thrift:"struct_field,14" json:"struct_field" db:"struct_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TerseStructWithCustomDefault{}
+var _ thrift.Struct = (*TerseStructWithCustomDefault)(nil)
 
 func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
     return (&TerseStructWithCustomDefault{}).
@@ -5970,7 +5970,7 @@ type AdaptedFields struct {
     Field3 MyInteger `thrift:"field3,3" json:"field3" db:"field3"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptedFields{}
+var _ thrift.Struct = (*AdaptedFields)(nil)
 
 func NewAdaptedFields() *AdaptedFields {
     return (&AdaptedFields{}).
@@ -6220,7 +6220,7 @@ type WrappedFields struct {
     Field1 int32 `thrift:"field1,1" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &WrappedFields{}
+var _ thrift.Struct = (*WrappedFields)(nil)
 
 func NewWrappedFields() *WrappedFields {
     return (&WrappedFields{}).
@@ -6352,7 +6352,7 @@ type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TerseException{}
+var _ thrift.Struct = (*TerseException)(nil)
 
 func NewTerseException() *TerseException {
     return (&TerseException{}).

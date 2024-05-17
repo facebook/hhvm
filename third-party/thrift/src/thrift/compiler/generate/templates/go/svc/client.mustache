@@ -29,7 +29,7 @@ type {{service:go_name}}ChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ {{service:go_name}}ChannelClientInterface = &{{service:go_name}}ChannelClient{}
+var _ {{service:go_name}}ChannelClientInterface = (*{{service:go_name}}ChannelClient)(nil)
 
 func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}ChannelClient {
     return &{{service:go_name}}ChannelClient{
@@ -57,8 +57,8 @@ type {{service:go_name}}Client struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
-var _ {{service:go_name}}ContextClientInterface = &{{service:go_name}}Client{}
+var _ {{service:go_name}}ClientInterface = (*{{service:go_name}}Client)(nil)
+var _ {{service:go_name}}ContextClientInterface = (*{{service:go_name}}Client)(nil)
 
 func New{{service:go_name}}Client(prot thrift.Protocol) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{

@@ -105,7 +105,7 @@ result := listResult
 type GeneratePatch struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &GeneratePatch{}
+var _ thrift.Struct = (*GeneratePatch)(nil)
 
 func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
@@ -178,7 +178,7 @@ func (x *GeneratePatch) String() string {
 type GeneratePatchNew struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &GeneratePatchNew{}
+var _ thrift.Struct = (*GeneratePatchNew)(nil)
 
 func NewGeneratePatchNew() *GeneratePatchNew {
     return (&GeneratePatchNew{})
@@ -251,7 +251,7 @@ func (x *GeneratePatchNew) String() string {
 type AssignOnlyPatch struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AssignOnlyPatch{}
+var _ thrift.Struct = (*AssignOnlyPatch)(nil)
 
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
@@ -327,7 +327,7 @@ type BoolPatch struct {
     Invert bool `thrift:"invert,9" json:"invert" db:"invert"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BoolPatch{}
+var _ thrift.Struct = (*BoolPatch)(nil)
 
 func NewBoolPatch() *BoolPatch {
     return (&BoolPatch{}).
@@ -592,7 +592,7 @@ type BytePatch struct {
     Add int8 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BytePatch{}
+var _ thrift.Struct = (*BytePatch)(nil)
 
 func NewBytePatch() *BytePatch {
     return (&BytePatch{}).
@@ -859,7 +859,7 @@ type I16Patch struct {
     Add int16 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &I16Patch{}
+var _ thrift.Struct = (*I16Patch)(nil)
 
 func NewI16Patch() *I16Patch {
     return (&I16Patch{}).
@@ -1124,7 +1124,7 @@ type I32Patch struct {
     Add int32 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &I32Patch{}
+var _ thrift.Struct = (*I32Patch)(nil)
 
 func NewI32Patch() *I32Patch {
     return (&I32Patch{}).
@@ -1389,7 +1389,7 @@ type I64Patch struct {
     Add int64 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &I64Patch{}
+var _ thrift.Struct = (*I64Patch)(nil)
 
 func NewI64Patch() *I64Patch {
     return (&I64Patch{}).
@@ -1654,7 +1654,7 @@ type FloatPatch struct {
     Add float32 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &FloatPatch{}
+var _ thrift.Struct = (*FloatPatch)(nil)
 
 func NewFloatPatch() *FloatPatch {
     return (&FloatPatch{}).
@@ -1919,7 +1919,7 @@ type DoublePatch struct {
     Add float64 `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DoublePatch{}
+var _ thrift.Struct = (*DoublePatch)(nil)
 
 func NewDoublePatch() *DoublePatch {
     return (&DoublePatch{}).
@@ -2185,7 +2185,7 @@ type StringPatch struct {
     Append string `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StringPatch{}
+var _ thrift.Struct = (*StringPatch)(nil)
 
 func NewStringPatch() *StringPatch {
     return (&StringPatch{}).
@@ -2509,7 +2509,7 @@ type BinaryPatch struct {
     Append standard.ByteBuffer `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BinaryPatch{}
+var _ thrift.Struct = (*BinaryPatch)(nil)
 
 func NewBinaryPatch() *BinaryPatch {
     return (&BinaryPatch{}).

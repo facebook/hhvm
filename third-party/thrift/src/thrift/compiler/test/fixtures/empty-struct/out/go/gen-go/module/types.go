@@ -19,7 +19,7 @@ var _ = thrift.ZERO
 type Empty struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Empty{}
+var _ thrift.Struct = (*Empty)(nil)
 
 func NewEmpty() *Empty {
     return (&Empty{})
@@ -92,7 +92,7 @@ func (x *Empty) String() string {
 type Nada struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Nada{}
+var _ thrift.Struct = (*Nada)(nil)
 
 func NewNada() *Nada {
     return (&Nada{})

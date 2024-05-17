@@ -21,7 +21,7 @@ type Accessory struct {
     Name string `thrift:"Name,2" json:"Name" db:"Name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Accessory{}
+var _ thrift.Struct = (*Accessory)(nil)
 
 func NewAccessory() *Accessory {
     return (&Accessory{}).
@@ -212,7 +212,7 @@ type PartName struct {
     Name string `thrift:"Name,2" json:"Name" db:"Name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &PartName{}
+var _ thrift.Struct = (*PartName)(nil)
 
 func NewPartName() *PartName {
     return (&PartName{}).

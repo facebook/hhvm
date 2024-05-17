@@ -108,7 +108,7 @@ type MyStruct struct {
     NoHackCodegenField string `thrift:"no_hack_codegen_field,9" json:"no_hack_codegen_field" db:"no_hack_codegen_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -762,7 +762,7 @@ func (x *MyStruct) String() string {
 type MyDataItem struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataItem{}
+var _ thrift.Struct = (*MyDataItem)(nil)
 
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
@@ -839,7 +839,7 @@ type MyUnion struct {
     FloatSet []float32 `thrift:"floatSet,4" json:"floatSet,omitempty" db:"floatSet"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnion{}
+var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -1265,7 +1265,7 @@ type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ReservedKeyword{}
+var _ thrift.Struct = (*ReservedKeyword)(nil)
 
 func NewReservedKeyword() *ReservedKeyword {
     return (&ReservedKeyword{}).
@@ -1397,7 +1397,7 @@ type UnionToBeRenamed struct {
     ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field,omitempty" db:"reserved_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &UnionToBeRenamed{}
+var _ thrift.Struct = (*UnionToBeRenamed)(nil)
 
 func NewUnionToBeRenamed() *UnionToBeRenamed {
     return (&UnionToBeRenamed{})

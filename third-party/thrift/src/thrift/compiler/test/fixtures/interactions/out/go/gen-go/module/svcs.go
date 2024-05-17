@@ -47,7 +47,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -64,8 +64,8 @@ type MyServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = &MyServiceClient{}
-var _ MyServiceContextClientInterface = &MyServiceClient{}
+var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -101,7 +101,7 @@ func (c *MyServiceClient) FooContext(ctx context.Context) (error) {
 type reqMyServiceFoo struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceFoo{}
+var _ thrift.Struct = (*reqMyServiceFoo)(nil)
 
 // Deprecated: MyServiceFooArgsDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceFooArgsDeprecated = reqMyServiceFoo
@@ -176,8 +176,8 @@ func (x *reqMyServiceFoo) String() string {
 type respMyServiceFoo struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceFoo{}
-var _ thrift.WritableResult = &respMyServiceFoo{}
+var _ thrift.Struct = (*respMyServiceFoo)(nil)
+var _ thrift.WritableResult = (*respMyServiceFoo)(nil)
 
 // Deprecated: MyServiceFooResultDeprecated is deprecated, since it is supposed to be internal.
 type MyServiceFooResultDeprecated = respMyServiceFoo
@@ -261,7 +261,7 @@ type MyServiceProcessor struct {
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -307,7 +307,7 @@ type procFuncMyServiceFoo struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncMyServiceFoo{}
+var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceFoo)(nil)
 
 func (p *procFuncMyServiceFoo) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceFoo()

@@ -76,7 +76,7 @@ type Included struct {
     MyTransitiveField *transitive.Foo `thrift:"MyTransitiveField,2" json:"MyTransitiveField" db:"MyTransitiveField"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Included{}
+var _ thrift.Struct = (*Included)(nil)
 
 func NewIncluded() *Included {
     return (&Included{}).

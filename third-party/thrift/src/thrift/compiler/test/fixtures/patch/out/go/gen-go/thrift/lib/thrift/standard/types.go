@@ -160,7 +160,7 @@ type TypeUri struct {
     ScopedName *string `thrift:"scopedName,3" json:"scopedName,omitempty" db:"scopedName"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TypeUri{}
+var _ thrift.Struct = (*TypeUri)(nil)
 
 func NewTypeUri() *TypeUri {
     return (&TypeUri{})
@@ -487,7 +487,7 @@ type TypeName struct {
     TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType,omitempty" db:"typedefType"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TypeName{}
+var _ thrift.Struct = (*TypeName)(nil)
 
 func NewTypeName() *TypeName {
     return (&TypeName{})

@@ -644,7 +644,7 @@ func MyForwardRefEnumFromString(s string) (MyForwardRefEnum, error) {
 type EmptyStruct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &EmptyStruct{}
+var _ thrift.Struct = (*EmptyStruct)(nil)
 
 func NewEmptyStruct() *EmptyStruct {
     return (&EmptyStruct{})
@@ -718,7 +718,7 @@ type DecoratedStruct struct {
     Field string `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DecoratedStruct{}
+var _ thrift.Struct = (*DecoratedStruct)(nil)
 
 func NewDecoratedStruct() *DecoratedStruct {
     return (&DecoratedStruct{}).
@@ -857,7 +857,7 @@ type ContainerStruct struct {
     FieldA []int32 `thrift:"fieldA,12" json:"fieldA" db:"fieldA"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ContainerStruct{}
+var _ thrift.Struct = (*ContainerStruct)(nil)
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{}).
@@ -1607,7 +1607,7 @@ type CppTypeStruct struct {
     FieldA []int32 `thrift:"fieldA,1" json:"fieldA" db:"fieldA"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CppTypeStruct{}
+var _ thrift.Struct = (*CppTypeStruct)(nil)
 
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{}).
@@ -1776,7 +1776,7 @@ type VirtualStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &VirtualStruct{}
+var _ thrift.Struct = (*VirtualStruct)(nil)
 
 func NewVirtualStruct() *VirtualStruct {
     return (&VirtualStruct{}).
@@ -1909,7 +1909,7 @@ type MyStructWithForwardRefEnum struct {
     B MyForwardRefEnum `thrift:"b,2" json:"b" db:"b"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructWithForwardRefEnum{}
+var _ thrift.Struct = (*MyStructWithForwardRefEnum)(nil)
 
 func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
     return (&MyStructWithForwardRefEnum{}).
@@ -2106,7 +2106,7 @@ type TrivialNumeric struct {
     B bool `thrift:"b,2" json:"b" db:"b"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TrivialNumeric{}
+var _ thrift.Struct = (*TrivialNumeric)(nil)
 
 func NewTrivialNumeric() *TrivialNumeric {
     return (&TrivialNumeric{}).
@@ -2297,7 +2297,7 @@ type TrivialNestedWithDefault struct {
     N *TrivialNumeric `thrift:"n,2" json:"n" db:"n"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TrivialNestedWithDefault{}
+var _ thrift.Struct = (*TrivialNestedWithDefault)(nil)
 
 func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     return (&TrivialNestedWithDefault{}).
@@ -2513,7 +2513,7 @@ type ComplexString struct {
     B map[string]int32 `thrift:"b,2" json:"b" db:"b"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ComplexString{}
+var _ thrift.Struct = (*ComplexString)(nil)
 
 func NewComplexString() *ComplexString {
     return (&ComplexString{}).
@@ -2758,7 +2758,7 @@ type ComplexNestedWithDefault struct {
     N *ComplexString `thrift:"n,2" json:"n" db:"n"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ComplexNestedWithDefault{}
+var _ thrift.Struct = (*ComplexNestedWithDefault)(nil)
 
 func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     return (&ComplexNestedWithDefault{}).
@@ -2981,7 +2981,7 @@ type MinPadding struct {
     Tiny int8 `thrift:"tiny,5,required" json:"tiny" db:"tiny"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MinPadding{}
+var _ thrift.Struct = (*MinPadding)(nil)
 
 func NewMinPadding() *MinPadding {
     return (&MinPadding{}).
@@ -3351,7 +3351,7 @@ type MinPaddingWithCustomType struct {
     Tiny int8 `thrift:"tiny,5" json:"tiny" db:"tiny"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MinPaddingWithCustomType{}
+var _ thrift.Struct = (*MinPaddingWithCustomType)(nil)
 
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
     return (&MinPaddingWithCustomType{}).
@@ -3720,7 +3720,7 @@ type MyStruct struct {
     Data *MyDataItem `thrift:"data,4" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -4046,7 +4046,7 @@ func (x *MyStruct) String() string {
 type MyDataItem struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataItem{}
+var _ thrift.Struct = (*MyDataItem)(nil)
 
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
@@ -4120,7 +4120,7 @@ type Renaming struct {
     Foo int64 `thrift:"foo,1" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Renaming{}
+var _ thrift.Struct = (*Renaming)(nil)
 
 func NewRenaming() *Renaming {
     return (&Renaming{}).
@@ -4253,7 +4253,7 @@ type AnnotatedTypes struct {
     ListField SomeListOfTypeMap_2468 `thrift:"list_field,2" json:"list_field" db:"list_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AnnotatedTypes{}
+var _ thrift.Struct = (*AnnotatedTypes)(nil)
 
 func NewAnnotatedTypes() *AnnotatedTypes {
     return (&AnnotatedTypes{}).
@@ -4462,7 +4462,7 @@ type ForwardUsageRoot struct {
     ForwardUsageByRef *ForwardUsageByRef `thrift:"ForwardUsageByRef,2,optional" json:"ForwardUsageByRef,omitempty" db:"ForwardUsageByRef"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ForwardUsageRoot{}
+var _ thrift.Struct = (*ForwardUsageRoot)(nil)
 
 func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
@@ -4692,7 +4692,7 @@ type ForwardUsageStruct struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ForwardUsageStruct{}
+var _ thrift.Struct = (*ForwardUsageStruct)(nil)
 
 func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
@@ -4844,7 +4844,7 @@ type ForwardUsageByRef struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &ForwardUsageByRef{}
+var _ thrift.Struct = (*ForwardUsageByRef)(nil)
 
 func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
@@ -4996,7 +4996,7 @@ type IncompleteMap struct {
     Field map[int32]*IncompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IncompleteMap{}
+var _ thrift.Struct = (*IncompleteMap)(nil)
 
 func NewIncompleteMap() *IncompleteMap {
     return (&IncompleteMap{})
@@ -5185,7 +5185,7 @@ func (x *IncompleteMap) String() string {
 type IncompleteMapDep struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IncompleteMapDep{}
+var _ thrift.Struct = (*IncompleteMapDep)(nil)
 
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{})
@@ -5259,7 +5259,7 @@ type CompleteMap struct {
     Field map[int32]*CompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CompleteMap{}
+var _ thrift.Struct = (*CompleteMap)(nil)
 
 func NewCompleteMap() *CompleteMap {
     return (&CompleteMap{})
@@ -5448,7 +5448,7 @@ func (x *CompleteMap) String() string {
 type CompleteMapDep struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CompleteMapDep{}
+var _ thrift.Struct = (*CompleteMapDep)(nil)
 
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{})
@@ -5522,7 +5522,7 @@ type IncompleteList struct {
     Field []*IncompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IncompleteList{}
+var _ thrift.Struct = (*IncompleteList)(nil)
 
 func NewIncompleteList() *IncompleteList {
     return (&IncompleteList{})
@@ -5694,7 +5694,7 @@ func (x *IncompleteList) String() string {
 type IncompleteListDep struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IncompleteListDep{}
+var _ thrift.Struct = (*IncompleteListDep)(nil)
 
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{})
@@ -5768,7 +5768,7 @@ type CompleteList struct {
     Field []*CompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CompleteList{}
+var _ thrift.Struct = (*CompleteList)(nil)
 
 func NewCompleteList() *CompleteList {
     return (&CompleteList{})
@@ -5940,7 +5940,7 @@ func (x *CompleteList) String() string {
 type CompleteListDep struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &CompleteListDep{}
+var _ thrift.Struct = (*CompleteListDep)(nil)
 
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{})
@@ -6014,7 +6014,7 @@ type AdaptedList struct {
     Field []*AdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptedList{}
+var _ thrift.Struct = (*AdaptedList)(nil)
 
 func NewAdaptedList() *AdaptedList {
     return (&AdaptedList{})
@@ -6187,7 +6187,7 @@ type AdaptedListDep struct {
     Field *AdaptedList `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AdaptedListDep{}
+var _ thrift.Struct = (*AdaptedListDep)(nil)
 
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{}).
@@ -6340,7 +6340,7 @@ type DependentAdaptedList struct {
     Field []*DependentAdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DependentAdaptedList{}
+var _ thrift.Struct = (*DependentAdaptedList)(nil)
 
 func NewDependentAdaptedList() *DependentAdaptedList {
     return (&DependentAdaptedList{})
@@ -6513,7 +6513,7 @@ type DependentAdaptedListDep struct {
     Field *int16 `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &DependentAdaptedListDep{}
+var _ thrift.Struct = (*DependentAdaptedListDep)(nil)
 
 func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
@@ -6666,7 +6666,7 @@ type AllocatorAware struct {
     AaShared I32_9314 `thrift:"aa_shared,7" json:"aa_shared" db:"aa_shared"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AllocatorAware{}
+var _ thrift.Struct = (*AllocatorAware)(nil)
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{}).
@@ -7177,7 +7177,7 @@ type AllocatorAware2 struct {
     BoxField *int32 `thrift:"box_field,2,optional" json:"box_field,omitempty" db:"box_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &AllocatorAware2{}
+var _ thrift.Struct = (*AllocatorAware2)(nil)
 
 func NewAllocatorAware2() *AllocatorAware2 {
     return (&AllocatorAware2{}).
@@ -7384,7 +7384,7 @@ type TypedefStruct struct {
     UintTypedefField UintTypedef `thrift:"UintTypedef_field,3" json:"UintTypedef_field" db:"UintTypedef_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TypedefStruct{}
+var _ thrift.Struct = (*TypedefStruct)(nil)
 
 func NewTypedefStruct() *TypedefStruct {
     return (&TypedefStruct{}).
@@ -7634,7 +7634,7 @@ type StructWithDoubleUnderscores struct {
     _Field int32 `thrift:"__field,1" json:"__field" db:"__field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &StructWithDoubleUnderscores{}
+var _ thrift.Struct = (*StructWithDoubleUnderscores)(nil)
 
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
     return (&StructWithDoubleUnderscores{}).

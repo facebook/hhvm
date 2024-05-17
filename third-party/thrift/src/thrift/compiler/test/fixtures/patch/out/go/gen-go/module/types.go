@@ -62,7 +62,7 @@ type MyData struct {
     Data2 int32 `thrift:"data2,2" json:"data2" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyData{}
+var _ thrift.Struct = (*MyData)(nil)
 
 func NewMyData() *MyData {
     return (&MyData{}).
@@ -253,7 +253,7 @@ type MyDataWithCustomDefault struct {
     Data2 int32 `thrift:"data2,2" json:"data2" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataWithCustomDefault{}
+var _ thrift.Struct = (*MyDataWithCustomDefault)(nil)
 
 func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
     return (&MyDataWithCustomDefault{}).
@@ -443,7 +443,7 @@ type InnerUnion struct {
     InnerOption []byte `thrift:"innerOption,1" json:"innerOption,omitempty" db:"innerOption"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InnerUnion{}
+var _ thrift.Struct = (*InnerUnion)(nil)
 
 func NewInnerUnion() *InnerUnion {
     return (&InnerUnion{})
@@ -603,7 +603,7 @@ type MyUnion struct {
     Option3 *InnerUnion `thrift:"option3,3" json:"option3,omitempty" db:"option3"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnion{}
+var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -954,7 +954,7 @@ type MyStruct struct {
     StructWithFieldCustomDefault *MyData `thrift:"structWithFieldCustomDefault,1" json:"structWithFieldCustomDefault" db:"structWithFieldCustomDefault"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -3568,7 +3568,7 @@ func (x *MyStruct) String() string {
 type LateDefStruct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LateDefStruct{}
+var _ thrift.Struct = (*LateDefStruct)(nil)
 
 func NewLateDefStruct() *LateDefStruct {
     return (&LateDefStruct{})
@@ -3642,7 +3642,7 @@ type Recursive struct {
     Nodes map[string]*Recursive `thrift:"nodes,-1" json:"nodes" db:"nodes"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Recursive{}
+var _ thrift.Struct = (*Recursive)(nil)
 
 func NewRecursive() *Recursive {
     return (&Recursive{}).
@@ -3829,7 +3829,7 @@ type Bar struct {
     Loop *Loop `thrift:"loop,-1" json:"loop" db:"loop"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Bar{}
+var _ thrift.Struct = (*Bar)(nil)
 
 func NewBar() *Bar {
     return (&Bar{}).
@@ -3982,7 +3982,7 @@ type Loop struct {
     Bar *Bar `thrift:"bar,-1" json:"bar" db:"bar"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Loop{}
+var _ thrift.Struct = (*Loop)(nil)
 
 func NewLoop() *Loop {
     return (&Loop{}).
@@ -4141,7 +4141,7 @@ type RefFields struct {
     OptBox []int32 `thrift:"opt_box,7,optional" json:"opt_box,omitempty" db:"opt_box"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFields{}
+var _ thrift.Struct = (*RefFields)(nil)
 
 func NewRefFields() *RefFields {
     return (&RefFields{}).
@@ -4897,7 +4897,7 @@ type MyDataPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataPatch{}
+var _ thrift.Struct = (*MyDataPatch)(nil)
 
 func NewMyDataPatch() *MyDataPatch {
     return (&MyDataPatch{}).
@@ -5412,7 +5412,7 @@ type MyDataFieldPatch struct {
     Data2 *patch.I32Patch `thrift:"data2,2" json:"data2" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataFieldPatch{}
+var _ thrift.Struct = (*MyDataFieldPatch)(nil)
 
 func NewMyDataFieldPatch() *MyDataFieldPatch {
     return (&MyDataFieldPatch{}).
@@ -5645,7 +5645,7 @@ type MyDataEnsureStruct struct {
     Data2 *int32 `thrift:"data2,2,optional" json:"data2,omitempty" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataEnsureStruct{}
+var _ thrift.Struct = (*MyDataEnsureStruct)(nil)
 
 func NewMyDataEnsureStruct() *MyDataEnsureStruct {
     return (&MyDataEnsureStruct{})
@@ -5866,7 +5866,7 @@ type MyDataSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataSafePatch{}
+var _ thrift.Struct = (*MyDataSafePatch)(nil)
 
 func NewMyDataSafePatch() *MyDataSafePatch {
     return (&MyDataSafePatch{}).
@@ -6069,7 +6069,7 @@ type MyDataWithCustomDefaultPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
+var _ thrift.Struct = (*MyDataWithCustomDefaultPatch)(nil)
 
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
     return (&MyDataWithCustomDefaultPatch{}).
@@ -6584,7 +6584,7 @@ type MyDataWithCustomDefaultFieldPatch struct {
     Data2 *patch.I32Patch `thrift:"data2,2" json:"data2" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataWithCustomDefaultFieldPatch{}
+var _ thrift.Struct = (*MyDataWithCustomDefaultFieldPatch)(nil)
 
 func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
     return (&MyDataWithCustomDefaultFieldPatch{}).
@@ -6817,7 +6817,7 @@ type MyDataWithCustomDefaultEnsureStruct struct {
     Data2 *int32 `thrift:"data2,2,optional" json:"data2,omitempty" db:"data2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataWithCustomDefaultEnsureStruct{}
+var _ thrift.Struct = (*MyDataWithCustomDefaultEnsureStruct)(nil)
 
 func NewMyDataWithCustomDefaultEnsureStruct() *MyDataWithCustomDefaultEnsureStruct {
     return (&MyDataWithCustomDefaultEnsureStruct{})
@@ -7038,7 +7038,7 @@ type MyDataWithCustomDefaultSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyDataWithCustomDefaultSafePatch{}
+var _ thrift.Struct = (*MyDataWithCustomDefaultSafePatch)(nil)
 
 func NewMyDataWithCustomDefaultSafePatch() *MyDataWithCustomDefaultSafePatch {
     return (&MyDataWithCustomDefaultSafePatch{}).
@@ -7240,7 +7240,7 @@ type InnerUnionPatch struct {
     Patch *InnerUnionFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InnerUnionPatch{}
+var _ thrift.Struct = (*InnerUnionPatch)(nil)
 
 func NewInnerUnionPatch() *InnerUnionPatch {
     return (&InnerUnionPatch{}).
@@ -7687,7 +7687,7 @@ type InnerUnionFieldPatch struct {
     InnerOption *patch.BinaryPatch `thrift:"innerOption,1" json:"innerOption" db:"innerOption"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InnerUnionFieldPatch{}
+var _ thrift.Struct = (*InnerUnionFieldPatch)(nil)
 
 func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
     return (&InnerUnionFieldPatch{}).
@@ -7841,7 +7841,7 @@ type InnerUnionSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &InnerUnionSafePatch{}
+var _ thrift.Struct = (*InnerUnionSafePatch)(nil)
 
 func NewInnerUnionSafePatch() *InnerUnionSafePatch {
     return (&InnerUnionSafePatch{}).
@@ -8043,7 +8043,7 @@ type MyUnionPatch struct {
     Patch *MyUnionFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnionPatch{}
+var _ thrift.Struct = (*MyUnionPatch)(nil)
 
 func NewMyUnionPatch() *MyUnionPatch {
     return (&MyUnionPatch{}).
@@ -8492,7 +8492,7 @@ type MyUnionFieldPatch struct {
     Option3 *InnerUnionPatch `thrift:"option3,3" json:"option3" db:"option3"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnionFieldPatch{}
+var _ thrift.Struct = (*MyUnionFieldPatch)(nil)
 
 func NewMyUnionFieldPatch() *MyUnionFieldPatch {
     return (&MyUnionFieldPatch{}).
@@ -8804,7 +8804,7 @@ type MyUnionSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyUnionSafePatch{}
+var _ thrift.Struct = (*MyUnionSafePatch)(nil)
 
 func NewMyUnionSafePatch() *MyUnionSafePatch {
     return (&MyUnionSafePatch{}).
@@ -9007,7 +9007,7 @@ type MyStructPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructPatch{}
+var _ thrift.Struct = (*MyStructPatch)(nil)
 
 func NewMyStructPatch() *MyStructPatch {
     return (&MyStructPatch{}).
@@ -9522,7 +9522,7 @@ type MyStructField10Patch struct {
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField10Patch{}
+var _ thrift.Struct = (*MyStructField10Patch)(nil)
 
 func NewMyStructField10Patch() *MyStructField10Patch {
     return (&MyStructField10Patch{}).
@@ -9729,7 +9729,7 @@ type MyStructField23Patch struct {
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField23Patch{}
+var _ thrift.Struct = (*MyStructField23Patch)(nil)
 
 func NewMyStructField23Patch() *MyStructField23Patch {
     return (&MyStructField23Patch{}).
@@ -9938,7 +9938,7 @@ type MyStructField26Patch struct {
     Append []int16 `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField26Patch{}
+var _ thrift.Struct = (*MyStructField26Patch)(nil)
 
 func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{}).
@@ -10361,7 +10361,7 @@ type MyStructField27Patch struct {
     Add []string `thrift:"add,8" json:"add" db:"add"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField27Patch{}
+var _ thrift.Struct = (*MyStructField27Patch)(nil)
 
 func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{}).
@@ -10787,7 +10787,7 @@ type MyStructField28Patch struct {
     Put map[string]string `thrift:"put,9" json:"put" db:"put"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField28Patch{}
+var _ thrift.Struct = (*MyStructField28Patch)(nil)
 
 func NewMyStructField28Patch() *MyStructField28Patch {
     return (&MyStructField28Patch{}).
@@ -11582,7 +11582,7 @@ type MyStructField29Patch struct {
     Append []map[string]int32 `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField29Patch{}
+var _ thrift.Struct = (*MyStructField29Patch)(nil)
 
 func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{}).
@@ -12146,7 +12146,7 @@ type MyStructField30Patch struct {
     Put map[string]map[string]int32 `thrift:"put,9" json:"put" db:"put"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField30Patch{}
+var _ thrift.Struct = (*MyStructField30Patch)(nil)
 
 func NewMyStructField30Patch() *MyStructField30Patch {
     return (&MyStructField30Patch{}).
@@ -13082,7 +13082,7 @@ type MyStructField30Patch1 struct {
     Put map[string]int32 `thrift:"put,9" json:"put" db:"put"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructField30Patch1{}
+var _ thrift.Struct = (*MyStructField30Patch1)(nil)
 
 func NewMyStructField30Patch1() *MyStructField30Patch1 {
     return (&MyStructField30Patch1{}).
@@ -13906,7 +13906,7 @@ type MyStructFieldPatch struct {
     StructWithFieldCustomDefault *MyDataPatch `thrift:"structWithFieldCustomDefault,1" json:"structWithFieldCustomDefault" db:"structWithFieldCustomDefault"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructFieldPatch{}
+var _ thrift.Struct = (*MyStructFieldPatch)(nil)
 
 func NewMyStructFieldPatch() *MyStructFieldPatch {
     return (&MyStructFieldPatch{}).
@@ -16619,7 +16619,7 @@ type MyStructEnsureStruct struct {
     StructWithFieldCustomDefault *MyData `thrift:"structWithFieldCustomDefault,1,optional" json:"structWithFieldCustomDefault,omitempty" db:"structWithFieldCustomDefault"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructEnsureStruct{}
+var _ thrift.Struct = (*MyStructEnsureStruct)(nil)
 
 func NewMyStructEnsureStruct() *MyStructEnsureStruct {
     return (&MyStructEnsureStruct{})
@@ -19385,7 +19385,7 @@ type MyStructSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStructSafePatch{}
+var _ thrift.Struct = (*MyStructSafePatch)(nil)
 
 func NewMyStructSafePatch() *MyStructSafePatch {
     return (&MyStructSafePatch{}).
@@ -19588,7 +19588,7 @@ type LateDefStructPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LateDefStructPatch{}
+var _ thrift.Struct = (*LateDefStructPatch)(nil)
 
 func NewLateDefStructPatch() *LateDefStructPatch {
     return (&LateDefStructPatch{}).
@@ -20101,7 +20101,7 @@ func (x *LateDefStructPatch) String() string {
 type LateDefStructFieldPatch struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LateDefStructFieldPatch{}
+var _ thrift.Struct = (*LateDefStructFieldPatch)(nil)
 
 func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
     return (&LateDefStructFieldPatch{})
@@ -20174,7 +20174,7 @@ func (x *LateDefStructFieldPatch) String() string {
 type LateDefStructEnsureStruct struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LateDefStructEnsureStruct{}
+var _ thrift.Struct = (*LateDefStructEnsureStruct)(nil)
 
 func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
     return (&LateDefStructEnsureStruct{})
@@ -20249,7 +20249,7 @@ type LateDefStructSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LateDefStructSafePatch{}
+var _ thrift.Struct = (*LateDefStructSafePatch)(nil)
 
 func NewLateDefStructSafePatch() *LateDefStructSafePatch {
     return (&LateDefStructSafePatch{}).
@@ -20452,7 +20452,7 @@ type RecursivePatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RecursivePatch{}
+var _ thrift.Struct = (*RecursivePatch)(nil)
 
 func NewRecursivePatch() *RecursivePatch {
     return (&RecursivePatch{}).
@@ -20967,7 +20967,7 @@ type RecursiveField1Patch struct {
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RecursiveField1Patch{}
+var _ thrift.Struct = (*RecursiveField1Patch)(nil)
 
 func NewRecursiveField1Patch() *RecursiveField1Patch {
     return (&RecursiveField1Patch{}).
@@ -21215,7 +21215,7 @@ type RecursiveFieldPatch struct {
     Nodes *RecursiveField1Patch `thrift:"nodes,-1" json:"nodes" db:"nodes"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RecursiveFieldPatch{}
+var _ thrift.Struct = (*RecursiveFieldPatch)(nil)
 
 func NewRecursiveFieldPatch() *RecursiveFieldPatch {
     return (&RecursiveFieldPatch{}).
@@ -21368,7 +21368,7 @@ type RecursiveEnsureStruct struct {
     Nodes map[string]*Recursive `thrift:"nodes,-1,optional" json:"nodes,omitempty" db:"nodes"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RecursiveEnsureStruct{}
+var _ thrift.Struct = (*RecursiveEnsureStruct)(nil)
 
 func NewRecursiveEnsureStruct() *RecursiveEnsureStruct {
     return (&RecursiveEnsureStruct{})
@@ -21559,7 +21559,7 @@ type RecursiveSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RecursiveSafePatch{}
+var _ thrift.Struct = (*RecursiveSafePatch)(nil)
 
 func NewRecursiveSafePatch() *RecursiveSafePatch {
     return (&RecursiveSafePatch{}).
@@ -21762,7 +21762,7 @@ type BarPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BarPatch{}
+var _ thrift.Struct = (*BarPatch)(nil)
 
 func NewBarPatch() *BarPatch {
     return (&BarPatch{}).
@@ -22276,7 +22276,7 @@ type BarFieldPatch struct {
     Loop *LoopPatch `thrift:"loop,-1" json:"loop" db:"loop"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BarFieldPatch{}
+var _ thrift.Struct = (*BarFieldPatch)(nil)
 
 func NewBarFieldPatch() *BarFieldPatch {
     return (&BarFieldPatch{}).
@@ -22429,7 +22429,7 @@ type BarEnsureStruct struct {
     Loop *Loop `thrift:"loop,-1,optional" json:"loop,omitempty" db:"loop"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BarEnsureStruct{}
+var _ thrift.Struct = (*BarEnsureStruct)(nil)
 
 func NewBarEnsureStruct() *BarEnsureStruct {
     return (&BarEnsureStruct{})
@@ -22582,7 +22582,7 @@ type BarSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &BarSafePatch{}
+var _ thrift.Struct = (*BarSafePatch)(nil)
 
 func NewBarSafePatch() *BarSafePatch {
     return (&BarSafePatch{}).
@@ -22781,7 +22781,7 @@ type LoopPatch struct {
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LoopPatch{}
+var _ thrift.Struct = (*LoopPatch)(nil)
 
 func NewLoopPatch() *LoopPatch {
     return (&LoopPatch{}).
@@ -22992,7 +22992,7 @@ type LoopSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &LoopSafePatch{}
+var _ thrift.Struct = (*LoopSafePatch)(nil)
 
 func NewLoopSafePatch() *LoopSafePatch {
     return (&LoopSafePatch{}).
@@ -23195,7 +23195,7 @@ type RefFieldsPatch struct {
     Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsPatch{}
+var _ thrift.Struct = (*RefFieldsPatch)(nil)
 
 func NewRefFieldsPatch() *RefFieldsPatch {
     return (&RefFieldsPatch{}).
@@ -23712,7 +23712,7 @@ type RefFieldsField1Patch struct {
     Append []int32 `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsField1Patch{}
+var _ thrift.Struct = (*RefFieldsField1Patch)(nil)
 
 func NewRefFieldsField1Patch() *RefFieldsField1Patch {
     return (&RefFieldsField1Patch{}).
@@ -24135,7 +24135,7 @@ type RefFieldsField4Patch struct {
     Append []int32 `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsField4Patch{}
+var _ thrift.Struct = (*RefFieldsField4Patch)(nil)
 
 func NewRefFieldsField4Patch() *RefFieldsField4Patch {
     return (&RefFieldsField4Patch{}).
@@ -24558,7 +24558,7 @@ type RefFieldsField7Patch struct {
     Append []int32 `thrift:"append,9" json:"append" db:"append"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsField7Patch{}
+var _ thrift.Struct = (*RefFieldsField7Patch)(nil)
 
 func NewRefFieldsField7Patch() *RefFieldsField7Patch {
     return (&RefFieldsField7Patch{}).
@@ -24980,7 +24980,7 @@ type RefFieldsFieldPatch struct {
     OptBox *RefFieldsField7Patch `thrift:"opt_box,7" json:"opt_box" db:"opt_box"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsFieldPatch{}
+var _ thrift.Struct = (*RefFieldsFieldPatch)(nil)
 
 func NewRefFieldsFieldPatch() *RefFieldsFieldPatch {
     return (&RefFieldsFieldPatch{}).
@@ -25297,7 +25297,7 @@ type RefFieldsEnsureStruct struct {
     OptBox []int32 `thrift:"opt_box,7,optional" json:"opt_box,omitempty" db:"opt_box"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsEnsureStruct{}
+var _ thrift.Struct = (*RefFieldsEnsureStruct)(nil)
 
 func NewRefFieldsEnsureStruct() *RefFieldsEnsureStruct {
     return (&RefFieldsEnsureStruct{})
@@ -26058,7 +26058,7 @@ type RefFieldsSafePatch struct {
     Data []byte `thrift:"data,2" json:"data" db:"data"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsSafePatch{}
+var _ thrift.Struct = (*RefFieldsSafePatch)(nil)
 
 func NewRefFieldsSafePatch() *RefFieldsSafePatch {
     return (&RefFieldsSafePatch{}).

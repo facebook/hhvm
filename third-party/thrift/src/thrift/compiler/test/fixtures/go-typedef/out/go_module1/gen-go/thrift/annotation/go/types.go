@@ -20,7 +20,7 @@ type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Name{}
+var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
     return (&Name{}).
@@ -152,7 +152,7 @@ type Tag struct {
     Tag string `thrift:"tag,1" json:"tag" db:"tag"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Tag{}
+var _ thrift.Struct = (*Tag)(nil)
 
 func NewTag() *Tag {
     return (&Tag{}).

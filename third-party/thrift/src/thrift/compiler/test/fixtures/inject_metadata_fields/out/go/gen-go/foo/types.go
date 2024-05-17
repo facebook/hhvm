@@ -22,7 +22,7 @@ type Fields struct {
     InjectedUnstructuredAnnotationField *string `thrift:"injected_unstructured_annotation_field,102,optional" json:"injected_unstructured_annotation_field,omitempty" db:"injected_unstructured_annotation_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Fields{}
+var _ thrift.Struct = (*Fields)(nil)
 
 func NewFields() *Fields {
     return (&Fields{}).

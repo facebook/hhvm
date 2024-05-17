@@ -22,7 +22,7 @@ type IncludesAlso struct {
     Also *includesAlso.Also `thrift:"also,1" json:"also" db:"also"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &IncludesAlso{}
+var _ thrift.Struct = (*IncludesAlso)(nil)
 
 func NewIncludesAlso() *IncludesAlso {
     return (&IncludesAlso{}).

@@ -20,7 +20,7 @@ type Foo struct {
     A int64 `thrift:"a,1" json:"a" db:"a"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Foo{}
+var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
     return (&Foo{}).

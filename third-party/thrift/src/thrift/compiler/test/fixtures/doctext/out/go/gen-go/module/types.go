@@ -109,7 +109,7 @@ type A struct {
     UselessField int32 `thrift:"useless_field,1" json:"useless_field" db:"useless_field"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &A{}
+var _ thrift.Struct = (*A)(nil)
 
 func NewA() *A {
     return (&A{}).
@@ -242,7 +242,7 @@ type U struct {
     S *string `thrift:"s,2" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &U{}
+var _ thrift.Struct = (*U)(nil)
 
 func NewU() *U {
     return (&U{})
@@ -480,7 +480,7 @@ type Bang struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Bang{}
+var _ thrift.Struct = (*Bang)(nil)
 
 func NewBang() *Bang {
     return (&Bang{}).

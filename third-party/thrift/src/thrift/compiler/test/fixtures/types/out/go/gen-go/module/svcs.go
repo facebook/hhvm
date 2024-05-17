@@ -52,7 +52,7 @@ type SomeServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SomeServiceChannelClientInterface = &SomeServiceChannelClient{}
+var _ SomeServiceChannelClientInterface = (*SomeServiceChannelClient)(nil)
 
 func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceChannelClient {
     return &SomeServiceChannelClient{
@@ -69,8 +69,8 @@ type SomeServiceClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ SomeServiceClientInterface = &SomeServiceClient{}
-var _ SomeServiceContextClientInterface = &SomeServiceClient{}
+var _ SomeServiceClientInterface = (*SomeServiceClient)(nil)
+var _ SomeServiceContextClientInterface = (*SomeServiceClient)(nil)
 
 func NewSomeServiceClient(prot thrift.Protocol) *SomeServiceClient {
     return &SomeServiceClient{
@@ -128,7 +128,7 @@ type reqSomeServiceBounceMap struct {
     M included.SomeMap `thrift:"m,1" json:"m" db:"m"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqSomeServiceBounceMap{}
+var _ thrift.Struct = (*reqSomeServiceBounceMap)(nil)
 
 // Deprecated: SomeServiceBounceMapArgsDeprecated is deprecated, since it is supposed to be internal.
 type SomeServiceBounceMapArgsDeprecated = reqSomeServiceBounceMap
@@ -271,8 +271,8 @@ type respSomeServiceBounceMap struct {
     Success included.SomeMap `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respSomeServiceBounceMap{}
-var _ thrift.WritableResult = &respSomeServiceBounceMap{}
+var _ thrift.Struct = (*respSomeServiceBounceMap)(nil)
+var _ thrift.WritableResult = (*respSomeServiceBounceMap)(nil)
 
 // Deprecated: SomeServiceBounceMapResultDeprecated is deprecated, since it is supposed to be internal.
 type SomeServiceBounceMapResultDeprecated = respSomeServiceBounceMap
@@ -422,7 +422,7 @@ type reqSomeServiceBinaryKeyedMap struct {
     R []int64 `thrift:"r,1" json:"r" db:"r"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
+var _ thrift.Struct = (*reqSomeServiceBinaryKeyedMap)(nil)
 
 // Deprecated: SomeServiceBinaryKeyedMapArgsDeprecated is deprecated, since it is supposed to be internal.
 type SomeServiceBinaryKeyedMapArgsDeprecated = reqSomeServiceBinaryKeyedMap
@@ -593,8 +593,8 @@ type respSomeServiceBinaryKeyedMap struct {
     Success map[*TBinary]int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
-var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
+var _ thrift.Struct = (*respSomeServiceBinaryKeyedMap)(nil)
+var _ thrift.WritableResult = (*respSomeServiceBinaryKeyedMap)(nil)
 
 // Deprecated: SomeServiceBinaryKeyedMapResultDeprecated is deprecated, since it is supposed to be internal.
 type SomeServiceBinaryKeyedMapResultDeprecated = respSomeServiceBinaryKeyedMap
@@ -798,7 +798,7 @@ type SomeServiceProcessor struct {
     handler            SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &SomeServiceProcessor{}
+var _ thrift.ProcessorContext = (*SomeServiceProcessor)(nil)
 
 func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
     p := &SomeServiceProcessor{
@@ -846,7 +846,7 @@ type procFuncSomeServiceBounceMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncSomeServiceBounceMap{}
+var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBounceMap)(nil)
 
 func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBounceMap()
@@ -898,7 +898,7 @@ type procFuncSomeServiceBinaryKeyedMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncSomeServiceBinaryKeyedMap{}
+var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBinaryKeyedMap)(nil)
 
 func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBinaryKeyedMap()

@@ -57,7 +57,7 @@ type FinderChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FinderChannelClientInterface = &FinderChannelClient{}
+var _ FinderChannelClientInterface = (*FinderChannelClient)(nil)
 
 func NewFinderChannelClient(channel thrift.RequestChannel) *FinderChannelClient {
     return &FinderChannelClient{
@@ -74,8 +74,8 @@ type FinderClient struct {
     Mu       sync.Mutex
 }
 // Compile time interface enforcer
-var _ FinderClientInterface = &FinderClient{}
-var _ FinderContextClientInterface = &FinderClient{}
+var _ FinderClientInterface = (*FinderClient)(nil)
+var _ FinderContextClientInterface = (*FinderClient)(nil)
 
 func NewFinderClient(prot thrift.Protocol) *FinderClient {
     return &FinderClient{
@@ -153,7 +153,7 @@ type reqFinderByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqFinderByPlate{}
+var _ thrift.Struct = (*reqFinderByPlate)(nil)
 
 // Deprecated: FinderByPlateArgsDeprecated is deprecated, since it is supposed to be internal.
 type FinderByPlateArgsDeprecated = reqFinderByPlate
@@ -288,8 +288,8 @@ type respFinderByPlate struct {
     Success *Automobile `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respFinderByPlate{}
-var _ thrift.WritableResult = &respFinderByPlate{}
+var _ thrift.Struct = (*respFinderByPlate)(nil)
+var _ thrift.WritableResult = (*respFinderByPlate)(nil)
 
 // Deprecated: FinderByPlateResultDeprecated is deprecated, since it is supposed to be internal.
 type FinderByPlateResultDeprecated = respFinderByPlate
@@ -447,7 +447,7 @@ type reqFinderAliasByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqFinderAliasByPlate{}
+var _ thrift.Struct = (*reqFinderAliasByPlate)(nil)
 
 // Deprecated: FinderAliasByPlateArgsDeprecated is deprecated, since it is supposed to be internal.
 type FinderAliasByPlateArgsDeprecated = reqFinderAliasByPlate
@@ -582,8 +582,8 @@ type respFinderAliasByPlate struct {
     Success *Car `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respFinderAliasByPlate{}
-var _ thrift.WritableResult = &respFinderAliasByPlate{}
+var _ thrift.Struct = (*respFinderAliasByPlate)(nil)
+var _ thrift.WritableResult = (*respFinderAliasByPlate)(nil)
 
 // Deprecated: FinderAliasByPlateResultDeprecated is deprecated, since it is supposed to be internal.
 type FinderAliasByPlateResultDeprecated = respFinderAliasByPlate
@@ -741,7 +741,7 @@ type reqFinderPreviousPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqFinderPreviousPlate{}
+var _ thrift.Struct = (*reqFinderPreviousPlate)(nil)
 
 // Deprecated: FinderPreviousPlateArgsDeprecated is deprecated, since it is supposed to be internal.
 type FinderPreviousPlateArgsDeprecated = reqFinderPreviousPlate
@@ -876,8 +876,8 @@ type respFinderPreviousPlate struct {
     Success *Plate `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respFinderPreviousPlate{}
-var _ thrift.WritableResult = &respFinderPreviousPlate{}
+var _ thrift.Struct = (*respFinderPreviousPlate)(nil)
+var _ thrift.WritableResult = (*respFinderPreviousPlate)(nil)
 
 // Deprecated: FinderPreviousPlateResultDeprecated is deprecated, since it is supposed to be internal.
 type FinderPreviousPlateResultDeprecated = respFinderPreviousPlate
@@ -1035,7 +1035,7 @@ type FinderProcessor struct {
     handler            Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = &FinderProcessor{}
+var _ thrift.ProcessorContext = (*FinderProcessor)(nil)
 
 func NewFinderProcessor(handler Finder) *FinderProcessor {
     p := &FinderProcessor{
@@ -1085,7 +1085,7 @@ type procFuncFinderByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncFinderByPlate{}
+var _ thrift.ProcessorFunctionContext = (*procFuncFinderByPlate)(nil)
 
 func (p *procFuncFinderByPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqFinderByPlate()
@@ -1137,7 +1137,7 @@ type procFuncFinderAliasByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncFinderAliasByPlate{}
+var _ thrift.ProcessorFunctionContext = (*procFuncFinderAliasByPlate)(nil)
 
 func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqFinderAliasByPlate()
@@ -1189,7 +1189,7 @@ type procFuncFinderPreviousPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = &procFuncFinderPreviousPlate{}
+var _ thrift.ProcessorFunctionContext = (*procFuncFinderPreviousPlate)(nil)
 
 func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqFinderPreviousPlate()

@@ -319,7 +319,7 @@ type Internship struct {
     School *string `thrift:"school,5,optional" json:"school,omitempty" db:"school"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Internship{}
+var _ thrift.Struct = (*Internship)(nil)
 
 func NewInternship() *Internship {
     return (&Internship{}).
@@ -730,7 +730,7 @@ type Range struct {
     Max int32 `thrift:"max,2,required" json:"max" db:"max"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Range{}
+var _ thrift.Struct = (*Range)(nil)
 
 func NewRange() *Range {
     return (&Range{}).
@@ -921,7 +921,7 @@ type Struct1 struct {
     B string `thrift:"b,2" json:"b" db:"b"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Struct1{}
+var _ thrift.Struct = (*Struct1)(nil)
 
 func NewStruct1() *Struct1 {
     return (&Struct1{}).
@@ -1114,7 +1114,7 @@ type Struct2 struct {
     D []int32 `thrift:"d,4" json:"d" db:"d"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Struct2{}
+var _ thrift.Struct = (*Struct2)(nil)
 
 func NewStruct2() *Struct2 {
     return (&Struct2{}).
@@ -1480,7 +1480,7 @@ type Struct3 struct {
     C *Struct2 `thrift:"c,3" json:"c" db:"c"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Struct3{}
+var _ thrift.Struct = (*Struct3)(nil)
 
 func NewStruct3() *Struct3 {
     return (&Struct3{}).
@@ -1751,7 +1751,7 @@ type Struct4 struct {
     C *int8 `thrift:"c,3,optional" json:"c,omitempty" db:"c"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Struct4{}
+var _ thrift.Struct = (*Struct4)(nil)
 
 func NewStruct4() *Struct4 {
     return (&Struct4{}).
@@ -2031,7 +2031,7 @@ type Union1 struct {
     D *float64 `thrift:"d,2" json:"d,omitempty" db:"d"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Union1{}
+var _ thrift.Struct = (*Union1)(nil)
 
 func NewUnion1() *Union1 {
     return (&Union1{})
@@ -2272,7 +2272,7 @@ type Union2 struct {
     U *Union1 `thrift:"u,4" json:"u,omitempty" db:"u"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Union2{}
+var _ thrift.Struct = (*Union2)(nil)
 
 func NewUnion2() *Union2 {
     return (&Union2{})

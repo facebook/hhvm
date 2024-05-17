@@ -348,7 +348,7 @@ type SomeStruct struct {
     Tags []int32 `thrift:"tags,4" json:"tags" db:"tags"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &SomeStruct{}
+var _ thrift.Struct = (*SomeStruct)(nil)
 
 func NewSomeStruct() *SomeStruct {
     return (&SomeStruct{}).
@@ -707,7 +707,7 @@ type MyStruct struct {
     Me1T2 MyEnum1 `thrift:"me1_t2,6" json:"me1_t2" db:"me1_t2"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MyStruct{}
+var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).

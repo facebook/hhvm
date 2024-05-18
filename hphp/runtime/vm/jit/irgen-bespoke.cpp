@@ -1841,7 +1841,8 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 
   emitLogArrayReach(env, loc, sk);
 
-  auto const sinkLayouts = bespoke::layoutsForSink(env.profTransIDs, ni.source);
+  auto const sinkLayouts = bespoke::layoutsForSink(
+    env.profTransIDs, ni.source, type.arrSpec().layout());
 
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);

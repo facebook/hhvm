@@ -1017,7 +1017,8 @@ ArrayLayout layoutForSource(SrcKey sk) {
 // Computes the layouts for a given sink by looking at the layouts for each
 // TransID. If there are <= 2 total layouts then they are returned in frequency
 // order. If there are more than 2 layouts, they will be unioned and returned.
-SinkLayouts layoutsForSink(const jit::TransIDSet& ids, SrcKey sk) {
+SinkLayouts layoutsForSink(
+    const jit::TransIDSet& ids, SrcKey sk, ArrayLayout knownLayout) {
   auto result = SinkLayouts{};
 
   // Track layout frequencies across the multiple layouts
@@ -1031,8 +1032,9 @@ SinkLayouts layoutsForSink(const jit::TransIDSet& ids, SrcKey sk) {
 
       // Record the frequencies for each layout
       for (auto const& layout : sls.layouts) {
-        layoutFrequencies[layout.layout.toUint16()] +=
-          layout.coverage * transCounter;
+        auto const l = layout.layout & knownLayout;
+        if (l == ArrayLayout::Bottom()) continue;
+        layoutFrequencies[l.toUint16()] += layout.coverage * transCounter;
       }
     }
   }
@@ -1060,14 +1062,14 @@ SinkLayouts layoutsForSink(const jit::TransIDSet& ids, SrcKey sk) {
     }
 
     if (sl.layout == ArrayLayout::Bottom()) {
-      return {{{ArrayLayout::Top(), 1.0}}, false};
+      return {{{knownLayout, 1.0}}, false};
     }
 
     result.layouts = {std::move(sl)};
   }
 
   if (result.layouts.empty()) {
-    return {{{ArrayLayout::Top(), 1.0}}, false};
+    return {{{knownLayout, 1.0}}, false};
   }
 
   return result;

@@ -697,9 +697,11 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const layout = [&]{
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
     if (!arrayTypeCouldBeBespoke(baseDT)) return ArrayLayout::Vanilla();
-    auto const sl = bespoke::layoutsForSink(env.profTransIDs, curSrcKey(env));
+    auto const knownLayout = base->type().arrSpec().layout();
+    auto const sl = bespoke::layoutsForSink(
+      env.profTransIDs, curSrcKey(env), knownLayout);
     assertx(sl.layouts.size() == 1);
-    return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
+    return sl.layouts[0].layout;
   }();
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
 

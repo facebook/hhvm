@@ -27,13 +27,7 @@
 
 {{! methods }}
 {{> types/struct_methods}}
-{{#program:compat?}}
 
-{{! builder }}
-{{#program:gen_builders?}}
-{{> types/struct_builder}}
-{{/program:gen_builders?}}
-{{/program:compat?}}
 {{#struct:resp?}}
 
 {{! exception }}

@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <cstring>
 
+#include <folly/Format.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -50,6 +51,43 @@ static ALWAYS_INLINE void do_cpuid(int func, uint32_t* p) {
 }
 #endif
 
+#ifdef __aarch64__
+std::string aarch64ImplementerName(uint8_t implementer) {
+  switch (implementer) {
+    case 0x00:
+      return "Reserved";
+    case 0x41:
+      return "Arm Limited";
+    case 0x42:
+      return "Broadcom Corporation";
+    case 0x43:
+      return "Cavium Inc";
+    case 0x44:
+      return "Digital Equipment Corporation";
+    case 0x46:
+      return "Fujitsu Ltd";
+    case 0x49:
+      return "Infineon Technologies AG";
+    case 0x4D:
+      return "Motorola or Freescale Semiconductor Inc";
+    case 0x4E:
+      return "NVIDIA Corporation";
+    case 0x50:
+      return "Applied Micro Circuits Corporation";
+    case 0x51:
+      return "Qualcomm Inc";
+    case 0x56:
+      return "Marvell International Ltd";
+    case 0x69:
+      return "Intel Corporation";
+    case 0xC0:
+      return "Ampere Computing";
+    default:
+      return folly::sformat("Unknown aarch64 0x{:02X}", implementer);
+  }
+}
+#endif
+
 std::string Process::GetCPUModel() {
 #if defined(__x86_64__) || defined(_M_X64)
   uint32_t regs[4];
@@ -76,6 +114,24 @@ std::string Process::GetCPUModel() {
   *brand = '\0';
   assert(brand - cpu_brand < sizeof(cpu_brand));
   return cpu_brand;
+
+#elif defined(__aarch64__)
+
+  uint64_t midr_el1;
+  asm volatile ("mrs %0, midr_el1" : "=r" (midr_el1) : : );
+
+  // top 32 bits are reserved
+  uint8_t implementer = (midr_el1 >> 24) & 0xFF;
+  uint8_t variant = (midr_el1 >> 20) & 0x0F;
+  uint16_t partnum = (midr_el1 >> 4) & 0x0FFF;
+  uint8_t revision = midr_el1 & 0x0F;
+
+  std::string model = folly::sformat("{} 0x{:01X} 0x{:03X} 0x{:01X}",
+      aarch64ImplementerName(implementer),
+      variant,
+      partnum,
+      revision);
+  return model;
 
 #else
   // On non-x64, fall back to calling uname

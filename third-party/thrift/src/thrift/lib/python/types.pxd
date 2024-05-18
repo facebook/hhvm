@@ -216,7 +216,7 @@ cdef class Union(StructOrUnion):
     cdef readonly object value
     cdef void _fbthrift_load_cache(self) except *
     cdef object _fbthrift_to_internal_data(self, type_value, value)
-    cdef void _fbthrift_update_type_value(self, type_value, value) except *
+    cdef void _fbthrift_set_union_value(self, int field_id, object value) except *
     cdef folly.iobuf.IOBuf _serialize(Union self, Protocol proto)
     cdef uint32_t _deserialize(Union self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
 

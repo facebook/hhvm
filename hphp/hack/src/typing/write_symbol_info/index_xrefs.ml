@@ -166,7 +166,7 @@ let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, fa) =
     pos
     (xrefs, fa)
 
-let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, fa) =
+let process_attribute_xref ctx File_info.{ occ; _ } (xrefs, fa) =
   let get_con_preds_from_name con_name =
     let con_name_with_ns = Utils.add_ns con_name in
     match Sym_def.get_class_by_name ctx con_name_with_ns with
@@ -189,43 +189,7 @@ let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, fa) =
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)
   let SymbolOccurrence.{ name; pos; _ } = occ in
-  if String.equal name "__Override" then
-    match opt_info with
-    | None ->
-      Hh_logger.log "WARNING: no override info for <<__Override>> instance";
-      (xrefs, fa)
-    | Some SymbolOccurrence.{ class_name; method_name; _ } ->
-      (match get_con_preds_from_name class_name with
-      | None -> (xrefs, fa)
-      | Some override_con_pred_types ->
-        (match def with
-        | None -> (xrefs, fa)
-        | Some Sym_def.{ full_name; _ } ->
-          (match Str.split (Str.regexp "::") full_name with
-          | [] -> (xrefs, fa)
-          | base_con_name :: _mem_name ->
-            (match get_con_preds_from_name base_con_name with
-            | None ->
-              Hh_logger.log
-                "WARNING: could not compute parent container type for override %s::%s"
-                class_name
-                method_name;
-              (xrefs, fa)
-            | Some base_con_pred_types ->
-              let (_fid, fa) =
-                Add_fact.method_overrides
-                  method_name
-                  base_con_name
-                  (fst base_con_pred_types)
-                  class_name
-                  (fst override_con_pred_types)
-                  fa
-              in
-              (* Cross-references for overrides could be added to xefs by calling
-                 'process_member_xref' here with 'sym_def' and 'occ.pos' *)
-              (xrefs, fa)))))
-  (* Ignore other built-in attributes *)
-  else if String.is_prefix name ~prefix:"__" then
+  if String.is_prefix name ~prefix:"__" then
     (xrefs, fa)
   (* Process user-defined attributes *)
   else
@@ -267,7 +231,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
       else
         let pos = occ.pos in
         match occ.type_ with
-        | Attribute info -> process_attribute_xref ctx sym info (xrefs, fa)
+        | Attribute _info -> process_attribute_xref ctx sym (xrefs, fa)
         | _ ->
           (match def with
           | None ->

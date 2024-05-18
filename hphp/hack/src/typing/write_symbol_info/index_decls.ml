@@ -126,7 +126,7 @@ let process_member_cluster mc fa =
        mc.File_info.class_constants
 
 let process_container_decl
-    thrift_ctx path source_text con member_clusters (xrefs, all_decls, fa) =
+    ctx thrift_ctx path source_text con member_clusters (xrefs, all_decls, fa) =
   let (con_pos, con_name) = con.c_name in
   let parent_kind = Predicate.get_parent_kind con.c_kind in
   let decl_pred = Predicate.parent_decl_predicate parent_kind in
@@ -191,6 +191,33 @@ let process_container_decl
   in
   let (method_decls, fa) =
     List.fold_right con.c_methods ~init:([], fa) ~f:(fun meth (decls, fa) ->
+        let (_, method_name) = meth.m_name in
+        let class_name = con_name in
+        let fa =
+          match
+            Sym_def.get_overridden_method_origin
+              ctx
+              ~class_name
+              ~method_name
+              ~is_static:meth.m_static
+          with
+          | None -> fa
+          | Some (origin, override_kind) ->
+            let annotation =
+              List.exists meth.m_user_attributes ~f:(function
+                  | { ua_name = (_, "__Override"); _ } -> true
+                  | _ -> false)
+            in
+            Add_fact.method_overrides
+              ~annotation
+              method_name
+              origin
+              override_kind
+              class_name
+              parent_kind
+              fa
+            |> snd
+        in
         let (pos, id) = meth.m_name in
         let (decl_id, fa) =
           process_decl_loc
@@ -397,13 +424,14 @@ let process_mod_xref fa xrefs (pos, id) =
   in
   (Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type = None }, fa)
 
-let process_tast_decls ~path tast source_text (decls, fa) =
+let process_tast_decls ctx ~path tast source_text (decls, fa) =
   let thrift_ctx = Thrift.empty () in
   List.fold tast ~init:(Xrefs.empty, decls, fa) ~f:(fun acc (def, im) ->
       match def with
       | Class en when Util.is_enum_or_enum_class en.c_kind ->
         process_enum_decl path source_text en acc
-      | Class cd -> process_container_decl thrift_ctx path source_text cd im acc
+      | Class cd ->
+        process_container_decl ctx thrift_ctx path source_text cd im acc
       | Constant gd -> process_gconst_decl path source_text gd acc
       | Fun fd -> process_func_decl path source_text fd acc
       | Typedef td -> process_typedef_decl path source_text td acc
@@ -414,11 +442,11 @@ let process_tast_decls ~path tast source_text (decls, fa) =
         (xrefs, decls, fa)
       | _ -> acc)
 
-let process_decls fa File_info.{ path; tast; source_text; cst; _ } =
+let process_decls ctx fa File_info.{ path; tast; source_text; cst; _ } =
   Fact_acc.set_ownership_unit fa (Some path);
   let (_, fa) = Add_fact.file_lines ~path source_text fa in
   let (mod_xrefs, decls, fa) =
-    process_tast_decls ~path tast source_text ([], fa)
+    process_tast_decls ctx ~path tast source_text ([], fa)
   in
   let (decls, fa) = process_cst_decls source_text path cst (decls, fa) in
   (mod_xrefs, Add_fact.file_decls ~path decls fa |> snd)

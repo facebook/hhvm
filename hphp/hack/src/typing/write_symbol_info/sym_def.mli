@@ -30,3 +30,10 @@ val get_class_by_name :
   Provider_context.t -> string -> [ `None | `Enum | `Class of Nast.class_ ]
 
 val get_kind : Provider_context.t -> string -> Ast_defs.classish_kind option
+
+val get_overridden_method_origin :
+  Provider_context.t ->
+  class_name:string ->
+  method_name:string ->
+  is_static:bool ->
+  (string * Predicate.parent_container_type) option

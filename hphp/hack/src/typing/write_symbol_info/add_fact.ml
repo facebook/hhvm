@@ -345,10 +345,17 @@ let method_defn source_text meth decl_id fa =
   Fact_acc.add_fact Predicate.(Hack MethodDefinition) json fa
 
 let method_overrides
-    meth_name base_cont_name base_cont_type der_cont_name der_cont_type fa =
+    ~annotation
+    meth_name
+    base_cont_name
+    base_cont_type
+    der_cont_name
+    der_cont_type
+    fa =
   let json =
     MethodOverrides.(
       {
+        annotation = Some annotation;
         derived = Build_fact.method_decl meth_name der_cont_name der_cont_type;
         base = Build_fact.method_decl meth_name base_cont_name base_cont_type;
       }

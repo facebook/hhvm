@@ -688,6 +688,7 @@ and MethodOverridden: sig
   and key= {
     base: MethodDeclaration.t;
     derived: MethodDeclaration.t;
+    annotation: bool option;
   }
   [@@deriving ord]
 
@@ -704,6 +705,7 @@ end = struct
   and key= {
     base: MethodDeclaration.t;
     derived: MethodDeclaration.t;
+    annotation: bool option;
   }
   [@@deriving ord]
 
@@ -711,11 +713,15 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {base; derived} = 
+  and to_json_key {base; derived; annotation} = 
     let fields = [
       ("base", MethodDeclaration.to_json base);
       ("derived", MethodDeclaration.to_json derived);
     ] in
+    let fields =
+      match annotation with
+      | None -> fields
+      | Some annotation -> ("annotation", JSON_Bool annotation) :: fields in
     JSON_Object fields
 
 end
@@ -1887,6 +1893,7 @@ and MethodOverrides: sig
   and key= {
     derived: MethodDeclaration.t;
     base: MethodDeclaration.t;
+    annotation: bool option;
   }
   [@@deriving ord]
 
@@ -1903,6 +1910,7 @@ end = struct
   and key= {
     derived: MethodDeclaration.t;
     base: MethodDeclaration.t;
+    annotation: bool option;
   }
   [@@deriving ord]
 
@@ -1910,11 +1918,15 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {derived; base} = 
+  and to_json_key {derived; base; annotation} = 
     let fields = [
       ("derived", MethodDeclaration.to_json derived);
       ("base", MethodDeclaration.to_json base);
     ] in
+    let fields =
+      match annotation with
+      | None -> fields
+      | Some annotation -> ("annotation", JSON_Bool annotation) :: fields in
     JSON_Object fields
 
 end

@@ -38,3 +38,12 @@ let get_kind ctx class_ =
   match ServerSymbolDefinition.get_class_by_name ctx class_ with
   | None -> None
   | Some cls -> Some cls.Aast.c_kind
+
+let get_overridden_method_origin ctx ~class_name ~method_name ~is_static =
+  let open Option in
+  Decl_provider.get_overridden_method ctx ~class_name ~method_name ~is_static
+  |> Decl_entry.to_option
+  >>= fun method_ ->
+  Some method_.Typing_defs.ce_origin >>= fun origin ->
+  get_kind ctx origin >>= fun kind ->
+  Some (origin, Predicate.get_parent_kind kind)

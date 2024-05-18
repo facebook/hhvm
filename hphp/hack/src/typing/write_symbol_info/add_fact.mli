@@ -74,6 +74,7 @@ val method_defn :
   Fact_id.t * Fact_acc.t
 
 val method_overrides :
+  annotation:bool ->
   string ->
   string ->
   Predicate.parent_container_type ->

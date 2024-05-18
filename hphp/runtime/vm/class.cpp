@@ -430,7 +430,7 @@ EnumValues* Class::setEnumValues(EnumValues* values) {
   auto extra = m_extra.ensureAllocated();
   EnumValues* expected = nullptr;
   if (!extra->m_enumValues.compare_exchange_strong(
-        expected, values, std::memory_order_relaxed)) {
+        expected, values, std::memory_order_acq_rel)) {
     // Already set by someone else, use theirs.
     delete values;
     return expected;
@@ -440,7 +440,7 @@ EnumValues* Class::setEnumValues(EnumValues* values) {
 }
 
 Class::ExtraData::~ExtraData() {
-  delete m_enumValues.load(std::memory_order_relaxed);
+  delete m_enumValues.load(std::memory_order_acquire);
   if (m_lsbMemoExtra.m_handles) {
     for (auto const& kv : m_lsbMemoExtra.m_symbols) {
       rds::unbind(kv.first, kv.second);

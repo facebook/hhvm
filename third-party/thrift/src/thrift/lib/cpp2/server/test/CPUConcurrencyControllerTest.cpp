@@ -169,7 +169,7 @@ TEST_F(CPUConcurrencyControllerTest, getDbgInfo) {
 
   // Assert
   ASSERT_EQ("ENABLED", dbgInfo.get_mode());
-  ASSERT_EQ(*dbgInfo.method(), "TOKEN_BUCKET");
+  ASSERT_EQ(*dbgInfo.method(), "MAX_QPS");
   ASSERT_EQ(*dbgInfo.cpuTarget(), 99);
   ASSERT_EQ(*dbgInfo.cpuLoadSource(), "CONTAINER_AND_HOST");
   ASSERT_EQ(*dbgInfo.refreshPeriodMs(), 100);

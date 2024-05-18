@@ -162,7 +162,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
     def test_field_name_conflict(self) -> None:
         # BAD: All statements below should actually pass, but are failing due
         # to the (undocumented) reserved attributes colliding with IDL field names.
-        with self.assertRaises(TypeError):
+        with self.assertRaises(AttributeError):
             TestUnionAmbiguousTypeFieldNameImmutable()
 
         self.assertNotIsInstance(

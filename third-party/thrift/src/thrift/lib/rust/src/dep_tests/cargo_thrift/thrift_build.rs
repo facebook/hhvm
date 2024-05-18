@@ -29,6 +29,6 @@ fn main() {
     conf.types_crate("test_if__types");
     conf.clients_crate("test_if__clients");
     conf.options("deprecated_default_enum_min_i32,serde");
-    let srcs = &["../test_thrift.thrift"];
+    let srcs: &[&str] = &["../test_thrift.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

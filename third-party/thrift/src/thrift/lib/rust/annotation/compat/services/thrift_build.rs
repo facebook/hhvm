@@ -30,6 +30,6 @@ fn main() {
     conf.types_crate("compat__types");
     conf.clients_crate("compat__clients");
     conf.options("deprecated_default_enum_min_i32");
-    let srcs = &["../../../../../annotation/compat.thrift"];
+    let srcs: &[&str] = &["../../../../../annotation/compat.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

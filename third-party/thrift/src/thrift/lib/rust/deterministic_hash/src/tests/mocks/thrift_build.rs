@@ -28,6 +28,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("teststructs__types");
     conf.clients_crate("teststructs__clients");
-    let srcs = &["../test_structs.thrift"];
+    let srcs: &[&str] = &["../test_structs.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

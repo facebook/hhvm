@@ -29,6 +29,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("thrift__types");
     conf.clients_crate("thrift__clients");
-    let srcs = &["../../../../annotation/thrift.thrift"];
+    let srcs: &[&str] = &["../../../../annotation/thrift.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

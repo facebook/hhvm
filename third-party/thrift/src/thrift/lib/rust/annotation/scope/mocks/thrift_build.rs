@@ -28,6 +28,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("scope__types");
     conf.clients_crate("scope__clients");
-    let srcs = &["../../../../../annotation/scope.thrift"];
+    let srcs: &[&str] = &["../../../../../annotation/scope.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

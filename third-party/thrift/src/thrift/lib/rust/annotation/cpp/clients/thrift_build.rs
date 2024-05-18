@@ -31,6 +31,6 @@ fn main() {
     conf.types_crate("cpp__types");
     conf.clients_crate("cpp__clients");
     conf.options("deprecated_default_enum_min_i32");
-    let srcs = &["../../../../../annotation/cpp.thrift"];
+    let srcs: &[&str] = &["../../../../../annotation/cpp.thrift"];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

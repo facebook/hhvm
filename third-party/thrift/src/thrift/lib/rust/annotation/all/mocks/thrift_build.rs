@@ -38,6 +38,6 @@ fn main() {
     conf.base_path(base_path);
     conf.types_crate("all__types");
     conf.clients_crate("all__clients");
-    let srcs = &[];
+    let srcs: &[&str] = &[];
     conf.run(srcs).expect("Failed while running thrift compilation");
 }

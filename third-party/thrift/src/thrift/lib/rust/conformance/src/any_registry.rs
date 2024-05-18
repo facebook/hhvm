@@ -44,6 +44,7 @@ pub struct AnySerDeser {
 pub struct AnyRegistry {
     uri_to_typeid: HashMap<&'static str, TypeId>,
     typeid_to_uri: HashMap<TypeId, &'static str>,
+    hash_prefix_to_typeid: HashMap<Vec<u8>, TypeId>,
     alg_to_hashes: HashMap<UniversalHashAlgorithm, HashSet<Vec<u8>>>,
     typeid_to_serializers: HashMap<TypeId, AnySerDeser>,
 }
@@ -63,6 +64,7 @@ impl AnyRegistry {
         Self {
             uri_to_typeid: HashMap::new(),
             typeid_to_uri: HashMap::new(),
+            hash_prefix_to_typeid: HashMap::new(),
             typeid_to_serializers: HashMap::new(),
             alg_to_hashes,
         }
@@ -72,12 +74,19 @@ impl AnyRegistry {
         &mut self,
     ) -> Result<bool> {
         let uri = T::uri();
+        let hash_prefix =
+            get_universal_hash_prefix_sha_256(uri, UNIVERSAL_HASH_PREFIX_SHA_256_LEN)?;
         let type_id = TypeId::of::<T>();
-        if self.uri_to_typeid.contains_key(uri) || self.typeid_to_uri.contains_key(&type_id) {
+
+        if self.uri_to_typeid.contains_key(uri)
+            || self.hash_prefix_to_typeid.contains_key(&hash_prefix)
+        {
             return Ok(false);
         }
         self.uri_to_typeid.insert(uri, type_id);
         self.typeid_to_uri.insert(type_id, uri);
+        self.hash_prefix_to_typeid.insert(hash_prefix, type_id);
+
         for (alg, hashes) in self.alg_to_hashes.iter_mut() {
             let hash = get_universal_hash(*alg, uri)?;
             hashes.insert(hash);
@@ -97,6 +106,10 @@ impl AnyRegistry {
             },
         );
         Ok(true)
+    }
+
+    pub fn num_registered_types(&self) -> usize {
+        self.uri_to_typeid.len()
     }
 
     pub fn has_type<T: 'static + GetUri>(&self, obj: &any::Any) -> Result<bool> {
@@ -152,11 +165,21 @@ impl AnyRegistry {
         deserialize(&obj.data, obj.protocol.unwrap_or(StandardProtocol::Compact))
     }
 
-    pub fn serializers(&self, uri: &str) -> Result<&AnySerDeser> {
+    pub fn serializers_given_uri(&self, uri: &str) -> Result<&AnySerDeser> {
         self.typeid_to_serializers
             .get(
                 self.uri_to_typeid
                     .get(uri)
+                    .context("typeid lookup failure")?,
+            )
+            .context("serializers lookup failure")
+    }
+
+    pub fn serializers_given_hash_prefix(&self, hash_prefix: &Vec<u8>) -> Result<&AnySerDeser> {
+        self.typeid_to_serializers
+            .get(
+                self.hash_prefix_to_typeid
+                    .get(hash_prefix)
                     .context("typeid lookup failure")?,
             )
             .context("serializers lookup failure")
@@ -259,14 +282,15 @@ mod tests {
     }
 
     #[test]
-    fn test_round_trip_through_any() -> Result<()> {
+    fn test_round_trip_through_any_via_uri() -> Result<()> {
         let mut any_registry = AnyRegistry::new();
         any_registry.register_type::<struct_map_string_i32>()?;
 
+        let uri = struct_map_string_i32::uri();
         let AnySerDeser {
             serialize,
             deserialize,
-        } = any_registry.serializers(struct_map_string_i32::uri())?;
+        } = any_registry.serializers_given_uri(uri)?;
 
         let obj = get_test_object();
         for protocol in get_test_protocols() {
@@ -275,7 +299,35 @@ mod tests {
             assert!(!bytes.is_empty());
             let val = *(deserialize(&bytes, protocol)?
                 .downcast::<struct_map_string_i32>()
-                .map_err(|_| anyhow::Error::msg("cast failure")))?;
+                .map_err(|_| anyhow::Error::msg("bad any cast")))?;
+            assert_eq!(val, obj);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_round_trip_through_any_via_hash_prefix() -> Result<()> {
+        let mut any_registry = AnyRegistry::new();
+        any_registry.register_type::<struct_map_string_i32>()?;
+
+        let hash_prefix = get_universal_hash_prefix_sha_256(
+            struct_map_string_i32::uri(),
+            UNIVERSAL_HASH_PREFIX_SHA_256_LEN,
+        )?;
+        let AnySerDeser {
+            serialize,
+            deserialize,
+        } = any_registry.serializers_given_hash_prefix(&hash_prefix)?;
+
+        let obj = get_test_object();
+        for protocol in get_test_protocols() {
+            let any: Box<dyn std::any::Any> = Box::new(obj.clone());
+            let bytes = serialize(any, protocol)?;
+            assert!(!bytes.is_empty());
+            let val = *(deserialize(&bytes, protocol)?
+                .downcast::<struct_map_string_i32>()
+                .map_err(|_| anyhow::Error::msg("bad any cast")))?;
             assert_eq!(val, obj);
         }
 

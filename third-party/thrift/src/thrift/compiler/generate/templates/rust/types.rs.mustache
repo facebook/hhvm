@@ -37,11 +37,6 @@ extern crate serde;
 
 {{/program:serde?}}{{!
 
-}}{{#program:any?}}
-use fbthrift_conformance as _; // Work in progress. Not used yet but here to remind us of the link requirements when doing so.
-
-{{/program:any?}}{{!
-
 }}{{#program:types_include_srcs}}
 include!("{{.}}");
 {{/program:types_include_srcs}}{{!
@@ -102,6 +97,14 @@ mod dot_dot {{>lib/block}}{{!
 }{{!
 }}{{/program:nonexhaustiveStructs?}}
 
+{{#program:any?}}
+pub fn init_registry(registry: &mut fbthrift_conformance::AnyRegistry) -> anyhow::Result<bool> {
+    Ok(true)
+}
+
+{{/program:any?}}{{!
+
+}}
 pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}
 {{!
 }}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}

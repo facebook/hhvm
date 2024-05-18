@@ -23,11 +23,14 @@ use clap::Parser;
 use conformance::services::conformance_service::PatchExn;
 use conformance::services::conformance_service::RoundTripExn;
 use conformance_services::ConformanceService;
+use enum_ as enum_types; // fbcode//thrift/test/testet:enum
 use futures::StreamExt;
 use patch_data::PatchOpRequest;
 use patch_data::PatchOpResponse;
 use serialization::RoundTripRequest;
 use serialization::RoundTripResponse;
+use testset as test_types; // fbcode//thrift/test/testet:testset
+use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Debug, Parser)]
@@ -45,9 +48,23 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
 
     init_logging(args.log);
 
+    let any_registry = Box::leak(Box::new(fbthrift_conformance::AnyRegistry::new()));
+    test_types::init_registry(any_registry)?;
+    enum_types::init_registry(any_registry)?;
+    info!(
+        "\"Any registry\" initialized, {} types registered",
+        any_registry.num_registered_types()
+    );
+
     let runtime = tokio::runtime::Runtime::new()?;
-    let service = move |proto| {
-        conformance_services::make_ConformanceService_server(proto, ConformanceServiceImpl { fb })
+    let service = {
+        let any_registry = any_registry as &'static _;
+        move |proto| {
+            conformance_services::make_ConformanceService_server(
+                proto,
+                ConformanceServiceImpl { fb, any_registry },
+            )
+        }
     };
     let thrift_server = srserver::ThriftServerBuilder::new(fb)
         .with_port(args.port)
@@ -102,6 +119,7 @@ fn init_logging(directives: Vec<tracing_subscriber::filter::Directive>) {
 #[derive(Clone)]
 pub struct ConformanceServiceImpl {
     pub fb: fbinit::FacebookInit,
+    pub any_registry: &'static fbthrift_conformance::AnyRegistry,
 }
 
 #[async_trait]

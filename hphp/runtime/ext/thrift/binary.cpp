@@ -728,6 +728,8 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
                    bool strict_write,
                    bool oneway) {
   CoeffectsAutoGuard _;
+  VMRegAnchor _2;
+
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionNotice suppressor;

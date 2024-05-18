@@ -70,50 +70,59 @@ let validator =
     method! on_class acc r cls tyl =
       match Env.get_class acc.Type_validator.env (snd cls) with
       | Decl_entry.Found tc ->
-        let tparams = Cls.tparams tc in
-        begin
-          match tyl with
-          | [] -> acc
-          (* this case should really be handled by the fold2,
-             but we still allow class hints without args in certain places *)
-          | targs ->
-            List.Or_unequal_lengths.(
-              begin
-                match
-                  List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
-                      let inside_reified_class_generic_position =
-                        acc.Type_validator.inside_reified_class_generic_position
-                      in
-                      if this#is_wildcard targ then begin
-                        if inside_reified_class_generic_position then
-                          this#invalid
-                            acc
-                            r
-                            "a reified type containing a wildcard (`_`)"
-                        else
+        (match Cls.kind tc with
+        | Ast_defs.Ctrait -> this#invalid acc r "a trait name"
+        | _ ->
+          let tparams = Cls.tparams tc in
+          begin
+            match tyl with
+            | [] -> acc
+            (* this case should really be handled by the fold2,
+               but we still allow class hints without args in certain places *)
+            | targs ->
+              List.Or_unequal_lengths.(
+                begin
+                  match
+                    List.fold2
+                      ~init:acc
+                      targs
+                      tparams
+                      ~f:(fun acc targ tparam ->
+                        let inside_reified_class_generic_position =
                           acc
-                      end else if
-                            Aast.(equal_reify_kind tparam.tp_reified Reified)
-                          then
-                        this#on_type
-                          {
-                            acc with
-                            Type_validator.inside_reified_class_generic_position =
-                              true;
-                          }
-                          targ
-                      else if inside_reified_class_generic_position then
-                        this#on_type acc targ
-                      else
-                        let error_message =
-                          "a type with an erased generic type argument"
+                            .Type_validator
+                             .inside_reified_class_generic_position
                         in
-                        this#invalid acc r error_message)
-                with
-                | Ok new_acc -> new_acc
-                | Unequal_lengths -> acc (* arity error elsewhere *)
-              end)
-        end
+                        if this#is_wildcard targ then begin
+                          if inside_reified_class_generic_position then
+                            this#invalid
+                              acc
+                              r
+                              "a reified type containing a wildcard (`_`)"
+                          else
+                            acc
+                        end else if
+                              Aast.(equal_reify_kind tparam.tp_reified Reified)
+                            then
+                          this#on_type
+                            {
+                              acc with
+                              Type_validator
+                              .inside_reified_class_generic_position = true;
+                            }
+                            targ
+                        else if inside_reified_class_generic_position then
+                          this#on_type acc targ
+                        else
+                          let error_message =
+                            "a type with an erased generic type argument"
+                          in
+                          this#invalid acc r error_message)
+                  with
+                  | Ok new_acc -> new_acc
+                  | Unequal_lengths -> acc (* arity error elsewhere *)
+                end)
+          end)
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->
         acc

@@ -805,7 +805,7 @@ bool replaceRedundantComputations(
 
 /////////////////////////////////////////////////////////////////////////
 
-void gvn(IRUnit& unit) {
+bool gvn(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
   Timer t(Timer::optimize_gvn, unit.logEntry().get_pointer());
   splitCriticalEdges(unit);
@@ -830,11 +830,7 @@ void gvn(IRUnit& unit) {
   state.globalTable = nullptr;
   // We might have added a new use of a SSATmp past a CheckType or
   // AssertType on it, so refine if necessary.
-  if (changed) {
-    // Restore basic invariants before refining.
-    mandatoryDCE(unit);
-    refineTmps(unit);
-  }
+  return changed;
 }
 
 }

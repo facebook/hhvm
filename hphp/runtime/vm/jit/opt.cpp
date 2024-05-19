@@ -280,7 +280,9 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   if (Cfg::HHIR::GlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
-    doPass(unit, gvn, DCE::Full);
+    if (doPass(unit, gvn, DCE::Full)) {
+      doPass(unit, refineTmps, DCE::None);
+    }
   }
 
   while (true) {
@@ -349,12 +351,12 @@ void optimize(IRUnit& unit, TransKind kind) {
   // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
 
-  if (!isProfiling(kind) && Cfg::HHIR::GlobalValueNumbering) {
-    rqtrace::EventGuard trace{"OPT_GVN"};
-    doPass(unit, gvn, DCE::Full);
-  }
-
   if (!isProfiling(kind)) {
+    if (Cfg::HHIR::GlobalValueNumbering) {
+      rqtrace::EventGuard trace{"OPT_GVN"};
+      doPass(unit, gvn, DCE::Full);
+    }
+
     doPass(unit, refineTmpsPass, DCE::None);
     doPass(unit, cleanCfg, DCE::None);
   }

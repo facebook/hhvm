@@ -86,9 +86,11 @@ Object create_new_IC() {
 } // namespace
 
 bool HHVM_FUNCTION(is_inaccessible) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return false;
   auto const context = Native::data<ImplicitContext>(obj);
+  // In future, if we add a nullstate, that will be implemented
+  // using an object to represent the null state
   return context->m_state == ImplicitContext::State::Inaccessible;
 }
 
@@ -100,8 +102,8 @@ Object initInaccessibleConext() {
 };
 
 String HHVM_FUNCTION(get_state_unsafe) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return String{s_ICStateNull.get()};
   auto const context = Native::data<ImplicitContext>(obj);
 
   switch (context->m_state) {
@@ -118,8 +120,8 @@ String HHVM_FUNCTION(get_state_unsafe) {
 }
 
 TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return make_tv<KindOfNull>();
   auto const context = Native::data<ImplicitContext>(obj);
 
   switch (context->m_state) {
@@ -141,9 +143,9 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   not_reached();
 }
 
-Variant HHVM_FUNCTION(get_whole_implicit_context) {
+ObjectRet HHVM_FUNCTION(get_whole_implicit_context) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return init_null();
   return Object{obj};
 }
 
@@ -153,6 +155,7 @@ Variant HHVM_FUNCTION(get_whole_implicit_context) {
  * the IC should stay alive due to being stored in s_memokey_to_IC
 */
 int64_t HHVM_FUNCTION(get_implicit_context_memo_key) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
   return reinterpret_cast<int64_t>(obj);
 }
@@ -162,8 +165,8 @@ int64_t HHVM_FUNCTION(get_implicit_context_memo_key) {
 * Only to be used for testing
 */
 Array HHVM_FUNCTION(get_implicit_context_debug_info) {
+  assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return Array{};
   auto const context = Native::data<ImplicitContext>(obj);
 
   if (context->m_state != ImplicitContext::State::Value) {
@@ -195,6 +198,7 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
     throw_implicit_context_exception(
       "Implicit context keys cannot be empty or start with _");
   }
+  assertx(*ImplicitContext::activeCtx);
   auto const prev = *ImplicitContext::activeCtx;
 
   // Compute memory key first

@@ -135,6 +135,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   waitHandle->m_packedTailFrameIds = -1;
   assertx(!waitHandle->hasTailFrames());
   waitHandle->initialize(child);
+  assertx(*ImplicitContext::activeCtx);
   waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
   return waitHandle;
 }
@@ -194,6 +195,7 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
+  assertx(*ImplicitContext::activeCtx);
   this->m_implicitContext = *ImplicitContext::activeCtx;
 
   // Suspend the async function.

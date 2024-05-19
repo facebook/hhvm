@@ -1366,7 +1366,7 @@ To string conversions:
 
   Load the ArrayData* containing the generics attached to the RFuncData in S0
 
-| LdImplicitContext, D(Obj|InitNull), NA, NF
+| LdImplicitContext, D(Obj), NA, NF
 
   Loads implicit context from RDS.
 
@@ -1801,7 +1801,7 @@ ReqBindJmp and CallFuncEntry.
   Store the TypedValue in S0 into the specified RDS handle. Must store the aux
   bits if `includeAux` is true.
 
-| StImplicitContext, ND, S(Obj|InitNull), NF
+| StImplicitContext, ND, S(Obj), NF
 
   Sets the implicit context to S0.
 

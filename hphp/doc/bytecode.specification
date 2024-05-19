@@ -3206,7 +3206,7 @@ RaiseClassStringConversionNotice [] -> []
   Raises a notice indicating an implicit class to string conversion.
   This notice is emitted at a sampled rate through a runtime option.
 
-SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
+SetImplicitContextByValue [C:Obj] -> [C:Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
 

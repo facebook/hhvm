@@ -5483,7 +5483,7 @@ void in(ISS& env, const bc::AwaitAll& op) {
 
 void in(ISS& env, const bc::SetImplicitContextByValue&) {
   popC(env);
-  push(env, TOptObj);
+  push(env, TObj);
 }
 
 const StaticString

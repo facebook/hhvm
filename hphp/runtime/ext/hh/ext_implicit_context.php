@@ -93,7 +93,7 @@ final class ImplicitContextData {}
 function get_implicit_context(string $key)[zoned]: mixed;
 
 <<__Native>>
-function get_whole_implicit_context()[zoned]: ?ImplicitContextData;
+function get_whole_implicit_context()[zoned]: ImplicitContextData;
 
 /**
  * Creates implicit context $context keyed by $key.

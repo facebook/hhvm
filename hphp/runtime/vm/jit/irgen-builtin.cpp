@@ -1251,19 +1251,8 @@ SSATmp* opt_meth_caller_get_method(IRGS& env, const ParamPrep& params) {
 
 SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
   if (params.size() != 0) return nullptr;
-  return cond(
-    env,
-    [&] (Block* taken) {
-      auto const ctx = gen(env, LdImplicitContext);
-      return gen(env, CheckType, TObj, taken, ctx);
-    },
-    [&] (SSATmp* ctx) {
-      return gen(env, LdImplicitContextMemoKey, ctx);
-    },
-    [&] {
-      return cns(env, 0);
-    }
-  );
+  auto const ctx = gen(env, LdImplicitContext);
+  return gen(env, LdImplicitContextMemoKey, ctx);
 }
 
 SSATmp* opt_class_to_classname(IRGS& env, const ParamPrep& params) {
@@ -2643,7 +2632,7 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 
 void emitSetImplicitContextByValue(IRGS& env) {
   auto const tv = topC(env);
-  if (!tv->type().subtypeOfAny(TInitNull, TObj)) return interpOne(env);
+  if(!tv->isA(TObj)) return interpOne(env);
 
   auto const prev = gen(env, LdImplicitContext);
   gen(env, StImplicitContext, tv);

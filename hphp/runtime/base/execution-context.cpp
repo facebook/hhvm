@@ -1745,6 +1745,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
                                        const TypedValue awaitResult) {
   assertx(regState() == VMRegState::CLEAN);
+  assertx(*ImplicitContext::activeCtx);
   SCOPE_EXIT { assertx(regState() == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
@@ -1789,6 +1790,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   assertx(exception);
   assertx(exception->instanceof(SystemLib::getThrowableClass()));
   assertx(regState() == VMRegState::CLEAN);
+  assertx(*ImplicitContext::activeCtx);
   SCOPE_EXIT { assertx(regState() == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();

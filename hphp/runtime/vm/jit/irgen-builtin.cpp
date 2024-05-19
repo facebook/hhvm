@@ -2643,37 +2643,13 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 
 void emitSetImplicitContextByValue(IRGS& env) {
   auto const tv = topC(env);
-  ifThenElse(
-    env,
-    [&] (Block* taken) { gen(env, CheckType, TInitNull, taken, tv); },
-    [&] {
-      auto const prev = gen(env, LdImplicitContext);
-      gen(env, StImplicitContext, cns(env, TInitNull));
-      popC(env);
-      pushIncRef(env, prev);
-    },
-    [&] {
-      ifThenElse(
-        env,
-        [&] (Block* taken) { gen(env, CheckType, TObj, taken, tv); },
-        [&] {
-          auto const obj = gen(env, AssertType, TObj, tv);
-          auto const prev = gen(env, LdImplicitContext);
-          gen(env, StImplicitContext, obj);
-          popC(env);
-          pushIncRef(env, prev);
-          // Decref after discarding so that if we are pushing the same object back,
-          // avoid refcount going to zero
-          decRef(env, obj);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          gen(env, AssertType, tv->type() - TObj - TInitNull, tv);
-          interpOne(env);
-        }
-      );
-    }
-  );
+  if (!tv->type().subtypeOfAny(TInitNull, TObj)) return interpOne(env);
+
+  auto const prev = gen(env, LdImplicitContext);
+  gen(env, StImplicitContext, tv);
+  popC(env);
+  pushIncRef(env, prev);
+  decRef(env, tv);
 }
 
 void emitGetInaccessibleImplicitContext(IRGS& env) {

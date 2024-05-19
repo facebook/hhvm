@@ -91,6 +91,9 @@ struct ArrayKeyTypes {
   static constexpr ArrayKeyTypes Strs() {
     return FromBits(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
   }
+  static constexpr ArrayKeyTypes ArrayKeys() {
+    return Ints() | Strs();
+  }
   static constexpr ArrayKeyTypes Any() {
     return FromBits(kAnyKey);
   }

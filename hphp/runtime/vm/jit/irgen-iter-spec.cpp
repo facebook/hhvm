@@ -594,9 +594,12 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   gen(env, Jmp, header, accessor.getPos(env, arr, cns(env, 0)));
 }
 
-void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
-                           const IterArgs& data, const Type& value_type,
-                           Block* body, uint32_t baseLocalId) {
+Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
+                             const IterArgs& data, const Type& value_type,
+                             Block* body, uint32_t baseLocalId) {
+  auto const header = env.unit.defBlock(body->profCount());
+  BlockPusher bp(*env.irb, env.irb->curMarker(), header);
+
   auto const pos = phiIterPos(env, accessor);
   auto const arr = iterBase(env, accessor, data, baseLocalId);
 
@@ -628,6 +631,8 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
   );
   finish(elm, guarded_val);
   gen(env, Jmp, body);
+
+  return header;
 }
 
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
@@ -660,13 +665,31 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
   );
 }
 
-void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
+Block* emitSpecializedFooter(IRGS& env, const Accessor& accessor,
                            const IterArgs& data, Block* header) {
+  auto const footer = env.unit.defBlock(env.irb->curBlock()->profCount());
+  BlockPusher bp{*env.irb, env.irb->curMarker(), footer};
+
   auto const pos = phiIterPos(env, accessor);
   iterClear(env, data.valId);
   if (data.hasKey()) iterClear(env, data.keyId);
   iterSurpriseCheck(env, accessor, data, pos);
   gen(env, Jmp, header, pos);
+
+  return footer;
+}
+
+// Use bespoke profiling (if enabled) to choose a layout.
+ArrayLayout getProfiledLayout(IRGS& env, SSATmp* base) {
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
+  if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
+  if (!arrayTypeCouldBeBespoke(baseDT)) return ArrayLayout::Vanilla();
+
+  auto const knownLayout = base->type().arrSpec().layout();
+  auto const sl = bespoke::layoutsForSink(
+    env.profTransIDs, curSrcKey(env), knownLayout);
+  assertx(sl.layouts.size() == 1);
+  return sl.layouts[0].layout;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -681,9 +704,10 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId,
                         ArrayIterProfile::Result profiledResult) {
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
   profileDecRefs(env, data, /*init=*/true);
+  if (base->isA(TObj)) return false;
 
-  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
   auto const keyTypes = profiledResult.key_types;
@@ -693,58 +717,41 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
     return false;
   }
 
-  // Use bespoke profiling (if enabled) to choose a layout.
-  auto const layout = [&]{
-    if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
-    if (!arrayTypeCouldBeBespoke(baseDT)) return ArrayLayout::Vanilla();
-    auto const knownLayout = base->type().arrSpec().layout();
-    auto const sl = bespoke::layoutsForSink(
-      env.profTransIDs, curSrcKey(env), knownLayout);
-    assertx(sl.layouts.size() == 1);
-    return sl.layouts[0].layout;
-  }();
-  auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
+  auto const layout = getProfiledLayout(env, base);
 
-  // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
          keyTypes.show(), layout.describe());
   if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
     FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
-    return false;
-  } else if (!base->type().maybe(accessor->arr_type)) {
-    FTRACE(2, "Failure: incoming type mismatch: {}\n", base->type());
     return false;
   }
 
   // We're committing to the specialization.
   TRACE(2, "Success! Generating specialized code.\n");
 
-  auto const iterKey = std::make_pair(body, baseDT);
-  auto const iter = env.iters.contains(iterKey)
-    ? env.iters[iterKey].get()
-    : nullptr;
-  auto const compat =
-    iter &&
-    iter->keyTypes == keyTypes &&
-    iter->layout == layout;
+  // Record the first profile for this DataType specialization. We should almost
+  // always have just one, but in case regionizeFunc() did something weird and
+  // produced multiple IterInits of the same base DataType pointing to the same
+  // body block, the first one likely has the highest weight, so we pick that
+  // one as a hint for IterNext.
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
+  auto const iterProfileKey = std::make_pair(body, baseDT);
+  env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout, keyTypes});
 
-  auto const header = compat
-    ? iter->header
-    : env.unit.defBlock(body->profCount());
+  auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
+  assertx(base->type().maybe(accessor->arr_type));
+
+  auto const iterKey = std::make_tuple(
+    body, baseDT, layout.toUint16(), keyTypes.toBits());
+  auto const header = [&] {
+    if (env.iters.contains(iterKey)) return env.iters[iterKey].header;
+    auto const res = emitSpecializedHeader(
+      env, *accessor, data, profiledResult.value_type, body, baseLocalId);
+    env.iters.emplace(iterKey, IterSpecInfo{res, nullptr});
+    return res;
+  }();
+
   emitSpecializedInit(env, *accessor, data, header, done, base);
-
-  if (!compat) {
-    env.irb->appendBlock(header);
-    auto const& value_type = profiledResult.value_type;
-    emitSpecializedHeader(env, *accessor, data, value_type, body, baseLocalId);
-
-    if (!iter) {
-      // The first emitted specialization is likely the best one.
-      auto const def = SpecializedIterator{layout, keyTypes, header, nullptr};
-      env.iters[iterKey] = std::make_unique<SpecializedIterator>(def);
-    }
-  }
-
   return true;
 }
 
@@ -752,28 +759,55 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
 bool specializeIterNext(IRGS& env, Offset loopOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId) {
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
   profileDecRefs(env, data, /*init=*/false);
+  if (base->isA(TObj)) return false;
 
-  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const body = getBlock(env, bcOff(env) + loopOffset);
-  auto const iterKey = std::make_pair(body, baseDT);
-  if (!env.iters.contains(iterKey)) return false;
+  auto const baseDT = dt_modulo_persistence(base->type().toDataType());
+  auto const iterProfileKey = std::make_pair(body, baseDT);
+  auto const it = env.iterProfiles.find(iterProfileKey);
+  auto const keyTypes = it != env.iterProfiles.end()
+    ? it->second.keyTypes
+    : baseDT == KindOfVec ? ArrayKeyTypes::Ints() : ArrayKeyTypes::ArrayKeys();
+  auto const layout = [&] {
+    if (it != env.iterProfiles.end()) {
+      // If IterInit provided a profiling hint and it doesn't contradict what
+      // we know about the type, use it.
+      auto const l = it->second.layout & base->type().arrSpec().layout();
+      if (l != ArrayLayout::Bottom()) return l;
+    }
+    return getProfiledLayout(env, base);
+  }();
 
-  auto const iter = env.iters[iterKey].get();
-  auto const accessor =
-    getAccessor(baseDT, iter->keyTypes, iter->layout, data);
-  if (!base->type().maybe(accessor->arr_type)) return false;
-
-  assertx(iter->header != nullptr);
-  auto const footer = iter->footer == nullptr
-    ? env.unit.defBlock(env.irb->curBlock()->profCount())
-    : iter->footer;
-  emitSpecializedNext(env, *accessor, data, footer, base);
-  if (iter->footer == nullptr) {
-    BlockPusher pushBlock{*env.irb, env.irb->curMarker(), footer};
-    emitSpecializedFooter(env, *accessor, data, iter->header);
-    iter->footer = footer;
+  FTRACE(2, "Trying to specialize IterNext: {} @ {}\n",
+         keyTypes.show(), layout.describe());
+  if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
+    FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
+    return false;
   }
+
+  auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
+  assertx(base->type().maybe(accessor->arr_type));
+
+  auto const iterKey = std::make_tuple(
+    body, baseDT, layout.toUint16(), keyTypes.toBits());
+  auto const header = [&] {
+    if (env.iters.contains(iterKey)) return env.iters[iterKey].header;
+    auto const res = emitSpecializedHeader(
+      env, *accessor, data, TInitCell, body, baseLocalId);
+    env.iters.emplace(iterKey, IterSpecInfo{res, nullptr});
+    return res;
+  }();
+  auto const footer = [&] {
+    assertx(env.iters.contains(iterKey));
+    if (auto const f = env.iters[iterKey].footer) return f;
+    auto const res = emitSpecializedFooter(env, *accessor, data, header);
+    env.iters[iterKey].footer = res;
+    return res;
+  }();
+
+  emitSpecializedNext(env, *accessor, data, footer, base);
   return true;
 }
 

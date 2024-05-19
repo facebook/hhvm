@@ -29,16 +29,29 @@ namespace HPHP::jit::irgen {
 // declare functions that take an IRGS& env as input.
 struct IRGS;
 
-// To reduce code size for specialized iters, we share blocks of generated code
-// such as the "dec-ref old outputs; load, inc-ref, and store new ones" block
-// that's part of both IterInit and IterNext.
-//
-// To make it possible to reuse this code, we consider IterInits / IterNexts
-// equivalent if they share the same loop entry block, and we store a map from
-// loop entry block -> SpecializedIterator struct in IRGS. See cpp for details.
-struct SpecializedIterator {
+/*
+ * Represents an information from profiling at IterInit, intersected with known
+ * layout at that time. Used by IterNext to bootstrap its knowledge about the
+ * iterated array, as we do not perform array key profiling there and known
+ * information about array specialization in frame state is lost during irgen
+ * due to unprocessed preds while emitting the loop.
+ */
+struct IterProfileInfo {
   ArrayLayout layout;
   ArrayKeyTypes keyTypes;
+};
+
+/*
+ * To reduce code size for specialized iters, we share blocks of generated code
+ * such as the "dec-ref old outputs; load, inc-ref, and store new ones" block
+ * that's part of both IterInit and IterNext.
+ *
+ * To make it possible to reuse this code, we consider IterInits / IterNexts
+ * equivalent if they share the same loop entry block, operate on the same
+ * underlying DataType and are specialized using the same ArrayLayout and
+ * ArrayKeyTypes. We store a map from a tuple of that to IterSpecInfo in IRGS.
+ */
+struct IterSpecInfo {
   Block* header;
   Block* footer;
 };

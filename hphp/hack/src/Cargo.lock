@@ -619,11 +619,11 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "cfgrammar"
-version = "0.12.0"
+version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf74ea341ae8905eac9a234b6a5a845e118c25bbbdecf85ec77431a8b3bfa0be"
+checksum = "163348850b1cd34fa99ef1592b5d598ea7e6752f18aff2125b67537e887edb36"
 dependencies = [
- "indexmap 1.9.2",
+ "indexmap 2.2.6",
  "lazy_static",
  "num-traits",
  "regex",
@@ -1137,6 +1137,7 @@ dependencies = [
 name = "cxx"
 version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21db378d04296a84d8b7d047c36bb3954f0b46529db725d7e62fb02f9ba53ccc"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -1148,6 +1149,7 @@ dependencies = [
 name = "cxx-build"
 version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e5262a7fa3f0bae2a55b767c223ba98032d7c328f5c13fa5cdc980b77fc0658"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -1162,11 +1164,13 @@ dependencies = [
 name = "cxxbridge-flags"
 version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be8dcadd2e2fb4a501e1d9e93d6e88e6ea494306d8272069c92d5a9edf8855c0"
 
 [[package]]
 name = "cxxbridge-macro"
 version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad08a837629ad949b73d032c637653d069e909cffe4ee7870b02301939ce39cc"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1370,6 +1374,15 @@ dependencies = [
  "ocamlrep_ocamlpool",
  "rpds",
  "typing_deps_hash",
+]
+
+[[package]]
+name = "deranged"
+version = "0.3.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b42b6fa04a440b495c8b04d0e71b707c585f83cb9cb28cf8cd0d976c315e31b4"
+dependencies = [
+ "powerfmt",
 ]
 
 [[package]]
@@ -1612,26 +1625,6 @@ name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
-
-[[package]]
-name = "enum-iterator"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7add3873b5dd076766ee79c8e406ad1a472c385476b9e38849f8eec24f1be689"
-dependencies = [
- "enum-iterator-derive",
-]
-
-[[package]]
-name = "enum-iterator-derive"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eecf8589574ce9b895052fa12d69af7a233f99e6107f5cb8dd1044f2a17bfdcb"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.60",
-]
 
 [[package]]
 name = "env"
@@ -2008,18 +2001,6 @@ dependencies = [
  "cfg-if 1.0.0",
  "libc",
  "wasi",
-]
-
-[[package]]
-name = "getset"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24b328c01a4d71d2d8173daa93562a73ab0fe85616876f02500f53d82948c504"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -2914,31 +2895,33 @@ dependencies = [
 
 [[package]]
 name = "lrlex"
-version = "0.12.0"
+version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22b832738fbfa58ad036580929e973b3b6bd31c6d6c7f18f6b5ea7b626675c85"
+checksum = "77ff18e1bd3ed77d7bc2800a0f8b0e922a3c7ba525505be8bab9cf45dfc4984b"
 dependencies = [
+ "cfgrammar",
  "getopts",
  "lazy_static",
  "lrpar",
  "num-traits",
+ "quote",
  "regex",
+ "regex-syntax",
  "serde",
- "try_from",
  "vergen",
 ]
 
 [[package]]
 name = "lrpar"
-version = "0.12.0"
+version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f270b952b07995fe874b10a5ed7dd28c80aa2130e37a7de7ed667d034e0a521"
+checksum = "efea5a41b9988b5ae41ea9b2375a52cfa0e483f0210357209caa8d361a24a368"
 dependencies = [
  "bincode",
  "cactus",
  "cfgrammar",
  "filetime",
- "indexmap 1.9.2",
+ "indexmap 2.2.6",
  "lazy_static",
  "lrtable",
  "num-traits",
@@ -2952,16 +2935,15 @@ dependencies = [
 
 [[package]]
 name = "lrtable"
-version = "0.12.0"
+version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a854115c6a10772ac154261592b082436abc869c812575cadcf9d7ceda8eff0b"
+checksum = "ff5668c3bfd279ed24d5b0d24568c48dc993f9beabd51f74d1865a78c1d206ab"
 dependencies = [
  "cfgrammar",
  "fnv",
  "num-traits",
  "serde",
  "sparsevec",
- "static_assertions",
  "vob",
 ]
 
@@ -3304,12 +3286,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-conv"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
+
+[[package]]
 name = "num-traits"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da0df0e5185db44f69b44f26786fe401b6c293d1907744beaa7fa62b2e5a517a"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "num_threads"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c7398b9c8b70908f6371f47ed36737907c87c52af34c268fed0bf0ceb92ead9"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
@@ -3355,6 +3352,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "bstr",
  "bumpalo",
@@ -3367,6 +3365,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_caml_builtins"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
@@ -3376,6 +3375,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_custom"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
@@ -3384,6 +3384,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_derive"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3394,6 +3395,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_marshal"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "bitflags 2.4.0",
  "cc",
@@ -3412,6 +3414,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_ocamlpool"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#a77b28bae784692abe9f7d7944a2ddc7268a663a"
 dependencies = [
  "bumpalo",
  "cc",
@@ -3790,6 +3793,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "powerfmt"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3950,6 +3959,7 @@ dependencies = [
 name = "quickcheck"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
 dependencies = [
  "env_logger 0.8.4",
  "log",
@@ -4714,9 +4724,9 @@ dependencies = [
 
 [[package]]
 name = "sparsevec"
-version = "0.1.4"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "928d1ef5df00aec8c5643c2ac37db4dd282763013c0fcc81efbb8e13db8dd8ec"
+checksum = "35df5d2e580b29f3f7ec5b4ed49b0ab3acf7f3624122b3e823cafb9630f293b8"
 dependencies = [
  "num-traits",
  "packedvec",
@@ -5099,11 +5109,16 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.17"
+version = "0.3.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a561bf4617eebd33bca6434b988f39ed798e527f51a1e797d0ee4f61c0a38376"
+checksum = "5dfd88e563464686c916c7e46e623e520ddc6d79fa6641390f2e3fa86e83e885"
 dependencies = [
+ "deranged",
  "itoa",
+ "libc",
+ "num-conv",
+ "num_threads",
+ "powerfmt",
  "serde",
  "time-core",
  "time-macros",
@@ -5111,16 +5126,17 @@ dependencies = [
 
 [[package]]
 name = "time-core"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e153e1f1acaef8acc537e68b44906d2db6436e2b35ac2c6b42640fff91f00fd"
+checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
 
 [[package]]
 name = "time-macros"
-version = "0.2.6"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d967f99f534ca7e495c575c62638eebc2898a8c84c119b89e250477bc4ba16b2"
+checksum = "3f252a68540fde3a3877aeea552b832b40ab9a69e318efd078774a01ddee1ccf"
 dependencies = [
+ "num-conv",
  "time-core",
 ]
 
@@ -5237,15 +5253,6 @@ checksum = "859eb650cfee7434994602c3a68b25d77ad9e68c8a6cd491616ef86661382eb3"
 dependencies = [
  "serde",
  "stable_deref_trait",
-]
-
-[[package]]
-name = "try_from"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "283d3b89e1368717881a9d51dad843cc435380d8109c9e47d38780a324698d8b"
-dependencies = [
- "cfg-if 0.1.10",
 ]
 
 [[package]]
@@ -5418,16 +5425,12 @@ dependencies = [
 
 [[package]]
 name = "vergen"
-version = "7.3.2"
+version = "8.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bbc4fafd30514504c7593cfa52eaf4d6c4ef660386e2ec54edc17f14aa08e8d"
+checksum = "e27d6bdd219887a9eadd19e1c34f32e47fa332301184935c6d9bca26f3cca525"
 dependencies = [
  "anyhow",
- "cfg-if 1.0.0",
- "enum-iterator",
- "getset",
  "rustversion",
- "thiserror",
  "time",
 ]
 

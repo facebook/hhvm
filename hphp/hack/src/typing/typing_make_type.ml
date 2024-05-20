@@ -137,7 +137,7 @@ let shape r kind map =
 
 let closed_shape r map = shape r (nothing r) map
 
-let open_shape r map = shape r (mixed r) map
+let open_shape ~kind r map = shape r kind map
 
 let supportdyn_mixed ?(mixed_reason = Reason.Rnone) r =
   supportdyn r (mixed mixed_reason)

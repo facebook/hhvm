@@ -81,7 +81,10 @@ let refine_shape field_name pos env shape =
     env
     ~r:(Reason.Rwitness pos)
     shape
-    (MakeType.open_shape Reason.Rnone (TShapeMap.singleton field_name sft))
+    (MakeType.open_shape
+       Reason.Rnone
+       ~kind:sft_ty
+       (TShapeMap.singleton field_name sft))
 
 (** Remove a field from all the shapes found in a given type.
   The function leaves all the other types (non-shapes) unchanged. *)
@@ -227,8 +230,12 @@ let shapes_idx_not_null env shape_ty fld =
   (env, res)
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
+  let r = Reason.Rshape (shape_pos, fun_name) in
+  (* Since this shape is only used as a supertype, it is safe to use mixed
+     as the kind, regardless of --everything-sdt *)
   MakeType.open_shape
-    (Reason.Rshape (shape_pos, fun_name))
+    r
+    ~kind:(MakeType.mixed r)
     (TShapeMap.singleton field_name field_ty)
 
 (* Typing rules for Shapes::idx
@@ -615,14 +622,19 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
     MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
   in
   let (params, ret) =
+    let r = Reason.Rwitness_from_decl param1.fp_pos in
     let param1 =
       update_param
         param1
         (mk
            ( Reason.Rnone,
              Toption
+               (* It is safe to use mixed as the kind, regardless of --everything-sdt, since
+                  the idx function doesn't look at any of the other fields besides the explicitly
+                  specified one *)
                (MakeType.open_shape
-                  (Reason.Rwitness_from_decl param1.fp_pos)
+                  r
+                  ~kind:(MakeType.mixed r)
                   (TShapeMap.singleton
                      field_name
                      { sft_optional = true; sft_ty = field_ty })) ))
@@ -673,11 +685,16 @@ let transform_at_fun_ty (field_name : tshape_field_name) fty =
     let field_ty : decl_ty =
       MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
     in
+    let r = Reason.Rwitness_from_decl param1.fp_pos in
     let param1 =
       update_param
         param1
+        (* It is safe to use mixed as the kind, regardless of --everything-sdt, since
+           the at function doesn't look at any of the other fields besides the explicitly
+           specified one *)
         (MakeType.open_shape
-           (Reason.Rwitness_from_decl param1.fp_pos)
+           r
+           ~kind:(MakeType.mixed r)
            (TShapeMap.singleton
               field_name
               { sft_optional = true; sft_ty = field_ty }))

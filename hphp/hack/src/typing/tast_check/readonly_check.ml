@@ -195,7 +195,12 @@ let is_value_collection_ty env ty =
   let ty = Typing_utils.strip_dynamic env ty in
   let hackarray = MakeType.any_array Reason.none mixed mixed in
   (* Subtype against an empty open shape (shape(...)) *)
-  let shape = MakeType.open_shape Reason.none Typing_defs.TShapeMap.empty in
+  let shape =
+    MakeType.open_shape
+      Reason.none
+      ~kind:(MakeType.mixed Reason.none)
+      Typing_defs.TShapeMap.empty
+  in
   Typing_utils.is_sub_type env ty hackarray
   || Typing_utils.is_sub_type env ty shape
 

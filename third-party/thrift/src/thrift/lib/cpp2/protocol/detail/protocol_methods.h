@@ -32,6 +32,7 @@
 #include <folly/container/View.h>
 #include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
+#include <folly/memory/UninitializedMemoryHacks.h>
 
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TType.h>
@@ -93,6 +94,10 @@ template <typename C, typename... A>
 using detect_reserve = decltype(FOLLY_DECLVAL(C).reserve(FOLLY_DECLVAL(A)...));
 template <typename C, typename... A>
 using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
+template <typename C, typename... A>
+using detect_resize_without_initialization =
+    decltype(folly::resizeWithoutInitialization(
+        FOLLY_DECLVAL(C&), FOLLY_DECLVAL(A)...));
 
 template <typename Container, typename Size>
 auto reserve_if_possible(Container* t, Size size) {
@@ -554,12 +559,37 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
           protocol::TProtocolException::throwTruncatedData();
         }
 
-        // Do special treatments for lists of primitive types, as we found
-        // resize is more performant than reserve.
-        constexpr auto should_resize =
-            folly::is_detected_v<detect_resize, Type, decltype(list_size)> &&
-            std::is_trivial_v<elem_type>;
-        if constexpr (should_resize) {
+#ifndef _MSC_VER
+        constexpr auto should_resize_without_initialization = std::is_trivial_v<
+                                                                  elem_type> &&
+            folly::is_detected_v<detect_resize_without_initialization,
+                                 Type,
+                                 decltype(list_size)>;
+#else
+        // For MSVC, vector layout is not fixed, so resizeWithoutInitialization
+        // is not supported yet
+        constexpr auto should_resize_without_initialization = false;
+#endif
+        constexpr auto should_resize = std::is_trivial_v<elem_type> &&
+            folly::is_detected_v<detect_resize, Type, decltype(list_size)>;
+
+        // For performance, do special treatments for trivial value list. Try to
+        // resizeWithoutInitialization first, then resize.
+        if constexpr (should_resize_without_initialization) {
+          folly::resizeWithoutInitialization(out, list_size);
+          auto outIt = out.begin();
+          const auto outEnd = out.end();
+          try {
+            for (; outIt != outEnd; ++outIt) {
+              elem_methods::read(protocol, *outIt);
+            }
+          } catch (...) {
+            // For behaviour parity, initialize the leftover elements when
+            // exceptions happen
+            std::fill(outIt, outEnd, elem_type());
+            throw;
+          }
+        } else if constexpr (should_resize) {
           out.resize(list_size);
           for (auto&& elem : out) {
             elem_methods::read(protocol, elem);

@@ -5270,6 +5270,9 @@ fn p_namespace_use_clause<'a>(
             } else {
                 p_namespace_use_kind(clause_kind, env)
             }?;
+            if n.contains(':') {
+                raise_parsing_error(node, env, &syntax_error::invalid_namespace_name);
+            }
             Ok((
                 kind,
                 ast::Id(

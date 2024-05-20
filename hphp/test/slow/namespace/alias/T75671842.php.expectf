@@ -1,0 +1,1 @@
+Fatal error: Cannot use namespace with xhp-style names (contains `:`) in %s/namespace/alias/T75671842.php on line 6

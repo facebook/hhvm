@@ -62,7 +62,7 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
     }
 
     void connectError(quic::QuicError error) override {
-      LOG(FATAL) << "unreachable";
+      client_.connectError(error);
     }
 
    private:

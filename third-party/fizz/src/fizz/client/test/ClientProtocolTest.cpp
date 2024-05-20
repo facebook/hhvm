@@ -3712,8 +3712,10 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   setupExpectingEncryptedExtensions();
   state_.requestedExtensions()->push_back(
       ExtensionType::encrypted_client_hello);
+  state_.sni() = "www.facebook.com";
   state_.echState().emplace();
   state_.echState()->status = ECHStatus::Rejected;
+  state_.echState()->sni = "private.facebook.com";
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("eeencoding")));
 
@@ -3726,13 +3728,20 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   ee.extensions.push_back(encodeExtension(std::move(serverECH)));
 
   auto actions = detail::processEvent(state_, std::move(ee));
-  expectActions<MutateState>(actions);
+  expectActions<MutateState, ECHRetryAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(*state_.alpn(), "h2");
   EXPECT_TRUE(folly::IOBufEqualTo()(
       state_.echState()->retryConfigs.value()[0].ech_config_content,
       folly::IOBuf::copyBuffer("retryconfig")));
   EXPECT_EQ(state_.state(), StateEnum::ExpectingCertificate);
+  auto retry = expectAction<ECHRetryAvailable>(actions);
+  EXPECT_EQ(retry.sni, "private.facebook.com");
+  ASSERT_EQ(retry.configs.size(), 1);
+  EXPECT_EQ(retry.configs.at(0).version, ech::ECHVersion::Draft15);
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      retry.configs.at(0).ech_config_content,
+      folly::IOBuf::copyBuffer("retryconfig")));
 }
 
 TEST_F(ClientProtocolTest, TestCertificateFlow) {

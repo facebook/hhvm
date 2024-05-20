@@ -654,6 +654,12 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
 
 template <typename SM>
 void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
+    ECHRetryAvailable& echRetry) {
+  client_.echRetryAvailable(echRetry);
+}
+
+template <typename SM>
+void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
     SecretAvailable& secret) {
   fizz_probe_secret_available(
       secret.secret.secret.size(),

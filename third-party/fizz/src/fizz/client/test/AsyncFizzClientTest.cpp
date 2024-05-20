@@ -12,6 +12,7 @@
 #include <fizz/client/AsyncFizzClient.h>
 
 #include <fizz/client/test/Mocks.h>
+#include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/test/AsyncSocketTest.h>
@@ -121,7 +122,8 @@ class AsyncFizzClientTest : public Test {
       std::shared_ptr<const Cert> clientCert = nullptr,
       std::shared_ptr<const Cert> serverCert = nullptr,
       bool pskResumed = false,
-      ECHMode echMode = ECHMode::NotRequested) {
+      ECHMode echMode = ECHMode::NotRequested,
+      folly::Optional<ECHRetryAvailable> expectedECHRetry = {}) {
     EXPECT_CALL(*machine_, _processSocketData(_, _, _))
         .WillOnce(InvokeWithoutArgs([=]() {
           MutateState addToState([=](State& newState) {
@@ -161,8 +163,18 @@ class AsyncFizzClientTest : public Test {
           });
           ReportHandshakeSuccess reportSuccess;
           reportSuccess.earlyDataAccepted = acceptEarlyData;
-          return detail::actions(
-              std::move(addToState), std::move(reportSuccess), WaitForData());
+          ECHRetryAvailable echRetryAvailable;
+          if (expectedECHRetry.has_value()) {
+            echRetryAvailable = expectedECHRetry.value();
+            return detail::actions(
+                std::move(addToState),
+                std::move(echRetryAvailable),
+                std::move(reportSuccess),
+                WaitForData());
+          } else {
+            return detail::actions(
+                std::move(addToState), std::move(reportSuccess), WaitForData());
+          }
         }));
     socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ServerData"));
   }
@@ -1215,6 +1227,34 @@ TEST_F(AsyncFizzClientTest, TestTransportEof) {
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("Data"));
   EXPECT_FALSE(client_->error());
   EXPECT_FALSE(client_->good());
+}
+
+TEST_F(AsyncFizzClientTest, TestECHRetryAvailableAction) {
+  connect();
+  EXPECT_CALL(handshakeCallback_, _fizzHandshakeSuccess());
+  auto callback = MockECHRetryCallback();
+  EXPECT_CALL(callback, retryAvailable(_))
+      .WillOnce(Invoke([](ECHRetryAvailable gotRetryConfig) {
+        EXPECT_EQ(
+            gotRetryConfig.configs.at(0).version, ech::ECHVersion::Draft15);
+        EXPECT_EQ(
+            gotRetryConfig.configs.at(0).ech_config_content->moveToFbString(),
+            "retryConfig");
+      }));
+  client_->setECHRetryCallback(&callback);
+  ech::ECHConfig retryConfig;
+  retryConfig.version = ech::ECHVersion::Draft15;
+  retryConfig.ech_config_content = folly::IOBuf::copyBuffer("retryConfig");
+  ECHRetryAvailable expectedECHRetries;
+  expectedECHRetries.configs.push_back(retryConfig);
+  fullHandshakeSuccess(
+      false,
+      "h2",
+      nullptr,
+      nullptr,
+      false,
+      ECHMode::Rejected,
+      expectedECHRetries);
 }
 
 TEST_F(AsyncFizzClientTest, TestNewCachedPskActions) {

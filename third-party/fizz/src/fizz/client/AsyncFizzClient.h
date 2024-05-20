@@ -21,6 +21,23 @@
 namespace fizz {
 namespace client {
 
+/**
+ * ECHRetryCallback is used to convey ECHRetryConfigs that are
+ * received by the client.
+ */
+class ECHRetryCallback {
+ public:
+  virtual ~ECHRetryCallback() = default;
+
+  /**
+   * retryAvailable may be invoked whenever the client receives a list of
+   * ECHRetryConfigs from the server.
+   *
+   * There is no guarantee that this callback will be invoked on a connection.
+   */
+  virtual void retryAvailable(ECHRetryAvailable retry) = 0;
+};
+
 template <typename SM>
 class AsyncFizzClientT : public AsyncFizzBase,
                          private folly::AsyncSocket::ConnectCallback {
@@ -172,6 +189,16 @@ class AsyncFizzClientT : public AsyncFizzBase,
    */
   folly::Optional<std::vector<ech::ECHConfig>> getEchRetryConfigs() const;
 
+  void echRetryAvailable(const ECHRetryAvailable& retry) noexcept {
+    if (echRetryCallback_) {
+      echRetryCallback_->retryAvailable(retry);
+    }
+  }
+
+  void setECHRetryCallback(ECHRetryCallback* cb) {
+    echRetryCallback_ = cb;
+  }
+
  protected:
   ~AsyncFizzClientT() override = default;
   void writeAppData(
@@ -215,6 +242,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
     void operator()(WaitForData&);
     void operator()(MutateState&);
     void operator()(NewCachedPsk&);
+    void operator()(ECHRetryAvailable&);
     void operator()(SecretAvailable&);
     void operator()(EndOfData&);
 
@@ -298,6 +326,8 @@ class AsyncFizzClientT : public AsyncFizzBase,
   };
 
   folly::Optional<AsyncClientCallbackPtr> callback_;
+
+  ECHRetryCallback* echRetryCallback_{nullptr};
 
   std::shared_ptr<const FizzClientContext> fizzContext_;
 

@@ -133,6 +133,11 @@ class MockPskCache : public PskCache {
   MOCK_METHOD(void, removePsk, (const std::string& identity));
 };
 
+class MockECHRetryCallback : public ECHRetryCallback {
+ public:
+  MOCK_METHOD(void, retryAvailable, (ECHRetryAvailable retry));
+};
+
 class MockECHPolicy : public fizz::client::ECHPolicy {
  public:
   MOCK_METHOD(

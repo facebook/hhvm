@@ -1779,11 +1779,15 @@ Actions EventHandler<
   }
 
   folly::Optional<std::vector<ech::ECHConfig>> retryConfigs;
+  folly::Optional<ECHRetryAvailable> echRetryAvailable;
   if (state.echState().has_value()) {
     // Check if we were sent retry configs
     auto serverECH = getExtension<ech::ECHEncryptedExtensions>(ee.extensions);
     if (serverECH.has_value()) {
       retryConfigs = std::move(serverECH->retry_configs);
+      echRetryAvailable = ECHRetryAvailable{};
+      echRetryAvailable->sni = state.echState()->sni.value_or("");
+      echRetryAvailable->configs = retryConfigs.value();
     }
   }
 
@@ -1791,7 +1795,8 @@ Actions EventHandler<
     state.extensions()->onEncryptedExtensions(ee.extensions);
   }
 
-  MutateState mutateState(
+  Actions ret;
+  ret.emplace_back(MutateState(
       [appProto = std::move(appProto),
        earlyDataType,
        retryConfigs = std::move(retryConfigs)](State& newState) mutable {
@@ -1801,17 +1806,18 @@ Actions EventHandler<
         if (retryConfigs.has_value()) {
           newState.echState()->retryConfigs = std::move(retryConfigs);
         }
-      });
+      }));
 
-  if (isPskAccepted(*state.pskType())) {
-    return actions(
-        std::move(mutateState),
-        MutateState(&Transition<StateEnum::ExpectingFinished>));
-  } else {
-    return actions(
-        std::move(mutateState),
-        MutateState(&Transition<StateEnum::ExpectingCertificate>));
+  if (echRetryAvailable) {
+    ret.emplace_back(std::move(*echRetryAvailable));
   }
+
+  auto nextState = (isPskAccepted(*state.pskType()))
+      ? &Transition<StateEnum::ExpectingFinished>
+      : &Transition<StateEnum::ExpectingCertificate>;
+  ret.emplace_back(MutateState(nextState));
+
+  return ret;
 }
 
 static folly::Optional<

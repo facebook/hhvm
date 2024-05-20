@@ -68,6 +68,30 @@ struct NewCachedPsk {
   CachedPsk psk;
 };
 
+/**
+ * New ech retry config available. This action is emitted whenever an ECH retry
+ * config is received from the server's encrypted extensions.
+ */
+struct ECHRetryAvailable {
+  /**
+   * The original SNI that was used in the `Connect` event, prior to any
+   * modifications due to ECH.
+   *
+   * It is present here in order to associate this `ECHRetryAvailable`
+   * action with a connection attempt.
+   *
+   * An empty string indicates that no SNI was sent, but the peer responded
+   * with a set of ECHConfigs regardless
+   */
+  std::string sni;
+  /**
+   * A list of ECHConfigs sent by the peer. It is intended to indicate
+   * the set of acceptable ECHConfigs to use the next time the local
+   * sender intends to open a TLS connection to `sni`.
+   */
+  std::vector<ech::ECHConfig> configs;
+};
+
 #define FIZZ_CLIENT_ACTIONS(F, ...)           \
   F(DeliverAppData, __VA_ARGS__)              \
   F(WriteToSocket, __VA_ARGS__)               \
@@ -79,7 +103,8 @@ struct NewCachedPsk {
   F(MutateState, __VA_ARGS__)                 \
   F(WaitForData, __VA_ARGS__)                 \
   F(NewCachedPsk, __VA_ARGS__)                \
-  F(SecretAvailable, __VA_ARGS__)
+  F(SecretAvailable, __VA_ARGS__)             \
+  F(ECHRetryAvailable, __VA_ARGS__)
 
 FIZZ_DECLARE_VARIANT_TYPE(Action, FIZZ_CLIENT_ACTIONS)
 

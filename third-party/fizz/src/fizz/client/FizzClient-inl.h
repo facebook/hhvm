@@ -100,6 +100,9 @@ void FizzClient<ActionMoveVisitor, SM>::visitActions(
       case Action::Type::SecretAvailable_E:
         this->visitor_(*action.asSecretAvailable());
         break;
+      case Action::Type::ECHRetryAvailable_E:
+        this->visitor_(*action.asECHRetryAvailable());
+        break;
     }
   }
 }

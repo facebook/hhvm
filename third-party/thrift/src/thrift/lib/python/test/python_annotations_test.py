@@ -14,26 +14,43 @@
 
 # pyre-strict
 
+import types
 import unittest
+from typing import Type, Union
 
-import thrift.python.test.annotations.thrift_types as test_types
+import thrift.python.test.annotations.thrift_mutable_types as mutable_test_types
+
+import thrift.python.test.annotations.thrift_types as immutable_test_types
+
+from parameterized import parameterized
+from thrift.python.mutable_types import MutableStructOrUnion
 
 from thrift.python.types import StructOrUnion
 
 
-class TypeInfoTests(unittest.TestCase):
-    def test_python_Name_on_struct(self) -> None:
+class TestPythonAnnotations(unittest.TestCase):
+    @parameterized.expand(
+        [
+            (immutable_test_types, StructOrUnion),
+            (mutable_test_types, MutableStructOrUnion),
+        ]
+    )
+    def test_python_Name_on_struct(
+        self,
+        test_types: types.ModuleType,
+        base_type: Type[Union[StructOrUnion, MutableStructOrUnion]],
+    ) -> None:
         """
         @python.Name{name = "RenamedEmpty"}
         struct Empty {}
         """
         with self.assertRaisesRegex(AttributeError, "has no attribute 'Empty'"):
-            # pyre-ignore[16]: no attribute
             test_types.Empty()
 
-        self.assertTrue(isinstance(test_types.RenamedEmpty(), StructOrUnion))
+        self.assertIsInstance(test_types.RenamedEmpty(), base_type)
 
-    def test_python_Name_on_field(self) -> None:
+    @parameterized.expand([immutable_test_types, mutable_test_types])
+    def test_python_Name_on_field(self, test_types: types.ModuleType) -> None:
         """
         struct Struct {
           1: i32 first;
@@ -44,7 +61,6 @@ class TypeInfoTests(unittest.TestCase):
         struct = test_types.Struct()
 
         with self.assertRaisesRegex(AttributeError, "has no attribute 'second'"):
-            # pyre-ignore[16]: no attribute
             struct.second
 
         self.assertEqual(0, struct.renamed_second)

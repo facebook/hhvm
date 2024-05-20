@@ -470,6 +470,7 @@ module.exports = {
             ],
           },
           'fb/troubleshooting/fb303-counters',
+          'fb/troubleshooting/overload',
         ],
       },
     ]),

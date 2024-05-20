@@ -22,6 +22,8 @@ struct A {
   1: string a;
 }
 
+typedef string StringType
+
 struct B {
   1: A just_an_A;
   2: set<i32> set_of_i32;
@@ -33,10 +35,10 @@ struct B {
   8: map<string, list<A>> map_of_string_to_list_of_A;
   9: map<string, set<i32>> map_of_string_to_set_of_i32;
   10: map<string, map<string, i32>> map_of_string_to_map_of_string_to_i32;
-  11: map<string, map<string, A>> map_of_string_to_map_of_string_to_A;
+  11: map<string, map<StringType, A>> map_of_string_to_map_of_string_to_A;
   12: list<set<i32>> list_of_set_of_i32;
-  13: list<map<string, list<A>>> list_of_map_of_string_to_list_of_A;
-  14: list<map<string, A>> list_of_map_of_string_to_A;
+  13: list<map<StringType, list<A>>> list_of_map_of_string_to_list_of_A;
+  14: list<map<StringType, A>> list_of_map_of_string_to_A;
   17: Enum just_an_enum;
 
   51: optional A optional_just_an_A;
@@ -47,6 +49,6 @@ struct B {
   56: optional map<string, A> optional_map_of_string_to_A;
   57: optional map<string, list<i32>> optional_map_of_string_to_list_of_i32;
   58: optional map<string, list<A>> optional_map_of_string_to_list_of_A;
-  59: optional map<string, set<i32>> optional_map_of_string_to_set_of_i32;
+  59: optional map<StringType, set<i32>> optional_map_of_string_to_set_of_i32;
   60: optional Enum optional_enum;
 }

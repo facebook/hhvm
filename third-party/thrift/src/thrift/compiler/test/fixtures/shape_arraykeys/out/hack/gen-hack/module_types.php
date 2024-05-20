@@ -622,7 +622,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 11: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
+   * 11: map<string, map<module.StringType, module.A>> map_of_string_to_map_of_string_to_A
    */
   public Map<string, Map<string, A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -632,12 +632,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Vector<Set<int>> $list_of_set_of_i32;
   /**
    * Original thrift field:-
-   * 13: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
+   * 13: list<map<module.StringType, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public Vector<Map<string, Vector<A>>> $list_of_map_of_string_to_list_of_A;
   /**
    * Original thrift field:-
-   * 14: list<map<string, module.A>> list_of_map_of_string_to_A
+   * 14: list<map<module.StringType, module.A>> list_of_map_of_string_to_A
    */
   public Vector<Map<string, A>> $list_of_map_of_string_to_A;
   /**
@@ -687,7 +687,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, Vector<A>> $optional_map_of_string_to_list_of_A;
   /**
    * Original thrift field:-
-   * 59: map<string, set<i32>> optional_map_of_string_to_set_of_i32
+   * 59: map<module.StringType, set<i32>> optional_map_of_string_to_set_of_i32
    */
   public ?Map<string, Set<int>> $optional_map_of_string_to_set_of_i32;
   /**
@@ -1046,7 +1046,16 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                             shape(
                               "keyType" => tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.StringType",
+                                      "underlyingType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                               "valueType" => tmeta_ThriftType::fromShape(
@@ -1109,7 +1118,16 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                             shape(
                               "keyType" => tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.StringType",
+                                      "underlyingType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                               "valueType" => tmeta_ThriftType::fromShape(
@@ -1153,7 +1171,16 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                             shape(
                               "keyType" => tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.StringType",
+                                      "underlyingType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                               "valueType" => tmeta_ThriftType::fromShape(
@@ -1400,7 +1427,16 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
                     shape(
                       "keyType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.StringType",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                       "valueType" => tmeta_ThriftType::fromShape(

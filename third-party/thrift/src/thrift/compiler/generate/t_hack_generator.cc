@@ -3216,7 +3216,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     std::ostream& out, t_name_generator& namer, const t_map* t) {
   bool stringify_map_keys = false;
   if (shape_arraykeys_) {
-    const t_type* key_type = t->get_key_type();
+    const t_type* key_type = t->get_key_type()->get_true_type();
     if (key_type->is_primitive_type() && key_type->is_string_or_binary()) {
       stringify_map_keys = true;
     }
@@ -3653,7 +3653,7 @@ bool t_hack_generator::
       container_type = "Dict\\";
       if (shape_arraykeys_) {
         const t_type* key_type =
-            static_cast<const t_map*>(ttype)->get_key_type();
+            static_cast<const t_map*>(ttype)->get_key_type()->get_true_type();
         if (is_shape_method && key_type->is_primitive_type() &&
             key_type->is_string_or_binary()) {
           stringify_map_keys = true;

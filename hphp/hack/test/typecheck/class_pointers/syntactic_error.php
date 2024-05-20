@@ -2,12 +2,14 @@
 
 function expect_string(string $s): void {}
 function expect_nstring(?string $s): void {}
-function expect_tstring<T as string>(T $s): T { return $s; }
-function expect_tnstring<T as ?string>(T $s): T { return $s; }
-function expect_ntstring<T as string>(?T $s): T { return $s as nonnull; }
-function expect_ntnstring<T as ?string>(?T $s): T { return $s as nonnull; }
 
-class C {}
+class C {
+  public string $s = "";
+  public ?string $ns = null;
+
+  public static string $ss = "";
+  public static ?string $sns = null;
+}
 
 function error_cases(): void {
   expect_string(C::class);
@@ -16,7 +18,6 @@ function error_cases(): void {
 
 function skip_reified<reify T as C>(): void {
   expect_string(T::class);
-  expect_nstring(T::class);
 }
 
 function error_only_syntactic(): void {
@@ -24,9 +25,14 @@ function error_only_syntactic(): void {
   expect_string($c);
 }
 
-function future_cases(): void {
-  expect_tstring(C::class);
-  expect_tnstring(C::class);
-  expect_ntstring(C::class);
-  expect_ntnstring(C::class);
+function ret_string(): string { return C::class; }
+function ret_nstring(): ?string { return C::class; }
+
+function prop_string(C $c): void {
+  $c->s = C::class;
+  C::$ss = C::class;
+}
+function prop_nstring(C $c): void {
+  $c->ns = C::class;
+  C::$sns = C::class;
 }

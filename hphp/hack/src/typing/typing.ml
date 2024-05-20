@@ -7715,13 +7715,19 @@ end = struct
       (env, Aast.Return None)
     | Return (Some e) ->
       let env = Typing_return.check_inout_return pos env in
-      let (_, expr_pos, _) = e in
+      let (_, expr_pos, expr_) = e in
       let Typing_env_return_info.{ return_type; return_disposable } =
         Env.get_return env
       in
       let return_type =
         Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type
       in
+      Typing_class_pointers.check_string_coercion_point
+        env
+        ~flag:"return"
+        expr_pos
+        expr_
+        return_type;
       let expected =
         Some
           (ExpectedTy.make_and_allow_coercion
@@ -10238,7 +10244,14 @@ end = struct
             e2
         in
         let (_, pos2, _) = te2 in
-        let (env, te1, ty, ty_mismatch_opt) = Assign.assign p env e1 pos2 ty2 in
+        let expr_for_string_check =
+          match e2 with
+          | Either.First e -> Some e
+          | Either.Second _ -> None
+        in
+        let (env, te1, ty, ty_mismatch_opt) =
+          Assign.assign ?expr_for_string_check p env e1 pos2 ty2
+        in
         let te =
           Aast.Binop
             {
@@ -10634,6 +10647,7 @@ end
 
 and Assign : sig
   val assign :
+    ?expr_for_string_check:Nast.expr ->
     pos ->
     env ->
     Nast.expr ->
@@ -10645,6 +10659,7 @@ and Assign : sig
     * (locl_ty * locl_phase Typing_defs_core.ty) option
 
   val assign_ :
+    ?expr_for_string_check:Nast.expr ->
     pos ->
     Reason.ureason ->
     env ->
@@ -10683,7 +10698,8 @@ end = struct
     let ty_mismatch = mk_ty_mismatch_opt ty2 ty1 ty_err_opt in
     (env, te1, ty2, ty_mismatch)
 
-  let rec assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
+  let rec assign_with_subtype_err_
+      ?expr_for_string_check p ur env (e1 : Nast.expr) pos2 ty2 =
     match e1 with
     | (_, _, Hole (e, _, _, _)) -> assign_with_subtype_err_ p ur env e pos2 ty2
     | _ ->
@@ -10840,6 +10856,15 @@ end = struct
             obj_ty
         in
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+        Option.iter
+          ~f:(fun (_, e2_pos, e2) ->
+            Typing_class_pointers.check_string_coercion_point
+              env
+              ~flag:"prop"
+              e2_pos
+              e2
+              declared_ty)
+          expr_for_string_check;
         let (env, inner_te) =
           TUtils.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
         in
@@ -11025,11 +11050,20 @@ end = struct
       | _ -> assign_simple p ur env e1 ty2)
 
   (* Deal with assignment of a value of type ty2 to lvalue e1 *)
-  and assign p env e1 pos2 ty2 =
-    assign_with_subtype_err_ p Reason.URassign env e1 pos2 ty2
+  and assign ?expr_for_string_check p env e1 pos2 ty2 =
+    assign_with_subtype_err_
+      ?expr_for_string_check
+      p
+      Reason.URassign
+      env
+      e1
+      pos2
+      ty2
 
-  let assign_ p ur env e1 pos2 ty2 =
-    let (env, te, ty, _err) = assign_with_subtype_err_ p ur env e1 pos2 ty2 in
+  let assign_ ?expr_for_string_check p ur env e1 pos2 ty2 =
+    let (env, te, ty, _err) =
+      assign_with_subtype_err_ ?expr_for_string_check p ur env e1 pos2 ty2
+    in
     (env, te, ty)
 end
 

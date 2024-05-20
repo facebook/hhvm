@@ -54,6 +54,9 @@ cdef class AsyncClient:
     cdef bind_client(self, cRequestChannel_ptr channel):
         self._omni_client = make_unique[cOmniClient](cmove(channel))
 
+    cdef bind_client_shared(self, shared_ptr[cRequestChannel] channel):
+        self._omni_client = make_unique[cOmniClient](channel)
+
     def __enter__(AsyncClient self):
         raise asyncio.InvalidStateError('Use an async context for thrift clients')
 

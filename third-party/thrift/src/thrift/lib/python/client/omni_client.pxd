@@ -72,6 +72,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
 
     cdef cppclass cOmniClient "::thrift::python::client::OmniClient" nogil:
         cOmniClient(cRequestChannel_ptr channel, const string& serviceName)
+        cOmniClient(shared_ptr[cRequestChannel] channel, const string& serviceName)
         cOmniClientResponseWithHeaders sync_send(
             const string& serviceName,
             const string& methodName,

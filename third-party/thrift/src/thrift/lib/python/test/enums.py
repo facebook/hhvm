@@ -22,7 +22,9 @@ import pickle
 import unittest
 from typing import cast, Type, TypeVar
 
-from testing.thrift_types import (
+from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
+
+from thrift.python.test.enums.thrift_types import (
     BadMembers,
     Color,
     ColorGroups,
@@ -32,7 +34,6 @@ from testing.thrift_types import (
     OptionalFile,
     Perm,
 )
-from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
 from thrift.python.types import BadEnum, Enum, Flag
 
 _E = TypeVar("_E", bound=Enum)

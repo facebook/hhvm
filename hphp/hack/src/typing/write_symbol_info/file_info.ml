@@ -50,9 +50,7 @@ let concat_hash str hash = Md5.digest_string (Md5.to_binary hash ^ str)
 let compute_sym_hash symbols init =
   let f cur { occ; def } =
     let full_name =
-      match def with
-      | None -> ""
-      | Some def -> Sym_def.(def.full_name ^ Sym_def.kind_to_string def.kind)
+      Option.map def ~f:Sym_def.show |> Option.value ~default:""
     in
     let str = SymbolOccurrence.(occ.name ^ show_kind occ.type_ ^ full_name) in
     concat_hash str cur

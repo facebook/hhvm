@@ -200,6 +200,12 @@ let container_decl_qname container_type name =
 let container_ref container_type id =
   Declaration.Container (container_decl container_type id)
 
+let classish_to_predicate = function
+  | Ast_defs.Cinterface -> (InterfaceContainer, Hack InterfaceDeclaration)
+  | Ast_defs.Ctrait -> (TraitContainer, Hack TraitDeclaration)
+  | Ast_defs.Cclass _ -> (ClassContainer, Hack ClassDeclaration)
+  | _ -> raise (Failure "Unexpected enum class")
+
 let get_parent_kind = function
   | Ast_defs.Cenum_class _ ->
     raise (Failure "Unexpected enum class as parent container kind")

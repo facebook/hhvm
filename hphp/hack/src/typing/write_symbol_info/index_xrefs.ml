@@ -121,42 +121,44 @@ let process_gconst_xref symbol_def pos (xrefs, fa) =
     (xrefs, fa)
 
 let process_member_xref
-    ctx member pos mem_decl_fun ref_fun ?receiver_type (xrefs, fa) =
-  let Sym_def.{ name; full_name; kind; _ } = member in
-  match Str.split (Str.regexp "::") full_name with
-  | [] -> (xrefs, fa)
-  | con_name :: _mem_name ->
-    (match Sym_def.get_kind ctx con_name with
-    | None ->
-      Hh_logger.log
-        "WARNING: could not find parent container %s processing reference to %s"
-        con_name
-        full_name;
-      (xrefs, fa)
-    | Some Ast_defs.Cenum
-    | Some (Ast_defs.Cenum_class _) ->
-      (match kind with
-      | Sym_def.ClassConst ->
-        let (enum_id, fa) = Add_fact.enum_decl con_name fa in
-        process_xref
-          (Add_fact.enumerator enum_id)
-          (fun x -> Declaration.Enumerator (Enumerator.Id x))
-          name
-          pos
-          (xrefs, fa)
-      (* This includes references to built-in enum methods *)
-      | _ -> (xrefs, fa))
-    | Some cls ->
-      let con_kind = Predicate.get_parent_kind cls in
-      let decl_pred = Predicate.parent_decl_predicate con_kind in
-      let (con_decl_id, fa) = Add_fact.container_decl decl_pred con_name fa in
+    ctx
+    ~class_name
+    ~name
+    pos
+    mem_decl_fun
+    ref_fun
+    ?receiver_type
+    ~class_const
+    (xrefs, fa) =
+  match Sym_def.get_kind ctx class_name with
+  | None ->
+    Hh_logger.log
+      "WARNING: could not find parent container %s processing reference to %s"
+      class_name
+      name;
+    (xrefs, fa)
+  | Some Ast_defs.Cenum
+  | Some (Ast_defs.Cenum_class _) ->
+    if class_const then
+      let (enum_id, fa) = Add_fact.enum_decl class_name fa in
       process_xref
-        (mem_decl_fun con_kind con_decl_id)
-        ref_fun
+        (Add_fact.enumerator enum_id)
+        (fun x -> Declaration.Enumerator (Enumerator.Id x))
         name
         pos
-        ?receiver_type
-        (xrefs, fa))
+        (xrefs, fa)
+    else
+      (xrefs, fa)
+  | Some cls ->
+    let (class_kind, decl_pred) = Predicate.classish_to_predicate cls in
+    let (class_decl_id, fa) = Add_fact.container_decl decl_pred class_name fa in
+    process_xref
+      (mem_decl_fun class_kind class_decl_id)
+      ref_fun
+      name
+      pos
+      ?receiver_type
+      (xrefs, fa)
 
 let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, fa) =
   process_xref
@@ -247,57 +249,72 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
               in
               (xrefs, fa)
             | _ -> (xrefs, fa))
-          | Some (Sym_def.{ name; kind; _ } as sym_def) ->
+          | Some sym_def ->
             let open Sym_def in
-            let proc_mem = process_member_xref ctx sym_def pos in
-            (match kind with
-            | Class ->
+            (match sym_def with
+            | Class { kind = Ast_defs.Cenum; name }
+            | Class { kind = Ast_defs.Cenum_class _; name } ->
+              process_enum_xref name pos (xrefs, fa)
+            | Class { kind; name } ->
               process_container_xref
-                Predicate.(ClassContainer, Hack ClassDeclaration)
+                (Predicate.classish_to_predicate kind)
                 name
                 pos
                 (xrefs, fa)
-            | ClassConst ->
+            | ClassConst { class_name; name } ->
               let ref_fun x =
                 Declaration.ClassConst (ClassConstDeclaration.Id x)
               in
-              proc_mem Add_fact.class_const_decl ref_fun (xrefs, fa)
-            | GlobalConst -> process_gconst_xref name pos (xrefs, fa)
-            | Enum -> process_enum_xref name pos (xrefs, fa)
-            | Function -> process_function_xref name pos (xrefs, fa)
-            | Interface ->
-              process_container_xref
-                Predicate.(InterfaceContainer, Hack InterfaceDeclaration)
-                name
+              process_member_xref
+                ctx
+                ~class_name
+                ~name
                 pos
+                Add_fact.class_const_decl
+                ref_fun
+                ~class_const:true
                 (xrefs, fa)
-            | Method ->
+            | GlobalConst { name } -> process_gconst_xref name pos (xrefs, fa)
+            | Function { name } -> process_function_xref name pos (xrefs, fa)
+            | Method { class_name; name } ->
               let ref_fun x = Declaration.Method (MethodDeclaration.Id x) in
               process_member_xref
                 ctx
-                sym_def
+                ~class_name
+                ~name
                 pos
                 Add_fact.method_decl
                 ref_fun (* TODO just pass the occurrence here *)
                 ?receiver_type:(receiver_type occ)
+                ~class_const:false
                 (xrefs, fa)
-            | Property ->
+            | Property { class_name; name } ->
               let ref_fun x =
                 Declaration.Property_ (PropertyDeclaration.Id x)
               in
-              proc_mem Add_fact.property_decl ref_fun (xrefs, fa)
-            | Typeconst ->
+              process_member_xref
+                ctx
+                ~class_name
+                ~name
+                pos
+                Add_fact.property_decl
+                ref_fun
+                ~class_const:false
+                (xrefs, fa)
+            | Typeconst { class_name; name } ->
               let ref_fun x =
                 Declaration.TypeConst (TypeConstDeclaration.Id x)
               in
-              proc_mem Add_fact.type_const_decl ref_fun (xrefs, fa)
-            | Typedef -> process_typedef_xref name pos (xrefs, fa)
-            | Trait ->
-              process_container_xref
-                Predicate.(TraitContainer, Hack TraitDeclaration)
-                name
+              process_member_xref
+                ctx
+                ~class_name
+                ~name
                 pos
+                Add_fact.type_const_decl
+                ref_fun
+                ~class_const:false
                 (xrefs, fa)
+            | Typedef { name } -> process_typedef_xref name pos (xrefs, fa)
             | _ -> (xrefs, fa))))
 
 let process_xrefs_and_calls ctx fa File_info.{ path; tast; symbols; _ } =

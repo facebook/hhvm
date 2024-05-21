@@ -87,10 +87,9 @@ let process_member
 
 let process_member_cluster mc fa =
   let (container_type, container_id, fa) =
-    let parent_kind =
-      Predicate.get_parent_kind mc.File_info.container.File_info.kind
+    let (parent_kind, decl_pred) =
+      Predicate.classish_to_predicate mc.File_info.container.File_info.kind
     in
-    let decl_pred = Predicate.parent_decl_predicate parent_kind in
     let (con_decl_id, fa) =
       Add_fact.container_decl decl_pred mc.File_info.container.File_info.name fa
     in
@@ -128,8 +127,7 @@ let process_member_cluster mc fa =
 let process_container_decl
     ctx thrift_ctx path source_text con member_clusters (xrefs, all_decls, fa) =
   let (con_pos, con_name) = con.c_name in
-  let parent_kind = Predicate.get_parent_kind con.c_kind in
-  let decl_pred = Predicate.parent_decl_predicate parent_kind in
+  let (parent_kind, decl_pred) = Predicate.classish_to_predicate con.c_kind in
   let (con_decl_id, fa) = Add_fact.container_decl decl_pred con_name fa in
   let ref = Predicate.container_ref parent_kind con_decl_id in
   let fa = process_loc_span path con_pos con.c_span ref fa in

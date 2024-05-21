@@ -14,27 +14,33 @@
   [resolve] gets these information from an occurrence. It is mostly a specialized and
   simplified implementation of [ServerSymbolDefinition.go].  *)
 
-type kind =
-  | Function
-  | Class
-  | Method
-  | Property
-  | ClassConst
-  | GlobalConst
-  | Enum
-  | Interface
-  | Trait
-  | Typeconst
-  | Typedef
-  | Module
-
-val kind_to_string : kind -> string
-
-type t = {
-  kind: kind;
-  name: string;
-  full_name: string;
-}
+(* class_name is the canonical qualified name to a container kind.
+   starts with a backslash *)
+type t =
+  | Function of { name: string }
+  | Method of {
+      class_name: string;
+      name: string;
+    }
+  | Property of {
+      class_name: string;
+      name: string;
+    }
+  | ClassConst of {
+      class_name: string;
+      name: string;
+    }
+  | GlobalConst of { name: string }
+  | Class of {
+      kind: Ast_defs.classish_kind;
+      name: string;
+    }
+  | Typeconst of {
+      class_name: string;
+      name: string;
+    }
+  | Typedef of { name: string }
+  | Module of { name: string }
 [@@deriving show]
 
 val resolve :

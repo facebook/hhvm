@@ -73,6 +73,9 @@ val parent_decl_predicate : parent_container_type -> t
 
 val get_parent_kind : Ast_defs.classish_kind -> parent_container_type
 
+(** will fail if kind is an enum *)
+val classish_to_predicate : Ast_defs.classish_kind -> parent_container_type * t
+
 val container_ref : parent_container_type -> Fact_id.t -> Declaration.t
 
 val container_decl :

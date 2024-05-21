@@ -497,24 +497,26 @@ void ThriftServer::touchRequestTimestamp() noexcept {
 void ThriftServer::configureIOUring() {
 #ifdef HAS_IO_URING
   if (preferIoUring_) {
-    VLOG(1) << "Preferring io_uring";
+    XLOG_IF(INFO, infoLoggingEnabled_) << "Preferring io_uring";
     auto b = io_uring_util::validateExecutorSupportsIOUring(ioThreadPool_);
 
     if (!b) {
       if (!useDefaultIoUringExecutor_) {
-        VLOG(1)
+        XLOG_IF(INFO, infoLoggingEnabled_)
             << "Configured IOThreadPoolExecutor does not support io_uring, but default not selected. epoll will be used";
         usingIoUring_ = false;
         return;
       }
 
-      VLOG(1) << "Configured IOThreadPoolExecutor does not support io_uring, "
-                 "configuring default io_uring IOThreadPoolExecutor pool";
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << "Configured IOThreadPoolExecutor does not support io_uring, "
+             "configuring default io_uring IOThreadPoolExecutor pool";
       ioThreadPool_ = io_uring_util::getDefaultIOUringExecutor(
           THRIFT_FLAG(enable_io_queue_lag_detection));
       usingIoUring_ = true;
     } else {
-      VLOG(1) << "Configured IOThreadPoolExecutor supports io_uring";
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << "Configured IOThreadPoolExecutor supports io_uring";
       usingIoUring_ = true;
     }
   }

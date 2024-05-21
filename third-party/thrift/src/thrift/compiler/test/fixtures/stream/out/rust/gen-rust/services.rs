@@ -66,7 +66,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Returnstream");
+            p.write_struct_begin("returnstream");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -165,7 +165,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Returnstream");
+            p.write_struct_begin("returnstream");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -249,7 +249,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Streamthrows");
+            p.write_struct_begin("streamthrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -356,7 +356,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Streamthrows");
+            p.write_struct_begin("streamthrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -430,7 +430,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Servicethrows");
+            p.write_struct_begin("servicethrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -520,7 +520,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Servicethrows");
+            p.write_struct_begin("servicethrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -602,7 +602,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Servicethrows2");
+            p.write_struct_begin("servicethrows2");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -702,7 +702,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Servicethrows2");
+            p.write_struct_begin("servicethrows2");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -802,7 +802,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Boththrows");
+            p.write_struct_begin("boththrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -900,7 +900,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Boththrows");
+            p.write_struct_begin("boththrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -992,7 +992,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamstreamthrows");
+            p.write_struct_begin("responseandstreamstreamthrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1099,7 +1099,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamstreamthrows");
+            p.write_struct_begin("responseandstreamstreamthrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -1174,7 +1174,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamservicethrows");
+            p.write_struct_begin("responseandstreamservicethrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1264,7 +1264,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamservicethrows");
+            p.write_struct_begin("responseandstreamservicethrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -1357,7 +1357,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamboththrows");
+            p.write_struct_begin("responseandstreamboththrows");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1455,7 +1455,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Responseandstreamboththrows");
+            p.write_struct_begin("responseandstreamboththrows");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -1538,7 +1538,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("ReturnstreamFast");
+            p.write_struct_begin("returnstreamFast");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1637,7 +1637,7 @@ pub mod pub_sub_streaming_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("ReturnstreamFast");
+            p.write_struct_begin("returnstreamFast");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);

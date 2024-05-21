@@ -120,7 +120,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("{{function:upcamel}}");
+            p.write_struct_begin("{{function:name}}");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -275,7 +275,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("{{function:upcamel}}");
+            p.write_struct_begin("{{function:name}}");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", {{!

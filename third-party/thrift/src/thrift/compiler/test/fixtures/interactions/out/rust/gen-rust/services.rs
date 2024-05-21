@@ -78,7 +78,7 @@ pub mod my_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Frobnicate");
+            p.write_struct_begin("frobnicate");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -181,7 +181,7 @@ pub mod my_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Ping");
+            p.write_struct_begin("ping");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -256,7 +256,7 @@ pub mod my_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Truthify");
+            p.write_struct_begin("truthify");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -355,7 +355,7 @@ pub mod my_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Truthify");
+            p.write_struct_begin("truthify");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -452,7 +452,7 @@ pub mod my_interaction_fast {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Frobnicate");
+            p.write_struct_begin("frobnicate");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -547,7 +547,7 @@ pub mod my_interaction_fast {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Ping");
+            p.write_struct_begin("ping");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -622,7 +622,7 @@ pub mod my_interaction_fast {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Truthify");
+            p.write_struct_begin("truthify");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -721,7 +721,7 @@ pub mod my_interaction_fast {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Truthify");
+            p.write_struct_begin("truthify");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -818,7 +818,7 @@ pub mod serial_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Frobnicate");
+            p.write_struct_begin("frobnicate");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -915,7 +915,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Foo");
+            p.write_struct_begin("foo");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -1010,7 +1010,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Interact");
+            p.write_struct_begin("interact");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -1105,7 +1105,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("InteractFast");
+            p.write_struct_begin("interactFast");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
@@ -1180,7 +1180,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Serialize");
+            p.write_struct_begin("serialize");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1279,7 +1279,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Serialize");
+            p.write_struct_begin("serialize");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);

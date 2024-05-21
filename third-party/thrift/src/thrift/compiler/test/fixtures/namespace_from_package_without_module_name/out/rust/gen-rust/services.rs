@@ -86,7 +86,7 @@ pub mod test_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Init");
+            p.write_struct_begin("init");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I64, 0i16);

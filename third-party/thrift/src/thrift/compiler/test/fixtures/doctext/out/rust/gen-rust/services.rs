@@ -88,7 +88,7 @@ pub mod c {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("F");
+            p.write_struct_begin("f");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -163,7 +163,7 @@ pub mod c {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Numbers");
+            p.write_struct_begin("numbers");
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -262,7 +262,7 @@ pub mod c {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Numbers");
+            p.write_struct_begin("numbers");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -347,7 +347,7 @@ pub mod c {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("Thing");
+            p.write_struct_begin("thing");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);

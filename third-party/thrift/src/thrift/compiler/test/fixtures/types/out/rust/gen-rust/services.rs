@@ -86,7 +86,7 @@ pub mod some_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("BounceMap");
+            p.write_struct_begin("bounce_map");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Map, 0i16);
@@ -181,7 +181,7 @@ pub mod some_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("BinaryKeyedMap");
+            p.write_struct_begin("binary_keyed_map");
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Map, 0i16);

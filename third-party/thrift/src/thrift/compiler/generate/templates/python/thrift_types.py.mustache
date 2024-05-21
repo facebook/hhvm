@@ -127,45 +127,7 @@ class {{> structs/unadapted_name}}(metaclass={{!
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata
 
-{{#program:enums}}
-class {{enum:name}}(_fbthrift_python_types.{{!
-        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}):
-    {{#enum:values}}
-    {{enum_value:py_name}} = {{enum_value:value}}
-    {{/enum:values}}
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "{{program:name}}.{{enum:name}}"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return {{#enum:thrift_uri}}"{{enum:thrift_uri}}"{{/enum:thrift_uri}}{{!
-            }}{{^enum:thrift_uri}}None{{/enum:thrift_uri}}
-
-    @staticmethod
-    def __get_metadata__():
-        return {{program:module_path}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
-
-    {{#enum:legacy_api?}}
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("{{program:module_path}}.types")
-        return py3_types.{{enum:name}}(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-    {{/enum:legacy_api?}}
-{{/program:enums}}
-
-_fbthrift_all_enums = [
-    {{#program:enums}}
-    {{enum:name}},
-    {{/program:enums}}
-]
+{{> enums/thrift_enums }}
 
 {{#program:structs}}
 def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():

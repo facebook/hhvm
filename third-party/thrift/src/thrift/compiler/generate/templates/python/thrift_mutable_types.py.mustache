@@ -30,6 +30,8 @@ import {{program:base_library_package}}.types as _fbthrift_python_types
 import {{module_path}}
 {{/program:adapter_modules}}
 
+{{> enums/thrift_enums }}
+
 {{!
 For now, process all structs that are neither exceptions nor unions.
 }}{{#program:structs}}{{^struct:exception?}}{{^struct:union?}}

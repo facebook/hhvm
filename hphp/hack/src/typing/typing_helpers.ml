@@ -19,6 +19,10 @@ open Typing_env_types
 open Aast
 module Env = Typing_env
 module SN = Naming_special_names
+module Inter = Typing_intersection
+module Union = Typing_union
+module MakeType = Typing_make_type
+module Utils = Typing_utils
 
 module ExpectedTy : sig
   [@@@warning "-32"]
@@ -197,3 +201,80 @@ module Prov = struct
     Typing_reason.(
       Rprj_symm (Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super), r))
 end
+
+(** [refine_and_simplify_intersection ~hint_first env p reason ivar_pos ty hint_ty]
+  intersects [ty] and [hint_ty], possibly making [hint_ty] support dynamic
+  first if [ty] also supports dynamic.
+  Then if the result has some like types in which prevent simplification
+  of the intersection, it'll distribute any '&' at the top of the type tree
+  in order to have a union at hand.
+  This is because the resulting type will likely end up on the LHS of a subtyping
+  call down the line, and unions on the LHS behave better than intersections,
+  which result in incomplete typing.
+
+  Parameters:
+  * [reason]          The reason for the result types and other intermediate types.
+  * [is_class]        Whether [hint_ty] is a class
+  *)
+let refine_and_simplify_intersection ~hint_first env ~is_class reason ty hint_ty
+    =
+  let intersect ~hint_first ~is_class env r ty hint_ty =
+    let (env, hint_ty) =
+      if
+        is_class
+        && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+        && Utils.is_supportdyn env ty
+      then
+        Utils.make_supportdyn reason env hint_ty
+      else
+        (env, hint_ty)
+    in
+    (* Sometimes the type checker is sensitive to the ordering of intersections *)
+    if hint_first then
+      Inter.intersect env ~r hint_ty ty
+    else
+      Inter.intersect env ~r ty hint_ty
+  in
+  let like_type_simplify env ty hint_ty ~is_class =
+    (* This basically distributes the intersection over the union.
+       Let's call X the type to refine (`ty` here) and H the hint type.
+       We want to intersect ~X with either H if H is enforced, or
+       ~H if H is not enforced.
+
+       If H is enforced: ~X & H is an intersection so may not behave well
+       if passed as LHS of subtyping, so we distribute the intersection:
+
+         ~X & H = ~H | (X & H)
+
+       (With the hope that (X & H) simplifies)
+
+
+       If X is not enforced:
+
+         ~X & ~H = ~(X & H)
+    *)
+    let (env, intersection_ty) =
+      intersect ~hint_first:false ~is_class env reason ty hint_ty
+    in
+    let rec is_enforced hint_ty =
+      match get_node hint_ty with
+      | Toption ty -> is_nonnull ty || is_enforced ty
+      | Tclass (_, _, [])
+      | Tprim _ ->
+        true
+      | Tshape { s_fields = expected_fdm; _ } ->
+        TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
+      | _ -> false
+    in
+    if is_enforced hint_ty then
+      let (env, dyn_ty) =
+        Inter.intersect env ~r:reason (Typing_make_type.dynamic reason) hint_ty
+      in
+      Union.union env dyn_ty intersection_ty
+    else
+      (env, MakeType.locl_like reason intersection_ty)
+  in
+  match Utils.try_strip_dynamic env ty with
+  | Some ty when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+    like_type_simplify env ty hint_ty ~is_class
+  | _ -> intersect ~hint_first ~is_class env reason ty hint_ty

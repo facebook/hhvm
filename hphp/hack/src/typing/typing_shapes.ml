@@ -93,9 +93,11 @@ let refine_key_exists field_name pos env shape =
     mixed_for_refinement env r shape
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
-  Typing_intersection.intersect
+  Typing_helpers.refine_and_simplify_intersection
+    ~hint_first:false
     env
-    ~r:(Reason.Rwitness pos)
+    ~is_class:false
+    (Reason.Rwitness pos)
     shape
     (MakeType.open_shape
        Reason.Rnone
@@ -127,9 +129,11 @@ let refine_not_key_exists field_name pos env shape_ty =
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
   let r = Reason.Rwitness pos in
-  Typing_intersection.intersect
+  Typing_helpers.refine_and_simplify_intersection
+    ~hint_first:false
     env
-    ~r
+    ~is_class:false
+    r
     shape_ty
     (MakeType.open_shape
        (get_reason shape_ty)
@@ -292,15 +296,6 @@ let shapes_idx_not_null env shape_ty (fld : Nast.expr) =
   let (_, p, _) = fld in
   refine_handle_errors env shape_ty fld (shapes_idx_not_null_with_ty_err p)
 
-let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
-  let r = Reason.Rshape (shape_pos, fun_name) in
-  (* Since this shape is only used as a supertype, it is safe to use mixed
-     as the kind, regardless of --everything-sdt *)
-  MakeType.open_shape
-    r
-    ~kind:(MakeType.mixed r)
-    (TShapeMap.singleton field_name field_ty)
-
 (* Typing rules for Shapes::idx
  *
  *     e : ?shape(?sfn => t, ...)
@@ -333,11 +328,13 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
   let (env, res) = Env.fresh_type env expr_pos in
   let ((env, ty_err_opt), res) =
     let fake_super_shape_ty =
-      make_idx_fake_super_shape
-        shape_pos
-        "Shapes::idx"
-        field_name
-        { sft_optional = true; sft_ty = res }
+      let r = Reason.Rshape (shape_pos, "Shapes::idx") in
+      (* Since this shape is only used as a supertype, it is safe to use mixed
+         as the kind, regardless of --everything-sdt *)
+      MakeType.open_shape
+        r
+        ~kind:(MakeType.mixed r)
+        (TShapeMap.singleton field_name { sft_optional = true; sft_ty = res })
     in
     let nullable_super_shape = mk (Reason.Rnone, Toption fake_super_shape_ty) in
     let super_shape =

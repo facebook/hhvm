@@ -52,13 +52,14 @@ val with_timeout :
 val reify_kind : Aast.reify_kind -> Aast.reify_kind
 
 (** Convert a function signature hint (method or toplevel function) into a bunch
-    of decl_tys. *)
+  of decl_tys. *)
 val hint_fun_decl :
   params:Nast.fun_param list ->
   ret:Nast.type_hint ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option * Typing_defs.decl_ty option list
 
+(** Stuff about type provenance? *)
 module Prov : sig
   val update :
     Typing_defs.locl_ty ->
@@ -108,3 +109,12 @@ module Prov : sig
     fld_kind_super:Typing_reason.field_kind ->
     Typing_reason.t
 end
+
+val refine_and_simplify_intersection :
+  hint_first:bool ->
+  Typing_env_types.env ->
+  is_class:bool ->
+  Typing_reason.t ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty

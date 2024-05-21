@@ -126,12 +126,11 @@ let process_member_xref
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, fa)
   | con_name :: _mem_name ->
-    let con_name_with_ns = Utils.add_ns con_name in
-    (match Sym_def.get_kind ctx con_name_with_ns with
+    (match Sym_def.get_kind ctx con_name with
     | None ->
       Hh_logger.log
         "WARNING: could not find parent container %s processing reference to %s"
-        con_name_with_ns
+        con_name
         full_name;
       (xrefs, fa)
     | Some Ast_defs.Cenum
@@ -169,20 +168,15 @@ let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, fa) =
 
 let process_attribute_xref ctx File_info.{ occ; _ } (xrefs, fa) =
   let get_con_preds_from_name con_name =
-    let con_name_with_ns = Utils.add_ns con_name in
-    match Sym_def.get_kind ctx con_name_with_ns with
+    match Sym_def.get_kind ctx con_name with
     | None ->
       Hh_logger.log
-        "WARNING: could not find declaration container %s for attribute reference to %s"
-        con_name_with_ns
+        "WARNING: could not find declaration container %s for attribute reference"
         con_name;
       None
     | Some (Ast_defs.Cenum_class _)
     | Some Ast_defs.Cenum ->
-      Hh_logger.log
-        "WARNING: unexpected enum %s processing attribute reference %s"
-        con_name_with_ns
-        con_name;
+      Hh_logger.log "WARNING: unexpected enum %s" con_name;
       None
     | Some cls ->
       let parent_kind = Predicate.get_parent_kind cls in

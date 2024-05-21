@@ -46,9 +46,7 @@ type t = {
 }
 [@@deriving show]
 
-let member_name ~class_name ~name =
-  let class_name = Utils.strip_ns class_name in
-  class_name ^ "::" ^ name
+let member_name ~class_name ~name = class_name ^ "::" ^ name
 
 let create_property class_name name =
   let kind = Property in
@@ -71,7 +69,6 @@ let create_method class_name name =
   { kind; name; full_name }
 
 let create_class class_name kind =
-  let class_name = Utils.strip_ns class_name in
   let kind =
     match kind with
     | Ast_defs.Cinterface -> Interface
@@ -87,19 +84,16 @@ let create_class class_name kind =
 
 let create_typedef name =
   let kind = Typedef in
-  let name = Utils.strip_ns name in
   let full_name = name in
   { kind; name; full_name }
 
 let create_fun name =
   let kind = Function in
-  let name = Utils.strip_ns name in
   let full_name = name in
   { kind; name; full_name }
 
 let create_gconst name =
   let kind = GlobalConst in
-  let name = Utils.strip_ns name in
   let full_name = name in
   { kind; name; full_name }
 
@@ -216,20 +210,20 @@ let get_overridden_method_origin ctx ~class_name ~method_name ~is_static =
 
 let get_class_name full_name =
   match Str.split (Str.regexp "::") full_name with
-  | con :: _mem -> Some (Utils.add_ns con)
+  | con :: _mem -> Some con
   | _ -> None
 
 let filename ctx { kind; name; full_name } =
   match kind with
-  | Function -> Naming_provider.get_fun_path ctx (Utils.add_ns name)
+  | Function -> Naming_provider.get_fun_path ctx name
   | Module -> Naming_provider.get_module_path ctx name
   | Class
   | Enum
   | Interface
   | Trait ->
-    Naming_provider.get_class_path ctx (Utils.add_ns name)
-  | Typedef -> Naming_provider.get_typedef_path ctx (Utils.add_ns name)
-  | GlobalConst -> Naming_provider.get_const_path ctx (Utils.add_ns name)
+    Naming_provider.get_class_path ctx name
+  | Typedef -> Naming_provider.get_typedef_path ctx name
+  | GlobalConst -> Naming_provider.get_const_path ctx name
   | Method
   | Property
   | ClassConst

@@ -147,15 +147,6 @@ pub mod c {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for NumbersStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "numbers");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for NumbersStreamExn {
         type Success = crate::types::number;
 

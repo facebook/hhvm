@@ -244,15 +244,6 @@ pub mod my_interaction {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for TruthifyStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "truthify");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for TruthifyStreamExn {
         type Success = ::std::primitive::bool;
 
@@ -623,15 +614,6 @@ pub mod my_interaction_fast {
     impl ::std::convert::From<::fbthrift::ApplicationException> for TruthifyStreamExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for TruthifyStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "truthify");
         }
     }
 
@@ -1205,15 +1187,6 @@ pub mod my_service {
     impl ::std::convert::From<::fbthrift::ApplicationException> for SerializeStreamExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for SerializeStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "serialize");
         }
     }
 

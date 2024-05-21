@@ -100,15 +100,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
     {{/function:enable_anyhow_to_application_exn}}
 
-    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}StreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "{{function:name}}");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}StreamExn {
         type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
 

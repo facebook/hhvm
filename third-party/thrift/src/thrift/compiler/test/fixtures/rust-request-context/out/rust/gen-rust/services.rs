@@ -742,15 +742,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for StreamByIdStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamById");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for StreamByIdStreamExn {
         type Success = crate::types::MyStruct;
 
@@ -933,15 +924,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for StreamByIdWithExceptionStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithException");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for StreamByIdWithExceptionStreamExn {
         type Success = crate::types::MyStruct;
 
@@ -1119,15 +1101,6 @@ pub mod my_service {
     impl ::std::convert::From<::fbthrift::ApplicationException> for StreamByIdWithResponseStreamExn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for StreamByIdWithResponseStreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithResponse");
         }
     }
 

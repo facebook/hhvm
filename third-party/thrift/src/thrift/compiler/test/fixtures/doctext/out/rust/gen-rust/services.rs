@@ -68,15 +68,6 @@ pub mod c {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "f");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FExn {
         type Success = ();
 
@@ -241,15 +232,6 @@ pub mod c {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for NumbersExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "numbers");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for NumbersExn {
         type Success = ();
 
@@ -327,15 +309,6 @@ pub mod c {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::bang(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for ThingExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "thing");
         }
     }
 

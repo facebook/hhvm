@@ -66,15 +66,6 @@ pub mod test_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for InitExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "init");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for InitExn {
         type Success = ::std::primitive::i64;
 

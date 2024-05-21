@@ -66,15 +66,6 @@ pub mod some_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for BounceMapExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "bounce_map");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for BounceMapExn {
         type Success = included__types::SomeMap;
 
@@ -162,15 +153,6 @@ pub mod some_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for BinaryKeyedMapExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "binary_keyed_map");
         }
     }
 

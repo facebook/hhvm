@@ -66,15 +66,6 @@ pub mod foo {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ReturnExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "return");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ReturnExn {
         type Success = ();
 
@@ -162,15 +153,6 @@ pub mod foo {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for SuperExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "super");
         }
     }
 

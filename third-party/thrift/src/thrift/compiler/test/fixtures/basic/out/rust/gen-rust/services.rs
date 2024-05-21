@@ -66,15 +66,6 @@ pub mod foo_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for SimpleRpcExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "simple_rpc");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for SimpleRpcExn {
         type Success = ();
 
@@ -165,15 +156,6 @@ pub mod f_b303_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for SimpleRpcExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "simple_rpc");
         }
     }
 
@@ -270,15 +252,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for PingExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "ping");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for PingExn {
         type Success = ();
 
@@ -366,15 +339,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for GetRandomDataExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getRandomData");
         }
     }
 
@@ -468,15 +432,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for SinkExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "sink");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for SinkExn {
         type Success = ();
 
@@ -564,15 +519,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for PutDataByIdExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "putDataById");
         }
     }
 
@@ -666,15 +612,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for HasDataByIdExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "hasDataById");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for HasDataByIdExn {
         type Success = ::std::primitive::bool;
 
@@ -762,15 +699,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for GetDataByIdExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getDataById");
         }
     }
 
@@ -864,15 +792,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for DeleteDataByIdExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "deleteDataById");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for DeleteDataByIdExn {
         type Success = ();
 
@@ -960,15 +879,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for LobDataByIdExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "lobDataById");
         }
     }
 
@@ -1062,15 +972,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for InvalidReturnForHackExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "invalid_return_for_hack");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for InvalidReturnForHackExn {
         type Success = ::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>;
 
@@ -1158,15 +1059,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for RpcSkippedCodegenExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "rpc_skipped_codegen");
         }
     }
 
@@ -1263,15 +1155,6 @@ pub mod db_mixed_stack_arguments {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for GetDataByKey0Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getDataByKey0");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for GetDataByKey0Exn {
         type Success = ::std::vec::Vec<::std::primitive::u8>;
 
@@ -1359,15 +1242,6 @@ pub mod db_mixed_stack_arguments {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for GetDataByKey1Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getDataByKey1");
         }
     }
 

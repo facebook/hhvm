@@ -242,15 +242,6 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "{{function:name}}");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}Exn {
         type Success = {{!
             }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!

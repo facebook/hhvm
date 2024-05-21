@@ -140,15 +140,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ReturnstreamExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "returnstream");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ReturnstreamExn {
         type Success = ();
 
@@ -330,15 +321,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for StreamthrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamthrows");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for StreamthrowsExn {
         type Success = ();
 
@@ -490,15 +472,6 @@ pub mod pub_sub_streaming_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::e(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for ServicethrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "servicethrows");
         }
     }
 
@@ -671,15 +644,6 @@ pub mod pub_sub_streaming_service {
                 Self::e1(_exn) => fbthrift::ResultType::Error,
                 Self::e2(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for Servicethrows2Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "servicethrows2");
         }
     }
 
@@ -868,15 +832,6 @@ pub mod pub_sub_streaming_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::e(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for BoththrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "boththrows");
         }
     }
 
@@ -1069,15 +1024,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ResponseandstreamstreamthrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "responseandstreamstreamthrows");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ResponseandstreamstreamthrowsExn {
         type Success = ::std::primitive::i32;
 
@@ -1230,15 +1176,6 @@ pub mod pub_sub_streaming_service {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::e(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for ResponseandstreamservicethrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "responseandstreamservicethrows");
         }
     }
 
@@ -1423,15 +1360,6 @@ pub mod pub_sub_streaming_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ResponseandstreamboththrowsExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "responseandstreamboththrows");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ResponseandstreamboththrowsExn {
         type Success = ::std::primitive::i32;
 
@@ -1601,15 +1529,6 @@ pub mod pub_sub_streaming_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for ReturnstreamFastExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "returnstreamFast");
         }
     }
 

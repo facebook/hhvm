@@ -66,15 +66,6 @@ pub mod service1 {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for RExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "r");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for RExn {
         type Success = crate::types::T6;
 
@@ -165,15 +156,6 @@ pub mod s2 {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for RExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "r");
         }
     }
 
@@ -281,15 +263,6 @@ pub mod all_methods {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FooExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "foo");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FooExn {
         type Success = ();
 
@@ -379,15 +352,6 @@ pub mod all_methods {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for BarExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "bar");
         }
     }
 
@@ -503,15 +467,6 @@ pub mod one_method {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FooExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "foo");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FooExn {
         type Success = ();
 
@@ -590,15 +545,6 @@ pub mod one_method {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for BarExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "bar");
         }
     }
 
@@ -714,15 +660,6 @@ pub mod one_method_opt_out {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FooExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "foo");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FooExn {
         type Success = ();
 
@@ -801,15 +738,6 @@ pub mod one_method_opt_out {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 Self::se(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for BarExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "bar");
         }
     }
 

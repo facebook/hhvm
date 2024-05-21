@@ -66,15 +66,6 @@ pub mod service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FuncExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "func");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FuncExn {
         type Success = crate::types::MyI32_4873;
 
@@ -168,15 +159,6 @@ pub mod adapter_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for CountExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "count");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for CountExn {
         type Success = crate::types::CountingStruct;
 
@@ -264,15 +246,6 @@ pub mod adapter_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for AdaptedTypesExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "adaptedTypes");
         }
     }
 

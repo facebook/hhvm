@@ -66,15 +66,6 @@ pub mod nested_containers {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for MapListExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "mapList");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for MapListExn {
         type Success = ();
 
@@ -162,15 +153,6 @@ pub mod nested_containers {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for MapSetExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "mapSet");
         }
     }
 
@@ -264,15 +246,6 @@ pub mod nested_containers {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ListMapExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "listMap");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ListMapExn {
         type Success = ();
 
@@ -363,15 +336,6 @@ pub mod nested_containers {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for ListSetExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "listSet");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for ListSetExn {
         type Success = ();
 
@@ -459,15 +423,6 @@ pub mod nested_containers {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for TurtlesExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "turtles");
         }
     }
 

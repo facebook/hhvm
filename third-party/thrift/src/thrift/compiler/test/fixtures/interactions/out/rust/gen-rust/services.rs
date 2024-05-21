@@ -58,15 +58,6 @@ pub mod my_interaction {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "frobnicate");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FrobnicateExn {
         type Success = ::std::primitive::i32;
 
@@ -165,15 +156,6 @@ pub mod my_interaction {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for PingExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "ping");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for PingExn {
         type Success = ();
 
@@ -335,15 +317,6 @@ pub mod my_interaction {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for TruthifyExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "truthify");
         }
     }
 
@@ -439,15 +412,6 @@ pub mod my_interaction_fast {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "frobnicate");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FrobnicateExn {
         type Success = ::std::primitive::i32;
 
@@ -535,15 +499,6 @@ pub mod my_interaction_fast {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for PingExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "ping");
         }
     }
 
@@ -711,15 +666,6 @@ pub mod my_interaction_fast {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for TruthifyExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "truthify");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for TruthifyExn {
         type Success = ();
 
@@ -809,15 +755,6 @@ pub mod serial_interaction {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for FrobnicateExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "frobnicate");
         }
     }
 
@@ -913,15 +850,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for FooExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "foo");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for FooExn {
         type Success = ();
 
@@ -1012,15 +940,6 @@ pub mod my_service {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for InteractExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "interact");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for InteractExn {
         type Success = ();
 
@@ -1108,15 +1027,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for InteractFastExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "interactFast");
         }
     }
 
@@ -1281,15 +1191,6 @@ pub mod my_service {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for SerializeExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "serialize");
         }
     }
 

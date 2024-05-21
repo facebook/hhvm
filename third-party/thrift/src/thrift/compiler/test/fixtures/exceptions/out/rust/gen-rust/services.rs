@@ -66,15 +66,6 @@ pub mod raiser {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for DoBlandExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "doBland");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for DoBlandExn {
         type Success = ();
 
@@ -173,15 +164,6 @@ pub mod raiser {
                 Self::f(_exn) => fbthrift::ResultType::Error,
                 Self::s(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for DoRaiseExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "doRaise");
         }
     }
 
@@ -299,15 +281,6 @@ pub mod raiser {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for Get200Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "get200");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for Get200Exn {
         type Success = ::std::string::String;
 
@@ -406,15 +379,6 @@ pub mod raiser {
                 Self::b(_exn) => fbthrift::ResultType::Error,
                 Self::s(_exn) => fbthrift::ResultType::Error,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for Get500Exn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "get500");
         }
     }
 

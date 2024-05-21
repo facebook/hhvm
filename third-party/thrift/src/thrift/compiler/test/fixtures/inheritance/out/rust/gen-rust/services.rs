@@ -66,15 +66,6 @@ pub mod my_root {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for DoRootExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_root");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for DoRootExn {
         type Success = ();
 
@@ -168,15 +159,6 @@ pub mod my_node {
         }
     }
 
-    impl<P> ::fbthrift::Serialize<P> for DoMidExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_mid");
-        }
-    }
-
     impl ::fbthrift::help::SerializeExn for DoMidExn {
         type Success = ();
 
@@ -267,15 +249,6 @@ pub mod my_leaf {
             match self {
                 Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
             }
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for DoLeafExn
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_leaf");
         }
     }
 

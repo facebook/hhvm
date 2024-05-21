@@ -518,3 +518,17 @@ class PythonCapiSerializeParity(PythonCapiFixture):
                 self.serialize(self.composed())
             ),
         )
+
+    def test_serialize_oversized_py_struct(self) -> None:
+        s = SerializedStruct(s="1" * 2**31)
+        # The RuntimeError comes from `except +` in cserialize binding
+        with self.assertRaisesRegex(
+            RuntimeError, "TProtocolException: .* exceeds size limit"
+        ):
+            fixture.roundtrip_SerializedStruct(s)
+
+    def test_serialize_oversized_cpp_struct(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "TProtocolException: .* exceeds size limit"
+        ):
+            fixture.gen_SerializedStruct(2**31)

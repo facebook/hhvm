@@ -1469,8 +1469,15 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::AdaptedFields>::ope
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__terse_write__AdaptedFields(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__terse_write__AdaptedFields(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }

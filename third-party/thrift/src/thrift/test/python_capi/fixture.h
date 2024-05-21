@@ -22,6 +22,7 @@
 #include <thrift/lib/python/capi/iobuf.h>
 
 #include <thrift/test/python_capi/gen-python-capi/module/thrift_types_capi.h>
+#include <thrift/test/python_capi/gen-python-capi/serialized_dep/thrift_types_capi.h>
 
 namespace apache::thrift::test {
 
@@ -55,6 +56,13 @@ PyObject* __shim__serialize_to_iobuf(PyObject* obj) {
       folly::python::iobuf_ptr_from_python_iobuf(obj));
   return folly::python::make_python_iobuf(
       python::capi::detail::serialize_to_iobuf(cpp));
+}
+
+PyObject* __shim__gen_SerializedStruct(int64_t len) {
+  ::thrift::test::python_capi::SerializedStruct s;
+  s.s_ref() = std::string(len, '1');
+  return python::capi::Constructor<
+      ::thrift::test::python_capi::SerializedStruct>{}(s);
 }
 
 } // namespace apache::thrift::test

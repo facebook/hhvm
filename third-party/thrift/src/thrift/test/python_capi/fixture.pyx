@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from libcpp cimport bool as cbool
+from libc.stdint cimport int64_t
 
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "thrift::test::python_capi":
@@ -30,11 +31,16 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass StringPair
     cppclass VapidStruct
 
+cdef extern from "thrift/test/python_capi/gen-cpp2/serialized_dep_types.h" namespace "thrift::test::python_capi":
+    cppclass SerializedStruct
+
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T](object)
     cdef cbool __shim__typeCheck[T](object)
     cdef object __shim__marshal_to_iobuf[T](object)
     cdef object __shim__serialize_to_iobuf[T](object obj)
+    cdef object __shim__gen_SerializedStruct(int64_t)
+
 
 def roundtrip_MyStruct(object x):
     return __shim__roundtrip[MyStruct](x)
@@ -74,6 +80,12 @@ def roundtrip_ComposeStruct(object x):
 
 def roundtrip_AdaptedFields(object x):
     return __shim__roundtrip[AdaptedFields](x)
+
+def roundtrip_SerializedStruct(object x):
+    return __shim__roundtrip[SerializedStruct](x)
+
+def gen_SerializedStruct(int64_t len_):
+    return __shim__gen_SerializedStruct(len_)
 
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))

@@ -88,8 +88,15 @@ PyObject* Constructor<::test::fixtures::python_capi::SerializedStruct>::operator
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -162,8 +169,15 @@ PyObject* Constructor<::test::fixtures::python_capi::SerializedUnion>::operator(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedUnion(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedUnion(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -236,8 +250,15 @@ PyObject* Constructor<::test::fixtures::python_capi::SerializedError>::operator(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedError(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__serialized_dep__SerializedError(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }

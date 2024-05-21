@@ -187,13 +187,20 @@ PyObject* Constructor<{{struct:cpp_name}}>::operator()(
   return init__{{program:capi_module_prefix}}__{{struct:py_name}}(*fbthrift_data);
   {{/struct:marshal_capi?}}
   {{^struct:marshal_capi?}}
-  auto ptr = construct__{{program:capi_module_prefix}}__{{struct:py_name}}(
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
   {{#struct:cpp_adapter?}}
-      detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(val));
+    serialized = detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(val);
   {{/struct:cpp_adapter?}}
   {{^struct:cpp_adapter?}}
-      detail::serialize_to_iobuf(val));
+    serialized = detail::serialize_to_iobuf(val);
   {{/struct:cpp_adapter?}}
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__{{program:capi_module_prefix}}__{{struct:py_name}}(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }

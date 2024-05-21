@@ -211,8 +211,15 @@ PyObject* Constructor<::facebook::thrift::test::Foo>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Foo(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__Foo(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -285,8 +292,15 @@ PyObject* Constructor<::facebook::thrift::test::Baz>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Baz(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__Baz(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -359,8 +373,15 @@ PyObject* Constructor<::facebook::thrift::test::Bar>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Bar(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__Bar(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -591,8 +612,15 @@ PyObject* Constructor<::facebook::thrift::test::StructWithFieldAdapter>::operato
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__StructWithFieldAdapter(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__StructWithFieldAdapter(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -665,8 +693,15 @@ PyObject* Constructor<::facebook::thrift::test::TerseAdaptedFields>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__TerseAdaptedFields(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__TerseAdaptedFields(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -739,8 +774,15 @@ PyObject* Constructor<::facebook::thrift::test::B>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__B(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__B(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -952,8 +994,15 @@ PyObject* Constructor<::facebook::thrift::test::MyStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__MyStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__MyStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1026,8 +1075,15 @@ PyObject* Constructor<::facebook::thrift::test::AdaptTestStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AdaptTestStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__AdaptTestStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1100,8 +1156,15 @@ PyObject* Constructor<::facebook::thrift::test::AdaptTemplatedTestStruct>::opera
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AdaptTemplatedTestStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__AdaptTemplatedTestStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1253,8 +1316,15 @@ PyObject* Constructor<::facebook::thrift::test::ThriftAdaptTestUnion>::operator(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AdaptTestUnion(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__AdaptTestUnion(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1485,8 +1555,15 @@ PyObject* Constructor<::facebook::thrift::test::StructFieldAdaptedStruct>::opera
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__StructFieldAdaptedStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__StructFieldAdaptedStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1638,8 +1715,15 @@ PyObject* Constructor<::facebook::thrift::test::CircularStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__CircularStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__CircularStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1712,8 +1796,15 @@ PyObject* Constructor<::facebook::thrift::test::ReorderedStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__ReorderedStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__ReorderedStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2064,8 +2155,15 @@ PyObject* Constructor<::facebook::thrift::test::MoveOnly>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__MoveOnly(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__MoveOnly(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2138,8 +2236,15 @@ PyObject* Constructor<::facebook::thrift::test::AlsoMoveOnly>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AlsoMoveOnly(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__AlsoMoveOnly(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2332,8 +2437,15 @@ PyObject* Constructor<::facebook::thrift::test::CountingStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__CountingStruct(
-      detail::serialize_to_iobuf(val));
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__CountingStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }

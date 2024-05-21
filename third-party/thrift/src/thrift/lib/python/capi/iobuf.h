@@ -48,7 +48,6 @@ std::unique_ptr<folly::IOBuf> serialize_to_iobuf(const S& s) {
     folly::IOBufQueue queue;
     apache::thrift::BinaryProtocolWriter protocol;
     protocol.setOutput(&queue);
-
     s.write(&protocol);
     return queue.move();
   } else if constexpr (is_wrap_v<S>) {
@@ -117,6 +116,12 @@ T deserialize_iobuf_to_adapted(std::unique_ptr<folly::IOBuf>&& buf) {
     return Adapter::fromThrift(deserialize_iobuf<S>(std::move(buf)));
   }
 }
+
+/**
+ * Sets a ValueError with the message from input TProtocolException.
+ * Once thrift.python.ProtocolError is available, that will be raised instead.
+ */
+void handle_protocol_error(const apache::thrift::TProtocolException& e);
 
 } // namespace detail
 } // namespace capi

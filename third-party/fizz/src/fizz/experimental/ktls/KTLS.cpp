@@ -62,14 +62,14 @@ static folly::Optional<KTLSParameterLayout> getKTLSLayout(CipherSuite suite) {
   // TODO: Newer kernels support chacha20
   switch (suite) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      ret.keyLength = openssl::AESGCM128::kKeyLength;
-      ret.ivLength = openssl::AESGCM128::kIVLength;
+      ret.keyLength = fizz::AESGCM128::kKeyLength;
+      ret.ivLength = fizz::AESGCM128::kIVLength;
       ret.ktlsAllocationSize = CRYPTO_INFO_SIZE(TLS_CIPHER_AES_GCM_128);
       ret.ktlsCipherType = TLS_CIPHER_AES_GCM_128;
       break;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      ret.keyLength = openssl::AESGCM256::kKeyLength;
-      ret.ivLength = openssl::AESGCM256::kIVLength;
+      ret.keyLength = fizz::AESGCM256::kKeyLength;
+      ret.ivLength = fizz::AESGCM256::kIVLength;
       ret.ktlsAllocationSize = CRYPTO_INFO_SIZE(TLS_CIPHER_AES_GCM_256);
       ret.ktlsCipherType = TLS_CIPHER_AES_GCM_256;
       break;

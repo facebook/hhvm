@@ -80,7 +80,7 @@ void encryptGCM(
   std::vector<std::unique_ptr<folly::IOBuf>> msg_clones;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+    aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     aead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {
@@ -108,9 +108,8 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead =
-        openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
-    auto readAead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+    auto writeAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+    auto readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(writeAead));
@@ -145,8 +144,8 @@ void decryptGCMNoRecord(uint32_t n, size_t size) {
   auto aad = folly::IOBuf::copyBuffer("aad");
   BENCHMARK_SUSPEND {
     std::unique_ptr<Aead> writeAead =
-        openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
-    readAead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+    readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
     for (size_t i = 0; i < n; ++i) {
@@ -215,7 +214,7 @@ void encryptOCB(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = openssl::OpenSSLEVPCipher::makeCipher<openssl::AESOCB128>();
+    aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
     aead->setKey(getKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {

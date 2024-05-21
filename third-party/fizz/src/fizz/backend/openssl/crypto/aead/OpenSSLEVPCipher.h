@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/crypto/aead/AESGCM128.h>
+#include <fizz/backend/openssl/crypto/aead/Ciphers.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
 #include <folly/Conv.h>
@@ -44,7 +44,7 @@ class OpenSSLEVPCipher : public Aead {
   static constexpr size_t kMaxIVLength = 20;
   static constexpr size_t kMaxTagLength = 20;
 
-  template <class EVPImpl>
+  template <class AeadCipher>
   static std::unique_ptr<Aead> makeCipher();
 
   OpenSSLEVPCipher(OpenSSLEVPCipher&& other) = default;

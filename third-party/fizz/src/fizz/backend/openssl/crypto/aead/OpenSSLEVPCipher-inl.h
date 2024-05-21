@@ -9,18 +9,18 @@
 namespace fizz {
 namespace openssl {
 
-template <typename EVPImpl>
+template <typename AeadCipher>
 std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
-  static_assert(EVPImpl::kIVLength >= sizeof(uint64_t), "iv too small");
-  static_assert(EVPImpl::kIVLength < kMaxIVLength, "iv too large");
-  static_assert(EVPImpl::kTagLength < kMaxTagLength, "tag too large");
+  static_assert(AeadCipher::kIVLength >= sizeof(uint64_t), "iv too small");
+  static_assert(AeadCipher::kIVLength < kMaxIVLength, "iv too large");
+  static_assert(AeadCipher::kTagLength < kMaxTagLength, "tag too large");
   return std::unique_ptr<Aead>(new OpenSSLEVPCipher(
-      EVPImpl::kKeyLength,
-      EVPImpl::kIVLength,
-      EVPImpl::kTagLength,
-      EVPImpl::Cipher(),
-      EVPImpl::kOperatesInBlocks,
-      EVPImpl::kRequiresPresetTagLen));
+      AeadCipher::kKeyLength,
+      AeadCipher::kIVLength,
+      AeadCipher::kTagLength,
+      Properties<AeadCipher>::Cipher(),
+      Properties<AeadCipher>::kOperatesInBlocks,
+      Properties<AeadCipher>::kRequiresPresetTagLen));
 }
 
 } // namespace openssl

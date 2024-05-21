@@ -48,8 +48,8 @@ static TrafficKey createKey() {
   return key;
 }
 
-static const TrafficKey kAES128TrafficKey = createKey<openssl::AESGCM128>();
-static const TrafficKey kAES256TrafficKey = createKey<openssl::AESGCM256>();
+static const TrafficKey kAES128TrafficKey = createKey<fizz::AESGCM128>();
+static const TrafficKey kAES256TrafficKey = createKey<fizz::AESGCM256>();
 
 TEST_F(KTLSTest, TestSockoptFormat) {
   // An unsupported ktls cipher suite should not work

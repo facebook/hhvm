@@ -162,7 +162,7 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
         HashFunction::Sha256,
         CipherSuite::TLS_AES_128_GCM_SHA256);
     HpkeContextImpl context(
-        openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>(),
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(),
         toIOBuf(testParam.exporterSecret),
         std::make_unique<fizz::hpke::Hkdf>(
             kPrefix->clone(),

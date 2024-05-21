@@ -8,14 +8,7 @@
 
 #pragma once
 
-#include <cstdlib>
-
-namespace fizz {
-
-struct ChaCha20Poly1305 {
-  static const size_t kKeyLength{32};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
-};
-
-} // namespace fizz
+#include <fizz/backend/openssl/crypto/aead/AESGCM128.h>
+#include <fizz/backend/openssl/crypto/aead/AESGCM256.h>
+#include <fizz/backend/openssl/crypto/aead/AESOCB128.h>
+#include <fizz/backend/openssl/crypto/aead/ChaCha20Poly1305.h>

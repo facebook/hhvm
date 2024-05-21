@@ -24,7 +24,7 @@ class Aead128GCMTokenCipher : public TokenCipher {
 
   using HashType = openssl::Sha256;
   using AeadType = openssl::OpenSSLEVPCipher;
-  using CipherType = openssl::AESGCM128;
+  using CipherType = fizz::AESGCM128;
 
   /**
    * Set additional context strings for use with these tokens. The strings will

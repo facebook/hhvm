@@ -11,20 +11,10 @@
 #include <openssl/evp.h>
 
 #include <fizz/backend/openssl/Properties.h>
-#include <fizz/crypto/aead/AESGCM128.h>
+#include <fizz/crypto/Crypto.h>
 
 namespace fizz {
 namespace openssl {
-
-struct AESGCM128 {
-  static constexpr auto Cipher = EVP_aes_128_gcm;
-
-  static const size_t kKeyLength{16};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
-  static const bool kOperatesInBlocks{false};
-  static const bool kRequiresPresetTagLen{false};
-};
 
 template <>
 struct Properties<fizz::AESGCM128> {

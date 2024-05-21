@@ -180,11 +180,11 @@ size_t nenc(KEMId kemId) {
 std::unique_ptr<Aead> makeCipher(AeadId aeadId) {
   switch (aeadId) {
     case AeadId::TLS_CHACHA20_POLY1305_SHA256:
-      return openssl::OpenSSLEVPCipher::makeCipher<openssl::ChaCha20Poly1305>();
+      return openssl::OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
     case AeadId::TLS_AES_128_GCM_SHA256:
-      return openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM128>();
+      return openssl::OpenSSLEVPCipher::makeCipher<AESGCM128>();
     case AeadId::TLS_AES_256_GCM_SHA384:
-      return openssl::OpenSSLEVPCipher::makeCipher<openssl::AESGCM256>();
+      return openssl::OpenSSLEVPCipher::makeCipher<AESGCM256>();
     default:
       throw std::runtime_error("can't make aead: not implemented");
   }

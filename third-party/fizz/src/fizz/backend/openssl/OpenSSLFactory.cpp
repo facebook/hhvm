@@ -69,13 +69,13 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
 std::unique_ptr<Aead> OpenSSLFactory::makeAead(CipherSuite cipher) const {
   switch (cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      return OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
+      return OpenSSLEVPCipher::makeCipher<fizz::ChaCha20Poly1305>();
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      return OpenSSLEVPCipher::makeCipher<AESGCM128>();
+      return OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return OpenSSLEVPCipher::makeCipher<AESGCM256>();
+      return OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>();
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      return OpenSSLEVPCipher::makeCipher<AESOCB128>();
+      return OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
 #if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
       return AEGIS::make256();

@@ -11,7 +11,7 @@
 #include <openssl/evp.h>
 
 #include <fizz/backend/openssl/Properties.h>
-#include <fizz/crypto/aead/AESGCM256.h>
+#include <fizz/crypto/Crypto.h>
 
 namespace fizz {
 namespace openssl {

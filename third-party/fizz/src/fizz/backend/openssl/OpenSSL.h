@@ -12,6 +12,7 @@ Include this file to use openssl features.
 #include <fizz/fizz-config.h>
 
 #include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/backend/openssl/Properties.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>

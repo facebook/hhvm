@@ -18,4 +18,22 @@ struct AESGCM128 {
   static const size_t kTagLength{16};
 };
 
+struct AESGCM256 {
+  static const size_t kKeyLength{32};
+  static const size_t kIVLength{12};
+  static const size_t kTagLength{16};
+};
+
+struct AESOCB128 {
+  static const size_t kKeyLength{16};
+  static const size_t kIVLength{12};
+  static const size_t kTagLength{16};
+};
+
+struct ChaCha20Poly1305 {
+  static const size_t kKeyLength{32};
+  static const size_t kIVLength{12};
+  static const size_t kTagLength{16};
+};
+
 } // namespace fizz

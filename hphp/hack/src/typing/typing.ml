@@ -2028,8 +2028,22 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     (env, (MakeType.tuple reason (List.map ~f:fst tyl), List.exists ~f:snd tyl))
   | _ -> (env, (hint_ty, false))
 
+(** [refine_and_simplify_intersection ~hint_first env p reason ivar_pos ty hint_ty]
+  intersects [ty] and [hint_ty], possibly making [hint_ty] support dynamic
+  first if [ty] also supports dynamic.
+  Then if the result has some like types in which prevent simplification
+  of the intersection, it'll distribute any '&' at the top of the type tree
+  in order to have a union at hand.
+  This is because the resulting type will likely end up on the LHS of a subtyping
+  call down the line, and unions on the LHS behave better than intersections,
+  which result in incomplete typing.
+
+  Parameters:
+  * [reason]          The reason for the result types and other intermediate types.
+  * [p], [ivar_pos]   Only used if hint_ty is a class
+  *)
 let refine_and_simplify_intersection
-    ~hint_first env p reason ivar_pos ivar_ty hint_ty =
+    ~hint_first env p reason ivar_pos ty hint_ty =
   let intersect ~hint_first ~is_class env r ty hint_ty =
     let (env, hint_ty) =
       if
@@ -2048,11 +2062,27 @@ let refine_and_simplify_intersection
       Inter.intersect env ~r ty hint_ty
   in
   let like_type_simplify ty =
-    (* Distribute the intersection over the union *)
+    (* This basically distributes the intersection over the union.
+       Let's call X the type to refine (`ty` here) and H the hint type.
+       We want to intersect ~X with either H if H is enforced, or
+       ~H if H is not enforced.
+
+       If H is enforced: ~X & H is an intersection so may not behave well
+       if passed as LHS of subtyping, so we distribute the intersection:
+
+         ~X & H = ~H | (X & H)
+
+       (With the hope that (X & H) simplifies)
+
+
+       If X is not enforced:
+
+         ~X & ~H = ~(X & H)
+    *)
     let (env, (hint_ty, is_class)) =
       class_for_refinement env p reason ivar_pos ty hint_ty
     in
-    let (env, ty2) =
+    let (env, intersection_ty) =
       intersect ~hint_first:false ~is_class env reason ty hint_ty
     in
     let rec is_enforced hint_ty =
@@ -2065,23 +2095,22 @@ let refine_and_simplify_intersection
         TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
       | _ -> false
     in
-    (* If the hint is fully enforced, keep that information around *)
     if is_enforced hint_ty then
       let (env, dyn_ty) =
         Inter.intersect env ~r:reason (MakeType.dynamic reason) hint_ty
       in
-      Union.union env dyn_ty ty2
+      Union.union env dyn_ty intersection_ty
     else
-      (env, MakeType.locl_like reason ty2)
+      (env, MakeType.locl_like reason intersection_ty)
   in
-  match TUtils.try_strip_dynamic env ivar_ty with
+  match TUtils.try_strip_dynamic env ty with
   | Some ty when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
     like_type_simplify ty
   | _ ->
     let (env, (hint_ty, is_class)) =
-      class_for_refinement env p reason ivar_pos ivar_ty hint_ty
+      class_for_refinement env p reason ivar_pos ty hint_ty
     in
-    intersect ~hint_first ~is_class env reason ivar_ty hint_ty
+    intersect ~hint_first ~is_class env reason ty hint_ty
 
 let ish_weakening env hint hint_ty =
   match hint with

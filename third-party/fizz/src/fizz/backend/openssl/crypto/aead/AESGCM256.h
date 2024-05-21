@@ -10,6 +10,9 @@
 
 #include <openssl/evp.h>
 
+#include <fizz/backend/openssl/Properties.h>
+#include <fizz/crypto/aead/AESGCM256.h>
+
 namespace fizz {
 namespace openssl {
 
@@ -19,6 +22,15 @@ struct AESGCM256 {
   static const size_t kKeyLength{32};
   static const size_t kIVLength{12};
   static const size_t kTagLength{16};
+  static const bool kOperatesInBlocks{false};
+  static const bool kRequiresPresetTagLen{false};
+};
+
+template <>
+struct Properties<fizz::AESGCM256> {
+  static const EVP_CIPHER* Cipher() {
+    return EVP_aes_256_gcm();
+  }
   static const bool kOperatesInBlocks{false};
   static const bool kRequiresPresetTagLen{false};
 };

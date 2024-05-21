@@ -52,8 +52,7 @@ let compute_sym_hash symbols init =
     let full_name =
       match def with
       | None -> ""
-      | Some def ->
-        Sym_def.(def.full_name ^ SymbolDefinition.string_of_kind def.kind)
+      | Some def -> Sym_def.(def.full_name ^ Sym_def.kind_to_string def.kind)
     in
     let str = SymbolOccurrence.(occ.name ^ show_kind occ.type_ ^ full_name) in
     concat_hash str cur
@@ -206,13 +205,7 @@ let collect_inherited_members ctx def =
   in
   (def, inherited_member_clusters)
 
-let create
-    ctx
-    Indexable.{ path; fanout }
-    ~gen_sym_hash
-    ~gen_references
-    ~root_path
-    ~hhi_path =
+let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
   let path_str =
     Relative_path.to_absolute_with_prefix
@@ -229,10 +222,14 @@ let create
     Provider_context.PositionedSyntaxTree.root
       (Ast_provider.compute_cst ~ctx ~entry)
   in
+  (* Compute all symbol occurrences in the file. Two passes:
+       - Get SymbolOccurrrence.t values, repurposing `hh` SymbolService
+       - Get missing information using `Sym_def.resolve`
+
+     TODO: do it in one pass using a dedicated visitor *)
   let symbol_occs = IdentifySymbolService.all_symbols ctx tast in
   let symbols =
-    List.map symbol_occs ~f:(fun occ ->
-        { occ; def = Sym_def.resolve ctx occ ~sym_path:gen_references })
+    List.map symbol_occs ~f:(fun occ -> { occ; def = Sym_def.resolve ctx occ })
   in
   let tast = List.map tast ~f:(collect_inherited_members ctx) in
   let sym_hash =
@@ -246,11 +243,12 @@ let create
   in
   { path = path_str; tast; source_text; cst; symbols; sym_hash; fanout }
 
-let referenced t =
+let referenced ctx t =
+  let open Option.Monad_infix in
   let path sym =
-    match sym.def with
-    | Some Sym_def.{ path = Some path; _ }
-      when Relative_path.(is_root (prefix path)) ->
+    sym.def >>= fun def ->
+    match Sym_def.filename ctx def with
+    | Some path when Relative_path.(is_root (prefix path)) ->
       Some (Relative_path.to_absolute path)
     | _ -> None
   in

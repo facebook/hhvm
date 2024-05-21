@@ -109,8 +109,8 @@ let write_json
   in
   JobReturn.{ elapsed; hashes; reindexed = SSet.empty; referenced = SSet.empty }
 
-let references_from_files_info files_info =
-  List.map files_info ~f:File_info.referenced
+let references_from_files_info ctx files_info =
+  List.map files_info ~f:(File_info.referenced ctx)
   |> List.reduce ~f:SSet.union
   |> Option.value ~default:SSet.empty
 
@@ -136,8 +136,7 @@ let recheck_job
            ctx
            ~root_path:opts.root_path
            ~hhi_path:opts.hhi_path
-           ~gen_sym_hash
-           ~gen_references)
+           ~gen_sym_hash)
   in
   let reindex f =
     match (f.File_info.fanout, opts.incremental, f.File_info.sym_hash) with
@@ -157,7 +156,7 @@ let recheck_job
   in
   let referenced =
     if gen_references then
-      references_from_files_info files_info
+      references_from_files_info ctx files_info
     else
       SSet.empty
   in
@@ -171,7 +170,6 @@ let sym_hashes ctx ~files =
         ~root_path:"www"
         ~hhi_path:"hhi"
         ~gen_sym_hash:true
-        ~gen_references:false
         (Indexable.from_file file)
     in
     let sym_hash =

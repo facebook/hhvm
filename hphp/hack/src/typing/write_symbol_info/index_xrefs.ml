@@ -136,7 +136,7 @@ let process_member_xref
       (xrefs, fa)
     | `Enum ->
       (match kind with
-      | SymbolDefinition.ClassConst ->
+      | Sym_def.ClassConst ->
         let (enum_id, fa) = Add_fact.enum_decl con_name fa in
         process_xref
           (Add_fact.enumerator enum_id)
@@ -252,7 +252,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
               (xrefs, fa)
             | _ -> (xrefs, fa))
           | Some (Sym_def.{ name; kind; _ } as sym_def) ->
-            let open SymbolDefinition in
+            let open Sym_def in
             let proc_mem = process_member_xref ctx sym_def pos in
             (match kind with
             | Class ->

@@ -71,14 +71,18 @@ pub mod my_root {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_root");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for DoRootExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -86,7 +90,7 @@ pub mod my_root {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("do_root");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -169,14 +173,18 @@ pub mod my_node {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_mid");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for DoMidExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -184,7 +192,7 @@ pub mod my_node {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("do_mid");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -267,14 +275,18 @@ pub mod my_leaf {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "do_leaf");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for DoLeafExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -282,7 +294,7 @@ pub mod my_leaf {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("do_leaf");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);

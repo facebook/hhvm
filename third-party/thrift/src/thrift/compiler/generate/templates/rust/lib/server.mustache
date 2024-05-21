@@ -355,6 +355,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "{{function:name}}",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }
@@ -367,6 +368,7 @@ where
                                 tracing::debug!(?exn, method="{{service:name}}.{{function:name}}", "Streaming declared exception");
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn>(
                                     ::std::result::Result::Err(exn),
+                                    "{{function:name}}",
                                 );
                                 ::fbthrift::SerializedStreamElement::DeclaredException(payload)
                             }

@@ -71,14 +71,18 @@ pub mod nested_containers {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "mapList");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for MapListExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -86,7 +90,7 @@ pub mod nested_containers {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("mapList");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -166,14 +170,18 @@ pub mod nested_containers {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "mapSet");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for MapSetExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -181,7 +189,7 @@ pub mod nested_containers {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("mapSet");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -261,14 +269,18 @@ pub mod nested_containers {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "listMap");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for ListMapExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -276,7 +288,7 @@ pub mod nested_containers {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("listMap");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -356,14 +368,18 @@ pub mod nested_containers {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "listSet");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for ListSetExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -371,7 +387,7 @@ pub mod nested_containers {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("listSet");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -451,14 +467,18 @@ pub mod nested_containers {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "turtles");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for TurtlesExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -466,7 +486,7 @@ pub mod nested_containers {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("turtles");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);

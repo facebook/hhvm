@@ -78,14 +78,14 @@ pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
 pub trait SerializeExn {
     type Success;
 
-    fn write_result<P>(res: Result<&Self::Success, &Self>, p: &mut P)
+    fn write_result<P>(res: Result<&Self::Success, &Self>, p: &mut P, function_name: &'static str)
     where
         P: ProtocolWriter;
 }
 
 /// Serialize a result as encoded into a generated *Exn type, wrapped in an envelope.
 pub fn serialize_result_envelope<P, CTXT, EXN>(
-    name: &str,
+    function_name: &'static str,
     name_cstr: &<CTXT::ContextStack as ContextStack>::Name,
     seqid: u32,
     rctxt: &CTXT,
@@ -113,8 +113,8 @@ where
 
     ctx_stack.pre_write()?;
     let envelope = serialize!(P, |p| {
-        p.write_message_begin(name, res_type.message_type(), seqid);
-        EXN::write_result(res, p);
+        p.write_message_begin(function_name, res_type.message_type(), seqid);
+        EXN::write_result(res, p, function_name);
         p.write_message_end();
     });
 
@@ -129,13 +129,16 @@ where
     Ok(envelope)
 }
 
-pub fn serialize_stream_item<P, EXN>(res: Result<EXN::Success, EXN>) -> ProtocolEncodedFinal<P>
+pub fn serialize_stream_item<P, EXN>(
+    res: Result<EXN::Success, EXN>,
+    function_name: &'static str,
+) -> ProtocolEncodedFinal<P>
 where
     P: Protocol,
     EXN: SerializeExn,
 {
     let res = res.as_ref();
-    serialize!(P, |p| EXN::write_result(res, p))
+    serialize!(P, |p| EXN::write_result(res, p, function_name))
 }
 
 /// Serialize a request with envelope.

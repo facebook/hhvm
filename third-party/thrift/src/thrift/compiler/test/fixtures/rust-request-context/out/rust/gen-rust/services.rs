@@ -72,14 +72,18 @@ pub mod my_interaction {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "ping");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for PingExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -87,7 +91,7 @@ pub mod my_interaction {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("ping");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -169,14 +173,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "ping");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for PingExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -184,7 +192,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("ping");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -264,14 +272,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getRandomData");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for GetRandomDataExn {
         type Success = ::std::string::String;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -279,7 +291,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("getRandomData");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
@@ -359,14 +371,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "hasDataById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for HasDataByIdExn {
         type Success = ::std::primitive::bool;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -374,7 +390,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("hasDataById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Bool, 0i16);
@@ -454,14 +470,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "getDataById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for GetDataByIdExn {
         type Success = ::std::string::String;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -469,7 +489,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("getDataById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
@@ -549,14 +569,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "putDataById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for PutDataByIdExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -564,7 +588,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("putDataById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -644,14 +668,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "lobDataById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for LobDataByIdExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -659,7 +687,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("lobDataById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -719,14 +747,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdStreamExn {
         type Success = crate::types::MyStruct;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -734,7 +766,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -818,14 +850,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamById");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -833,7 +869,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamById");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -902,14 +938,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithException");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdWithExceptionStreamExn {
         type Success = crate::types::MyStruct;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -917,7 +957,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamByIdWithException");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1009,14 +1049,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithException");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdWithExceptionExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -1024,7 +1068,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamByIdWithException");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -1083,14 +1127,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithResponse");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdWithResponseStreamExn {
         type Success = crate::types::MyStruct;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -1098,7 +1146,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamByIdWithResponse");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -1182,14 +1230,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "streamByIdWithResponse");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StreamByIdWithResponseExn {
         type Success = crate::types::MyDataItem;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -1197,7 +1249,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("streamByIdWithResponse");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Struct, 0i16);
@@ -1277,14 +1329,18 @@ pub mod my_service {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "startPingInteraction");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for StartPingInteractionExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -1292,7 +1348,7 @@ pub mod my_service {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("startPingInteraction");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);

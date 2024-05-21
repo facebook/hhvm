@@ -71,14 +71,18 @@ pub mod raiser {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "doBland");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for DoBlandExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -86,7 +90,7 @@ pub mod raiser {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("doBland");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -177,14 +181,18 @@ pub mod raiser {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "doRaise");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for DoRaiseExn {
         type Success = ();
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -192,7 +200,7 @@ pub mod raiser {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("doRaise");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
@@ -296,14 +304,18 @@ pub mod raiser {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "get200");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for Get200Exn {
         type Success = ::std::string::String;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -311,7 +323,7 @@ pub mod raiser {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("get200");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
@@ -402,14 +414,18 @@ pub mod raiser {
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "get500");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for Get500Exn {
         type Success = ::std::string::String;
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -417,7 +433,7 @@ pub mod raiser {
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("get500");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);

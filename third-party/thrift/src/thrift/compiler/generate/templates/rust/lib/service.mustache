@@ -105,14 +105,18 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "{{function:name}}");
         }
     }
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}StreamExn {
         type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -120,7 +124,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("{{function:name}}");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
@@ -252,7 +256,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         P: ::fbthrift::ProtocolWriter,
     {
         fn write(&self, p: &mut P) {
-            ::fbthrift::help::SerializeExn::write_result(Err(self), p);
+            ::fbthrift::help::SerializeExn::write_result(Err(self), p, "{{function:name}}");
         }
     }
 
@@ -267,7 +271,11 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }}{{/function:stream?}}{{!
         }};
 
-        fn write_result<P>(res: ::std::result::Result<&Self::Success, &Self>, p: &mut P)
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static str,
+        )
         where
             P: ::fbthrift::ProtocolWriter,
         {
@@ -275,7 +283,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::fbthrift::Serialize::write(aexn, p);
                 return;
             }
-            p.write_struct_begin("{{function:name}}");
+            p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", {{!

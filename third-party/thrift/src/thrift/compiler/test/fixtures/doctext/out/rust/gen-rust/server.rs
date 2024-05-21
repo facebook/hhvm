@@ -385,6 +385,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::c::NumbersStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "numbers",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }

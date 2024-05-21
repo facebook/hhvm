@@ -440,6 +440,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "truthify",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }
@@ -1040,6 +1041,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "truthify",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }
@@ -2167,6 +2169,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_service::SerializeStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "serialize",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }

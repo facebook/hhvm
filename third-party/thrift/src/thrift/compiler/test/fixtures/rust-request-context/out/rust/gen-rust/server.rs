@@ -1527,6 +1527,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_service::StreamByIdStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "streamById",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }
@@ -1630,6 +1631,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_service::StreamByIdWithExceptionStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "streamByIdWithException",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }
@@ -1641,6 +1643,7 @@ where
                                 tracing::debug!(?exn, method="MyService.streamByIdWithException", "Streaming declared exception");
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_service::StreamByIdWithExceptionStreamExn>(
                                     ::std::result::Result::Err(exn),
+                                    "streamByIdWithException",
                                 );
                                 ::fbthrift::SerializedStreamElement::DeclaredException(payload)
                             }
@@ -1740,6 +1743,7 @@ where
                             ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_service::StreamByIdWithResponseStreamExn>(
                                     ::std::result::Result::Ok(success),
+                                    "streamByIdWithResponse",
                                 );
                                 ::fbthrift::SerializedStreamElement::Success(payload)
                             }

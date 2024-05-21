@@ -310,6 +310,9 @@ cdef class ThriftServer:
     cdef void add_routing_handler(self, unique_ptr[cTransportRoutingHandler] handler):
         self.server.get().addRoutingHandler(cmove(handler))
 
+    def disable_info_logging(self):
+        self.server.get().disableInfoLogging()
+
 cdef class ClientMetadata:
     @staticmethod
     cdef ClientMetadata _fbthrift_create(optional[ClientMetadataRef] metadata_ref):

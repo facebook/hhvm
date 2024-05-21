@@ -139,6 +139,7 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         cbool getQuickExitOnShutdownTimeout()
         void setQuickExitOnShutdownTimeout(cbool quickExitOnShutdownTimeout)
         void addRoutingHandler(unique_ptr[cTransportRoutingHandler])
+        void disableInfoLogging()
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":

@@ -36,3 +36,15 @@ function prop_nstring(C $c): void {
   $c->ns = C::class;
   C::$sns = C::class;
 }
+
+class Attr implements HH\FunctionAttribute {
+  public function __construct(public string $s) {}
+}
+
+<<Attr("abcd".C::class)>>
+function concat(): void {
+  C::class."abcd";
+  "abcd".C::class;
+  $x = "abcd";
+  $x .= C::class;
+}

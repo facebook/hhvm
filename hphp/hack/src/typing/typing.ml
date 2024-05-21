@@ -9587,12 +9587,12 @@ end = struct
     (env, Aast.{ ua_name; ua_params = typed_ua_params })
 
   let attributes_check_def env kind attrs =
+    let { emit_string_coercion_error; _ } = env in
+    let env = { env with emit_string_coercion_error = false } in
     let new_object attr_pos env attr_cid params =
       (* We'd like the class id's position here to be the use position of the attribute
          instead of the decl position of the class *)
       let (_decl_pos, cid_) = attr_cid in
-      let { emit_string_coercion_error; _ } = env in
-      let env = { env with emit_string_coercion_error = false } in
       let (env, _, _, _, _, _, _, _) =
         Expr.new_object
           ~expected:None
@@ -9608,10 +9608,11 @@ end = struct
           None
         (* no variadic arguments *)
       in
-      { env with emit_string_coercion_error }
+      env
     in
     let env = Typing_attributes.check_def env new_object kind attrs in
     let (env, user_attrs) = List.map_env env attrs ~f:user_attribute in
+    let env = { env with emit_string_coercion_error } in
     (* If NoAutoDynamic is set, disable everything_sdt *)
     let env =
       if Naming_attributes.mem SN.UserAttributes.uaNoAutoDynamic user_attrs then
@@ -10313,13 +10314,31 @@ end = struct
           env
         | _ -> might_throw ~join_pos:p env
       in
-      let (_, p1, _) = e1 in
+      let (_, p1, e1_) = e1 in
       let p2 =
         match e2 with
         | Either.First (_, p, _)
         | Either.Second ((_, p, _), _) ->
           p
       in
+      (match bop with
+      | Ast_defs.Dot ->
+        Typing_class_pointers.check_string_coercion_point
+          env
+          ~flag:"concat"
+          p1
+          e1_
+          (MakeType.string Reason.Rnone);
+        (match e2 with
+        | Either.First (_, p2, e2_) ->
+          Typing_class_pointers.check_string_coercion_point
+            env
+            ~flag:"concat"
+            p2
+            e2_
+            (MakeType.string Reason.Rnone)
+        | Either.Second _ -> ())
+      | _ -> ());
       let (env, te3, ty) =
         Typing_arithmetic.binop p env bop p1 te1 ty1 p2 te2 ty2
       in

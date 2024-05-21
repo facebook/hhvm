@@ -215,9 +215,8 @@ let get_class_by_name ctx class_ =
   | Some cls -> `Class cls
 
 let get_kind ctx class_ =
-  match ServerSymbolDefinition.get_class_by_name ctx class_ with
-  | None -> None
-  | Some cls -> Some cls.Aast.c_kind
+  Decl_provider.get_class ctx class_ |> Decl_entry.to_option
+  >>= fun class_decl -> Some (Folded_class.kind class_decl)
 
 let get_overridden_method_origin ctx ~class_name ~method_name ~is_static =
   Decl_provider.get_overridden_method ctx ~class_name ~method_name ~is_static

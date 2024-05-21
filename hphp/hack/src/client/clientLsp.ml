@@ -1057,6 +1057,30 @@ let diagnostics_to_exclude_from_notebooks =
       "await cannot be used in a toplevel statement";
     ]
 
+let filter_diagnostics (diagnostics : Lsp.PublishDiagnostics.diagnostic list) :
+    Lsp.PublishDiagnostics.diagnostic list =
+  if !env.args.notebook_mode then
+    let is_at_breakpoint : bool Lazy.t =
+      lazy
+        (match Sys.getenv_opt "HOME" with
+        | Some home_dir ->
+          Sys.file_exists @@ home_dir ^ "/.vscode-sockets/hhvm-paused"
+        | None -> false)
+    in
+    let should_include_diagnostic { Lsp.PublishDiagnostics.message; code; _ } =
+      match code with
+      | Lsp.PublishDiagnostics.IntCode (* undefined variable *) 2050 ->
+        (* When we're breakpoint-debugging in a Hack notebook,
+            suppress all undefined variable errors.
+              There can be variables that exist the runtime environment
+              but aren't written in the notebook and vice-versa. *)
+        not @@ Lazy.force is_at_breakpoint
+      | _ -> not @@ SSet.mem message diagnostics_to_exclude_from_notebooks
+    in
+    List.filter diagnostics ~f:should_include_diagnostic
+  else
+    diagnostics
+
 let ide_diagnostics_to_lsp_diagnostics
     (filename : string) (diagnostics : ClientIdeMessage.diagnostic list) :
     PublishDiagnostics.params =
@@ -1153,20 +1177,14 @@ let ide_diagnostics_to_lsp_diagnostics
     in
     error_for_diagnostic :: additional_diagnostics
   in
-  let should_include_diagnostic { Lsp.PublishDiagnostics.message; _ } =
-    not
-      (!env.args.notebook_mode
-      && SSet.mem message diagnostics_to_exclude_from_notebooks)
-  in
   (* The caller is required to give us a non-empty filename. If it is empty,
      the following path_to_lsp_uri will fall back to the default path - which
      is also empty - and throw, logging appropriate telemetry. *)
   let diagnostics =
     diagnostics
     |> List.bind ~f:ide_diagnostic_to_lsp_diagnostics
-    |> List.filter ~f:should_include_diagnostic
+    |> filter_diagnostics
   in
-
   {
     Lsp.PublishDiagnostics.uri =
       path_string_to_lsp_uri filename ~default_path:"";

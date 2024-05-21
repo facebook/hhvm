@@ -11,6 +11,7 @@ import re
 import sys
 import unittest
 import urllib.parse
+from pathlib import Path
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
 import common_tests
@@ -19,6 +20,11 @@ from lspcommand import LspCommandProcessor, Transcript
 from lsptestspec import line, LspTestSpec, NoResponse
 from test_case import TestCase
 from utils import interpolate_variables, Json, JsonObject
+
+"""
+Existence of this file indicates that a Hack notebook is stopped at a breakpoint
+"""
+_HHVM_IS_PAUSED_FILE: Path = Path.home() / ".vscode-sockets/hhvm-paused"
 
 
 class LspTestDriver(common_tests.CommonTestDriver):
@@ -7404,9 +7410,19 @@ function expect_type_errors_inside(): void {
 
     def test_notebook_mode(self) -> None:
         """
-        Test that certain error messages are filtered out when the `--notebook-mode` argument
-        is passed to `hh lsp`: for example, **there should be no parse errors for top-level statements**
+        When `--notebook-mode` is passed to `hh lsp`:
+        - There should be NO parse errors for top-level statements
+        - There should be NO error for top-level await
+        - If HHVM is paused at a breakpoint, there should be no undefined vars
+        when not stopped at a breakpoint
         """
+        try:
+            # Ensure magic file not present.
+            # See also `test_notebook_mode_at_breakpoint`, where we test the behavior when
+            # the magic file is present.
+            os.remove(_HHVM_IS_PAUSED_FILE)
+        except FileNotFoundError:
+            pass
         variables = self.write_hhconf_and_naming_table()
         file_base_name = "notebook_mode.php"
         php_file_uri = self.repo_file_uri(file_base_name)
@@ -7419,6 +7435,7 @@ $s = "";                // OK top-level statement, because we pass '--notebook-m
 $s + 3;                 // Error, expected num but got string
 $i = await gen_bool();  // OK top-level await, because we pass '--notebook-mode' to the LSP
 $i + 3;                 // Error, expected num but got bool
+echo $undefined_var;
 """
         variables.update({"php_file_uri": php_file_uri, "contents": contents})
         spec = (
@@ -7445,6 +7462,40 @@ $i + 3;                 // Error, expected num but got bool
                 params={
                     "uri": "${php_file_uri}",
                     "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 9, "character": 5},
+                                "end": {"line": 9, "character": 19},
+                            },
+                            "severity": 1,
+                            "code": 2050,
+                            "source": "Hack",
+                            "message": "Variable $undefined_var is undefined, or not always defined.",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 0},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "Did you mean $s instead?",
+                                }
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 0},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "Did you mean $s instead?",
+                                }
+                            ],
+                        },
                         {
                             "range": {
                                 "start": {"line": 6, "character": 0},
@@ -7553,6 +7604,111 @@ $i + 3;                 // Error, expected num but got bool
                                 },
                             ],
                         },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])
+
+        # When `--notebook-mode` is passed to `hh lsp` and the notebook
+        # is stopped at a breakpoint:
+        # There should be NO undefined variable errors
+        os.makedirs(os.path.dirname(_HHVM_IS_PAUSED_FILE))
+        with open(_HHVM_IS_PAUSED_FILE, "w") as f:
+            pass
+        contents = """<?hh
+echo $undefined_var_1; // no error
+echo $undefined_var_2; // no error
+1 * true;              // should error
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 4},
+                                "end": {"line": 3, "character": 8},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 0},
+                                            "end": {"line": 3, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 4},
+                                            "end": {"line": 3, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 0},
+                                            "end": {"line": 3, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 4},
+                                            "end": {"line": 3, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        }
                     ],
                 },
             )

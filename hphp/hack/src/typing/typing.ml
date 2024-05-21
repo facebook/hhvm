@@ -2267,17 +2267,15 @@ let safely_refine_is_array env ty p pred_name arg_expr =
       in
       Inter.intersect ~r env refined_ty arg_ty)
 
-let key_exists env pos shape field =
+let key_exists env tparamet pos shape field =
   let field = Tast.to_nast_expr field in
   refine_lvalue_type env shape ~refine:(fun env shape_ty ->
-      match TUtils.shape_field_name_with_ty_err env field with
-      | Error ty_err ->
-        Typing_error_utils.add_typing_error ~env ty_err;
-
-        (env, shape_ty)
-      | Ok field_name ->
-        let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
-        Typing_shapes.refine_shape field_name pos env shape_ty)
+      Typing_shapes.do_with_field_expr env field ~with_error:(env, shape_ty)
+      @@ fun field_name ->
+      if tparamet then
+        Typing_shapes.refine_key_exists field_name pos env shape_ty
+      else
+        Typing_shapes.refine_not_key_exists field_name pos env shape_ty)
 
 module EnumClassLabelOps = struct
   type result =
@@ -5709,23 +5707,16 @@ end = struct
         let transform_fty =
           (* We expect the second argument to at, idx and keyExists to be a literal field name *)
           match el with
-          | _ :: (_, field) :: _ -> begin
-            match TUtils.shape_field_name_with_ty_err env field with
-            | Error ty_err ->
-              Typing_error_utils.add_typing_error ~env ty_err;
-              None
-            | Ok field_name ->
-              let field_name =
-                TShapeField.of_ast Pos_or_decl.of_raw_pos field_name
-              in
-              Some
-                (fun fty ->
-                  Typing_shapes.transform_special_shapes_fun_ty
-                    field_name
-                    method_id
-                    (List.length el)
-                    fty)
-          end
+          | _ :: (_, field) :: _ ->
+            Typing_shapes.do_with_field_expr env field ~with_error:None
+            @@ fun field_name ->
+            Some
+              (fun fty ->
+                Typing_shapes.transform_special_shapes_fun_ty
+                  field_name
+                  method_id
+                  (List.length el)
+                  fty)
           | _ -> None
         in
         dispatch_class_const env class_id method_id ?transform_fty
@@ -7126,6 +7117,7 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
     return (env, locl, ty_true, ty_false)
 
+  (** [tparamet] = false means the expression is negated. *)
   and condition env tparamet te =
     let (env, cond_true, cond_false) = condition_dual env te in
     if tparamet then
@@ -7405,10 +7397,9 @@ end = struct
           unpacked_arg = None;
           _;
         }
-      when tparamet
-           && String.equal class_name SN.Shapes.cShapes
+      when String.equal class_name SN.Shapes.cShapes
            && String.equal method_name SN.Shapes.keyExists ->
-      let env = key_exists env p shape field in
+      let env = key_exists env tparamet p shape field in
       (env, { pkgs = SSet.empty })
     | Aast.Is (ivar, h) ->
       let env =

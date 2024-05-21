@@ -6,10 +6,26 @@
  *
  *)
 
+(** Convert an field as Aast.expr into a tshape_field_name then pass the result to the provided function.
+  Handle any conversion error as well. *)
+val do_with_field_expr :
+  Typing_env_types.env ->
+  ('a, 'b) Aast.expr ->
+  with_error:'res ->
+  (Typing_defs_core.tshape_field_name -> 'res) ->
+  'res
+
 (** Refine a shape with the knowledge that field_name
   exists. We do this by intersecting with
   shape(field_name => mixed, ...) *)
-val refine_shape :
+val refine_key_exists :
+  Typing_defs.TShapeMap.key ->
+  Pos.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
+val refine_not_key_exists :
   Typing_defs.TShapeMap.key ->
   Pos.t ->
   Typing_env_types.env ->
@@ -45,7 +61,7 @@ val remove_key :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   ('a, 'b) Aast.expr ->
-  Typing_env_types.env * Typing_reason.locl_phase Typing_defs.ty
+  Typing_env_types.env * Typing_defs.locl_ty
 
 val to_dict :
   Typing_env_types.env ->

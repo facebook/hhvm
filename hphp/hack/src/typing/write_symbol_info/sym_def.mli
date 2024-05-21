@@ -40,9 +40,6 @@ type t = {
 val resolve :
   Provider_context.t -> Relative_path.t SymbolOccurrence.t -> t option
 
-val get_class_by_name :
-  Provider_context.t -> string -> [ `None | `Enum | `Class of Nast.class_ ]
-
 val get_kind : Provider_context.t -> string -> Ast_defs.classish_kind option
 
 val get_overridden_method_origin :

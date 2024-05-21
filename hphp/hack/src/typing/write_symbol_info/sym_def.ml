@@ -202,18 +202,6 @@ let resolve ctx SO.{ name; type_; _ } =
   | SO.BuiltInType _ -> None
   | SO.BestEffortArgument _ -> None
 
-(* TODO rewrite so it doesnt use Ast_provider *)
-let get_class_by_name ctx class_ =
-  let get_class_by_name ctx x =
-    Naming_provider.get_type_path ctx x >>= fun fn ->
-    Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_class_in_file ctx fn x ~full:false
-  in
-  match get_class_by_name ctx class_ with
-  | None -> `None
-  | Some cls when Util.is_enum_or_enum_class cls.Aast.c_kind -> `Enum
-  | Some cls -> `Class cls
-
 let get_kind ctx class_ =
   Decl_provider.get_class ctx class_ |> Decl_entry.to_option
   >>= fun class_decl -> Some (Folded_class.kind class_decl)

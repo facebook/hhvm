@@ -127,14 +127,15 @@ let process_member_xref
   | [] -> (xrefs, fa)
   | con_name :: _mem_name ->
     let con_name_with_ns = Utils.add_ns con_name in
-    (match Sym_def.get_class_by_name ctx con_name_with_ns with
-    | `None ->
+    (match Sym_def.get_kind ctx con_name_with_ns with
+    | None ->
       Hh_logger.log
         "WARNING: could not find parent container %s processing reference to %s"
         con_name_with_ns
         full_name;
       (xrefs, fa)
-    | `Enum ->
+    | Some Ast_defs.Cenum
+    | Some (Ast_defs.Cenum_class _) ->
       (match kind with
       | Sym_def.ClassConst ->
         let (enum_id, fa) = Add_fact.enum_decl con_name fa in
@@ -146,8 +147,8 @@ let process_member_xref
           (xrefs, fa)
       (* This includes references to built-in enum methods *)
       | _ -> (xrefs, fa))
-    | `Class cls ->
-      let con_kind = Predicate.get_parent_kind cls.Aast.c_kind in
+    | Some cls ->
+      let con_kind = Predicate.get_parent_kind cls in
       let decl_pred = Predicate.parent_decl_predicate con_kind in
       let (con_decl_id, fa) = Add_fact.container_decl decl_pred con_name fa in
       process_xref
@@ -169,21 +170,22 @@ let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, fa) =
 let process_attribute_xref ctx File_info.{ occ; _ } (xrefs, fa) =
   let get_con_preds_from_name con_name =
     let con_name_with_ns = Utils.add_ns con_name in
-    match Sym_def.get_class_by_name ctx con_name_with_ns with
-    | `None ->
+    match Sym_def.get_kind ctx con_name_with_ns with
+    | None ->
       Hh_logger.log
         "WARNING: could not find declaration container %s for attribute reference to %s"
         con_name_with_ns
         con_name;
       None
-    | `Enum ->
+    | Some (Ast_defs.Cenum_class _)
+    | Some Ast_defs.Cenum ->
       Hh_logger.log
         "WARNING: unexpected enum %s processing attribute reference %s"
         con_name_with_ns
         con_name;
       None
-    | `Class cls ->
-      let parent_kind = Predicate.get_parent_kind cls.Aast.c_kind in
+    | Some cls ->
+      let parent_kind = Predicate.get_parent_kind cls in
       Some (parent_kind, Predicate.(parent_decl_predicate parent_kind))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact

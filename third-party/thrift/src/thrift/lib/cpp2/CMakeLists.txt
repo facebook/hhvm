@@ -283,6 +283,7 @@ add_library(
   server/ServerFlags.cpp
   server/ServerInstrumentation.cpp
   server/ServiceHealthPoller.cpp
+  server/ServiceInterceptorBase.cpp
   server/ThriftProcessor.cpp
   server/ThriftServer.cpp
   server/ThriftServerConfig.cpp

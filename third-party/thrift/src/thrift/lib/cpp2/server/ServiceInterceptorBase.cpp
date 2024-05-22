@@ -14,34 +14,18 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <thrift/lib/cpp/TProcessorEventHandler.h>
-#include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
+
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+
+#if FOLLY_HAS_COROUTINES
 
 namespace apache::thrift {
 
-class ServerModule {
- public:
-  virtual ~ServerModule() = default;
-
-  virtual std::string getName() const = 0;
-
-  virtual std::vector<std::shared_ptr<ServiceInterceptorBase>>
-  getServiceInterceptors() {
-    return {};
-  }
-
-  virtual std::vector<std::shared_ptr<TProcessorEventHandler>>
-  getLegacyEventHandlers() {
-    return {};
-  }
-
-  virtual std::vector<std::shared_ptr<server::TServerEventHandler>>
-  getLegacyServerEventHandlers() {
-    return {};
-  }
-};
+folly::coro::Task<void> ServiceInterceptorBase::co_onStartServing(InitParams) {
+  co_return;
+}
 
 } // namespace apache::thrift
+
+#endif // FOLLY_HAS_COROUTINES

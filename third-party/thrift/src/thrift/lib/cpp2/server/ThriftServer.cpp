@@ -2422,6 +2422,8 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         info.module->getLegacyEventHandlers();
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         legacyServerEventHandlers = info.module->getLegacyServerEventHandlers();
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
+        info.module->getServiceInterceptors();
 
     result.modules.emplace_back(std::move(info));
 
@@ -2433,6 +2435,10 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         result.coalescedLegacyServerEventHandlers.end(),
         std::make_move_iterator(legacyServerEventHandlers.begin()),
         std::make_move_iterator(legacyServerEventHandlers.end()));
+    result.coalescedServiceInterceptors.insert(
+        result.coalescedServiceInterceptors.end(),
+        std::make_move_iterator(serviceInterceptors.begin()),
+        std::make_move_iterator(serviceInterceptors.end()));
   }
 
   return result;

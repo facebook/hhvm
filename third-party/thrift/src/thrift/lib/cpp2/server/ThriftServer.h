@@ -2040,6 +2040,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         coalescedLegacyEventHandlers;
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         coalescedLegacyServerEventHandlers;
+    std::vector<std::shared_ptr<ServiceInterceptorBase>>
+        coalescedServiceInterceptors;
   };
   static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
 
@@ -2824,6 +2826,17 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";
     return processedServiceDescription_->modules.coalescedLegacyEventHandlers;
+  }
+
+  /**
+   * Gets all ServiceInterceptors installed on this ThriftServer instance via
+   * addModule().
+   */
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+  getServiceInterceptors() const override {
+    CHECK(processedServiceDescription_)
+        << "Server must be set up before calling this method";
+    return processedServiceDescription_->modules.coalescedServiceInterceptors;
   }
 
   /**

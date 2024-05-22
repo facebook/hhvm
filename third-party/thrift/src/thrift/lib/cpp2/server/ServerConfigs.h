@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/PreprocessResult.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache {
@@ -235,6 +236,12 @@ class ServerConfigs {
   virtual const std::vector<std::shared_ptr<TProcessorEventHandler>>&
   getLegacyEventHandlers() const {
     static const std::vector<std::shared_ptr<TProcessorEventHandler>> kEmpty;
+    return kEmpty;
+  }
+
+  virtual const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+  getServiceInterceptors() const {
+    static const std::vector<std::shared_ptr<ServiceInterceptorBase>> kEmpty;
     return kEmpty;
   }
 

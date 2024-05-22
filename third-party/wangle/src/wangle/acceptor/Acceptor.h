@@ -117,10 +117,9 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    * subsequent TLS connections that this Acceptor handles.
    */
   virtual void resetSSLContextConfigs(
-      std::shared_ptr<fizz::server::CertManager> certManager = nullptr,
-      std::shared_ptr<SSLContextManager> ctxManager = nullptr,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
-          nullptr);
+      std::shared_ptr<fizz::server::CertManager> certManager,
+      std::shared_ptr<SSLContextManager> ctxManager,
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext);
 
   /**
    * Updates the SSL configuration for the acceptor.

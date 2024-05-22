@@ -45,10 +45,11 @@ from libcpp.utility cimport move as cmove
 from libcpp.pair cimport pair
 from cython.operator cimport dereference as deref
 from cpython.ref cimport PyObject
-from thrift.py3.exceptions cimport (
-    cTApplicationException,
+from thrift.python.exceptions cimport (
     ApplicationError as __ApplicationError,
-    cTApplicationExceptionType__UNKNOWN)
+    cTApplicationException,
+    cTApplicationExceptionType__UNKNOWN,
+)
 from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
 from thrift.py3.server import RequestContext
 from folly cimport (

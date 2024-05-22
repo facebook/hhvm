@@ -30,7 +30,11 @@ from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
 from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
-from thrift.py3.exceptions cimport cTApplicationException, cTApplicationExceptionType__UNKNOWN, ApplicationError
+from thrift.python.exceptions cimport (
+    ApplicationError,
+    cTApplicationException,
+    cTApplicationExceptionType__UNKNOWN,
+)
 from thrift.py3.server cimport Cpp2RequestContext, RequestContext, THRIFT_REQUEST_CONTEXT
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, ServerStream

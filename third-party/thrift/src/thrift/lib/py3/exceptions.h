@@ -19,8 +19,6 @@
 #include <exception>
 #include <vector>
 
-#include <Python.h>
-
 #include <folly/ExceptionWrapper.h>
 
 namespace thrift {

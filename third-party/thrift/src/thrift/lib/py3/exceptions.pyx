@@ -17,7 +17,17 @@ from cpython.exc cimport PyErr_Occurred
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from libcpp.vector cimport vector
 from thrift.python.common import RpcOptions
-from thrift.python.exceptions import Error, LibraryError
+from thrift.python.exceptions cimport (
+    ApplicationError as cApplicationError,
+    create_ApplicationError,
+    cTApplicationException,
+)
+from thrift.python.exceptions import (
+    ApplicationError,
+    ApplicationErrorType,
+    Error,
+    LibraryError,
+)
 
 from enum import Enum, Flag
 import itertools
@@ -44,21 +54,6 @@ class TransportOptions(Flag):
     CHANNEL_IS_VALID = cTTransportExceptionOptions__CHANNEL_IS_VALID
 
 
-class ApplicationErrorType(Enum):
-    UNKNOWN = cTApplicationExceptionType__UNKNOWN
-    UNKNOWN_METHOD = cTApplicationExceptionType__UNKNOWN_METHOD
-    INVALID_MESSAGE_TYPE = cTApplicationExceptionType__INVALID_MESSAGE_TYPE
-    WRONG_METHOD_NAME = cTApplicationExceptionType__WRONG_METHOD_NAME
-    BAD_SEQUENCE_ID = cTApplicationExceptionType__BAD_SEQUENCE_ID
-    MISSING_RESULT = cTApplicationExceptionType__MISSING_RESULT
-    INTERNAL_ERROR = cTApplicationExceptionType__INTERNAL_ERROR
-    PROTOCOL_ERROR = cTApplicationExceptionType__PROTOCOL_ERROR
-    INVALID_TRANSFORM = cTApplicationExceptionType__INVALID_TRANSFORM
-    INVALID_PROTOCOL = cTApplicationExceptionType__INVALID_PROTOCOL
-    UNSUPPORTED_CLIENT_TYPE = cTApplicationExceptionType__UNSUPPORTED_CLIENT_TYPE
-    LOADSHEDDING = cTApplicationExceptionType__LOADSHEDDING
-    TIMEOUT = cTApplicationExceptionType__TIMEOUT
-    INJECTED_FAILURE = cTApplicationExceptionType__INJECTED_FAILURE
 
 
 class ProtocolErrorType(Enum):
@@ -158,38 +153,6 @@ cdef class GeneratedError(BaseError):
     @staticmethod
     def __get_thrift_name__():
         raise NotImplementedError()
-
-
-cdef class ApplicationError(BaseError):
-    """All Application Level Errors (TApplicationException)"""
-
-    def __init__(ApplicationError self, type, str message):
-        assert type in ApplicationErrorType, f"{type} not in ApplicationErrorType"
-        assert message, "message is empty"
-        super().__init__(type, message)
-
-    @property
-    def type(self):
-        return self.args[0]
-
-    @property
-    def message(self):
-        return self.args[1]
-
-
-cdef create_ApplicationError(const cTApplicationException* ex):
-    if not ex:
-        return
-    type = ApplicationErrorType(deref(ex).getType())
-    message = (<bytes>deref(ex).what()).decode('utf-8')
-    # Strip out the message prefix its verbose for python
-    message = message[message.startswith('TApplicationException: ')*23:]
-    inst = <ApplicationError>ApplicationError.__new__(
-        ApplicationError,
-        type,
-        message,
-    )
-    return inst
 
 
 cdef create_LibraryError(const cTLibraryException* ex):

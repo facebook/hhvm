@@ -49,30 +49,6 @@ cdef extern from "thrift/lib/cpp/protocol/TProtocolException.h":
     cdef cppclass cTProtocolException "apache::thrift::protocol::TProtocolException"(cTLibraryException):
         cTProtocolExceptionType getType()
 
-cdef extern from "thrift/lib/cpp/TApplicationException.h" \
-        namespace "apache::thrift":
-
-    enum cTApplicationExceptionType "apache::thrift::TApplicationException::TApplicationExceptionType":
-        cTApplicationExceptionType__UNKNOWN "apache::thrift::TApplicationException::UNKNOWN"
-        cTApplicationExceptionType__UNKNOWN_METHOD "apache::thrift::TApplicationException::UNKNOWN_METHOD"
-        cTApplicationExceptionType__INVALID_MESSAGE_TYPE "apache::thrift::TApplicationException::INVALID_MESSAGE_TYPE"
-        cTApplicationExceptionType__WRONG_METHOD_NAME "apache::thrift::TApplicationException::WRONG_METHOD_NAME"
-        cTApplicationExceptionType__BAD_SEQUENCE_ID "apache::thrift::TApplicationException::BAD_SEQUENCE_ID"
-        cTApplicationExceptionType__MISSING_RESULT "apache::thrift::TApplicationException::MISSING_RESULT"
-        cTApplicationExceptionType__INTERNAL_ERROR "apache::thrift::TApplicationException::INTERNAL_ERROR"
-        cTApplicationExceptionType__PROTOCOL_ERROR "apache::thrift::TApplicationException::PROTOCOL_ERROR"
-        cTApplicationExceptionType__INVALID_TRANSFORM "apache::thrift::TApplicationException::INVALID_TRANSFORM"
-        cTApplicationExceptionType__INVALID_PROTOCOL "apache::thrift::TApplicationException::INVALID_PROTOCOL"
-        cTApplicationExceptionType__UNSUPPORTED_CLIENT_TYPE "apache::thrift::TApplicationException::UNSUPPORTED_CLIENT_TYPE"
-        cTApplicationExceptionType__LOADSHEDDING "apache::thrift::TApplicationException::LOADSHEDDING"
-        cTApplicationExceptionType__TIMEOUT "apache::thrift::TApplicationException::TIMEOUT"
-        cTApplicationExceptionType__INJECTED_FAILURE "apache::thrift::TApplicationException::INJECTED_FAILURE"
-
-    cdef cppclass cTApplicationException \
-            "apache::thrift::TApplicationException"(cTException):
-        cTApplicationException(cTApplicationExceptionType type,
-                               string& message) nogil except +
-        cTApplicationExceptionType getType() nogil
 
 cdef extern from "thrift/lib/cpp/transport/TTransportException.h" \
         namespace "apache::thrift::transport":
@@ -120,16 +96,12 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
 
 # cdef Inheritence sucks in cython
 cdef object create_Error(const cTException* ex)
-cdef object create_ApplicationError(const cTApplicationException* ex)
 cdef object create_LibraryError(const cTLibraryException* ex)
 cdef object create_TransportError(const cTTransportException* ex)
 cdef object create_ProtocolError(const cTProtocolException* ex)
 
 
 cdef class ProtocolError(cLibraryError):
-    pass
-
-cdef class ApplicationError(BaseError):
     pass
 
 cdef class TransportError(cLibraryError):

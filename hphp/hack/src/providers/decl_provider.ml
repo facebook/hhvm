@@ -179,14 +179,13 @@ let maybe_pessimise_fun_decl ctx fun_decl =
       {
         fun_decl with
         fe_type =
-          Decl_enforceability_shallow.(
-            pessimise_fun_type
-              ~fun_kind:Function
-              ~this_class:None
-              ~no_auto_likes
-              ctx
-              fun_decl.fe_pos
-              fun_decl.fe_type);
+          Decl_enforceability_shallow.pessimise_fun_type
+            ~fun_kind:Decl_enforceability.Function
+            ~this_class:None
+            ~no_auto_likes
+            ctx
+            fun_decl.fe_pos
+            fun_decl.fe_type;
       }
   else
     fun_decl

@@ -227,8 +227,6 @@ support situations where the original backend isn't
 val ctx_with_pessimisation_info_exn :
   t -> Provider_backend.pessimisation_info -> t
 
-val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
-
 val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
 
 val no_auto_likes_for_fun : Shallow_decl_defs.fun_decl -> bool

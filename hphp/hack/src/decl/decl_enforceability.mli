@@ -16,7 +16,12 @@ type 'a class_or_typedef_result =
   | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
-module type ContextAccess = sig
+type fun_kind =
+  | Function
+  | Abstract_method
+  | Concrete_method
+
+module type Provider = sig
   (** [t] is the type of the context that classes and typedefs can be found in *)
   type t
 
@@ -31,6 +36,10 @@ module type ContextAccess = sig
   val get_typedef : t -> string -> Typing_defs.typedef_type Decl_entry.t
 
   val get_class : t -> string -> class_t option
+end
+
+module type ContextAccess = sig
+  include Provider
 
   (** [get_typeconst ctx cls name] gets the definition of the type constant
       [name] from [cls] or ancestor if it exists. *)
@@ -46,30 +55,48 @@ module type ContextAccess = sig
   val get_enum_type : class_t -> Typing_defs.enum_type option
 end
 
-module type Enforcement = sig
-  type ctx
+module type ShallowProvider =
+  Provider with type class_t := Shallow_decl_defs.shallow_class
 
-  type class_t
+module ShallowContextAccess : functor (CA : ShallowProvider) ->
+  ContextAccess
+    with type class_t = Shallow_decl_defs.shallow_class
+     and type t = CA.t
 
+module Enforce : functor (ContextAccess : ContextAccess) -> sig
   val get_enforcement :
     return_from_async:bool ->
-    this_class:class_t option ->
-    ctx ->
+    this_class:ContextAccess.class_t option ->
+    ContextAccess.t ->
     Typing_defs.decl_ty ->
     enf
-
-  val is_enforceable :
-    return_from_async:bool ->
-    this_class:class_t option ->
-    ctx ->
-    Typing_defs.decl_ty ->
-    bool
 end
 
-module Enforce : functor (ContextAccess : ContextAccess) ->
-  Enforcement
-    with type ctx = ContextAccess.t
-     and type class_t = ContextAccess.class_t
+module Pessimize : functor (Provider : ShallowProvider) -> sig
+  (** Pessimise the type if in implicit pessimisation mode, otherwise
+    return the type *)
+  val maybe_pessimise_type :
+    reason:Typing_reason.decl_t ->
+    is_xhp_attr:bool ->
+    this_class:Shallow_decl_defs.shallow_class option ->
+    Provider.t ->
+    Typing_defs.decl_ty ->
+    Typing_defs.decl_ty
+
+  (** If the return type is not enforceable, turn it into a like type (~ty) otherwise
+    return the original function type. Also add supportdyn<mixed> to the type parameters. *)
+  val pessimise_fun_type :
+    fun_kind:fun_kind ->
+    this_class:Shallow_decl_defs.shallow_class option ->
+    no_auto_likes:bool ->
+    Provider.t ->
+    Pos_or_decl.t ->
+    Typing_defs.decl_ty ->
+    Typing_defs.decl_ty
+
+  val implicit_sdt_for_class :
+    Provider.t -> Shallow_decl_defs.shallow_class option -> bool
+end
 
 (** Add as supportdyn<mixed> constraints to the type parameters *)
 val add_supportdyn_constraints :

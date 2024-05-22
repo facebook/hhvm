@@ -840,14 +840,10 @@ void ProxygenServer::resetSSLContextConfigs(
     auto evb = m_workers[i]->getEventBase();
     evb->runInEventBaseThread([this, configs, i] {
         if (m_httpsAcceptors[i] && m_httpsConfig.isSSL()) {
-          m_httpsAcceptors[i]->getServerSocketConfig(
-            ).updateSSLContextConfigs(configs);
-          m_httpsAcceptors[i]->resetSSLContextConfigs();
+          m_httpsAcceptors[i]->resetSSLContextConfigs(configs);
         }
         if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
-          m_httpAcceptors[i]->getServerSocketConfig(
-            ).updateSSLContextConfigs(configs);
-          m_httpAcceptors[i]->resetSSLContextConfigs();
+          m_httpAcceptors[i]->resetSSLContextConfigs(configs);
         }
     });
   }

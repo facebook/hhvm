@@ -35,6 +35,7 @@ from libcpp cimport bool
 from asyncio import InvalidStateError as asyncio_InvalidStateError
 from thrift.python.common cimport cThriftMetadata
 from thrift.python.protocol cimport Protocol as cProtocol
+from thrift.python.client.request_channel cimport cRequestChannel, cRequestChannel_ptr
 from folly.executor cimport AsyncioExecutor
 
 cdef extern from "thrift/lib/cpp/transport/THeader.h":
@@ -51,10 +52,6 @@ cdef extern from "thrift/lib/cpp/transport/THeader.h":
         THRIFT_UNFRAMED_COMPACT_DEPRECATED
 
 cdef extern from "thrift/lib/py3/client.h" namespace "::thrift::py3":
-    # The custome deleter is hard, so instead make cython treat it as class
-    cdef cppclass cRequestChannel_ptr "::thrift::py3::RequestChannel_ptr":
-        pass
-
     cdef cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(
         string&& host,
         const uint16_t port,

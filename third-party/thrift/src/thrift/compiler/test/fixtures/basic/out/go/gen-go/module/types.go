@@ -16,6 +16,76 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type MyEnumAlias = MyEnum
+
+const (
+    MyEnumAlias_MyValue1 MyEnumAlias = MyEnum_MyValue1
+    MyEnumAlias_MyValue2 MyEnumAlias = MyEnum_MyValue2
+)
+
+// Enum value maps for MyEnum
+var (
+    MyEnumAliasToName  = MyEnumToName
+    MyEnumAliasToValue = MyEnumToValue
+)
+
+// Deprecated: Use MyEnumAliasToValue instead (e.g. `x, ok := MyEnumAliasToValue["name"]`).
+func MyEnumAliasFromString(s string) (MyEnumAlias, error) {
+    return MyEnumFromString(s)
+}
+
+func NewMyEnumAlias() MyEnumAlias {
+    return 0
+}
+
+func WriteMyEnumAlias(item MyEnumAlias, p thrift.Format) error {
+    if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadMyEnumAlias(p thrift.Format) (MyEnumAlias, error) {
+    var decodeResult MyEnumAlias
+    decodeErr := func() error {
+        enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := MyEnum(enumResult)
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type MyDataItemAlias = MyDataItem
+
+func NewMyDataItemAlias() *MyDataItemAlias {
+    return NewMyDataItem()
+}
+
+func WriteMyDataItemAlias(item *MyDataItemAlias, p thrift.Format) error {
+    if err := item.Write(p); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadMyDataItemAlias(p thrift.Format) (MyDataItemAlias, error) {
+    var decodeResult MyDataItemAlias
+    decodeErr := func() error {
+        result := *NewMyDataItem()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type MyEnum int32
 
 const (
@@ -99,7 +169,7 @@ func HackEnumFromString(s string) (HackEnum, error) {
 type MyStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
-    MyDataField *MyDataItem `thrift:"MyDataField,3" json:"MyDataField" db:"MyDataField"`
+    MyDataField *MyDataItemAlias `thrift:"MyDataField,3" json:"MyDataField" db:"MyDataField"`
     MyEnum MyEnum `thrift:"myEnum,4" json:"myEnum" db:"myEnum"`
     Oneway bool `thrift:"oneway,5" json:"oneway" db:"oneway"`
     Readonly bool `thrift:"readonly,6" json:"readonly" db:"readonly"`
@@ -114,7 +184,7 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMyIntFieldNonCompat(0).
         SetMyStringFieldNonCompat("").
-        SetMyDataFieldNonCompat(*NewMyDataItem()).
+        SetMyDataFieldNonCompat(*NewMyDataItemAlias()).
         SetMyEnumNonCompat(0).
         SetOnewayNonCompat(false).
         SetReadonlyNonCompat(false).
@@ -139,11 +209,11 @@ func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
 
-func (x *MyStruct) GetMyDataFieldNonCompat() *MyDataItem {
+func (x *MyStruct) GetMyDataFieldNonCompat() *MyDataItemAlias {
     return x.MyDataField
 }
 
-func (x *MyStruct) GetMyDataField() *MyDataItem {
+func (x *MyStruct) GetMyDataField() *MyDataItemAlias {
     if !x.IsSetMyDataField() {
         return nil
     }
@@ -223,12 +293,12 @@ func (x *MyStruct) SetMyStringField(value string) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyDataFieldNonCompat(value MyDataItem) *MyStruct {
+func (x *MyStruct) SetMyDataFieldNonCompat(value MyDataItemAlias) *MyStruct {
     x.MyDataField = &value
     return x
 }
 
-func (x *MyStruct) SetMyDataField(value *MyDataItem) *MyStruct {
+func (x *MyStruct) SetMyDataField(value *MyDataItemAlias) *MyStruct {
     x.MyDataField = value
     return x
 }
@@ -343,7 +413,8 @@ func (x *MyStruct) writeField3(p thrift.Format) error {  // MyDataField
     }
 
     item := x.MyDataField
-    if err := item.Write(p); err != nil {
+    err := WriteMyDataItemAlias(item, p)
+if err != nil {
     return err
 }
 
@@ -481,8 +552,7 @@ if err != nil {
 }
 
 func (x *MyStruct) readField3(p thrift.Format) error {  // MyDataField
-    result := *NewMyDataItem()
-err := result.Read(p)
+    result, err := ReadMyDataItemAlias(p)
 if err != nil {
     return err
 }
@@ -607,9 +677,9 @@ func (x *MyStruct) toString9() string {  // NoHackCodegenField
 }
 
 // Deprecated: Use NewMyStruct().GetMyDataField() instead.
-func (x *MyStruct) DefaultGetMyDataField() *MyDataItem {
+func (x *MyStruct) DefaultGetMyDataField() *MyDataItemAlias {
     if !x.IsSetMyDataField() {
-        return NewMyDataItem()
+        return NewMyDataItemAlias()
     }
     return x.MyDataField
 }
@@ -833,7 +903,7 @@ func (x *MyDataItem) String() string {
 }
 
 type MyUnion struct {
-    MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
+    MyEnum *MyEnumAlias `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
     MyStruct *MyStruct `thrift:"myStruct,2" json:"myStruct,omitempty" db:"myStruct"`
     MyDataItem *MyDataItem `thrift:"myDataItem,3" json:"myDataItem,omitempty" db:"myDataItem"`
     FloatSet []float32 `thrift:"floatSet,4" json:"floatSet,omitempty" db:"floatSet"`
@@ -845,13 +915,13 @@ func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
 
-func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
+func (x *MyUnion) GetMyEnumNonCompat() *MyEnumAlias {
     return x.MyEnum
 }
 
-func (x *MyUnion) GetMyEnum() MyEnum {
+func (x *MyUnion) GetMyEnum() MyEnumAlias {
     if !x.IsSetMyEnum() {
-        return 0
+        return NewMyEnumAlias()
     }
 
     return *x.MyEnum
@@ -893,12 +963,12 @@ func (x *MyUnion) GetFloatSet() []float32 {
     return x.FloatSet
 }
 
-func (x *MyUnion) SetMyEnumNonCompat(value MyEnum) *MyUnion {
+func (x *MyUnion) SetMyEnumNonCompat(value MyEnumAlias) *MyUnion {
     x.MyEnum = &value
     return x
 }
 
-func (x *MyUnion) SetMyEnum(value *MyEnum) *MyUnion {
+func (x *MyUnion) SetMyEnum(value *MyEnumAlias) *MyUnion {
     x.MyEnum = value
     return x
 }
@@ -959,7 +1029,8 @@ func (x *MyUnion) writeField1(p thrift.Format) error {  // MyEnum
     }
 
     item := *x.MyEnum
-    if err := p.WriteI32(int32(item)); err != nil {
+    err := WriteMyEnumAlias(item, p)
+if err != nil {
     return err
 }
 
@@ -1041,11 +1112,10 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *MyUnion) readField1(p thrift.Format) error {  // MyEnum
-    enumResult, err := p.ReadI32()
+    result, err := ReadMyEnumAlias(p)
 if err != nil {
     return err
 }
-result := MyEnum(enumResult)
 
     x.MyEnum = &result
     return nil

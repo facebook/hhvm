@@ -194,6 +194,8 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+typedef ::test::fixtures::basic::MyEnum MyEnumAlias;
+typedef ::test::fixtures::basic::MyDataItem MyDataItemAlias;
 
 class MyDataItem final  {
  private:
@@ -358,7 +360,7 @@ class MyStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyDataItem MyDataField__arg, ::test::fixtures::basic::MyEnum myEnum__arg, bool oneway__arg, bool readonly__arg, bool idempotent__arg, ::std::set<float> floatSet__arg, ::std::string no_hack_codegen_field__arg);
+  MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyDataItemAlias MyDataField__arg, ::test::fixtures::basic::MyEnum myEnum__arg, bool oneway__arg, bool readonly__arg, bool idempotent__arg, ::std::set<float> floatSet__arg, ::std::string no_hack_codegen_field__arg);
 
   MyStruct(MyStruct&&) noexcept;
 
@@ -375,7 +377,7 @@ class MyStruct final  {
  private:
   ::std::string __fbthrift_field_MyStringField;
  private:
-  ::test::fixtures::basic::MyDataItem __fbthrift_field_MyDataField;
+  ::test::fixtures::basic::MyDataItemAlias __fbthrift_field_MyDataField;
  private:
   ::test::fixtures::basic::MyEnum __fbthrift_field_myEnum;
  private:
@@ -476,42 +478,42 @@ class MyStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_MyStringField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyDataField_ref() const& {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyDataField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyDataField_ref() & {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyDataField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyDataField() const& {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyDataField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyDataField() & {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItemAlias>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyDataField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
@@ -780,12 +782,12 @@ class MyStruct final  {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
-  const ::test::fixtures::basic::MyDataItem& get_MyDataField() const&;
-  ::test::fixtures::basic::MyDataItem get_MyDataField() &&;
+  const ::test::fixtures::basic::MyDataItemAlias& get_MyDataField() const&;
+  ::test::fixtures::basic::MyDataItemAlias get_MyDataField() &&;
 
-  template <typename T_MyStruct_MyDataField_struct_setter = ::test::fixtures::basic::MyDataItem>
+  template <typename T_MyStruct_MyDataField_struct_setter = ::test::fixtures::basic::MyDataItemAlias>
   [[deprecated("Use `FOO.MyDataField_ref() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
-  ::test::fixtures::basic::MyDataItem& set_MyDataField(T_MyStruct_MyDataField_struct_setter&& MyDataField_) {
+  ::test::fixtures::basic::MyDataItemAlias& set_MyDataField(T_MyStruct_MyDataField_struct_setter&& MyDataField_) {
     MyDataField_ref() = std::forward<T_MyStruct_MyDataField_struct_setter>(MyDataField_);
     return __fbthrift_field_MyDataField;
   }
@@ -1027,7 +1029,7 @@ class MyUnion final  {
   ~MyUnion();
 
   union storage_type {
-    ::test::fixtures::basic::MyEnum myEnum;
+    ::test::fixtures::basic::MyEnumAlias myEnum;
     ::test::fixtures::basic::MyStruct myStruct;
     ::test::fixtures::basic::MyDataItem myDataItem;
     ::std::set<float> floatSet;
@@ -1040,8 +1042,8 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum t = ::test::fixtures::basic::MyEnum()) {
-    using T0 = ::test::fixtures::basic::MyEnum;
+  ::test::fixtures::basic::MyEnumAlias& set_myEnum(::test::fixtures::basic::MyEnumAlias t = ::test::fixtures::basic::MyEnumAlias()) {
+    using T0 = ::test::fixtures::basic::MyEnumAlias;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myEnum);
@@ -1131,7 +1133,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
-  ::test::fixtures::basic::MyEnum const& get_myEnum() const {
+  ::test::fixtures::basic::MyEnumAlias const& get_myEnum() const {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1159,7 +1161,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
-  ::test::fixtures::basic::MyEnum& mutable_myEnum() {
+  ::test::fixtures::basic::MyEnumAlias& mutable_myEnum() {
     assert(getType() == Type::myEnum);
     return value_.myEnum;
   }
@@ -1179,7 +1181,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
-  ::test::fixtures::basic::MyEnum move_myEnum() {
+  ::test::fixtures::basic::MyEnumAlias move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
@@ -1199,22 +1201,22 @@ class MyUnion final  {
     return std::move(value_.floatSet);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyEnum>
+  template <typename..., typename T = ::test::fixtures::basic::MyEnumAlias>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myEnum_ref() const& {
     return {value_.myEnum, type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyEnum>
+  template <typename..., typename T = ::test::fixtures::basic::MyEnumAlias>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myEnum_ref() const&& {
     return {std::move(value_.myEnum), type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyEnum>
+  template <typename..., typename T = ::test::fixtures::basic::MyEnumAlias>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myEnum_ref() & {
     return {value_.myEnum, type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic::MyEnum>
+  template <typename..., typename T = ::test::fixtures::basic::MyEnumAlias>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && {
     return {std::move(value_.myEnum), type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

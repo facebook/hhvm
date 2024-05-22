@@ -421,6 +421,9 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem
+
 
 
 class _fbthrift_FooService_simple_rpc_args(metaclass=_fbthrift_python_types.StructMeta):

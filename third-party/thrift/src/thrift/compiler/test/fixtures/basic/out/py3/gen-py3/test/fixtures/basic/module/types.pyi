@@ -264,3 +264,5 @@ class Set__float(_typing.AbstractSet[float], _typing.Hashable):
     def __iter__(self) -> _typing.Iterator[float]: ...
 
 
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem

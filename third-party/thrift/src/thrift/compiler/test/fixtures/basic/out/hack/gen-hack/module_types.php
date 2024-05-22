@@ -156,7 +156,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'idempotent' => bool,
     ...
   );
-  const int STRUCTURAL_ID = 4991963907375804067;
+  const int STRUCTURAL_ID = 5227179801175427619;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -169,7 +169,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public string $MyStringField;
   /**
    * Original thrift field:-
-   * 3: module.MyDataItem MyDataField
+   * 3: module.MyDataItemAlias MyDataField
    */
   public ?\test\fixtures\basic\MyDataItem $MyDataField;
   /**
@@ -255,9 +255,18 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => 3,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "module.MyDataItem",
+                      "name" => "module.MyDataItemAlias",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.MyDataItem",
+                            )
+                          ),
+                        )
+                      ),
                     )
                   ),
                 )
@@ -520,10 +529,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'myDataItem' => ?\test\fixtures\basic\MyDataItem::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 4641160414833587430;
+  const int STRUCTURAL_ID = 4300912820644046400;
   /**
    * Original thrift field:-
-   * 1: module.MyEnum myEnum
+   * 1: module.MyEnumAlias myEnum
    */
   public ?\test\fixtures\basic\MyEnum $myEnum;
   /**
@@ -661,9 +670,18 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "module.MyEnum",
+                      "name" => "module.MyEnumAlias",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                            shape(
+                              "name" => "module.MyEnum",
+                            )
+                          ),
+                        )
+                      ),
                     )
                   ),
                 )

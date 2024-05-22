@@ -183,6 +183,9 @@ class UnionToBeRenamed(_fbthrift_python_types.Union, _fbthrift_compatible_with_U
     def _to_py3(self) -> "test.fixtures.basic.module.types.UnionToBeRenamed": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
 
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem
+
 
 class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_types.Struct):
 

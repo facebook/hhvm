@@ -106,7 +106,7 @@ _readField_MyStringField:
 _readField_MyDataField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItem>::readWithContext(*iprot, this->__fbthrift_field_MyDataField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItemAlias>::readWithContext(*iprot, this->__fbthrift_field_MyDataField, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -321,7 +321,7 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("MyDataField", apache::thrift::protocol::T_STRUCT, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItem>::serializedSize<false>(*prot_, this->__fbthrift_field_MyDataField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItemAlias>::serializedSize<false>(*prot_, this->__fbthrift_field_MyDataField);
   }
   {
     xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 4);
@@ -365,7 +365,7 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("MyDataField", apache::thrift::protocol::T_STRUCT, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItem>::serializedSize<true>(*prot_, this->__fbthrift_field_MyDataField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItemAlias>::serializedSize<true>(*prot_, this->__fbthrift_field_MyDataField);
   }
   {
     xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 4);
@@ -418,7 +418,7 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "MyDataField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItem>::write(*prot_, this->__fbthrift_field_MyDataField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItemAlias>::write(*prot_, this->__fbthrift_field_MyDataField);
     xfer += prot_->writeFieldEnd();
   }
   {
@@ -578,7 +578,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
           this->myEnum_ref().emplace();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnumAlias>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
           _readState.skip(iprot);
@@ -648,7 +648,7 @@ uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
     case MyUnion::Type::myEnum:
     {
       xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 1);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnum>::serializedSize<false>(*prot_, value_.myEnum);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnumAlias>::serializedSize<false>(*prot_, value_.myEnum);
       break;
     }
     case MyUnion::Type::myStruct:
@@ -683,7 +683,7 @@ uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
     case MyUnion::Type::myEnum:
     {
       xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 1);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnum>::serializedSize<false>(*prot_, value_.myEnum);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnumAlias>::serializedSize<false>(*prot_, value_.myEnum);
       break;
     }
     case MyUnion::Type::myStruct:
@@ -719,7 +719,7 @@ uint32_t MyUnion::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 0;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "myEnum", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnum>::write(*prot_, value_.myEnum);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnumAlias>::write(*prot_, value_.myEnum);
       xfer += prot_->writeFieldEnd();
       break;
     }

@@ -1064,3 +1064,5 @@ cdef class Set__float(thrift.py3.types.Set):
 
 Set.register(Set__float)
 
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem

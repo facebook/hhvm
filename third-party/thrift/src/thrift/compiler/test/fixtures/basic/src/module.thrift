@@ -28,11 +28,13 @@ enum MyEnum {
   MyValue2 = 1,
 }
 
+typedef MyEnum MyEnumAlias
+
 struct MyStruct {
   1: i64 MyIntField;
   2: string MyStringField;
   # use the type before it is defined. Thrift should be able to handle this
-  3: MyDataItem MyDataField;
+  3: MyDataItemAlias MyDataField;
   4: MyEnum myEnum;
   5: bool oneway;
   6: bool readonly;
@@ -44,9 +46,10 @@ struct MyStruct {
 }
 
 struct MyDataItem {}
+typedef MyDataItem MyDataItemAlias
 
 union MyUnion {
-  1: MyEnum myEnum;
+  1: MyEnumAlias myEnum;
   2: MyStruct myStruct;
   3: MyDataItem myDataItem;
   @hack.SkipCodegen{reason = "Invalid key type"}

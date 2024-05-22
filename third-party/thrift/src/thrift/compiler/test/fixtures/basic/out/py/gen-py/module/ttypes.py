@@ -51,7 +51,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'MyDataItem', 'MyUnion', 'ReservedKeyword', 'UnionToBeRenamed']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'MyDataItem', 'MyUnion', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
 
 class MyEnum:
   MyValue1 = 0
@@ -935,6 +935,8 @@ class UnionToBeRenamed(object):
   def _to_py_deprecated(self):
     return self
 
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem
 all_structs.append(MyStruct)
 MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'MyIntField', None, None, 2, ), # 1

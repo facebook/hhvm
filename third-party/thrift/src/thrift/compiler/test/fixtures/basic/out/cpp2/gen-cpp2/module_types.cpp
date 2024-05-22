@@ -120,7 +120,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 }
 
 
-MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyDataItem MyDataField__arg, ::test::fixtures::basic::MyEnum myEnum__arg, bool oneway__arg, bool readonly__arg, bool idempotent__arg, ::std::set<float> floatSet__arg, ::std::string no_hack_codegen_field__arg) :
+MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyDataItemAlias MyDataField__arg, ::test::fixtures::basic::MyEnum myEnum__arg, bool oneway__arg, bool readonly__arg, bool idempotent__arg, ::std::set<float> floatSet__arg, ::std::string no_hack_codegen_field__arg) :
     __fbthrift_field_MyIntField(std::move(MyIntField__arg)),
     __fbthrift_field_MyStringField(std::move(MyStringField__arg)),
     __fbthrift_field_MyDataField(std::move(MyDataField__arg)),
@@ -170,11 +170,11 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::test::fixtures::basic::MyDataItem& MyStruct::get_MyDataField() const& {
+const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
 
-::test::fixtures::basic::MyDataItem MyStruct::get_MyDataField() && {
+::test::fixtures::basic::MyDataItemAlias MyStruct::get_MyDataField() && {
   return std::move(__fbthrift_field_MyDataField);
 }
 
@@ -214,7 +214,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyStruct,
         ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic::MyDataItem>,
+        ::test::fixtures::basic::MyDataItemAlias>,
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic

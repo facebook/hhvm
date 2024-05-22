@@ -195,18 +195,10 @@ public class MyUnion extends TUnion<MyUnion> {
     value_ = __value;
   }
 
-  /**
-   * 
-   * @see MyEnum
-   */
   public MyEnum getMyEnum() {
     return (MyEnum) __getValue(MYENUM);
   }
 
-  /**
-   * 
-   * @see MyEnum
-   */
   public void setMyEnum(MyEnum __value) {
     __setValue(MYENUM, __value);
   }

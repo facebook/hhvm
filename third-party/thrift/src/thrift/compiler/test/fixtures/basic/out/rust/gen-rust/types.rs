@@ -10,11 +10,15 @@ pub mod services;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+pub use crate::types::MyEnum as MyEnumAlias;
+
+pub type MyDataItemAlias = crate::types::MyDataItem;
+
 #[derive(Clone, PartialEq)]
 pub struct MyStruct {
     pub MyIntField: ::std::primitive::i64,
     pub MyStringField: ::std::string::String,
-    pub MyDataField: crate::types::MyDataItem,
+    pub MyDataField: crate::types::MyDataItemAlias,
     pub myEnum: crate::types::MyEnum,
     pub oneway: ::std::primitive::bool,
     pub readonly: ::std::primitive::bool,
@@ -41,7 +45,7 @@ pub struct MyDataItem {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum MyUnion {
-    myEnum(crate::types::MyEnum),
+    myEnum(crate::types::MyEnumAlias),
     myStruct(crate::types::MyStruct),
     myDataItem(crate::types::MyDataItem),
     floatSet(::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>),

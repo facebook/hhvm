@@ -34,6 +34,11 @@ var (
         metadata.NewThriftStructType().
             SetName("module.MyDataItem"),
             )
+    premadeThriftType_module_MyDataItemAlias = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.MyDataItemAlias").
+            SetUnderlyingType(premadeThriftType_module_MyDataItem),
+            )
     premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),
@@ -47,6 +52,11 @@ var (
     premadeThriftType_set_float = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_float),
+            )
+    premadeThriftType_module_MyEnumAlias = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.MyEnumAlias").
+            SetUnderlyingType(premadeThriftType_module_MyEnum),
             )
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -87,7 +97,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(3).
     SetName("MyDataField").
     SetIsOptional(false).
-    SetType(premadeThriftType_module_MyDataItem),
+    SetType(premadeThriftType_module_MyDataItemAlias),
             metadata.NewThriftField().
     SetId(4).
     SetName("myEnum").
@@ -132,7 +142,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("myEnum").
     SetIsOptional(false).
-    SetType(premadeThriftType_module_MyEnum),
+    SetType(premadeThriftType_module_MyEnumAlias),
             metadata.NewThriftField().
     SetId(2).
     SetName("myStruct").

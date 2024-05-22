@@ -237,6 +237,60 @@ void Acceptor::resetSSLContextConfigs(
   }
 }
 
+void Acceptor::resetSSLContextConfigs(
+    const std::vector<SSLContextConfig>& sslContextConfigs) {
+  std::shared_ptr<fizz::server::CertManager> certManager = nullptr;
+  std::shared_ptr<SSLContextManager> ctxManager = nullptr;
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext = nullptr;
+  try {
+    if (accConfig_.fizzConfig.enableFizz) {
+      certManager = FizzConfigUtil::createCertManager(
+          sslContextConfigs,
+          /* pwFactory = */ nullptr,
+          accConfig_.strictSSL);
+      if (certManager) {
+        auto context = createFizzContext();
+        if (context) {
+          context->setCertManager(certManager);
+          std::string pskContext;
+          if (!sslContextConfigs.empty()) {
+            pskContext = sslContextConfigs.front().sessionContext.value_or("");
+          }
+          context->setTicketCipher(createFizzTicketCipher(
+              ticketSecrets_,
+              context->getFactoryPtr(),
+              certManager,
+              std::move(pskContext)));
+        }
+        fizzContext = std::move(context);
+      }
+    }
+    if (sslCtxManager_) {
+      // The API only updates sslContextConfigs, this API should be only called
+      // for acceptors that hos no SNI configs
+      DCHECK(accConfig_.sniConfigs.empty());
+      sslCtxManager_->resetSSLContextConfigs(
+          sslContextConfigs,
+          accConfig_.sniConfigs,
+          accConfig_.sslCacheOptions,
+          nullptr,
+          accConfig_.bindAddress,
+          cacheProvider_);
+    }
+    resetSSLContextConfigs(certManager, sslCtxManager_, fizzContext);
+  } catch (const std::runtime_error& ex) {
+    LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+               << "will keep old config";
+  }
+}
+
+void Acceptor::reloadSSLContextConfigs() {
+  resetSSLContextConfigs(
+      /* certManager = */ nullptr,
+      /* ctxManager = */ nullptr,
+      /* fizzContext = */ nullptr);
+}
+
 Acceptor::~Acceptor() = default;
 
 void Acceptor::setTLSTicketSecrets(

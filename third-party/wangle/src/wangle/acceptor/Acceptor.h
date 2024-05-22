@@ -111,13 +111,41 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
           nullptr);
 
   /**
-   * Recreates ssl configs, re-reads certs
+   * TODO: This naming is slightly confusing.
+   *
+   * Sets TLS related dependencies which will be used to handle handshakes for
+   * subsequent TLS connections that this Acceptor handles.
    */
   virtual void resetSSLContextConfigs(
       std::shared_ptr<fizz::server::CertManager> certManager = nullptr,
       std::shared_ptr<SSLContextManager> ctxManager = nullptr,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
           nullptr);
+
+  /**
+   * Updates the SSL configuration for the acceptor.
+   *
+   * This method must be invoked in the thread associated with the
+   * Acceptor's Eventbase.
+   *
+   * New instances of TLS handling components (e.g. fizz::server::CertManager,
+   * fizz::server::FizzServerContext, etc.) are constructed from the
+   * configuration supplied. `resetSSLContextConfigs(...)` is invoked with the
+   * newly created components.
+   */
+  void resetSSLContextConfigs(
+      const std::vector<SSLContextConfig>& sslContextConfigs);
+
+  /**
+   * A shorthand for `resetSSLContextConfigs(nullptr, nullptr, nullptr`).
+   *
+   * This method must be invoked in the thread associated with the
+   * Acceptor's Eventbase.
+   *
+   * Re-reads the certificates and updates the contexts and contexts'
+   * dependencies.
+   */
+  void reloadSSLContextConfigs();
 
   SSLContextManager* getSSLContextManager() const {
     return sslCtxManager_.get();

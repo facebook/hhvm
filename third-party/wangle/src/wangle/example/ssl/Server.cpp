@@ -116,7 +116,7 @@ void initCredProcessorCallbacks(
           return;
         }
         evb->runInEventBaseThread(
-            [acceptor] { acceptor->resetSSLContextConfigs(); });
+            [acceptor] { acceptor->reloadSSLContextConfigs(); });
       });
     }
   });

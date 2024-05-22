@@ -534,7 +534,7 @@ void insertMask(Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
 
 template <typename Id, typename F>
 void insertNextMask(
-    ExtractedMasks& masks,
+    ExtractedMasksFromPatch& masks,
     const Value& nextPatch,
     Id readId,
     Id writeId,
@@ -634,7 +634,7 @@ void insertRemoveWriteFieldsToMask(Mask& mask, const std::vector<Value>& ids) {
 // uses the appropriate integer map mask and string map mask after parsing
 // from Value.
 void insertFieldsToMask(
-    ExtractedMasks& masks,
+    ExtractedMasksFromPatch& masks,
     const Value& patchFields,
     bool recursive,
     bool view) {
@@ -681,8 +681,9 @@ void insertFieldsToMask(
   }
 }
 
-ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
-  ExtractedMasks masks = {noneMask(), noneMask()};
+ExtractedMasksFromPatch extractMaskFromPatch(
+    const protocol::Object& patch, bool view) {
+  ExtractedMasksFromPatch masks = {noneMask(), noneMask()};
   // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
     return {noneMask(), allMask()};
@@ -752,12 +753,13 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
 
 } // namespace detail
 
-ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch) {
+ExtractedMasksFromPatch extractMaskViewFromPatch(
+    const protocol::Object& patch) {
   detail::checkNotSafePatch(patch);
   return detail::extractMaskFromPatch(patch, true);
 }
 
-ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
+ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch) {
   detail::checkNotSafePatch(patch);
   return detail::extractMaskFromPatch(patch, false);
 }

@@ -70,11 +70,13 @@ class PatchTest : public testing::Test {
   }
 
   static bool checkReadWriteMask(
-      const ExtractedMasks& masks, const Mask& read, const Mask& write) {
+      const ExtractedMasksFromPatch& masks,
+      const Mask& read,
+      const Mask& write) {
     return masks.read == read && masks.write == write;
   }
   static bool checkReadWriteMask(
-      const ExtractedMasks& masks, const Mask& mask) {
+      const ExtractedMasksFromPatch& masks, const Mask& mask) {
     return checkReadWriteMask(masks, mask, mask);
   }
 

@@ -22,6 +22,7 @@
 #include <cstring>
 #include <optional>
 #include <string_view>
+#include <fmt/format.h>
 
 #include <folly/Conv.h>
 #include <folly/Portability.h>
@@ -59,7 +60,10 @@ template <typename EnumType>
 EnumType enumValueOrThrow(std::string_view name) {
   EnumType out;
   if (!tryParseEnum(name, &out)) {
-    folly::throw_exception<std::out_of_range>("name not found in enum");
+    folly::throw_exception<std::out_of_range>(fmt::format(
+        "name '{}' not found in enum '{}'",
+        name,
+        folly::pretty_name<EnumType>()));
   }
   return out;
 }

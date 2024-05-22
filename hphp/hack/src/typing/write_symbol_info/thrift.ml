@@ -9,6 +9,7 @@
 open Aast
 open Hh_prelude
 open Fbthrift
+open Option.Monad_infix
 
 type kind =
   | Exception
@@ -35,10 +36,29 @@ let add { services; _ } ~interface ~thrift_path ~service =
 let lookup { services; _ } ~interfaces =
   List.filter_map ~f:(Hashtbl.find services) interfaces |> List.hd
 
+let rex_id = "(\\w(?:\\w|\\.)+)"
+
+let rex_ty = "(?:\\w|<|>|, )+"
+
+let rex_sp = "(?:\\s|\\*|\\d|\\:|\\-)*"
+
 let rex_container =
   Pcre.regexp
     ~flags:[`MULTILINE]
-    "Original thrift (struct|service|exception):-(?:\\s|\\*)*([\\w]+)"
+    (Printf.sprintf
+       "Original thrift (struct|service|exception):-%s%s"
+       rex_sp
+       rex_id)
+
+let rex_member =
+  Pcre.regexp
+    ~flags:[`MULTILINE]
+    (Printf.sprintf
+       "Original thrift (field|definition):-%s%s%s%s"
+       rex_sp
+       rex_ty
+       rex_sp
+       rex_id)
 
 let get_thrift_from_container_aux ~thrift_path ~doc =
   try
@@ -69,9 +89,7 @@ let get_thrift_from_container_aux ~thrift_path ~doc =
       Some ({ thrift_path; name; kind = Exception }, xref_target)
     | _ -> failwith "internal error"
   with
-  | _ ->
-    Hh_logger.log "Couldn't parse thrift comment %s" doc;
-    None
+  | _ -> None
 
 let get_thrift_from_container t ~thrift_path con =
   let (container, fact) =
@@ -105,11 +123,6 @@ let get_thrift_from_container t ~thrift_path con =
   Option.iter ~f:(fun container -> t.cur_container <- Some container) container;
   fact
 
-let rex_member =
-  Pcre.regexp
-    ~flags:[`MULTILINE]
-    "(?:Original thrift definition:-(?:\\s|\\*)*(?:\\w)+(?:\\s|\\*)*(\\w+))|(?:Original thrift field:-(?:\\s|\\*|.|\\d|\\:)*(?:\\w+) (\\w+))"
-
 let make_member_decl member_name container_qname kind =
   let name = container_qname in
   match kind with
@@ -129,21 +142,14 @@ let make_member_decl member_name container_qname kind =
   | Exception -> XRefTarget.(Exception_ ExceptionName.(Key { name }))
 
 let get_thrift_from_member t ~doc =
+  t.cur_container >>= fun { thrift_path; name; kind } ->
   try
     let substrings = Pcre.exec ~rex:rex_member doc in
-    let member_name =
-      try Pcre.get_substring substrings 1 with
-      | _ -> Pcre.get_substring substrings 2
-    in
-    match t.cur_container with
-    | None ->
-      Hh_logger.log "Container not set when indexing this method";
-      None
-    | Some { thrift_path; name; kind } ->
-      let name = Identifier.Key name in
-      let file = File.Key (Src.File.Key thrift_path) in
-      let container_qname = QualName.(Key { file; name }) in
-      Some (make_member_decl member_name container_qname kind)
+    let member_name = Pcre.get_substring substrings 2 in
+    let name = Identifier.Key name in
+    let file = File.Key (Src.File.Key thrift_path) in
+    let container_qname = QualName.(Key { file; name }) in
+    Some (make_member_decl member_name container_qname kind)
   with
   | _ ->
     Hh_logger.log "Couldn't parse thrift comment %s" doc;

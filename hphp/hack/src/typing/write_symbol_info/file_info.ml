@@ -40,6 +40,7 @@ type t = {
   symbols: symbol list;
   sym_hash: Md5.t option;
   fanout: bool;
+  root_path: string;
 }
 
 let concat_hash str hash = Md5.digest_string (Md5.to_binary hash ^ str)
@@ -246,8 +247,16 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
       Unix.gmtime tast_elapsed_s
     in
     Hh_logger.log "tast: %s %dm%ds" path_str tast_min tast_sec);
-
-  { path = path_str; tast; source_text; cst; symbols; sym_hash; fanout }
+  {
+    path = path_str;
+    tast;
+    source_text;
+    cst;
+    symbols;
+    sym_hash;
+    fanout;
+    root_path;
+  }
 
 let referenced ctx t =
   let open Option.Monad_infix in

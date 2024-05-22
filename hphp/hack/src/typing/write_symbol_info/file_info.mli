@@ -46,6 +46,7 @@ type t = private {
   symbols: symbol list;
   sym_hash: Md5.t option;
   fanout: bool;
+  root_path: string;
 }
 
 (** all the root (i.e. non-hhi) files referenced by t through xrefs. *)

@@ -58,11 +58,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "666",
+        "line": "671",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "666",
-        "bodyend": "674"
+        "bodystart": "671",
+        "bodyend": "679"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
@@ -78,11 +78,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "664",
+    "line": "669",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "664",
-    "bodyend": "675"
+    "bodystart": "669",
+    "bodyend": "680"
   },
   "namespacednames_html": [
     "apache",
@@ -140,11 +140,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "666",
+                "line": "671",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "666",
-                "bodyend": "674"
+                "bodystart": "671",
+                "bodyend": "679"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
@@ -166,7 +166,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/AdaptedEncode/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
+          "parent_links": [
+            {
+              "text_html": "AdaptedEncode",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/AdaptedEncode"
+            }
+          ]
         }
       ]
     }

@@ -124,5 +124,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/required_field_ref/operator.arrow",
-  "refid": "/ref/cpp/f/class/apache/thrift/required_field_ref/operator.arrow"
+  "refid": "/ref/cpp/f/class/apache/thrift/required_field_ref/operator.arrow",
+  "parent_links": [
+    {
+      "text_html": "required_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/required_field_ref"
+    }
+  ]
 }

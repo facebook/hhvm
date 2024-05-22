@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "300",
+        "line": "307",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "300",
-        "bodyend": "303"
+        "bodystart": "307",
+        "bodyend": "310"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator-=(U&amp;&amp; val)",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Decreases the value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

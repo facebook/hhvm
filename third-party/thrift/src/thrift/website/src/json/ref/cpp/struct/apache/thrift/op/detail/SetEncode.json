@@ -55,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "612",
+        "line": "617",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "612",
-        "bodyend": "621"
+        "bodystart": "617",
+        "bodyend": "626"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
@@ -75,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "610",
+    "line": "615",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "610",
-    "bodyend": "622"
+    "bodystart": "615",
+    "bodyend": "627"
   },
   "namespacednames_html": [
     "apache",
@@ -137,11 +137,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "612",
+                "line": "617",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "612",
-                "bodyend": "621"
+                "bodystart": "617",
+                "bodyend": "626"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
@@ -163,7 +163,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/SetEncode/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/SetEncode/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/SetEncode/operator.call",
+          "parent_links": [
+            {
+              "text_html": "SetEncode",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/SetEncode"
+            }
+          ]
         }
       ]
     }

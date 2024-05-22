@@ -506,7 +506,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/size",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/size"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/size",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -563,7 +569,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/find",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/find"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/find",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -620,7 +632,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/iter",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/iter"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/iter",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -686,7 +704,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/next",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/next"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/next",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -856,7 +880,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ref",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1064,7 +1094,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ret",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ret"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/ret",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1117,7 +1153,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/cref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/cref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/cref",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1170,7 +1212,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/delete_",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/delete_"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/delete_",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1227,7 +1275,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/make",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/make"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/make",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1280,7 +1334,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/empty",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1333,7 +1393,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/clear",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1390,7 +1456,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/assign",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1447,7 +1519,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/identical",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/identical"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/identical",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1504,7 +1582,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/compare",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/compare"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/compare",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1614,7 +1698,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "ContainerOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+            }
+          ]
         }
       ]
     }

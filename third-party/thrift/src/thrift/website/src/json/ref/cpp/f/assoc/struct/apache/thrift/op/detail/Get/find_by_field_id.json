@@ -59,5 +59,11 @@
   "brief_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returning the first 'true' result produced. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id",
-  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id"
+  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id",
+  "parent_links": [
+    {
+      "text_html": "Get",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+    }
+  ]
 }

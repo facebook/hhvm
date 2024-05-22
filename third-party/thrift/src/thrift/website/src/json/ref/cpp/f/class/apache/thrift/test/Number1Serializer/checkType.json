@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType",
-  "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType"
+  "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType",
+  "parent_links": [
+    {
+      "text_html": "Number1Serializer",
+      "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+    }
+  ]
 }

@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange",
+  "parent_links": [
+    {
+      "text_html": "MapEquality",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEquality"
+    }
+  ]
 }

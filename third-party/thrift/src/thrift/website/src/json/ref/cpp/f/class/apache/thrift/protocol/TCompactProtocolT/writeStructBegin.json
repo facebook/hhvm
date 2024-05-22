@@ -52,5 +52,11 @@
   "brief_html": "<p>Write a struct begin. This doesn't actually put anything on the wire. We use it as an opportunity to put special placeholder markers on the field stack so we can get the field id deltas correct. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

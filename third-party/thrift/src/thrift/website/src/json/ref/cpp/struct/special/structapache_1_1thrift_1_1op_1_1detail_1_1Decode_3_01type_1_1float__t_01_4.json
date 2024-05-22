@@ -40,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "757",
+        "line": "762",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "757",
-        "bodyend": "759"
+        "bodystart": "762",
+        "bodyend": "764"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, float&amp; f) const",
@@ -60,11 +60,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "755",
+    "line": "760",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "755",
-    "bodyend": "760"
+    "bodystart": "760",
+    "bodyend": "765"
   },
   "namespacednames_html": [
     "apache",
@@ -119,11 +119,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "757",
+                "line": "762",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "757",
-                "bodyend": "759"
+                "bodystart": "762",
+                "bodyend": "764"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, float&amp; f) const",
@@ -145,7 +145,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1float__t_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1float__t_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1float__t_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Decode&lt; type::float_t &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1float__t_01_4"
+            }
+          ]
         }
       ]
     }

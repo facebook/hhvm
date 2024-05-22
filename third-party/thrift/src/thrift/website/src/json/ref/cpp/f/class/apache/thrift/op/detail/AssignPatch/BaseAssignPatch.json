@@ -83,5 +83,11 @@
   "brief_html": "Constructs the BaseAssignPatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BaseAssignPatch",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BaseAssignPatch"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BaseAssignPatch",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
 }

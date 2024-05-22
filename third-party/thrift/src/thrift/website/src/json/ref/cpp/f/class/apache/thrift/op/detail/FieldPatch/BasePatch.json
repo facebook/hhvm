@@ -83,5 +83,11 @@
   "brief_html": "Constructs the BasePatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch",
+  "parent_links": [
+    {
+      "text_html": "FieldPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+    }
+  ]
 }

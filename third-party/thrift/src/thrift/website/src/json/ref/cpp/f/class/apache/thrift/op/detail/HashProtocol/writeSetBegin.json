@@ -52,5 +52,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin",
+  "parent_links": [
+    {
+      "text_html": "HashProtocol",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+    }
+  ]
 }

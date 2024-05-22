@@ -54,5 +54,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultCompareWith/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultCompareWith/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultCompareWith/operator.call",
+  "parent_links": [
+    {
+      "text_html": "DefaultCompareWith",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/DefaultCompareWith"
+    }
+  ]
 }

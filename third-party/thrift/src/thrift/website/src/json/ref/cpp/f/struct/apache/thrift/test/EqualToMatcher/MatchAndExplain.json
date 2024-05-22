@@ -57,5 +57,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/test/EqualToMatcher/MatchAndExplain",
-  "refid": "/ref/cpp/f/struct/apache/thrift/test/EqualToMatcher/MatchAndExplain"
+  "refid": "/ref/cpp/f/struct/apache/thrift/test/EqualToMatcher/MatchAndExplain",
+  "parent_links": [
+    {
+      "text_html": "EqualToMatcher",
+      "href": "/ref/cpp/struct/apache/thrift/test/EqualToMatcher"
+    }
+  ]
 }

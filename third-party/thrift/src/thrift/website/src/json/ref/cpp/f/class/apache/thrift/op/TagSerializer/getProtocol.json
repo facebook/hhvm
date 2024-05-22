@@ -58,5 +58,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol",
+  "parent_links": [
+    {
+      "text_html": "TagSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+    }
+  ]
 }

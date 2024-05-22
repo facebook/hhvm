@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "187",
+        "line": "194",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "187",
-        "bodyend": "197"
+        "bodystart": "194",
+        "bodyend": "204"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(bool);\n  void clear();\n  void invert();\n}\n</pre> For example: <pre>auto patch = BoolPatch::createClear();\npatch = !patch;\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.invert(); \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

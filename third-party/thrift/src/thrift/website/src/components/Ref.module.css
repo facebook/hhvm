@@ -32,6 +32,11 @@
   border-radius: 0.3em;
 }
 
+.refhighlight {
+  background-color: rgba(138, 222, 235, 0.2);
+  border-radius: 0.3em;
+}
+
 ul li p {
   margin: 0;
 }

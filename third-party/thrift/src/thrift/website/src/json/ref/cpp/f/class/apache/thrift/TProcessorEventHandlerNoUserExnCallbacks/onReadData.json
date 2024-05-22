@@ -57,5 +57,11 @@
   "brief_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>\n",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+    }
+  ]
 }

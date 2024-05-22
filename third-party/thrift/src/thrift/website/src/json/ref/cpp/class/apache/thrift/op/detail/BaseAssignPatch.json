@@ -765,7 +765,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -809,7 +815,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -896,7 +908,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -940,7 +958,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1268,7 +1292,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1454,7 +1484,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1741,7 +1777,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1803,7 +1845,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1850,7 +1898,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1904,7 +1958,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1965,7 +2025,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2115,7 +2181,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2162,7 +2234,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseAssignPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "BaseAssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch"
+            }
+          ]
         }
       ]
     }

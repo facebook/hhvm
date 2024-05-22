@@ -106,5 +106,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ContainerOp/partialCmp",
+  "parent_links": [
+    {
+      "text_html": "ContainerOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp"
+    }
+  ]
 }

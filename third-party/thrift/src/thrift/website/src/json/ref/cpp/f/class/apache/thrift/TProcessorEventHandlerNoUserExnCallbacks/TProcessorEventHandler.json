@@ -44,5 +44,11 @@
   "brief_html": "Constructs the TProcessorEventHandler.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+    }
+  ]
 }

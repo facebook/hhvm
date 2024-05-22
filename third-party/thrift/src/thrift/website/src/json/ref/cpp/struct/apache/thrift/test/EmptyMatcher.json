@@ -220,7 +220,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain",
+          "parent_links": [
+            {
+              "text_html": "EmptyMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/EmptyMatcher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -273,7 +279,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeTo",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeTo"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeTo",
+          "parent_links": [
+            {
+              "text_html": "EmptyMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/EmptyMatcher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -326,7 +338,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeNegationTo",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeNegationTo"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/DescribeNegationTo",
+          "parent_links": [
+            {
+              "text_html": "EmptyMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/EmptyMatcher"
+            }
+          ]
         }
       ]
     }

@@ -17,11 +17,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "156",
+        "line": "158",
         "column": "27",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "156",
-        "bodyend": "166"
+        "bodystart": "158",
+        "bodyend": "168"
       },
       "definition": {
         "simple_html": "FOLLY_EXPORT const auto&amp; operator()() const",
@@ -43,5 +43,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/CreateDefault/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/CreateDefault/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/CreateDefault/operator.call",
+  "parent_links": [
+    {
+      "text_html": "CreateDefault",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/CreateDefault"
+    }
+  ]
 }

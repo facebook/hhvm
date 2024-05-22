@@ -402,5 +402,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign",
+  "parent_links": [
+    {
+      "text_html": "StringOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+    }
+  ]
 }

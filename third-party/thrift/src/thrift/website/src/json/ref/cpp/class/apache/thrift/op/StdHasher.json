@@ -398,7 +398,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/getResult",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/getResult"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/getResult",
+          "parent_links": [
+            {
+              "text_html": "StdHasher",
+              "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -619,7 +625,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine",
+          "parent_links": [
+            {
+              "text_html": "StdHasher",
+              "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -666,7 +678,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/finalize",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/finalize"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/finalize",
+          "parent_links": [
+            {
+              "text_html": "StdHasher",
+              "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -719,7 +737,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt",
+          "parent_links": [
+            {
+              "text_html": "StdHasher",
+              "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+            }
+          ]
         }
       ]
     }

@@ -50,11 +50,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "1066",
+        "line": "1086",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "1066",
-        "bodyend": "1085"
+        "bodystart": "1086",
+        "bodyend": "1105"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U&gt;\nvoid operator()(Protocol&amp; prot, U&amp; m) const",
@@ -70,11 +70,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "1064",
+    "line": "1084",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "1064",
-    "bodyend": "1086"
+    "bodystart": "1084",
+    "bodyend": "1106"
   },
   "namespacednames_html": [
     "apache",
@@ -132,11 +132,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "1066",
+                "line": "1086",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "1066",
-                "bodyend": "1085"
+                "bodystart": "1086",
+                "bodyend": "1105"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U&gt;\nvoid operator()(Protocol&amp; prot, U&amp; m) const",
@@ -158,7 +158,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4"
+            }
+          ]
         }
       ]
     }

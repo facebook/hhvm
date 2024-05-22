@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n}\n</pre> For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.clear();\npatch.push_front(30);\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.prepend({30}); \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "ListPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+    }
+  ]
 }

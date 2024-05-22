@@ -1505,7 +1505,13 @@
           "brief_html": "Constructs the optional_field_ref.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1552,7 +1558,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1652,7 +1664,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1711,7 +1729,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/copy_from",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/copy_from"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/copy_from",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1770,7 +1794,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1874,7 +1904,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/from_optional",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/from_optional"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/from_optional",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1921,7 +1957,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/to_optional",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/to_optional"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/to_optional",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1969,7 +2011,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/has_value",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/has_value"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/has_value",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2017,7 +2065,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.cast.bool",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.cast.bool"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.cast.bool",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2065,7 +2119,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2112,7 +2172,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2171,7 +2237,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_or",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_or"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_or",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2218,7 +2290,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_unchecked",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_unchecked"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/value_unchecked",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2265,7 +2343,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.mul",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.mul"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.mul",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2390,7 +2474,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.arrow",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.arrow"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.arrow",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2438,7 +2528,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/ensure",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2551,7 +2647,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/emplace",
-          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/emplace"
+          "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/emplace",
+          "parent_links": [
+            {
+              "text_html": "optional_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+            }
+          ]
         }
       ]
     }

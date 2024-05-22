@@ -120,5 +120,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put",
+  "parent_links": [
+    {
+      "text_html": "MapOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+    }
+  ]
 }

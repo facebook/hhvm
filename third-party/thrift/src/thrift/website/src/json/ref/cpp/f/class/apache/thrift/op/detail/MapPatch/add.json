@@ -58,5 +58,11 @@
   "brief_html": "<p>Inserts entries. Ignore entries that already exist. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
+  "parent_links": [
+    {
+      "text_html": "MapPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+    }
+  ]
 }

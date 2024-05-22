@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "createFromObject",
+  "compoundname_html": "apache::thrift::op::detail::AssignPatch::createFromObject",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ab8c8b911261fd9d7a9eac81b2a0ff739",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::createFromObject",
+      "argsstring_html": "(protocol::Object v)",
+      "name_html": "createFromObject",
+      "param": [
+        {
+          "type_html": "protocol::Object",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "137",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "137",
+        "bodyend": "144"
+      },
+      "definition": {
+        "simple_html": "void createFromObject(protocol::Object v)",
+        "simple_raw": "void createFromObject(protocol::Object v)",
+        "detailed_html": "private inline void createFromObject(protocol::Object v)",
+        "detailed_raw": "private inline void createFromObject(protocol::Object v)",
+        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::createFromObject",
+        "original_argsstring_html": "(protocol::Object v)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/createFromObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/createFromObject",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
+      "compoundname_html": "apache::thrift::op::detail::AssignPatch::createFromObject"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AssignPatch/createFromObject",
+  "minprot": "private",
+  "displayname_html": "createFromObject",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/createFromObject",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/createFromObject",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
+}

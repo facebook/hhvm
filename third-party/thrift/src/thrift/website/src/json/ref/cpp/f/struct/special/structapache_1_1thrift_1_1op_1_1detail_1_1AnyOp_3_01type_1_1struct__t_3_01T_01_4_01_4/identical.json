@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1struct__t_3_01T_01_4_01_4/identical",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1struct__t_3_01T_01_4_01_4/identical"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1struct__t_3_01T_01_4_01_4/identical",
+  "parent_links": [
+    {
+      "text_html": "AnyOp&lt; type::struct_t&lt; T &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1struct__t_3_01T_01_4_01_4"
+    }
+  ]
 }

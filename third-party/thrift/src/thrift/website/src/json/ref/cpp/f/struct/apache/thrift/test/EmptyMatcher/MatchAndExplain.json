@@ -57,5 +57,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain",
-  "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain"
+  "refid": "/ref/cpp/f/struct/apache/thrift/test/EmptyMatcher/MatchAndExplain",
+  "parent_links": [
+    {
+      "text_html": "EmptyMatcher",
+      "href": "/ref/cpp/struct/apache/thrift/test/EmptyMatcher"
+    }
+  ]
 }

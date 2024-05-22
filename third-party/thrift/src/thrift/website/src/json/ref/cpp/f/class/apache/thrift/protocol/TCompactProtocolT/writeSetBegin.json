@@ -56,5 +56,11 @@
   "brief_html": "<p>Write a set header. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

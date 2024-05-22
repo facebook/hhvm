@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "932",
+        "line": "952",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "932",
-        "bodyend": "955"
+        "bodystart": "952",
+        "bodyend": "975"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nvoid operator()(Protocol&amp; prot, SetType&amp; set) const",
@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Decode&lt; type::set&lt; Tag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4"
+    }
+  ]
 }

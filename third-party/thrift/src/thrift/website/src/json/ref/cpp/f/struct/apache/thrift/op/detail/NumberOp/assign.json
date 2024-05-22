@@ -96,5 +96,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign",
+  "parent_links": [
+    {
+      "text_html": "NumberOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+    }
+  ]
 }

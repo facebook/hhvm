@@ -86,5 +86,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove",
+  "parent_links": [
+    {
+      "text_html": "BaseEnsurePatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+    }
+  ]
 }

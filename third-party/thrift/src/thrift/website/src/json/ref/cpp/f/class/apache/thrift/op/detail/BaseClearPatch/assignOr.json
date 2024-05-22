@@ -50,5 +50,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/assignOr",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/assignOr"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/assignOr",
+  "parent_links": [
+    {
+      "text_html": "BaseClearPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseClearPatch"
+    }
+  ]
 }

@@ -54,5 +54,11 @@
   "brief_html": "<p>Expected to free resources associated with a context. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandler",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+    }
+  ]
 }

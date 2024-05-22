@@ -52,5 +52,11 @@
   "brief_html": "<p>Write an i64 as a varint. Results in 1-10 bytes on the wire. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

@@ -23,7 +23,7 @@
   ],
   "types": [
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a7f69bc29bd7d6d4bd328440e248c7327",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1a6f4db1b818571070fc78ee56c855a732",
       "prot": "private",
       "type_html": "std::bool_constant&lt;\n    <code>detail::is_boxed_value_ptr_v</code>&lt;folly::remove_cvref_t&lt;T&gt;&gt; ||\n    detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt;&gt;",
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::is_cpp_ref_or_boxed =  std::bool_constant&lt; detail::is_boxed_value_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt; || detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt;&gt;",
@@ -1148,7 +1148,13 @@
           "brief_html": "Constructs the union_field_ref.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1212,7 +1218,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1259,7 +1271,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/has_value",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/has_value"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/has_value",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1306,7 +1324,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.cast.bool",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.cast.bool"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.cast.bool",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1353,7 +1377,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/value",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/value"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/value",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1412,7 +1442,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/value_or",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/value_or"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/value_or",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1459,7 +1495,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.mul",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.mul"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.mul",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1584,7 +1626,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.arrow",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.arrow"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/operator.arrow",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1631,7 +1679,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/ensure",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1744,7 +1798,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1791,7 +1851,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/throw_if_unset",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/throw_if_unset"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/throw_if_unset",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1914,7 +1980,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/get_value",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/get_value"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/get_value",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2026,7 +2098,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl",
-          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl"
+          "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+            }
+          ]
         }
       ]
     }

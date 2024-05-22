@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "594",
+        "line": "599",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "594",
-        "bodyend": "603"
+        "bodystart": "599",
+        "bodyend": "608"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ListEncode/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListEncode/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListEncode/operator.call",
+  "parent_links": [
+    {
+      "text_html": "ListEncode",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ListEncode"
+    }
+  ]
 }

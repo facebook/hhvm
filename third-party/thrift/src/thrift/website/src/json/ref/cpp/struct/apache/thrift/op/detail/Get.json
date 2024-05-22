@@ -1112,7 +1112,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Get/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Get/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Get/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         }
       ]
     }
@@ -1183,7 +1189,13 @@
           "brief_html": "<p>Calls the given function with ordinal&lt;1&gt; to ordinal&lt;N&gt;. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal",
-          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal"
+          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1294,7 +1306,13 @@
           "brief_html": "<p>Calls the given function with with ordinal&lt;1&gt; to ordinal&lt;N&gt;, returing the first 'true' result produced. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_ordinal",
-          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_ordinal"
+          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_ordinal",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1357,7 +1375,13 @@
           "brief_html": "<p>Calls the given function with each field_id&lt;{id}&gt; in Thrift class. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_field_id",
-          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_field_id"
+          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_field_id",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1420,7 +1444,13 @@
           "brief_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returning the first 'true' result produced. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id",
-          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id"
+          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/find_by_field_id",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1483,7 +1513,13 @@
           "brief_html": "<p>It calls the given function with each folly::tag&lt;thrift::ident::*&gt;{} in Thrift class. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident",
-          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident"
+          "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident",
+          "parent_links": [
+            {
+              "text_html": "Get",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+            }
+          ]
         }
       ]
     }

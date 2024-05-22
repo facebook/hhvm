@@ -98,5 +98,11 @@
   "brief_html": "<p>Returns the proper patch object for the given field. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+  "parent_links": [
+    {
+      "text_html": "UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+    }
+  ]
 }

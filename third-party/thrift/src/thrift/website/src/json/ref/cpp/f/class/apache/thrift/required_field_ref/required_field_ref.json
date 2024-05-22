@@ -101,5 +101,11 @@
   "brief_html": "Constructs the required_field_ref.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/required_field_ref/required_field_ref",
-  "refid": "/ref/cpp/f/class/apache/thrift/required_field_ref/required_field_ref"
+  "refid": "/ref/cpp/f/class/apache/thrift/required_field_ref/required_field_ref",
+  "parent_links": [
+    {
+      "text_html": "required_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/required_field_ref"
+    }
+  ]
 }

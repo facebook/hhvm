@@ -514,7 +514,13 @@
           "brief_html": "Constructs the BitRef.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef",
+          "parent_links": [
+            {
+              "text_html": "BitRef",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitRef"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -567,7 +573,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "BitRef",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitRef"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -614,7 +626,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.cast.bool",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.cast.bool"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.cast.bool",
+          "parent_links": [
+            {
+              "text_html": "BitRef",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitRef"
+            }
+          ]
         }
       ]
     }

@@ -55,5 +55,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Clear&lt; Id, type::if_id&lt; Id &gt;, type::if_not_thrift_type_tag&lt; Id &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe"
+    }
+  ]
 }

@@ -40,5 +40,11 @@
   "brief_html": "Destructs the BaseClearPatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor",
+  "parent_links": [
+    {
+      "text_html": "BinaryPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+    }
+  ]
 }

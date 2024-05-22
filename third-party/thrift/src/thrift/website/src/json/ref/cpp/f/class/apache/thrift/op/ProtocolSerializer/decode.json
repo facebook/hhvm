@@ -1156,5 +1156,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/decode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/decode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/decode",
+  "parent_links": [
+    {
+      "text_html": "ProtocolSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/ProtocolSerializer"
+    }
+  ]
 }

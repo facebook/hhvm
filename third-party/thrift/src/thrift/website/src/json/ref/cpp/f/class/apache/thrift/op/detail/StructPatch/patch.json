@@ -51,5 +51,11 @@
   "brief_html": "<p>Ensures the given field is initalized, and return the associated patch object. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patch",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patch"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patch",
+  "parent_links": [
+    {
+      "text_html": "StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+    }
+  ]
 }

@@ -24,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "432",
+        "line": "440",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "432",
-        "bodyend": "435"
+        "bodystart": "440",
+        "bodyend": "443"
       },
       "definition": {
         "simple_html": "constexpr void operator()(T&amp; val) const",
@@ -50,5 +50,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4"
+    }
+  ]
 }

@@ -26,11 +26,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "171",
+    "line": "173",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "171",
-    "bodyend": "171"
+    "bodystart": "173",
+    "bodyend": "173"
   },
   "namespacednames_html": [
     "apache",
@@ -72,11 +72,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "156",
+                "line": "158",
                 "column": "27",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "156",
-                "bodyend": "166"
+                "bodystart": "158",
+                "bodyend": "168"
               },
               "definition": {
                 "simple_html": "FOLLY_EXPORT const auto&amp; operator()() const",
@@ -98,7 +98,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "GetDefault&lt; type::struct_t&lt; T &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1struct__t_3_01T_01_4_01_4"
+            }
+          ]
         }
       ]
     }

@@ -60,5 +60,11 @@
   "brief_html": "<p>Write a field header containing the field id and field type. If the difference between the current field id and the last one is small (&lt; 15), then the field id will be encoded in the 4 MSB as a delta. Otherwise, the field id will follow the type header as a zigzag varint. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

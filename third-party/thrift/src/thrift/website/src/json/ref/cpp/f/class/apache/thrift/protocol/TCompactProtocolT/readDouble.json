@@ -52,5 +52,11 @@
   "brief_html": "<p>No magic here - just read a double off the wire. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

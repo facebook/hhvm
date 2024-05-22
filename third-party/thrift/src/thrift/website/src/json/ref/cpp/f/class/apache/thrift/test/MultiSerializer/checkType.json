@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType",
-  "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType"
+  "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType",
+  "parent_links": [
+    {
+      "text_html": "MultiSerializer",
+      "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+    }
+  ]
 }

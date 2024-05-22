@@ -96,5 +96,11 @@
   "brief_html": "<p>Write a string to the wire with a varint size preceding. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

@@ -214,5 +214,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/AnyOp/concat",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/AnyOp/concat"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/AnyOp/concat",
+  "parent_links": [
+    {
+      "text_html": "AnyOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/AnyOp"
+    }
+  ]
 }

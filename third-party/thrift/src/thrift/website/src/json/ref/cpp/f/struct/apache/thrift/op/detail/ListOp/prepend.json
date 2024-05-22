@@ -102,5 +102,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/prepend",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/prepend"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/prepend",
+  "parent_links": [
+    {
+      "text_html": "ListOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ListOp"
+    }
+  ]
 }

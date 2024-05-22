@@ -58,5 +58,11 @@
   "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/createAssign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/createAssign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/createAssign",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

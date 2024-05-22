@@ -51,11 +51,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "893",
+        "line": "913",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "893",
-        "bodyend": "913"
+        "bodystart": "913",
+        "bodyend": "933"
       },
       "definition": {
         "simple_html": "template &lt;typename Set, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
@@ -104,11 +104,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "919",
+        "line": "939",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "919",
-        "bodyend": "928"
+        "bodystart": "939",
+        "bodyend": "948"
       },
       "definition": {
         "simple_html": "template &lt;typename Set, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
@@ -153,11 +153,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "932",
+        "line": "952",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "932",
-        "bodyend": "955"
+        "bodystart": "952",
+        "bodyend": "975"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nvoid operator()(Protocol&amp; prot, SetType&amp; set) const",
@@ -173,11 +173,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "887",
+    "line": "907",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "887",
-    "bodyend": "956"
+    "bodystart": "907",
+    "bodyend": "976"
   },
   "namespacednames_html": [
     "apache",
@@ -239,11 +239,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "893",
+                "line": "913",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "893",
-                "bodyend": "913"
+                "bodystart": "913",
+                "bodyend": "933"
               },
               "definition": {
                 "simple_html": "template &lt;typename Set, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
@@ -294,11 +294,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "919",
+                "line": "939",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "919",
-                "bodyend": "928"
+                "bodystart": "939",
+                "bodyend": "948"
               },
               "definition": {
                 "simple_html": "template &lt;typename Set, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
@@ -320,7 +320,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
+          "parent_links": [
+            {
+              "text_html": "Decode&lt; type::set&lt; Tag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -359,11 +365,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "932",
+                "line": "952",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "932",
-                "bodyend": "955"
+                "bodystart": "952",
+                "bodyend": "975"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nvoid operator()(Protocol&amp; prot, SetType&amp; set) const",
@@ -385,7 +391,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Decode&lt; type::set&lt; Tag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4"
+            }
+          ]
         }
       ]
     }

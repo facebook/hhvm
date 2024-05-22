@@ -40,5 +40,11 @@
   "brief_html": "Destructs the BaseAssignPatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/BaseAssignPatch.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/BaseAssignPatch.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/BaseAssignPatch.dtor",
+  "parent_links": [
+    {
+      "text_html": "BaseStringPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseStringPatch"
+    }
+  ]
 }

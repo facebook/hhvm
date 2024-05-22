@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName",
+  "parent_links": [
+    {
+      "text_html": "StructuredOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+    }
+  ]
 }

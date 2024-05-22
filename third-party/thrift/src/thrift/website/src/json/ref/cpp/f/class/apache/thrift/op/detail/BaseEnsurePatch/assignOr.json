@@ -50,5 +50,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr",
+  "parent_links": [
+    {
+      "text_html": "BaseEnsurePatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+    }
+  ]
 }

@@ -209,7 +209,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/add",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/add"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/add",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -272,7 +278,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/get",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/get"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/get",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -339,7 +351,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/put",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/put"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/put",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -504,7 +522,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/next",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/next"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/next",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -604,7 +628,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/find",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/find"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/find",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -852,7 +882,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ref",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ref"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ref",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1157,7 +1193,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ret",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ret"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/ret",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1210,7 +1252,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/size",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/size"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/size",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1267,7 +1315,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/iter",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/iter"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/iter",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1320,7 +1374,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/cref",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/cref"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/cref",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1373,7 +1433,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/delete_",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/delete_"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/delete_",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1430,7 +1496,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/make",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/make"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/make",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1483,7 +1555,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/empty",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/empty"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/empty",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1536,7 +1614,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/clear",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/clear"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/clear",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1593,7 +1677,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/assign",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/assign"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/assign",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1650,7 +1740,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/identical",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/identical"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/identical",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1707,7 +1803,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/compare",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/compare"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/compare",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1817,7 +1919,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/partialCmp",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/partialCmp"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4"
+            }
+          ]
         }
       ]
     }

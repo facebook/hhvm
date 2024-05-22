@@ -83,5 +83,11 @@
   "brief_html": "Constructs the BaseAssignPatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch",
+  "parent_links": [
+    {
+      "text_html": "BinaryPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+    }
+  ]
 }

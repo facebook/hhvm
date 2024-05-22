@@ -43,5 +43,11 @@
   "brief_html": "Destructs the TCompactProtocolFactoryT.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolFactoryT/TCompactProtocolFactoryT.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolFactoryT/TCompactProtocolFactoryT.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolFactoryT/TCompactProtocolFactoryT.dtor",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolFactoryT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolFactoryT"
+    }
+  ]
 }

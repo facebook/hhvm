@@ -17,11 +17,11 @@
       "name_html": "invert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "162",
+        "line": "169",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "162",
-        "bodyend": "165"
+        "bodystart": "169",
+        "bodyend": "172"
       },
       "definition": {
         "simple_html": "void invert()",
@@ -46,5 +46,11 @@
   "brief_html": "<p>Inverts the bool. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/invert",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/invert"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/invert",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

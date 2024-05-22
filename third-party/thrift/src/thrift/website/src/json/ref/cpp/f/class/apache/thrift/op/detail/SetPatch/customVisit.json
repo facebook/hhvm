@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Set&amp;);\n  void clear();\n  void remove(const Set&amp;);\n  void add(const Set&amp;);\n}\n</pre> For example: <pre>SetPatch&lt;SetI32Patch&gt; patch;\npatch.remove({20, 30});\npatch.add({10, 20});\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({10, 20});\nv.remove({30}); \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "SetPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/SetPatch"
+    }
+  ]
 }

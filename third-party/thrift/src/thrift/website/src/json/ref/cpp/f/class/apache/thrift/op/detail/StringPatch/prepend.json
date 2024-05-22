@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "432",
+        "line": "439",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "432",
-        "bodyend": "435"
+        "bodystart": "439",
+        "bodyend": "442"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Prepends a string. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/prepend",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/prepend"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/prepend",
+  "parent_links": [
+    {
+      "text_html": "StringPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StringPatch"
+    }
+  ]
 }

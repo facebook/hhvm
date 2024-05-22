@@ -46,5 +46,11 @@
   "brief_html": "<p>These methods are called by structs, but don't actually have any wired output or purpose </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

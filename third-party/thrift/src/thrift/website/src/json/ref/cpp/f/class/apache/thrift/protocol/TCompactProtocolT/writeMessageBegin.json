@@ -60,5 +60,11 @@
   "brief_html": "<p>Writing functions </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

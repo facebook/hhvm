@@ -195,11 +195,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "479",
+        "line": "486",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "479",
-        "bodyend": "489"
+        "bodystart": "486",
+        "bodyend": "496"
       },
       "definition": {
         "simple_html": "void assign(std::string s)",
@@ -221,5 +221,11 @@
   "brief_html": "<p>Replaces the existing value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign",
+  "parent_links": [
+    {
+      "text_html": "BinaryPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+    }
+  ]
 }

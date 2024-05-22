@@ -43,5 +43,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/throw_if_unset",
+  "parent_links": [
+    {
+      "text_html": "optional_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+    }
+  ]
 }

@@ -247,5 +247,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty",
+  "parent_links": [
+    {
+      "text_html": "IsEmpty",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/IsEmpty"
+    }
+  ]
 }

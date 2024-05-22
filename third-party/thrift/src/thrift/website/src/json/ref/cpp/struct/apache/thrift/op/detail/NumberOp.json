@@ -524,7 +524,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/compare",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/compare"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/compare",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -624,7 +630,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/add",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/add"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/add",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -724,7 +736,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/assign",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -894,7 +912,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ref",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -947,7 +971,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/cref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/cref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/cref",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1058,7 +1088,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ret",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ret"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/ret",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1111,7 +1147,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/delete_",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/delete_"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/delete_",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1168,7 +1210,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/make",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/make"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/make",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1221,7 +1269,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/empty",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1274,7 +1328,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/clear",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1331,7 +1391,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/identical",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/identical"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/identical",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1441,7 +1507,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/partialCmp",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/partialCmp"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/NumberOp/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "NumberOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp"
+            }
+          ]
         }
       ]
     }

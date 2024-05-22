@@ -327,5 +327,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode",
+  "parent_links": [
+    {
+      "text_html": "Serializer",
+      "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+    }
+  ]
 }

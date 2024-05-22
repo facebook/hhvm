@@ -703,7 +703,13 @@
           "brief_html": "Destructs the Serializer.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/Serializer.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/Serializer.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/Serializer.dtor",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1017,7 +1023,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1747,7 +1759,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1794,7 +1812,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/derived",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/derived"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/derived",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1856,7 +1880,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/getProtocol",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1913,7 +1943,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType",
+          "parent_links": [
+            {
+              "text_html": "TagSerializer",
+              "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+            }
+          ]
         }
       ]
     }

@@ -1063,7 +1063,13 @@
           "brief_html": "Constructs the field_ref.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/field_ref",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/field_ref"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/field_ref",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1163,7 +1169,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1225,7 +1237,13 @@
           "brief_html": "<p>Assignment from <code>field_ref</code> is intentionally not provided to prevent potential confusion between two possible behaviors, copying and reference rebinding. The copy_from method is provided instead. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1273,7 +1291,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/has_value",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/has_value"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/has_value",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1324,7 +1348,13 @@
           "brief_html": "<p>Returns true iff the field is set. <code>field_ref</code> doesn't provide conversion to bool to avoid confusion between checking if the field is set and getting the field's value, particularly for bool fields. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/is_set",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/is_set"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/is_set",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1375,7 +1405,13 @@
           "brief_html": "<p>Returns a reference to the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/value",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/value"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/value",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1426,7 +1462,13 @@
           "brief_html": "<p>Returns a reference to the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.mul",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.mul"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.mul",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1560,7 +1602,13 @@
           "brief_html": "<p>Returns a pointer to the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.arrow",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.arrow"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.arrow",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1608,7 +1656,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/ensure",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1669,7 +1723,13 @@
           "brief_html": "<p>Forward operator[] to the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1788,7 +1848,13 @@
           "brief_html": "<p>Constructs the value in-place. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/field_ref/emplace",
-          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/emplace"
+          "refid": "/ref/cpp/f/class/apache/thrift/field_ref/emplace",
+          "parent_links": [
+            {
+              "text_html": "field_ref",
+              "href": "/ref/cpp/class/apache/thrift/field_ref"
+            }
+          ]
         }
       ]
     }

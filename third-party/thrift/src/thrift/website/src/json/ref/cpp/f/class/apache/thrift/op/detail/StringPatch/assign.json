@@ -182,5 +182,11 @@
   "brief_html": "<p>Replaces the existing value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StringPatch/assign",
+  "parent_links": [
+    {
+      "text_html": "StringPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StringPatch"
+    }
+  ]
 }

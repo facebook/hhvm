@@ -101,5 +101,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d"
+    }
+  ]
 }

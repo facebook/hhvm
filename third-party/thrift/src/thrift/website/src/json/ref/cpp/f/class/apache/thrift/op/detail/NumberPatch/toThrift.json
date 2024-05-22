@@ -146,5 +146,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

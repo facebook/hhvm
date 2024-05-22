@@ -43,5 +43,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/toObject",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/toObject"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/toObject",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
 }

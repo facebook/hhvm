@@ -223,7 +223,13 @@
           "brief_html": "Destructs the Serializer.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -322,7 +328,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/getProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/getProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/getProtocol",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -678,7 +690,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/encode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/encode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/encode",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1451,7 +1469,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/decode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/decode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/decode",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1498,7 +1522,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/derived",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/derived"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/derived",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1555,7 +1585,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/checkType",
+          "parent_links": [
+            {
+              "text_html": "Number1Serializer",
+              "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+            }
+          ]
         }
       ]
     }

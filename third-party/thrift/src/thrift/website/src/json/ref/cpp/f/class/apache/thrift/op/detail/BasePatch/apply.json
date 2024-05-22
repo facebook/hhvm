@@ -151,5 +151,11 @@
   "brief_html": "<p>Applies patches to a Thrift value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BasePatch/apply",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BasePatch/apply"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BasePatch/apply",
+  "parent_links": [
+    {
+      "text_html": "BasePatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BasePatch"
+    }
+  ]
 }

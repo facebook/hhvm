@@ -205,11 +205,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "270",
+        "line": "278",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "270",
-        "bodyend": "272"
+        "bodystart": "278",
+        "bodyend": "280"
       },
       "definition": {
         "simple_html": "constexpr void operator()(type::native_type&lt;Tag&gt;&amp; value) const",
@@ -245,11 +245,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "432",
+        "line": "440",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "432",
-        "bodyend": "435"
+        "bodystart": "440",
+        "bodyend": "443"
       },
       "definition": {
         "simple_html": "constexpr void operator()(T&amp; val) const",
@@ -271,5 +271,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Clear",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Clear"
+    }
+  ]
 }

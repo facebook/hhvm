@@ -52,5 +52,11 @@
   "brief_html": "<p>Write a float to the wire as 4 bytes. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

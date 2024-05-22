@@ -81,5 +81,11 @@
   "brief_html": "<p>Returns the reference to the Thrift patch struct. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul",
+  "parent_links": [
+    {
+      "text_html": "FieldPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+    }
+  ]
 }

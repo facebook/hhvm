@@ -1,0 +1,77 @@
+{
+  "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasksFromPatch",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::ExtractedMasksFromPatch",
+  "includes": {
+    "refid": "protocol_2Patch_8h",
+    "local": "no",
+    "text_html": "Patch.h"
+  },
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "line": "79",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "bodystart": "79",
+    "bodyend": "82"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "ExtractedMasksFromPatch"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasksFromPatch_1a7741a30bce2b80e29bd79bb01a4bc062",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "Mask",
+      "definition_html": "Mask apache::thrift::protocol::ExtractedMasksFromPatch::read",
+      "argsstring_html": "",
+      "name_html": "read",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "80",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "bodystart": "80",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasksFromPatch_1a394ac1977a89fde610f57d8ca1f02ce1",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "Mask",
+      "definition_html": "Mask apache::thrift::protocol::ExtractedMasksFromPatch::write",
+      "argsstring_html": "",
+      "name_html": "write",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "81",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "bodystart": "81",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "struct ExtractedMasksFromPatch;",
+  "declaration_html": "struct ExtractedMasksFromPatch;",
+  "description": {
+    "detailed_html": "<p>Extracted Thrift Masks from Thrift Patch. Read Thrift Mask contains fields or map elements that are need to be known to apply Thrift Patch to the target value. Write Thrift Mask contains fields or map elements that are affected by Thrift Patch. Read and write Thrift Masks are useful to gain better insight on the given Thrift Patch. For example, it is used in <code><code>protocol::applyPatchToSerializedData</code></code> to avoid full deserialization when applying Thrift Patch to serialized data in a binary blob. </p>"
+  },
+  "filepath": "struct/apache/thrift/protocol/ExtractedMasksFromPatch",
+  "href": "/ref/cpp/struct/apache/thrift/protocol/ExtractedMasksFromPatch",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

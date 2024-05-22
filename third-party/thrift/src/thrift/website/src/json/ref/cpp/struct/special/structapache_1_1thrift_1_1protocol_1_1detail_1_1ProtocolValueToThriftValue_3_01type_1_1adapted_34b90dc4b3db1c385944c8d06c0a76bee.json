@@ -1,0 +1,238 @@
+{
+  "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;",
+  "includes": {
+    "refid": "ValuePatch_8h",
+    "local": "no",
+    "text_html": "ValuePatch.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename PatchStruct"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee_1adb5b8fddc2f5f338ed3a63dd1e26a880",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(const Object &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "obj"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/AssignPatch\">op::detail::AssignPatch</a>&lt; PatchStruct &gt; &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "565",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "565",
+        "bodyend": "569"
+      },
+      "definition": {
+        "simple_html": "bool operator()(const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+        "simple_raw": "bool operator()(const Object& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+        "detailed_html": "inline bool operator()(\n    const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+        "detailed_raw": "inline bool operator()(\n    const Object& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+        "original_definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(const Object &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee_1aa16d05424aa7ab4ff64b744e0d9708ec",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(const Value &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "const Value &amp;",
+          "declname_html": "obj"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/AssignPatch\">op::detail::AssignPatch</a>&lt; PatchStruct &gt; &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "570",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "570",
+        "bodyend": "577"
+      },
+      "definition": {
+        "simple_html": "bool operator()(const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+        "simple_raw": "bool operator()(const Value& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+        "detailed_html": "inline bool operator()(\n    const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+        "detailed_raw": "inline bool operator()(\n    const Value& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+        "original_definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(const Value &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+    "line": "562",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+    "bodystart": "564",
+    "bodyend": "578"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "detail",
+    "ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template < typename PatchStruct >\nstruct ProtocolValueToThriftValue< type::adapted< InlineAdapter< op::detail::AssignPatch< PatchStruct > >, type::struct_t< PatchStruct > > >;",
+  "declaration_html": "template &lt; typename PatchStruct &gt;\nstruct ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee_1adb5b8fddc2f5f338ed3a63dd1e26a880",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(const Object &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Object &amp;",
+                  "declname_html": "obj"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/AssignPatch\">op::detail::AssignPatch</a>&lt; PatchStruct &gt; &amp;",
+                  "declname_html": "patch"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "line": "565",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "bodystart": "565",
+                "bodyend": "569"
+              },
+              "definition": {
+                "simple_html": "bool operator()(const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+                "simple_raw": "bool operator()(const Object& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+                "detailed_html": "inline bool operator()(\n    const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+                "detailed_raw": "inline bool operator()(\n    const Object& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+                "original_definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(const Object &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
+              "compoundname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee_1aa16d05424aa7ab4ff64b744e0d9708ec",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(const Value &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "const Value &amp;",
+                  "declname_html": "obj"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/AssignPatch\">op::detail::AssignPatch</a>&lt; PatchStruct &gt; &amp;",
+                  "declname_html": "patch"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "line": "570",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "bodystart": "570",
+                "bodyend": "577"
+              },
+              "definition": {
+                "simple_html": "bool operator()(const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+                "simple_raw": "bool operator()(const Value& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+                "detailed_html": "inline bool operator()(\n    const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
+                "detailed_raw": "inline bool operator()(\n    const Value& obj, op::detail::AssignPatch<PatchStruct>& patch)",
+                "original_definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(const Value &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
+              "compoundname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()"
+            }
+          ],
+          "filepath": "f/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee/operator.call",
+          "parent_links": [
+            {
+              "text_html": "ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

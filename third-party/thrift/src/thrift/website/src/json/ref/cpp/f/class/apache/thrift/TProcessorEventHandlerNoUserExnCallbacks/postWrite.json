@@ -57,5 +57,11 @@
   "brief_html": "<p>Called after writing the response. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+    }
+  ]
 }

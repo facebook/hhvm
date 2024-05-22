@@ -52,5 +52,11 @@
   "brief_html": "<p>Set this if you need backwards compatibility with an old version </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

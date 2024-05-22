@@ -778,7 +778,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/operator.call",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/IdenticalTo"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -948,7 +954,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/createHashMap",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/createHashMap"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/createHashMap",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/IdenticalTo"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1166,7 +1178,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/inRange",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/inRange"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IdenticalTo/inRange",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/IdenticalTo"
+            }
+          ]
         }
       ]
     }

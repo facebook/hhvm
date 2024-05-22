@@ -146,5 +146,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseContainerPatch/toThrift",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseContainerPatch/toThrift"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseContainerPatch/toThrift",
+  "parent_links": [
+    {
+      "text_html": "BaseContainerPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseContainerPatch"
+    }
+  ]
 }

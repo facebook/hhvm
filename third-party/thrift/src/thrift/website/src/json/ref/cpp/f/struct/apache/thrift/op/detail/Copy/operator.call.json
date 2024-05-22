@@ -409,5 +409,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Copy/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Copy/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Copy/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Copy",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Copy"
+    }
+  ]
 }

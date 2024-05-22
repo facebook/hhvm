@@ -311,5 +311,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringCompare/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringCompare/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringCompare/operator.call",
+  "parent_links": [
+    {
+      "text_html": "StringCompare",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringCompare"
+    }
+  ]
 }

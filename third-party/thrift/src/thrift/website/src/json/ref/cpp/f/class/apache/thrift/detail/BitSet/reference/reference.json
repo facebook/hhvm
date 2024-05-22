@@ -54,5 +54,11 @@
   "brief_html": "Constructs the reference.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reference/reference",
-  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reference/reference"
+  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reference/reference",
+  "parent_links": [
+    {
+      "text_html": "reference",
+      "href": "/ref/cpp/class/apache/thrift/detail/BitSet/reference"
+    }
+  ]
 }

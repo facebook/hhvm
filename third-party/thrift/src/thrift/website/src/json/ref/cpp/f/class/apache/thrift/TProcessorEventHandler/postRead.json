@@ -60,5 +60,11 @@
   "brief_html": "<p>Called between reading arguments and calling the handler. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandler",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+    }
+  ]
 }

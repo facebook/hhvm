@@ -21,7 +21,7 @@
         "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
         "bodystart": "142",
-        "bodyend": "150"
+        "bodyend": "152"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -43,5 +43,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ThriftClearDefault/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ThriftClearDefault/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ThriftClearDefault/operator.call",
+  "parent_links": [
+    {
+      "text_html": "ThriftClearDefault",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ThriftClearDefault"
+    }
+  ]
 }

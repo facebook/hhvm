@@ -46,5 +46,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "BitSet",
+      "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+    }
+  ]
 }

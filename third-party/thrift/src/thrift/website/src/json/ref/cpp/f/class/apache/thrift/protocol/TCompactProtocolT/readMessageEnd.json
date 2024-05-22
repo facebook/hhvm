@@ -43,5 +43,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

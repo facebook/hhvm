@@ -862,7 +862,13 @@
           "brief_html": "Constructs the BitSet.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/BitSet",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/BitSet"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/BitSet",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -912,7 +918,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1004,7 +1016,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.at",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.at"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/operator.at",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1084,7 +1102,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1233,7 +1257,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/get",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/get"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/get",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1382,7 +1412,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/set",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/set"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/set",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1531,7 +1567,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reset",
-          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reset"
+          "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reset",
+          "parent_links": [
+            {
+              "text_html": "BitSet",
+              "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+            }
+          ]
         }
       ]
     }

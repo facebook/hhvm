@@ -109,5 +109,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_boxed_field_ref/emplace",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_boxed_field_ref/emplace"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_boxed_field_ref/emplace",
+  "parent_links": [
+    {
+      "text_html": "optional_boxed_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_boxed_field_ref"
+    }
+  ]
 }

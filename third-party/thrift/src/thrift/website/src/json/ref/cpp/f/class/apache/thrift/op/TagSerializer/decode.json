@@ -726,5 +726,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/decode",
+  "parent_links": [
+    {
+      "text_html": "TagSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+    }
+  ]
 }

@@ -652,7 +652,13 @@
           "brief_html": "Destructs the Serializer.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/Serializer.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/Serializer.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/Serializer.dtor",
+          "parent_links": [
+            {
+              "text_html": "Serializer",
+              "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -714,7 +720,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/getProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/getProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/getProtocol",
+          "parent_links": [
+            {
+              "text_html": "Serializer",
+              "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -852,7 +864,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/encode",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/encode"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/encode",
+          "parent_links": [
+            {
+              "text_html": "Serializer",
+              "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1183,7 +1201,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/decode",
+          "parent_links": [
+            {
+              "text_html": "Serializer",
+              "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1240,7 +1264,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Serializer/checkType",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/checkType"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Serializer/checkType",
+          "parent_links": [
+            {
+              "text_html": "Serializer",
+              "href": "/ref/cpp/class/apache/thrift/op/Serializer"
+            }
+          ]
         }
       ]
     }

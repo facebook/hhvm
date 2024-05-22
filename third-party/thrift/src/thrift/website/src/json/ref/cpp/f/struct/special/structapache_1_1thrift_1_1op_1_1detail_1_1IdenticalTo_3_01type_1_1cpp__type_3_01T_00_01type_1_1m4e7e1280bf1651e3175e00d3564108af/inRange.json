@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1cpp__type_3_01T_00_01type_1_1m4e7e1280bf1651e3175e00d3564108af/inRange",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1cpp__type_3_01T_00_01type_1_1m4e7e1280bf1651e3175e00d3564108af/inRange"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1cpp__type_3_01T_00_01type_1_1m4e7e1280bf1651e3175e00d3564108af/inRange",
+  "parent_links": [
+    {
+      "text_html": "IdenticalTo&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1cpp__type_3_01T_00_01type_1_1m4e7e1280bf1651e3175e00d3564108af"
+    }
+  ]
 }

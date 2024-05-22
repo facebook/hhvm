@@ -44,5 +44,11 @@
   "brief_html": "Constructs the Sha256Hasher.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher",
+  "parent_links": [
+    {
+      "text_html": "Sha256Hasher",
+      "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+    }
+  ]
 }

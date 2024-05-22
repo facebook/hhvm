@@ -52,5 +52,11 @@
   "brief_html": "<p>Read a boolean off the wire. If this is a boolean field, the value should already have been read during readFieldBegin, so we'll just consume the pre-stored value. Otherwise, read a byte. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

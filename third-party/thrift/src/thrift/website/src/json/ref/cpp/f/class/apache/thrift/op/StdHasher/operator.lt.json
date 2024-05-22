@@ -49,5 +49,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/operator.lt",
+  "parent_links": [
+    {
+      "text_html": "StdHasher",
+      "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+    }
+  ]
 }

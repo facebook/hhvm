@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+    }
+  ]
 }

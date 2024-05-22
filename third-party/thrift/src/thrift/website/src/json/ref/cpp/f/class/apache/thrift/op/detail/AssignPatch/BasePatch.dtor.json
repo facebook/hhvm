@@ -40,5 +40,11 @@
   "brief_html": "Destructs the BasePatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BasePatch.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BasePatch.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/BasePatch.dtor",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
 }

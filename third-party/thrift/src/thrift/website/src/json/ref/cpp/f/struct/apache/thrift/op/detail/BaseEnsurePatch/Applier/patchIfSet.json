@@ -57,5 +57,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+  "parent_links": [
+    {
+      "text_html": "Applier",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+    }
+  ]
 }

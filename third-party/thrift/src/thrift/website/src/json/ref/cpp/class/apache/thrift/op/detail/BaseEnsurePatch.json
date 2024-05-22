@@ -1259,7 +1259,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1303,7 +1309,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1390,7 +1402,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1434,7 +1452,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1521,7 +1545,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1565,7 +1595,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1652,7 +1688,13 @@
           "brief_html": "Constructs the BaseEnsurePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1696,7 +1738,13 @@
           "brief_html": "Destructs the BaseEnsurePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/BaseEnsurePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1748,7 +1796,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/removeImpl",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/removeImpl"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/removeImpl",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1838,7 +1892,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/remove",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1899,7 +1959,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getRawPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getRawPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getRawPatch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2001,7 +2067,13 @@
           "brief_html": "<p>Returns the proper patch object for the given field. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchIfSet",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2471,7 +2543,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2527,7 +2605,13 @@
           "brief_html": "<p>Returns if the patch ensures the given field is set (explicitly or implicitly). </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensures",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensures"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensures",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2574,7 +2658,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/empty",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/empty"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/empty",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2672,7 +2762,13 @@
           "brief_html": "<p>Returns if the patch modifies the given field. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/modifies",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/modifies"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/modifies",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2778,7 +2874,13 @@
           "brief_html": "<p>Ensures the given field is set. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2833,7 +2935,13 @@
           "brief_html": "<p>Ensures the given field is initalized, and return the associated patch object. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patch",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2894,7 +3002,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3264,7 +3378,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/apply",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3352,7 +3472,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/clear",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3404,7 +3530,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchPrior",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchPrior"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchPrior",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3456,7 +3588,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchAfter",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchAfter"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/patchAfter",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3503,7 +3641,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3555,7 +3699,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/maybeEnsure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/maybeEnsure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/maybeEnsure",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3616,7 +3766,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getEnsure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getEnsure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/getEnsure",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3666,7 +3822,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3724,7 +3886,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3910,7 +4078,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assign",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3972,7 +4146,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4019,7 +4199,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4073,7 +4259,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4134,7 +4326,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/merge",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4284,7 +4482,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4331,7 +4535,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "BaseEnsurePatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch"
+            }
+          ]
         }
       ]
     }

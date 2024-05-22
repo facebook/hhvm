@@ -198,7 +198,13 @@
           "brief_html": "Constructs the TProcessorEventHandler.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -245,7 +251,13 @@
           "brief_html": "Destructs the TProcessorEventHandler.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/TProcessorEventHandler.dtor",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -370,7 +382,13 @@
           "brief_html": "<p>Called if the handler throws an exception.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -493,7 +511,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -543,7 +567,13 @@
           "brief_html": "<p>Returns the name of the <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/TProcessorEventHandler\">TProcessorEventHandler</a> implementation </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getName",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getName"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getName",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -606,7 +636,13 @@
           "brief_html": "<p>Called before calling other callback methods. Expected to return some sort of context object. The return value is passed to all other callbacks for that function invocation. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -661,7 +697,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -719,7 +761,13 @@
           "brief_html": "<p>Expected to free resources associated with a context. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/freeContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/freeContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/freeContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -777,7 +825,13 @@
           "brief_html": "<p>Called before reading arguments. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preRead",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preRead"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preRead",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -838,7 +892,13 @@
           "brief_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -902,7 +962,13 @@
           "brief_html": "<p>Called between reading arguments and calling the handler. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postRead",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postRead"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postRead",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -960,7 +1026,13 @@
           "brief_html": "<p>Called between calling the handler and writing the response. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preWrite",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preWrite"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/preWrite",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1021,7 +1093,13 @@
           "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1082,7 +1160,13 @@
           "brief_html": "<p>Called after writing the response. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/postWrite",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1140,7 +1224,13 @@
           "brief_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1190,7 +1280,13 @@
           "brief_html": "<p>defaults to false.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1248,7 +1344,13 @@
           "brief_html": "<p>Called if the handler throws an undeclared exception. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerError",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerError"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerError",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1308,7 +1410,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerErrorWrapped",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerErrorWrapped"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/handlerErrorWrapped",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+            }
+          ]
         }
       ]
     }

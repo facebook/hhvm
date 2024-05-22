@@ -40,5 +40,11 @@
   "brief_html": "Destructs the Serializer.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/test/Number1Serializer/Serializer.dtor",
+  "parent_links": [
+    {
+      "text_html": "Number1Serializer",
+      "href": "/ref/cpp/class/apache/thrift/test/Number1Serializer"
+    }
+  ]
 }

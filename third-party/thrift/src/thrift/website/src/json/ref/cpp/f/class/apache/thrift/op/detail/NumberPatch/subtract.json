@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "244",
+        "line": "251",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "244",
-        "bodyend": "246"
+        "bodystart": "251",
+        "bodyend": "253"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid subtract(U&amp;&amp; val)",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Decreases the value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

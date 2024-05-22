@@ -176,7 +176,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultLessThan/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultLessThan/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultLessThan/operator.call",
+          "parent_links": [
+            {
+              "text_html": "DefaultLessThan",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/DefaultLessThan"
+            }
+          ]
         }
       ]
     }

@@ -39,11 +39,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "965",
+        "line": "985",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "965",
-        "bodyend": "989"
+        "bodystart": "985",
+        "bodyend": "1009"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -94,11 +94,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "995",
+        "line": "1015",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "995",
-        "bodyend": "1006"
+        "bodystart": "1015",
+        "bodyend": "1026"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -120,5 +120,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4/decode_known_length_map",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4/decode_known_length_map"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4/decode_known_length_map",
+  "parent_links": [
+    {
+      "text_html": "Decode&lt; type::map&lt; Key, Value &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4"
+    }
+  ]
 }

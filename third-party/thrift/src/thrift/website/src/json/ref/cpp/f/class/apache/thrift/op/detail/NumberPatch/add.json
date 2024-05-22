@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "238",
+        "line": "245",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "238",
-        "bodyend": "240"
+        "bodystart": "245",
+        "bodyend": "247"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid add(U&amp;&amp; val)",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Increases the value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

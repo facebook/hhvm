@@ -217,5 +217,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/StdHasher/combine",
+  "parent_links": [
+    {
+      "text_html": "StdHasher",
+      "href": "/ref/cpp/class/apache/thrift/op/StdHasher"
+    }
+  ]
 }

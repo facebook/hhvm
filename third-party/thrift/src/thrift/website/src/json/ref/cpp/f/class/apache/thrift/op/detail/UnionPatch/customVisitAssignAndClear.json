@@ -54,5 +54,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear",
+  "parent_links": [
+    {
+      "text_html": "UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+    }
+  ]
 }

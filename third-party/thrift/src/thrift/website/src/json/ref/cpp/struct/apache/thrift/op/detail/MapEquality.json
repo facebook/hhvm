@@ -241,7 +241,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/operator.call",
+          "parent_links": [
+            {
+              "text_html": "MapEquality",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEquality"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -294,7 +300,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/createHashMap",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/createHashMap"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/createHashMap",
+          "parent_links": [
+            {
+              "text_html": "MapEquality",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEquality"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -359,7 +371,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEquality/inRange",
+          "parent_links": [
+            {
+              "text_html": "MapEquality",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEquality"
+            }
+          ]
         }
       ]
     }

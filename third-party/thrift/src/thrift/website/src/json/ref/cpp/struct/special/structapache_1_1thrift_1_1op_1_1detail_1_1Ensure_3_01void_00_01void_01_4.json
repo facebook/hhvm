@@ -152,7 +152,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Ensure&lt; void, void &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4"
+            }
+          ]
         }
       ]
     }

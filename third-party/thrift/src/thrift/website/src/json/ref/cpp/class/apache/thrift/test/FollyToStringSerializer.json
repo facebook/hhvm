@@ -775,7 +775,13 @@
           "brief_html": "Destructs the Serializer.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -874,7 +880,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/getProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/getProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/getProtocol",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1399,7 +1411,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/encode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/encode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/encode",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2559,7 +2577,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2606,7 +2630,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/derived",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/derived"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/derived",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2663,7 +2693,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/checkType",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/checkType"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/checkType",
+          "parent_links": [
+            {
+              "text_html": "FollyToStringSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+            }
+          ]
         }
       ]
     }

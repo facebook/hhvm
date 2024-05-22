@@ -395,5 +395,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

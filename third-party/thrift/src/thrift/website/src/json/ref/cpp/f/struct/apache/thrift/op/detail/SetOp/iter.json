@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/SetOp/iter",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/SetOp/iter"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/SetOp/iter",
+  "parent_links": [
+    {
+      "text_html": "SetOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/SetOp"
+    }
+  ]
 }

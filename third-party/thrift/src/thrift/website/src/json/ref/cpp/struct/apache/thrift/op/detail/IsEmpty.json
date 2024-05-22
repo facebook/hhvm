@@ -439,11 +439,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "281",
+                "line": "289",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "281",
-                "bodyend": "283"
+                "bodystart": "289",
+                "bodyend": "291"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\noperator()(const type::native_type&lt;Tag&gt;&amp; value) const",
@@ -485,11 +485,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "289",
+                "line": "297",
                 "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "289",
-                "bodyend": "291"
+                "bodystart": "297",
+                "bodyend": "299"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
@@ -531,11 +531,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "299",
+                "line": "307",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "299",
-                "bodyend": "301"
+                "bodystart": "307",
+                "bodyend": "309"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::if_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\noperator()(const type::native_type&lt;Tag&gt;&amp; value) const",
@@ -577,11 +577,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "306",
+                "line": "314",
                 "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "306",
-                "bodyend": "308"
+                "bodystart": "314",
+                "bodyend": "316"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_is_empty_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;&gt;\n    operator()(const type::native_type&lt;Tag&gt;&amp; value) const",
@@ -603,7 +603,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/operator.call",
+          "parent_links": [
+            {
+              "text_html": "IsEmpty",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/IsEmpty"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -854,7 +860,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/IsEmpty/empty",
+          "parent_links": [
+            {
+              "text_html": "IsEmpty",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/IsEmpty"
+            }
+          ]
         }
       ]
     }

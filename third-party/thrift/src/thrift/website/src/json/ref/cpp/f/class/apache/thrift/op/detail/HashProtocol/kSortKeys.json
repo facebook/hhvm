@@ -44,5 +44,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys",
+  "parent_links": [
+    {
+      "text_html": "HashProtocol",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+    }
+  ]
 }

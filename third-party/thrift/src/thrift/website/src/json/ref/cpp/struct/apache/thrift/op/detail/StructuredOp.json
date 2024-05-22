@@ -894,7 +894,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/putIf",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/putIf"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/putIf",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -962,7 +968,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/put",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/put"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/put",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1028,7 +1040,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getIf",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getIf"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getIf",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1092,7 +1110,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/get",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/get"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/get",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1149,7 +1173,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/getByName",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1202,7 +1232,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/pos",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/pos"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/pos",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1310,7 +1346,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/next",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/next"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/next",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1380,7 +1422,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensureIf",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensureIf"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensureIf",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1445,7 +1493,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensure",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensure"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ensure",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1497,7 +1551,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/size",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/size"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/size",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1667,7 +1727,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ref",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1875,7 +1941,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ret",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ret"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/ret",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1928,7 +2000,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/cref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/cref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/cref",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1981,7 +2059,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/delete_",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/delete_"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/delete_",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2038,7 +2122,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/make",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/make"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/make",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2091,7 +2181,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/empty",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2144,7 +2240,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/clear",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2201,7 +2303,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/assign",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2258,7 +2366,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/identical",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/identical"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/identical",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2315,7 +2429,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/compare",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/compare"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/compare",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2425,7 +2545,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/partialCmp",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/partialCmp"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructuredOp/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "StructuredOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructuredOp"
+            }
+          ]
         }
       ]
     }

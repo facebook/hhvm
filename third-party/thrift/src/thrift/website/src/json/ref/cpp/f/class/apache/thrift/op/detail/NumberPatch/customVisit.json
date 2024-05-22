@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "268",
+        "line": "275",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "268",
-        "bodyend": "278"
+        "bodystart": "275",
+        "bodyend": "285"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(Number);\n  void clear();\n  void add(Number);\n}\n</pre> For example: <pre>auto patch = I32Patch::createClear();\npatch += 10;\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.add(10); \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "NumberPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+    }
+  ]
 }

@@ -466,5 +466,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+    }
+  ]
 }

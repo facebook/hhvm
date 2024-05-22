@@ -59,5 +59,11 @@
   "brief_html": "<p>Called before calling other callback methods. Expected to return some sort of context object. The return value is passed to all other callbacks for that function invocation. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/getServiceContext",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+    }
+  ]
 }

@@ -106,5 +106,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1binary__t_01_4/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1binary__t_01_4/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1binary__t_01_4/operator.call",
+  "parent_links": [
+    {
+      "text_html": "SerializedSize&lt; false, type::binary_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1binary__t_01_4"
+    }
+  ]
 }

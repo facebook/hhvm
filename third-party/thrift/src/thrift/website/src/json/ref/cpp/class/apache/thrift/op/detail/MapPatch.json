@@ -811,7 +811,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -855,7 +861,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -942,7 +954,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -986,7 +1004,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1073,7 +1097,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1117,7 +1147,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1161,7 +1197,13 @@
           "brief_html": "Destructs the BaseContainerPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseContainerPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseContainerPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/BaseContainerPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1223,7 +1265,13 @@
           "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/put",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/put"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/put",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1291,7 +1339,13 @@
           "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/insert_or_assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/insert_or_assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/insert_or_assign",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1353,7 +1407,13 @@
           "brief_html": "<p>Inserts entries. Ignore entries that already exist. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1415,7 +1475,13 @@
           "brief_html": "<p>Removes keys. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1477,7 +1543,13 @@
           "brief_html": "<p>Removes a key. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/erase",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/erase"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/erase",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1539,7 +1611,13 @@
           "brief_html": "<p>Returns the patch that for the entry. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchByKey",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchByKey"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchByKey",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1601,7 +1679,13 @@
           "brief_html": "<p>Ensures that key exists and patches the entry. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1662,7 +1746,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Map&amp;);\n  void clear();\n  void add(const Map&amp;);\n  void put(const Map&amp;);\n  void remove(const std::unordered_set&lt;Key&gt;&amp;);\n  void patchIfSet(const std::unordered_map&lt;Key, ValuePatch&gt;&amp;);\n}\n</pre> For example: <pre>MapPatch&lt;MapI32StringPatch&gt; patch;\npatch.add({{10, \"10\"}});\npatch.ensureAndPatchByKey(20).append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({{10, \"10\"}, {20, \"\"}});\nv.patchIfSet({{20, StringPatch::createAppend(\"_\")}}); \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2032,7 +2122,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2091,7 +2187,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/isKeyModified",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/isKeyModified"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/isKeyModified",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2148,7 +2250,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/applyPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/applyPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/applyPatch",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2201,7 +2309,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchIfSet",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchIfSet"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/patchIfSet",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2248,7 +2362,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensurePatchable"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2647,7 +2767,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2697,7 +2823,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2755,7 +2887,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2805,7 +2943,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2991,7 +3135,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3053,7 +3203,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3100,7 +3256,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3154,7 +3316,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3215,7 +3383,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3365,7 +3539,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3412,7 +3592,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "MapPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+            }
+          ]
         }
       ]
     }

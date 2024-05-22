@@ -76,5 +76,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result",
+  "parent_links": [
+    {
+      "text_html": "DeterministicAccumulator",
+      "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+    }
+  ]
 }

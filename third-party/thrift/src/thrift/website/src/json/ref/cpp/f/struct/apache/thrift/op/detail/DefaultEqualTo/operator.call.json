@@ -54,5 +54,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/DefaultEqualTo/operator.call",
+  "parent_links": [
+    {
+      "text_html": "DefaultEqualTo",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/DefaultEqualTo"
+    }
+  ]
 }

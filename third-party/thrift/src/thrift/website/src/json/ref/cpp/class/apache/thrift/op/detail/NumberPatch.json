@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "226",
+        "line": "233",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "226",
+        "bodystart": "233",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "227",
+        "line": "234",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "227",
+        "bodystart": "234",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch"
@@ -68,10 +68,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "228",
+        "line": "235",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "228",
+        "bodystart": "235",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch"
@@ -123,11 +123,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "238",
+        "line": "245",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "238",
-        "bodyend": "240"
+        "bodystart": "245",
+        "bodyend": "247"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid add(U&amp;&amp; val)",
@@ -168,11 +168,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "244",
+        "line": "251",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "244",
-        "bodyend": "246"
+        "bodystart": "251",
+        "bodyend": "253"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid subtract(U&amp;&amp; val)",
@@ -213,11 +213,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "268",
+        "line": "275",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "268",
-        "bodyend": "278"
+        "bodystart": "275",
+        "bodyend": "285"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -253,11 +253,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "280",
+        "line": "287",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "280",
-        "bodyend": "289"
+        "bodystart": "287",
+        "bodyend": "296"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -295,11 +295,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "293",
+        "line": "300",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "293",
-        "bodyend": "296"
+        "bodystart": "300",
+        "bodyend": "303"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator+=(U&amp;&amp; val)",
@@ -340,11 +340,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "300",
+        "line": "307",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "300",
-        "bodyend": "303"
+        "bodystart": "307",
+        "bodyend": "310"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator-=(U&amp;&amp; val)",
@@ -391,11 +391,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "310",
+        "line": "317",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "310",
-        "bodyend": "313"
+        "bodystart": "317",
+        "bodyend": "320"
       }
     },
     {
@@ -427,11 +427,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "316",
+        "line": "323",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "316",
-        "bodyend": "319"
+        "bodystart": "323",
+        "bodyend": "326"
       }
     },
     {
@@ -463,21 +463,21 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "322",
+        "line": "329",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "322",
-        "bodyend": "325"
+        "bodystart": "329",
+        "bodyend": "332"
       }
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "225",
+    "line": "232",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "225",
-    "bodyend": "326"
+    "bodystart": "232",
+    "bodyend": "333"
   },
   "namespacednames_html": [
     "apache",
@@ -584,7 +584,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -628,7 +634,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -715,7 +727,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -759,7 +777,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -846,7 +870,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -890,7 +920,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -922,11 +958,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "238",
+                "line": "245",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "238",
-                "bodyend": "240"
+                "bodystart": "245",
+                "bodyend": "247"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid add(U&amp;&amp; val)",
@@ -951,7 +987,13 @@
           "brief_html": "<p>Increases the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/add",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -983,11 +1025,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "244",
+                "line": "251",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "244",
-                "bodyend": "246"
+                "bodystart": "251",
+                "bodyend": "253"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid subtract(U&amp;&amp; val)",
@@ -1012,7 +1054,13 @@
           "brief_html": "<p>Decreases the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/subtract",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1044,11 +1092,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "268",
+                "line": "275",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "268",
-                "bodyend": "278"
+                "bodystart": "275",
+                "bodyend": "285"
               },
               "definition": {
                 "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1073,7 +1121,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(Number);\n  void clear();\n  void add(Number);\n}\n</pre> For example: <pre>auto patch = I32Patch::createClear();\npatch += 10;\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.add(10); \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1417,11 +1471,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "280",
+                "line": "287",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "280",
-                "bodyend": "289"
+                "bodystart": "287",
+                "bodyend": "296"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1443,7 +1497,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1475,11 +1535,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "293",
+                "line": "300",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "293",
-                "bodyend": "296"
+                "bodystart": "300",
+                "bodyend": "303"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator+=(U&amp;&amp; val)",
@@ -1504,7 +1564,13 @@
           "brief_html": "<p>Increases the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.add_assign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1536,11 +1602,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "300",
+                "line": "307",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "300",
-                "bodyend": "303"
+                "bodystart": "307",
+                "bodyend": "310"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator-=(U&amp;&amp; val)",
@@ -1565,7 +1631,13 @@
           "brief_html": "<p>Decreases the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.sub_assign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1964,7 +2036,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2014,7 +2092,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2072,7 +2156,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2122,7 +2212,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2308,7 +2404,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2370,7 +2472,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2417,7 +2525,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2471,7 +2585,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2532,7 +2652,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2682,7 +2808,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2729,7 +2861,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "NumberPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+            }
+          ]
         }
       ]
     }

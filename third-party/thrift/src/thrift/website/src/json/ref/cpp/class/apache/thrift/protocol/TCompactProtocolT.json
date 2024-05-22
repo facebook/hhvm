@@ -2955,7 +2955,13 @@
           "brief_html": "Constructs the TCompactProtocolT.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/TCompactProtocolT",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/TCompactProtocolT"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/TCompactProtocolT",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3008,7 +3014,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setStringSizeLimit",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setStringSizeLimit"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setStringSizeLimit",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3061,7 +3073,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setContainerSizeLimit",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setContainerSizeLimit"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setContainerSizeLimit",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3108,7 +3126,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getStringSizeLimit",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getStringSizeLimit"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getStringSizeLimit",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3155,7 +3179,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getContainerSizeLimit",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getContainerSizeLimit"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getContainerSizeLimit",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3211,7 +3241,13 @@
           "brief_html": "<p>Set this if you need backwards compatibility with an old version </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/setVersion",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3275,7 +3311,13 @@
           "brief_html": "<p>Writing functions </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3331,7 +3373,13 @@
           "brief_html": "<p>Write a struct begin. This doesn't actually put anything on the wire. We use it as an opportunity to put special placeholder markers on the field stack so we can get the field id deltas correct. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3381,7 +3429,13 @@
           "brief_html": "<p>Write a struct end. This doesn't actually put anything on the wire. We use this as an opportunity to pop the last field from the current struct off of the field stack. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3445,7 +3499,13 @@
           "brief_html": "<p>Write a field header containing the field id and field type. If the difference between the current field id and the last one is small (&lt; 15), then the field id will be encoded in the 4 MSB as a delta. Otherwise, the field id will follow the type header as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3495,7 +3555,13 @@
           "brief_html": "<p>Write the STOP symbol so we know there are no more fields in this struct. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldStop",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldStop"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldStop",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3555,7 +3621,13 @@
           "brief_html": "<p>Write a List header. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3615,7 +3687,13 @@
           "brief_html": "<p>Write a set header. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3679,7 +3757,13 @@
           "brief_html": "<p>Write a map header. If the map is empty, omit the key and value type headers, as we don't need any additional information to skip it. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3735,7 +3819,13 @@
           "brief_html": "<p>Write a boolean value. Potentially, this could be a boolean field, in which case the field header info isn't written yet. If so, decide what the right type header is for the value and then write the field header. Otherwise, write a single byte. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBool",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBool"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBool",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3788,7 +3878,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeByte",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeByte"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeByte",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3844,7 +3940,13 @@
           "brief_html": "<p>Write an i16 as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI16",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI16"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI16",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3900,7 +4002,13 @@
           "brief_html": "<p>Write an i32 as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI32",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI32"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI32",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3956,7 +4064,13 @@
           "brief_html": "<p>Write an i64 as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI64",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI64"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeI64",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4012,7 +4126,13 @@
           "brief_html": "<p>Write a double to the wire as 8 bytes. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeDouble",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeDouble"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeDouble",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4068,7 +4188,13 @@
           "brief_html": "<p>Write a float to the wire as 4 bytes. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFloat",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4168,7 +4294,13 @@
           "brief_html": "<p>Write a string to the wire with a varint size preceding. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeString",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4226,7 +4358,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4276,7 +4414,13 @@
           "brief_html": "<p>These methods are called by structs, but don't actually have any wired output or purpose </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMessageEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4323,7 +4467,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeMapEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4370,7 +4520,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeListEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4417,7 +4573,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeSetEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4464,7 +4626,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4528,7 +4696,13 @@
           "brief_html": "<p>Read a message header. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4584,7 +4758,13 @@
           "brief_html": "<p>Read a struct begin. There's nothing on the wire for this, but it is our opportunity to push a new struct begin marker on the field stack. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4634,7 +4814,13 @@
           "brief_html": "<p>Doesn't actually consume any wire data, just removes the last field for this struct from the field stack. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readStructEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4698,7 +4884,13 @@
           "brief_html": "<p>Read a field header off the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4766,7 +4958,13 @@
           "brief_html": "<p>Read a map header off the wire. If the size is zero, skip reading the key and value type. This means that 0-length maps will yield TMaps without the \"correct\" types. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4830,7 +5028,13 @@
           "brief_html": "<p>Read a list header off the wire. If the list size is 0-14, the size will be packed into the element type header. If it's a longer list, the 4 MSB of the element type header will be 0xF, and a varint will follow with the true size. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4894,7 +5098,13 @@
           "brief_html": "<p>Read a set header off the wire. If the set size is 0-14, the size will be packed into the element type header. If it's a longer set, the 4 MSB of the element type header will be 0xF, and a varint will follow with the true size. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -4950,7 +5160,13 @@
           "brief_html": "<p>Read a boolean off the wire. If this is a boolean field, the value should already have been read during readFieldBegin, so we'll just consume the pre-stored value. Otherwise, read a byte. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBool",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5006,7 +5222,13 @@
           "brief_html": "<p>Read a single byte off the wire. Nothing interesting here. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5062,7 +5284,13 @@
           "brief_html": "<p>Read an i16 from the wire as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI16",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI16"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI16",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5118,7 +5346,13 @@
           "brief_html": "<p>Read an i32 from the wire as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI32",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI32"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI32",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5174,7 +5408,13 @@
           "brief_html": "<p>Read an i64 from the wire as a zigzag varint. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI64",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI64"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readI64",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5230,7 +5470,13 @@
           "brief_html": "<p>No magic here - just read a double off the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readDouble",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5286,7 +5532,13 @@
           "brief_html": "<p>No magic here - just read a float off the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFloat",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFloat"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFloat",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5344,7 +5596,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readString",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readString"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readString",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5405,7 +5663,13 @@
           "brief_html": "<p>Read a byte[] from the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBinary",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBinary"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readBinary",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5452,7 +5716,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMessageEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5499,7 +5769,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readFieldEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5546,7 +5822,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readMapEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5593,7 +5875,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5640,7 +5928,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readSetEnd",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5708,7 +6002,13 @@
           "brief_html": "<p>The workhorse of writeFieldBegin. It has the option of doing a 'type override' of the type header. This is used specifically in the boolean field case. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5768,7 +6068,13 @@
           "brief_html": "<p>Abstract method for writing the start of lists and sets. List and sets on the wire differ only by the type indicator. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeCollectionBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeCollectionBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeCollectionBegin",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5824,7 +6130,13 @@
           "brief_html": "<p>Write an i32 as a varint. Results in 1-5 bytes on the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint32",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint32"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint32",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5880,7 +6192,13 @@
           "brief_html": "<p>Write an i64 as a varint. Results in 1-10 bytes on the wire. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeVarint64",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5936,7 +6254,13 @@
           "brief_html": "<p>Given a TType value, find the appropriate <code>detail::compact::Types</code> value </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -5992,7 +6316,13 @@
           "brief_html": "<p>Read an i32 from the wire as a varint. The MSB of each byte is set if there is another byte to follow. This can read up to 5 bytes. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint32",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint32"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint32",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -6048,7 +6378,13 @@
           "brief_html": "<p>Read an i64 from the wire as a proper varint. The MSB of each byte is set if there is another byte to follow. This can read up to 10 bytes. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -6101,7 +6437,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getTType",
-          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getTType"
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getTType",
+          "parent_links": [
+            {
+              "text_html": "TCompactProtocolT",
+              "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+            }
+          ]
         }
       ]
     }

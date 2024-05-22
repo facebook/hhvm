@@ -49,5 +49,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_",
+  "parent_links": [
+    {
+      "text_html": "StringOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+    }
+  ]
 }

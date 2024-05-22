@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "471",
+        "line": "478",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "471",
+        "bodystart": "478",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "472",
+        "line": "479",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "472",
+        "bodystart": "479",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -101,11 +101,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "479",
+        "line": "486",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "479",
-        "bodyend": "489"
+        "bodystart": "486",
+        "bodyend": "496"
       },
       "definition": {
         "simple_html": "void assign(std::string s)",
@@ -143,11 +143,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "492",
+        "line": "499",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "492",
-        "bodyend": "494"
+        "bodystart": "499",
+        "bodyend": "501"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nBinaryPatch&amp; operator=(T&amp;&amp; other)",
@@ -187,11 +187,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "498",
+        "line": "505",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "498",
-        "bodyend": "504"
+        "bodystart": "505",
+        "bodyend": "511"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -232,11 +232,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "508",
+        "line": "515",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "508",
-        "bodyend": "514"
+        "bodystart": "515",
+        "bodyend": "521"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -272,11 +272,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "516",
+        "line": "523",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "516",
-        "bodyend": "534"
+        "bodystart": "523",
+        "bodyend": "541"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -309,11 +309,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "536",
+        "line": "543",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "536",
-        "bodyend": "540"
+        "bodystart": "543",
+        "bodyend": "547"
       },
       "definition": {
         "simple_html": "void apply(std::string&amp; val) const",
@@ -329,11 +329,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "470",
+    "line": "477",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "470",
-    "bodyend": "545"
+    "bodystart": "477",
+    "bodyend": "552"
   },
   "namespacednames_html": [
     "apache",
@@ -441,7 +441,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -485,7 +491,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -572,7 +584,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -616,7 +634,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -703,7 +727,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -747,7 +777,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -791,7 +827,13 @@
           "brief_html": "Destructs the BaseContainerPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseContainerPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseContainerPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/BaseContainerPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -990,11 +1032,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "479",
+                "line": "486",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "479",
-                "bodyend": "489"
+                "bodystart": "486",
+                "bodyend": "496"
               },
               "definition": {
                 "simple_html": "void assign(std::string s)",
@@ -1016,7 +1058,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1433,11 +1481,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "492",
+                "line": "499",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "492",
-                "bodyend": "494"
+                "bodystart": "499",
+                "bodyend": "501"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nBinaryPatch&amp; operator=(T&amp;&amp; other)",
@@ -1459,7 +1507,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1493,11 +1547,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "498",
+                "line": "505",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "498",
-                "bodyend": "504"
+                "bodystart": "505",
+                "bodyend": "511"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -1522,7 +1576,13 @@
           "brief_html": "<p>Appends a binary string. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/append",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/append"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/append",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1554,11 +1614,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "508",
+                "line": "515",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "508",
-                "bodyend": "514"
+                "bodystart": "515",
+                "bodyend": "521"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -1583,7 +1643,13 @@
           "brief_html": "<p>Prepends a binary string. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/prepend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/prepend"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/prepend",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1927,11 +1993,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "516",
+                "line": "523",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "516",
-                "bodyend": "534"
+                "bodystart": "523",
+                "bodyend": "541"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1966,11 +2032,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "536",
+                "line": "543",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "536",
-                "bodyend": "540"
+                "bodystart": "543",
+                "bodyend": "547"
               },
               "definition": {
                 "simple_html": "void apply(std::string&amp; val) const",
@@ -1992,7 +2058,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2024,11 +2096,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "347",
+                "line": "354",
                 "column": "11",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "347",
-                "bodyend": "350"
+                "bodystart": "354",
+                "bodyend": "357"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
@@ -2053,7 +2125,13 @@
           "brief_html": "<p>Appends a string. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.add_assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.add_assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.add_assign",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2085,11 +2163,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "373",
+                "line": "380",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "373",
-                "bodyend": "385"
+                "bodystart": "380",
+                "bodyend": "392"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -2114,7 +2192,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const String&amp;);\n  void clear();\n  void prepend(const String&amp;);\n  void append(const String&amp;);\n}\n</pre> For example: <pre>auto patch = StringPatch::createPrepend(\"(\");\npatch += \")\";\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.prepend(\"(\");\nv.append(\")\"); \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2164,7 +2248,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2222,7 +2312,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2272,7 +2368,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2334,7 +2436,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2381,7 +2489,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2435,7 +2549,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2496,7 +2616,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2646,7 +2772,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2693,7 +2825,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "BinaryPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+            }
+          ]
         }
       ]
     }

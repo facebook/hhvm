@@ -58,5 +58,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/class/apache/thrift/op/StdSerializer/registerStdSerializers",
-  "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/StdSerializer/registerStdSerializers"
+  "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/StdSerializer/registerStdSerializers",
+  "parent_links": [
+    {
+      "text_html": "StdSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/StdSerializer"
+    }
+  ]
 }

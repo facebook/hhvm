@@ -50,5 +50,11 @@
   "brief_html": "Constructs the HashProtocol.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol",
+  "parent_links": [
+    {
+      "text_html": "HashProtocol",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+    }
+  ]
 }

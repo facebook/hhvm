@@ -364,5 +364,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend",
+  "parent_links": [
+    {
+      "text_html": "StringOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+    }
+  ]
 }

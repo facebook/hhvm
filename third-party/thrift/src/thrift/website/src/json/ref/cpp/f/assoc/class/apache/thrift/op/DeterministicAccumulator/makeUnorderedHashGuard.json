@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard",
-  "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard"
+  "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard",
+  "parent_links": [
+    {
+      "text_html": "DeterministicAccumulator",
+      "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+    }
+  ]
 }

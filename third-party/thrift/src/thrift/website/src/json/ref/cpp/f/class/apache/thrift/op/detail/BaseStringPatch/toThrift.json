@@ -146,5 +146,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/toThrift",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/toThrift"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/toThrift",
+  "parent_links": [
+    {
+      "text_html": "BaseStringPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseStringPatch"
+    }
+  ]
 }

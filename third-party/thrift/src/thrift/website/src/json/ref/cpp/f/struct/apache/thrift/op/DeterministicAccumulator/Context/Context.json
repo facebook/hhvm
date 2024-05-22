@@ -81,5 +81,11 @@
   "brief_html": "Constructs the Context.",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/DeterministicAccumulator/Context/Context",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/DeterministicAccumulator/Context/Context"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/DeterministicAccumulator/Context/Context",
+  "parent_links": [
+    {
+      "text_html": "Context",
+      "href": "/ref/cpp/struct/apache/thrift/op/DeterministicAccumulator/Context"
+    }
+  ]
 }

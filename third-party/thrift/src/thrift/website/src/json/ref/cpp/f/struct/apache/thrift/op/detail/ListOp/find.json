@@ -96,5 +96,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/find",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/find"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/ListOp/find",
+  "parent_links": [
+    {
+      "text_html": "ListOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ListOp"
+    }
+  ]
 }

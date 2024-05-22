@@ -243,7 +243,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/MatchAndExplain",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/MatchAndExplain"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/MatchAndExplain",
+          "parent_links": [
+            {
+              "text_html": "IdenticalToMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/IdenticalToMatcher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -296,7 +302,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeTo",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeTo"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeTo",
+          "parent_links": [
+            {
+              "text_html": "IdenticalToMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/IdenticalToMatcher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -349,7 +361,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeNegationTo",
-          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeNegationTo"
+          "refid": "/ref/cpp/f/struct/apache/thrift/test/IdenticalToMatcher/DescribeNegationTo",
+          "parent_links": [
+            {
+              "text_html": "IdenticalToMatcher",
+              "href": "/ref/cpp/struct/apache/thrift/test/IdenticalToMatcher"
+            }
+          ]
         }
       ]
     }

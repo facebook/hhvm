@@ -340,5 +340,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "FieldPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+    }
+  ]
 }

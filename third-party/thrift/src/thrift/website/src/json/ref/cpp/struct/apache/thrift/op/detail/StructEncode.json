@@ -44,11 +44,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "526",
+        "line": "531",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "526",
-        "bodyend": "547"
+        "bodystart": "531",
+        "bodyend": "552"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
@@ -64,11 +64,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "524",
+    "line": "529",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "524",
-    "bodyend": "548"
+    "bodystart": "529",
+    "bodyend": "553"
   },
   "namespacednames_html": [
     "apache",
@@ -225,11 +225,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "526",
+                "line": "531",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "526",
-                "bodyend": "547"
+                "bodystart": "531",
+                "bodyend": "552"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
@@ -251,7 +251,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StructEncode/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructEncode/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StructEncode/operator.call",
+          "parent_links": [
+            {
+              "text_html": "StructEncode",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StructEncode"
+            }
+          ]
         }
       ]
     }

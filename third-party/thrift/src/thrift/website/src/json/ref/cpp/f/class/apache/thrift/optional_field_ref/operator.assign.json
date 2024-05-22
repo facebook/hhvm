@@ -96,5 +96,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "optional_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+    }
+  ]
 }

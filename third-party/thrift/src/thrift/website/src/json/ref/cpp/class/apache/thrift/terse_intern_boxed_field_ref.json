@@ -927,7 +927,13 @@
           "brief_html": "Constructs the terse_intern_boxed_field_ref.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1026,7 +1032,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1084,7 +1096,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1143,7 +1161,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/move_from"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1191,7 +1215,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/reset",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/reset"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1283,7 +1313,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/value",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/value"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/value",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1331,7 +1367,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1411,7 +1453,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1503,7 +1551,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1616,7 +1670,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
-          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/emplace"
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+          "parent_links": [
+            {
+              "text_html": "terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref"
+            }
+          ]
         }
       ]
     }

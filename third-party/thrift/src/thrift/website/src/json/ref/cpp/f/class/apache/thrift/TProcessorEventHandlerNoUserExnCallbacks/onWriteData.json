@@ -57,5 +57,11 @@
   "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks"
+    }
+  ]
 }

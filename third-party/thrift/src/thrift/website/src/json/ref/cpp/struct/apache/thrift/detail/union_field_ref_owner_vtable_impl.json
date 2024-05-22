@@ -135,7 +135,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/detail/union_field_ref_owner_vtable_impl/reset",
-          "refid": "/ref/cpp/f/struct/apache/thrift/detail/union_field_ref_owner_vtable_impl/reset"
+          "refid": "/ref/cpp/f/struct/apache/thrift/detail/union_field_ref_owner_vtable_impl/reset",
+          "parent_links": [
+            {
+              "text_html": "union_field_ref_owner_vtable_impl",
+              "href": "/ref/cpp/struct/apache/thrift/detail/union_field_ref_owner_vtable_impl"
+            }
+          ]
         }
       ]
     }

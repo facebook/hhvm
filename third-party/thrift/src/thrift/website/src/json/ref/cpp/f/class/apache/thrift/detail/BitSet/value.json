@@ -76,5 +76,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value",
-  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value"
+  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value",
+  "parent_links": [
+    {
+      "text_html": "BitSet",
+      "href": "/ref/cpp/class/apache/thrift/detail/BitSet"
+    }
+  ]
 }

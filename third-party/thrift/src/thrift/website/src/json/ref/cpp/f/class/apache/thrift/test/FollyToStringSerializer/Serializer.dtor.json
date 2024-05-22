@@ -40,5 +40,11 @@
   "brief_html": "Destructs the Serializer.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor",
-  "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor"
+  "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/Serializer.dtor",
+  "parent_links": [
+    {
+      "text_html": "FollyToStringSerializer",
+      "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+    }
+  ]
 }

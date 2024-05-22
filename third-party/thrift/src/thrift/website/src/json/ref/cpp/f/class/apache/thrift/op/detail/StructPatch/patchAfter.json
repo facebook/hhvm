@@ -48,5 +48,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patchAfter",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patchAfter"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patchAfter",
+  "parent_links": [
+    {
+      "text_html": "StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+    }
+  ]
 }

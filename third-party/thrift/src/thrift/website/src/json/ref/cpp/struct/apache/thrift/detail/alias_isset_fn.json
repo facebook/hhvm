@@ -151,7 +151,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/detail/alias_isset_fn/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/detail/alias_isset_fn/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/detail/alias_isset_fn/operator.call",
+          "parent_links": [
+            {
+              "text_html": "alias_isset_fn",
+              "href": "/ref/cpp/struct/apache/thrift/detail/alias_isset_fn"
+            }
+          ]
         }
       ]
     }

@@ -23,11 +23,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "241",
+        "line": "245",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "241",
-        "bodyend": "243"
+        "bodystart": "245",
+        "bodyend": "247"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -62,11 +62,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "248",
+        "line": "252",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "248",
-        "bodyend": "263"
+        "bodystart": "252",
+        "bodyend": "271"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -88,5 +88,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
+  "parent_links": [
+    {
+      "text_html": "GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c"
+    }
+  ]
 }

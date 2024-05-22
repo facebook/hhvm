@@ -59,5 +59,11 @@
   "brief_html": "<p>Emplaces the set. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/emplace",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/emplace"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/emplace",
+  "parent_links": [
+    {
+      "text_html": "SetPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/SetPatch"
+    }
+  ]
 }

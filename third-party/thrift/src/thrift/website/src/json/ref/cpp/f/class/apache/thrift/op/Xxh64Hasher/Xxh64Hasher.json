@@ -44,5 +44,11 @@
   "brief_html": "Constructs the Xxh64Hasher.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/Xxh64Hasher/Xxh64Hasher",
+  "parent_links": [
+    {
+      "text_html": "Xxh64Hasher",
+      "href": "/ref/cpp/class/apache/thrift/op/Xxh64Hasher"
+    }
+  ]
 }

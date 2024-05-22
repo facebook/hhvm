@@ -44,5 +44,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/reset",
+  "parent_links": [
+    {
+      "text_html": "optional_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+    }
+  ]
 }

@@ -58,5 +58,11 @@
   "brief_html": "<p>Adds keys. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/add",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/add"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/add",
+  "parent_links": [
+    {
+      "text_html": "SetPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/SetPatch"
+    }
+  ]
 }

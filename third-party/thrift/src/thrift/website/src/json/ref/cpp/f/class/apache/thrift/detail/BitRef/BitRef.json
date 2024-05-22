@@ -145,5 +145,11 @@
   "brief_html": "Constructs the BitRef.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef",
-  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef"
+  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/BitRef",
+  "parent_links": [
+    {
+      "text_html": "BitRef",
+      "href": "/ref/cpp/class/apache/thrift/detail/BitRef"
+    }
+  ]
 }

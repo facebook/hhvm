@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "651",
+        "line": "656",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "651",
-        "bodyend": "657"
+        "bodystart": "656",
+        "bodyend": "662"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol, class U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Encode&lt; type::cpp_type&lt; T, Tag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4"
+    }
+  ]
 }

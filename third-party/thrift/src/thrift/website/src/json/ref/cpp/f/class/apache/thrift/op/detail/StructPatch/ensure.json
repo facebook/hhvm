@@ -102,5 +102,11 @@
   "brief_html": "<p>Ensures the given field is set. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensure",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensure"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensure",
+  "parent_links": [
+    {
+      "text_html": "StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+    }
+  ]
 }

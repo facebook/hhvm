@@ -96,5 +96,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4/add",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4/add"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4/add",
+  "parent_links": [
+    {
+      "text_html": "AnyOp&lt; type::i32_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4"
+    }
+  ]
 }

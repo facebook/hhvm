@@ -60,5 +60,11 @@
   "brief_html": "<p>Read a list header off the wire. If the list size is 0-14, the size will be packed into the element type header. If it's a longer list, the 4 MSB of the element type header will be 0xF, and a varint will follow with the true size. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readListBegin",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

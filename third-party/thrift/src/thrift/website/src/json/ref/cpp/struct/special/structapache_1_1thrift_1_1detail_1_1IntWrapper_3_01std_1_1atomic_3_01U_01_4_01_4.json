@@ -365,7 +365,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/IntWrapper",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/IntWrapper"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/IntWrapper",
+          "parent_links": [
+            {
+              "text_html": "IntWrapper&lt; std::atomic&lt; U &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -459,7 +465,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "IntWrapper&lt; std::atomic&lt; U &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4"
+            }
+          ]
         }
       ]
     }

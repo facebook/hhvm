@@ -123,7 +123,13 @@
           "brief_html": "Constructs the bad_patch_access.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/bad_patch_access/bad_patch_access",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/bad_patch_access/bad_patch_access"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/bad_patch_access/bad_patch_access",
+          "parent_links": [
+            {
+              "text_html": "bad_patch_access",
+              "href": "/ref/cpp/class/apache/thrift/op/bad_patch_access"
+            }
+          ]
         }
       ]
     }

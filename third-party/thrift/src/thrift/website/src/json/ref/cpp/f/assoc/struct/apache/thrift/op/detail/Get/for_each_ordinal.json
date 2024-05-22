@@ -60,5 +60,11 @@
   "brief_html": "<p>Calls the given function with ordinal&lt;1&gt; to ordinal&lt;N&gt;. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal",
-  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal"
+  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ordinal",
+  "parent_links": [
+    {
+      "text_html": "Get",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+    }
+  ]
 }

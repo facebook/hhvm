@@ -58,5 +58,11 @@
   "brief_html": "<p>Assignment from <code>field_ref</code> is intentionally not provided to prevent potential confusion between two possible behaviors, copying and reference rebinding. The copy_from method is provided instead. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from",
-  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from"
+  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/copy_from",
+  "parent_links": [
+    {
+      "text_html": "field_ref",
+      "href": "/ref/cpp/class/apache/thrift/field_ref"
+    }
+  ]
 }

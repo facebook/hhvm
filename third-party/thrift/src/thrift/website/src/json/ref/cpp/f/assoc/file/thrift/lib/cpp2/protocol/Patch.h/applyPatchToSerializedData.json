@@ -34,10 +34,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "90",
+        "line": "101",
         "column": "17",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "90",
+        "declline": "101",
         "declcolumn": "17"
       },
       "definition": {

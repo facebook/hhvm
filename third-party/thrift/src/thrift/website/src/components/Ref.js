@@ -12,7 +12,27 @@ import Admonition from '@theme/Admonition';
 //import MDXHeading from '@theme/Heading';
 //return MDXHeading("h3")({children: "Lorum ipsum"});
 
-// Heading
+
+export function ParentLinks({data}) {
+  const parents = data.parent_links || [];
+  if (parents.length == 0) {
+    return null;
+  }
+
+  return (
+    <span className={styles.refhighlight} >
+      <small>
+        &nbsp;
+        {parents.map(pl => {
+          return (
+            <span><Link to={pl.href} dangerouslySetInnerHTML={{__html: pl.text_html}} />&nbsp;&gt;&nbsp;</span>
+          );
+        })}
+      </small>
+    </span>
+  );
+}
+
 export function Heading({data}) {
   return (
     <h1>
@@ -521,6 +541,7 @@ export function Contribute({empty}) {
 export function Class({data}) {
   return (
     <div>
+      <ParentLinks data={data} />
       <Heading data={data} />
       <Decl data={data} />
       <Desc data={data} />
@@ -542,6 +563,7 @@ export function Struct({data}) {
 export function Overloadset({data}) {
   return (
     <div>
+      <ParentLinks data={data} />
       <Heading data={data} />
       <MethodDecls data={data} />
       <MethodDescriptions data={data} />
@@ -554,6 +576,7 @@ export function Overloadset({data}) {
 export function File({data}) {
   return (
     <div>
+      <ParentLinks data={data} />
       <Heading data={data} />
       <Include data={data} />
       <Desc data={data} />

@@ -23,11 +23,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "205",
+        "line": "207",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "205",
-        "bodyend": "207"
+        "bodystart": "207",
+        "bodyend": "209"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -62,11 +62,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "212",
+        "line": "214",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "212",
-        "bodyend": "222"
+        "bodystart": "214",
+        "bodyend": "226"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -88,5 +88,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
+  "parent_links": [
+    {
+      "text_html": "GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7"
+    }
+  ]
 }

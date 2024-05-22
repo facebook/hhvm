@@ -334,7 +334,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/assign",
+          "parent_links": [
+            {
+              "text_html": "Applier",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -381,7 +387,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/clear",
+          "parent_links": [
+            {
+              "text_html": "Applier",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -442,7 +454,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/patchIfSet",
+          "parent_links": [
+            {
+              "text_html": "Applier",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -541,7 +559,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+          "parent_links": [
+            {
+              "text_html": "Applier",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -593,7 +617,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/remove",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/remove"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/remove",
+          "parent_links": [
+            {
+              "text_html": "Applier",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier"
+            }
+          ]
         }
       ]
     }

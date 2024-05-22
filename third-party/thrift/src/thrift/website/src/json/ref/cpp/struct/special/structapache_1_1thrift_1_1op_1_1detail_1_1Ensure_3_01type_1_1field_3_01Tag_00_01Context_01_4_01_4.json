@@ -175,7 +175,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "Ensure&lt; type::field&lt; Tag, Context &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4"
+            }
+          ]
         }
       ]
     }

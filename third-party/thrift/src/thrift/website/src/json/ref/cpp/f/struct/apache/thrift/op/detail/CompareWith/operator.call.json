@@ -210,5 +210,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/CompareWith/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/CompareWith/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/CompareWith/operator.call",
+  "parent_links": [
+    {
+      "text_html": "CompareWith",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/CompareWith"
+    }
+  ]
 }

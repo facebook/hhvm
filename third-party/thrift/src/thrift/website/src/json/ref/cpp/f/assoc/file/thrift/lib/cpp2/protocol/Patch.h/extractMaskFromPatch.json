@@ -4,15 +4,15 @@
   "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
   "functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1protocol_1abc5eb0c602568f2c57f357e87f7cce4a",
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a112b8d1c4057e25841d53011ef06d80c",
       "prot": "public",
       "static": "no",
       "const": "no",
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
-      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
-      "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasksFromPatch\">ExtractedMasksFromPatch</a>",
+      "definition_html": "ExtractedMasksFromPatch apache::thrift::protocol::extractMaskFromPatch",
       "argsstring_html": "(const protocol::Object &amp;patch)",
       "name_html": "extractMaskFromPatch",
       "param": [
@@ -23,18 +23,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "87",
-        "column": "16",
+        "line": "98",
+        "column": "25",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "87",
-        "declcolumn": "16"
+        "declline": "98",
+        "declcolumn": "25"
       },
       "definition": {
-        "simple_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
-        "simple_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
-        "detailed_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
-        "detailed_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
-        "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+        "simple_html": "ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object&amp; patch)",
+        "simple_raw": "ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch)",
+        "detailed_html": "ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object&amp; patch)",
+        "detailed_raw": "ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch)",
+        "original_definition_html": "ExtractedMasksFromPatch apache::thrift::protocol::extractMaskFromPatch",
         "original_argsstring_html": "(const protocol::Object &amp;patch)"
       },
       "description": {

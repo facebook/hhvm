@@ -108,5 +108,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl",
-  "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl"
+  "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/emplace_impl",
+  "parent_links": [
+    {
+      "text_html": "union_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+    }
+  ]
 }

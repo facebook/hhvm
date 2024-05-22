@@ -54,5 +54,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeBinary",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

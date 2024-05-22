@@ -52,5 +52,11 @@
   "brief_html": "<p>Read a single byte off the wire. Nothing interesting here. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readByte",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

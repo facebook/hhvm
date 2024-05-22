@@ -54,5 +54,11 @@
   "brief_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
-  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate"
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+  "parent_links": [
+    {
+      "text_html": "TProcessorEventHandler",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+    }
+  ]
 }

@@ -115,5 +115,11 @@
   "brief_html": "<p>Constructs the value in-place. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/field_ref/emplace",
-  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/emplace"
+  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/emplace",
+  "parent_links": [
+    {
+      "text_html": "field_ref",
+      "href": "/ref/cpp/class/apache/thrift/field_ref"
+    }
+  ]
 }

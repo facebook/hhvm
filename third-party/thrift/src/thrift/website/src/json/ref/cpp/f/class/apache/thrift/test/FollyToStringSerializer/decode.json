@@ -1156,5 +1156,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode",
-  "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode"
+  "refid": "/ref/cpp/f/class/apache/thrift/test/FollyToStringSerializer/decode",
+  "parent_links": [
+    {
+      "text_html": "FollyToStringSerializer",
+      "href": "/ref/cpp/class/apache/thrift/test/FollyToStringSerializer"
+    }
+  ]
 }

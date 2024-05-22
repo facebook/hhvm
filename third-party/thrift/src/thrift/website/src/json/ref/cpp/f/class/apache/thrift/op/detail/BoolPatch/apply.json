@@ -340,11 +340,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "199",
+        "line": "206",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "199",
-        "bodyend": "208"
+        "bodystart": "206",
+        "bodyend": "215"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -366,5 +366,11 @@
   "brief_html": "<p>Applies patches to a Thrift value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/apply",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/apply"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/apply",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

@@ -57,5 +57,11 @@
   "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Map&amp;);\n  void clear();\n  void add(const Map&amp;);\n  void put(const Map&amp;);\n  void remove(const std::unordered_set&lt;Key&gt;&amp;);\n  void patchIfSet(const std::unordered_map&lt;Key, ValuePatch&gt;&amp;);\n}\n</pre> For example: <pre>MapPatch&lt;MapI32StringPatch&gt; patch;\npatch.add({{10, \"10\"}});\npatch.ensureAndPatchByKey(20).append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({{10, \"10\"}, {20, \"\"}});\nv.patchIfSet({{20, StringPatch::createAppend(\"_\")}}); \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "MapPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+    }
+  ]
 }

@@ -693,7 +693,13 @@
           "brief_html": "Constructs the DeterministicAccumulator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/DeterministicAccumulator",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/DeterministicAccumulator"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/DeterministicAccumulator",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -773,7 +779,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/result",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -831,7 +843,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/combine",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/combine"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/combine",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -878,7 +896,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginOrdered",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginOrdered"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginOrdered",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -925,7 +949,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endOrdered",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endOrdered"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endOrdered",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -972,7 +1002,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginUnordered",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginUnordered"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/beginUnordered",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1019,7 +1055,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endUnordered",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endUnordered"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/endUnordered",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1067,7 +1109,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/context",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/context"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/context",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1120,7 +1168,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/exitContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/exitContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/DeterministicAccumulator/exitContext",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         }
       ]
     }
@@ -1178,7 +1232,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeDeterministicAccumulator",
-          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeDeterministicAccumulator"
+          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeDeterministicAccumulator",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1235,7 +1295,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeOrderedHashGuard",
-          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeOrderedHashGuard"
+          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeOrderedHashGuard",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1292,7 +1358,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard",
-          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard"
+          "refid": "/ref/cpp/f/assoc/class/apache/thrift/op/DeterministicAccumulator/makeUnorderedHashGuard",
+          "parent_links": [
+            {
+              "text_html": "DeterministicAccumulator",
+              "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator"
+            }
+          ]
         }
       ]
     }

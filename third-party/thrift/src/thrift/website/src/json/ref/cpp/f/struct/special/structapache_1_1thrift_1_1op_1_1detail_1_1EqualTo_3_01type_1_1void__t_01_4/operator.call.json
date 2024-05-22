@@ -62,5 +62,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4/operator.call",
-  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4/operator.call"
+  "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4/operator.call",
+  "parent_links": [
+    {
+      "text_html": "EqualTo&lt; type::void_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4"
+    }
+  ]
 }

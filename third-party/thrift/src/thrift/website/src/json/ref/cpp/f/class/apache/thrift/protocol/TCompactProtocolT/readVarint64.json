@@ -52,5 +52,11 @@
   "brief_html": "<p>Read an i64 from the wire as a proper varint. The MSB of each byte is set if there is another byte to follow. This can read up to 10 bytes. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/readVarint64",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

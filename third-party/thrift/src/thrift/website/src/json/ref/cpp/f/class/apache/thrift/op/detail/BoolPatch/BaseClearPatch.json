@@ -83,5 +83,11 @@
   "brief_html": "Constructs the BaseClearPatch.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/BaseClearPatch",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/BaseClearPatch"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/BaseClearPatch",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

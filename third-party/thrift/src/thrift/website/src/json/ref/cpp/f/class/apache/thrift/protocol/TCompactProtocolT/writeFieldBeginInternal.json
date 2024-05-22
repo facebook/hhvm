@@ -64,5 +64,11 @@
   "brief_html": "<p>The workhorse of writeFieldBegin. It has the option of doing a 'type override' of the type header. This is used specifically in the boolean field case. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeFieldBeginInternal",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

@@ -59,5 +59,11 @@
   "brief_html": "<p>Emplaces and appends a new element. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back",
+  "parent_links": [
+    {
+      "text_html": "ListPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+    }
+  ]
 }

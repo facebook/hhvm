@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "630",
+        "line": "635",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "630",
-        "bodyend": "642"
+        "bodystart": "635",
+        "bodyend": "647"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEncode/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEncode/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapEncode/operator.call",
+  "parent_links": [
+    {
+      "text_html": "MapEncode",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEncode"
+    }
+  ]
 }

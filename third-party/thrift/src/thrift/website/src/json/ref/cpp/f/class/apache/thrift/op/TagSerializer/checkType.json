@@ -53,5 +53,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/checkType",
+  "parent_links": [
+    {
+      "text_html": "TagSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+    }
+  ]
 }

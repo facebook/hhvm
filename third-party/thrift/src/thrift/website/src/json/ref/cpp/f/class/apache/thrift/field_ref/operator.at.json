@@ -57,5 +57,11 @@
   "brief_html": "<p>Forward operator[] to the value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at",
-  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at"
+  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.at",
+  "parent_links": [
+    {
+      "text_html": "field_ref",
+      "href": "/ref/cpp/class/apache/thrift/field_ref"
+    }
+  ]
 }

@@ -669,7 +669,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -713,7 +719,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -771,7 +783,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/createFrom",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/createFrom"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/createFrom",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -856,7 +874,13 @@
           "brief_html": "<p>Returns the pointer to the Thrift patch struct. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.arrow",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.arrow"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.arrow",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -941,7 +965,13 @@
           "brief_html": "<p>Returns the reference to the Thrift patch struct. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.mul",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -999,7 +1029,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1295,7 +1331,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1639,7 +1681,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1747,7 +1795,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1808,7 +1862,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1958,7 +2018,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2005,7 +2071,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "FieldPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+            }
+          ]
         }
       ]
     }

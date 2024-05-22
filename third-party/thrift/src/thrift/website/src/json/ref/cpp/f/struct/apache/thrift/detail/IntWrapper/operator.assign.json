@@ -90,5 +90,11 @@
   "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/detail/IntWrapper/operator.assign",
-  "refid": "/ref/cpp/f/struct/apache/thrift/detail/IntWrapper/operator.assign"
+  "refid": "/ref/cpp/f/struct/apache/thrift/detail/IntWrapper/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "IntWrapper",
+      "href": "/ref/cpp/struct/apache/thrift/detail/IntWrapper"
+    }
+  ]
 }

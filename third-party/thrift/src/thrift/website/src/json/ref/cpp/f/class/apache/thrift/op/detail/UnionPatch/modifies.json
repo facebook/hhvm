@@ -94,5 +94,11 @@
   "brief_html": "<p>Returns if the patch modifies the given field. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies",
+  "parent_links": [
+    {
+      "text_html": "UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+    }
+  ]
 }

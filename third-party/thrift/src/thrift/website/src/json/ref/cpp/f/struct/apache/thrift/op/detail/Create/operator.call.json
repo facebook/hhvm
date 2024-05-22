@@ -181,5 +181,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Create/operator.call",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Create/operator.call"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Create/operator.call",
+  "parent_links": [
+    {
+      "text_html": "Create",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Create"
+    }
+  ]
 }

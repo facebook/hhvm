@@ -111,7 +111,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/operator.call",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/operator.call"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/operator.call",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo&lt; type::map&lt; KTag, VTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -164,7 +170,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/createHashMap",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/createHashMap"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/createHashMap",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo&lt; type::map&lt; KTag, VTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -229,7 +241,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/inRange",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/inRange"
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4/inRange",
+          "parent_links": [
+            {
+              "text_html": "IdenticalTo&lt; type::map&lt; KTag, VTag &gt; &gt;",
+              "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4"
+            }
+          ]
         }
       ]
     }

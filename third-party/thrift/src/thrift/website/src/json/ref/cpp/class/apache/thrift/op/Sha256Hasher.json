@@ -435,7 +435,13 @@
           "brief_html": "Constructs the Sha256Hasher.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/Sha256Hasher",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -482,7 +488,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/getResult",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/getResult"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/getResult",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -658,7 +670,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/combine",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/combine"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/combine",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -705,7 +723,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalize",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalize"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalize",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -758,7 +782,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/operator.lt",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/operator.lt"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/operator.lt",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -805,7 +835,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/Sha256Hasher/finalized",
+          "parent_links": [
+            {
+              "text_html": "Sha256Hasher",
+              "href": "/ref/cpp/class/apache/thrift/op/Sha256Hasher"
+            }
+          ]
         }
       ]
     }

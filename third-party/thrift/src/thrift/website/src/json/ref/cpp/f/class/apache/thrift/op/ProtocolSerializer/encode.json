@@ -521,5 +521,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/encode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/encode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/ProtocolSerializer/encode",
+  "parent_links": [
+    {
+      "text_html": "ProtocolSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/ProtocolSerializer"
+    }
+  ]
 }

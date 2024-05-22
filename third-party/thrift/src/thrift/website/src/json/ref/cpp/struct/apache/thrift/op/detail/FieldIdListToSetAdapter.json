@@ -198,7 +198,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/fromThrift",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/fromThrift"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/fromThrift",
+          "parent_links": [
+            {
+              "text_html": "FieldIdListToSetAdapter",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/FieldIdListToSetAdapter"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -251,7 +257,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/toThrift",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/toThrift"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/FieldIdListToSetAdapter/toThrift",
+          "parent_links": [
+            {
+              "text_html": "FieldIdListToSetAdapter",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/FieldIdListToSetAdapter"
+            }
+          ]
         }
       ]
     }

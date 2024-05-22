@@ -46,5 +46,11 @@
   "brief_html": "<p>Write a struct end. This doesn't actually put anything on the wire. We use this as an opportunity to pop the last field from the current struct off of the field stack. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/writeStructEnd",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

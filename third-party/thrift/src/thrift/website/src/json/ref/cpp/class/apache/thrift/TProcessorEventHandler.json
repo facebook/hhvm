@@ -855,7 +855,13 @@
           "brief_html": "Constructs the TProcessorEventHandler.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -902,7 +908,13 @@
           "brief_html": "Destructs the TProcessorEventHandler.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/TProcessorEventHandler.dtor",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -952,7 +964,13 @@
           "brief_html": "<p>Returns the name of the <code>TProcessorEventHandler</code> implementation </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getName",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getName"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getName",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1015,7 +1033,13 @@
           "brief_html": "<p>Called before calling other callback methods. Expected to return some sort of context object. The return value is passed to all other callbacks for that function invocation. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getServiceContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getServiceContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getServiceContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1070,7 +1094,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/getContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1128,7 +1158,13 @@
           "brief_html": "<p>Expected to free resources associated with a context. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/freeContext",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1186,7 +1222,13 @@
           "brief_html": "<p>Called before reading arguments. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preRead",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preRead"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preRead",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1247,7 +1289,13 @@
           "brief_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onReadData",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onReadData"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onReadData",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1311,7 +1359,13 @@
           "brief_html": "<p>Called between reading arguments and calling the handler. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postRead",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1369,7 +1423,13 @@
           "brief_html": "<p>Called between calling the handler and writing the response. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preWrite",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preWrite"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/preWrite",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1430,7 +1490,13 @@
           "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onWriteData",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onWriteData"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onWriteData",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1491,7 +1557,13 @@
           "brief_html": "<p>Called after writing the response. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postWrite",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postWrite"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/postWrite",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1549,7 +1621,13 @@
           "brief_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1599,7 +1677,13 @@
           "brief_html": "<p>defaults to false.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/wantNonPerRequestCallbacks",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/wantNonPerRequestCallbacks"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/wantNonPerRequestCallbacks",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1657,7 +1741,13 @@
           "brief_html": "<p>Called if the handler throws an undeclared exception. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerError",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerError"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerError",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1717,7 +1807,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerErrorWrapped",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerErrorWrapped"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/handlerErrorWrapped",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1787,7 +1883,13 @@
           "brief_html": "<p>Called if the handler throws an exception.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userException",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userException"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userException",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1858,7 +1960,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userExceptionWrapped",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userExceptionWrapped"
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userExceptionWrapped",
+          "parent_links": [
+            {
+              "text_html": "TProcessorEventHandler",
+              "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler"
+            }
+          ]
         }
       ]
     }

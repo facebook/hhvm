@@ -104,5 +104,11 @@
   "brief_html": "<p>Replaces the existing value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/FieldPatch/assign",
+  "parent_links": [
+    {
+      "text_html": "FieldPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+    }
+  ]
 }

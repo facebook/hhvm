@@ -254,5 +254,11 @@
   "brief_html": "Constructs the optional_field_ref.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/optional_field_ref",
+  "parent_links": [
+    {
+      "text_html": "optional_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+    }
+  ]
 }

@@ -152,5 +152,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear",
+  "parent_links": [
+    {
+      "text_html": "Clear",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Clear"
+    }
+  ]
 }

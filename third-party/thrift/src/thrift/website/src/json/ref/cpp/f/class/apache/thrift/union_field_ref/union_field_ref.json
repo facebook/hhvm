@@ -67,5 +67,11 @@
   "brief_html": "Constructs the union_field_ref.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref",
-  "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref"
+  "refid": "/ref/cpp/f/class/apache/thrift/union_field_ref/union_field_ref",
+  "parent_links": [
+    {
+      "text_html": "union_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/union_field_ref"
+    }
+  ]
 }

@@ -61,5 +61,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat",
-  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat"
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat",
+  "parent_links": [
+    {
+      "text_html": "StringOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+    }
+  ]
 }

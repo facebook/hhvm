@@ -463,7 +463,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -507,7 +513,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -594,7 +606,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -638,7 +656,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -725,7 +749,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -769,7 +799,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -813,7 +849,13 @@
           "brief_html": "Destructs the BaseContainerPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseContainerPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseContainerPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/BaseContainerPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -875,7 +917,13 @@
           "brief_html": "<p>Appends a list. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/append",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/append"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/append",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -938,7 +986,13 @@
           "brief_html": "<p>Emplaces and appends a new element. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/emplace_back",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1000,7 +1054,13 @@
           "brief_html": "<p>Appends the given element value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/push_back",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/push_back"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/push_back",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1061,7 +1121,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n}\n</pre> For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.clear();\npatch.push_front(30);\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.prepend({30}); \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1431,7 +1497,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1493,7 +1565,13 @@
           "brief_html": "<p>Prepends a list. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/prepend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/prepend"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/prepend",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1892,7 +1970,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1942,7 +2026,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2000,7 +2090,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2050,7 +2146,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2236,7 +2338,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2298,7 +2406,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2345,7 +2459,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2399,7 +2519,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2460,7 +2586,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2610,7 +2742,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2657,7 +2795,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "ListPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+            }
+          ]
         }
       ]
     }

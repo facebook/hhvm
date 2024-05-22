@@ -59,5 +59,11 @@
   "brief_html": "<p>It calls the given function with each folly::tag&lt;thrift::ident::*&gt;{} in Thrift class. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident",
-  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident"
+  "refid": "/ref/cpp/f/assoc/struct/apache/thrift/op/detail/Get/for_each_ident",
+  "parent_links": [
+    {
+      "text_html": "Get",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Get"
+    }
+  ]
 }

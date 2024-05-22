@@ -1080,7 +1080,13 @@
           "brief_html": "Constructs the HashProtocol.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/HashProtocol",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1132,7 +1138,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1179,7 +1191,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeStructEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1238,7 +1256,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1285,7 +1309,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1332,7 +1362,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldStop",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldStop"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFieldStop",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1391,7 +1427,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1438,7 +1480,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1485,7 +1533,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapValueEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1532,7 +1586,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeMapEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1588,7 +1648,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1635,7 +1701,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeListEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1691,7 +1763,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetBegin",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1738,7 +1816,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetEnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetEnd"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeSetEnd",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1791,7 +1875,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBool",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBool"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBool",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1844,7 +1934,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeByte",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeByte"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeByte",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1897,7 +1993,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI16",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI16"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI16",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1950,7 +2052,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI32",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI32"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI32",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2003,7 +2111,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI64",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI64"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeI64",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2056,7 +2170,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeDouble",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeDouble"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeDouble",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2109,7 +2229,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFloat",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFloat"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeFloat",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2162,7 +2288,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeString",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeString"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeString",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2332,7 +2464,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBinary",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBinary"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/writeBinary",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2380,7 +2518,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/HashProtocol/kSortKeys",
+          "parent_links": [
+            {
+              "text_html": "HashProtocol",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol"
+            }
+          ]
         }
       ]
     }

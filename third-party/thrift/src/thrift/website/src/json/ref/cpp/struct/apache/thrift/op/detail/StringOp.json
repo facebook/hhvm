@@ -1706,7 +1706,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/assign",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1771,7 +1777,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/concat",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2139,7 +2151,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/append",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/append"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/append",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2507,7 +2525,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/prepend",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2607,7 +2631,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/compare",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/compare"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/compare",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2664,7 +2694,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/add",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/add"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/add",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2834,7 +2870,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ref",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2887,7 +2929,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/cref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/cref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/cref",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2998,7 +3046,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ret",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ret"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/ret",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3051,7 +3105,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/delete_",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3108,7 +3168,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/make",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/make"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/make",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3161,7 +3227,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/empty",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3214,7 +3286,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/clear",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3271,7 +3349,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/identical",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/identical"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/identical",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3381,7 +3465,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/partialCmp",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/partialCmp"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/StringOp/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "StringOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp"
+            }
+          ]
         }
       ]
     }

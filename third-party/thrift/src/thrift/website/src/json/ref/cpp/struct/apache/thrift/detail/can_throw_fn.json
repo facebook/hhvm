@@ -135,7 +135,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/detail/can_throw_fn/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/detail/can_throw_fn/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/detail/can_throw_fn/operator.call",
+          "parent_links": [
+            {
+              "text_html": "can_throw_fn",
+              "href": "/ref/cpp/struct/apache/thrift/detail/can_throw_fn"
+            }
+          ]
         }
       ]
     }

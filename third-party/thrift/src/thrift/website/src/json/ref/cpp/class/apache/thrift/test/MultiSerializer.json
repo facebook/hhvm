@@ -1140,7 +1140,13 @@
           "brief_html": "Destructs the Serializer.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/Serializer.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/Serializer.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/Serializer.dtor",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1239,7 +1245,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/getProtocol",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/getProtocol"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/getProtocol",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1551,7 +1563,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/encode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/encode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/encode",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2269,7 +2287,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/decode",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/decode"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/decode",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2326,7 +2350,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetInt",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetInt"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetInt",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2383,7 +2413,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetDbl",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetDbl"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetDbl",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2436,7 +2472,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAny",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAny"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAny",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2483,7 +2525,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAll",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAll"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAndResetAll",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2530,7 +2578,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDec",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDec"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDec",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2577,7 +2631,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntEnc",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntEnc"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntEnc",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2624,7 +2684,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntDec",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntDec"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkIntDec",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2671,7 +2737,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblEnc",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblEnc"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblEnc",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2718,7 +2790,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblDec",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblDec"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkDblDec",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2765,7 +2843,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyIntDec",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyIntDec"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyIntDec",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2812,7 +2896,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDblDec",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDblDec"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkAnyDblDec",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2869,7 +2959,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType",
-          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType"
+          "refid": "/ref/cpp/f/class/apache/thrift/test/MultiSerializer/checkType",
+          "parent_links": [
+            {
+              "text_html": "MultiSerializer",
+              "href": "/ref/cpp/class/apache/thrift/test/MultiSerializer"
+            }
+          ]
         }
       ]
     }

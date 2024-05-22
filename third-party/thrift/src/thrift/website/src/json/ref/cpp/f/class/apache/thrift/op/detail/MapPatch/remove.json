@@ -58,5 +58,11 @@
   "brief_html": "<p>Removes keys. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/remove",
+  "parent_links": [
+    {
+      "text_html": "MapPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+    }
+  ]
 }

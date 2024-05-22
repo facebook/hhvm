@@ -149,7 +149,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MockStruct/write",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MockStruct/write"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MockStruct/write",
+          "parent_links": [
+            {
+              "text_html": "MockStruct",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MockStruct"
+            }
+          ]
         }
       ]
     }

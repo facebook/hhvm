@@ -46,5 +46,11 @@
   "brief_html": "<p>Creates a new patch that clears the value. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/createClear",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/createClear"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseClearPatch/createClear",
+  "parent_links": [
+    {
+      "text_html": "BaseClearPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseClearPatch"
+    }
+  ]
 }

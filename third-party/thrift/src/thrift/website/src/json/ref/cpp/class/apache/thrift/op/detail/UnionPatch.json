@@ -309,7 +309,13 @@
           "brief_html": "Constructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -353,7 +359,13 @@
           "brief_html": "Destructs the BasePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BasePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -440,7 +452,13 @@
           "brief_html": "Constructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -484,7 +502,13 @@
           "brief_html": "Destructs the BaseAssignPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseAssignPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -571,7 +595,13 @@
           "brief_html": "Constructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -615,7 +645,13 @@
           "brief_html": "Destructs the BaseClearPatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseClearPatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -702,7 +738,13 @@
           "brief_html": "Constructs the BaseEnsurePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -746,7 +788,13 @@
           "brief_html": "Destructs the BaseEnsurePatch.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch.dtor",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch.dtor"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch.dtor",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -983,7 +1031,13 @@
           "brief_html": "<p>Replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1035,7 +1089,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/removeImpl",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/removeImpl"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/removeImpl",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1125,7 +1185,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/remove",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/remove"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/remove",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1186,7 +1252,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getRawPatch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getRawPatch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getRawPatch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1288,7 +1360,13 @@
           "brief_html": "<p>Returns the proper patch object for the given field. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1758,7 +1836,13 @@
           "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1814,7 +1898,13 @@
           "brief_html": "<p>Returns if the patch ensures the given field is set (explicitly or implicitly). </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensures",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensures"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensures",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1861,7 +1951,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/empty",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/empty"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/empty",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1959,7 +2055,13 @@
           "brief_html": "<p>Returns if the patch modifies the given field. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/modifies",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2065,7 +2167,13 @@
           "brief_html": "<p>Ensures the given field is set. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2120,7 +2228,13 @@
           "brief_html": "<p>Ensures the given field is initalized, and return the associated patch object. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patch",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patch"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patch",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2181,7 +2295,13 @@
           "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2551,7 +2671,13 @@
           "brief_html": "<p>Applies patches to a Thrift value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/apply",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/apply"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2639,7 +2765,13 @@
           "brief_html": "<p>Clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/clear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2691,7 +2823,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchPrior",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchPrior"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchPrior",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2743,7 +2881,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchAfter",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchAfter"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchAfter",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2790,7 +2934,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2842,7 +2992,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/maybeEnsure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/maybeEnsure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/maybeEnsure",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2903,7 +3059,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getEnsure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getEnsure"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/getEnsure",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2953,7 +3115,13 @@
           "brief_html": "<p>Creates a new patch that clears the value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createClear",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3011,7 +3179,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClear",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3073,7 +3247,13 @@
           "brief_html": "<p>Creates a new patch that replaces the existing value. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createAssign",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3120,7 +3300,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/hasAssign",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/hasAssign"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/hasAssign",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3174,7 +3360,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assignOr",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assignOr"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/assignOr",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3235,7 +3427,13 @@
           "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/merge",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/merge"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3385,7 +3583,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toThrift",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toThrift"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toThrift",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -3432,7 +3636,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toObject",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toObject"
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "UnionPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+            }
+          ]
         }
       ]
     }

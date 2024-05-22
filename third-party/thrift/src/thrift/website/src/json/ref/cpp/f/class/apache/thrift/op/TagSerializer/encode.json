@@ -310,5 +310,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/TagSerializer/encode",
+  "parent_links": [
+    {
+      "text_html": "TagSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/TagSerializer"
+    }
+  ]
 }

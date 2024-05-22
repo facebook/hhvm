@@ -830,7 +830,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/put",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -951,7 +957,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ensure",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ensure"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ensure",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1014,7 +1026,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/get",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/get"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/get",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1174,7 +1192,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/next",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/next"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/next",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1274,7 +1298,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/iter",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/iter"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/iter",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1522,7 +1552,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ref",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1827,7 +1863,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ret",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ret"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/ret",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1880,7 +1922,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/size",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/size"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/size",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1937,7 +1985,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/find",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/find"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/find",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -1990,7 +2044,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/cref",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/cref"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/cref",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2043,7 +2103,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/delete_",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/delete_"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/delete_",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2100,7 +2166,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/make",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/make"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/make",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2153,7 +2225,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/empty",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/empty"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/empty",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2206,7 +2284,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/clear",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/clear"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/clear",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2263,7 +2347,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/assign",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/assign"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/assign",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2320,7 +2410,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/identical",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/identical"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/identical",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2377,7 +2473,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/compare",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/compare"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/compare",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         },
         {
           "kind": "overloadset",
@@ -2487,7 +2589,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/partialCmp",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/partialCmp"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/MapOp/partialCmp",
+          "parent_links": [
+            {
+              "text_html": "MapOp",
+              "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp"
+            }
+          ]
         }
       ]
     }

@@ -55,5 +55,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from",
-  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from"
+  "refid": "/ref/cpp/f/class/apache/thrift/optional_field_ref/move_from",
+  "parent_links": [
+    {
+      "text_html": "optional_field_ref",
+      "href": "/ref/cpp/class/apache/thrift/optional_field_ref"
+    }
+  ]
 }

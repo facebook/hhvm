@@ -57,5 +57,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/getEnsure",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/getEnsure"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/getEnsure",
+  "parent_links": [
+    {
+      "text_html": "StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+    }
+  ]
 }

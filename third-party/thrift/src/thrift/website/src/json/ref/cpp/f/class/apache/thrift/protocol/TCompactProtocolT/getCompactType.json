@@ -52,5 +52,11 @@
   "brief_html": "<p>Given a TType value, find the appropriate <code>detail::compact::Types</code> value </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType",
-  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType"
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/TCompactProtocolT/getCompactType",
+  "parent_links": [
+    {
+      "text_html": "TCompactProtocolT",
+      "href": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
+    }
+  ]
 }

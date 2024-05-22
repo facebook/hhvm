@@ -32,7 +32,7 @@
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
         "bodystart": "124",
-        "bodyend": "136"
+        "bodyend": "131"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol&gt;\nvoid decode(Protocol&amp; prot)",
@@ -54,5 +54,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/decode",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/decode"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/decode",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
 }

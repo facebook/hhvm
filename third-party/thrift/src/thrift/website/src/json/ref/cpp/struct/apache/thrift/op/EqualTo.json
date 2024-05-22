@@ -365,7 +365,13 @@
           "brief_html": "",
           "groupname_html": "",
           "href": "/ref/cpp/f/struct/apache/thrift/op/EqualTo/operator.call",
-          "refid": "/ref/cpp/f/struct/apache/thrift/op/EqualTo/operator.call"
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/EqualTo/operator.call",
+          "parent_links": [
+            {
+              "text_html": "EqualTo",
+              "href": "/ref/cpp/struct/apache/thrift/op/EqualTo"
+            }
+          ]
         }
       ]
     }

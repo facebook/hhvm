@@ -50,5 +50,11 @@
   "brief_html": "",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/assignOr",
-  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/assignOr"
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/assignOr",
+  "parent_links": [
+    {
+      "text_html": "BoolPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+    }
+  ]
 }

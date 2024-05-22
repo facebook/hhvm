@@ -1751,6 +1751,30 @@ end = struct
       ~f:apply_quickfix
 end
 
+let do_hover ~ctx ~filename oc pos_given =
+  let (ctx, entry) =
+    Provider_context.add_entry_if_missing ~ctx ~path:filename
+  in
+  let (line, column) =
+    match pos_given with
+    | Some (line, column) -> (line, column)
+    | None ->
+      let src = Provider_context.read_file_contents_exn entry in
+      caret_pos_exn src "^ hover-at-caret"
+  in
+  let results = Ide_hover.go_quarantined ~ctx ~entry ~line ~column in
+  let formatted_results =
+    List.map
+      ~f:(fun r ->
+        let open HoverService in
+        String.concat ~sep:"\n" (r.snippet :: r.addendum))
+      results
+  in
+  Printf.fprintf
+    oc
+    "%s\n"
+    (String.concat ~sep:"\n-------------\n" formatted_results)
+
 let handle_mode
     mode
     filenames
@@ -2262,29 +2286,17 @@ let handle_mode
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())
+  | Hover None when batch_mode ->
+    iter_over_files (fun filename ->
+        let oc =
+          Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
+        in
+        Typing_log.out_channel := oc;
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            do_hover ~ctx ~filename oc None))
   | Hover pos_given ->
     let filename = expect_single_file () in
-    let (ctx, entry) =
-      Provider_context.add_entry_if_missing ~ctx ~path:filename
-    in
-    let (line, column) =
-      match pos_given with
-      | Some (line, column) -> (line, column)
-      | None ->
-        let src = Provider_context.read_file_contents_exn entry in
-        caret_pos_exn src "^ hover-at-caret"
-    in
-    let results = Ide_hover.go_quarantined ~ctx ~entry ~line ~column in
-    let formatted_results =
-      List.map
-        ~f:(fun r ->
-          let open HoverService in
-          String.concat ~sep:"\n" (r.snippet :: r.addendum))
-        results
-    in
-    Printf.printf
-      "%s\n"
-      (String.concat ~sep:"\n-------------\n" formatted_results)
+    do_hover ~ctx ~filename stdout pos_given
   | Apply_quickfixes ->
     let path = expect_single_file () in
     let (ctx, _entry) = Provider_context.add_entry_if_missing ~ctx ~path in

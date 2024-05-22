@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -18,7 +17,6 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -70,7 +68,6 @@ func (c *RaiserChannelClient) Close() error {
 
 type RaiserClient struct {
     chClient *RaiserChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ RaiserClientInterface = (*RaiserClient)(nil)

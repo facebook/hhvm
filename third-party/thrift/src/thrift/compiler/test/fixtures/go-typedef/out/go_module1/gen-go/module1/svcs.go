@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     module0 "module0"
     module2 "module2"
@@ -22,7 +21,6 @@ var _ = module2.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -71,7 +69,6 @@ func (c *FinderChannelClient) Close() error {
 
 type FinderClient struct {
     chClient *FinderChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FinderClientInterface = (*FinderClient)(nil)

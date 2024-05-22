@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -18,7 +17,6 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -61,7 +59,6 @@ func (c *MyRootChannelClient) Close() error {
 
 type MyRootClient struct {
     chClient *MyRootChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyRootClientInterface = (*MyRootClient)(nil)
@@ -403,7 +400,6 @@ type MyNodeClient struct {
     // Inherited/extended service
     *MyRootClient
     chClient *MyNodeChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyNodeClientInterface = (*MyNodeClient)(nil)
@@ -720,7 +716,6 @@ type MyLeafClient struct {
     // Inherited/extended service
     *MyNodeClient
     chClient *MyLeafChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = (*MyLeafClient)(nil)

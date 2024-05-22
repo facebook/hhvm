@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -18,7 +17,6 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -79,7 +77,6 @@ func (c *MyServiceChannelClient) Close() error {
 
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
@@ -2446,7 +2443,6 @@ func (c *MyServicePrioParentChannelClient) Close() error {
 
 type MyServicePrioParentClient struct {
     chClient *MyServicePrioParentChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = (*MyServicePrioParentClient)(nil)
@@ -3014,7 +3010,6 @@ type MyServicePrioChildClient struct {
     // Inherited/extended service
     *MyServicePrioParentClient
     chClient *MyServicePrioChildChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = (*MyServicePrioChildClient)(nil)
@@ -3320,7 +3315,6 @@ func (c *BadServiceChannelClient) Close() error {
 
 type BadServiceClient struct {
     chClient *BadServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ BadServiceClientInterface = (*BadServiceClient)(nil)
@@ -3732,7 +3726,6 @@ func (c *FooBarBazServiceChannelClient) Close() error {
 
 type FooBarBazServiceClient struct {
     chClient *FooBarBazServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = (*FooBarBazServiceClient)(nil)

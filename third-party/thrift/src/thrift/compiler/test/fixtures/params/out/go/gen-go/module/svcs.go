@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -18,7 +17,6 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -73,7 +71,6 @@ func (c *NestedContainersChannelClient) Close() error {
 
 type NestedContainersClient struct {
     chClient *NestedContainersChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ NestedContainersClientInterface = (*NestedContainersClient)(nil)

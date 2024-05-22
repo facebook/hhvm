@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     included "included"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -20,7 +19,6 @@ var _ = included.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -66,7 +64,6 @@ func (c *SomeServiceChannelClient) Close() error {
 
 type SomeServiceClient struct {
     chClient *SomeServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = (*SomeServiceClient)(nil)

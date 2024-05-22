@@ -8,7 +8,6 @@ import (
     "context"
     "fmt"
     "strings"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -18,7 +17,6 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = strings.Split
-var _ = sync.Mutex{}
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
@@ -61,7 +59,6 @@ func (c *FooServiceChannelClient) Close() error {
 
 type FooServiceClient struct {
     chClient *FooServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FooServiceClientInterface = (*FooServiceClient)(nil)
@@ -392,7 +389,6 @@ func (c *FB303ServiceChannelClient) Close() error {
 
 type FB303ServiceClient struct {
     chClient *FB303ServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = (*FB303ServiceClient)(nil)
@@ -891,7 +887,6 @@ func (c *MyServiceChannelClient) Close() error {
 
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
@@ -4064,7 +4059,6 @@ func (c *DbMixedStackArgumentsChannelClient) Close() error {
 
 type DbMixedStackArgumentsClient struct {
     chClient *DbMixedStackArgumentsChannelClient
-    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = (*DbMixedStackArgumentsClient)(nil)

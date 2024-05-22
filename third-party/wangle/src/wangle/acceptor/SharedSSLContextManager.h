@@ -147,8 +147,12 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   // recreates contexts using config_ and seeds_
   void reloadContexts() {
     if (config_.fizzConfig.enableFizz) {
-      certManager_ = FizzConfigUtilT::createCertManager(config_, nullptr);
-      fizzContext_ = FizzConfigUtilT::createFizzContext(config_);
+      certManager_ = FizzConfigUtilT::createCertManager(
+          config_.sslContextConfigs,
+          /* pwFactory = */ nullptr,
+          config_.strictSSL);
+      fizzContext_ = FizzConfigUtilT::createFizzContext(
+          config_.sslContextConfigs, config_.fizzConfig, config_.strictSSL);
       if (fizzContext_) {
         fizzContext_->setCertManager(certManager_);
         auto fizzTicketCipher = FizzConfigUtilT::createFizzTicketCipher(

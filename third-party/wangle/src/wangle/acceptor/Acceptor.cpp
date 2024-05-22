@@ -153,7 +153,10 @@ void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
 }
 
 std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext() {
-  return FizzConfigUtil::createFizzContext(accConfig_);
+  return FizzConfigUtil::createFizzContext(
+      accConfig_.sslContextConfigs,
+      accConfig_.fizzConfig,
+      accConfig_.strictSSL);
 }
 
 std::shared_ptr<fizz::server::FizzServerContext>
@@ -188,7 +191,10 @@ std::shared_ptr<fizz::server::TicketCipher> Acceptor::createFizzTicketCipher(
 }
 
 std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager() {
-  return FizzConfigUtil::createCertManager(accConfig_, nullptr);
+  return FizzConfigUtil::createCertManager(
+      accConfig_.sslContextConfigs,
+      /* pwFactory = */ nullptr,
+      accConfig_.strictSSL);
 }
 
 std::string Acceptor::getPskContext() {

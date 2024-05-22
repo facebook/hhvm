@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # pyre-strict
+# pyre-ignore-all-errors[16]: `EnumTests` has not attribute `tt`
 
 
 from __future__ import annotations
@@ -22,165 +23,190 @@ import pickle
 import unittest
 from typing import cast, Type, TypeVar
 
-from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
+import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.serializer as immutable_serializer
+import thrift.python.test.enums.thrift_mutable_types as mutable_types
+import thrift.python.test.enums.thrift_types as immutable_types
 
-from thrift.python.test.enums.thrift_types import (
-    BadMembers,
-    Color,
-    ColorGroups,
-    File,
-    Kind,
-    OptionalColorGroups,
-    OptionalFile,
-    Perm,
-)
+from parameterized import parameterized_class
+
 from thrift.python.types import BadEnum, Enum, Flag
+
 
 _E = TypeVar("_E", bound=Enum)
 
 
+# tt = test_types, ser = serializer
+@parameterized_class(
+    ("tt", "ser"),
+    [
+        (immutable_types, immutable_serializer),
+        (mutable_types, mutable_serializer),
+    ],
+)
 class EnumTests(unittest.TestCase):
     def test_bad_member_names(self) -> None:
-        self.assertIsInstance(BadMembers.name_, BadMembers)
-        self.assertIsInstance(BadMembers.value_, BadMembers)
-        self.assertIn("name_", BadMembers.__members__)
-        self.assertIn("value_", BadMembers.__members__)
+        self.assertIsInstance(self.tt.BadMembers.name_, self.tt.BadMembers)
+        self.assertIsInstance(self.tt.BadMembers.value_, self.tt.BadMembers)
+        self.assertIn("name_", self.tt.BadMembers.__members__)
+        self.assertIn("value_", self.tt.BadMembers.__members__)
 
     def test_normal_enum(self) -> None:
         with self.assertRaises(TypeError):
             # Enums are not ints
-            # pyre-ignore[6]: for tests
-            File(name="/etc/motd", type=8)
-        x = File(name="/etc", type=Kind.DIR)
-        self.assertIsInstance(x.type, Kind)
-        self.assertEqual(x.type, Kind.DIR)
-        self.assertNotEqual(x.type, Kind.SOCK)
-        self.assertNotIsInstance(4, Kind, "Ints are not Enums")
-        self.assertIsInstance(Kind.DIR, int, "Enums are Ints")
-        self.assertIn(x.type, Kind)
+            self.tt.File(name="/etc/motd", type=8)
+        x = self.tt.File(name="/etc", type=self.tt.Kind.DIR)
+        self.assertIsInstance(x.type, self.tt.Kind)
+        self.assertEqual(x.type, self.tt.Kind.DIR)
+        self.assertNotEqual(x.type, self.tt.Kind.SOCK)
+        self.assertNotIsInstance(4, self.tt.Kind, "Ints are not Enums")
+        self.assertIsInstance(self.tt.Kind.DIR, int, "Enums are Ints")
+        self.assertIn(x.type, self.tt.Kind)
         self.assertEqual(x.type.value, 4)
 
     def test_enum_value_rename(self) -> None:
         """The value name is None but we auto rename it to None_"""
-        x = deserialize(File, b'{"name":"blah", "type":0}', Protocol.JSON)
-        self.assertEqual(x.type, Kind.None_)
+        x = self.ser.deserialize(
+            self.tt.File, b'{"name":"blah", "type":0}', self.ser.Protocol.JSON
+        )
+        self.assertEqual(x.type, self.tt.Kind.None_)
 
     def test_protocol_int_conversion(self) -> None:
-        self.assertEqual(Protocol.BINARY.value, 0)
-        self.assertEqual(Protocol.DEPRECATED_VERBOSE_JSON.value, 1)
-        self.assertEqual(Protocol.COMPACT.value, 2)
-        self.assertEqual(Protocol.JSON.value, 5)
+        self.assertEqual(self.ser.Protocol.BINARY.value, 0)
+        self.assertEqual(self.ser.Protocol.DEPRECATED_VERBOSE_JSON.value, 1)
+        self.assertEqual(self.ser.Protocol.COMPACT.value, 2)
+        self.assertEqual(self.ser.Protocol.JSON.value, 5)
 
     def test_bad_enum_hash_same(self) -> None:
-        x = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
-        y = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
-        self.assertEqual(hash(x), hash(y))
+        x = self.ser.deserialize(
+            self.tt.File,
+            b'{"name": "something", "type": 64}',
+            self.ser.Protocol.JSON,
+        )
+        y = self.ser.deserialize(
+            self.tt.File, b'{"name": "something", "type": 64}', self.ser.Protocol.JSON
+        )
+        # Mutable types do not support hashing
+        if self.tt.__name__.endswith("immutable_types"):
+            self.assertEqual(hash(x), hash(y))
         self.assertEqual(hash(x.type), hash(y.type))
         self.assertFalse(x.type is y.type)
         self.assertEqual(x.type, y.type)
         self.assertFalse(x.type != y.type)
 
     def test_bad_enum_in_struct(self) -> None:
-        to_serialize = OptionalFile(name="something", type=64)
-        serialized = serialize_iobuf(to_serialize)
-        x = deserialize(File, serialized)
-        self.assertBadEnum(cast(BadEnum, x.type), Kind, 64)
+        to_serialize = self.tt.OptionalFile(name="something", type=64)
+        serialized = self.ser.serialize_iobuf(to_serialize)
+        x = self.ser.deserialize(self.tt.File, serialized)
+        self.assertBadEnum(cast(BadEnum, x.type), self.tt.Kind, 64)
 
     def test_bad_enum_in_list_index(self) -> None:
-        x = deserialize(
-            ColorGroups, serialize_iobuf(OptionalColorGroups(color_list=[1, 5, 0]))
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(self.tt.OptionalColorGroups(color_list=[1, 5, 0])),
         )
         self.assertEqual(len(x.color_list), 3)
-        self.assertEqual(x.color_list[0], Color.blue)
-        self.assertBadEnum(cast(BadEnum, x.color_list[1]), Color, 5)
-        self.assertEqual(x.color_list[2], Color.red)
+        self.assertEqual(x.color_list[0], self.tt.Color.blue)
+        self.assertBadEnum(cast(BadEnum, x.color_list[1]), self.tt.Color, 5)
+        self.assertEqual(x.color_list[2], self.tt.Color.red)
 
     def test_bad_enum_in_list_iter(self) -> None:
-        x = deserialize(
-            ColorGroups, serialize_iobuf(OptionalColorGroups(color_list=[1, 5, 0]))
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(self.tt.OptionalColorGroups(color_list=[1, 5, 0])),
         )
         for idx, v in enumerate(x.color_list):
             if idx == 0:
-                self.assertEqual(v, Color.blue)
+                self.assertEqual(v, self.tt.Color.blue)
             elif idx == 1:
-                self.assertBadEnum(cast(BadEnum, v), Color, 5)
+                self.assertBadEnum(cast(BadEnum, v), self.tt.Color, 5)
             else:
-                self.assertEqual(v, Color.red)
+                self.assertEqual(v, self.tt.Color.red)
 
     def test_bad_enum_in_list_reverse(self) -> None:
-        x = deserialize(
-            ColorGroups, serialize_iobuf(OptionalColorGroups(color_list=[1, 5, 0]))
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(self.tt.OptionalColorGroups(color_list=[1, 5, 0])),
         )
         for idx, v in enumerate(reversed(x.color_list)):
             if idx == 0:
-                self.assertEqual(v, Color.red)
+                self.assertEqual(v, self.tt.Color.red)
             elif idx == 1:
-                self.assertBadEnum(cast(BadEnum, v), Color, 5)
+                self.assertBadEnum(cast(BadEnum, v), self.tt.Color, 5)
             else:
-                self.assertEqual(v, Color.blue)
+                self.assertEqual(v, self.tt.Color.blue)
 
     def test_bad_enum_in_set_iter(self) -> None:
-        x = deserialize(
-            ColorGroups, serialize_iobuf(OptionalColorGroups(color_list=[1, 5, 0]))
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(self.tt.OptionalColorGroups(color_list=[1, 5, 0])),
         )
         for v in x.color_set:
-            if v not in (Color.blue, Color.red):
-                self.assertBadEnum(cast(BadEnum, v), Color, 5)
+            if v not in (self.tt.Color.blue, self.tt.Color.red):
+                self.assertBadEnum(cast(BadEnum, v), self.tt.Color, 5)
 
     def test_bad_enum_in_map_lookup(self) -> None:
-        x = deserialize(
-            ColorGroups,
-            serialize_iobuf(OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})),
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(
+                self.tt.OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})
+            ),
         )
-        val = x.color_map[Color.red]
-        self.assertBadEnum(cast(BadEnum, val), Color, 5)
+        val = x.color_map[self.tt.Color.red]
+        self.assertBadEnum(cast(BadEnum, val), self.tt.Color, 5)
 
     def test_bad_enum_in_map_iter(self) -> None:
-        x = deserialize(
-            ColorGroups,
-            serialize_iobuf(OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})),
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(
+                self.tt.OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})
+            ),
         )
         s = set()
         for k in x.color_map:
             s.add(k)
         self.assertEqual(len(s), 4)
-        s.discard(Color.red)
-        s.discard(Color.blue)
+        s.discard(self.tt.Color.red)
+        s.discard(self.tt.Color.blue)
         lst = sorted(s, key=lambda e: cast(BadEnum, e).value)
-        self.assertBadEnum(cast(BadEnum, lst[0]), Color, 6)
-        self.assertBadEnum(cast(BadEnum, lst[1]), Color, 7)
+        self.assertBadEnum(cast(BadEnum, lst[0]), self.tt.Color, 6)
+        self.assertBadEnum(cast(BadEnum, lst[1]), self.tt.Color, 7)
 
     def test_bad_enum_in_map_values(self) -> None:
-        x = deserialize(
-            ColorGroups,
-            serialize_iobuf(OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})),
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(
+                self.tt.OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})
+            ),
         )
         s = set()
         for k in x.color_map.values():
             s.add(k)
         self.assertEqual(len(s), 4)
-        s.discard(Color.green)
-        s.discard(Color.blue)
+        s.discard(self.tt.Color.green)
+        s.discard(self.tt.Color.blue)
         lst = sorted(s, key=lambda e: cast(BadEnum, e).value)
-        self.assertBadEnum(cast(BadEnum, lst[0]), Color, 5)
-        self.assertBadEnum(cast(BadEnum, lst[1]), Color, 8)
+        self.assertBadEnum(cast(BadEnum, lst[0]), self.tt.Color, 5)
+        self.assertBadEnum(cast(BadEnum, lst[1]), self.tt.Color, 8)
 
     def test_bad_enum_in_map_items(self) -> None:
-        x = deserialize(
-            ColorGroups,
-            serialize_iobuf(OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})),
+        x = self.ser.deserialize(
+            self.tt.ColorGroups,
+            self.ser.serialize_iobuf(
+                self.tt.OptionalColorGroups(color_map={1: 2, 0: 5, 6: 1, 7: 8})
+            ),
         )
         for k, v in x.color_map.items():
-            if k == Color.blue:
-                self.assertEqual(v, Color.green)
-            elif k == Color.red:
-                self.assertBadEnum(cast(BadEnum, v), Color, 5)
+            if k == self.tt.Color.blue:
+                self.assertEqual(v, self.tt.Color.green)
+            elif k == self.tt.Color.red:
+                self.assertBadEnum(cast(BadEnum, v), self.tt.Color, 5)
             else:
                 ck = cast(BadEnum, k)
                 if ck.value == 6:
-                    self.assertEqual(v, Color.blue)
+                    self.assertEqual(v, self.tt.Color.blue)
                 else:
-                    self.assertBadEnum(cast(BadEnum, v), Color, 8)
+                    self.assertBadEnum(cast(BadEnum, v), self.tt.Color, 8)
 
     def assertBadEnum(self, e: BadEnum, cls: Type[_E], val: int) -> None:
         self.assertIsInstance(e, BadEnum)
@@ -189,145 +215,159 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(int(e), val)
 
     def test_format(self) -> None:
-        self.assertEqual(f"{Color.red}", "Color.red")
+        self.assertEqual(f"{self.tt.Color.red}", "Color.red")
 
     def test_bool_of_class(self) -> None:
-        self.assertTrue(bool(Color))
+        self.assertTrue(bool(self.tt.Color))
 
     def test_bool_of_members(self) -> None:
-        self.assertTrue(Kind.None_)
-        self.assertTrue(Color.red)
+        self.assertTrue(self.tt.Kind.None_)
+        self.assertTrue(self.tt.Color.red)
 
     def test_pickle(self) -> None:
-        serialized = pickle.dumps(Color.green)
+        serialized = pickle.dumps(self.tt.Color.green)
         green = pickle.loads(serialized)
-        self.assertIs(green, Color.green)
+        self.assertIs(green, self.tt.Color.green)
 
     def test_adding_member(self) -> None:
         with self.assertRaises(AttributeError):
-            # pyre-fixme[16]: `Type` has no attribute `black`.
-            Color.black = 3
+            self.tt.Color.black = 3
 
     def test_delete(self) -> None:
         with self.assertRaises(AttributeError):
-            del Color.red
+            del self.tt.Color.red
 
     def test_changing_member(self) -> None:
         with self.assertRaises(AttributeError):
-            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
-            Color.red = "lol"
+            self.tt.Color.red = "lol"
 
     def test_contains(self) -> None:
-        self.assertIn(Color.blue, Color)
-        self.assertIn(1, Color)
+        self.assertIn(self.tt.Color.blue, self.tt.Color)
+        self.assertIn(1, self.tt.Color)
 
     def test_equal(self) -> None:
-        self.assertEqual(Color.blue, Color.blue)
-        self.assertNotEqual(Color.blue, Color.green)
-        self.assertEqual(Color.blue, 1)
-        self.assertEqual(2, Color.green)
-        self.assertNotEqual(Color.blue, Kind.FIFO)
+        self.assertEqual(self.tt.Color.blue, self.tt.Color.blue)
+        self.assertNotEqual(self.tt.Color.blue, self.tt.Color.green)
+        self.assertEqual(self.tt.Color.blue, 1)
+        self.assertEqual(2, self.tt.Color.green)
+        self.assertNotEqual(self.tt.Color.blue, self.tt.Kind.FIFO)
 
     def test_hash(self) -> None:
         colors = {}
-        colors[Color.red] = 0xFF0000
-        colors[Color.blue] = 0x0000FF
-        colors[Color.green] = 0x00FF00
-        self.assertEqual(colors[Color.green], 0x00FF00)
-        self.assertTrue(Color.blue in colors)
-        self.assertTrue(Kind.CHAR not in colors)
+        colors[self.tt.Color.red] = 0xFF0000
+        colors[self.tt.Color.blue] = 0x0000FF
+        colors[self.tt.Color.green] = 0x00FF00
+        self.assertEqual(colors[self.tt.Color.green], 0x00FF00)
+        self.assertTrue(self.tt.Color.blue in colors)
+        self.assertTrue(self.tt.Kind.CHAR not in colors)
         self.assertTrue(1 in colors)
-        values_to_names = {v.value: v.name for v in Color}
-        self.assertEqual(values_to_names[Color.red], "red")
+        values_to_names = {v.value: v.name for v in self.tt.Color}
+        self.assertEqual(values_to_names[self.tt.Color.red], "red")
 
     def test_enum_in_enum_out(self) -> None:
-        self.assertIs(Color(Color.blue), Color.blue)
+        self.assertIs(self.tt.Color(self.tt.Color.blue), self.tt.Color.blue)
 
     def test_enum_value(self) -> None:
-        self.assertEqual(Color.red.value, 0)
+        self.assertEqual(self.tt.Color.red.value, 0)
 
     def test_enum(self) -> None:
-        lst = list(Color)
-        self.assertEqual(len(lst), len(Color))
-        self.assertEqual(len(Color), 3)
-        self.assertEqual([Color.red, Color.blue, Color.green], lst)
+        lst = list(self.tt.Color)
+        self.assertEqual(len(lst), len(self.tt.Color))
+        self.assertEqual(len(self.tt.Color), 3)
+        self.assertEqual(
+            [self.tt.Color.red, self.tt.Color.blue, self.tt.Color.green], lst
+        )
         for i, color in enumerate("red blue green".split(), 0):
-            e = Color(i)
-            self.assertEqual(e, getattr(Color, color))
+            e = self.tt.Color(i)
+            self.assertEqual(e, getattr(self.tt.Color, color))
             self.assertEqual(e.value, i)
             self.assertEqual(e, i)
             self.assertEqual(e.name, color)
-            self.assertIn(e, Color)
-            self.assertIs(type(e), Color)
-            self.assertIsInstance(e, Color)
+            self.assertIn(e, self.tt.Color)
+            self.assertIs(type(e), self.tt.Color)
+            self.assertIsInstance(e, self.tt.Color)
             self.assertEqual(str(e), "Color." + color)
             self.assertEqual(int(e), i)
             self.assertEqual(repr(e), f"<Color.{color}: {i}>")
 
     def test_insinstance_Enum(self) -> None:
-        self.assertIsInstance(Color.red, Enum)
-        self.assertTrue(issubclass(Color, Enum))
+        _ = list(self.tt.Color)
+        self.assertIsInstance(self.tt.Color.red, Enum)
+        self.assertTrue(issubclass(self.tt.Color, Enum))
 
 
+# tt = test_types, ser = serializer
+@parameterized_class(
+    ("tt", "ser"),
+    [
+        (immutable_types, immutable_serializer),
+        (mutable_types, mutable_serializer),
+    ],
+)
 class FlagTests(unittest.TestCase):
     def test_flag_enum(self) -> None:
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for tests
-            File(name="/etc/motd", permissions=4)
-        x = File(name="/bin/sh", permissions=Perm.read | Perm.execute)
-        self.assertIsInstance(x.permissions, Perm)
-        self.assertEqual(x.permissions, Perm.read | Perm.execute)
+            self.tt.File(name="/etc/motd", permissions=4)
+        x = self.tt.File(
+            name="/bin/sh", permissions=self.tt.Perm.read | self.tt.Perm.execute
+        )
+        self.assertIsInstance(x.permissions, self.tt.Perm)
+        self.assertEqual(x.permissions, self.tt.Perm.read | self.tt.Perm.execute)
         self.assertTrue(x.permissions)
-        self.assertNotIsInstance(2, Perm, "Flags are not ints")
+        self.assertNotIsInstance(2, self.tt.Perm, "Flags are not ints")
         self.assertEqual(x.permissions.value, 5)
-        x = File(name="")
+        x = self.tt.File(name="")
         self.assertFalse(x.permissions)
-        self.assertIsInstance(x.permissions, Perm)
-        self.assertEqual(f"{Perm.read}", "Perm.read")
-        self.assertTrue(Perm.read in Perm.read | Perm.execute)
+        self.assertIsInstance(x.permissions, self.tt.Perm)
+        self.assertEqual(f"{self.tt.Perm.read}", "Perm.read")
+        self.assertTrue(self.tt.Perm.read in self.tt.Perm.read | self.tt.Perm.execute)
 
     def test_flag_enum_serialization_roundtrip(self) -> None:
-        x = File(name="/dev/null", type=Kind.CHAR, permissions=Perm.read | Perm.write)
+        x = self.tt.File(
+            name="/dev/null",
+            type=self.tt.Kind.CHAR,
+            permissions=self.tt.Perm.read | self.tt.Perm.write,
+        )
 
-        y = deserialize(File, serialize_iobuf(x))
+        y = self.ser.deserialize(self.tt.File, self.ser.serialize_iobuf(x))
         self.assertEqual(x, y)
-        self.assertEqual(x.permissions, Perm.read | Perm.write)
-        self.assertIsInstance(x.permissions, Perm)
+        self.assertEqual(x.permissions, self.tt.Perm.read | self.tt.Perm.write)
+        self.assertIsInstance(x.permissions, self.tt.Perm)
 
     def test_zero(self) -> None:
-        zero = Perm(0)
-        self.assertNotIn(zero, Perm)
-        self.assertIsInstance(zero, Perm)
+        zero = self.tt.Perm(0)
+        self.assertNotIn(zero, self.tt.Perm)
+        self.assertIsInstance(zero, self.tt.Perm)
 
     def test_logical(self) -> None:
-        self.assertEqual(Perm.read & Perm.write, Perm(0))
-        self.assertEqual(Perm.read ^ Perm.write, Perm(6))
-        self.assertEqual(~Perm.read, Perm(3))
+        self.assertEqual(self.tt.Perm.read & self.tt.Perm.write, self.tt.Perm(0))
+        self.assertEqual(self.tt.Perm.read ^ self.tt.Perm.write, self.tt.Perm(6))
+        self.assertEqual(~self.tt.Perm.read, self.tt.Perm(3))
 
     def test_combination(self) -> None:
-        combo = Perm(Perm.read.value | Perm.execute.value)
-        self.assertNotIn(combo, Perm)
-        self.assertIsInstance(combo, Perm)
-        self.assertIs(combo, Perm.read | Perm.execute)
+        combo = self.tt.Perm(self.tt.Perm.read.value | self.tt.Perm.execute.value)
+        self.assertNotIn(combo, self.tt.Perm)
+        self.assertIsInstance(combo, self.tt.Perm)
+        self.assertIs(combo, self.tt.Perm.read | self.tt.Perm.execute)
 
     def test_is(self) -> None:
-        allp = Perm(7)
-        self.assertIs(allp, Perm(7))
+        allp = self.tt.Perm(7)
+        self.assertIs(allp, self.tt.Perm(7))
 
     def test_invert(self) -> None:
-        x = Perm(-2)
-        self.assertIs(x, Perm.read | Perm.write)
+        x = self.tt.Perm(-2)
+        self.assertIs(x, self.tt.Perm.read | self.tt.Perm.write)
 
     def test_insinstance_Flag(self) -> None:
-        self.assertIsInstance(Perm.read, Flag)
-        self.assertTrue(issubclass(Perm, Flag))
-        self.assertIsInstance(Perm.read, Enum)
-        self.assertTrue(issubclass(Perm, Enum))
+        self.assertIsInstance(self.tt.Perm.read, Flag)
+        self.assertTrue(issubclass(self.tt.Perm, Flag))
+        self.assertIsInstance(self.tt.Perm.read, Enum)
+        self.assertTrue(issubclass(self.tt.Perm, Enum))
 
     def test_combo_in_call(self) -> None:
-        x = Perm(7)
-        self.assertIs(x, Perm.read | Perm.write | Perm.execute)
+        x = self.tt.Perm(7)
+        self.assertIs(x, self.tt.Perm.read | self.tt.Perm.write | self.tt.Perm.execute)
 
     def test_combo_repr(self) -> None:
-        x = Perm(7)
+        x = self.tt.Perm(7)
         self.assertEqual("<Perm.read|write|execute: 7>", repr(x))

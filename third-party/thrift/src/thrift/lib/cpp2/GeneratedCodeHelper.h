@@ -1316,13 +1316,14 @@ EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
     constexpr size_t kQueueAppenderGrowth = 4096;
     prot.setOutput(&queue, kQueueAppenderGrowth);
     TApplicationException ex(ew.what().toStdString());
-    exceptionMetadataBase.what_utf8() = ex.what();
     apache::thrift::detail::serializeExceptionBody(&prot, &ex);
     PayloadAppUnknownExceptionMetdata aue;
     aue.errorClassification().ensure().blame() = Blame;
     exceptionMetadata.appUnknownException_ref() = std::move(aue);
   }
 
+  exceptionMetadataBase.name_utf8() = ew.class_name();
+  exceptionMetadataBase.what_utf8() = ew.what();
   exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
   StreamPayloadMetadata streamPayloadMetadata;
   PayloadMetadata payloadMetadata;

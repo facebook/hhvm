@@ -343,8 +343,8 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
         return inst
 
 cdef class ThriftServer(ThriftServer_py3):
-    def __init__(self, cServiceInterface server, int port=0, ip=None, path=None):
+    def __init__(self, cServiceInterface server, int port=0, ip=None, path=None, socket_fd=None):
         self.funcMap = server.getFunctionTable()
         self.handler = server
         self.lifecycle = [self.handler.onStartServing, self.handler.onStopRequested]
-        super().__init__(PythonAsyncProcessorFactory.create(self.funcMap, self.lifecycle, self.handler.service_name(), self.handler), port, ip, path)
+        super().__init__(PythonAsyncProcessorFactory.create(self.funcMap, self.lifecycle, self.handler.service_name(), self.handler), port, ip, path, socket_fd)

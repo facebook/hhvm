@@ -47,4 +47,5 @@ class ThriftServer(ThriftServer_py3):
         port: int = 0,
         ip: Optional[IPAddress | str] = None,
         path: Optional[Path] = None,
+        socket_fd: Optional[int] = None,
     ) -> None: ...

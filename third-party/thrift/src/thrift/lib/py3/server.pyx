@@ -137,7 +137,7 @@ cdef class ThriftServer:
     def __cinit__(self):
         self.server = make_shared[cThriftServer]()
 
-    def __init__(self, AsyncProcessorFactory handler, int port=0, ip=None, path=None):
+    def __init__(self, AsyncProcessorFactory handler, int port=0, ip=None, path=None, socket_fd=None):
         self.loop = asyncio.get_event_loop()
         self.factory = handler
         if handler is not None:
@@ -152,7 +152,9 @@ cdef class ThriftServer:
         else:
             # This thrift server is only for monitoring/status/control
             self.server.get().setProcessorFactory(make_shared[EmptyAsyncProcessorFactory]())
-        if path:
+        if socket_fd:
+            self.server.get().useExistingSocket(int(socket_fd))
+        elif path:
             fspath = os.fsencode(path)
             self.server.get().setAddress(
                 makeFromPath(

@@ -824,7 +824,12 @@ let parse_options () =
   (* --root implies certain things... *)
   let root =
     match !root with
-    | None -> Path.make "/" (* if none specified, we use this dummy *)
+    | None ->
+      (match !packages_config_path with
+      | Some p ->
+        Path.make (Filename.dirname p)
+        (* if a package config path is supplied, use its directory name as the root *)
+      | None -> Path.make "/" (* otherwise, we use this dummy *))
     | Some root ->
       if Option.is_none !naming_table then
         naming_table := Some (Hh_single_common.find_naming_table_or_fail ());

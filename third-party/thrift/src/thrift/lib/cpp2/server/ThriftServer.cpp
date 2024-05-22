@@ -1838,7 +1838,7 @@ void ThriftServer::updateTLSCert() {
         return;
       }
       evb->runInEventBaseThread(
-          [acceptor] { acceptor->resetSSLContextConfigs(); });
+          [acceptor] { acceptor->reloadSSLContextConfigs(); });
     });
   }
 }
@@ -2235,12 +2235,9 @@ folly::observer::CallbackHandle ThriftServer::getSSLCallbackHandle() {
         if (!evb) {
           return;
         }
-        evb->runInEventBaseThread([acceptor, ssl] {
-          for (auto& sslContext : acceptor->getConfig().sslContextConfigs) {
-            sslContext = *ssl;
-          }
-          acceptor->resetSSLContextConfigs();
-        });
+
+        evb->runInEventBaseThread(
+            [acceptor, ssl] { acceptor->resetSSLContextConfigs({*ssl}); });
       });
     }
     this->updateCertsToWatch();

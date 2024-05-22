@@ -15,19 +15,21 @@
 from cython.operator cimport dereference as deref
 from libc.stdint cimport int32_t
 from libcpp.memory cimport shared_ptr, make_shared
+from testing.types cimport cHardError, cUnusedError
+from testing.converter cimport (
+    HardError_from_cpp,
+    UnusedError_from_cpp,
+)
 
-cimport testing.types
 import testing.types
 
 def simulate_HardError(str errortext, int32_t code):
-    cdef shared_ptr[testing.types.cHardError] c_inst
-    c_inst = make_shared[testing.types.cHardError]()
+    cdef shared_ptr[cHardError] c_inst = make_shared[cHardError]()
     deref(c_inst).errortext_ref().assign(<bytes>errortext.encode('utf-8'))
     deref(c_inst).code_ref().assign(code)
-    return testing.types.HardError._fbthrift_create(c_inst)
+    return HardError_from_cpp(c_inst)
 
 def simulate_UnusedError(str message):
-    cdef shared_ptr[testing.types.cUnusedError] c_inst
-    c_inst = make_shared[testing.types.cUnusedError]()
+    cdef shared_ptr[cUnusedError] c_inst = make_shared[cUnusedError]()
     deref(c_inst).message_ref().assign(<bytes>message.encode('utf-8'))
-    return testing.types.UnusedError._fbthrift_create(c_inst)
+    return UnusedError_from_cpp(c_inst)

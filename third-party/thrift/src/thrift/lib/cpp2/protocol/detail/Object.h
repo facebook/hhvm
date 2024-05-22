@@ -712,7 +712,7 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::listValue: {
       TType elemType = protocol::T_I64;
       const auto& listVal = value.as_list();
-      uint32_t size = listVal.size();
+      const auto size = listVal.size();
       if (size > 0) {
         elemType = getTType(listVal.at(0));
       }
@@ -728,7 +728,7 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
       TType keyType = protocol::T_STRING;
       TType valueType = protocol::T_I64;
       const auto& mapVal = value.as_map();
-      uint32_t size = mapVal.size();
+      const auto size = mapVal.size();
       if (size > 0) {
         keyType = getTType(mapVal.begin()->first);
         valueType = getTType(mapVal.begin()->second);
@@ -746,7 +746,7 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::setValue: {
       TType elemType = protocol::T_I64;
       const auto& setVal = value.as_set();
-      uint32_t size = setVal.size();
+      const auto size = setVal.size();
       if (size > 0) {
         elemType = getTType(*setVal.begin());
       }
@@ -887,7 +887,7 @@ void serializeValue(
 
       // compute size, keyType, and valueType
       const auto& mapVal = value.as_map();
-      uint32_t size = mapVal.size();
+      auto size = mapVal.size();
       if (size > 0) {
         keyType = getTType(mapVal.begin()->first);
         valueType = getTType(mapVal.begin()->second);

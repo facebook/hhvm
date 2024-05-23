@@ -37,7 +37,7 @@ struct Class;
 struct FuncEmitter;
 struct Object;
 struct Extension;
-};
+}
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> global functions.

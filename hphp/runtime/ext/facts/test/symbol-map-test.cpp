@@ -67,7 +67,7 @@ struct StringData {
  public:
   // These two constructions allow implicit construction for convenience
   // in unit tests.
-  /* implicit */ StringData(const char* s) : m_impl{s} {};
+  /* implicit */ StringData(const char* s) : m_impl{s} {}
   /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {}
 
   explicit StringData(std::string_view s) : m_impl{s} {}

@@ -115,7 +115,7 @@ public:
 
   struct ParserCallback {
     explicit ParserCallback(ParserCallbackMode mode) : mode_(mode) {}
-    virtual ~ParserCallback() {};
+    virtual ~ParserCallback() {}
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
     virtual void onEntry(const std::string &key, const std::string &value,

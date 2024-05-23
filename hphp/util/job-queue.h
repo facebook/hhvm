@@ -858,7 +858,7 @@ private:
    */
   static AsyncFunc<TWorker>* funcFrom(TWorker* worker) {
     return reinterpret_cast<AsyncFunc<TWorker>*>(worker->func());
-  };
+  }
 
   /*
    * Total number of workers that might be active.

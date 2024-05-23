@@ -546,7 +546,7 @@ struct KeyProxyWithTypes {
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
-  };
+  }
 
   static constexpr std::bitset<Size> makeBitset() {
     std::bitset<Size> b;

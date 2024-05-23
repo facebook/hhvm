@@ -95,7 +95,7 @@ struct VMRegs {
     scanner.scan(mInstrState);
     scanner.scan(firstAR);
     scanner.scan(jitCalledFrame);
-  };
+  }
 };
 
 namespace rds {
@@ -173,4 +173,3 @@ static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");
 
 } }
-

@@ -51,7 +51,7 @@ ClsMethData::ClsMethData(Class* cls, Func* func)
   , m_func{to_low(func)} {
   assertx(cls);
   assertx(func);
-};
+}
 
 ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
 #ifdef USE_LOWPTR

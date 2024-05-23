@@ -24,7 +24,7 @@ template <typename T, size_t Expected, size_t Actual = sizeof(T)>
 constexpr bool CheckSize() { static_assert(Expected == Actual); return true; }
 
 template <size_t Actual, size_t Expected>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
+constexpr bool CheckSize() { static_assert(Expected == Actual); return true; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

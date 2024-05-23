@@ -60,7 +60,7 @@ struct ResponseMessage {
         // sad panda copy.  TODO (t4362832): change sendImpl to take IOBuf
         m_chunk = folly::IOBuf::copyBuffer(data, size);
       }
-    };
+    }
 
   ResponseMessage(ResponseMessage&& m) noexcept
   : m_transport(std::move(m.m_transport)),

@@ -31,7 +31,7 @@ struct CmdAuth : DebuggerCommand {
 
   void setSandboxPath(const std::string& sandboxPath) {
     m_sandboxPath = sandboxPath;
-  };
+  }
 
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
@@ -48,4 +48,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

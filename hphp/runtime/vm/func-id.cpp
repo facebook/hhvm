@@ -24,6 +24,4 @@ FuncId FuncId::Invalid = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max()
 FuncId FuncId::Dummy   = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max() - 1);
 
 ///////////////////////////////////////////////////////////////////////////////
-};
-
-
+}

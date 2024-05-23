@@ -166,17 +166,17 @@ public:
    */
   virtual const char *getServerName() {
     return "";
-  };
+  }
   virtual const std::string& getServerAddr() {
     auto const& ipv4 = RuntimeOption::GetServerPrimaryIPv4();
     return ipv4.empty() ? RuntimeOption::GetServerPrimaryIPv6() : ipv4;
-  };
+  }
   virtual uint16_t getServerPort() {
     return Cfg::Server::Port;
-  };
+  }
   virtual const char *getServerSoftware() {
     return "HPHP";
-  };
+  }
 
   /**
    * Get stream transport if it has one, otherwise returns nullptr
@@ -332,7 +332,7 @@ public:
                const Array& /*responseHeaders*/, const void* /*data*/,
                int /*size*/, bool /*eom*/) {
     return 0;
-  };
+  }
 
   /**
    * Stream body and/or EOM marker for a pushed resource

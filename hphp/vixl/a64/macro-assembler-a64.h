@@ -129,7 +129,7 @@ class MacroAssembler : public Assembler {
   }
   void Mvn(const Register& rd, uint64_t imm) {
     Mov(rd, ~imm);
-  };
+  }
   void Mvn(const Register& rd, const Operand& operand);
   bool IsImmMovn(uint64_t imm, unsigned reg_size);
   bool IsImmMovz(uint64_t imm, unsigned reg_size);

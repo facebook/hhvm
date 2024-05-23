@@ -336,7 +336,7 @@ struct Tv7Up : public LayoutBase<Tv7Up,
         break;
       default:
         assertx(false);
-      };
+      }
 
       return true;
     };

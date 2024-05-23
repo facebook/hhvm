@@ -82,12 +82,15 @@
 (library
  (name decl_folded_class)
  (wrapped false)
- (modules decl_folded_class decl_inherit decl_requirements)
+ (modules
+  decl_folded_class
+  decl_inherit
+  decl_requirements)
  (libraries
   ast_provider
   decl_class_elements
   decl_defs
-  decl_enforceability
+  decl_enforceability_shallow
   decl_enum
   decl_env
   decl_fun_utils
@@ -123,7 +126,7 @@
  (modules decl_members)
  (libraries
   decl_defs
-  decl_enforceability_shallow
+  decl_enforceability
   typing_defs))
 
 (library
@@ -131,6 +134,7 @@
  (modules decl_class)
  (libraries
    decl_defs
+   decl_enforceability_shallow
    decl_instantiate
    decl_members
    decl_provider_internals

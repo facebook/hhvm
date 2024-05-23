@@ -113,5 +113,3 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       fe_no_auto_likes;
     }
 end
-
-include Make (Decl_enforceability_shallow.Provider)

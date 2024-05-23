@@ -26,6 +26,8 @@ let directory_walk
   let t = Hh_logger.log_duration ("indexing " ^ telemetry_label) t in
   (get_next, t)
 
+(** This parses files with the direct decl parser and uses the result to update
+  the naming table in the provided env. *)
 let parse_files_and_update_forward_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)

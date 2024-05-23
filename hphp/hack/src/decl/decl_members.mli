@@ -10,18 +10,21 @@
     `shallow_method` into member types from Typing_defs like `fun_elt`.
     It may perform pessimization along the way. *)
 
-(** May pessimize the property. *)
-val build_property :
-  ctx:Provider_context.t ->
-  this_class:Shallow_decl_defs.shallow_class option ->
-  Shallow_decl_defs.shallow_prop ->
-  Typing_defs.decl_ty
+module Make : functor (Provider : Decl_enforceability.ShallowProvider) -> sig
+  (** May pessimize the property. *)
+  val build_property :
+    ctx:Provider.t ->
+    this_class:Shallow_decl_defs.shallow_class option ->
+    Shallow_decl_defs.shallow_prop ->
+    Typing_defs.decl_ty
 
-(** May pessimize the method. *)
-val build_method :
-  ctx:Provider_context.t ->
-  this_class:Shallow_decl_defs.shallow_class option ->
-  Shallow_decl_defs.shallow_method ->
-  Typing_defs.fun_elt
+  (** May pessimize the method. *)
+  val build_method :
+    ctx:Provider.t ->
+    this_class:Shallow_decl_defs.shallow_class option ->
+    Shallow_decl_defs.shallow_method ->
+    Typing_defs.fun_elt
 
-val build_constructor : Shallow_decl_defs.shallow_method -> Typing_defs.fun_elt
+  val build_constructor :
+    Shallow_decl_defs.shallow_method -> Typing_defs.fun_elt
+end

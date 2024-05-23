@@ -26,6 +26,8 @@ module SN = Naming_special_names
 
 type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
 
+module Members = Decl_members.Make (Decl_enforceability_shallow.Provider)
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -330,7 +332,7 @@ let build_constructor_fun_elt
     ~(ctx : Provider_context.t)
     ~(elt_origin : string)
     ~(method_ : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
-  let fe = Decl_members.build_constructor method_ in
+  let fe = Members.build_constructor method_ in
   (if member_heaps_enabled ctx then
     Decl_store.((get ()).add_constructor elt_origin fe));
   fe
@@ -442,7 +444,7 @@ let build_prop_sprop_ty
     ~(is_static : bool)
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
-  let ty = Decl_members.build_property ~ctx ~this_class sp in
+  let ty = Members.build_property ~ctx ~this_class sp in
   (if member_heaps_enabled ctx then
     let (_pos, name) = sp.sp_name in
     if is_static then
@@ -636,7 +638,7 @@ let build_method_fun_elt
     ~(is_static : bool)
     ~(elt_origin : string)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
-  let fe = Decl_members.build_method ~ctx ~this_class m in
+  let fe = Members.build_method ~ctx ~this_class m in
   (if member_heaps_enabled ctx then
     let (_pos, id) = m.sm_name in
     if is_static then

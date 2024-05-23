@@ -20,6 +20,8 @@ type member_lookup_error =
   | MLEMemberNotFound
 [@@deriving show]
 
+module Members = Decl_members.Make (Decl_enforceability_shallow.Provider)
+
 (** Raise an exception when the class element can't be found.
 
 Note that this exception can be raised in two modes:
@@ -137,8 +139,7 @@ let find_method_in_shallow_class
            String.equal (snd m.Shallow_decl_defs.sm_name) sm_name)
      with
     | None -> Error MLEMemberNotFound
-    | Some sm ->
-      Ok (Decl_members.build_method ~this_class:(Some class_) ~ctx sm))
+    | Some sm -> Ok (Members.build_method ~this_class:(Some class_) ~ctx sm))
 
 let find_method ctx ~child_class_name x =
   let fun_elt =
@@ -193,8 +194,7 @@ let find_property_in_shallow_class
            String.equal (snd prop.Shallow_decl_defs.sp_name) sp_name)
      with
     | None -> Error MLEMemberNotFound
-    | Some sp ->
-      Ok (Decl_members.build_property ~ctx ~this_class:(Some class_) sp))
+    | Some sp -> Ok (Members.build_property ~ctx ~this_class:(Some class_) sp))
 
 let find_property ctx ~child_class_name (x : Decl_store.ClassEltKey.t) =
   let ty =
@@ -225,8 +225,7 @@ let find_static_property_in_shallow_class
            String.equal (snd prop.Shallow_decl_defs.sp_name) sp_name)
      with
     | None -> Error MLEMemberNotFound
-    | Some sp ->
-      Ok (Decl_members.build_property ~ctx ~this_class:(Some class_) sp))
+    | Some sp -> Ok (Members.build_property ~ctx ~this_class:(Some class_) sp))
 
 let find_static_property ctx ~child_class_name x =
   let ty =
@@ -255,7 +254,7 @@ let find_constructor_in_shallow_class
   | Some class_ ->
     (match class_.Shallow_decl_defs.sc_constructor with
     | None -> Error MLEMemberNotFound
-    | Some method_ -> Ok (Decl_members.build_constructor method_))
+    | Some method_ -> Ok (Members.build_constructor method_))
 
 let find_constructor ctx ~child_class_name ~elt_origin =
   lookup_store_or ctx Decl_store.Constructor elt_origin @@ fun elt_origin ->

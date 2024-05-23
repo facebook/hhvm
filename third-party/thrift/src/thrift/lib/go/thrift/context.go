@@ -91,19 +91,6 @@ func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	return v, ok
 }
 
-// The context can be augmented with the underlying headerProtocol. Thrift
-// handlers can then query the context for the message headers. We store the
-// protocol object on the context instead of the headers directly to avoid
-// copying headers at each request and only lazy-copy them when the handler
-// asks for them.
-func headerProtocolFromContext(ctx context.Context) *headerProtocol {
-	v, ok := ctx.Value(protocolKey).(*headerProtocol)
-	if !ok {
-		return nil
-	}
-	return v
-}
-
 // WithProtocol attaches thrift protocol to a context
 func WithProtocol(ctx context.Context, proto Protocol) context.Context {
 	return context.WithValue(ctx, protocolKey, proto)
@@ -116,8 +103,8 @@ func WithProtocol(ctx context.Context, proto Protocol) context.Context {
 // This function returns nil when the underlying transport/protocol do not
 // support headers.
 func HeadersFromContext(ctx context.Context) map[string]string {
-	t := headerProtocolFromContext(ctx)
-	if t == nil {
+	t, ok := ctx.Value(protocolKey).(Protocol)
+	if !ok {
 		// A nil map behaves like an empty map for reading.
 		return nil
 	}

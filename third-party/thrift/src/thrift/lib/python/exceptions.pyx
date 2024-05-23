@@ -125,9 +125,11 @@ cdef class TransportError(LibraryError):
     """All Transport Level Errors (TTransportException)"""
 
     def __init__(TransportError self, type, str message, int errno, options, *args):
-        if not isinstance(type, TransportErrorType):
+        if type is None:
+            type = TransportErrorType.UNKNOWN
+        elif not isinstance(type, TransportErrorType):
             try:
-                type = TransportErrorType(int(type))
+                type = TransportErrorType(type)
             except ValueError as e:
                 raise TypeError(f"Invalid TransportErrorType {type}") from e
         super().__init__(type, message, errno, options, *args)

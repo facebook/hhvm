@@ -50,6 +50,15 @@ class ExceptionTests(unittest.TestCase):
     def test_invalid_error_type(self) -> None:
         with self.assertRaises(TypeError):
             ApplicationError("msg", "legit error message")  # pyre-ignore
+        self.assertEqual(
+            TransportError(
+                type=0,  # pyre-ignore
+                message="transport error",
+                errno=5,
+                options=1,
+            ).type,
+            TransportErrorType.UNKNOWN,
+        )
         with self.assertRaises(TypeError):
             TransportError(
                 type="oops",  # pyre-ignore
@@ -57,6 +66,24 @@ class ExceptionTests(unittest.TestCase):
                 errno=5,
                 options=1,
             )
+        with self.assertRaises(TypeError):
+            TransportError(
+                type=100,  # pyre-ignore
+                message="transport error",
+                errno=5,
+                options=1,
+            )
+
+        # allow this for backwards-compatibility reasons
+        self.assertEqual(
+            TransportError(
+                type=None,  # pyre-ignore
+                message="transport error",
+                errno=5,
+                options=1,
+            ).type,
+            TransportErrorType.UNKNOWN,
+        )
 
     def test_exception_message_annotation(self) -> None:
         x = UnusedError(message="something broke")

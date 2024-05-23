@@ -733,6 +733,7 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
       if (value.length() > maxDisplayLength) {
         value = value.substr(0, maxDisplayLength) + std::string{"..."};
       }
+      value = std::string("'") + value + "'";
       return VariableValue{value};
     }
 

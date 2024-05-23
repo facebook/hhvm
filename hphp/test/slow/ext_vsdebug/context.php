@@ -172,7 +172,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "\$b",
-          "value" => "Hello world",
+          "value" => "'Hello world'",
         ],
         dict[
           "type" => "B",
@@ -405,7 +405,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "A::HELLOA",
-          "value" => "hello0",
+          "value" => "'hello0'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -413,7 +413,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "A::HELLOB",
-          "value" => "hello0",
+          "value" => "'hello0'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -421,7 +421,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "B::HELLOB",
-          "value" => "hello1",
+          "value" => "'hello1'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -717,7 +717,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "A::HELLOB",
-          "value" => "hello0",
+          "value" => "'hello0'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -725,7 +725,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "B::HELLOB",
-          "value" => "hello1",
+          "value" => "'hello1'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -758,7 +758,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "A::HELLOA",
-          "value" => "hello0",
+          "value" => "'hello0'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -789,7 +789,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "A::HELLOB",
-          "value" => "hello0",
+          "value" => "'hello0'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]
@@ -797,7 +797,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "type" => "string",
           "name" => "B::HELLOB",
-          "value" => "hello1",
+          "value" => "'hello1'",
           "presentationHint" => dict[
             "attributes" => vec["constant", "readOnly"]
           ]

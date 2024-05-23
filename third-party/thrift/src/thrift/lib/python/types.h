@@ -399,6 +399,14 @@ inline void* setList(void* object) {
   return object;
 }
 
+// Sets the Python object pointed to by `object` to an empty Python `set`
+inline void* setMutableSet(void* object) {
+  if (!setPyObject(object, UniquePyObjectPtr{PySet_New(nullptr)})) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return object;
+}
+
 class ListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
@@ -641,6 +649,21 @@ struct ImmutableSetHandler {
 };
 
 using SetTypeInfo = SetTypeInfoTemplate<ImmutableSetHandler>;
+
+/**
+ * This class is intended to be used as a template parameter for the
+ * `SetTypeInfoTemplate` class.
+ *
+ * Mutable Thrift structs utilize Python's `set` for internal data
+ * representation. The `MutableSetHandler` class provides methods to create
+ * and clear the set.
+ */
+struct MutableSetHandler {
+  static PyObject* create(PyObject* iterable) { return PySet_New(iterable); }
+  static void* clear(void* object) { return setMutableSet(object); }
+};
+
+using MutableSetTypeInfo = SetTypeInfoTemplate<MutableSetHandler>;
 
 class MapTypeInfo {
  public:

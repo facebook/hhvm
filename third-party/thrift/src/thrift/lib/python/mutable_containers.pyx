@@ -181,8 +181,12 @@ cdef class MutableSet:
             return NotImplemented
 
         cdef TypeInfoBase typeinfo = self._val_typeinfo
-        type_checked_set = set(value for value in other
-                               if typeinfo.to_internal_data(value) in self._set_data)
+        cdef set type_checked_set = set()
+        for value in other:
+            internal_value = typeinfo.to_internal_data(value)
+            if internal_value in self._set_data:
+                type_checked_set.add(internal_value)
+
         return MutableSet(self._val_typeinfo, type_checked_set)
 
     def __or__(MutableSet self, other):

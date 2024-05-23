@@ -220,8 +220,8 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
       value = UniquePyObjectPtr(PyTuple_New(0));
       break;
     case protocol::TType::T_SET:
-      // For sets, the default value is an empty `frozenset`.
-      value = UniquePyObjectPtr(PyFrozenSet_New(nullptr));
+      // For sets, the default value is an empty `set`.
+      value = UniquePyObjectPtr(PySet_New(nullptr));
       break;
     case protocol::TType::T_STRUCT: {
       // For struct and unions, the default value is a (recursively)

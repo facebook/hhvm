@@ -16,10 +16,11 @@ from libcpp.memory cimport make_unique
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
+from cpython.set cimport PySet_New, PySet_Add
 
 from cython.operator cimport dereference as deref
 
-from thrift.python.mutable_containers cimport MutableList
+from thrift.python.mutable_containers cimport MutableList, MutableSet
 from thrift.python.mutable_types cimport MutableStruct, MutableStructInfo
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.types cimport getCTypeInfo
@@ -135,3 +136,60 @@ cdef class MutableListTypeInfo(TypeInfoBase):
             return False
 
         return self.val_info == (<MutableListTypeInfo>other).val_info
+
+
+cdef class MutableSetTypeInfo(TypeInfoBase):
+    """
+    `MutableSetTypeInfo` is similar to `SetTypeInfo`. However, the main
+    difference is that `MutableSetTypeInfo` uses a Python `set` for internal
+    data representation, whereas `SetTypeInfo` uses a Python `frozenset` for
+    internal data representation. In addition, `MutableSetTypeInfo` returns
+    a `MutableSet` from the `to_python_value()` method, rather than a `Set`.
+    """
+    def __cinit__(self, val_info):
+        self.val_info = val_info
+        self.cpp_obj = make_unique[cMutableSetTypeInfo](getCTypeInfo(val_info))
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj.get().get()
+
+    cdef to_internal_data(self, object values):
+        """
+        Validates the `values` and converts them into an internal data representation.
+
+        Args:
+            values (iterable): An iterable object. Each value in the iteration should
+            be of a valid value type as verified by in `self._val_info`.
+
+        Returns a Python set with converted values, representing the internal data
+        """
+        cdef set py_set = PySet_New(<object>NULL)
+        cdef TypeInfoBase val_type_info = self.val_info
+        for value in values:
+            PySet_Add(py_set, val_type_info.to_internal_data(value))
+
+        return py_set
+
+    cdef to_python_value(self, object value):
+        """
+        Converts the given internal data (`value`) into a `MutableSet` The
+        resulting `MutableSet` is capable of converting the internal data to
+        Python values for its elements.
+
+        Args:
+            value (object): A Python set, very likely returned by the
+            `MutableSetInfo.to_internal_data()` method.
+
+        Returns a `MutableSet` instance with the internal data (`value`) and
+            the type info (`self.val_info`) attached.
+        """
+        return MutableSet(self.val_info, value)
+
+    def same_as(MutableSetTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, MutableSetTypeInfo):
+            return False
+
+        return self.val_info == (<MutableSetTypeInfo>other).val_info

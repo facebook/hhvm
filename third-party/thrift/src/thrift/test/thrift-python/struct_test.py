@@ -24,7 +24,7 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized
-from thrift.python.mutable_containers import MutableList
+from thrift.python.mutable_containers import MutableList, MutableSet
 
 from thrift.python.mutable_types import (
     MutableStruct,
@@ -740,6 +740,22 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
                     unqualified_list_i32=[1, 2], optional_list_i32=[3]
                 ),
             ),
+            (
+                MutableTestStructAllThriftContainerTypes(
+                    unqualified_set_string=["1", "2", "3"]
+                ),
+            ),
+            (
+                MutableTestStructAllThriftContainerTypes(
+                    optional_set_string=["11", "22", "33"]
+                ),
+            ),
+            (
+                MutableTestStructAllThriftContainerTypes(
+                    unqualified_set_string=["1", "2", "3"],
+                    optional_set_string=["11", "22", "33"],
+                ),
+            ),
         ]
     )
     def test_container_serialization_round_trip(self, struct) -> None:
@@ -796,3 +812,164 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         struct.empty_struct_alias = empty
 
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
+
+    def test_create_and_init_for_set(self) -> None:
+        # Initializing the `set` member with an iterable that contains duplicate
+        # elements is fine. Thrift removes the duplicates.
+        s = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=["1", "2", "2", "3", "3"]
+        )
+        self.assertEqual(3, len(s.unqualified_set_string))
+        self.assertEqual({"1", "2", "3"}, s.unqualified_set_string)
+
+        # Initializing the `set` member with an iterable that contains elements
+        # with wrong type raises `TypeError`.
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s = MutableTestStructAllThriftContainerTypes(
+                unqualified_set_string=["1", "2", "2", 9999, "3", "3"]
+            )
+
+    def test_create_and_assign_for_set(self) -> None:
+        s = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=["1", "2", "3"]
+        )
+
+        self.assertEqual(3, len(s.unqualified_set_string))
+        self.assertEqual({"1", "2", "3"}, s.unqualified_set_string)
+
+        with self.assertRaisesRegex(
+            TypeError, "Thrift container types do not support direct assignment."
+        ):
+            s.unqualified_set_string = {"9", "8", "7"}
+
+        # `__contains__()`
+        self.assertIn("1", s.unqualified_set_string)
+        self.assertIn("2", s.unqualified_set_string)
+        self.assertNotIn("11", s.unqualified_set_string)
+        self.assertNotIn("12", s.unqualified_set_string)
+
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            self.assertIn(1, s.unqualified_set_string)
+
+        # `add()`
+        s.unqualified_set_string.add("4")
+        self.assertEqual({"1", "2", "3", "4"}, s.unqualified_set_string)
+
+        # uniqueness
+        s.unqualified_set_string.add("3")
+        s.unqualified_set_string.add("4")
+        self.assertEqual({"1", "2", "3", "4"}, s.unqualified_set_string)
+
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s.unqualified_set_string.add(999)
+
+        # `remove()`
+        s.unqualified_set_string.remove("1")
+        self.assertEqual({"2", "3", "4"}, s.unqualified_set_string)
+
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s.unqualified_set_string.remove(111)
+
+        # `remove()` raises a `KeyError` if key is absent
+        with self.assertRaisesRegex(KeyError, "111"):
+            s.unqualified_set_string.remove("111")
+
+        # `discard()`
+        s.unqualified_set_string.discard("4")
+        self.assertEqual({"2", "3"}, s.unqualified_set_string)
+
+        # `discard()` does not raises a `KeyError` or `TypeError`
+        s.unqualified_set_string.discard("111")
+        s.unqualified_set_string.discard(111)
+
+        set1 = s.unqualified_set_string
+        set2 = s.unqualified_set_string
+
+        # sets are instance of thrift.python.mutable_containers.MutableSet
+        self.assertTrue(isinstance(set1, MutableSet))
+        self.assertTrue(isinstance(set2, MutableSet))
+
+        # set1 and set2 are the same instances
+        self.assertIs(set1, set2)
+
+        # Update on any variable is reflected on others
+        self.assertEqual({"2", "3"}, s.unqualified_set_string)
+        self.assertEqual({"2", "3"}, set1)
+        self.assertEqual({"2", "3"}, set2)
+
+        set1.add("1")
+
+        self.assertEqual({"1", "2", "3"}, s.unqualified_set_string)
+        self.assertEqual({"1", "2", "3"}, set1)
+        self.assertEqual({"1", "2", "3"}, set2)
+
+        # `isdisjoint(iterable)`
+        self.assertTrue(set1.isdisjoint(["4", "5"]))
+        self.assertTrue(set2.isdisjoint({"4", "5"}))
+        self.assertFalse(set1.isdisjoint(["3", "4"]))
+        self.assertFalse(set2.isdisjoint({"3", "4"}))
+
+        other = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=["2", "3", "4"]
+        )
+        other_set = other.unqualified_set_string
+        self.assertEqual({"1", "2", "3"}, set1)
+
+        # `__and__()` (both sides are MutableSet)
+        result = set1 & other_set
+        self.assertIsInstance(result, MutableSet)
+        self.assertIsNot(result, set1)
+        self.assertIsNot(result, other_set)
+        self.assertEqual({"1", "2", "3"}, set1)
+        self.assertEqual({"2", "3", "4"}, other_set)
+        self.assertEqual({"2", "3"}, result)
+
+        # `__and__()` (left hand side is MutableSet)
+        result = set1 & {"2", "3", "4"}
+        self.assertIsInstance(result, MutableSet)
+        self.assertEqual({"2", "3"}, result)
+
+        # `__rand__() Not implemented yet` (right hand side is MutableSet)
+        with self.assertRaisesRegex(TypeError, r"unsupported operand type\(s\) for \&"):
+            result = {"2", "3", "4"} & set1
+
+        # `__or__()` (both sides are MutableSet)
+        result = set1 | other_set
+        self.assertIsInstance(result, MutableSet)
+        self.assertIsNot(result, set1)
+        self.assertIsNot(result, other_set)
+        self.assertEqual({"1", "2", "3"}, set1)
+        self.assertEqual({"2", "3", "4"}, other_set)
+        self.assertEqual({"1", "2", "3", "4"}, result)
+
+        # `__or__()` (left hand side is MutableSet)
+        result = set1 | {"2", "3", "4"}
+        self.assertIsInstance(result, MutableSet)
+        self.assertEqual({"1", "2", "3", "4"}, result)
+
+        # `__ror__() Not implemented yet` (right hand side is MutableSet)
+        with self.assertRaisesRegex(TypeError, r"unsupported operand type\(s\) for \|"):
+            result = {"2", "3", "4"} | set1
+
+        # `MutableSet` instances are not hashable
+        with self.assertRaisesRegex(
+            TypeError, "unhashable type: 'thrift.python.mutable_containers.MutableSet'"
+        ):
+            hash(set1)
+
+        _thrift_serialization_round_trip(self, mutable_serializer, s)
+        _thrift_serialization_round_trip(self, mutable_serializer, other)
+
+        # `clear()`
+        set2.clear()
+        self.assertEqual(set(), s.unqualified_set_string)
+        self.assertEqual(set(), set1)
+        self.assertEqual(set(), set2)

@@ -22,7 +22,10 @@ from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM
 from cpython.unicode cimport PyUnicode_AsUTF8String
 
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
-from thrift.python.mutable_typeinfos cimport MutableListTypeInfo
+from thrift.python.mutable_typeinfos cimport (
+    MutableListTypeInfo,
+    MutableSetTypeInfo,
+)
 from thrift.python.types cimport (
     AdaptedTypeInfo,
     FieldInfo,
@@ -109,7 +112,7 @@ cdef is_mutable_container(object type_info):
     if PyCallable_Check(type_info):
         type_info = type_info()
 
-    return isinstance(type_info, MutableListTypeInfo)
+    return isinstance(type_info, (MutableListTypeInfo, MutableSetTypeInfo))
 
 
 class _MutableStructContainerField:

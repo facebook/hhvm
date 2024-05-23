@@ -151,7 +151,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "floatSet",  # name
             "floatSet", # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

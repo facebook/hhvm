@@ -8,7 +8,9 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Properties.h>
 #include <fizz/backend/openssl/crypto/Sha.h>
+#include <fizz/crypto/Crypto.h>
 #include <openssl/evp.h>
 #include <array>
 
@@ -24,5 +26,12 @@ class Sha512 : public Sha<Sha512> {
   static constexpr folly::StringPiece BlankHash{
       "\xcf\x83\xe1\x35\x7e\xef\xb8\xbd\xf1\x54\x28\x50\xd6\x6d\x80\x07\xd6\x20\xe4\x05\x0b\x57\x15\xdc\x83\xf4\xa9\x21\xd3\x6c\xe9\xce\x47\xd0\xd1\x3c\x5d\x85\xf2\xb0\xff\x83\x18\xd2\x87\x7e\xec\x2f\x63\xb9\x31\xbd\x47\x41\x7a\x81\xa5\x38\x32\x7a\xf9\x27\xda\x3e"};
 };
+
+template <>
+struct Properties<fizz::Sha512> {
+  static constexpr auto HashEngine = EVP_sha512;
+  // TODO: include Sha<Sha512> hasher as part of this struct.
+};
+
 } // namespace openssl
 } // namespace fizz

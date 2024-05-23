@@ -185,8 +185,7 @@ set(FIZZ_SOURCES
   backend/openssl/crypto/signature/Signature.cpp
   crypto/Hkdf.cpp
   crypto/KeyDerivation.cpp
-  backend/openssl/crypto/Sha256.cpp
-  backend/openssl/crypto/Sha384.cpp
+  crypto/Crypto.cpp
   crypto/hpke/Context.cpp
   crypto/hpke/DHKEM.cpp
   crypto/hpke/Hkdf.cpp

@@ -18,42 +18,23 @@ from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from libcpp.vector cimport vector
 from thrift.python.common import RpcOptions
 from thrift.python.exceptions cimport (
-    ApplicationError as cApplicationError,
     create_ApplicationError,
+    create_TransportError,
     cTApplicationException,
+    cTTransportException,
 )
 from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
     Error,
     LibraryError,
+    TransportError,
+    TransportErrorType,
+    TransportOptions,
 )
 
-from enum import Enum, Flag
+from enum import Enum
 import itertools
-
-class TransportErrorType(Enum):
-    UNKNOWN = cTTransportExceptionType__UNKNOWN
-    NOT_OPEN = cTTransportExceptionType__NOT_OPEN
-    ALREADY_OPEN = cTTransportExceptionType__ALREADY_OPEN
-    TIMED_OUT = cTTransportExceptionType__TIMED_OUT
-    END_OF_FILE = cTTransportExceptionType__END_OF_FILE
-    INTERRUPTED = cTTransportExceptionType__INTERRUPTED
-    BAD_ARGS = cTTransportExceptionType__BAD_ARGS
-    CORRUPTED_DATA = cTTransportExceptionType__CORRUPTED_DATA
-    INTERNAL_ERROR = cTTransportExceptionType__INTERNAL_ERROR
-    NOT_SUPPORTED = cTTransportExceptionType__NOT_SUPPORTED
-    INVALID_STATE = cTTransportExceptionType__INVALID_STATE
-    INVALID_FRAME_SIZE = cTTransportExceptionType__INVALID_FRAME_SIZE
-    SSL_ERROR = cTTransportExceptionType__SSL_ERROR
-    COULD_NOT_BIND = cTTransportExceptionType__COULD_NOT_BIND
-    NETWORK_ERROR = cTTransportExceptionType__NETWORK_ERROR
-
-
-class TransportOptions(Flag):
-    CHANNEL_IS_VALID = cTTransportExceptionOptions__CHANNEL_IS_VALID
-
-
 
 
 class ProtocolErrorType(Enum):
@@ -183,48 +164,6 @@ cdef create_ProtocolError(const cTProtocolException* ex):
     type = ProtocolErrorType(deref(ex).getType())
     message = (<bytes>deref(ex).what()).decode('utf-8')
     inst = <ProtocolError>ProtocolError.__new__(ProtocolError, type, message)
-    return inst
-
-
-cdef class TransportError(cLibraryError):
-    """All Transport Level Errors (TTransportException)"""
-
-    def __init__(self, type, str message, int errno, options, *args):
-        super().__init__(type, message, errno, options, *args)
-
-    @property
-    def type(self):
-        return self.args[0]
-
-    @property
-    def message(self):
-        return self.args[1]
-
-    @property
-    def errno(self):
-        return self.args[2]
-
-    @property
-    def options(self):
-        return self.args[3]
-
-
-cdef create_TransportError(const cTTransportException* ex):
-    if not ex:
-        return
-    type = TransportErrorType(deref(ex).getType())
-    options = TransportOptions(deref(ex).getOptions())
-    Errno = deref(ex).getErrno()
-    message = (<bytes>deref(ex).what()).decode('utf-8')
-    # Strip off the c++ message prefix
-    message = message[message.startswith('TTransportException: ')*21:]
-    inst = <TransportError>TransportError.__new__(
-        TransportError,
-        type,
-        message,
-        Errno,
-        options,
-    )
     return inst
 
 

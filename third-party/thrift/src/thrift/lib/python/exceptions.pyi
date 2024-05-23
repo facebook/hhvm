@@ -61,15 +61,27 @@ class TransportErrorType(enum.Enum):
     SSL_ERROR: TransportErrorType = ...
     COULD_NOT_BIND: TransportErrorType = ...
     NETWORK_ERROR: TransportErrorType = ...
+    @property
+    def value(self) -> int: ...
 
-class TransportError(Error):
+class TransportOptions(enum.Flag):
+    CHANNEL_IS_VALID: TransportOptions = ...
+    @property
+    def value(self) -> int: ...
+
+class TransportError(LibraryError):
     def __init__(
-        self, type: TransportErrorType, message: str, errno: int, options: int
+        self,
+        type: TransportErrorType,
+        message: str,
+        errno: int,
+        options: typing.Union[int, TransportOptions],
+        *args: object,
     ) -> None: ...
     type: TransportErrorType
+    options: TransportOptions
     message: str
     errno: int
-    options: int
 
 class GeneratedError(Error, typing.Hashable, metaclass=GeneratedErrorMeta):
     def __hash__(self) -> int: ...

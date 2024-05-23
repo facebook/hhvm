@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import copy
-from enum import Enum
+from enum import Enum, Flag
 
 from cython.operator cimport dereference as deref
 from thrift.python.serializer cimport cserialize, cdeserialize
@@ -104,16 +104,20 @@ class TransportErrorType(Enum):
     NETWORK_ERROR = cTTransportExceptionType__NETWORK_ERROR
 
 
+class TransportOptions(Flag):
+    CHANNEL_IS_VALID = cTTransportExceptionOptions__CHANNEL_IS_VALID
+
+
 cdef class TransportError(LibraryError):
     """All Transport Level Errors (TTransportException)"""
 
-    def __init__(TransportError self, type, str message, int errno, int options):
+    def __init__(TransportError self, type, str message, int errno, options, *args):
         if not isinstance(type, TransportErrorType):
             try:
                 type = TransportErrorType(int(type))
             except ValueError as e:
                 raise TypeError(f"Invalid TransportErrorType {type}") from e
-        super().__init__(type, message, errno, options)
+        super().__init__(type, message, errno, options, *args)
 
     @property
     def type(self):
@@ -158,7 +162,7 @@ cdef TransportError create_TransportError(const cTTransportException* ex):
     # Strip off the c++ message prefix
     message = message[message.startswith('TTransportException: ')*21:]
     errno = deref(ex).getErrno()
-    options = deref(ex).getOptions()
+    options = TransportOptions(deref(ex).getOptions())
     return <TransportError>TransportError.__new__(
         TransportError,
         type,

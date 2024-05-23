@@ -50,35 +50,6 @@ cdef extern from "thrift/lib/cpp/protocol/TProtocolException.h":
         cTProtocolExceptionType getType()
 
 
-cdef extern from "thrift/lib/cpp/transport/TTransportException.h" \
-        namespace "apache::thrift::transport":
-
-    enum cTTransportExceptionType "apache::thrift::transport::TTransportException::TTransportExceptionType":
-        cTTransportExceptionType__UNKNOWN "apache::thrift::transport::TTransportException::UNKNOWN"
-        cTTransportExceptionType__NOT_OPEN "apache::thrift::transport::TTransportException::NOT_OPEN"
-        cTTransportExceptionType__ALREADY_OPEN "apache::thrift::transport::TTransportException::ALREADY_OPEN"
-        cTTransportExceptionType__TIMED_OUT "apache::thrift::transport::TTransportException::TIMED_OUT"
-        cTTransportExceptionType__END_OF_FILE "apache::thrift::transport::TTransportException::END_OF_FILE"
-        cTTransportExceptionType__INTERRUPTED "apache::thrift::transport::TTransportException::INTERRUPTED"
-        cTTransportExceptionType__BAD_ARGS "apache::thrift::transport::TTransportException::BAD_ARGS"
-        cTTransportExceptionType__CORRUPTED_DATA "apache::thrift::transport::TTransportException::CORRUPTED_DATA"
-        cTTransportExceptionType__INTERNAL_ERROR "apache::thrift::transport::TTransportException::INTERNAL_ERROR"
-        cTTransportExceptionType__NOT_SUPPORTED "apache::thrift::transport::TTransportException::NOT_SUPPORTED"
-        cTTransportExceptionType__INVALID_STATE "apache::thrift::transport::TTransportException::INVALID_STATE"
-        cTTransportExceptionType__INVALID_FRAME_SIZE "apache::thrift::transport::TTransportException::INVALID_FRAME_SIZE"
-        cTTransportExceptionType__SSL_ERROR "apache::thrift::transport::TTransportException::SSL_ERROR"
-        cTTransportExceptionType__COULD_NOT_BIND "apache::thrift::transport::TTransportException::COULD_NOT_BIND"
-        cTTransportExceptionType__NETWORK_ERROR "apache::thrift::transport::TTransportException::NETWORK_ERROR"
-
-    enum cTTransportExceptionOptions "apache::thrift::transport::TTransportException::Options":
-        cTTransportExceptionOptions__CHANNEL_IS_VALID "apache::thrift::transport::TTransportException::CHANNEL_IS_VALID"
-
-    cdef cppclass cTTransportException "apache::thrift::transport::TTransportException"(cTLibraryException):
-        ## No need to instance from Python
-        int getOptions()
-        cTTransportExceptionType getType()
-        int getErrno()
-
 cdef extern from "Python.h":
     ctypedef extern class builtins.Exception[object PyBaseExceptionObject]:
         pass
@@ -97,15 +68,12 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
 # cdef Inheritence sucks in cython
 cdef object create_Error(const cTException* ex)
 cdef object create_LibraryError(const cTLibraryException* ex)
-cdef object create_TransportError(const cTTransportException* ex)
 cdef object create_ProtocolError(const cTProtocolException* ex)
 
 
 cdef class ProtocolError(cLibraryError):
     pass
 
-cdef class TransportError(cLibraryError):
-    pass
 
 cdef class GeneratedError(BaseError):
     cdef object __weakref__

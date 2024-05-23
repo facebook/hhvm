@@ -72,6 +72,9 @@ cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apa
         cTTransportExceptionType__COULD_NOT_BIND "apache::thrift::transport::TTransportException::COULD_NOT_BIND"
         cTTransportExceptionType__NETWORK_ERROR "apache::thrift::transport::TTransportException::NETWORK_ERROR"
 
+    enum cTTransportExceptionOptions "apache::thrift::transport::TTransportException::Options":
+        cTTransportExceptionOptions__CHANNEL_IS_VALID "apache::thrift::transport::TTransportException::CHANNEL_IS_VALID"
+
     cdef cppclass cTTransportException "apache::thrift::transport::TTransportException"(cTLibraryException):
         int getOptions() noexcept
         cTTransportExceptionType getType() noexcept

@@ -29,16 +29,6 @@ cdef api object init__module__SimpleException(object data):
 cdef api int can_extract__module__OptionalRefStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.OptionalRefStruct) else 0
 
-cdef api __cIOBuf* extract__module__OptionalRefStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__OptionalRefStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.OptionalRefStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__OptionalRefStruct(object data):
     return __thrift_types.OptionalRefStruct._fbthrift_create(data)
@@ -101,16 +91,6 @@ cdef api object init__module__ComplexStruct(object data):
 cdef api int can_extract__module__BinaryUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.BinaryUnion) else 0
 
-cdef api __cIOBuf* extract__module__BinaryUnion(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__BinaryUnion(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.BinaryUnion,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__BinaryUnion(object data):
     return __thrift_types.BinaryUnion._fbthrift_create(data)

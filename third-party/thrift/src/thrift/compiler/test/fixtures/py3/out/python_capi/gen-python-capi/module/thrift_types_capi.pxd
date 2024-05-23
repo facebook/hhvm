@@ -20,9 +20,6 @@ cdef api object init__module__SimpleException(object data)
 
 cdef api int can_extract__module__OptionalRefStruct(object) except -1
 
-cdef api __cIOBuf* extract__module__OptionalRefStruct(object) except NULL
-
-cdef api object construct__module__OptionalRefStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__OptionalRefStruct(object data)
 
@@ -59,9 +56,6 @@ cdef api object init__module__ComplexStruct(object data)
 
 cdef api int can_extract__module__BinaryUnion(object) except -1
 
-cdef api __cIOBuf* extract__module__BinaryUnion(object) except NULL
-
-cdef api object construct__module__BinaryUnion(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__BinaryUnion(object data)
 

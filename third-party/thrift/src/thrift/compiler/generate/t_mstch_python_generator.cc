@@ -34,8 +34,8 @@
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/py3/util.h>
+#include <thrift/compiler/lib/python/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 
@@ -44,14 +44,6 @@ namespace thrift {
 namespace compiler {
 
 namespace {
-
-bool is_type_iobuf(std::string_view name) {
-  return name == "folly::IOBuf" || name == "std::unique_ptr<folly::IOBuf>";
-}
-
-bool is_type_iobuf(const t_type* type) {
-  return is_type_iobuf(cpp2::get_type(type));
-}
 
 const t_const* find_structured_adapter_annotation(
     const t_named& node, const char* uri = kPythonAdapterUri) {

@@ -33,6 +33,7 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/py3/util.h>
+#include <thrift/compiler/lib/python/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 
@@ -41,10 +42,6 @@ namespace thrift {
 namespace compiler {
 
 namespace {
-
-bool is_type_iobuf(std::string_view name) {
-  return name == "folly::IOBuf" || name == "std::unique_ptr<folly::IOBuf>";
-}
 
 // t_node must be t_type or t_field
 const t_const* find_structured_annotation(const t_node& node, const char* uri) {
@@ -470,14 +467,50 @@ class python_capi_mstch_struct : public mstch_struct {
     return a;
   }
 
-  bool type_or_adapter_override(const t_type* type) {
-    return t_typedef::get_first_structured_annotation_or_null(
-               type, kCppTypeUri) ||
-        t_typedef::get_first_structured_annotation_or_null(
-               type, kCppAdapterUri) ||
-        t_typedef::get_first_annotation_or_null(
-               type,
-               {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
+  bool eligible_type_override(const t_const* annotation) {
+    if (const auto* type_name =
+            annotation->get_value_from_structured_annotation_or_null("name")) {
+      return is_type_iobuf(type_name->get_string());
+    }
+    return annotation->get_value_from_structured_annotation_or_null(
+               "template") == nullptr;
+  }
+
+  bool eligible_type_or_adapter_override(const t_type* type) {
+    if (t_typedef::get_first_structured_annotation_or_null(
+            type, kCppAdapterUri)) {
+      return false;
+    }
+
+    if (const auto* type_anno =
+            t_typedef::get_first_structured_annotation_or_null(
+                type, kCppTypeUri)) {
+      return eligible_type_override(type_anno);
+    }
+    // thrift currently lowers structured annotations to unstructured
+    // annotations so this will always be non-null if @cpp.Type annotation
+    // used on type or field
+    // TODO: delete these if structured annotation migration completed
+    if (t_typedef::get_first_annotation_or_null(
+            type, {"cpp.template", "cpp2.template"})) {
+      return false;
+    }
+    if (const std::string* type_anno = t_typedef::get_first_annotation_or_null(
+            type, {"cpp.type", "cpp2.type"})) {
+      return is_type_iobuf(*type_anno);
+    }
+    return true;
+  }
+
+  bool eligible_type_or_adapter_override(const t_field& field) {
+    if (field.find_structured_annotation_or_null(kCppAdapterUri)) {
+      return false;
+    }
+    if (const auto* type_anno =
+            field.find_structured_annotation_or_null(kCppTypeUri)) {
+      return eligible_type_override(type_anno);
+    }
+    return true;
   }
 
   mstch::node marshal_capi() {
@@ -499,28 +532,27 @@ class python_capi_mstch_struct : public mstch_struct {
       return true;
     }
     for (const auto& f : struct_->fields()) {
-      if (f.find_structured_annotation_or_null(kCppTypeUri) ||
-          f.find_structured_annotation_or_null(kCppAdapterUri)) {
+      if (!eligible_type_or_adapter_override(f)) {
         return false;
       }
       const auto* type_ = f.get_type();
-      if (type_or_adapter_override(type_)) {
+      if (!eligible_type_or_adapter_override(type_)) {
         return false;
       }
       if (type_->is_list() &&
-          type_or_adapter_override(
+          !eligible_type_or_adapter_override(
               dynamic_cast<const t_list*>(type_)->get_elem_type())) {
         return false;
-      }
-      if (type_->is_set() &&
-          type_or_adapter_override(
+      } else if (
+          type_->is_set() &&
+          !eligible_type_or_adapter_override(
               dynamic_cast<const t_set*>(type_)->get_elem_type())) {
         return false;
-      }
-      if (type_->is_map() &&
-          (type_or_adapter_override(
+      } else if (
+          type_->is_map() &&
+          (!eligible_type_or_adapter_override(
                dynamic_cast<const t_map*>(type_)->get_key_type()) ||
-           type_or_adapter_override(
+           !eligible_type_or_adapter_override(
                dynamic_cast<const t_map*>(type_)->get_val_type()))) {
         return false;
       }

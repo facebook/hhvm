@@ -28,6 +28,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__SimpleException__tuple_pos[1] = {
     1
   };
+  static constexpr std::int16_t _fbthrift__OptionalRefStruct__tuple_pos[1] = {
+    1
+  };
   static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[8] = {
     1, 2, 3, 4, 5, 6, 7, 8
   };
@@ -120,37 +123,34 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::py3::simple::OptionalRefStruct>
 Extractor<::py3::simple::OptionalRefStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::py3::simple::OptionalRefStruct>(
-      "Module module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a OptionalRefStruct");
+      }
+      return extractorError<::py3::simple::OptionalRefStruct>(
+          "Marshal error: OptionalRefStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__module__OptionalRefStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::py3::simple::OptionalRefStruct>(
-        "Thrift serialize error: OptionalRefStruct");
-  }
-  return detail::deserialize_iobuf<::py3::simple::OptionalRefStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::py3::simple::OptionalRefStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::py3::simple::OptionalRefStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::py3::simple::OptionalRefStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::py3::simple::OptionalRefStruct>(
-      "Module module import error");
+    ::py3::simple::OptionalRefStruct>>::operator()(PyObject* fbThriftData) {
+  ::py3::simple::OptionalRefStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<std::unique_ptr<folly::IOBuf>>{}.extractInto(
+      cpp.optional_blob_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__OptionalRefStruct__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__module__OptionalRefStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::py3::simple::OptionalRefStruct>(
-          "Init from fbthrift error: OptionalRefStruct");
-  }
-  return Extractor<::py3::simple::OptionalRefStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::py3::simple::OptionalRefStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -173,31 +173,39 @@ PyObject* Constructor<::py3::simple::OptionalRefStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::OptionalRefStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__module__OptionalRefStruct(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__module__OptionalRefStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::py3::simple::OptionalRefStruct>>::operator()(
-    const ::py3::simple::OptionalRefStruct& val) {
-  auto obj = StrongRef(Constructor<::py3::simple::OptionalRefStruct>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::py3::simple::OptionalRefStruct& val) {
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__optional_blob(
+    Constructor<std::unique_ptr<folly::IOBuf>>{}
+    .constructFrom(val.optional_blob_ref()));
+  if (_fbthrift__optional_blob.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__OptionalRefStruct__tuple_pos[0],
+      Py_None);
+  } else
+  if (!_fbthrift__optional_blob ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__OptionalRefStruct__tuple_pos[0],
+          *_fbthrift__optional_blob) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::py3::simple::SimpleStruct>
 Extractor<::py3::simple::SimpleStruct>::operator()(PyObject* obj) {
@@ -711,37 +719,42 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::py3::simple::BinaryUnion>
 Extractor<::py3::simple::BinaryUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::py3::simple::BinaryUnion>(
-      "Module module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a BinaryUnion");
+      }
+      return extractorError<::py3::simple::BinaryUnion>(
+          "Marshal error: BinaryUnion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__module__BinaryUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::py3::simple::BinaryUnion>(
-        "Thrift serialize error: BinaryUnion");
-  }
-  return detail::deserialize_iobuf<::py3::simple::BinaryUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::py3::simple::BinaryUnion>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::py3::simple::BinaryUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::py3::simple::BinaryUnion>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::py3::simple::BinaryUnion>(
-      "Module module import error");
+    ::py3::simple::BinaryUnion>>::operator()(PyObject* fbThriftData) {
+  ::py3::simple::BinaryUnion cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__module__BinaryUnion(fbthrift_data));
-  if (!obj) {
-      return extractorError<::py3::simple::BinaryUnion>(
-          "Init from fbthrift error: BinaryUnion");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<folly::IOBuf>{}.extractInto(
+          cpp.iobuf_val_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::py3::simple::BinaryUnion>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::py3::simple::BinaryUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -764,31 +777,37 @@ PyObject* Constructor<::py3::simple::BinaryUnion>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::BinaryUnion>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__module__BinaryUnion(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__module__BinaryUnion(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::py3::simple::BinaryUnion>>::operator()(
-    const ::py3::simple::BinaryUnion& val) {
-  auto obj = StrongRef(Constructor<::py3::simple::BinaryUnion>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::py3::simple::BinaryUnion& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<folly::IOBuf>{}
+          .constructFrom(val.iobuf_val_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::py3::simple::BinaryUnionStruct>
 Extractor<::py3::simple::BinaryUnionStruct>::operator()(PyObject* obj) {

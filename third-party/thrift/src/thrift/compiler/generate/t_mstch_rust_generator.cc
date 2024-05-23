@@ -620,11 +620,8 @@ class rust_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:types?", &rust_mstch_program::rust_has_types},
             {"program:types", &rust_mstch_program::rust_types},
             {"program:clients", &rust_mstch_program::rust_clients},
-            {"program:structsOrEnums?",
-             &rust_mstch_program::rust_structs_or_enums},
             {"program:nonexhaustiveStructs?",
              &rust_mstch_program::rust_nonexhaustive_structs},
             {"program:serde?", &rust_mstch_program::rust_serde},
@@ -637,12 +634,6 @@ class rust_mstch_program : public mstch_program {
             {"program:includes", &rust_mstch_program::rust_includes},
             {"program:label", &rust_mstch_program::rust_label},
             {"program:namespace", &rust_mstch_program::rust_namespace},
-            {"program:anyServiceWithoutParent?",
-             &rust_mstch_program::rust_any_service_without_parent},
-            {"program:nonstandardTypes?",
-             &rust_mstch_program::rust_has_nonstandard_types},
-            {"program:nonstandardFields?",
-             &rust_mstch_program::rust_has_nonstandard_fields},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
@@ -680,11 +671,6 @@ class rust_mstch_program : public mstch_program {
         "program:deprecated_default_enum_min_i32?",
         "deprecated_default_enum_min_i32");
   }
-  mstch::node rust_has_types() {
-    return !program_->structs_and_unions().empty() ||
-        !program_->enums().empty() || !program_->typedefs().empty() ||
-        !program_->xceptions().empty();
-  }
 
   mstch::node rust_types() {
     auto types = "::" + options_.types_crate;
@@ -702,10 +688,6 @@ class rust_mstch_program : public mstch_program {
     return clients;
   }
 
-  mstch::node rust_structs_or_enums() {
-    return !program_->structs_and_unions().empty() ||
-        !program_->enums().empty() || !program_->xceptions().empty();
-  }
   mstch::node rust_nonexhaustive_structs() {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
@@ -762,14 +744,6 @@ class rust_mstch_program : public mstch_program {
     }
     return program_name;
   }
-  mstch::node rust_any_service_without_parent() {
-    for (const t_service* service : program_->services()) {
-      if (service->get_extends() == nullptr) {
-        return true;
-      }
-    }
-    return false;
-  }
   template <typename F>
   void foreach_field(F&& f) const {
     for (const t_structured* strct : program_->structs_and_unions()) {
@@ -806,12 +780,6 @@ class rust_mstch_program : public mstch_program {
     fields_set_t fields = nonstandard_fields();
     return make_mstch_fields(
         std::vector<const t_field*>(fields.begin(), fields.end()));
-  }
-  mstch::node rust_has_nonstandard_types() {
-    return !nonstandard_types().empty();
-  }
-  mstch::node rust_has_nonstandard_fields() {
-    return !nonstandard_fields().empty();
   }
   mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }

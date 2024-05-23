@@ -69,10 +69,6 @@ struct rust_codegen_options {
   // to affect codegen.
   bool skip_none_serialization = false;
 
-  // Whether to skip server stubs. Server stubs are built by default, but can
-  // be turned off via `--gen rust:noserver`.
-  bool noserver = false;
-
   // True if we are generating a submodule rather than the whole crate.
   bool multifile_mode = false;
 
@@ -634,7 +630,6 @@ class rust_mstch_program : public mstch_program {
             {"program:serde?", &rust_mstch_program::rust_serde},
             {"program:skip_none_serialization?",
              &rust_mstch_program::rust_skip_none_serialization},
-            {"program:server?", &rust_mstch_program::rust_server},
             {"program:multifile?", &rust_mstch_program::rust_multifile},
             {"program:crate", &rust_mstch_program::rust_crate},
             {"program:client_package",
@@ -731,7 +726,6 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_skip_none_serialization() {
     return options_.skip_none_serialization;
   }
-  mstch::node rust_server() { return !options_.noserver; }
   mstch::node rust_multifile() { return options_.multifile_mode; }
   mstch::node rust_crate() {
     if (options_.multifile_mode) {
@@ -2360,7 +2354,6 @@ void t_mstch_rust_generator::generate_program() {
   }
 
   options_.serde = has_option("serde");
-  options_.noserver = has_option("noserver");
   options_.skip_none_serialization = has_option("skip_none_serialization");
   if (options_.skip_none_serialization) {
     assert(options_.serde);
@@ -2576,7 +2569,6 @@ THRIFT_REGISTER_GENERATOR(
     mstch_rust,
     "Rust",
     "    serde:           Derive serde Serialize/Deserialize traits for types\n"
-    "    noserver:        Don't emit server code\n"
     "    any:             Generate \"any registry\" initialization functions\n"
     "    deprecated_default_enum_min_i32:\n"
     "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"

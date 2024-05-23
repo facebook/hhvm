@@ -729,15 +729,28 @@ bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
       }
     }
   }
-  if (found_second &&
-      deltaFits((int64_t)(vlea.s.disp) + (int64_t)(disp2), sz::dword)) {
-     (void) simplify_impl(env, b, i,
-         lea { vlea.s+disp2, (xinst).lea_.d });
-     // update uses and delete the inst
-     (void) simplify_impl(env, b, x, [&] (Vout& v) { return 1; });
-     return true;
+
+  if (!found_second) return false;
+
+  const auto newDisp = (int64_t)(vlea.s.disp) + (int64_t)(disp2);
+
+  if (!deltaFits(newDisp, sz::dword)) return false;
+
+  // On ARM, we're careful lowering Vptrs upfront, and we need to make sure we
+  // don't recreate Vptrs that can't be emitted.  See lowerVptr() for validity
+  // conditions.
+  if (arch() == Arch::ARM) {
+    // We can't have both a disp and an index.
+    if (newDisp != 0 && vlea.s.index.isValid()) return false;
+
+    // Furthermore, if we have a base, the disp has to be within [-256..255].
+    if (vlea.s.base.isValid() && (newDisp < -256 || newDisp > 255)) return false;
   }
-  return false;
+
+  simplify_impl(env, b, i, lea { vlea.s + disp2, xinst.lea_.d });
+  // update uses and delete the inst
+  simplify_impl(env, b, x, [&] (Vout& v) { return 1; });
+  return true;
 }
 
 // remove compares with unused results. This overlaps with removeDeadCode,

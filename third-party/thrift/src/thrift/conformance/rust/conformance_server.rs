@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod conformance_server_utils;
+
 use std::io::IsTerminal;
 
 use anyhow::Context;
@@ -22,11 +24,15 @@ use async_trait::async_trait;
 use clap::Parser;
 use conformance::services::conformance_service::PatchExn;
 use conformance::services::conformance_service::RoundTripExn;
+use conformance_server_utils::get_protocol;
+use conformance_server_utils::internal_error;
+use conformance_server_utils::unimplemented_method;
 use conformance_services::ConformanceService;
 use enum_ as enum_types; // fbcode//thrift/test/testet:enum
 use futures::StreamExt;
 use patch_data::PatchOpRequest;
 use patch_data::PatchOpResponse;
+use protocol_detail as protocol_detail_types; // fbcode//thrift:protocol_detail
 use serialization::RoundTripRequest;
 use serialization::RoundTripResponse;
 use testset as test_types; // fbcode//thrift/test/testet:testset
@@ -51,8 +57,9 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
     let any_registry = Box::leak(Box::new(fbthrift_conformance::AnyRegistry::new()));
     test_types::init_registry(any_registry)?;
     enum_types::init_registry(any_registry)?;
+    protocol_detail_types::init_registry(any_registry)?;
     info!(
-        "\"Any registry\" initialized, {} types registered",
+        "\"Any registry\" initialized, {} types registered.",
         any_registry.num_registered_types()
     );
 
@@ -128,18 +135,28 @@ impl ConformanceService for ConformanceServiceImpl {
         &self,
         request: RoundTripRequest,
     ) -> Result<RoundTripResponse, RoundTripExn> {
-        // This is a cheat to enable integrating the test while it's not
-        // implemented yet. If we didn't do this, we'd have to enumerate around
-        // 30k failures in 'nonconformance.txt'.
+        // Load the value.
+        let any = self
+            .any_registry
+            .load_(&request.value)
+            .map_err(internal_error)?;
+        // Figure out what protocol we are supposed to use.
+        let protocol = get_protocol(&request)?;
+        // Store the value and return the result.
         Ok(RoundTripResponse {
-            value: request.value,
+            value: any::Any {
+                protocol: Some(protocol),
+                data: self
+                    .any_registry
+                    .store_(any, protocol)
+                    .map_err(internal_error)?,
+                ..request.value
+            },
             ..Default::default()
         })
     }
 
     async fn patch(&self, _request: PatchOpRequest) -> Result<PatchOpResponse, PatchExn> {
-        Err(PatchExn::ApplicationException(
-            fbthrift::ApplicationException::unimplemented_method("ConformanceService", "patch"),
-        ))
+        Err(unimplemented_method("ConformanceService", "patch"))?
     }
 }

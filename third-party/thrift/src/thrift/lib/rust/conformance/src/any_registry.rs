@@ -27,6 +27,7 @@ use fbthrift::binary_protocol;
 use fbthrift::compact_protocol;
 use fbthrift::simplejson_protocol;
 use fbthrift::GetUri;
+use itertools::Itertools;
 use protocol::StandardProtocol;
 
 use crate::universal_name::ensure_registered;
@@ -36,9 +37,9 @@ use crate::universal_name::UniversalHashAlgorithm;
 
 const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;
 
-pub struct AnySerDeser {
-    pub serialize: fn(Box<dyn std::any::Any>, StandardProtocol) -> Result<Vec<u8>>,
-    pub deserialize: fn(&[u8], StandardProtocol) -> Result<Box<dyn std::any::Any>>,
+struct AnySerDeser {
+    serialize: fn(Box<dyn std::any::Any>, StandardProtocol) -> Result<Vec<u8>>,
+    deserialize: fn(&[u8], StandardProtocol) -> Result<Box<dyn std::any::Any>>,
 }
 
 pub struct AnyRegistry {
@@ -55,6 +56,18 @@ pub trait SerializeRef = binary_protocol::SerializeRef
 pub trait DeserializeSlice = binary_protocol::DeserializeSlice
     + compact_protocol::DeserializeSlice
     + simplejson_protocol::DeserializeSlice;
+
+impl std::fmt::Debug for AnyRegistry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut map = f.debug_map();
+        for uri in self.uri_to_typeid.keys().sorted() {
+            let hp =
+                get_universal_hash_prefix_sha_256(uri, UNIVERSAL_HASH_PREFIX_SHA_256_LEN).unwrap();
+            map.entry(uri, &hex::encode(hp));
+        }
+        map.finish()
+    }
+}
 
 impl AnyRegistry {
     pub fn new() -> Self {
@@ -165,7 +178,25 @@ impl AnyRegistry {
         deserialize(&obj.data, obj.protocol.unwrap_or(StandardProtocol::Compact))
     }
 
-    pub fn serializers_given_uri(&self, uri: &str) -> Result<&AnySerDeser> {
+    pub fn load_(&self, val: &any::Any) -> Result<Box<dyn std::any::Any>> {
+        let AnySerDeser { deserialize, .. } = self.serializers(val)?;
+        deserialize(&val.data, val.protocol.unwrap_or(StandardProtocol::Compact))
+    }
+
+    pub fn store_(
+        &self,
+        val: Box<dyn std::any::Any>,
+        protocol: StandardProtocol,
+    ) -> Result<Vec<u8>> {
+        let typeid = (*val).type_id();
+        let AnySerDeser { serialize, .. } = self
+            .typeid_to_serializers
+            .get(&typeid)
+            .context("serializers lookup failure")?;
+        serialize(val, protocol)
+    }
+
+    fn serializers_given_uri(&self, uri: &str) -> Result<&AnySerDeser> {
         self.typeid_to_serializers
             .get(
                 self.uri_to_typeid
@@ -175,7 +206,7 @@ impl AnyRegistry {
             .context("serializers lookup failure")
     }
 
-    pub fn serializers_given_hash_prefix(&self, hash_prefix: &Vec<u8>) -> Result<&AnySerDeser> {
+    fn serializers_given_hash_prefix(&self, hash_prefix: &Vec<u8>) -> Result<&AnySerDeser> {
         self.typeid_to_serializers
             .get(
                 self.hash_prefix_to_typeid
@@ -183,6 +214,14 @@ impl AnyRegistry {
                     .context("typeid lookup failure")?,
             )
             .context("serializers lookup failure")
+    }
+
+    fn serializers(&self, any: &any::Any) -> Result<&AnySerDeser> {
+        match (any.r#type.as_ref(), any.typeHashPrefixSha2_256.as_ref()) {
+            (Some(uri), _) => self.serializers_given_uri(uri),
+            (_, Some(hash_prefix)) => self.serializers_given_hash_prefix(hash_prefix),
+            (None, None) => Err(anyhow!("neither uri or hash prefix given ")),
+        }
     }
 }
 
@@ -209,8 +248,23 @@ mod tests {
     use anyhow::Result;
     use maplit::btreemap;
     use testset::struct_map_string_i32;
+    use testset::union_map_string_i32;
 
     use super::*;
+
+    #[test]
+    fn test_debug() -> Result<()> {
+        let mut registry = AnyRegistry::new();
+        registry.register_type::<union_map_string_i32>().unwrap();
+        registry.register_type::<struct_map_string_i32>().unwrap();
+        let expected = r#"{
+    "facebook.com/thrift/test/testset/struct_map_string_i32": "d4252c01f98d688ebb155e0a0a316763",
+    "facebook.com/thrift/test/testset/union_map_string_i32": "35f8820d6ded47c7d1611dd76a002040",
+}"#;
+        assert_eq!(format!("{:#?}", &registry), expected);
+
+        Ok(())
+    }
 
     fn get_test_object() -> struct_map_string_i32 {
         struct_map_string_i32 {

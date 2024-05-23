@@ -99,6 +99,10 @@ mod dot_dot {{>lib/block}}{{!
 
 {{#program:any?}}
 pub fn init_registry(registry: &mut fbthrift_conformance::AnyRegistry) -> anyhow::Result<bool> {
+{{#program:structs}}
+    registry.register_type::<{{struct:rust_name}}>()?;
+{{/program:structs}}
+
     Ok(true)
 }
 

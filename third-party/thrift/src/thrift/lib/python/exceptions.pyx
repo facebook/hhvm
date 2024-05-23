@@ -232,6 +232,18 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
     if pyex:
         return pyex
 
+    pyex = create_ProtocolError(ex.get_exception[cTProtocolException]())
+    if pyex:
+        return pyex
+
+    pyex = create_LibraryError(ex.get_exception[cTLibraryException]())
+    if pyex:
+        return pyex
+
+    pyex = create_Error(ex.get_exception[cTException]())
+    if pyex:
+        return pyex
+
     try:
         # No clue what this is just throw it and let the default cython logic takeover
         ex.throw_exception()

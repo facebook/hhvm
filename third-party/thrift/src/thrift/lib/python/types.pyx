@@ -266,8 +266,46 @@ typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
 
 StructOrError = cython.fused_type(Struct, GeneratedError)
 
+# AdapterInfo = (
+#     typing.Tuple[
+#         "thrift.python.adapter.Adapter", typing.Callable[[], typing.Optional[Struct]]
+#     ]
+# )
+
 cdef class FieldInfo:
     def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive):
+        """
+        Args:
+            id (int): The field ID specified in the IDL.
+
+            qualifier (FieldQualifier): Unqualified, Optional, ...
+
+            name (str): The name of the Thrift field, as specified in the IDL.
+
+            py_name (str):
+                The actual output name of the Thrift field, as specified in an
+                `@python.Name{}` annotation if present, or just the IDL name if there's
+                no annotation
+
+            type_info (TypeInfoBase | Callable[[], TypeInfoBase]):
+                Type information object corresponding to this field (eg. typeinfo_string,
+                ListTypeInfo, SetTypeInfo, etc.), OR a callable (eg. lambda) that returns
+                such an object (to handle types with dependencies in arbitrary order).
+
+            default_value (typing.Optional[object | Callable[[], object]]):
+                Custom default value specified in the IDL, or None. If present, this can
+                also be a callable which will be called (exactly once) to obtain the
+                default value.
+
+            adapter_info (typing.Optional[AdapterInfo])
+
+            is_primitive (bool):
+                Whether the field has a "primitive" type, such as: bool, byte, i16, i32,
+                i62, double, float.
+                Note that this definition of "primitive" DOES NOT match that of Thrift IDL
+                primitive types, as the latter include string and binary (see:
+                https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#primitive-types).
+        """
         self.id = id
         self.qualifier = qualifier
         self.name = name
@@ -318,36 +356,8 @@ cdef class StructInfo:
     Stores information for a specific Thrift Struct class.
 
     Instance Variables:
-        fields: Set containing the specifications of each field in this Thrift
-            struct. Each field is represented as a tuple with the following
-            structure:
-
-            (
-                id (int): The field ID specified in the IDL.
-
-                qualifier (FieldQualifier enum): Unqualified, Optional, ...
-
-                name (str); The name of the Thrift struct, as specified in the
-                    IDL.
-
-                type_info: Type information object corresponding to this field
-                    (eg. typeinfo_string, ListTypeInfo, SetTypeInfo, etc.), OR
-                    a callable (eg. lambda) that returns such an object (useful
-                        to handle types with dependencies in arbitrary order).
-
-                default_value: custom default value specified in the IDL, or
-                    None. If present, this can also be a callable which will be
-                    called (exactly once) to obtain the default value.
-
-                adapter_info: if the field has an adapter, or None.
-
-                is_primitive (bool): Whether the field has a "primitive" type,
-                    such as: bool, byte, i16, i32, i62, double, float.
-                    Note that this definition of "primitive" DOES NOT match that
-                    of Thrift IDL primitive types, as the latter include string
-                    and binary (see:
-                    https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#primitive-types).
-            )
+        fields (tuple[FieldInfo, ...]): Specifications of each field in this Thrift
+            struct.
 
         cpp_obj: cDynamicStructInfo for this struct.
 
@@ -363,8 +373,8 @@ cdef class StructInfo:
         Stores information for a Thrift Struct class with the given name.
 
         Args:
-            name (str): Name of the Thrift Struct (as specified in IDL)
-            fields (Set[Tuple]): Field spec tuples. See class docstring above.
+            name: Name of the Thrift Struct (as specified in IDL)
+            fields (tuple[FieldInfo, ...]): Field spec tuples.
         """
         self.fields = fields
         cdef int16_t num_fields = len(fields)
@@ -422,8 +432,8 @@ cdef class StructInfo:
         iniitalized (see `DynamicStructInfo::addFieldValue()`).
         """
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
-        for idx, field in enumerate(self.fields):
-            default_value = field.default_value
+        for idx, field_info in enumerate(self.fields):
+            default_value = field_info.default_value
             if default_value is None:
                 continue
             if callable(default_value):
@@ -436,18 +446,42 @@ cdef class StructInfo:
 
 
 cdef class UnionInfo:
-    def __cinit__(self, name, fields):
-        self.fields = fields
+    """
+    Stores information for a specific (immutable) Thrift union class.
+
+    Attributes:
+        fields (tuple[FieldInfo, ...])
+
+        cpp_obj (cDynamicStructInfo):
+            Fully initialized only after `fill()` completes.
+
+        type_infos (dict[int, TypeInfoBase | Callable[[], TypeInfoBase]):
+            Mapping from union field id to the corresponding TypeInfo (or callable that
+            returns a TypeInfo). Initialized by `fill()`.
+
+        id_to_adapter_info (dict[int, Optional[AdapterInfo]]):
+            Initialized by `fill()`.
+
+        name_to_index (dict[str, int]):
+            Mapping from union field name to field id. Initialized by `fill()`.
+    """
+
+    def __cinit__(self, name: str, field_infos: tuple[FieldInfo, ...]):
+        self.fields = field_infos
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
-            len(fields),
-            True,
+            len(field_infos),
+            True, # isUnion
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}
         self.name_to_index = {}
 
     cdef void fill(self) except *:
+        """
+        Completes the initialization of this instance. Must be called exactly once.
+        """
+
         cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         for idx, field_info in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
@@ -458,7 +492,10 @@ cdef class UnionInfo:
             self.id_to_adapter_info[field_info.id] = field_info.adapter_info
             self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
-                field_info.id, field_info.qualifier, PyUnicode_AsUTF8(field_info.name), getCTypeInfo(field_info.type_info)
+                field_info.id,
+                field_info.qualifier,
+                PyUnicode_AsUTF8(field_info.name),
+                getCTypeInfo(field_info.type_info)
             )
 
 
@@ -1108,6 +1145,23 @@ def _unpickle_union(klass, bytes data):
     return inst
 
 cdef class Union(StructOrUnion):
+    """
+    Base class for all generated (immutable) thrift-python unions.
+
+    Concrete derived classes of this base class are created by the `UnionMeta`
+    metaclass.
+
+    Attributes:
+        type: (instance of the "field enum type" `type(self).Type`) Which field is
+            currently holding a value, or `EMPTY` if none.
+
+        value: (Optional[object]) Current value set for this union, if any. Its actual
+            type should match that of the field corresponding to the `type` attribute.
+
+        One attribute per union field name (see `UnionMeta`).
+
+        _fbthrift_data: see `createUnionTuple()`
+    """
     def __cinit__(self):
         self._fbthrift_data = createUnionTuple()
 
@@ -1119,17 +1173,21 @@ cdef class Union(StructOrUnion):
         # ok to call with one not None kwarg and extra None kwargs.
         if len(kwargs) != 1 and sum(val is not None for val in kwargs.values()) != 1:
             raise TypeError("__init__() of a union may only take one keyword argument")
+
+        fields_enum_type = type(self).Type
         for name, value in kwargs.items():
             if value is None:
                 continue
             try:
-                tpe = self.Type[name]
+                field_enum = fields_enum_type[name]
             except KeyError:
-                raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
+                raise TypeError(
+                    f"__init__() got an unexpected keyword argument '{name}'"
+                )
             break
-        self._fbthrift_update_type_value(
-            tpe.value,
-            self._fbthrift_to_internal_data(tpe.value, value),
+        self._fbthrift_set_union_value(
+            field_enum.value,
+            self._fbthrift_to_internal_data(field_enum.value, value),
         )
 
     @classmethod
@@ -1164,11 +1222,17 @@ cdef class Union(StructOrUnion):
             )
         return union_info.type_infos[type_value].to_internal_data(value)
 
-    cdef void _fbthrift_update_type_value(self, type_value, value) except *:
-        Py_INCREF(type_value)
-        old_type_value = self._fbthrift_data[0]
-        PyTuple_SET_ITEM(self._fbthrift_data, 0, type_value)
-        Py_DECREF(old_type_value)
+    cdef void _fbthrift_set_union_value(self, field_id, value) except *:
+        """
+        Args:
+            field_id (int)
+            value (object)
+        """
+        Py_INCREF(field_id)
+        old_field_id = self._fbthrift_data[0]
+        PyTuple_SET_ITEM(self._fbthrift_data, 0, field_id)
+        Py_DECREF(old_field_id)
+
         old_value = self._fbthrift_data[1]
         Py_INCREF(value)
         PyTuple_SET_ITEM(self._fbthrift_data, 1, value)
@@ -1176,7 +1240,7 @@ cdef class Union(StructOrUnion):
         self._fbthrift_load_cache()
 
     cdef void _fbthrift_load_cache(self) except *:
-        self.type = self.Type(self._fbthrift_data[0])
+        self.type = type(self).Type(self._fbthrift_data[0])
         val = self._fbthrift_data[1]
         if val is None:
             self.value = None
@@ -1197,9 +1261,15 @@ cdef class Union(StructOrUnion):
         return size
 
     cdef _fbthrift_get_field_value(self, int16_t index):
+        """
+        Returns the value of the field with the given `index` if it is indeed the field
+        that is (currently) set for this union. Otherwise, raises AttributeError.
+        """
         if self.type.value != index:
             # TODO in python 3.10 update this to use name and obj fields
-            raise AttributeError(f'Union contains a value of type {self.type.name}, not {self.Type(index).name}')
+            raise AttributeError(
+                f'Union contains a value of type {self.type.name}, not '
+                f'{type(self).Type(index).name}')
         return self.value
 
     def get_type(self):
@@ -1207,19 +1277,30 @@ cdef class Union(StructOrUnion):
 
     @classmethod
     def fromValue(cls, value):
-        cdef Union inst = cls.__new__(cls)
+        """
+        Creates a new instance of this Thrift union, populating the first field whose
+        type is compatible with the given `value`. If `value` is None, the returned
+        instance is empty.
+
+        WARNING: The heuristic above can lead to confusing behavior (see union_test.py),
+        and therefore usage of this method is strongly discouraged.
+
+        Args:
+            value (typing.Optional[object])
+        """
+        cdef Union union_instance = cls.__new__(cls)
         if value is None:
-            return inst
-        cdef UnionInfo info = cls._fbthrift_struct_info
-        for type_value, typeinfo in info.type_infos.items():
+            return union_instance
+        cdef UnionInfo union_info = cls._fbthrift_struct_info
+        for type_value, typeinfo in union_info.type_infos.items():
             try:
-                value = inst._fbthrift_to_internal_data(type_value, value)
+                value = union_instance._fbthrift_to_internal_data(type_value, value)
             except (TypeError, OverflowError):
                 continue
             else:
-                inst._fbthrift_update_type_value(type_value, value)
+                union_instance._fbthrift_set_union_value(type_value, value)
                 break
-        return inst
+        return union_instance
 
     def __copy__(Union self):
         return self
@@ -1257,7 +1338,7 @@ cdef class Union(StructOrUnion):
     def __reduce__(self):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 
-cdef make_fget_struct(i):
+cdef _make_fget_struct(i):
     """
     Returns a function that takes a `Struct` instance and returns the value of
     the field with index `i`, or `None` if n/a.
@@ -1269,18 +1350,29 @@ cdef make_fget_struct(i):
     """
     return lambda self: (<Struct>self)._fbthrift_get_field_value(i)
 
-cdef make_fget_union(type_value, adapter_info):
+cdef _make_fget_union(field_id, adapter_info):
+    """
+    Returns a function that takes a `Union` instance and returns the value of the field
+    with the given `field_id`.
+
+    If `adapter_info` is not None, the corresponding adapter will be called with the
+    field value prior to returning.
+
+    Args:
+        field_id (int)
+        adapter_info (typing.Optional[object])
+    """
     if adapter_info:
         adapter_class, transitive_annotation = adapter_info
         return property(lambda self:
             adapter_class.from_thrift_field(
-                (<Union>self)._fbthrift_get_field_value(type_value),
-                type_value,
+                (<Union>self)._fbthrift_get_field_value(field_id),
+                field_id,
                 self,
                 transitive_annotation=transitive_annotation(),
             )
         )
-    return property(lambda self: (<Union>self)._fbthrift_get_field_value(type_value))
+    return property(lambda self: (<Union>self)._fbthrift_get_field_value(field_id))
 
 
 def _make_readonly_setattr():
@@ -1354,7 +1446,7 @@ class StructMeta(type):
                 klass,
                 field_name,
                 _make_cached_property(
-                    make_fget_struct(field_index),
+                    _make_fget_struct(field_index),
                     klass,
                     field_name,
                 )
@@ -1368,6 +1460,9 @@ class StructMeta(type):
 
         This should be called once, after all generated classes (unions and
         structs) for a given module have been created.
+
+        Typically called by `fill_specs()`, at the end of the generated thrift_types
+        module (after all type classes have been created).
         """
         (<StructInfo>cls._fbthrift_struct_info).fill()
 
@@ -1396,21 +1491,64 @@ class StructMeta(type):
             yield name, None
 
 
-def gen_enum(fields):
+def _gen_union_field_enum_members(field_infos):
+    """
+    Generates a sequence of (enum name, enum value) pairs for the given fields of a
+    Thrift union.
+
+    Args:
+        field_infos (Iterable[FieldInfo])
+
+    Yields: (name, value) pairs, where:
+        name (str): py_name of the corresponding Thrift union field, or 'EMPTY'.
+        value (int): value of the corresponding Thrift union field, or 0 for 'EMPTY'.
+
+        The first pair yielded is always `("EMPTY", 0)`, regardless of the given field
+        definitions. Subsequently, a pair is yielded for every field in the given
+        `field_infos`.
+    """
     yield ("EMPTY", 0)
-    for f in fields:
+    for f in field_infos:
         yield (f.py_name, f.id)
 
 
 class UnionMeta(type):
-    def __new__(cls, name, bases, dct):
-        fields = dct.pop('_fbthrift_SPEC')
-        num_fields = len(fields)
-        dct["_fbthrift_struct_info"] = UnionInfo(name, fields)
-        dct["Type"] = enum.Enum(name, gen_enum(fields))
-        for f in fields:
-            dct[f.py_name] = make_fget_union(f.id, f.adapter_info)
-        return super().__new__(cls, name, (Union,), dct)
+    def __new__(cls, union_name, bases, union_class_namespace):
+        """
+        Returns a new class corresponding to a thrift-python Union type.
+
+        Args:
+            union_name (str)
+            bases (tuple): Parent classes. Must be empty.
+            union_class_namespace (dict)
+
+        Returns:
+            A new class, with the given `union_name`, corresponding to a Thrift union.
+            The returned class inherits from `Union`. It has the following attributes:
+
+            At the class level:
+                _fbthrift_struct_info (UnionInfo)
+
+                Type (class enum.Enum): Enumeration of all fields declared for this
+                    Thrift union (see `_gen_union_field_enum_members()`).
+
+            At the instance level (see also `Union`):
+                A property for every field in the Thrift union, with its corresponding
+                `py_name`.
+        """
+        field_infos = union_class_namespace.pop('_fbthrift_SPEC')
+        num_fields = len(field_infos)
+        union_class_namespace["_fbthrift_struct_info"] = UnionInfo(
+            union_name, field_infos
+        )
+        union_class_namespace["Type"] = enum.Enum(
+            union_name, _gen_union_field_enum_members(field_infos)
+        )
+        for field_info in field_infos:
+            union_class_namespace[field_info.py_name] = _make_fget_union(
+                field_info.id, field_info.adapter_info
+            )
+        return super().__new__(cls, union_name, (Union,), union_class_namespace)
 
     def __dir__(cls):
         return tuple((<UnionInfo>cls._fbthrift_struct_info).name_to_index.keys()) + (
@@ -1782,11 +1920,10 @@ Mapping.register(Map)
 
 # We will create all the classes first then call fill_specs after that so
 # dependancies can be properly solved.
-def fill_specs(*struct_types):
+def fill_specs(*structured_thrift_classes):
     """
     Completes the initialization of the given Thrift-generated Struct (and
     Union) classes.
-
 
     This is called at the end of the modules that define the corresponding
     generated types (i.e., the `thrift_types.py` files), after the given classes
@@ -1798,15 +1935,15 @@ def fill_specs(*struct_types):
     class creation, hence this call.
 
     Args:
-        *struct_types: Sequence of class objects, each one of which corresponds
-        to either a `Struct` (i.e., created by/instance of `StructMeta`) or a
-        `Union` (i.e., created by/instance of `UnionMeta`).
+        *structured_thrift_classes: Sequence of class objects, each one of which
+        corresponds to either a `Struct` (i.e., created by/instance of `StructMeta`) or
+        a `Union` (i.e., created by/instance of `UnionMeta`).
     """
 
-    for cls in struct_types:
+    for cls in structured_thrift_classes:
         cls._fbthrift_fill_spec()
 
-    for cls in struct_types:
+    for cls in structured_thrift_classes:
         if not isinstance(cls, UnionMeta):
             cls._fbthrift_store_field_values()
 

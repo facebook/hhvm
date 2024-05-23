@@ -54,12 +54,30 @@ class object_t {
   }
 
  protected:
+  // Uncached methods are re-invoked every time their value is needed during a
+  // template evaluation.
+  //
+  // This is potentially useful if mutating state during evaluation, but has a
+  // performance cost. There are usually better ways to express such logic.
   void register_method(std::string name, std::function<N()> method) {
     do_register_method(
         std::move(name),
         [method = std::move(method),
+         uncache = std::optional<N>()]() mutable -> const N& {
+          uncache = method();
+          return *uncache;
+        });
+  }
+
+  // Cached methods are invoked at most once on the same object.
+  void register_cached_method(std::string name, std::function<N()> method) {
+    do_register_method(
+        std::move(name),
+        [method = std::move(method),
          cache = std::optional<N>()]() mutable -> const N& {
-          cache = method();
+          if (!cache) {
+            cache = method();
+          }
           return *cache;
         });
   }
@@ -72,8 +90,25 @@ class object_t {
           std::move(method.first),
           [s,
            m = method.second,
+           uncache = std::optional<N>()]() mutable -> const N& {
+            uncache = (s->*m)();
+            return *uncache;
+          });
+    }
+  }
+
+  template <class S>
+  void register_cached_methods(
+      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
+    for (const auto& method : methods) {
+      do_register_method(
+          std::move(method.first),
+          [s,
+           m = method.second,
            cache = std::optional<N>()]() mutable -> const N& {
-            cache = (s->*m)();
+            if (!cache) {
+              cache = (s->*m)();
+            }
             return *cache;
           });
     }

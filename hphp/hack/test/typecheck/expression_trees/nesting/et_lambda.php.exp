@@ -1,10 +1,10 @@
-ERROR: File "et_lambda.php", line 8, characters 28-37:
-Nested expression trees must not provide the DSL name (it is inherited from the enclosing tree). (Parsing[1002])
-ERROR: File "et_lambda.php", line 9, characters 45-46:
+ERROR: File "et_lambda.php", line 8, characters 28-28:
+Expression trees must provide the DSL name. (Parsing[1002])
+ERROR: File "et_lambda.php", line 9, characters 55-56:
 Variable `$x` is undefined in this `ExampleDsl` expression tree. (Naming[2050])
-  File "et_lambda.php", line 8, characters 3-42:
+  File "et_lambda.php", line 8, characters 3-32:
   Did you forget to splice in `$y`?
 ERROR: File "et_lambda.php", line 10, characters 44-45:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "et_lambda.php", line 9, characters 3-51:
+  File "et_lambda.php", line 9, characters 3-61:
   Did you mean `$y` instead?

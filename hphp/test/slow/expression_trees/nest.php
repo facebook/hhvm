@@ -12,7 +12,7 @@ function f<T1, T2, T3>(string $s, ExprTree<T1, T2, T3> $et): ExprTree<T1, T2, T3
 function test(): void {
   require 'expression_tree.inc';
 
-  $et = f('a', Code`1 + ${f('b', `3 + ${f('c', `4`)}`)}`);
+  $et = f('a', Code`1 + ${f('b', Code`3 + ${f('c', Code`4`)}`)}`);
 
   print_et($et);
 }

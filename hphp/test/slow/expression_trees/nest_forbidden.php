@@ -4,7 +4,5 @@
 <<__EntryPoint>>
 function test(): void {
   require 'expression_tree.inc';
-  Code`${`1`}`;
-
-
+  Code`${Code`1`}`;
 }

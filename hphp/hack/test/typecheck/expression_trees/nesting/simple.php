@@ -4,7 +4,10 @@
 <<file:__EnableUnstableFeatures('expression_tree_nest')>>
 
 function f(): void {
-  $y = ExampleDsl`${`1`}`; // Ok
-  $y = ExampleDsl`${(() ==> {ExampleDsl2`1`; return ExampleDsl`2`;})()}`; // Ok
-  $y = ExampleDsl2`${(() ==> {ExampleDsl2`1`; return ExampleDsl`2`;})()}`; // Error: type mismatch on DSLs
+  $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  $y = ExampleDsl2`${ExampleDsl2`1`}`; // Ok
+  $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+  $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+  $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+  $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
 }

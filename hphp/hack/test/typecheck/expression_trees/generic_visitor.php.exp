@@ -3,10 +3,10 @@ A semicolon `;` is expected here. (Parsing[1002])
 ERROR: File "generic_visitor.php", line 7, characters 3-6:
 Unbound name: `Code` (a global function) (Naming[2049])
 ERROR: File "generic_visitor.php", line 7, characters 12-12:
-Unbound name: `` (Naming[2049])
+Unbound name: `MISSING_DSL` (Naming[2049])
 ERROR: File "generic_visitor.php", line 7, characters 12-12:
-Unbound name: `` (an object type) (Naming[2049])
+Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
 ERROR: File "generic_visitor.php", line 7, characters 13-13:
-Unbound name: `` (an object type) (Naming[2049])
+Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
 ERROR: File "generic_visitor.php", line 7, characters 3-6:
 Unbound name (typing): `Code` (Typing[4107])

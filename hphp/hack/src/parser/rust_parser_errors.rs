@@ -5692,18 +5692,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         prev_context: &mut Option<Context<'a>>,
     ) {
         if self.context.expression_tree_depth == 0 && prefix.is_missing() {
-            self.errors.push(make_error_from_node(
-                node,
-                errors::top_level_expression_tree_name,
-            ))
+            self.errors
+                .push(make_error_from_node(node, errors::expression_tree_name))
         } else if self.context.expression_tree_depth != 0
-            && !prefix.is_missing()
+            && prefix.is_missing()
             && !self.context.active_expression_tree
         {
-            self.errors.push(make_error_from_node(
-                prefix,
-                errors::nested_expression_tree_name,
-            ))
+            self.errors
+                .push(make_error_from_node(prefix, errors::expression_tree_name))
         }
         if self.context.expression_tree_depth > 0 && !self.context.active_expression_tree {
             self.check_can_use_feature(node, &UnstableFeatures::ExpressionTreeNest)

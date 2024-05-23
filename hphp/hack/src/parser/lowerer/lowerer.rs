@@ -1639,7 +1639,7 @@ fn p_expr_impl<'a>(
         YieldExpression(c) => p_yield_expr(node, c, env, pos, location),
         ScopeResolutionExpression(c) => p_scope_resolution_expr(node, c, env, pos, location),
         CastExpression(c) => p_cast_expr(c, env),
-        PrefixedCodeExpression(c) => p_prefixed_code_expr(c, env),
+        PrefixedCodeExpression(c) => p_prefixed_code_expr(node, c, env),
         ETSpliceExpression(c) => p_et_splice_expr(&c.expression, env, location),
         ConditionalExpression(c) => p_conditional_expr(c, env),
         SubscriptExpression(c) => p_subscript_expr(c, env),
@@ -2143,22 +2143,44 @@ fn p_cast_expr<'a>(
 }
 
 fn p_prefixed_code_expr<'a>(
+    node: S<'a>,
     c: &'a PrefixedCodeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
     let mut clear_et_class_at_end = false;
-    match &env.expression_tree_class {
-        None => match pos_name(&c.prefix, env) {
-            Ok(id) => {
-                clear_et_class_at_end = true;
-                env.expression_tree_class = Some(id.clone());
-                Ok(())
+    let missing = c.prefix.is_missing();
+    let nested_id = match (pos_name(&c.prefix, env), &env.expression_tree_class) {
+        (Ok(nested_id), Some(enclosing_id)) => {
+            if !missing {
+                if enclosing_id.1 != nested_id.1 {
+                    raise_parsing_error(
+                        node,
+                        env,
+                        &format!(
+                            "{} {} inside of {}",
+                            syntax_error::expression_tree_name_mismatch,
+                            nested_id.1,
+                            enclosing_id.1,
+                        ),
+                    );
+                };
+                Ok(nested_id)
+            } else {
+                Ok(enclosing_id.clone())
             }
-            Err(err) => Err(err),
-        },
-        Some(_) => Ok(()),
+        }
+        (Ok(nested_id), None) => {
+            let nested_id = if !missing {
+                nested_id
+            } else {
+                Id(nested_id.0, "MISSING_DSL".to_string())
+            };
+            clear_et_class_at_end = true;
+            env.expression_tree_class = Some(nested_id.clone());
+            Ok(nested_id)
+        }
+        (Err(e), _) => Err(e),
     }?;
-
     let src_expr = if !c.body.is_compound_statement() {
         p_expr(&c.body, env)?
     } else {
@@ -2192,9 +2214,7 @@ fn p_prefixed_code_expr<'a>(
         });
         ast::Expr::new((), pos, expr)
     };
-    let cls = env.expression_tree_class.as_ref().unwrap();
-
-    let desugar_result = desugar(cls, src_expr, env);
+    let desugar_result = desugar(&nested_id, src_expr, env);
     for (pos, msg) in desugar_result.errors {
         raise_parsing_error_pos(&pos, env, &msg);
     }

@@ -1,4 +1,2 @@
-ERROR: File "nested_expression_trees.php", line 6, characters 16-25:
-Nested expression trees must not provide the DSL name (it is inherited from the enclosing tree). (Parsing[1002])
 ERROR: File "nested_expression_trees.php", line 6, characters 16-28:
 Cannot use unstable feature: `expression_tree_nest` (Parsing[1002])

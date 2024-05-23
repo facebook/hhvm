@@ -1,10 +1,10 @@
 ERROR: File "missing_name.php", line 7, characters 8-10:
-Top-level expression trees must provide the DSL name (including at the top-level of a nested lambda). (Parsing[1002])
+Expression trees must provide the DSL name. (Parsing[1002])
 ERROR: File "missing_name.php", line 8, characters 29-31:
-Top-level expression trees must provide the DSL name (including at the top-level of a nested lambda). (Parsing[1002])
+Expression trees must provide the DSL name. (Parsing[1002])
 ERROR: File "missing_name.php", line 7, characters 8-8:
-Unbound name: `` (Naming[2049])
+Unbound name: `MISSING_DSL` (Naming[2049])
 ERROR: File "missing_name.php", line 7, characters 8-8:
-Unbound name: `` (an object type) (Naming[2049])
+Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
 ERROR: File "missing_name.php", line 7, characters 9-9:
-Unbound name: `` (an object type) (Naming[2049])
+Unbound name: `MISSING_DSL` (an object type) (Naming[2049])

@@ -1,4 +1,4 @@
 (6,25)-(6,25) A semicolon `;` is expected here.
 (6,26)-(6,26) A semicolon `;` is expected here.
-(6,26)-(6,28) Top-level expression trees must provide the DSL name (including at the top-level of a nested lambda).
+(6,26)-(6,28) Expression trees must provide the DSL name.
 (6,28)-(6,28) An expression is expected here.

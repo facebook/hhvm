@@ -17,7 +17,7 @@ from libcpp.string cimport string
 from folly.iobuf cimport cIOBuf
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.py3.server cimport cAsyncProcessorFactory, AsyncProcessorFactory, ThriftServer as ThriftServer_py3
-from thrift.py3.exceptions cimport cException
+from thrift.python.exceptions cimport cException
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
     cpdef enum class RpcKind:

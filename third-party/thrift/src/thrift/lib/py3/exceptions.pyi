@@ -12,33 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
-from typing import Any
-
 from thrift.python.exceptions import (
     ApplicationError as ApplicationError,
     ApplicationErrorType as ApplicationErrorType,
     Error as Error,
     LibraryError as LibraryError,
+    ProtocolError as ProtocolError,
+    ProtocolErrorType as ProtocolErrorType,
     TransportError as TransportError,
     TransportErrorType as TransportErrorType,
     TransportOptions as TransportOptions,
 )
 
-class ProtocolErrorType(Enum):
-    UNKNOWN: ProtocolErrorType = ...
-    INVALID_DATA: ProtocolErrorType = ...
-    NEGATIVE_SIZE: ProtocolErrorType = ...
-    BAD_VERSION: ProtocolErrorType = ...
-    NOT_IMPLEMENTED: ProtocolErrorType = ...
-    MISSING_REQUIRED_FIELD: ProtocolErrorType = ...
-    @property
-    def value(self) -> int: ...
-
 class GeneratedError(Error):
     def __repr__(self) -> str: ...
-
-class ProtocolError(LibraryError):
-    def __init__(self, type: ProtocolErrorType, message: str) -> None: ...
-    type: ProtocolErrorType
-    message: str

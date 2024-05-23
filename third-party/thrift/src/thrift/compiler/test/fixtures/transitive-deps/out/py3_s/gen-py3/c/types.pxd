@@ -19,7 +19,7 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
-from thrift.py3.exceptions cimport cTException
+from thrift.python.exceptions cimport cTException
 cimport folly.iobuf as _fbthrift_iobuf
 from thrift.py3.types cimport (
     bstring,

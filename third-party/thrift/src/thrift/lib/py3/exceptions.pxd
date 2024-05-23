@@ -22,32 +22,8 @@ from libc.stdint cimport uint32_t
 from libcpp.memory cimport shared_ptr
 from thrift.python.common cimport RpcOptions, cThriftMetadata
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
-from thrift.python.exceptions cimport Error as BaseError, LibraryError as cLibraryError
+from thrift.python.exceptions cimport Error as BaseError
 from thrift.python.protocol cimport Protocol
-
-cdef extern from * namespace "std":
-    cdef cppclass cException "std::exception":
-        const char* what() nogil
-
-cdef extern from "thrift/lib/cpp/Thrift.h" namespace "apache::thrift":
-    cdef cppclass cTException "apache::thrift::TException"(cException):
-        pass
-
-    cdef cppclass cTLibraryException "apache::thrift::TLibraryException"(cTException):
-        pass
-
-cdef extern from "thrift/lib/cpp/protocol/TProtocolException.h":
-    enum cTProtocolExceptionType "apache::thrift::protocol::TProtocolException::TProtocolExceptionType":
-        cTProtocolExceptionType__UNKNOWN "apache::thrift::protocol::TProtocolException::UNKNOWN"
-        cTProtocolExceptionType__INVALID_DATA "apache::thrift::protocol::TProtocolException::INVALID_DATA"
-        cTProtocolExceptionType__NEGATIVE_SIZE "apache::thrift::protocol::TProtocolException::NEGATIVE_SIZE"
-        cTProtocolExceptionType__SIZE_LIMIT "apache::thrift::protocol::TProtocolException::SIZE_LIMIT"
-        cTProtocolExceptionType__BAD_VERSION "apache::thrift::protocol::TProtocolException::BAD_VERSION"
-        cTProtocolExceptionType__NOT_IMPLEMENTED "apache::thrift::protocol::TProtocolException::NOT_IMPLEMENTED"
-        cTProtocolExceptionType__MISSING_REQUIRED_FIELD "apache::thrift::protocol::TProtocolException::MISSING_REQUIRED_FIELD"
-
-    cdef cppclass cTProtocolException "apache::thrift::protocol::TProtocolException"(cTLibraryException):
-        cTProtocolExceptionType getType()
 
 
 cdef extern from "Python.h":
@@ -64,15 +40,6 @@ ctypedef object(*Handler)(const cFollyExceptionWrapper& ex, PyObject* user_data)
 cdef void addHandler(Handler handler)
 cdef object runHandlers(const cFollyExceptionWrapper& ex, RpcOptions options)
 cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)
-
-# cdef Inheritence sucks in cython
-cdef object create_Error(const cTException* ex)
-cdef object create_LibraryError(const cTLibraryException* ex)
-cdef object create_ProtocolError(const cTProtocolException* ex)
-
-
-cdef class ProtocolError(cLibraryError):
-    pass
 
 
 cdef class GeneratedError(BaseError):

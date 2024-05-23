@@ -22,9 +22,14 @@ from thrift.python.common cimport RpcOptions
 from thrift.python.protocol cimport Protocol
 
 
+cdef extern from * namespace "std":
+    cdef cppclass cException "std::exception":
+        const char* what() nogil
+
+
 cdef extern from "thrift/lib/cpp/Thrift.h" namespace "apache::thrift":
-    cdef cppclass cTException "apache::thrift::TException":
-        const char* what() noexcept nogil
+    cdef cppclass cTException "apache::thrift::TException"(cException):
+        pass
 
     cdef cppclass cTLibraryException "apache::thrift::TLibraryException"(cTException):
         pass
@@ -80,14 +85,31 @@ cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apa
         cTTransportExceptionType getType() noexcept
         int getErrno() noexcept
 
+cdef extern from "thrift/lib/cpp/protocol/TProtocolException.h":
+    enum cTProtocolExceptionType "apache::thrift::protocol::TProtocolException::TProtocolExceptionType":
+        cTProtocolExceptionType__UNKNOWN "apache::thrift::protocol::TProtocolException::UNKNOWN"
+        cTProtocolExceptionType__INVALID_DATA "apache::thrift::protocol::TProtocolException::INVALID_DATA"
+        cTProtocolExceptionType__NEGATIVE_SIZE "apache::thrift::protocol::TProtocolException::NEGATIVE_SIZE"
+        cTProtocolExceptionType__SIZE_LIMIT "apache::thrift::protocol::TProtocolException::SIZE_LIMIT"
+        cTProtocolExceptionType__BAD_VERSION "apache::thrift::protocol::TProtocolException::BAD_VERSION"
+        cTProtocolExceptionType__NOT_IMPLEMENTED "apache::thrift::protocol::TProtocolException::NOT_IMPLEMENTED"
+        cTProtocolExceptionType__MISSING_REQUIRED_FIELD "apache::thrift::protocol::TProtocolException::MISSING_REQUIRED_FIELD"
+
+    cdef cppclass cTProtocolException "apache::thrift::protocol::TProtocolException"(cTLibraryException):
+        cTProtocolExceptionType getType()
+
 
 cdef class Error(Exception):
     """base class for all Thrift exceptions"""
     pass
 
+# cdef Inheritence sucks in cython
+cdef object create_Error(const cTException* ex)
+
 cdef class LibraryError(Error):
     pass
 
+cdef object create_LibraryError(const cTLibraryException* ex)
 
 cdef class ApplicationError(Error):
     pass
@@ -99,6 +121,11 @@ cdef class TransportError(LibraryError):
     pass
 
 cdef TransportError create_TransportError(const cTTransportException* ex)
+
+cdef class ProtocolError(LibraryError):
+    pass
+
+cdef ProtocolError create_ProtocolError(const cTProtocolException* ex)
 
 
 cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)

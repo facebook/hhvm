@@ -19,8 +19,14 @@ from libcpp.vector cimport vector
 from thrift.python.common import RpcOptions
 from thrift.python.exceptions cimport (
     create_ApplicationError,
+    create_Error,
+    create_LibraryError,
+    create_ProtocolError,
     create_TransportError,
     cTApplicationException,
+    cTException,
+    cTLibraryException,
+    cTProtocolException,
     cTTransportException,
 )
 from thrift.python.exceptions import (
@@ -28,33 +34,12 @@ from thrift.python.exceptions import (
     ApplicationErrorType,
     Error,
     LibraryError,
+    ProtocolError,
+    ProtocolErrorType,
     TransportError,
     TransportErrorType,
     TransportOptions,
 )
-
-from enum import Enum
-import itertools
-
-
-class ProtocolErrorType(Enum):
-    UNKNOWN = cTProtocolExceptionType__UNKNOWN
-    INVALID_DATA = cTProtocolExceptionType__INVALID_DATA
-    NEGATIVE_SIZE = cTProtocolExceptionType__NEGATIVE_SIZE
-    SIZE_LIMIT = cTProtocolExceptionType__SIZE_LIMIT
-    BAD_VERSION = cTProtocolExceptionType__BAD_VERSION
-    NOT_IMPLEMENTED = cTProtocolExceptionType__NOT_IMPLEMENTED
-    MISSING_REQUIRED_FIELD = cTProtocolExceptionType__MISSING_REQUIRED_FIELD
-
-
-
-
-cdef create_Error(const cTException* ex):
-    if not ex:
-        return
-    message = (<bytes>deref(ex).what()).decode('utf-8')
-    inst = <BaseError>BaseError.__new__(BaseError, message)
-    return inst
 
 
 cdef class GeneratedError(BaseError):
@@ -136,35 +121,7 @@ cdef class GeneratedError(BaseError):
         raise NotImplementedError()
 
 
-cdef create_LibraryError(const cTLibraryException* ex):
-    if not ex:
-        return
-    message = (<bytes>deref(ex).what()).decode('utf-8')
-    inst = <cLibraryError>cLibraryError.__new__(cLibraryError, message)
-    return inst
 
-
-cdef class ProtocolError(cLibraryError):
-    """Equivalent of a C++ TProtocolException"""
-    def __init__(self, type, str message):
-        super().__init__(type, message)
-
-    @property
-    def type(self):
-        return self.args[0]
-
-    @property
-    def message(self):
-        return self.args[1]
-
-
-cdef create_ProtocolError(const cTProtocolException* ex):
-    if not ex:
-        return
-    type = ProtocolErrorType(deref(ex).getType())
-    message = (<bytes>deref(ex).what()).decode('utf-8')
-    inst = <ProtocolError>ProtocolError.__new__(ProtocolError, type, message)
-    return inst
 
 
 # Our Registry

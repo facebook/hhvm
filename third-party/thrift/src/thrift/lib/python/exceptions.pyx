@@ -27,6 +27,13 @@ cdef class Error(Exception):
     def __init__(self, *args):
         super().__init__(*args)
 
+cdef create_Error(const cTException* ex):
+    if not ex:
+        return
+    message = (<bytes>(deref(ex).what())).decode('utf-8')
+    inst = <Error>Error.__new__(Error, message)
+    return inst
+
 
 class ApplicationErrorType(Enum):
     UNKNOWN = cTApplicationExceptionType__UNKNOWN
@@ -79,12 +86,18 @@ cdef ApplicationError create_ApplicationError(const cTApplicationException* ex):
         message,
     )
 
-
 cdef class LibraryError(Error):
     """Equivalent of a C++ TLibraryException"""
     def __init__(self, *args):
         super().__init__(*args)
 
+
+cdef object create_LibraryError(const cTLibraryException* ex):
+    if not ex:
+        return
+    message = (<bytes>deref(ex).what()).decode('utf-8')
+    inst = <LibraryError>LibraryError.__new__(LibraryError, message)
+    return inst
 
 class TransportErrorType(Enum):
     UNKNOWN = cTTransportExceptionType__UNKNOWN
@@ -134,6 +147,39 @@ cdef class TransportError(LibraryError):
     @property
     def options(self):
         return self.args[3]
+
+
+class ProtocolErrorType(Enum):
+    UNKNOWN = cTProtocolExceptionType__UNKNOWN
+    INVALID_DATA = cTProtocolExceptionType__INVALID_DATA
+    NEGATIVE_SIZE = cTProtocolExceptionType__NEGATIVE_SIZE
+    SIZE_LIMIT = cTProtocolExceptionType__SIZE_LIMIT
+    BAD_VERSION = cTProtocolExceptionType__BAD_VERSION
+    NOT_IMPLEMENTED = cTProtocolExceptionType__NOT_IMPLEMENTED
+    MISSING_REQUIRED_FIELD = cTProtocolExceptionType__MISSING_REQUIRED_FIELD
+
+
+cdef class ProtocolError(LibraryError):
+    """Equivalent of a C++ TProtocolException"""
+    def __init__(self, type, str message):
+        super().__init__(type, message)
+
+    @property
+    def type(self):
+        return self.args[0]
+
+    @property
+    def message(self):
+        return self.args[1]
+
+
+cdef ProtocolError create_ProtocolError(const cTProtocolException* ex):
+    if not ex:
+        return
+    type = ProtocolErrorType(deref(ex).getType())
+    message = (<bytes>deref(ex).what()).decode('utf-8')
+    inst = <ProtocolError>ProtocolError.__new__(ProtocolError, type, message)
+    return inst
 
 
 cdef vector[Handler] handlers

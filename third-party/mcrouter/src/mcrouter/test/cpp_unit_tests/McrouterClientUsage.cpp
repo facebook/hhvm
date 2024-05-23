@@ -702,12 +702,12 @@ TEST(CarbonRouterClient, requestExpiryTestWithLatencyInjectionRoute) {
   baton.wait();
   const auto& proxies = router->getProxies();
   uint32_t num_errors = 0;
-  uint32_t num_deadline_exceeded_errors = 0;
+  // uint32_t num_deadline_exceeded_errors = 0;
   for (size_t i = 0; i < proxies.size(); ++i) {
     num_errors += proxies[i]->stats().getValue(
         facebook::memcache::mcrouter::failover_policy_result_error_stat);
-    num_deadline_exceeded_errors += proxies[i]->stats().getValue(
-        facebook::memcache::mcrouter::result_deadline_exceeded_error_all_stat);
+    // num_deadline_exceeded_errors += proxies[i]->stats().getValue(
+    // facebook::memcache::mcrouter::result_deadline_exceeded_error_all_stat);
   }
   // DEADLINE_EXCEEDED error is also failover eligible because of
   // time-sync issues so, make sure we actually failed over 3 times.

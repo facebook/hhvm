@@ -31,6 +31,7 @@ SOFTWARE.
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -46,10 +47,7 @@ namespace internal {
 template <class N>
 class object_t {
  public:
-  const N& at(const std::string& name) const {
-    cache_[name] = (methods_.at(name))();
-    return cache_[name];
-  }
+  const N& at(const std::string& name) const { return methods_.at(name)(); }
 
   bool has(const std::string& name) const {
     return (methods_.find(name) != methods_.end());
@@ -57,6 +55,32 @@ class object_t {
 
  protected:
   void register_method(std::string name, std::function<N()> method) {
+    do_register_method(
+        std::move(name),
+        [method = std::move(method),
+         cache = std::optional<N>()]() mutable -> const N& {
+          cache = method();
+          return *cache;
+        });
+  }
+
+  template <class S>
+  void register_methods(
+      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
+    for (const auto& method : methods) {
+      do_register_method(
+          std::move(method.first),
+          [s,
+           m = method.second,
+           cache = std::optional<N>()]() mutable -> const N& {
+            cache = (s->*m)();
+            return *cache;
+          });
+    }
+  }
+
+ private:
+  void do_register_method(std::string name, std::function<const N&()> method) {
     auto result = methods_.emplace(std::move(name), std::move(method));
     if (!result.second) {
       throw std::runtime_error(
@@ -64,18 +88,7 @@ class object_t {
     }
   }
 
-  template <class S>
-  void register_methods(
-      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
-    for (const auto& method : methods) {
-      register_method(
-          method.first, [s, m = method.second]() { return (s->*m)(); });
-    }
-  }
-
- private:
-  std::unordered_map<std::string, std::function<N()>> methods_;
-  mutable std::unordered_map<std::string, N> cache_;
+  std::unordered_map<std::string, std::function<const N&()>> methods_;
 };
 
 template <class T, class N>

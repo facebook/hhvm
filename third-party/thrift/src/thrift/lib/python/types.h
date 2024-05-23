@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <folly/Conv.h>
 #include <folly/Optional.h>
 #include <folly/python/error.h>
 
@@ -410,7 +411,7 @@ inline void* setMutableSet(void* object) {
 class ListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return (std::uint32_t)PyTuple_GET_SIZE(toPyObject(object));
+    return folly::to<std::uint32_t>(PyTuple_GET_SIZE(toPyObject(object)));
   }
 
   static void clear(void* object) { setContainer(object); }
@@ -461,7 +462,7 @@ class ListTypeInfo {
 class MutableListTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return (std::uint32_t)PyList_GET_SIZE(toPyObject(object));
+    return folly::to<std::uint32_t>(PyList_GET_SIZE(toPyObject(object)));
   }
 
   static void clear(void* object) { setList(object); }
@@ -509,7 +510,7 @@ template <typename T>
 class SetTypeInfoTemplate {
  public:
   static std::uint32_t size(const void* object) {
-    return (std::uint32_t)PySet_GET_SIZE(toPyObject(object));
+    return folly::to<std::uint32_t>(PySet_GET_SIZE(toPyObject(object)));
   }
 
   static void clear(void* object) { T::clear(object); }
@@ -668,7 +669,7 @@ using MutableSetTypeInfo = SetTypeInfoTemplate<MutableSetHandler>;
 class MapTypeInfo {
  public:
   static std::uint32_t size(const void* object) {
-    return (std::uint32_t)PyTuple_GET_SIZE(toPyObject(object));
+    return folly::to<std::uint32_t>(PyTuple_GET_SIZE(toPyObject(object)));
   }
 
   static void clear(void* object) { setContainer(object); }

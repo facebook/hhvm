@@ -19,8 +19,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/experimental/observer/Observer.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/Observer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/PluggableFunction.h>

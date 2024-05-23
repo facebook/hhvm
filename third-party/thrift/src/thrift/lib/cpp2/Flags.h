@@ -24,8 +24,8 @@
 
 #include <folly/CPortability.h>
 #include <folly/Indestructible.h>
-#include <folly/experimental/observer/Observer.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/Observer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
 
 #include <thrift/lib/cpp2/PluggableFunction.h>

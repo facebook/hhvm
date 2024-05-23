@@ -20,7 +20,7 @@
 #include <cstdint>
 
 #include <folly/Utility.h>
-#include <folly/experimental/observer/Observer.h>
+#include <folly/observer/Observer.h>
 
 namespace apache {
 namespace thrift {

@@ -23,7 +23,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/SimpleObservable.h>
 
 THRIFT_FLAG_DEFINE_bool(test_flag_bool, true);
 THRIFT_FLAG_DEFINE_int64(test_flag_int, 42);

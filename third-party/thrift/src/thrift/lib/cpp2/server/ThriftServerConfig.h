@@ -17,8 +17,8 @@
 #pragma once
 #include <chrono>
 #include <folly/Portability.h>
-#include <folly/experimental/observer/Observer.h>
 #include <folly/io/SocketOptionMap.h>
+#include <folly/observer/Observer.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/Flags.h>

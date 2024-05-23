@@ -42,7 +42,6 @@
 #include <folly/executors/VirtualExecutor.h>
 #include <folly/experimental/PrimaryPtr.h>
 #include <folly/experimental/coro/AsyncScope.h>
-#include <folly/experimental/observer/Observer.h>
 #include <folly/io/ShutdownSocketSet.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncServerSocket.h>
@@ -52,6 +51,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/lang/Badge.h>
 #include <folly/logging/xlog.h>
+#include <folly/observer/Observer.h>
 #include <folly/synchronization/CallOnce.h>
 
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>

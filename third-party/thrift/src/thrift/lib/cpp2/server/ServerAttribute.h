@@ -23,7 +23,7 @@
 
 #include <folly/GLog.h>
 #include <folly/SharedMutex.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
 
 namespace apache {

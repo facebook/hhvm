@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>

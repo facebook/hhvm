@@ -21,8 +21,8 @@
 #include <folly/Synchronized.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/experimental/coro/GtestHelpers.h>
-#include <folly/experimental/observer/Observer.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/Observer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>

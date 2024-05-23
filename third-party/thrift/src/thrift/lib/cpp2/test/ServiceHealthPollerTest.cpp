@@ -29,7 +29,7 @@
 #include <folly/experimental/coro/Invoke.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 

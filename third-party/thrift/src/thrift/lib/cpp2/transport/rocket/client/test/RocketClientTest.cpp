@@ -29,11 +29,11 @@
 
 #include <folly/Try.h>
 #include <folly/experimental/TestUtil.h>
-#include <folly/experimental/observer/Observer.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/observer/Observer.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/concurrency/Util.h>

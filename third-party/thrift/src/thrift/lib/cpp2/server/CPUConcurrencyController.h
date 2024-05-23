@@ -22,8 +22,8 @@
 
 #include <folly/Synchronized.h>
 #include <folly/experimental/FunctionScheduler.h>
-#include <folly/experimental/observer/Observer.h>
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/Observer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>

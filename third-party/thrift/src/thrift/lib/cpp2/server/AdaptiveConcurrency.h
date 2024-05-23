@@ -19,7 +19,7 @@
 #include <atomic>
 #include <chrono>
 #include <folly/Function.h>
-#include <folly/experimental/observer/Observer.h>
+#include <folly/observer/Observer.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 

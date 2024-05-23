@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <folly/observer/SimpleObservable.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>

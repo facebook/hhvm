@@ -41,7 +41,6 @@
 #include <folly/experimental/TestUtil.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/observer/SimpleObservable.h>
 #include <folly/io/GlobalShutdownSocketSet.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -49,6 +48,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/TestSSLServer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/test/Barrier.h>

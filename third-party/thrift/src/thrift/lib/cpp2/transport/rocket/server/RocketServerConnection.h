@@ -29,7 +29,6 @@
 #include <folly/ObserverContainer.h>
 #include <folly/Portability.h>
 #include <folly/container/F14Map.h>
-#include <folly/experimental/observer/Observer.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -37,6 +36,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/net/NetOps.h>
+#include <folly/observer/Observer.h>
 
 #include <wangle/acceptor/ManagedConnection.h>
 

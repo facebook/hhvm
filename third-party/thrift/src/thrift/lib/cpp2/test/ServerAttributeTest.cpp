@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 
-#include <folly/experimental/observer/Observer.h>
+#include <folly/observer/Observer.h>
 #include <folly/portability/GTest.h>
 
 using namespace apache::thrift;

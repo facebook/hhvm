@@ -43,7 +43,10 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
+    TestStructEmpty as TestStructEmptyMutable,
+    TestStructEmptyAlias as TestStructEmptyAliasMutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
+    TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
@@ -781,4 +784,15 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         ]
     )
     def test_adapter_serialization_round_trip(self, struct) -> None:
+        _thrift_serialization_round_trip(self, mutable_serializer, struct)
+
+    def test_typedef_simple(self) -> None:
+        empty = TestStructEmptyMutable()
+        empty_alias = TestStructEmptyAliasMutable()
+        self.assertEqual(empty, empty_alias)
+
+        struct = TestStructWithTypedefFieldMutable()
+        struct.empty_struct = empty_alias
+        struct.empty_struct_alias = empty
+
         _thrift_serialization_round_trip(self, mutable_serializer, struct)

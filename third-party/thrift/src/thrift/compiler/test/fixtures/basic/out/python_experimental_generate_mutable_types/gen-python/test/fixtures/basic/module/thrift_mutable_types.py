@@ -240,6 +240,10 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         return immutable_types.ReservedKeyword(**dataclasses.asdict(self))
 
 
+
+MyEnumAlias = MyEnum
+MyDataItemAlias = MyDataItem
+
 _fbthrift_all_structs = [
     MyStruct,
     MyDataItem,

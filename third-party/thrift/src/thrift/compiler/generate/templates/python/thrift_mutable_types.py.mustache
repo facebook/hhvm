@@ -76,6 +76,8 @@ raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{
 {{/struct:has_adapter?}}{{!
 }}{{/struct:union?}}{{/struct:exception?}}{{/program:structs}}
 
+{{> common/typedef }}
+
 _fbthrift_all_structs = [
     {{#program:structs}}
     {{^struct:union?}}

@@ -113,3 +113,12 @@ struct TestStructAdaptedTypes {
   }
   3: string unqualified_adapted_string_to_i32 = "123";
 }
+
+struct TestStructEmpty {}
+typedef TestStructEmpty TestStructEmptyAlias
+
+struct TestStructWithTypedefField {
+  1: i32 n;
+  2: TestStructEmpty empty_struct;
+  3: TestStructEmptyAlias empty_struct_alias;
+}

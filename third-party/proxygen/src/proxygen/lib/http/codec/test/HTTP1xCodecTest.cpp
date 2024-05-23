@@ -1308,6 +1308,58 @@ TEST(HTTP1xCodecTest, Chunkify) {
   upCodec.onIngress(*buf.front());
 }
 
+TEST(HTTP1xCodecTest, ChunkifyConnClose) {
+  // Send a 1.1 request with Connection: close and a 1.1 non-chunked response.
+  // The codec should chunk.
+  HTTP1xCodec upCodec(TransportDirection::UPSTREAM, false);
+  folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setURL("/");
+  req.setMethod(HTTPMethod::GET);
+  req.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
+  HTTPCodec::StreamID id = upCodec.createStream();
+  upCodec.generateHeader(buf, id, req, false);
+
+  HTTP1xCodec codec(TransportDirection::DOWNSTREAM, false);
+  HTTP1xCodecCallback callbacks;
+  codec.setCallback(&callbacks);
+  codec.onIngress(*buf.front());
+  buf.reset();
+
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  resp.setHTTPVersion(1, 1);
+  resp.setIsChunked(false);
+  std::string body(10, 'a');
+  codec.generateHeader(buf, id, resp, false);
+  codec.generateBody(buf,
+                     id,
+                     folly::IOBuf::wrapBuffer(body.data(), body.size()),
+                     folly::none,
+                     false);
+  codec.generateEOM(buf, id);
+
+  StrictMock<MockHTTPCodecCallback> upCallbacks;
+  upCodec.setCallback(&upCallbacks);
+  // No chunk header callbacks
+  EXPECT_CALL(upCallbacks, onMessageBegin(1, _));
+  EXPECT_CALL(upCallbacks, onHeadersComplete(1, _))
+      .WillOnce(Invoke([](HTTPCodec::StreamID,
+                          std::shared_ptr<HTTPMessage> resp) {
+        EXPECT_EQ(
+            resp->getHeaders().getSingleOrEmpty(HTTP_HEADER_TRANSFER_ENCODING),
+            "chunked");
+        EXPECT_EQ(resp->getHeaders().getSingleOrEmpty(HTTP_HEADER_CONNECTION),
+                  "close");
+      }));
+  EXPECT_CALL(upCallbacks, onChunkHeader(1, _));
+  EXPECT_CALL(upCallbacks, onBody(1, _, _));
+  EXPECT_CALL(upCallbacks, onChunkComplete(1));
+  EXPECT_CALL(upCallbacks, onMessageComplete(1, _));
+  upCodec.onIngress(*buf.front());
+}
+
 TEST(HTTP1xCodecTest, Chunkify100) {
   // Send a 1.1 request and a 1.0 non-chunked response.  The codec should chunk
   HTTP1xCodec upCodec(TransportDirection::UPSTREAM, false);

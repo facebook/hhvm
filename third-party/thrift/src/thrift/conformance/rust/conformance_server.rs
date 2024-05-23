@@ -138,7 +138,7 @@ impl ConformanceService for ConformanceServiceImpl {
         // Load the value.
         let any = self
             .any_registry
-            .load_(&request.value)
+            .load(&request.value)
             .map_err(internal_error)?;
         // Figure out what protocol we are supposed to use.
         let protocol = get_protocol(&request)?;
@@ -148,7 +148,7 @@ impl ConformanceService for ConformanceServiceImpl {
                 protocol: Some(protocol),
                 data: self
                     .any_registry
-                    .store_(any, protocol)
+                    .store(any, protocol)
                     .map_err(internal_error)?,
                 ..request.value
             },

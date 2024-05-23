@@ -35,6 +35,5 @@ pub mod ffi {
         ) -> Result<UniquePtr<CxxString>>;
         fn getUniversalHashPrefix(universalHash: &CxxString, hashBytes: i8)
         -> UniquePtr<CxxString>;
-        fn matchesUniversalHash(universalHash: &CxxString, prefix: &CxxString) -> bool;
     }
 }

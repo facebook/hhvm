@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use std::collections::HashSet;
-
 use anyhow::Result;
 use cxx::let_cxx_string;
 pub use ffi::UniversalHashAlgorithm;
@@ -42,39 +40,8 @@ pub fn get_universal_hash_prefix_sha_256(uri: &str, hash_bytes: i8) -> Result<Ve
     let hash = get_universal_hash(UniversalHashAlgorithm::Sha2_256, uri)?;
     Ok(get_universal_hash_prefix(&hash, hash_bytes))
 }
-
-pub fn ensure_registered(
-    universal_hash_registry: &HashSet<Vec<u8>>,
-    hash_prefix: &[u8],
-) -> Result<()> {
-    let num_matched = universal_hash_registry
-        .iter()
-        .filter(|hash| matches_universal_hash(hash, hash_prefix))
-        .count();
-    match num_matched {
-        0 => Err(anyhow::anyhow!(
-            "No hash found with prefix {:?}",
-            hash_prefix
-        )),
-        1 => Ok(()),
-        _ => Err(anyhow::anyhow!(
-            "Multiple hashes found with prefix {:?}",
-            hash_prefix
-        )),
-    }
-}
-
-fn matches_universal_hash(universal_hash: &[u8], prefix: &[u8]) -> bool {
-    let_cxx_string!(universal_hash = universal_hash);
-    let_cxx_string!(prefix = prefix);
-
-    ffi::matchesUniversalHash(&universal_hash, &prefix)
-}
-
 #[cfg(test)]
 mod tests {
-    use maplit::hashset;
-
     use super::*;
 
     #[test]
@@ -96,58 +63,5 @@ mod tests {
         assert_eq!(get_universal_hash_prefix(hash, 32), hash.to_vec(),);
 
         assert_eq!(get_universal_hash_prefix(hash, 33), hash.to_vec(),);
-    }
-
-    #[test]
-    fn test_match_universal_hash() {
-        assert!(!matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b""
-        ));
-
-        assert!(!matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b"1"
-        ));
-
-        assert!(matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b"0"
-        ));
-
-        assert!(matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b"0123456789ABCDEF"
-        ));
-
-        assert!(matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b"0123456789ABCDEF0123456789ABCDEF"
-        ));
-
-        assert!(!matches_universal_hash(
-            b"0123456789ABCDEF0123456789ABCDEF",
-            b"0123456789ABCDEF0123456789ABCDEF0",
-        ));
-    }
-
-    #[test]
-    fn test_ensure_registered() {
-        let universal_hash_registry = hashset! {
-            b"DEADBEEF".to_vec(),
-            b"0123456789ABCDEF0123456789ABCDEF".to_vec(),
-            b"0123456789ABCDEF".to_vec(),
-        };
-
-        // Test no matching prefix
-        assert!(ensure_registered(&universal_hash_registry, b"").is_err());
-
-        assert!(ensure_registered(&universal_hash_registry, b"12345").is_err());
-
-        // Test multiple matches
-        assert!(ensure_registered(&universal_hash_registry, b"012345").is_err());
-
-        // Test single matches
-        assert!(ensure_registered(&universal_hash_registry, b"DEAD").is_ok());
     }
 }

@@ -214,22 +214,22 @@ std::unique_ptr<folly::IOBuf> getRecordDigest(
     hpke::KDFId id) {
   switch (id) {
     case hpke::KDFId::Sha256: {
-      std::array<uint8_t, fizz::openssl::Sha256::HashLen> recordDigest;
-      fizz::openssl::Sha256::hash(
+      std::array<uint8_t, fizz::Sha256::HashLen> recordDigest;
+      fizz::openssl::Hasher<Sha256>::hash(
           *encode(echConfig),
           folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
       return folly::IOBuf::copyBuffer(recordDigest);
     }
     case hpke::KDFId::Sha384: {
-      std::array<uint8_t, fizz::openssl::Sha384::HashLen> recordDigest;
-      fizz::openssl::Sha384::hash(
+      std::array<uint8_t, fizz::Sha384::HashLen> recordDigest;
+      fizz::openssl::Hasher<Sha384>::hash(
           *encode(echConfig),
           folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
       return folly::IOBuf::copyBuffer(recordDigest);
     }
     case hpke::KDFId::Sha512: {
-      std::array<uint8_t, fizz::openssl::Sha512::HashLen> recordDigest;
-      fizz::openssl::Sha512::hash(
+      std::array<uint8_t, fizz::Sha512::HashLen> recordDigest;
+      fizz::openssl::Hasher<Sha512>::hash(
           *encode(echConfig),
           folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
       return folly::IOBuf::copyBuffer(recordDigest);

@@ -22,7 +22,7 @@ class Aead128GCMTokenCipher : public TokenCipher {
  public:
   static constexpr size_t kMinTokenSecretLength = 32;
 
-  using HashType = openssl::Sha256;
+  using HashType = Sha256;
   using AeadType = openssl::OpenSSLEVPCipher;
   using CipherType = fizz::AESGCM128;
 

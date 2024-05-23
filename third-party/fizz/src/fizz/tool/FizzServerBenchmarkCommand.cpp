@@ -163,7 +163,7 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
       ProtocolVersion::tls_1_3, ProtocolVersion::tls_1_3_28};
   bool enableBatch = false;
   size_t batchNumMsgThreshold = 0;
-  std::shared_ptr<SynchronizedBatcher<openssl::Sha256>> batcher;
+  std::shared_ptr<SynchronizedBatcher<Sha256>> batcher;
 
   // Argument Handler Map
   // clang-format off
@@ -252,11 +252,10 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
     }
     std::shared_ptr<SelfCert> sharedCert = std::move(cert);
     if (enableBatch) {
-      batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+      batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
           batchNumMsgThreshold, sharedCert, CertificateVerifyContext::Server);
       auto batchCert =
-          std::make_shared<BatchSignatureAsyncSelfCert<openssl::Sha256>>(
-              batcher);
+          std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
       serverContext->setSupportedSigSchemes(batchCert->getSigSchemes());
       certManager->addCert(batchCert, true);
     } else {

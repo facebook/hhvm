@@ -137,7 +137,7 @@ class Batcher {
  * A batcher to store and manage the Merkle Tree globally for multiple threads.
  * The underlying Merkle Tree will be shared by all threads.
  */
-template <typename Hash = openssl::Sha256>
+template <typename Hash = Sha256>
 class SynchronizedBatcher : public Batcher<Hash> {
  public:
   SynchronizedBatcher(
@@ -196,7 +196,7 @@ class SynchronizedBatcher : public Batcher<Hash> {
  * A batcher to store and manage the Merkle Tree for each thread.
  * Each thread will have a Merkle Tree.
  */
-template <typename Hash = openssl::Sha256>
+template <typename Hash = Sha256>
 class ThreadLocalBatcher : public Batcher<Hash> {
  public:
   ThreadLocalBatcher(

@@ -24,7 +24,7 @@ void HandshakeContextImpl<Hash>::appendToTranscript(const Buf& data) {
 
 template <typename Hash>
 Buf HandshakeContextImpl<Hash>::getHandshakeContext() const {
-  Hash copied(hashState_);
+  openssl::Hasher<Hash> copied(hashState_);
   auto out = folly::IOBuf::create(Hash::HashLen);
   out->append(Hash::HashLen);
   folly::MutableByteRange outRange(out->writableData(), out->length());
@@ -43,7 +43,7 @@ Buf HandshakeContextImpl<Hash>::getFinishedData(
   auto data = folly::IOBuf::create(Hash::HashLen);
   data->append(Hash::HashLen);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
-  Hash::hmac(finishedKey->coalesce(), *context, outRange);
+  openssl::Hasher<Hash>::hmac(finishedKey->coalesce(), *context, outRange);
   return data;
 }
 } // namespace fizz

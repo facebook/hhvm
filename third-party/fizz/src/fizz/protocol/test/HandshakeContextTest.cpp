@@ -20,29 +20,29 @@ namespace test {
 class HandshakeContextTest : public testing::Test {};
 
 TEST_F(HandshakeContextTest, TestHandshakeContextSingle) {
-  HandshakeContextImpl<openssl::Sha256> context(kHkdfLabelPrefix.str());
+  HandshakeContextImpl<Sha256> context(kHkdfLabelPrefix.str());
   context.appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
   context.getHandshakeContext();
 }
 
 TEST_F(HandshakeContextTest, TestHandshakeContextMultiple) {
-  HandshakeContextImpl<openssl::Sha256> context(kHkdfLabelPrefix.str());
+  HandshakeContextImpl<Sha256> context(kHkdfLabelPrefix.str());
   context.appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
   context.appendToTranscript(folly::IOBuf::copyBuffer("ServerHello"));
   context.getHandshakeContext();
 }
 
 TEST_F(HandshakeContextTest, TestFinished) {
-  HandshakeContextImpl<openssl::Sha256> context(kHkdfLabelPrefix.str());
+  HandshakeContextImpl<Sha256> context(kHkdfLabelPrefix.str());
   context.appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
-  std::vector<uint8_t> baseKey(openssl::Sha256::HashLen);
+  std::vector<uint8_t> baseKey(Sha256::HashLen);
   context.getFinishedData(range(baseKey));
 }
 
 TEST_F(HandshakeContextTest, TestEmpty) {
-  HandshakeContextImpl<openssl::Sha256> context(kHkdfLabelPrefix.str());
+  HandshakeContextImpl<Sha256> context(kHkdfLabelPrefix.str());
   context.getHandshakeContext();
-  std::array<uint8_t, openssl::Sha256::HashLen> key{4};
+  std::array<uint8_t, Sha256::HashLen> key{4};
   context.getFinishedData(folly::range(key));
 }
 } // namespace test

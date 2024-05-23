@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Hasher.h>
 #include <fizz/record/Types.h>
 
 namespace fizz {
@@ -66,7 +67,7 @@ class HandshakeContextImpl : public HandshakeContext {
   }
 
  private:
-  Hash hashState_;
+  fizz::openssl::Hasher<Hash> hashState_;
   std::string hkdfLabelPrefix_;
 };
 } // namespace fizz

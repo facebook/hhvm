@@ -25,9 +25,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
   EXPECT_CALL(*mockBaseCert, getSigSchemes())
       .Times(2)
       .WillRepeatedly(Return(schemes));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, mockBaseCert, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
   EXPECT_EQ(batchCert.getSigner(), mockBaseCert);
   // getIdentity
   EXPECT_CALL(*mockBaseCert, getIdentity())
@@ -90,9 +90,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
 
 TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockAsyncCert) {
   auto mockBaseCert = std::make_shared<MockAsyncSelfCert>();
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, mockBaseCert, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
   EXPECT_EQ(batchCert.getSigner(), mockBaseCert);
   // sign
   EXPECT_CALL(
@@ -122,9 +122,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
 
   // non-batch signature
   auto signature = batchCert.signFuture(
@@ -161,9 +161,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
           getPrivateKey(kRSAKey), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
 
   // non-batch signature
   auto signature = batchCert.signFuture(
@@ -200,9 +200,9 @@ TEST(BatchSignatureAsyncSelfCertTest, TestUnsuportedHash) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>(
           getPrivateKey(kP384Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
 
   // thow when signing a batch scheme whose Hash doesn't match
   EXPECT_THROW(

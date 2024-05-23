@@ -14,7 +14,7 @@ namespace fizz {
 namespace test {
 
 TEST(BatchSignatureTypesTest, TestBatchSignatureSchemes) {
-  BatchSignatureSchemes<openssl::Sha256> sha256Schemes;
+  BatchSignatureSchemes<Sha256> sha256Schemes;
   EXPECT_EQ(
       sha256Schemes.getFromBaseScheme(SignatureScheme::ed25519), folly::none);
   EXPECT_EQ(

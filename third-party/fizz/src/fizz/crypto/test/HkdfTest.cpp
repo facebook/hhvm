@@ -33,7 +33,7 @@ TEST_P(HkdfTest, TestHkdfSha256Expand) {
   auto expectedOkm = toIOBuf(GetParam().okm);
   CHECK_EQ(outputBytes, expectedOkm->length());
 
-  auto actualOkm = HkdfImpl::create<openssl::Sha256>().hkdf(
+  auto actualOkm = HkdfImpl::create<Sha256>().hkdf(
       ikm->coalesce(), salt->coalesce(), *info, outputBytes);
   EXPECT_FALSE(actualOkm->isChained());
   EXPECT_EQ(outputBytes, actualOkm->length());

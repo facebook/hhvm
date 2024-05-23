@@ -180,11 +180,11 @@ folly::Optional<ech::ECHConfigList> parseECHConfigsBase64(
 
 folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
   auto getKDFId = [](std::string kdfStr) {
-    if (kdfStr == "openssl::Sha256") {
+    if (kdfStr == "Sha256") {
       return hpke::KDFId::Sha256;
-    } else if (kdfStr == "openssl::Sha384") {
+    } else if (kdfStr == "Sha384") {
       return hpke::KDFId::Sha384;
-    } else if (kdfStr == "openssl::Sha512") {
+    } else if (kdfStr == "Sha512") {
       return hpke::KDFId::Sha512;
     }
 

@@ -40,11 +40,11 @@ size_t getHashSize(HashFunction hash) {
 folly::StringPiece toString(HashFunction hash) {
   switch (hash) {
     case HashFunction::Sha256:
-      return "openssl::Sha256";
+      return "Sha256";
     case HashFunction::Sha384:
-      return "openssl::Sha384";
+      return "Sha384";
     case HashFunction::Sha512:
-      return "openssl::Sha512";
+      return "Sha512";
   }
   return "Invalid HashFunction";
 }

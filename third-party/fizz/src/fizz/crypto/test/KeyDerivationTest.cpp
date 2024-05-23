@@ -35,8 +35,7 @@ TEST_P(KeyDerivationTest, ExpandLabel) {
 
   auto secret = std::vector<uint8_t>(prk.begin(), prk.end());
 
-  auto deriver =
-      KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str());
+  auto deriver = KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str());
   auto out = deriver.expandLabel(
       range(secret),
       GetParam().label,
@@ -49,28 +48,23 @@ TEST_P(KeyDerivationTest, ExpandLabel) {
 TEST(KeyDerivation, DeriveSecret) {
   // dummy prk
   std::vector<uint8_t> secret(
-      KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str())
-          .hashLength());
+      KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str()).hashLength());
   std::vector<uint8_t> messageHash(
-      KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str())
-          .hashLength());
-  auto deriver =
-      KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str());
+      KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str()).hashLength());
+  auto deriver = KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str());
   deriver.deriveSecret(
       range(secret), "hey", range(messageHash), deriver.hashLength());
 }
 
 TEST(KeyDerivation, Sha256BlankHash) {
   std::vector<uint8_t> computed(
-      KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str())
-          .hashLength());
+      KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str()).hashLength());
   folly::IOBuf blankBuf;
-  openssl::Sha256::hash(
+  openssl::Hasher<Sha256>::hash(
       blankBuf, MutableByteRange(computed.data(), computed.size()));
   EXPECT_EQ(
-      StringPiece(
-          KeyDerivationImpl::create<openssl::Sha256>(kHkdfLabelPrefix.str())
-              .blankHash()),
+      StringPiece(KeyDerivationImpl::create<Sha256>(kHkdfLabelPrefix.str())
+                      .blankHash()),
       StringPiece(folly::range(computed)));
 }
 

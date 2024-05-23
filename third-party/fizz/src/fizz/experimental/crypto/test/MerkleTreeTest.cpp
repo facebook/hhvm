@@ -20,7 +20,7 @@ TEST(MerkleTreeTest, TestTree1) {
    *   Layer 0:  H(0)     H(1)
    * Messages: Message1 Message2
    */
-  BatchSignatureMerkleTree<openssl::Sha256> mt(2);
+  BatchSignatureMerkleTree<Sha256> mt(2);
   auto index1 = mt.append(folly::range(folly::StringPiece("Message1")));
   auto index2 = mt.append(folly::range(folly::StringPiece("Message2")));
   auto node1 = mt.getNodeValue(0, 0);
@@ -41,7 +41,7 @@ TEST(MerkleTreeTest, TestTree1) {
   auto root = mt.getRootValue();
   EXPECT_EQ(mt.countHeight(), 2);
   EXPECT_EQ(mt.countLeaves(), 2);
-  size_t hashLen = openssl::Sha256::HashLen;
+  size_t hashLen = Sha256::HashLen;
   EXPECT_EQ(root->length(), hashLen);
   EXPECT_EQ(
       folly::hexlify(std::string((char*)root->data(), root->length())),
@@ -53,7 +53,7 @@ TEST(MerkleTreeTest, TestTree2) {
    *   Layer 0:  H(0)
    * Messages: Message1
    */
-  BatchSignatureMerkleTree<openssl::Sha256> mt(2);
+  BatchSignatureMerkleTree<Sha256> mt(2);
   auto index1 = mt.append(folly::range(folly::StringPiece("Message1")));
   EXPECT_EQ(mt.countHeight(), 1);
   EXPECT_EQ(mt.countLeaves(), 1);
@@ -72,7 +72,7 @@ TEST(MerkleTreeTest, TestTree3) {
    *   Layer 0:  H(0)     H(1)     H(2)     H(3)*=H(0)
    * Messages: Message1 Message1 Message1
    */
-  BatchSignatureMerkleTree<openssl::Sha256> mt(2);
+  BatchSignatureMerkleTree<Sha256> mt(2);
   mt.append(folly::range(folly::StringPiece("Message1")));
   mt.append(folly::range(folly::StringPiece("Message1")));
   mt.append(folly::range(folly::StringPiece("Message1")));
@@ -112,7 +112,7 @@ TEST(MerkleTreeTest, TestTLSTree) {
    *   Layer 0:  H(0)       H(1)       H(2)      H(3)
    * Messages: Message1 Randomness1 Message2 Randomness2
    */
-  BatchSignatureMerkleTree<openssl::Sha256> mt(2);
+  BatchSignatureMerkleTree<Sha256> mt(2);
   auto index1 =
       mt.appendTranscript(folly::range(folly::StringPiece("Message1")));
   auto index2 =
@@ -125,21 +125,21 @@ TEST(MerkleTreeTest, TestTLSTree) {
 
   // generate a path used for reconstruct the root
   auto path = mt.getPath(index2.value());
-  EXPECT_EQ(path.path->computeChainDataLength() / openssl::Sha256::HashLen, 2);
+  EXPECT_EQ(path.path->computeChainDataLength() / Sha256::HashLen, 2);
   auto expectedPathNode1 = mt.getNodeValue(0, 3);
   EXPECT_TRUE(std::equal(
       path.path->data(),
-      path.path->data() + openssl::Sha256::HashLen,
+      path.path->data() + Sha256::HashLen,
       expectedPathNode1.value()->data()));
   auto expectedPathNode2 = mt.getNodeValue(1, 0);
   EXPECT_TRUE(std::equal(
-      path.path->data() + openssl::Sha256::HashLen,
-      path.path->data() + 2 * openssl::Sha256::HashLen,
+      path.path->data() + Sha256::HashLen,
+      path.path->data() + 2 * Sha256::HashLen,
       expectedPathNode2.value()->data()));
   // compute the root from message, index, and path
   mt.finalizeAndBuild();
   auto root = mt.getRootValue();
-  auto root2 = BatchSignatureMerkleTree<openssl::Sha256>::computeRootFromPath(
+  auto root2 = BatchSignatureMerkleTree<Sha256>::computeRootFromPath(
       folly::range(folly::StringPiece("Message2")), std::move(path));
   EXPECT_TRUE(std::equal(root->data(), root->tail(), root2->data()));
 }

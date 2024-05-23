@@ -78,8 +78,8 @@ void Validator::verify(
     auto pkey = constructEcKeyFromBuf(key);
     auto ecdsa = constructECDSASig(signature);
 
-    std::array<uint8_t, fizz::openssl::Sha256::HashLen> hashedMessage;
-    fizz::openssl::Sha256::hash(
+    std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
+    fizz::openssl::Hasher<fizz::Sha256>::hash(
         *message,
         folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
     if (ECDSA_do_verify(

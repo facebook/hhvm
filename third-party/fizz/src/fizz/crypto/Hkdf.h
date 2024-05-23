@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Hasher.h>
 #include <folly/io/IOBuf.h>
 
 namespace fizz {
@@ -52,7 +53,7 @@ class HkdfImpl : public Hkdf {
  public:
   template <typename Hash>
   static HkdfImpl create() {
-    return HkdfImpl(Hash::HashLen, &Hash::hmac);
+    return HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac);
   }
 
   std::vector<uint8_t> extract(folly::ByteRange salt, folly::ByteRange ikm)

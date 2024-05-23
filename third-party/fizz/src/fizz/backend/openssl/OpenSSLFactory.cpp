@@ -111,10 +111,12 @@ std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return std::make_unique<HandshakeContextImpl<Sha256>>(getHkdfPrefix());
+      return std::make_unique<HandshakeContextImpl<fizz::Sha256>>(
+          getHkdfPrefix());
     case CipherSuite::TLS_AES_256_GCM_SHA384:
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return std::make_unique<HandshakeContextImpl<Sha384>>(getHkdfPrefix());
+      return std::make_unique<HandshakeContextImpl<fizz::Sha384>>(
+          getHkdfPrefix());
     default:
       throw std::runtime_error("hs: not implemented");
   }

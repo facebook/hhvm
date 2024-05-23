@@ -63,9 +63,9 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature1 = batchSelfCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -103,9 +103,9 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
           getPrivateKey(kRSAKey), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature1 = batchSelfCert.signFuture(
       SignatureScheme::rsa_pss_sha256_batch,
@@ -143,9 +143,9 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   auto certificate =
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           getPrivateKey(kP256Key), std::move(certs));
-  auto batcher = std::make_shared<SynchronizedBatcher<openssl::Sha256>>(
+  auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
-  BatchSignatureAsyncSelfCert<openssl::Sha256> batchSelfCert(batcher);
+  BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
   folly::ManualExecutor executor;
   auto signature = batchSelfCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -181,11 +181,11 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
           newSig1.encode()->coalesce()),
       std::runtime_error);
 
-  // throw when signature's path length is larger than openssl::Sha256::HashLen
+  // throw when signature's path length is larger than Sha256::HashLen
   // * 32
   MerkleTreePath newPath2{
       .index = static_cast<uint32_t>(decodedSig.getIndex())};
-  size_t badLength = openssl::Sha256::HashLen * 33;
+  size_t badLength = Sha256::HashLen * 33;
   newPath2.path = folly::IOBuf::create(badLength);
   newPath2.path->append(badLength);
   BatchSignature newSig2(std::move(newPath2), decodedSig.getSignature());

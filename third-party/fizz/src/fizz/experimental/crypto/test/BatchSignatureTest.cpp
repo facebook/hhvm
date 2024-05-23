@@ -15,7 +15,7 @@ namespace fizz {
 namespace test {
 
 TEST(BatchSignatureTest, encodeToBeSigned) {
-  BatchSignatureMerkleTree<openssl::Sha256> mt(4);
+  BatchSignatureMerkleTree<Sha256> mt(4);
   mt.append(folly::range(folly::StringPiece("Message1")));
   mt.append(folly::range(folly::StringPiece("Message2")));
   mt.finalizeAndBuild();
@@ -33,7 +33,7 @@ TEST(BatchSignatureTest, encodeToBeSigned) {
 }
 
 TEST(BatchSignatureTest, signatureEncodeDecode) {
-  BatchSignatureMerkleTree<openssl::Sha256> mt(4);
+  BatchSignatureMerkleTree<Sha256> mt(4);
   auto index = mt.append(folly::range(folly::StringPiece("Message1")));
   mt.append(folly::range(folly::StringPiece("Message2")));
   mt.finalizeAndBuild();

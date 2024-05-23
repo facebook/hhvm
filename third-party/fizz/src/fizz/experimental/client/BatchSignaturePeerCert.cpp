@@ -28,14 +28,13 @@ void BatchSignaturePeerCert::batchSigVerify(
   }
   // verify path element size
   auto pathBuf = decoded.getPath();
-  if (pathBuf->computeChainDataLength() / openssl::Sha256::HashLen > 32) {
+  if (pathBuf->computeChainDataLength() / Sha256::HashLen > 32) {
     throw std::runtime_error(
         "Verification failure: batch signature number of path elements must be less than 32");
   }
   // verify signature
-  auto rootValue =
-      BatchSignatureMerkleTree<openssl::Sha256>::computeRootFromPath(
-          message, decoded.getIndex(), std::move(pathBuf));
+  auto rootValue = BatchSignatureMerkleTree<Sha256>::computeRootFromPath(
+      message, decoded.getIndex(), std::move(pathBuf));
   auto toBeSigned =
       BatchSignature::encodeToBeSigned(std::move(rootValue), scheme);
   verifier_->verify(

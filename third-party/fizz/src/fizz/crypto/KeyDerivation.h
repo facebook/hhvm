@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Hasher.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/record/Types.h>
 
@@ -68,8 +69,8 @@ class KeyDerivationImpl : public KeyDerivation {
     return KeyDerivationImpl(
         labelPrefix,
         Hash::HashLen,
-        &Hash::hash,
-        &Hash::hmac,
+        &openssl::Hasher<Hash>::hash,
+        &openssl::Hasher<Hash>::hmac,
         HkdfImpl::create<Hash>(),
         Hash::BlankHash);
   }
@@ -80,8 +81,8 @@ class KeyDerivationImpl : public KeyDerivation {
     return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
         labelPrefix,
         Hash::HashLen,
-        &Hash::hash,
-        &Hash::hmac,
+        &openssl::Hasher<Hash>::hash,
+        &openssl::Hasher<Hash>::hmac,
         HkdfImpl::create<Hash>(),
         Hash::BlankHash));
   }

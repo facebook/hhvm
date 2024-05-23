@@ -10,8 +10,7 @@
 
 namespace fizz {
 
-constexpr std::array<SignatureScheme, 2>
-    BatchSignatureSchemes<openssl::Sha256>::schemes;
+constexpr std::array<SignatureScheme, 2> BatchSignatureSchemes<Sha256>::schemes;
 
 folly::Optional<BatchSchemeInfo> getBatchSchemeInfo(
     SignatureScheme batchScheme,

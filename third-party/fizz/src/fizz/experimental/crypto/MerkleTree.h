@@ -54,7 +54,7 @@ struct MerkleTreePath {
  *    preimage attacks.
  *    @param msg, the original message.
  */
-template <typename Derived, typename Hash = openssl::Sha256>
+template <typename Derived, typename Hash = Sha256>
 class MerkleTree {
  public:
   // key of Hash Map: (height, offset)
@@ -270,7 +270,7 @@ class MerkleTree {
  * Refer to https://datatracker.ietf.org/doc/draft-ietf-tls-batch-signing for a
  * detailed description.
  */
-template <class Hash = openssl::Sha256>
+template <class Hash = Sha256>
 class BatchSignatureMerkleTree
     : public MerkleTree<BatchSignatureMerkleTree<Hash>, Hash> {
  public:
@@ -346,7 +346,7 @@ class BatchSignatureMerkleTree
     DCHECK(rightChild.size() == Hash::HashLen);
 
     std::array<uint8_t, Hash::HashLen> result;
-    Hash hasher;
+    openssl::Hasher<Hash> hasher;
     hasher.hash_init();
     constexpr std::array<uint8_t, 1> prefix = {0x01};
     hasher.hash_update(folly::range(prefix));
@@ -364,7 +364,7 @@ class BatchSignatureMerkleTree
   static std::array<uint8_t, Hash::HashLen> constructLeafNode(
       folly::ByteRange msg) {
     std::array<uint8_t, Hash::HashLen> result;
-    Hash hasher;
+    openssl::Hasher<Hash> hasher;
     hasher.hash_init();
     constexpr std::array<uint8_t, 1> prefix = {0x00};
     hasher.hash_update(folly::range(prefix));

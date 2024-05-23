@@ -7,8 +7,8 @@
  */
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
-#include <fizz/extensions/delegatedcred/DelegatedCredentialPemUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/extensions/delegatedcred/Serialization.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <fizz/util/Parse.h>
 #include <folly/FileUtil.h>

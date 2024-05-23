@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/extensions/delegatedcred/DelegatedCredentialPemUtils.h>
+#include <fizz/extensions/delegatedcred/Serialization.h>
 #include <folly/base64.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -116,7 +116,7 @@ StringPiece kP384DelegatedCred = {
     "D/EqLaFsDaP4Fl2PGH9NgXkyo8=\n"
     "-----END FIZZ DELEGATED CREDENTIAL-----\n"};
 
-TEST(PemUtilsTest, testValidReadFromPem) {
+TEST(SerializationTest, testValidReadFromPem) {
   auto combinedPem = kP256DelegatedCred.toString() +
       kP256DelegatedCredKey.toString() + kP256CredCert.toString();
   auto dc = loadDCFromPEM(combinedPem);
@@ -126,19 +126,19 @@ TEST(PemUtilsTest, testValidReadFromPem) {
       std::vector<SignatureScheme>{SignatureScheme::ecdsa_secp256r1_sha256});
 }
 
-TEST(PemUtilsTest, BadLabel) {
+TEST(SerializationTest, BadLabel) {
   auto combinedPem = kP256DelegatedCredBadLabel.toString() +
       kP256DelegatedCredKey.toString() + kP256CredCert.toString();
   EXPECT_THROW(loadDCFromPEM(combinedPem), std::runtime_error);
 }
 
-TEST(PemUtilsTest, P384DC) {
+TEST(SerializationTest, P384DC) {
   auto combinedPem = kP256DelegatedCredBadLabel.toString() +
       kP256DelegatedCredKey.toString() + kP256CredCert.toString();
   EXPECT_THROW(loadDCFromPEM(combinedPem), std::runtime_error);
 }
 
-TEST(PemUtilsTest, TestBuildCombinedPEM) {
+TEST(SerializationTest, TestBuildCombinedPEM) {
   auto credData = folly::base64Decode(kP256DelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
   credVec.emplace_back(Extension{

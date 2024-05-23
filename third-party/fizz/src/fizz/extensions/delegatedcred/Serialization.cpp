@@ -1,5 +1,5 @@
-#include <fizz/extensions/delegatedcred/DelegatedCredentialPemUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/extensions/delegatedcred/Serialization.h>
 #include <folly/Format.h>
 #include <folly/Range.h>
 #include <folly/base64.h>

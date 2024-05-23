@@ -225,9 +225,8 @@ set(FIZZ_SOURCES
   extensions/delegatedcred/DelegatedCredentialCertManager.cpp
   extensions/delegatedcred/DelegatedCredentialClientExtension.cpp
   extensions/delegatedcred/DelegatedCredentialFactory.cpp
-  extensions/delegatedcred/DelegatedCredentialPemUtils.cpp
+  extensions/delegatedcred/Serialization.cpp
   extensions/delegatedcred/DelegatedCredentialUtils.cpp
-  extensions/delegatedcred/DelegatedCredentialPemUtils.cpp
   extensions/delegatedcred/Types.cpp
   extensions/exportedauth/ExportedAuthenticator.cpp
   extensions/tokenbinding/Types.cpp

@@ -1,0 +1,1 @@
+Fatal error: Cannot use namespace alias with xhp-style names (contains `:` or `-`) in %s/namespace/alias/xhp_style_namespace3.php on line 6

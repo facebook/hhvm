@@ -492,7 +492,9 @@ pub const pair_initializer_arity: Error =
 pub const invalid_reified: Error =
     Cow::Borrowed("`reify` keyword can only appear at function or class type parameter position");
 pub const invalid_namespace_name: Error =
-    Cow::Borrowed("Cannot use namespace with xhp-style names (contains `:`)");
+    Cow::Borrowed("Cannot use namespace with xhp-style names (contains `:` or `-`)");
+pub const invalid_namespace_alias: Error =
+    Cow::Borrowed("Cannot use namespace alias with xhp-style names (contains `:` or `-`)");
 pub fn reified_in_invalid_classish(s: &str) -> Error {
     Cow::Owned(format!(
         "Invalid to use a reified type within {}'s type parameters",

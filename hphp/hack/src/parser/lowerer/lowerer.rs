@@ -5283,14 +5283,18 @@ fn p_namespace_use_clause<'a>(
                 let x = NAMESPACE_USE.find(&n).unwrap().as_str();
                 ast::Id(p.clone(), x.to_string())
             } else {
-                pos_name(alias, env)?
+                let result = pos_name(alias, env)?;
+                if result.1.contains(':') || result.1.contains('-') {
+                    raise_parsing_error(alias, env, &syntax_error::invalid_namespace_alias);
+                }
+                result
             };
             let kind = if clause_kind.is_missing() {
                 kind
             } else {
                 p_namespace_use_kind(clause_kind, env)
             }?;
-            if n.contains(':') {
+            if n.contains(':') || n.contains('-') {
                 raise_parsing_error(node, env, &syntax_error::invalid_namespace_name);
             }
             Ok((

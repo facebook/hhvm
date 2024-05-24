@@ -557,6 +557,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     // We now reuse the same entry created previously for non-psp, with updates
     // on certain metrics (memory and hardware counters).
     entry->setInt("response_code", transport->getResponseCode());
+    entry->setInt("response_size", transport->getResponseSize());
     tl_heap->recordStats(*entry);
     entry->setInt("uptime", HHVM_FN(server_uptime)());
     entry->setInt("rss", ProcStatus::adjustedRssKb());

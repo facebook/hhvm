@@ -38,7 +38,8 @@ let load_contents_unsafe (input_filename : string) : 'a =
 let load_saved_state_exn
     ~(naming_table_fallback_path : string option)
     ~(errors_path : string)
-    (ctx : Provider_context.t) : Naming_table.t * saved_state_errors =
+    ~(warning_hashes_path : string)
+    (ctx : Provider_context.t) : Naming_table.t * old_issues =
   let old_naming_table =
     match naming_table_fallback_path with
     | Some nt_path ->
@@ -75,7 +76,13 @@ let load_saved_state_exn
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  (old_naming_table, old_errors)
+  let (old_warnings : warning_hashes) =
+    if not (Sys.file_exists warning_hashes_path) then
+      ISet.empty
+    else
+      Marshal.from_channel (In_channel.create ~binary:true warning_hashes_path)
+  in
+  (old_naming_table, { old_errors; old_warnings })
 
 let get_hot_classes (filename : string) : SSet.t =
   if not (Disk.file_exists filename) then (

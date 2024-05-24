@@ -286,6 +286,7 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
               dep_table_path;
               compressed_dep_table_path;
               errors_path;
+              warning_hashes_path;
             };
           additional_info;
           changed_files;
@@ -316,6 +317,8 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
           ( "compressed_dep_table_path",
             compressed_dep_table_path |> Path.to_string |> Hh_json.string_ );
           ("errors_path", errors_path |> Path.to_string |> Hh_json.string_);
+          ( "warning_hashes_path",
+            warning_hashes_path |> Path.to_string |> Hh_json.string_ );
           ( "replay_token",
             Option.value_map
               replay_token

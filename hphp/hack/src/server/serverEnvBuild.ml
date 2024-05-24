@@ -74,6 +74,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
         init_start_t = Unix.gettimeofday ();
         init_type = "";
         mergebase = None;
+        mergebase_warning_hashes = ISet.empty;
         why_needed_full_check = None;
         recheck_id = None;
         saved_state_delta = None;

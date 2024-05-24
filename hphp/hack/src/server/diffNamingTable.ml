@@ -27,9 +27,13 @@ let get_default_provider_context () =
 let get_naming_table_and_errors provider_context path =
   let sqlite_path = Some path in
   let errors_path = Str.replace_first (Str.regexp "_naming.sql") ".err" path in
+  let warning_hashes_path =
+    Str.replace_first (Str.regexp "_naming.sql") ".warn" path
+  in
   SaveStateService.load_saved_state_exn
     ~naming_table_fallback_path:sqlite_path
     ~errors_path
+    ~warning_hashes_path
     provider_context
 
 type diff = {
@@ -159,10 +163,13 @@ let print_diff print_count diff =
 *)
 let diff control_path test_path =
   let provider_context = get_default_provider_context () in
-  let (control_naming_table, control_errors) =
+  let ( control_naming_table,
+        { SaveStateServiceTypes.old_errors = control_errors; old_warnings = _ }
+      ) =
     get_naming_table_and_errors provider_context control_path
   in
-  let (test_naming_table, test_errors) =
+  let ( test_naming_table,
+        { SaveStateServiceTypes.old_errors = test_errors; old_warnings = _ } ) =
     get_naming_table_and_errors provider_context test_path
   in
   let diff =

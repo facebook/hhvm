@@ -173,6 +173,54 @@ type saved_state_delta = {
 }
 [@@deriving show]
 
+type dirty_deps = {
+  dirty_local_deps: Typing_deps.DepSet.t;
+      (** We are rechecking dirty files to bootstrap the dependency graph.
+          After this is done we need to also recheck full fan-out (in this updated
+          graph) of provided set. *)
+  dirty_master_deps: Typing_deps.DepSet.t;
+      (** The fan-outs of those nodes were not expanded yet. *)
+  rechecked_files: Relative_path.Set.t;
+      (** Files that have been rechecked since server startup *)
+  clean_local_deps: Typing_deps.DepSet.t;
+      (** Those deps have already been checked against their interaction with
+          dirty_master_deps. Storing them here to avoid checking it over and over *)
+}
+[@@deriving show]
+
+(** When using prechecked files we split initial typechecking in two phases
+    (dirty files and a subset of their fan-out). Other init types compute the
+    full fan-out up-front. *)
+type prechecked_files_status =
+  | Prechecked_files_disabled
+  | Initial_typechecking of dirty_deps
+  | Prechecked_files_ready of dirty_deps
+[@@deriving show]
+
+type init_env = {
+  approach_name: string;
+  ci_info: Ci_util.info option Future.t option; [@opaque]
+      (** The info describing the CI job the server is a part of, if any *)
+  init_error: string option;
+  init_id: string;
+  init_start_t: float;
+  init_type: string;
+  mergebase: Hg.Rev.t option;
+  mergebase_warning_hashes: SaveStateServiceTypes.warning_hashes;
+  why_needed_full_check: Init_telemetry.t option; [@opaque]
+      (** This is about the first full check (if any) which was deferred after init.
+      It gets reset after that first full check is completed.
+      First parameter is a string label used in telemetry. Second is opaque telemetry. *)
+  recheck_id: string option;
+  (* Additional data associated with init that we want to log when a first full
+   * check completes. *)
+  saved_state_delta: saved_state_delta option;
+  naming_table_manifold_path: string option;
+      (** The manifold path for remote typechecker workers to download the naming table
+          saved state. This value will be None in the case of full init *)
+}
+[@@deriving show]
+
 (** In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
     (see respectively Parser_heap, Naming_table, Typing_env).
@@ -249,50 +297,6 @@ type env = {
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option; [@opaque]
 }
 [@@deriving show]
-
-and dirty_deps = {
-  dirty_local_deps: Typing_deps.DepSet.t;
-      (** We are rechecking dirty files to bootstrap the dependency graph.
-          After this is done we need to also recheck full fan-out (in this updated
-          graph) of provided set. *)
-  dirty_master_deps: Typing_deps.DepSet.t;
-      (** The fan-outs of those nodes were not expanded yet. *)
-  rechecked_files: Relative_path.Set.t;
-      (** Files that have been rechecked since server startup *)
-  clean_local_deps: Typing_deps.DepSet.t;
-      (** Those deps have already been checked against their interaction with
-          dirty_master_deps. Storing them here to avoid checking it over and over *)
-}
-
-(** When using prechecked files we split initial typechecking in two phases
-    (dirty files and a subset of their fan-out). Other init types compute the
-    full fan-out up-front. *)
-and prechecked_files_status =
-  | Prechecked_files_disabled
-  | Initial_typechecking of dirty_deps
-  | Prechecked_files_ready of dirty_deps
-
-and init_env = {
-  approach_name: string;
-  ci_info: Ci_util.info option Future.t option; [@opaque]
-      (** The info describing the CI job the server is a part of, if any *)
-  init_error: string option;
-  init_id: string;
-  init_start_t: float;
-  init_type: string;
-  mergebase: Hg.Rev.t option;
-  why_needed_full_check: Init_telemetry.t option; [@opaque]
-      (** This is about the first full check (if any) which was deferred after init.
-      It gets reset after that first full check is completed.
-      First parameter is a string label used in telemetry. Second is opaque telemetry. *)
-  recheck_id: string option;
-  (* Additional data associated with init that we want to log when a first full
-   * check completes. *)
-  saved_state_delta: saved_state_delta option;
-  naming_table_manifold_path: string option;
-      (** The manifold path for remote typechecker workers to download the naming table
-          saved state. This value will be None in the case of full init *)
-}
 
 let list_files env =
   let acc =

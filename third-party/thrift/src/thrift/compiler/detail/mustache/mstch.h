@@ -59,7 +59,9 @@ class object_t {
   //
   // This is potentially useful if mutating state during evaluation, but has a
   // performance cost. There are usually better ways to express such logic.
-  void register_method(std::string name, std::function<N()> method) {
+  template <typename F>
+  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>> register_method(
+      std::string name, F method) {
     do_register_method(
         std::move(name),
         [method = std::move(method),
@@ -70,7 +72,9 @@ class object_t {
   }
 
   // Cached methods are invoked at most once on the same object.
-  void register_cached_method(std::string name, std::function<N()> method) {
+  template <typename F>
+  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>
+  register_cached_method(std::string name, F method) {
     do_register_method(
         std::move(name),
         [method = std::move(method),
@@ -86,14 +90,9 @@ class object_t {
   void register_methods(
       S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
     for (const auto& method : methods) {
-      do_register_method(
-          std::move(method.first),
-          [s,
-           m = method.second,
-           uncache = std::optional<N>()]() mutable -> const N& {
-            uncache = (s->*m)();
-            return *uncache;
-          });
+      register_method(std::move(method.first), [s, m = method.second] {
+        return (s->*m)();
+      });
     }
   }
 
@@ -101,16 +100,9 @@ class object_t {
   void register_cached_methods(
       S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
     for (const auto& method : methods) {
-      do_register_method(
-          std::move(method.first),
-          [s,
-           m = method.second,
-           cache = std::optional<N>()]() mutable -> const N& {
-            if (!cache) {
-              cache = (s->*m)();
-            }
-            return *cache;
-          });
+      register_cached_method(std::move(method.first), [s, m = method.second] {
+        return (s->*m)();
+      });
     }
   }
 

@@ -379,7 +379,7 @@ cdef class MutableStructInfo:
                 getCTypeInfo(field_type_info),
             )
 
-    cdef void store_field_values(self) except *:
+    cdef void _initialize_default_values(self) except *:
         """
         Initializes the default values of fields in this Struct.
 
@@ -499,7 +499,7 @@ class MutableStructMeta(type):
         called for all generated classes (including unions and structs) in
         a module.
         """
-        (<MutableStructInfo>cls._fbthrift_mutable_struct_info).store_field_values()
+        (<MutableStructInfo>cls._fbthrift_mutable_struct_info)._initialize_default_values()
 
     def __iter__(cls):
         """

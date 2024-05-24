@@ -362,10 +362,10 @@ cdef class StructInfo:
         cpp_obj: cDynamicStructInfo for this struct.
 
         type_infos: Tuple whose size matches the number of fields in the Thrift
-            struct. Initialized by calling `fill()`.
+            struct. Initialized by calling `_fill_struct_info()`.
 
         name_to_index: Dict[str (field name), int (index in `fields`).].
-            Initialized by calling `fill()`.
+            Initialized by calling `_fill_struct_info()`.
     """
 
     def __cinit__(self, name: str, fields):
@@ -386,7 +386,7 @@ cdef class StructInfo:
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
 
-    cdef void fill(self) except *:
+    cdef void _fill_struct_info(self) except *:
         """
         Completes the initialization of this instance by populating all
         information relative to this Struct's fields.
@@ -424,7 +424,7 @@ cdef class StructInfo:
                 field_info.id, field_info.qualifier, PyUnicode_AsUTF8(field_info.name), getCTypeInfo(field_type_info)
             )
 
-    cdef void store_field_values(self) except *:
+    cdef void _initialize_default_values(self) except *:
         """
         Initializes the default values of fields in this Struct.
 
@@ -453,17 +453,17 @@ cdef class UnionInfo:
         fields (tuple[FieldInfo, ...])
 
         cpp_obj (cDynamicStructInfo):
-            Fully initialized only after `fill()` completes.
+            Fully initialized only after `_fill_union_info()` completes.
 
         type_infos (dict[int, TypeInfoBase | Callable[[], TypeInfoBase]):
             Mapping from union field id to the corresponding TypeInfo (or callable that
-            returns a TypeInfo). Initialized by `fill()`.
+            returns a TypeInfo). Initialized by `_fill_union_info()`.
 
         id_to_adapter_info (dict[int, Optional[AdapterInfo]]):
-            Initialized by `fill()`.
+            Initialized by `_fill_union_info()`.
 
         name_to_index (dict[str, int]):
-            Mapping from union field name to field id. Initialized by `fill()`.
+            Mapping from union field name to field id. Initialized by `_fill_union_info()`.
     """
 
     def __cinit__(self, name: str, field_infos: tuple[FieldInfo, ...]):
@@ -477,7 +477,7 @@ cdef class UnionInfo:
         self.id_to_adapter_info = {}
         self.name_to_index = {}
 
-    cdef void fill(self) except *:
+    cdef void _fill_union_info(self) except *:
         """
         Completes the initialization of this instance. Must be called exactly once.
         """
@@ -1464,7 +1464,7 @@ class StructMeta(type):
         Typically called by `fill_specs()`, at the end of the generated thrift_types
         module (after all type classes have been created).
         """
-        (<StructInfo>cls._fbthrift_struct_info).fill()
+        (<StructInfo>cls._fbthrift_struct_info)._fill_struct_info()
 
     def _fbthrift_store_field_values(cls):
         """
@@ -1473,7 +1473,7 @@ class StructMeta(type):
         This should be called once, after `_fbthrift_fill_spec()` has been
         called for all generated classes (unions and structs) in a module.
         """
-        (<StructInfo>cls._fbthrift_struct_info).store_field_values()
+        (<StructInfo>cls._fbthrift_struct_info)._initialize_default_values()
 
     def __dir__(cls):
         return tuple(name for name, _ in cls) + (
@@ -1555,7 +1555,7 @@ class UnionMeta(type):
             "type", "value")
 
     def _fbthrift_fill_spec(cls):
-        (<UnionInfo>cls._fbthrift_struct_info).fill()
+        (<UnionInfo>cls._fbthrift_struct_info)._fill_union_info()
 
 
 cdef class BadEnum:

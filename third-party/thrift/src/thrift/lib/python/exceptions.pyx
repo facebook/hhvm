@@ -269,10 +269,10 @@ class GeneratedErrorMeta(type):
         return super().__new__(cls, name, (GeneratedError,), dct)
 
     def _fbthrift_fill_spec(cls):
-        (<StructInfo>cls._fbthrift_struct_info).fill()
+        (<StructInfo>cls._fbthrift_struct_info)._fill_struct_info()
 
     def _fbthrift_store_field_values(cls):
-        (<StructInfo>cls._fbthrift_struct_info).store_field_values()
+        (<StructInfo>cls._fbthrift_struct_info)._initialize_default_values()
 
 
 cdef class GeneratedError(Error):

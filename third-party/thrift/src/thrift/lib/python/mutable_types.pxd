@@ -64,4 +64,4 @@ cdef class MutableStructInfo:
     cdef tuple fields
     cdef dict name_to_index
     cdef void fill(self) except *
-    cdef void store_field_values(self) except *
+    cdef void _initialize_default_values(self) except *

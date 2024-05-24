@@ -132,8 +132,8 @@ cdef class StructInfo:
     cdef tuple type_infos
     cdef tuple[FieldInfo] fields
     cdef dict name_to_index
-    cdef void fill(self) except *
-    cdef void store_field_values(self) except *
+    cdef void _fill_struct_info(self) except *
+    cdef void _initialize_default_values(self) except *
 
 cdef class UnionInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj
@@ -141,7 +141,7 @@ cdef class UnionInfo:
     cdef dict id_to_adapter_info
     cdef tuple fields
     cdef dict name_to_index
-    cdef void fill(self) except *
+    cdef void _fill_union_info(self) except *
 
 cdef class ListTypeInfo(TypeInfoBase):
     cdef object val_info

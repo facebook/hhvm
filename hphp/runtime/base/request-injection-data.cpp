@@ -18,9 +18,10 @@
 
 #include <atomic>
 #include <cinttypes>
-#include <string>
-#include <limits>
 #include <filesystem>
+#include <limits>
+#include <string>
+#include <thread>
 
 #include <signal.h>
 
@@ -102,7 +103,8 @@ void RequestTimer::setTimeout(int seconds) {
       // but m_timerActive is still set, so we haven't processed
       // the signal yet.
       // spin until its done.
-      while (m_timerActive.load(std::memory_order_relaxed)) {
+      while (m_timerActive.load(std::memory_order_acquire)) {
+        std::this_thread::yield();
       }
     }
   }
@@ -430,13 +432,13 @@ void RequestInjectionData::onSessionInit() {
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
     triggerTimeout(TimeoutTime);
-    m_timer.m_timerActive.store(false, std::memory_order_relaxed);
+    m_timer.m_timerActive.store(false, std::memory_order_release);
   } else if (timer == &m_cpuTimer) {
     triggerTimeout(TimeoutCPUTime);
-    m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
+    m_cpuTimer.m_timerActive.store(false, std::memory_order_release);
   } else if (timer == &m_userTimeoutTimer) {
     triggerTimeout(TimeoutSoft);
-    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_release);
   } else {
     always_assert(false && "Unknown timer fired");
   }

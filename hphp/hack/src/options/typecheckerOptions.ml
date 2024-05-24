@@ -94,11 +94,6 @@ let timeout t = t.GlobalOptions.tco_timeout
 
 let disallow_invalid_arraykey t = t.GlobalOptions.tco_disallow_invalid_arraykey
 
-let disallow_byref_dynamic_calls t =
-  t.GlobalOptions.tco_disallow_byref_dynamic_calls
-
-let disallow_byref_calls t = t.GlobalOptions.tco_disallow_byref_calls
-
 let log_levels t = t.GlobalOptions.log_levels
 
 let class_pointer_level t flag =

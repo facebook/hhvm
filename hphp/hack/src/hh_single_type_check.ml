@@ -231,8 +231,6 @@ let parse_options () =
   let auto_namespace_map = ref None in
   let log_inference_constraints = ref None in
   let timeout = ref None in
-  let disallow_byref_dynamic_calls = ref (Some false) in
-  let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
   let rust_elab = ref false in
@@ -522,14 +520,6 @@ let parse_options () =
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
-      ( "--disallow-byref-dynamic-calls",
-        Arg.Unit (set_bool disallow_byref_dynamic_calls),
-        " Disallow passing arguments by reference to dynamically called functions [e.g. $foo(&$bar)]"
-      );
-      ( "--disallow-byref-calls",
-        Arg.Unit (set_bool disallow_byref_calls),
-        " Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
-      );
       ( "--rust-elab",
         Arg.Set rust_elab,
         " Use the Rust implementation of naming elaboration and NAST checks" );
@@ -893,8 +883,6 @@ let parse_options () =
       ~tco_saved_state:GlobalOptions.default_saved_state
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
-      ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
-      ?tco_disallow_byref_calls:!disallow_byref_calls
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~tco_check_xhp_attribute:!check_xhp_attribute

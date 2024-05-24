@@ -42,8 +42,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_language_feature_logging: false,
     tco_timeout: 0,
     tco_disallow_invalid_arraykey: false,
-    tco_disallow_byref_dynamic_calls: false,
-    tco_disallow_byref_calls: true,
     code_agnostic_fixme: false,
     allowed_fixme_codes_strict: i_set::ISet::empty(),
     log_levels: s_map::SMap::empty(),

@@ -83,12 +83,6 @@ type t = {
   tco_disallow_invalid_arraykey: bool;
       (** Flag to disallow using values that get casted to array keys at runtime;
         like bools, floats, or null; as array keys. *)
-  tco_disallow_byref_dynamic_calls: bool;
-      (** Produces an error if an arguments is passed by reference to dynamically
-        called function [e.g. $foo(&$bar)]. *)
-  tco_disallow_byref_calls: bool;
-      (** Produces an error if an arguments is passed by reference in any form
-        [e.g. foo(&$bar)].*)
   code_agnostic_fixme: bool;
       (** HH_FIXME should silence *any* error, not just the one specified by code *)
   allowed_fixme_codes_strict: ISet.t;
@@ -277,8 +271,6 @@ val set :
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
-  ?tco_disallow_byref_dynamic_calls:bool ->
-  ?tco_disallow_byref_calls:bool ->
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->

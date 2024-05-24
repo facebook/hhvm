@@ -347,9 +347,6 @@ let load_config config options =
     ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
-    ?tco_disallow_byref_dynamic_calls:
-      (bool_opt "disallow_byref_dynamic_calls" config)
-    ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
     ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
     ?allowed_fixme_codes_strict:
       (prepare_iset config "allowed_fixme_codes_strict")

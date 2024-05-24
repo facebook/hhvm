@@ -304,8 +304,6 @@ impl HhConfig {
             tco_language_feature_logging: default.tco_language_feature_logging,
             tco_timeout: hhconfig.get_int_or("timeout", default.tco_timeout)?,
             tco_disallow_invalid_arraykey: hhconfig.get_bool_or("disallow_invalid_arraykey", default.tco_disallow_invalid_arraykey)?,
-            tco_disallow_byref_dynamic_calls: default.tco_disallow_byref_dynamic_calls,
-            tco_disallow_byref_calls: default.tco_disallow_byref_calls,
             code_agnostic_fixme: hhconfig.get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
             allowed_fixme_codes_strict: hhconfig.get_int_set_or("allowed_fixme_codes_strict", default.allowed_fixme_codes_strict)?,
             log_levels: hhconfig.get_str("log_levels").map_or(Ok(default.log_levels), parse_json)?,

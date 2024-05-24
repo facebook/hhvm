@@ -485,7 +485,7 @@ class ast_builder : public parser_actions {
           limits::min(),
           limits::max());
     }
-    return value;
+    return static_cast<T>(value);
   }
 
  public:

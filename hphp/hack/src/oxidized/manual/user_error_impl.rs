@@ -28,10 +28,12 @@ impl Severity {
     }
 }
 
+pub type UserErrorHash = isize;
+
 impl<PrimPos: Hash, Pos: Hash> UserError<PrimPos, Pos> {
-    pub fn hash_default(&self) -> u64 {
+    pub fn hash_for_saved_state(&self) -> UserErrorHash {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
-        hasher.finish()
+        hasher.finish() as isize
     }
 }

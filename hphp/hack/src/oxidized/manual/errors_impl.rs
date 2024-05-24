@@ -13,6 +13,7 @@ use crate::quickfix::Quickfix;
 use crate::user_error::Severity;
 use crate::user_error::UserError;
 use crate::user_error_flags::UserErrorFlags;
+use crate::user_error_impl::UserErrorHash;
 
 impl<PP, P> UserError<PP, P> {
     pub fn new(
@@ -313,3 +314,5 @@ impl Default for Format {
         Format::Plain
     }
 }
+
+pub type ErrorHash = UserErrorHash;

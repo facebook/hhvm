@@ -89,8 +89,13 @@ let get_last error_map =
 let iter t ~f =
   Relative_path.Map.iter t ~f:(fun _path errors -> List.iter errors ~f)
 
+external hash_error_for_saved_state : error -> int
+  = "hash_error_for_saved_state"
+
 module Error = struct
   type t = error [@@deriving ord]
+
+  let hash_for_saved_state (error : t) : int = hash_error_for_saved_state error
 end
 
 module ErrorSet = Stdlib.Set.Make (Error)
@@ -1294,3 +1299,8 @@ let try_when f ~if_error_and:condition ~then_:do_ =
       else
         add_error error;
       result)
+
+let filter (errors : t) ~(f : Relative_path.t -> error -> bool) : t =
+  Relative_path.Map.filter_map errors ~f:(fun path errors ->
+      let errors = List.filter errors ~f:(f path) in
+      Option.some_if (not (List.is_empty errors)) errors)

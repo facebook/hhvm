@@ -295,6 +295,16 @@ type type_checking_result = {
   cancel_reason: MultiThreadedCall.cancel_reason option;
 }
 
+let filter_out_mergebase_warnings env errors =
+  Errors.filter errors ~f:(fun _path error ->
+      match error.User_error.severity with
+      | User_error.Err -> true
+      | User_error.Warning ->
+        not
+          (ISet.mem
+             (Errors.Error.hash_for_saved_state error)
+             env.init_env.mergebase_warning_hashes))
+
 let do_type_checking
     (genv : genv)
     (env : env)
@@ -339,13 +349,12 @@ let do_type_checking
               time_first_error;
             } ),
           cancelled ) =
-      let root = Some (ServerArgs.root genv.ServerEnv.options) in
       Typing_check_service.go_with_interrupt
         ctx
         genv.workers
         telemetry
         (files_to_check |> Relative_path.Set.elements)
-        ~root
+        ~root:(Some (ServerArgs.root genv.ServerEnv.options))
         ~interrupt
         ~longlived_workers
         ~hh_distc_fanout_threshold
@@ -356,6 +365,7 @@ let do_type_checking
              genv
              env)
     in
+    let errorl = filter_out_mergebase_warnings env errorl in
     (errorl, telemetry, env, cancelled, time_first_error)
   in
   let telemetry =

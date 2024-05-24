@@ -1741,6 +1741,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "errors_ffi"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep_ocamlpool",
+ "oxidized",
+]
+
+[[package]]
 name = "escaper"
 version = "0.0.0"
 dependencies = [

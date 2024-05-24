@@ -11,6 +11,7 @@ members = [
     "deps/cargo/deps_rust",
     "deps/cargo/deps_rust_ffi",
     "deps/cargo/typing_deps_hash",
+    "errors/cargo/errors_ffi",
     "hackc/bytecode_printer",
     "hackc",
     "hackc/compile/cargo/closure_convert",

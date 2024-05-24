@@ -26,6 +26,12 @@ type t [@@deriving eq, show]
 
 val iter : t -> f:(error -> unit) -> unit
 
+module Error : sig
+  type t = error
+
+  val hash_for_saved_state : t -> int
+end
+
 module ErrorSet : Stdlib.Set.S with type elt := error
 
 module FinalizedErrorSet : Stdlib.Set.S with type elt := finalized_error
@@ -249,3 +255,5 @@ val function_is_not_dynamically_callable : string -> error -> unit
 
 val global_access_error :
   Error_codes.GlobalAccessCheck.t -> Pos.t -> string -> unit
+
+val filter : t -> f:(Relative_path.t -> error -> bool) -> t

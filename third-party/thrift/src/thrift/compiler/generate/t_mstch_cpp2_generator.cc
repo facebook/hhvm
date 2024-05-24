@@ -302,7 +302,7 @@ class cpp_mstch_program : public mstch_program {
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
         split_structs_(split_structs) {
-    register_methods(
+    register_cached_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
          {"program:namespace_cpp2", &cpp_mstch_program::namespace_cpp2},
@@ -663,7 +663,7 @@ class cpp_mstch_service : public mstch_service {
       int32_t split_id = 0,
       int32_t split_count = 1)
       : mstch_service(service, ctx, pos, containing_service) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"service:program_name", &cpp_mstch_service::program_name},
@@ -821,7 +821,7 @@ class cpp_mstch_function : public mstch_function {
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_function(function, ctx, pos, iface),
         cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"function:eb", &cpp_mstch_function::event_based},
@@ -922,7 +922,7 @@ class cpp_mstch_type : public mstch_type {
       mstch_element_position pos,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_type(type, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:resolves_to_base?", &cpp_mstch_type::resolves_to_base},
@@ -1104,7 +1104,7 @@ class cpp_mstch_typedef : public mstch_typedef {
       mstch_element_position pos,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_typedef(t, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"typedef:cpp_type", &cpp_mstch_typedef::cpp_type},
@@ -1126,7 +1126,7 @@ class cpp_mstch_struct : public mstch_struct {
       mstch_element_position pos,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_struct(s, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"struct:fields_size", &cpp_mstch_struct::fields_size},
@@ -1686,7 +1686,7 @@ class cpp_mstch_field : public mstch_field {
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_field(f, ctx, pos, field_context),
         cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"field:name_hash", &cpp_mstch_field::name_hash},
@@ -2038,7 +2038,7 @@ class cpp_mstch_enum : public mstch_enum {
   cpp_mstch_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum:empty?", &cpp_mstch_enum::is_empty},
@@ -2154,7 +2154,7 @@ class cpp_mstch_enum_value : public mstch_enum_value {
   cpp_mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum_value:name_hash", &cpp_mstch_enum_value::name_hash},
@@ -2190,7 +2190,7 @@ class cpp_mstch_const : public mstch_const {
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
       : mstch_const(c, ctx, pos, current_const, expected_type, field),
         cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"constant:enum_value", &cpp_mstch_const::enum_value},
@@ -2267,7 +2267,7 @@ class cpp_mstch_const_value : public mstch_const_value {
       const t_const* current_const,
       const t_type* expected_type)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"value:default_construct?",
@@ -2304,7 +2304,7 @@ class cpp_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   cpp_mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"annotation:safe_key", &cpp_mstch_deprecated_annotation::safe_key},

@@ -716,7 +716,6 @@ TEST_F(TBufferBaseTest, test_FramedTransport_Write_Read) {
         }
 
         int read_offset = 0;
-        int read_index = 0;
         for (auto fsize : flush_sizes) {
           // We are exploiting an implementation detail of TFramedTransport.
           // The read buffer starts empty and it will never do more than one
@@ -724,7 +723,6 @@ TEST_F(TBufferBaseTest, test_FramedTransport_Write_Read) {
           int got = trans.read(&data_out[read_offset], 1 << 15);
           EXPECT_EQ(got, fsize);
           read_offset += got;
-          read_index++;
         }
 
         EXPECT_EQ((unsigned int)read_offset, sizeof(data));

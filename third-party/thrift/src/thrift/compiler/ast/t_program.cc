@@ -128,7 +128,7 @@ std::vector<std::string> t_program::gen_namespace_or_default(
 void t_program::set_include_prefix(std::string include_prefix) {
   include_prefix_ = std::move(include_prefix);
 
-  int len = include_prefix_.size();
+  const auto len = include_prefix_.size();
   if (len > 0 && include_prefix_[len - 1] != '/') {
     include_prefix_ += '/';
   }

@@ -8,6 +8,7 @@
 import asyncio
 import os
 import unittest
+from unittest import IsolatedAsyncioTestCase
 
 import pywatchman_aio
 import WatchmanInstance
@@ -15,7 +16,7 @@ import WatchmanInstance
 
 # Note this does not extend AsyncWatchmanTestCase as it wants to start its
 # own Watchman server instances per test.
-class TestDeadSocket(unittest.TestCase):
+class TestDeadSocket(IsolatedAsyncioTestCase):
     @unittest.skipIf(os.name == "nt", "not supported on windows")
     def test_query_dead_socket(self):
         async def test_core(wminst):

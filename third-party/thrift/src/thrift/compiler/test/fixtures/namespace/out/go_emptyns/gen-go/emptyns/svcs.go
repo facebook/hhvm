@@ -112,10 +112,6 @@ func newReqTestServiceInit() *reqTestServiceInit {
         SetInt1NonCompat(0)
 }
 
-func (x *reqTestServiceInit) GetInt1NonCompat() int64 {
-    return x.Int1
-}
-
 func (x *reqTestServiceInit) GetInt1() int64 {
     return x.Int1
 }
@@ -244,10 +240,6 @@ type TestServiceInitResultDeprecated = respTestServiceInit
 
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{})
-}
-
-func (x *respTestServiceInit) GetSuccessNonCompat() *int64 {
-    return x.Success
 }
 
 func (x *respTestServiceInit) GetSuccess() int64 {

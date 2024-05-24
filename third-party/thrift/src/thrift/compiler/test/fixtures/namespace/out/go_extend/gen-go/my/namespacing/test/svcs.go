@@ -112,10 +112,6 @@ func newReqHsTestServiceInit() *reqHsTestServiceInit {
         SetInt1NonCompat(0)
 }
 
-func (x *reqHsTestServiceInit) GetInt1NonCompat() int64 {
-    return x.Int1
-}
-
 func (x *reqHsTestServiceInit) GetInt1() int64 {
     return x.Int1
 }
@@ -244,10 +240,6 @@ type HsTestServiceInitResultDeprecated = respHsTestServiceInit
 
 func newRespHsTestServiceInit() *respHsTestServiceInit {
     return (&respHsTestServiceInit{})
-}
-
-func (x *respHsTestServiceInit) GetSuccessNonCompat() *int64 {
-    return x.Success
 }
 
 func (x *respHsTestServiceInit) GetSuccess() int64 {

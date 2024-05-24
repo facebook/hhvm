@@ -126,10 +126,6 @@ func newReqExtendTestServiceCheck() *reqExtendTestServiceCheck {
         SetStruct1NonCompat(*test0.NewHsFoo())
 }
 
-func (x *reqExtendTestServiceCheck) GetStruct1NonCompat() *test0.HsFoo {
-    return x.Struct1
-}
-
 func (x *reqExtendTestServiceCheck) GetStruct1() *test0.HsFoo {
     if !x.IsSetStruct1() {
         return nil
@@ -279,10 +275,6 @@ type ExtendTestServiceCheckResultDeprecated = respExtendTestServiceCheck
 
 func newRespExtendTestServiceCheck() *respExtendTestServiceCheck {
     return (&respExtendTestServiceCheck{})
-}
-
-func (x *respExtendTestServiceCheck) GetSuccessNonCompat() *bool {
-    return x.Success
 }
 
 func (x *respExtendTestServiceCheck) GetSuccess() bool {

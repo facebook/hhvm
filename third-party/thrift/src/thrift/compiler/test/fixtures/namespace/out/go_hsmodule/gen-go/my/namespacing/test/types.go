@@ -29,10 +29,6 @@ func NewHsFoo() *HsFoo {
         SetMyIntNonCompat(0)
 }
 
-func (x *HsFoo) GetMyIntNonCompat() int64 {
-    return x.MyInt
-}
-
 func (x *HsFoo) GetMyInt() int64 {
     return x.MyInt
 }

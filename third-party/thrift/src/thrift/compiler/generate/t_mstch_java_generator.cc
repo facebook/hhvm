@@ -604,15 +604,16 @@ class mstch_java_struct : public mstch_struct {
 class mstch_java_service : public mstch_service {
  public:
   mstch_java_service(
-      const t_service* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_service(s, ctx, pos) {
+      const t_service* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service = nullptr)
+      : mstch_service(s, ctx, pos, containing_service) {
     register_methods(
         this,
         {
             {"service:javaPackage", &mstch_java_service::java_package},
             {"service:javaCapitalName", &mstch_java_service::java_capital_name},
-            {"service:javaParentCapitalName",
-             &mstch_java_service::java_parent_capital_name},
             {"service:onewayFunctions",
              &mstch_java_service::get_oneway_functions},
             {"service:requestResponseFunctions",
@@ -629,10 +630,6 @@ class mstch_java_service : public mstch_service {
   }
   mstch::node java_capital_name() {
     return java::mangle_java_name(service_->get_name(), true);
-  }
-  mstch::node java_parent_capital_name() {
-    return java::mangle_java_name(
-        context_.options.at("parent_service_name"), true);
   }
   mstch::node get_oneway_functions() {
     std::vector<t_function*> funcs;
@@ -681,6 +678,27 @@ class mstch_java_service : public mstch_service {
       }
     }
     return make_mstch_functions(funcs, service_);
+  }
+};
+
+class mstch_java_interaction : public mstch_java_service {
+ public:
+  using ast_type = t_interaction;
+
+  mstch_java_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service)
+      : mstch_java_service(interaction, ctx, pos, containing_service) {
+    register_methods(
+        this,
+        {{"interaction:javaParentCapitalName",
+          &mstch_java_interaction::java_parent_capital_name}});
+  }
+
+  mstch::node java_parent_capital_name() {
+    return java::mangle_java_name(containing_service_->get_name(), true);
   }
 };
 
@@ -1375,6 +1393,7 @@ void t_mstch_java_generator::generate_program() {
 void t_mstch_java_generator::set_mstch_factories() {
   mstch_context_.add<mstch_java_program>();
   mstch_context_.add<mstch_java_service>();
+  mstch_context_.add<mstch_java_interaction>();
   mstch_context_.add<mstch_java_function>();
   mstch_context_.add<mstch_java_type>();
   mstch_context_.add<mstch_java_struct>();

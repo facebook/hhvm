@@ -659,9 +659,10 @@ class cpp_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
+      const t_service* containing_service = nullptr,
       int32_t split_id = 0,
       int32_t split_count = 1)
-      : mstch_service(service, ctx, pos) {
+      : mstch_service(service, ctx, pos, containing_service) {
     register_methods(
         this,
         {
@@ -678,8 +679,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:metadata_name", &cpp_mstch_service::metadata_name},
             {"service:cpp_name", &cpp_mstch_service::cpp_name},
             {"service:qualified_name", &cpp_mstch_service::qualified_name},
-            {"service:parent_service_name",
-             &cpp_mstch_service::parent_service_name},
             {"service:parent_service_cpp_name",
              &cpp_mstch_service::parent_service_cpp_name},
             {"service:parent_service_qualified_name",
@@ -756,10 +755,11 @@ class cpp_mstch_service : public mstch_service {
   mstch::node qualified_name() {
     return cpp2::get_service_qualified_name(*service_);
   }
-  virtual mstch::node parent_service_name() { return service_->get_name(); }
-  virtual mstch::node parent_service_cpp_name() { return cpp_name(); }
-  virtual mstch::node parent_service_qualified_name() {
-    return qualified_name();
+  mstch::node parent_service_cpp_name() {
+    return cpp2::get_name(parent_service());
+  }
+  mstch::node parent_service_qualified_name() {
+    return cpp2::get_service_qualified_name(*parent_service());
   }
   mstch::node reduced_client() {
     return service_->is_interaction() || !generate_legacy_api(*service_);
@@ -808,21 +808,7 @@ class cpp_mstch_interaction : public cpp_mstch_service {
       mstch_context& ctx,
       mstch_element_position pos,
       const t_service* containing_service)
-      : cpp_mstch_service(interaction, ctx, pos),
-        containing_service_(containing_service) {}
-
-  mstch::node parent_service_name() override {
-    return containing_service_->get_name();
-  }
-  mstch::node parent_service_cpp_name() override {
-    return cpp2::get_name(containing_service_);
-  }
-  mstch::node parent_service_qualified_name() override {
-    return cpp2::get_service_qualified_name(*containing_service_);
-  }
-
- private:
-  const t_service* containing_service_ = nullptr;
+      : cpp_mstch_service(interaction, ctx, pos, containing_service) {}
 };
 
 class cpp_mstch_function : public mstch_function {
@@ -2491,6 +2477,7 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
           service,
           mstch_context_,
           mstch_element_position(),
+          nullptr,
           split_id,
           split_count);
       render_to_file(

@@ -84,7 +84,7 @@ void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^functio
 }
 {{/service:supportedFunctions}}
 {{#service:interactions}}
-std::unique_ptr<{{service:parent_service_cpp_name}}SvIf::{{service:name}}If> {{service:parent_service_name}}Wrapper::create{{service:name}}() {
+std::unique_ptr<{{interaction:parent_service_cpp_name}}SvIf::{{service:name}}If> {{service:parent_service_name}}Wrapper::create{{service:name}}() {
   throw std::runtime_error("Py3 server doesn't support interactions.");
 }
 {{/service:interactions}}

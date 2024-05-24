@@ -411,8 +411,9 @@ class py3_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_program* prog)
-      : mstch_service(service, ctx, pos), prog_{prog} {
+      const t_program* prog,
+      const t_service* containing_service = nullptr)
+      : mstch_service(service, ctx, pos, containing_service), prog_{prog} {
     register_methods(
         this,
         {
@@ -422,10 +423,6 @@ class py3_mstch_service : public mstch_service {
             {"service:programName", &py3_mstch_service::programName},
             {"service:includePrefix", &py3_mstch_service::includePrefix},
             {"service:cpp_name", &py3_mstch_service::cpp_name},
-            {"service:parent_service_name",
-             &py3_mstch_service::parent_service_name},
-            {"service:parent_service_cpp_name",
-             &py3_mstch_service::parent_service_cpp_name},
             {"service:qualified_name", &py3_mstch_service::qualified_name},
             {"service:supportedFunctions",
              &py3_mstch_service::get_supported_functions},
@@ -458,14 +455,6 @@ class py3_mstch_service : public mstch_service {
         "::" + cpp2::get_name(service_);
   }
 
-  mstch::node parent_service_name() {
-    return context_.options.at("parent_service_name");
-  }
-
-  mstch::node parent_service_cpp_name() {
-    return context_.options.at("parent_service_cpp_name");
-  }
-
   std::vector<t_function*> supportedFunctions() {
     std::vector<t_function*> funcs;
     bool no_stream = has_option("no_stream");
@@ -495,6 +484,28 @@ class py3_mstch_service : public mstch_service {
 
  protected:
   const t_program* prog_;
+};
+
+class py3_mstch_interaction : public py3_mstch_service {
+ public:
+  using ast_type = t_interaction;
+
+  py3_mstch_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service,
+      const t_program* prog)
+      : py3_mstch_service(interaction, ctx, pos, prog, containing_service) {
+    register_methods(
+        this,
+        {{"interaction:parent_service_cpp_name",
+          &py3_mstch_interaction::parent_service_cpp_name}});
+  }
+
+  mstch::node parent_service_cpp_name() {
+    return cpp2::get_name(containing_service_);
+  }
 };
 
 class py3_mstch_function : public mstch_function {
@@ -1314,6 +1325,7 @@ py3_mstch_type::CachedProperties& py3_mstch_type::get_cached_props(
 void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>();
   mstch_context_.add<py3_mstch_service>(program_);
+  mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_function>();
   mstch_context_.add<py3_mstch_type>(
       py3_mstch_type::data{program_, &type_props_cache_});

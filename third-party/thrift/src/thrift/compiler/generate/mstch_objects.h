@@ -316,19 +316,14 @@ class mstch_base : public mstch::object {
     return make_mstch_array(container, context_.service_factory.get(), args...);
   }
 
-  template <typename C, typename... Args>
+  template <typename C>
   mstch::array make_mstch_interactions(
-      const C& container,
-      const t_service* containing_service,
-      const Args&... args) {
+      const C& container, const t_service* containing_service) {
     if (context_.interaction_factory) {
       return make_mstch_array(
-          container,
-          *context_.interaction_factory,
-          containing_service,
-          args...);
+          container, *context_.interaction_factory, containing_service);
     }
-    return make_mstch_array(container, *context_.service_factory, args...);
+    return make_mstch_array(container, *context_.service_factory);
   }
 
   template <typename C, typename... Args>
@@ -496,8 +491,15 @@ class mstch_service : public mstch_base {
   using ast_type = t_service;
 
   mstch_service(
-      const t_service* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_base(ctx, pos), service_(s) {
+      const t_service* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service = nullptr)
+      : mstch_base(ctx, pos),
+        service_(s),
+        containing_service_(containing_service) {
+    assert(!service_->is_interaction() == !containing_service);
+
     register_methods(
         this,
         {
@@ -510,7 +512,8 @@ class mstch_service : public mstch_base {
             {"service:sinks?", &mstch_service::has_sinks},
             {"service:annotations", &mstch_service::annotations},
             {"service:thrift_uri", &mstch_service::thrift_uri},
-            {"service:parent", &mstch_service::parent},
+            {"service:parent_service_name",
+             &mstch_service::parent_service_name},
             {"service:interaction?", &mstch_service::is_interaction},
             {"service:interactions", &mstch_service::interactions},
             {"service:interactions?", &mstch_service::has_interactions},
@@ -518,9 +521,16 @@ class mstch_service : public mstch_base {
              &mstch_service::has_structured_annotations},
             {"service:structured_annotations",
              &mstch_service::structured_annotations},
-            {"interaction:serial?", &mstch_service::is_serial_interaction},
-            {"interaction:eb?", &mstch_service::is_event_base_interaction},
         });
+
+    if (service_->is_interaction()) {
+      register_methods(
+          this,
+          {
+              {"interaction:serial?", &mstch_service::is_serial_interaction},
+              {"interaction:eb?", &mstch_service::is_event_base_interaction},
+          });
+    }
 
     // Collect performed interactions and cache them.
     for (const auto* function : get_functions()) {
@@ -541,7 +551,7 @@ class mstch_service : public mstch_base {
   mstch::node annotations() { return mstch_base::annotations(service_); }
   mstch::node thrift_uri() { return service_->uri(); }
 
-  mstch::node parent() { return context_.options.at("parent_service_name"); }
+  mstch::node parent_service_name() { return parent_service()->get_name(); }
 
   mstch::node has_streams() {
     auto& funcs = get_functions();
@@ -559,11 +569,6 @@ class mstch_service : public mstch_base {
 
   mstch::node has_interactions() { return !interactions_.empty(); }
   mstch::node interactions() {
-    if (!service_->is_interaction()) {
-      // For Python interactions:
-      context_.options["parent_service_name"] = service_->get_name();
-      context_.options["parent_service_cpp_name"] = cpp2::get_name(service_);
-    }
     return make_mstch_interactions(interactions_, service_);
   }
   mstch::node has_structured_annotations() {
@@ -587,9 +592,16 @@ class mstch_service : public mstch_base {
   const t_service* service_;
   std::set<const t_interaction*> interactions_;
 
+  // If `service_` is really an interaction, `containing_service_` is the
+  // service it belongs to.
+  const t_service* containing_service_ = nullptr;
+
   mstch::node make_mstch_extended_service_cached(const t_service* service);
   virtual const std::vector<t_function*>& get_functions() const {
     return service_->get_functions();
+  }
+  const t_service* parent_service() const {
+    return service_->is_interaction() ? containing_service_ : service_;
   }
 };
 

@@ -97,9 +97,9 @@ public class {{service:javaCapitalName}}BlockingReactiveWrapper {{#service:exten
     {{/service:sinkFunctions}}
     {{#service:interactions}}
     public class {{service:name}}Impl implements {{service:name}} {
-        private {{service:javaParentCapitalName}}.{{service:name}} _delegateInteraction;
+        private {{interaction:javaParentCapitalName}}.{{service:name}} _delegateInteraction;
 
-        {{service:name}}Impl({{service:javaParentCapitalName}}.{{service:name}} delegateInteraction) {
+        {{service:name}}Impl({{interaction:javaParentCapitalName}}.{{service:name}} delegateInteraction) {
             this._delegateInteraction = delegateInteraction;
         }
 

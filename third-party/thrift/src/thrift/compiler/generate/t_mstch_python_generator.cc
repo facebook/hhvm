@@ -413,15 +413,14 @@ class python_mstch_service : public mstch_service {
       const t_service* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_program* prog)
-      : mstch_service(s, ctx, pos), prog_(prog) {
+      const t_program* prog,
+      const t_service* containing_service = nullptr)
+      : mstch_service(s, ctx, pos, containing_service), prog_(prog) {
     register_methods(
         this,
         {
             {"service:module_path", &python_mstch_service::module_path},
             {"service:program_name", &python_mstch_service::program_name},
-            {"service:parent_service_name",
-             &python_mstch_service::parent_service_name},
             {"service:supported_functions",
              &python_mstch_service::supported_functions},
             {"service:supported_service_functions",
@@ -437,10 +436,6 @@ class python_mstch_service : public mstch_service {
   }
 
   mstch::node program_name() { return service_->program()->name(); }
-
-  mstch::node parent_service_name() {
-    return context_.options.at("parent_service_name");
-  }
 
   std::vector<t_function*> get_supported_functions(
       std::function<bool(const t_function*)> func_filter) {
@@ -473,6 +468,19 @@ class python_mstch_service : public mstch_service {
 
  protected:
   const t_program* prog_;
+};
+
+class python_mstch_interaction : public python_mstch_service {
+ public:
+  using ast_type = t_interaction;
+
+  python_mstch_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service,
+      const t_program* prog)
+      : python_mstch_service(interaction, ctx, pos, prog, containing_service) {}
 };
 
 // Generator-specific validator that enforces that a reserved key is not used
@@ -1147,6 +1155,7 @@ class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>(program_);
+  mstch_context_.add<python_mstch_interaction>(program_);
   mstch_context_.add<python_mstch_function>();
   mstch_context_.add<python_mstch_type>(program_);
   mstch_context_.add<python_mstch_typedef>();

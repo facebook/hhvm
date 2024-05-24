@@ -960,8 +960,10 @@ class rust_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
-      const rust_codegen_options* options)
-      : mstch_service(service, ctx, pos), options_(*options) {
+      const rust_codegen_options* options,
+      const t_service* containing_service = nullptr)
+      : mstch_service(service, ctx, pos, containing_service),
+        options_(*options) {
     for (auto function : service->get_functions()) {
       function_upcamel_names_.insert(camelcase(function->get_name()));
     }
@@ -982,8 +984,6 @@ class rust_mstch_service : public mstch_service {
           &rust_mstch_service::rust_extended_servers},
          {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
-         {"service:parent_service_name",
-          &rust_mstch_service::parent_service_name},
          {"service:program_name", &rust_mstch_service::program_name}});
   }
   mstch::node rust_name() { return named_rust_name(service_); }
@@ -1048,7 +1048,6 @@ class rust_mstch_service : public mstch_service {
     }
     return extended_services;
   }
-  virtual mstch::node parent_service_name() { return service_->get_name(); }
   mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node rust_all_exceptions();
@@ -1070,15 +1069,8 @@ class rust_mstch_interaction : public rust_mstch_service {
       mstch_element_position pos,
       const t_service* containing_service,
       const rust_codegen_options* options)
-      : rust_mstch_service(interaction, ctx, pos, options),
-        containing_service_(containing_service) {}
-
-  mstch::node parent_service_name() override {
-    return containing_service_->get_name();
+      : rust_mstch_service(interaction, ctx, pos, options, containing_service) {
   }
-
- private:
-  const t_service* containing_service_ = nullptr;
 };
 
 class rust_mstch_function : public mstch_function {

@@ -131,6 +131,7 @@ impl<'a> Reason<'a> {
             | RpessimisedInout(p)
             | RpessimisedReturn(p)
             | RpessimisedProp(p)
+            | RpessimisedThis(p)
             | RunsafeCast(p)
             | Rpattern(p) => Some(p),
             RlostInfo((_, r, _))
@@ -283,6 +284,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
             RpessimisedInout(p) => f.debug_tuple("RpessimisedInout").field(p).finish(),
             RpessimisedReturn(p) => f.debug_tuple("RpessimisedReturn").field(p).finish(),
             RpessimisedProp(p) => f.debug_tuple("RpessimisedProp").field(p).finish(),
+            RpessimisedThis(p) => f.debug_tuple("RpessimisedThis").field(p).finish(),
             RunsafeCast(p) => f.debug_tuple("RunsafeCast").field(p).finish(),
             Rinvalid => f.debug_tuple("Rinvalid").finish(),
             Rpattern(p) => f.debug_tuple("Rpattern").field(p).finish(),

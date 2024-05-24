@@ -109,6 +109,7 @@ impl Reason {
             | RpessimisedInout(p)
             | RpessimisedReturn(p)
             | RpessimisedProp(p)
+            | RpessimisedThis(p)
             | RunsafeCast(p)
             | Rpattern(p) => Some(p),
             RlostInfo(_, r, _)

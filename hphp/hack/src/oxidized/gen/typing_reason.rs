@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<97f27a4d7da09bd6484a06293e45861b>>
+// @generated SignedSource<<e48e46d81e72290c2123c834c4144175>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -437,6 +437,8 @@ pub enum T_ {
     RprjAsymm(PrjAsymm, Box<T_>),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
+    #[rust_to_ocaml(name = "Rpessimised_this")]
+    RpessimisedThis(pos_or_decl::PosOrDecl),
 }
 
 #[derive(

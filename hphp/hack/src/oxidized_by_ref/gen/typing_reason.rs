@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ee3eb404483655dab6a46181263a34f9>>
+// @generated SignedSource<<e348bd0d306699ed836821590bc8c0e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -504,6 +504,9 @@ pub enum T_<'a> {
     RprjAsymm(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rpessimised_this")]
+    RpessimisedThis(&'a pos_or_decl::PosOrDecl<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

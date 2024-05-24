@@ -326,6 +326,7 @@ type _ t_ =
   | Rprj_symm : prj_symm * locl_phase t_ -> locl_phase t_
   | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
   | Rmissing_field : locl_phase t_
+  | Rpessimised_this : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
 [@@deriving hash]
 
 let rec normalize : locl_phase t_ -> locl_phase t_ = function
@@ -373,6 +374,7 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rpessimised_inout p
   | Rpessimised_return p
   | Rpessimised_prop p
+  | Rpessimised_this p
   | Rglobal_class_prop p ->
     p
   | Rwitness p
@@ -559,6 +561,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rprj_symm _ -> "Rprj_symm"
   | Rprj_asymm _ -> "Rprj_asymm"
   | Rmissing_field -> "Rmissing_field"
+  | Rpessimised_this _ -> "Rpessimised_this"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -642,6 +645,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Rpessimised_inout p
     | Rpessimised_return p
     | Rpessimised_prop p
+    | Rpessimised_this p
     | Rvar_param_from_decl p
     | Rglobal_fun_param p
     | Rglobal_fun_ret p
@@ -1179,6 +1183,10 @@ let rec to_json : type a. a t_ -> Hh_json.json =
       JSON_Object
         [("Rprj_asymm", JSON_Array [prj_asymm_to_json prj; to_json r])])
   | Rmissing_field -> Hh_json.(JSON_Object [("Rmissing_field", JSON_Array [])])
+  | Rpessimised_this pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Rpessimised_this", JSON_Array [Pos_or_decl.json pos_or_decl])])
 
 type direction =
   | Fwd
@@ -1493,6 +1501,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rpessimised_inout p -> Rpessimised_inout p
   | Rpessimised_return p -> Rpessimised_return p
   | Rpessimised_prop p -> Rpessimised_prop p
+  | Rpessimised_this p -> Rpessimised_this p
 
 let arg_pos_str ap =
   match ap with
@@ -1632,6 +1641,13 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     [
       ( p,
         prefix ^ " because the type of this property is implicitly a like-type"
+      );
+    ]
+  | Rpessimised_this _ ->
+    [
+      ( p,
+        prefix
+        ^ " from \"as this\" or \"is this\" in a class whose generic parameters (or those of a subclass) are erased at runtime"
       );
     ]
   | Rarith_dynamic _ ->
@@ -2216,6 +2232,7 @@ module Visitor = struct
         | Rrev t -> Rrev (this#on_reason t)
         | Rprj_symm (prj, t) -> Rprj_symm (prj, this#on_reason t)
         | Rprj_asymm (prj, t) -> Rprj_asymm (prj, this#on_reason t)
+        | Rpessimised_this x -> Rpessimised_this x
 
       method on_lazy l = l
     end

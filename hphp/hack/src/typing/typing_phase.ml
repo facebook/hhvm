@@ -301,6 +301,20 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
             Reason.Rexpr_dep_type (r, pos, s)
           | reason -> Reason.Rinstantiate (reason, SN.Typehints.this, r))
     in
+    (* When refining `as this`, insert a like type for generic or non-final
+     * classes, because generics are not checked at runtime *)
+    let ty =
+      if ety_env.ish_weakening then
+        match Env.get_self_class env with
+        | Decl_entry.Found tc ->
+          if Cls.final tc && List.is_empty (Cls.tparams tc) then
+            ty
+          else
+            MakeType.locl_like (Reason.Rpessimised_this (Reason.to_pos r)) ty
+        | _ -> ty
+      else
+        ty
+    in
     ((env, None), ty)
   | Tvec_or_dict (tk, tv) ->
     let ((env, e1), tk) = localize ~ety_env env tk in
@@ -561,7 +575,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         | _ -> false
       in
       let allow_abstract_tconst = allow_abstract_tconst root_ty in
-      let ((env, e1), root_ty) = localize ~ety_env env root_ty in
+      let ((env, e1), root_ty) =
+        (* We don't want to put `~` on this::TC, so set ish_weakening to false *)
+        localize ~ety_env:{ ety_env with ish_weakening = false } env root_ty
+      in
       let ((env, e2), ty) =
         TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst
       in

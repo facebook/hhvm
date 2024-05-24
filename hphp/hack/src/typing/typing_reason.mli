@@ -210,6 +210,7 @@ type _ t_ =
   | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
       (** Records reasons through type constructors where only one of the sub- or supertype is projected *)
   | Rmissing_field : locl_phase t_
+  | Rpessimised_this : Pos_or_decl.t -> 'phase t_
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

@@ -41,7 +41,7 @@ class mstch_starlark_type : public mstch_type {
   mstch_starlark_type(
       const t_type* t, mstch_context& ctx, mstch_element_position pos)
       : mstch_type(t, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:starlark_supported?",

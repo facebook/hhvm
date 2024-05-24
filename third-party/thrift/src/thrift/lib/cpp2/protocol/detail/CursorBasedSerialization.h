@@ -29,9 +29,9 @@ namespace apache::thrift {
 
 template <typename T, bool Contiguous>
 class StructuredCursorReader;
-template <typename Tag>
+template <typename Tag, bool Contiguous>
 class ContainerCursorReader;
-template <typename Tag>
+template <typename Tag, bool Contiguous>
 class ContainerCursorIterator;
 
 template <typename T>
@@ -311,6 +311,39 @@ class DelayedSizeCursorWriter : public BaseCursorWriter {
     memcpy(size_, &actualSize, kSizeLen);
   }
 };
+
+/** Converts std::string to std::string_view when Contiguous = true, and returns
+ * the original type otherwise. */
+template <typename T, bool Contiguous>
+using lift_view_t = std::conditional_t<
+    Contiguous && std::is_same_v<T, std::string>,
+    std::string_view,
+    T>;
+
+inline std::string_view readStringView(BinaryProtocolReader& protocol) {
+  int32_t size;
+  protocol.readI32(size);
+  if (size < 0) {
+    TProtocolException::throwNegativeSize();
+  }
+  folly::io::Cursor c = protocol.getCursor();
+  if (static_cast<size_t>(size) >= c.length()) {
+    TProtocolException::throwTruncatedData();
+  }
+  protocol.skipBytes(size);
+  return std::string_view(reinterpret_cast<const char*>(c.data()), size);
+}
+
+template <typename Tag, typename T>
+void decodeTo(BinaryProtocolReader& protocol, T& t) {
+  if constexpr (
+      std::is_same_v<T, std::string_view> &&
+      type::is_a_v<Tag, type::string_c>) {
+    t = readStringView(protocol);
+  } else {
+    op::decode<Tag>(protocol, t);
+  }
+}
 
 } // namespace detail
 } // namespace apache::thrift

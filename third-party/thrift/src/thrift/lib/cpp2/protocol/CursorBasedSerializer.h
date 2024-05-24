@@ -140,6 +140,8 @@ class StructuredCursorReader : detail::BaseCursorReader {
   using type_tag = op::get_type_tag<T, Ident>;
   template <typename Ident>
   using native_type = op::get_native_type<T, Ident>;
+  template <typename Ident>
+  using view_type = detail::lift_view_t<native_type<Ident>, Contiguous>;
 
   template <typename TypeClass, typename Ident>
   using enable_for =
@@ -164,6 +166,7 @@ class StructuredCursorReader : detail::BaseCursorReader {
   /**
    * Materializes a field into its native type (like in the generated struct).
    * Optional and union fields are wrapped in std::optional.
+   * If Contiguous = true, std::string is turned into std::string_view.
    *
    * Ex:
    *  StructuredCursorReader<OuterStruct> reader;
@@ -174,11 +177,12 @@ class StructuredCursorReader : detail::BaseCursorReader {
    *  std::optional<int32_t> val4 = unionReader.read<ident::int>();
    */
   template <typename Ident>
-  maybe_optional<native_type<Ident>, Ident> read() {
-    maybe_optional<native_type<Ident>, Ident> value;
+  maybe_optional<view_type<Ident>, Ident> read() {
+    maybe_optional<view_type<Ident>, Ident> value;
     readField<Ident>(
         [&] {
-          op::decode<type_tag<Ident>>(protocol_, detail::maybe_emplace(value));
+          detail::decodeTo<type_tag<Ident>>(
+              protocol_, detail::maybe_emplace(value));
         },
         value);
     return value;
@@ -209,7 +213,10 @@ class StructuredCursorReader : detail::BaseCursorReader {
   /** string/binary */
 
   template <typename Ident, enable_string_view<Ident> = 0>
-  [[nodiscard]] bool_if_optional<Ident> read(std::string_view& value);
+  [[nodiscard]] bool_if_optional<Ident> read(std::string_view& value) {
+    return readField<Ident>(
+        [&] { value = detail::readStringView(protocol_); }, value);
+  }
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   [[nodiscard]] bool_if_optional<Ident> read(std::string& value) {
@@ -230,16 +237,18 @@ class StructuredCursorReader : detail::BaseCursorReader {
    */
 
   template <typename Ident, enable_for<type::container_c, Ident> = 0>
-  maybe_optional<ContainerCursorReader<type_tag<Ident>>, Ident> beginRead() {
+  maybe_optional<ContainerCursorReader<type_tag<Ident>, Contiguous>, Ident>
+  beginRead() {
     if (!beforeReadField<Ident>()) {
       return {};
     }
     state_ = State::Child;
-    return ContainerCursorReader<type_tag<Ident>>{std::move(protocol_)};
+    return ContainerCursorReader<type_tag<Ident>, Contiguous>{
+        std::move(protocol_)};
   }
 
   template <typename CTag>
-  void endRead(ContainerCursorReader<CTag>&& child) {
+  void endRead(ContainerCursorReader<CTag, Contiguous>&& child) {
     if (state_ != State::Child) {
       // This is a sentinel iterator for an empty container.
       DCHECK_EQ(child.remaining_, 0);
@@ -406,15 +415,15 @@ class StructuredCursorReader : detail::BaseCursorReader {
  *  map.insert(mapReader.begin(), mapReader.end());
  *  reader.endRead(mapReader);
  */
-template <typename Tag>
+template <typename Tag, bool Contiguous>
 class ContainerCursorReader : detail::BaseCursorReader {
  public:
-  ContainerCursorIterator<Tag> begin() {
+  ContainerCursorIterator<Tag, Contiguous> begin() {
     checkState(State::Active);
-    return remaining_ ? ContainerCursorIterator<Tag>{*this}
-                      : ContainerCursorIterator<Tag>{};
+    return remaining_ ? ContainerCursorIterator<Tag, Contiguous>{*this}
+                      : ContainerCursorIterator<Tag, Contiguous>{};
   }
-  ContainerCursorIterator<Tag> end() const { return {}; }
+  ContainerCursorIterator<Tag, Contiguous> end() const { return {}; }
 
   // Returns remaining size if reading has begun.
   int32_t remaining() const {
@@ -454,7 +463,7 @@ class ContainerCursorReader : detail::BaseCursorReader {
 
   template <typename, bool>
   friend class StructuredCursorReader;
-  friend class ContainerCursorIterator<Tag>;
+  friend class ContainerCursorIterator<Tag, Contiguous>;
 };
 
 /**
@@ -462,18 +471,22 @@ class ContainerCursorReader : detail::BaseCursorReader {
  * This is an InputIterator, which means it must be iterated in a single pass.
  * Operator++ invalidates all other copies of the iterator.
  */
-template <typename Tag>
+template <typename Tag, bool Contiguous>
 class ContainerCursorIterator {
  public:
   using iterator_category = std::input_iterator_tag;
   using difference_type = ssize_t;
-  using value_type = typename detail::ContainerTraits<Tag>::ElementType;
+  // Same as the element type in regular generated code, or std::string_view if
+  // that would be std::string and Contiguous = true.
+  using value_type = detail::lift_view_t<
+      typename detail::ContainerTraits<Tag>::ElementType,
+      Contiguous>;
   // These are non-const to allow moving the deserialzed value out.
   // Modifying them does not affect the underlying buffer.
   using pointer = value_type*;
   using reference = value_type&;
 
-  explicit ContainerCursorIterator(ContainerCursorReader<Tag>& in)
+  explicit ContainerCursorIterator(ContainerCursorReader<Tag, Contiguous>& in)
       : reader_(&in) {}
   ContainerCursorIterator() = default;
 
@@ -501,7 +514,7 @@ class ContainerCursorIterator {
   }
 
  private:
-  ContainerCursorReader<Tag>* reader_ = nullptr;
+  ContainerCursorReader<Tag, Contiguous>* reader_ = nullptr;
 };
 
 /**
@@ -942,32 +955,8 @@ ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter&& p)
 }
 
 template <typename Tag, bool Contiguous>
-template <
-    typename Ident,
-    typename StructuredCursorReader<Tag, Contiguous>::
-        template enable_string_view<Ident>>
-typename StructuredCursorReader<Tag, Contiguous>::template bool_if_optional<
-    Ident>
-StructuredCursorReader<Tag, Contiguous>::read(std::string_view& value) {
-  return readField<Ident>(
-      [&] {
-        int32_t size;
-        protocol_.readI32(size);
-        if (size < 0) {
-          TProtocolException::throwNegativeSize();
-        }
-        folly::io::Cursor c = protocol_.getCursor();
-        if (static_cast<size_t>(size) >= c.length()) {
-          TProtocolException::throwTruncatedData();
-        }
-        value = std::string_view(reinterpret_cast<const char*>(c.data()), size);
-        protocol_.skipBytes(size);
-      },
-      value);
-}
-
-template <typename Tag>
-ContainerCursorReader<Tag>::ContainerCursorReader(BinaryProtocolReader&& p)
+ContainerCursorReader<Tag, Contiguous>::ContainerCursorReader(
+    BinaryProtocolReader&& p)
     : BaseCursorReader(std::move(p)) {
   // Check element types
   if constexpr (type::is_a_v<Tag, type::list_c>) {
@@ -1005,8 +994,8 @@ ContainerCursorReader<Tag>::ContainerCursorReader(BinaryProtocolReader&& p)
   }
 }
 
-template <typename Tag>
-void ContainerCursorReader<Tag>::finalize() {
+template <typename Tag, bool Contiguous>
+void ContainerCursorReader<Tag, Contiguous>::finalize() {
   checkState(State::Active);
   state_ = State::Done;
 
@@ -1026,20 +1015,20 @@ void ContainerCursorReader<Tag>::finalize() {
   }
 }
 
-template <typename Tag>
-void ContainerCursorReader<Tag>::read() {
+template <typename Tag, bool Contiguous>
+void ContainerCursorReader<Tag, Contiguous>::read() {
   DCHECK_GT(remaining_, 0);
 
   if constexpr (type::is_a_v<Tag, type::list_c>) {
-    op::decode<typename detail::ContainerTraits<Tag>::ElementTag>(
+    detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
         protocol_, lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
-    op::decode<typename detail::ContainerTraits<Tag>::ElementTag>(
+    detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
         protocol_, lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
-    op::decode<typename detail::ContainerTraits<Tag>::KeyTag>(
+    detail::decodeTo<typename detail::ContainerTraits<Tag>::KeyTag>(
         protocol_, lastRead_.first);
-    op::decode<typename detail::ContainerTraits<Tag>::ValueTag>(
+    detail::decodeTo<typename detail::ContainerTraits<Tag>::ValueTag>(
         protocol_, lastRead_.second);
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");

@@ -196,6 +196,9 @@ TEST(CursorSerializer, ContainerRead) {
   // Ending read in the middle of iteration still allows reading next field.
   reader.endRead(std::move(listReader));
   EXPECT_EQ(reader.read<ident::flavor>(), "Sugar");
+  static_assert(
+      std::is_same_v<decltype(reader.read<ident::flavor>()), std::string_view>,
+      "");
   wrapper.endRead(std::move(reader));
 
   // Reading from a finalized reader is not allowed (besides the obvious

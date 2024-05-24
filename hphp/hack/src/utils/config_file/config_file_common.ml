@@ -48,6 +48,14 @@ module type Getters_S = sig
 
   val int_list_opt : string -> t -> int list option
 
+  val all_or_some_ints_opt : string -> t -> int GlobalOptions.all_or_some option
+
+  val all_or_some_ints :
+    string ->
+    default:int GlobalOptions.all_or_some ->
+    t ->
+    int GlobalOptions.all_or_some
+
   val bool_if_min_version :
     string ->
     default:bool ->
@@ -78,6 +86,10 @@ module Getters : Getters_S = struct
     Config_file_ffi_externs.get_bool_opt config key
     |> Option.map ~f:ok_or_invalid_arg
 
+  let all_or_some_ints_opt key config =
+    Config_file_ffi_externs.get_all_or_some_ints_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
   let string_list_opt key config =
     Config_file_ffi_externs.get_string_list_opt config key
 
@@ -93,6 +105,9 @@ module Getters : Getters_S = struct
   let float_ key ~default config = Option.value (float_opt key config) ~default
 
   let bool_ key ~default config = Option.value (bool_opt key config) ~default
+
+  let all_or_some_ints key ~default config =
+    Option.value (all_or_some_ints_opt key config) ~default
 
   let string_list key ~default config =
     Option.value (string_list_opt key config) ~default

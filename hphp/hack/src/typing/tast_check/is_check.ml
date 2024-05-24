@@ -66,6 +66,7 @@ let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =
     | Some kind ->
       let print_ty = Env.print_ty env in
       Typing_warning_utils.add_for_migration
+        (Env.get_tcopt env)
         ~as_lint
         ( pos,
           Typing_warning.Is_as_always
@@ -81,7 +82,12 @@ let handler ~as_lint =
     inherit Tast_visitor.handler_base
 
     method! at_expr (env : Env.env) expr =
-      if as_lint || (Env.get_tcopt env).GlobalOptions.hack_warnings then
+      if
+        as_lint
+        || Typing_warning_utils.code_is_enabled
+             (Env.get_tcopt env)
+             Error_codes.Warning.IsAsAlways
+      then
         let as_lint =
           if as_lint then
             Some (Some (Env.get_check_status env))

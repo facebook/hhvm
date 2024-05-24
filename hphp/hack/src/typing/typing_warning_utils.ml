@@ -121,14 +121,22 @@ let to_error (type a) ((pos, warning) : a Typing_warning.t) : t =
     sketchy_equality pos result left right left_trail right_trail
   | Typing_warning.Is_as_always x -> IsAsAlways.warn pos x
 
-let add (type a) (warning : a Typing_warning.t) : unit =
-  Errors.add_error @@ to_user_error @@ to_error warning
+let code_is_enabled tcopt code =
+  match TypecheckerOptions.hack_warnings tcopt with
+  | GlobalOptions.All -> true
+  | GlobalOptions.ASome codes ->
+    List.mem codes (Codes.to_enum code) ~equal:Int.equal
+
+let add tcopt (type a) (warning : a Typing_warning.t) : unit =
+  let t = to_error warning in
+  if code_is_enabled tcopt t.code then Errors.add_error @@ to_user_error t
 
 let add_for_migration
+    tcopt
     ~(as_lint : Tast.check_status option option)
     (warning : Typing_warning.migrated Typing_warning.t) : unit =
   match as_lint with
-  | None -> add warning
+  | None -> add tcopt warning
   | Some check_status ->
     let (pos, warning) = warning in
     Lints_core.add
@@ -139,7 +147,4 @@ let add_for_migration
       pos
       (Lint.message warning)
 
-let add (type a) (env : Typing_env_types.env) (warning : a Typing_warning.t) :
-    unit =
-  if TypecheckerOptions.hack_warnings (Typing_env.get_tcopt env) then
-    add warning
+let add env warning = add (Typing_env.get_tcopt env) warning

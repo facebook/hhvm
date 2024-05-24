@@ -254,7 +254,8 @@ type t = {
       (** POC: @ljw - controls how quarantine invalidates folded decls *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
-  hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)
+  hack_warnings: int GlobalOptions.all_or_some;
+      (** POC: @catg - turn on hack warnings. *)
 }
 
 let default =
@@ -343,7 +344,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
     autocomplete_sort_text = false;
-    hack_warnings = false;
+    hack_warnings = GlobalOptions.ASome [];
   }
 
 let system_config_path =
@@ -1041,7 +1042,7 @@ let load_
       config
   in
   let hack_warnings =
-    bool_ "hack_warnings" ~default:default.hack_warnings config
+    all_or_some_ints "hack_warnings" ~default:default.hack_warnings config
   in
   let zstd_decompress_by_file =
     bool_

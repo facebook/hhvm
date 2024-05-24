@@ -1,7 +1,9 @@
 (library
  (name utils_config_file_common)
  (wrapped false)
- (modules config_file_common config_file_version)
+ (modules
+  config_file_common
+  config_file_version)
  (libraries
   config_file_ffi_externs
   core_kernel
@@ -15,7 +17,8 @@
 (library
  (name utils_config_file)
  (wrapped false)
- (modules config_file)
+ (modules
+  config_file)
  (libraries
   core_kernel
   sys_utils
@@ -29,7 +32,8 @@
 (library
  (name utils_config_file_lwt)
  (wrapped false)
- (modules config_file_lwt)
+ (modules
+  config_file_lwt)
  (libraries
   core_kernel
   lwt
@@ -63,7 +67,10 @@
 
 (library
  (name config_file_ffi_externs)
- (modules config_file_ffi_externs)
- (libraries config_file_ffi)
+ (modules
+  config_file_ffi_externs)
+ (libraries
+  config_file_ffi
+  global_options)
  (preprocess
   (pps lwt_ppx)))

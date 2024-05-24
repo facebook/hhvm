@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e881f96f37620669b370c1733225d83e>>
+// @generated SignedSource<<e875dd7abf3cca4771f2c3d314bbd810>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,6 +64,28 @@ pub struct SavedState {
     pub loading: SavedStateLoading,
     pub rollouts: saved_state_rollouts::SavedStateRollouts,
     pub project_metadata_w_flags: bool,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum AllOrSome<A> {
+    All,
+    ASome(Vec<A>),
 }
 
 /// Naming conventions for fields in this struct:
@@ -180,7 +202,7 @@ pub struct GlobalOptions {
     pub tco_lsp_invalidation: bool,
     pub tco_autocomplete_sort_text: bool,
     pub tco_extended_reasons: bool,
-    pub hack_warnings: bool,
+    pub hack_warnings: AllOrSome<isize>,
     pub tco_strict_switch: bool,
     pub tco_allowed_files_for_ignore_readonly: Vec<String>,
     pub tco_package_v2: bool,

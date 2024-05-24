@@ -447,7 +447,7 @@ let load_config config options =
       (bool_opt "populate_dead_unsafe_cast_heap" config)
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
-    ?hack_warnings:(bool_opt "hack_warnings" config)
+    ?hack_warnings:(all_or_some_ints_opt "hack_warnings" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)

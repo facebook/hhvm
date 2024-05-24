@@ -857,6 +857,7 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "lazy_static",
+ "oxidized",
  "regex",
  "serde_json",
  "sha1",
@@ -869,6 +870,7 @@ dependencies = [
  "config_file",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",
+ "oxidized",
 ]
 
 [[package]]

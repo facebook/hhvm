@@ -261,7 +261,6 @@ let () =
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
       ignored_flag "--enable-sealed-subclasses";
-      ignored_flag "--enable-sound-dynamic-type";
       ignored_arg "--explicit-consistent-constructors";
       ignored_arg "--require-types-class-consts";
       ignored_flag "--skip-tast-checks";

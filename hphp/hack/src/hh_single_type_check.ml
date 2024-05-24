@@ -273,8 +273,6 @@ let parse_options () =
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
   let report_pos_from_reason = ref false in
-  let enable_sound_dynamic = ref true in
-  let always_pessimise_return = ref false in
   let consider_type_const_enforceable = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
@@ -553,24 +551,12 @@ let parse_options () =
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
       );
-      ( "--naive-implicit-pess",
-        Arg.Unit
-          (fun () ->
-            set_bool_ enable_sound_dynamic ();
-            set_bool_ always_pessimise_return ();
-            set_bool_ consider_type_const_enforceable ();
-            set_bool_ enable_supportdyn_hint ()),
-        " Enables naive implicit pessimisation" );
       ( "--implicit-pess",
-        Arg.Unit
-          (fun () ->
-            set_bool_ enable_sound_dynamic ();
-            set_bool_ enable_supportdyn_hint ()),
+        Arg.Unit (fun () -> set_bool_ enable_supportdyn_hint ()),
         " Enables implicit pessimisation" );
       ( "--explicit-pess",
         Arg.String
           (fun dir ->
-            set_bool_ enable_sound_dynamic ();
             set_bool_ enable_supportdyn_hint ();
             custom_hhi_path := Some dir),
         " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
@@ -658,12 +644,6 @@ let parse_options () =
         Arg.Set report_pos_from_reason,
         " Flag errors whose position is derived from reason information in types."
       );
-      ( "--enable-sound-dynamic-type",
-        Arg.Set enable_sound_dynamic,
-        " Enforce sound dynamic types.  Experimental." );
-      ( "--always-pessimise-return",
-        Arg.Set always_pessimise_return,
-        " Consider all return types unenforceable." );
       ( "--consider-type-const-enforceable",
         Arg.Set consider_type_const_enforceable,
         " Consider type constants to potentially be enforceable." );
@@ -847,10 +827,6 @@ let parse_options () =
         config
         |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
         |> Option.map ~f:comma_string_to_iset;
-      enable_sound_dynamic :=
-        config
-        |> Config_file.Getters.bool_opt "enable_sound_dynamic_type"
-        |> Option.value ~default:!enable_sound_dynamic;
       sharedmem_config :=
         ServerConfig.make_sharedmem_config
           config
@@ -940,7 +916,7 @@ let parse_options () =
       ~glean_reponame:!glean_reponame
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~tco_report_pos_from_reason:!report_pos_from_reason
-      ~tco_enable_sound_dynamic:!enable_sound_dynamic
+      ~tco_enable_sound_dynamic:true
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
       ~tco_enable_strict_string_concat_interp:
@@ -1010,14 +986,6 @@ let parse_options () =
     if !enable_supportdyn_hint then
       SSet.add
         TypecheckerOptions.experimental_supportdynamic_type_hint
-        tco_experimental_features
-    else
-      tco_experimental_features
-  in
-  let tco_experimental_features =
-    if !always_pessimise_return then
-      SSet.add
-        TypecheckerOptions.experimental_always_pessimise_return
         tco_experimental_features
     else
       tco_experimental_features

@@ -98,7 +98,6 @@ def main() -> None:
         + hh_stc_arguments
         + extra_builtins_opts
         + [
-            "--enable-sound-dynamic-type",
             "--config",
             "pessimise_builtins=true",
             "--force-allow-builtins-in-custom-hhi-path-FLAKEY",

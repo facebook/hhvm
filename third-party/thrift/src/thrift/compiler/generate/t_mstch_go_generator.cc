@@ -65,7 +65,7 @@ class mstch_go_program : public mstch_program {
       mstch_element_position pos,
       go::codegen_data* data)
       : mstch_program(p, ctx, pos), data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"program:go_pkg_name", &mstch_go_program::go_pkg_name},
@@ -162,7 +162,7 @@ class mstch_go_enum : public mstch_enum {
       mstch_element_position pos,
       go::codegen_data* data)
       : mstch_enum(e, ctx, pos), data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum:go_name", &mstch_go_enum::go_name},
@@ -192,7 +192,6 @@ class mstch_go_enum_value : public mstch_enum_value {
       go::codegen_data* data)
       : mstch_enum_value(v, ctx, pos), data_(*data) {
     (void)data_;
-    register_methods(this, {});
   }
 
  private:
@@ -211,7 +210,7 @@ class mstch_go_const : public mstch_const {
       go::codegen_data* data)
       : mstch_const(c, ctx, pos, current_const, expected_type, field),
         data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"constant:go_name", &mstch_go_const::go_name},
@@ -254,7 +253,7 @@ class mstch_go_const_value : public mstch_const_value {
       : mstch_const_value(cv, ctx, pos, current_const, expected_type),
         data_(*data) {
     (void)data_;
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"value:go_quoted_value", &mstch_go_const_value::go_quoted_value},
@@ -280,7 +279,7 @@ class mstch_go_field : public mstch_field {
       go::codegen_data* data)
       : mstch_field(f, ctx, pos, field_context), data_(*data) {
     (void)data_;
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"field:go_name", &mstch_go_field::go_name},
@@ -445,7 +444,7 @@ class mstch_go_struct : public mstch_struct {
       mstch_element_position pos,
       go::codegen_data* data)
       : mstch_struct(s, ctx, pos), data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"struct:go_name", &mstch_go_struct::go_name},
@@ -538,7 +537,7 @@ class mstch_go_service : public mstch_service {
       mstch_element_position pos,
       go::codegen_data* data)
       : mstch_service(s, ctx, pos), data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"service:go_name", &mstch_go_service::go_name},
@@ -586,7 +585,7 @@ class mstch_go_function : public mstch_function {
       go::codegen_data* data)
       : mstch_function(f, ctx, pos, iface), data_(*data) {
     (void)data_;
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"function:go_name", &mstch_go_function::go_name},
@@ -675,7 +674,7 @@ class mstch_go_type : public mstch_type {
       go::codegen_data* data)
       : mstch_type(t, ctx, pos), data_(*data) {
     (void)data_;
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:go_comparable?", &mstch_go_type::is_go_comparable},
@@ -715,7 +714,7 @@ class mstch_go_typedef : public mstch_typedef {
       mstch_element_position pos,
       go::codegen_data* data)
       : mstch_typedef(t, ctx, pos), data_(*data) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"typedef:go_name", &mstch_go_typedef::go_name},

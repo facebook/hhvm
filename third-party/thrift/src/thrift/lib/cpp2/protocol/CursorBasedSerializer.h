@@ -398,6 +398,8 @@ class StructuredCursorReader : detail::BaseCursorReader {
 
   template <typename, bool>
   friend class StructuredCursorReader;
+  template <typename, bool>
+  friend class ContainerCursorReader;
   friend class CursorSerializationWrapper<T>;
 };
 
@@ -417,11 +419,34 @@ class StructuredCursorReader : detail::BaseCursorReader {
  */
 template <typename Tag, bool Contiguous>
 class ContainerCursorReader : detail::BaseCursorReader {
+  using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
+  using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
+  template <typename CTag, typename OwnTag>
+  using enable_cursor_for = std::enable_if_t<
+      (type::is_a_v<OwnTag, type::list_c> ||
+       type::is_a_v<OwnTag, type::set_c>) &&
+          type::is_a_v<ElementTag, CTag>,
+      int>;
+
  public:
+  /**
+   * Iterator read path
+   *
+   * When deserializing container elements into their normal C++ types is
+   * acceptable, this provides the most conventient way to consume a container.
+   * It permits use of range-based for loops and STL methods / constructors
+   * taking two iterators, as in the examples in this class' docblock.
+   */
   ContainerCursorIterator<Tag, Contiguous> begin() {
     checkState(State::Active);
-    return remaining_ ? ContainerCursorIterator<Tag, Contiguous>{*this}
-                      : ContainerCursorIterator<Tag, Contiguous>{};
+    if (remaining_ == 0) {
+      return {};
+    }
+    if (!lastRead_) {
+      lastRead_.emplace();
+      readItem();
+    }
+    return ContainerCursorIterator<Tag, Contiguous>{*this};
   }
   ContainerCursorIterator<Tag, Contiguous> end() const { return {}; }
 
@@ -432,6 +457,100 @@ class ContainerCursorReader : detail::BaseCursorReader {
   }
   [[deprecated("Call remaining() instead")]] int32_t size() const {
     return remaining();
+  }
+
+  /**
+   * Manual read path for nested containers.
+   *
+   * Allows iterating nested containers without materializing them.
+   * Caller is responsible for checking `remaining() > 0` before calling
+   * beginRead, which throws if no elements remain.
+   * Only lists and sets are supported.
+   *
+   * Note: the reader returned from beginRead must be passed to
+   * endRead before any other methods on this object can be called.
+   *
+   * Ex:
+   *  StructuredCursorReader<Struct> reader;
+   *  auto outerReader = reader.beginRead<ident::list_of_list>();
+   *  for (size_t n = outerReader.remaining(); n > 0; --n) {
+   *    auto innerReader = outerReader.beginRead();
+   *    for (auto& element : innerReader) {
+   *      use(element);
+   *    }
+   *    outerReader.endRead(std::move(innerReader));
+   *  }
+   *  reader.endRead(std::move(outerReader));
+   */
+
+  template <
+      typename...,
+      typename U = Tag,
+      enable_cursor_for<type::container_c, U> = 0>
+  ContainerCursorReader<ElementTag, Contiguous> beginRead() {
+    checkState(State::Active);
+    if (!remaining_) {
+      folly::throw_exception<std::out_of_range>("No elements remaining");
+    }
+    DCHECK(!lastRead_)
+        << "Can't mix manual and iterator APIs on same container.";
+    state_ = State::Child;
+    return ContainerCursorReader<ElementTag, Contiguous>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endRead(ContainerCursorReader<CTag, Contiguous>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    state_ = State::Active;
+    --remaining_;
+  }
+
+  /**
+   * Manual read path for containers of structured types.
+   *
+   * Allows using cursor serialization on contained elements.
+   * Caller is responsible for checking `remaining() > 0` before calling
+   * beginRead, which throws if no elements remain.
+   * Only lists and sets are supported.
+   *
+   * Note: the reader returned from beginRead must be passed to
+   * endRead before any other methods on this object can be called.
+   *
+   * Ex:
+   *  StructuredCursorReader<Struct> reader;
+   *  auto outerReader = reader.beginRead<ident::list_of_list>();
+   *  for (size_t n = outerReader.remaining(); n > 0; --n) {
+   *    auto innerReader = outerReader.beginRead();
+   *    use(innerReader.read<ident::unqualified_int>());
+   *    outerReader.endRead(std::move(innerReader));
+   *  }
+   *  reader.endRead(std::move(outerReader));
+   */
+
+  template <
+      typename...,
+      typename U = Tag,
+      enable_cursor_for<type::structured_c, U> = 0>
+  StructuredCursorReader<ElementTag, Contiguous> beginRead() {
+    checkState(State::Active);
+    if (!remaining_) {
+      folly::throw_exception<std::out_of_range>("No elements remaining");
+    }
+    DCHECK(!lastRead_)
+        << "Can't mix manual and iterator APIs on same container.";
+    state_ = State::Child;
+    return StructuredCursorReader<ElementTag, Contiguous>{std::move(protocol_)};
+  }
+
+  template <typename CTag>
+  void endRead(StructuredCursorReader<CTag, Contiguous>&& child) {
+    checkState(State::Child);
+    child.finalize();
+    protocol_ = std::move(child.protocol_);
+    state_ = State::Active;
+    --remaining_;
   }
 
  private:
@@ -446,23 +565,26 @@ class ContainerCursorReader : detail::BaseCursorReader {
     if (--remaining_ == 0) {
       return false;
     }
-    read();
+    readItem();
     return true;
   }
 
   typename detail::ContainerTraits<Tag>::ElementType& currentValue() {
     checkState(State::Active);
-    return lastRead_;
+    DCHECK(lastRead_);
+    return *lastRead_;
   }
 
-  void read();
+  void readItem();
 
   // remaining_ includes the element cached in the reader as lastRead_.
   uint32_t remaining_;
-  typename detail::ContainerTraits<Tag>::ElementType lastRead_;
+  std::optional<typename detail::ContainerTraits<Tag>::ElementType> lastRead_;
 
   template <typename, bool>
   friend class StructuredCursorReader;
+  template <typename, bool>
+  friend class ContainerCursorReader;
   friend class ContainerCursorIterator<Tag, Contiguous>;
 };
 
@@ -988,10 +1110,6 @@ ContainerCursorReader<Tag, Contiguous>::ContainerCursorReader(
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }
-
-  if (remaining_) {
-    read();
-  }
 }
 
 template <typename Tag, bool Contiguous>
@@ -1016,20 +1134,21 @@ void ContainerCursorReader<Tag, Contiguous>::finalize() {
 }
 
 template <typename Tag, bool Contiguous>
-void ContainerCursorReader<Tag, Contiguous>::read() {
+void ContainerCursorReader<Tag, Contiguous>::readItem() {
   DCHECK_GT(remaining_, 0);
+  DCHECK(lastRead_);
 
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
-        protocol_, lastRead_);
+        protocol_, *lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
-        protocol_, lastRead_);
+        protocol_, *lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::KeyTag>(
-        protocol_, lastRead_.first);
+        protocol_, lastRead_->first);
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ValueTag>(
-        protocol_, lastRead_.second);
+        protocol_, lastRead_->second);
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }

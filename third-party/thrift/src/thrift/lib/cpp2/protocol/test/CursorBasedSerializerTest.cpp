@@ -250,6 +250,37 @@ TEST(CursorSerializer, NestedStructRead) {
   wrapper.endRead(std::move(outerReader));
 }
 
+TEST(CursorSerializer, CursorReadInContainer) {
+  Struct s;
+  Stringish inner;
+  inner.string_field_ref() = "foo";
+  s.set_nested_field() = std::vector{std::set{inner}};
+  inner.string_field_ref() = "bar";
+  s.set_nested_field()[0].insert(inner);
+
+  StructCursor wrapper(s);
+  auto reader = wrapper.beginRead();
+  auto listReader = reader.beginRead<ident::set_nested_field>();
+  auto setReader = listReader.beginRead();
+  auto innerReader = setReader.beginRead();
+  EXPECT_EQ(innerReader.read<ident::string_field>(), "bar");
+  setReader.endRead(std::move(innerReader));
+  innerReader = setReader.beginRead();
+  EXPECT_EQ(innerReader.read<ident::string_field>(), "foo");
+  setReader.endRead(std::move(innerReader));
+  EXPECT_THROW(setReader.beginRead(), std::out_of_range);
+  listReader.endRead(std::move(setReader));
+  reader.endRead(std::move(listReader));
+  wrapper.endRead(std::move(reader));
+
+  wrapper = StructCursor(Struct());
+  reader = wrapper.beginRead();
+  listReader = reader.beginRead<ident::set_nested_field>();
+  EXPECT_THROW(listReader.beginRead(), std::out_of_range);
+  reader.endRead(std::move(listReader));
+  wrapper.endRead(std::move(reader));
+}
+
 TEST(CursorSerializer, QualifierWrite) {
   CursorSerializationWrapper<Qualifiers> wrapper;
   auto writer = wrapper.beginWrite();
@@ -445,7 +476,6 @@ TEST(CursorSerializer, CursorWriteInContainer) {
   wrapper.endWrite(std::move(writer));
 
   auto obj = wrapper.deserialize();
-  LOG(INFO) << debugStringViaEncode(obj);
   EXPECT_THAT(
       *obj.set_nested_field(),
       Contains(Contains(IsThriftUnionWith<ident::string_field>(Eq("foo")))));

@@ -27,10 +27,6 @@ func NewFoo() *Foo {
         SetANonCompat(2)
 }
 
-func (x *Foo) GetANonCompat() int64 {
-    return x.A
-}
-
 func (x *Foo) GetA() int64 {
     return x.A
 }

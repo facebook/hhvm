@@ -27,10 +27,6 @@ func NewInjectMetadataFields() *InjectMetadataFields {
         SetTypeNonCompat("")
 }
 
-func (x *InjectMetadataFields) GetTypeNonCompat() string {
-    return x.Type
-}
-
 func (x *InjectMetadataFields) GetType() string {
     return x.Type
 }

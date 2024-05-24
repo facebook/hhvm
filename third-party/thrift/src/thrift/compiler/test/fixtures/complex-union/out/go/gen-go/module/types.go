@@ -103,20 +103,12 @@ func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{})
 }
 
-func (x *ComplexUnion) GetIntValueNonCompat() *int64 {
-    return x.IntValue
-}
-
 func (x *ComplexUnion) GetIntValue() int64 {
     if !x.IsSetIntValue() {
         return 0
     }
 
     return *x.IntValue
-}
-
-func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
-    return x.IntListValue
 }
 
 func (x *ComplexUnion) GetIntListValue() []int64 {
@@ -127,20 +119,12 @@ func (x *ComplexUnion) GetIntListValue() []int64 {
     return x.IntListValue
 }
 
-func (x *ComplexUnion) GetStringListValueNonCompat() []string {
-    return x.StringListValue
-}
-
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
         return make([]string, 0)
     }
 
     return x.StringListValue
-}
-
-func (x *ComplexUnion) GetStringValueNonCompat() *string {
-    return x.StringValue
 }
 
 func (x *ComplexUnion) GetStringValue() string {
@@ -151,20 +135,12 @@ func (x *ComplexUnion) GetStringValue() string {
     return *x.StringValue
 }
 
-func (x *ComplexUnion) GetTypedefValueNonCompat() ContainerTypedef {
-    return x.TypedefValue
-}
-
 func (x *ComplexUnion) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
         return NewContainerTypedef()
     }
 
     return x.TypedefValue
-}
-
-func (x *ComplexUnion) GetStringRefNonCompat() *string {
-    return x.StringRef
 }
 
 func (x *ComplexUnion) GetStringRef() string {
@@ -693,20 +669,12 @@ func NewListUnion() *ListUnion {
     return (&ListUnion{})
 }
 
-func (x *ListUnion) GetIntListValueNonCompat() []int64 {
-    return x.IntListValue
-}
-
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
         return make([]int64, 0)
     }
 
     return x.IntListValue
-}
-
-func (x *ListUnion) GetStringListValueNonCompat() []string {
-    return x.StringListValue
 }
 
 func (x *ListUnion) GetStringListValue() []string {
@@ -982,20 +950,12 @@ func NewDataUnion() *DataUnion {
     return (&DataUnion{})
 }
 
-func (x *DataUnion) GetBinaryDataNonCompat() []byte {
-    return x.BinaryData
-}
-
 func (x *DataUnion) GetBinaryData() []byte {
     if !x.IsSetBinaryData() {
         return []byte("")
     }
 
     return x.BinaryData
-}
-
-func (x *DataUnion) GetStringDataNonCompat() *string {
-    return x.StringData
 }
 
 func (x *DataUnion) GetStringData() string {
@@ -1221,24 +1181,12 @@ func NewVal() *Val {
         SetTypedefValueNonCompat(NewContainerTypedef())
 }
 
-func (x *Val) GetStrValNonCompat() string {
-    return x.StrVal
-}
-
 func (x *Val) GetStrVal() string {
     return x.StrVal
 }
 
-func (x *Val) GetIntValNonCompat() int32 {
-    return x.IntVal
-}
-
 func (x *Val) GetIntVal() int32 {
     return x.IntVal
-}
-
-func (x *Val) GetTypedefValueNonCompat() ContainerTypedef {
-    return x.TypedefValue
 }
 
 func (x *Val) GetTypedefValue() ContainerTypedef {
@@ -1476,20 +1424,12 @@ func NewValUnion() *ValUnion {
     return (&ValUnion{})
 }
 
-func (x *ValUnion) GetV1NonCompat() *Val {
-    return x.V1
-}
-
 func (x *ValUnion) GetV1() *Val {
     if !x.IsSetV1() {
         return nil
     }
 
     return x.V1
-}
-
-func (x *ValUnion) GetV2NonCompat() *Val {
-    return x.V2
 }
 
 func (x *ValUnion) GetV2() *Val {
@@ -1725,20 +1665,12 @@ func NewVirtualComplexUnion() *VirtualComplexUnion {
     return (&VirtualComplexUnion{})
 }
 
-func (x *VirtualComplexUnion) GetThingOneNonCompat() *string {
-    return x.ThingOne
-}
-
 func (x *VirtualComplexUnion) GetThingOne() string {
     if !x.IsSetThingOne() {
         return ""
     }
 
     return *x.ThingOne
-}
-
-func (x *VirtualComplexUnion) GetThingTwoNonCompat() *string {
-    return x.ThingTwo
 }
 
 func (x *VirtualComplexUnion) GetThingTwo() string {
@@ -1964,10 +1896,6 @@ func NewNonCopyableStruct() *NonCopyableStruct {
         SetNumNonCompat(0)
 }
 
-func (x *NonCopyableStruct) GetNumNonCompat() int64 {
-    return x.Num
-}
-
 func (x *NonCopyableStruct) GetNum() int64 {
     return x.Num
 }
@@ -2093,10 +2021,6 @@ var _ thrift.Struct = (*NonCopyableUnion)(nil)
 
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{})
-}
-
-func (x *NonCopyableUnion) GetSNonCompat() *NonCopyableStruct {
-    return x.S
 }
 
 func (x *NonCopyableUnion) GetS() *NonCopyableStruct {

@@ -440,10 +440,6 @@ func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
         SetIntParameterNonCompat(0)
 }
 
-func (x *reqFB303ServiceSimpleRPC) GetIntParameterNonCompat() int32 {
-    return x.IntParameter
-}
-
 func (x *reqFB303ServiceSimpleRPC) GetIntParameter() int32 {
     return x.IntParameter
 }
@@ -572,10 +568,6 @@ type FB303ServiceSimpleRPCResultDeprecated = respFB303ServiceSimpleRPC
 
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{})
-}
-
-func (x *respFB303ServiceSimpleRPC) GetSuccessNonCompat() *ReservedKeyword {
-    return x.Success
 }
 
 func (x *respFB303ServiceSimpleRPC) GetSuccess() *ReservedKeyword {
@@ -1341,10 +1333,6 @@ func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
 }
 
-func (x *respMyServiceGetRandomData) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respMyServiceGetRandomData) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
@@ -1493,10 +1481,6 @@ type MyServiceSinkArgsDeprecated = reqMyServiceSink
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{}).
         SetSinkNonCompat(0)
-}
-
-func (x *reqMyServiceSink) GetSinkNonCompat() int64 {
-    return x.Sink
 }
 
 func (x *reqMyServiceSink) GetSink() int64 {
@@ -1711,16 +1695,8 @@ func newReqMyServicePutDataById() *reqMyServicePutDataById {
         SetDataNonCompat("")
 }
 
-func (x *reqMyServicePutDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
-}
-
-func (x *reqMyServicePutDataById) GetDataNonCompat() string {
-    return x.Data
 }
 
 func (x *reqMyServicePutDataById) GetData() string {
@@ -1982,10 +1958,6 @@ func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
         SetIdNonCompat(0)
 }
 
-func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
@@ -2114,10 +2086,6 @@ type MyServiceHasDataByIdResultDeprecated = respMyServiceHasDataById
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
-}
-
-func (x *respMyServiceHasDataById) GetSuccessNonCompat() *bool {
-    return x.Success
 }
 
 func (x *respMyServiceHasDataById) GetSuccess() bool {
@@ -2270,10 +2238,6 @@ func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
         SetIdNonCompat(0)
 }
 
-func (x *reqMyServiceGetDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
@@ -2402,10 +2366,6 @@ type MyServiceGetDataByIdResultDeprecated = respMyServiceGetDataById
 
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
-}
-
-func (x *respMyServiceGetDataById) GetSuccessNonCompat() *string {
-    return x.Success
 }
 
 func (x *respMyServiceGetDataById) GetSuccess() string {
@@ -2556,10 +2516,6 @@ type MyServiceDeleteDataByIdArgsDeprecated = reqMyServiceDeleteDataById
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{}).
         SetIdNonCompat(0)
-}
-
-func (x *reqMyServiceDeleteDataById) GetIdNonCompat() int64 {
-    return x.Id
 }
 
 func (x *reqMyServiceDeleteDataById) GetId() int64 {
@@ -2774,16 +2730,8 @@ func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
         SetDataNonCompat("")
 }
 
-func (x *reqMyServiceLobDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
-}
-
-func (x *reqMyServiceLobDataById) GetDataNonCompat() string {
-    return x.Data
 }
 
 func (x *reqMyServiceLobDataById) GetData() string {
@@ -3118,10 +3066,6 @@ type MyServiceInvalidReturnForHackResultDeprecated = respMyServiceInvalidReturnF
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{})
-}
-
-func (x *respMyServiceInvalidReturnForHack) GetSuccessNonCompat() []float32 {
-    return x.Success
 }
 
 func (x *respMyServiceInvalidReturnForHack) GetSuccess() []float32 {
@@ -4130,10 +4074,6 @@ func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetData
         SetKeyNonCompat("")
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKeyNonCompat() string {
-    return x.Key
-}
-
 func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
     return x.Key
 }
@@ -4262,10 +4202,6 @@ type DbMixedStackArgumentsGetDataByKey0ResultDeprecated = respDbMixedStackArgume
 
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{})
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccessNonCompat() []byte {
-    return x.Success
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccess() []byte {
@@ -4414,10 +4350,6 @@ func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetData
         SetKeyNonCompat("")
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKeyNonCompat() string {
-    return x.Key
-}
-
 func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
     return x.Key
 }
@@ -4546,10 +4478,6 @@ type DbMixedStackArgumentsGetDataByKey1ResultDeprecated = respDbMixedStackArgume
 
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{})
-}
-
-func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccessNonCompat() []byte {
-    return x.Success
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccess() []byte {

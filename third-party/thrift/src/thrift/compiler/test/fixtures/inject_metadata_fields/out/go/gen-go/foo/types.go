@@ -29,16 +29,8 @@ func NewFields() *Fields {
         SetInjectedFieldNonCompat("")
 }
 
-func (x *Fields) GetInjectedFieldNonCompat() string {
-    return x.InjectedField
-}
-
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
-}
-
-func (x *Fields) GetInjectedStructuredAnnotationFieldNonCompat() *string {
-    return x.InjectedStructuredAnnotationField
 }
 
 func (x *Fields) GetInjectedStructuredAnnotationField() string {
@@ -47,10 +39,6 @@ func (x *Fields) GetInjectedStructuredAnnotationField() string {
     }
 
     return *x.InjectedStructuredAnnotationField
-}
-
-func (x *Fields) GetInjectedUnstructuredAnnotationFieldNonCompat() *string {
-    return x.InjectedUnstructuredAnnotationField
 }
 
 func (x *Fields) GetInjectedUnstructuredAnnotationField() string {

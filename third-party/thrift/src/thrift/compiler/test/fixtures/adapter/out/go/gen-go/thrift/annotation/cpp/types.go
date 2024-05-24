@@ -121,16 +121,8 @@ func NewType() *Type {
         SetTemplateNonCompat("")
 }
 
-func (x *Type) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Type) GetName() string {
     return x.Name
-}
-
-func (x *Type) GetTemplateNonCompat() string {
-    return x.Template
 }
 
 func (x *Type) GetTemplate() string {
@@ -310,10 +302,6 @@ func NewRef() *Ref {
         SetTypeNonCompat(0)
 }
 
-func (x *Ref) GetTypeNonCompat() RefType {
-    return x.Type
-}
-
 func (x *Ref) GetType() RefType {
     return x.Type
 }
@@ -443,10 +431,6 @@ func NewName() *Name {
         SetValueNonCompat("")
 }
 
-func (x *Name) GetValueNonCompat() string {
-    return x.Value
-}
-
 func (x *Name) GetValue() string {
     return x.Value
 }
@@ -573,10 +557,6 @@ var _ thrift.Struct = (*Lazy)(nil)
 func NewLazy() *Lazy {
     return (&Lazy{}).
         SetRefNonCompat(false)
-}
-
-func (x *Lazy) GetRefNonCompat() bool {
-    return x.Ref
 }
 
 func (x *Lazy) GetRef() bool {
@@ -788,40 +768,20 @@ func NewAdapter() *Adapter {
         SetMoveOnlyNonCompat(false)
 }
 
-func (x *Adapter) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Adapter) GetName() string {
     return x.Name
-}
-
-func (x *Adapter) GetAdaptedTypeNonCompat() string {
-    return x.AdaptedType
 }
 
 func (x *Adapter) GetAdaptedType() string {
     return x.AdaptedType
 }
 
-func (x *Adapter) GetUnderlyingNameNonCompat() string {
-    return x.UnderlyingName
-}
-
 func (x *Adapter) GetUnderlyingName() string {
     return x.UnderlyingName
 }
 
-func (x *Adapter) GetExtraNamespaceNonCompat() string {
-    return x.ExtraNamespace
-}
-
 func (x *Adapter) GetExtraNamespace() string {
     return x.ExtraNamespace
-}
-
-func (x *Adapter) GetMoveOnlyNonCompat() bool {
-    return x.MoveOnly
 }
 
 func (x *Adapter) GetMoveOnly() bool {
@@ -1146,10 +1106,6 @@ var _ thrift.Struct = (*PackIsset)(nil)
 func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
         SetAtomicNonCompat(true)
-}
-
-func (x *PackIsset) GetAtomicNonCompat() bool {
-    return x.Atomic
 }
 
 func (x *PackIsset) GetAtomic() bool {
@@ -1574,16 +1530,8 @@ func NewFieldInterceptor() *FieldInterceptor {
         SetNoinlineNonCompat(false)
 }
 
-func (x *FieldInterceptor) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *FieldInterceptor) GetName() string {
     return x.Name
-}
-
-func (x *FieldInterceptor) GetNoinlineNonCompat() bool {
-    return x.Noinline
 }
 
 func (x *FieldInterceptor) GetNoinline() bool {
@@ -1834,10 +1782,6 @@ var _ thrift.Struct = (*EnumType)(nil)
 func NewEnumType() *EnumType {
     return (&EnumType{}).
         SetTypeNonCompat(0)
-}
-
-func (x *EnumType) GetTypeNonCompat() EnumUnderlyingType {
-    return x.Type
 }
 
 func (x *EnumType) GetType() EnumUnderlyingType {

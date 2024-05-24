@@ -725,10 +725,6 @@ func NewDecoratedStruct() *DecoratedStruct {
         SetFieldNonCompat("")
 }
 
-func (x *DecoratedStruct) GetFieldNonCompat() string {
-    return x.Field
-}
-
 func (x *DecoratedStruct) GetField() string {
     return x.Field
 }
@@ -871,20 +867,12 @@ func NewContainerStruct() *ContainerStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
-func (x *ContainerStruct) GetFieldBNonCompat() []int32 {
-    return x.FieldB
-}
-
 func (x *ContainerStruct) GetFieldB() []int32 {
     if !x.IsSetFieldB() {
         return make([]int32, 0)
     }
 
     return x.FieldB
-}
-
-func (x *ContainerStruct) GetFieldCNonCompat() []int32 {
-    return x.FieldC
 }
 
 func (x *ContainerStruct) GetFieldC() []int32 {
@@ -895,20 +883,12 @@ func (x *ContainerStruct) GetFieldC() []int32 {
     return x.FieldC
 }
 
-func (x *ContainerStruct) GetFieldDNonCompat() []int32 {
-    return x.FieldD
-}
-
 func (x *ContainerStruct) GetFieldD() []int32 {
     if !x.IsSetFieldD() {
         return make([]int32, 0)
     }
 
     return x.FieldD
-}
-
-func (x *ContainerStruct) GetFieldENonCompat() []int32 {
-    return x.FieldE
 }
 
 func (x *ContainerStruct) GetFieldE() []int32 {
@@ -919,20 +899,12 @@ func (x *ContainerStruct) GetFieldE() []int32 {
     return x.FieldE
 }
 
-func (x *ContainerStruct) GetFieldFNonCompat() SetI32_7194 {
-    return x.FieldF
-}
-
 func (x *ContainerStruct) GetFieldF() SetI32_7194 {
     if !x.IsSetFieldF() {
         return NewSetI32_7194()
     }
 
     return x.FieldF
-}
-
-func (x *ContainerStruct) GetFieldGNonCompat() MapI32String_1261 {
-    return x.FieldG
 }
 
 func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
@@ -943,20 +915,12 @@ func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
     return x.FieldG
 }
 
-func (x *ContainerStruct) GetFieldHNonCompat() included.SomeMap {
-    return x.FieldH
-}
-
 func (x *ContainerStruct) GetFieldH() included.SomeMap {
     if !x.IsSetFieldH() {
         return included.NewSomeMap()
     }
 
     return x.FieldH
-}
-
-func (x *ContainerStruct) GetFieldANonCompat() []int32 {
-    return x.FieldA
 }
 
 func (x *ContainerStruct) GetFieldA() []int32 {
@@ -1614,10 +1578,6 @@ func NewCppTypeStruct() *CppTypeStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
-func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
-    return x.FieldA
-}
-
 func (x *CppTypeStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
         return make([]int32, 0)
@@ -1783,10 +1743,6 @@ func NewVirtualStruct() *VirtualStruct {
         SetMyIntFieldNonCompat(0)
 }
 
-func (x *VirtualStruct) GetMyIntFieldNonCompat() int64 {
-    return x.MyIntField
-}
-
 func (x *VirtualStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
@@ -1921,16 +1877,8 @@ func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
           )
 }
 
-func (x *MyStructWithForwardRefEnum) GetANonCompat() MyForwardRefEnum {
-    return x.A
-}
-
 func (x *MyStructWithForwardRefEnum) GetA() MyForwardRefEnum {
     return x.A
-}
-
-func (x *MyStructWithForwardRefEnum) GetBNonCompat() MyForwardRefEnum {
-    return x.B
 }
 
 func (x *MyStructWithForwardRefEnum) GetB() MyForwardRefEnum {
@@ -2114,16 +2062,8 @@ func NewTrivialNumeric() *TrivialNumeric {
         SetBNonCompat(false)
 }
 
-func (x *TrivialNumeric) GetANonCompat() int32 {
-    return x.A
-}
-
 func (x *TrivialNumeric) GetA() int32 {
     return x.A
-}
-
-func (x *TrivialNumeric) GetBNonCompat() bool {
-    return x.B
 }
 
 func (x *TrivialNumeric) GetB() bool {
@@ -2309,16 +2249,8 @@ func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
           )
 }
 
-func (x *TrivialNestedWithDefault) GetZNonCompat() int32 {
-    return x.Z
-}
-
 func (x *TrivialNestedWithDefault) GetZ() int32 {
     return x.Z
-}
-
-func (x *TrivialNestedWithDefault) GetNNonCompat() *TrivialNumeric {
-    return x.N
 }
 
 func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
@@ -2521,16 +2453,8 @@ func NewComplexString() *ComplexString {
         SetBNonCompat(make(map[string]int32))
 }
 
-func (x *ComplexString) GetANonCompat() string {
-    return x.A
-}
-
 func (x *ComplexString) GetA() string {
     return x.A
-}
-
-func (x *ComplexString) GetBNonCompat() map[string]int32 {
-    return x.B
 }
 
 func (x *ComplexString) GetB() map[string]int32 {
@@ -2774,16 +2698,8 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
           )
 }
 
-func (x *ComplexNestedWithDefault) GetZNonCompat() string {
-    return x.Z
-}
-
 func (x *ComplexNestedWithDefault) GetZ() string {
     return x.Z
-}
-
-func (x *ComplexNestedWithDefault) GetNNonCompat() *ComplexString {
-    return x.N
 }
 
 func (x *ComplexNestedWithDefault) GetN() *ComplexString {
@@ -2992,40 +2908,20 @@ func NewMinPadding() *MinPadding {
         SetTinyNonCompat(0)
 }
 
-func (x *MinPadding) GetSmallNonCompat() int8 {
-    return x.Small
-}
-
 func (x *MinPadding) GetSmall() int8 {
     return x.Small
-}
-
-func (x *MinPadding) GetBigNonCompat() int64 {
-    return x.Big
 }
 
 func (x *MinPadding) GetBig() int64 {
     return x.Big
 }
 
-func (x *MinPadding) GetMediumNonCompat() int16 {
-    return x.Medium
-}
-
 func (x *MinPadding) GetMedium() int16 {
     return x.Medium
 }
 
-func (x *MinPadding) GetBiggishNonCompat() int32 {
-    return x.Biggish
-}
-
 func (x *MinPadding) GetBiggish() int32 {
     return x.Biggish
-}
-
-func (x *MinPadding) GetTinyNonCompat() int8 {
-    return x.Tiny
 }
 
 func (x *MinPadding) GetTiny() int8 {
@@ -3362,40 +3258,20 @@ func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
         SetTinyNonCompat(0)
 }
 
-func (x *MinPaddingWithCustomType) GetSmallNonCompat() int8 {
-    return x.Small
-}
-
 func (x *MinPaddingWithCustomType) GetSmall() int8 {
     return x.Small
-}
-
-func (x *MinPaddingWithCustomType) GetBigNonCompat() int64 {
-    return x.Big
 }
 
 func (x *MinPaddingWithCustomType) GetBig() int64 {
     return x.Big
 }
 
-func (x *MinPaddingWithCustomType) GetMediumNonCompat() int16 {
-    return x.Medium
-}
-
 func (x *MinPaddingWithCustomType) GetMedium() int16 {
     return x.Medium
 }
 
-func (x *MinPaddingWithCustomType) GetBiggishNonCompat() int32 {
-    return x.Biggish
-}
-
 func (x *MinPaddingWithCustomType) GetBiggish() int32 {
     return x.Biggish
-}
-
-func (x *MinPaddingWithCustomType) GetTinyNonCompat() int8 {
-    return x.Tiny
 }
 
 func (x *MinPaddingWithCustomType) GetTiny() int8 {
@@ -3730,32 +3606,16 @@ func NewMyStruct() *MyStruct {
         SetDataNonCompat(*NewMyDataItem())
 }
 
-func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
-    return x.MyIntField
-}
-
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
-}
-
-func (x *MyStruct) GetMyStringFieldNonCompat() string {
-    return x.MyStringField
 }
 
 func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
 
-func (x *MyStruct) GetMajorVerNonCompat() int64 {
-    return x.MajorVer
-}
-
 func (x *MyStruct) GetMajorVer() int64 {
     return x.MajorVer
-}
-
-func (x *MyStruct) GetDataNonCompat() *MyDataItem {
-    return x.Data
 }
 
 func (x *MyStruct) GetData() *MyDataItem {
@@ -4127,10 +3987,6 @@ func NewRenaming() *Renaming {
         SetFooNonCompat(0)
 }
 
-func (x *Renaming) GetFooNonCompat() int64 {
-    return x.Foo
-}
-
 func (x *Renaming) GetFoo() int64 {
     return x.Foo
 }
@@ -4261,20 +4117,12 @@ func NewAnnotatedTypes() *AnnotatedTypes {
         SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
 }
 
-func (x *AnnotatedTypes) GetBinaryFieldNonCompat() TBinary_8623 {
-    return x.BinaryField
-}
-
 func (x *AnnotatedTypes) GetBinaryField() TBinary_8623 {
     if !x.IsSetBinaryField() {
         return NewTBinary_8623()
     }
 
     return x.BinaryField
-}
-
-func (x *AnnotatedTypes) GetListFieldNonCompat() SomeListOfTypeMap_2468 {
-    return x.ListField
 }
 
 func (x *AnnotatedTypes) GetListField() SomeListOfTypeMap_2468 {
@@ -4468,20 +4316,12 @@ func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
 }
 
-func (x *ForwardUsageRoot) GetForwardUsageStructNonCompat() *ForwardUsageStruct {
-    return x.ForwardUsageStruct
-}
-
 func (x *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
     if !x.IsSetForwardUsageStruct() {
         return nil
     }
 
     return x.ForwardUsageStruct
-}
-
-func (x *ForwardUsageRoot) GetForwardUsageByRefNonCompat() *ForwardUsageByRef {
-    return x.ForwardUsageByRef
 }
 
 func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
@@ -4698,10 +4538,6 @@ func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
 
-func (x *ForwardUsageStruct) GetFooNonCompat() *ForwardUsageRoot {
-    return x.Foo
-}
-
 func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
         return nil
@@ -4850,10 +4686,6 @@ func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
 }
 
-func (x *ForwardUsageByRef) GetFooNonCompat() *ForwardUsageRoot {
-    return x.Foo
-}
-
 func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
         return nil
@@ -5000,10 +4832,6 @@ var _ thrift.Struct = (*IncompleteMap)(nil)
 
 func NewIncompleteMap() *IncompleteMap {
     return (&IncompleteMap{})
-}
-
-func (x *IncompleteMap) GetFieldNonCompat() map[int32]*IncompleteMapDep {
-    return x.Field
 }
 
 func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
@@ -5265,10 +5093,6 @@ func NewCompleteMap() *CompleteMap {
     return (&CompleteMap{})
 }
 
-func (x *CompleteMap) GetFieldNonCompat() map[int32]*CompleteMapDep {
-    return x.Field
-}
-
 func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     if !x.IsSetField() {
         return make(map[int32]*CompleteMapDep)
@@ -5528,10 +5352,6 @@ func NewIncompleteList() *IncompleteList {
     return (&IncompleteList{})
 }
 
-func (x *IncompleteList) GetFieldNonCompat() []*IncompleteListDep {
-    return x.Field
-}
-
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     if !x.IsSetField() {
         return make([]*IncompleteListDep, 0)
@@ -5772,10 +5592,6 @@ var _ thrift.Struct = (*CompleteList)(nil)
 
 func NewCompleteList() *CompleteList {
     return (&CompleteList{})
-}
-
-func (x *CompleteList) GetFieldNonCompat() []*CompleteListDep {
-    return x.Field
 }
 
 func (x *CompleteList) GetField() []*CompleteListDep {
@@ -6020,10 +5836,6 @@ func NewAdaptedList() *AdaptedList {
     return (&AdaptedList{})
 }
 
-func (x *AdaptedList) GetFieldNonCompat() []*AdaptedListDep {
-    return x.Field
-}
-
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     if !x.IsSetField() {
         return make([]*AdaptedListDep, 0)
@@ -6194,10 +6006,6 @@ func NewAdaptedListDep() *AdaptedListDep {
         SetFieldNonCompat(*NewAdaptedList())
 }
 
-func (x *AdaptedListDep) GetFieldNonCompat() *AdaptedList {
-    return x.Field
-}
-
 func (x *AdaptedListDep) GetField() *AdaptedList {
     if !x.IsSetField() {
         return nil
@@ -6344,10 +6152,6 @@ var _ thrift.Struct = (*DependentAdaptedList)(nil)
 
 func NewDependentAdaptedList() *DependentAdaptedList {
     return (&DependentAdaptedList{})
-}
-
-func (x *DependentAdaptedList) GetFieldNonCompat() []*DependentAdaptedListDep {
-    return x.Field
 }
 
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
@@ -6519,10 +6323,6 @@ func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
 
-func (x *DependentAdaptedListDep) GetFieldNonCompat() *int16 {
-    return x.Field
-}
-
 func (x *DependentAdaptedListDep) GetField() int16 {
     if !x.IsSetField() {
         return 0
@@ -6679,20 +6479,12 @@ func NewAllocatorAware() *AllocatorAware {
         SetAaSharedNonCompat(NewI32_9314())
 }
 
-func (x *AllocatorAware) GetAaListNonCompat() ListI32_9187 {
-    return x.AaList
-}
-
 func (x *AllocatorAware) GetAaList() ListI32_9187 {
     if !x.IsSetAaList() {
         return NewListI32_9187()
     }
 
     return x.AaList
-}
-
-func (x *AllocatorAware) GetAaSetNonCompat() SetI32_7070 {
-    return x.AaSet
 }
 
 func (x *AllocatorAware) GetAaSet() SetI32_7070 {
@@ -6703,10 +6495,6 @@ func (x *AllocatorAware) GetAaSet() SetI32_7070 {
     return x.AaSet
 }
 
-func (x *AllocatorAware) GetAaMapNonCompat() MapI32I32_9565 {
-    return x.AaMap
-}
-
 func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
     if !x.IsSetAaMap() {
         return NewMapI32I32_9565()
@@ -6715,32 +6503,16 @@ func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
     return x.AaMap
 }
 
-func (x *AllocatorAware) GetAaStringNonCompat() String_5252 {
-    return x.AaString
-}
-
 func (x *AllocatorAware) GetAaString() String_5252 {
     return x.AaString
-}
-
-func (x *AllocatorAware) GetNotAContainerNonCompat() int32 {
-    return x.NotAContainer
 }
 
 func (x *AllocatorAware) GetNotAContainer() int32 {
     return x.NotAContainer
 }
 
-func (x *AllocatorAware) GetAaUniqueNonCompat() I32_9314 {
-    return x.AaUnique
-}
-
 func (x *AllocatorAware) GetAaUnique() I32_9314 {
     return x.AaUnique
-}
-
-func (x *AllocatorAware) GetAaSharedNonCompat() I32_9314 {
-    return x.AaShared
 }
 
 func (x *AllocatorAware) GetAaShared() I32_9314 {
@@ -7184,16 +6956,8 @@ func NewAllocatorAware2() *AllocatorAware2 {
         SetNotAContainerNonCompat(0)
 }
 
-func (x *AllocatorAware2) GetNotAContainerNonCompat() int32 {
-    return x.NotAContainer
-}
-
 func (x *AllocatorAware2) GetNotAContainer() int32 {
     return x.NotAContainer
-}
-
-func (x *AllocatorAware2) GetBoxFieldNonCompat() *int32 {
-    return x.BoxField
 }
 
 func (x *AllocatorAware2) GetBoxField() int32 {
@@ -7393,24 +7157,12 @@ func NewTypedefStruct() *TypedefStruct {
         SetUintTypedefFieldNonCompat(NewUintTypedef())
 }
 
-func (x *TypedefStruct) GetI32FieldNonCompat() int32 {
-    return x.I32Field
-}
-
 func (x *TypedefStruct) GetI32Field() int32 {
     return x.I32Field
 }
 
-func (x *TypedefStruct) GetIntTypedefFieldNonCompat() IntTypedef {
-    return x.IntTypedefField
-}
-
 func (x *TypedefStruct) GetIntTypedefField() IntTypedef {
     return x.IntTypedefField
-}
-
-func (x *TypedefStruct) GetUintTypedefFieldNonCompat() UintTypedef {
-    return x.UintTypedefField
 }
 
 func (x *TypedefStruct) GetUintTypedefField() UintTypedef {
@@ -7639,10 +7391,6 @@ var _ thrift.Struct = (*StructWithDoubleUnderscores)(nil)
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
     return (&StructWithDoubleUnderscores{}).
         Set_FieldNonCompat(0)
-}
-
-func (x *StructWithDoubleUnderscores) Get_FieldNonCompat() int32 {
-    return x._Field
 }
 
 func (x *StructWithDoubleUnderscores) Get_Field() int32 {

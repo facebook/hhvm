@@ -100,10 +100,6 @@ func NewAnnotation() *Annotation {
         SetJavaAnnotationNonCompat("")
 }
 
-func (x *Annotation) GetJavaAnnotationNonCompat() string {
-    return x.JavaAnnotation
-}
-
 func (x *Annotation) GetJavaAnnotation() string {
     return x.JavaAnnotation
 }
@@ -307,16 +303,8 @@ func NewAdapter() *Adapter {
         SetTypeClassNameNonCompat("")
 }
 
-func (x *Adapter) GetAdapterClassNameNonCompat() string {
-    return x.AdapterClassName
-}
-
 func (x *Adapter) GetAdapterClassName() string {
     return x.AdapterClassName
-}
-
-func (x *Adapter) GetTypeClassNameNonCompat() string {
-    return x.TypeClassName
 }
 
 func (x *Adapter) GetTypeClassName() string {
@@ -498,16 +486,8 @@ func NewWrapper() *Wrapper {
         SetTypeClassNameNonCompat("")
 }
 
-func (x *Wrapper) GetWrapperClassNameNonCompat() string {
-    return x.WrapperClassName
-}
-
 func (x *Wrapper) GetWrapperClassName() string {
     return x.WrapperClassName
-}
-
-func (x *Wrapper) GetTypeClassNameNonCompat() string {
-    return x.TypeClassName
 }
 
 func (x *Wrapper) GetTypeClassName() string {

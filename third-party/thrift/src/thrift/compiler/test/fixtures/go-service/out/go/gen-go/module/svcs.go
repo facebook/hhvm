@@ -588,10 +588,6 @@ func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
         SetRNonCompat(*NewGetEntityRequest())
 }
 
-func (x *reqGetEntityGetEntity) GetRNonCompat() *GetEntityRequest {
-    return x.R
-}
-
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     if !x.IsSetR() {
         return nil
@@ -741,10 +737,6 @@ type GetEntityGetEntityResultDeprecated = respGetEntityGetEntity
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{})
-}
-
-func (x *respGetEntityGetEntity) GetSuccessNonCompat() *GetEntityResponse {
-    return x.Success
 }
 
 func (x *respGetEntityGetEntity) GetSuccess() *GetEntityResponse {
@@ -977,10 +969,6 @@ func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{})
 }
 
-func (x *respGetEntityGetBool) GetSuccessNonCompat() *bool {
-    return x.Success
-}
-
 func (x *respGetEntityGetBool) GetSuccess() bool {
     if !x.IsSetSuccess() {
         return false
@@ -1204,10 +1192,6 @@ type GetEntityGetByteResultDeprecated = respGetEntityGetByte
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{})
-}
-
-func (x *respGetEntityGetByte) GetSuccessNonCompat() *int8 {
-    return x.Success
 }
 
 func (x *respGetEntityGetByte) GetSuccess() int8 {
@@ -1436,10 +1420,6 @@ func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{})
 }
 
-func (x *respGetEntityGetI16) GetSuccessNonCompat() *int16 {
-    return x.Success
-}
-
 func (x *respGetEntityGetI16) GetSuccess() int16 {
     if !x.IsSetSuccess() {
         return 0
@@ -1663,10 +1643,6 @@ type GetEntityGetI32ResultDeprecated = respGetEntityGetI32
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{})
-}
-
-func (x *respGetEntityGetI32) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetI32) GetSuccess() int32 {
@@ -1894,10 +1870,6 @@ func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{})
 }
 
-func (x *respGetEntityGetI64) GetSuccessNonCompat() *int64 {
-    return x.Success
-}
-
 func (x *respGetEntityGetI64) GetSuccess() int64 {
     if !x.IsSetSuccess() {
         return 0
@@ -2121,10 +2093,6 @@ type GetEntityGetDoubleResultDeprecated = respGetEntityGetDouble
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{})
-}
-
-func (x *respGetEntityGetDouble) GetSuccessNonCompat() *float64 {
-    return x.Success
 }
 
 func (x *respGetEntityGetDouble) GetSuccess() float64 {
@@ -2352,10 +2320,6 @@ func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{})
 }
 
-func (x *respGetEntityGetString) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respGetEntityGetString) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
@@ -2581,10 +2545,6 @@ func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{})
 }
 
-func (x *respGetEntityGetBinary) GetSuccessNonCompat() []byte {
-    return x.Success
-}
-
 func (x *respGetEntityGetBinary) GetSuccess() []byte {
     if !x.IsSetSuccess() {
         return []byte("")
@@ -2804,10 +2764,6 @@ type GetEntityGetMapResultDeprecated = respGetEntityGetMap
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{})
-}
-
-func (x *respGetEntityGetMap) GetSuccessNonCompat() map[string]string {
-    return x.Success
 }
 
 func (x *respGetEntityGetMap) GetSuccess() map[string]string {
@@ -3077,10 +3033,6 @@ func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{})
 }
 
-func (x *respGetEntityGetSet) GetSuccessNonCompat() []string {
-    return x.Success
-}
-
 func (x *respGetEntityGetSet) GetSuccess() []string {
     if !x.IsSetSuccess() {
         return make([]string, 0)
@@ -3331,10 +3283,6 @@ func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{})
 }
 
-func (x *respGetEntityGetList) GetSuccessNonCompat() []string {
-    return x.Success
-}
-
 func (x *respGetEntityGetList) GetSuccess() []string {
     if !x.IsSetSuccess() {
         return make([]string, 0)
@@ -3514,24 +3462,12 @@ func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
         SetNumPosNonCompat(0)
 }
 
-func (x *reqGetEntityGetLegacyStuff) GetNumNeg2NonCompat() int64 {
-    return x.NumNeg2
-}
-
 func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
     return x.NumNeg2
 }
 
-func (x *reqGetEntityGetLegacyStuff) GetNumNeg1NonCompat() int64 {
-    return x.NumNeg1
-}
-
 func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
     return x.NumNeg1
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumPosNonCompat() int64 {
-    return x.NumPos
 }
 
 func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
@@ -3762,10 +3698,6 @@ func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{})
 }
 
-func (x *respGetEntityGetLegacyStuff) GetSuccessNonCompat() *int32 {
-    return x.Success
-}
-
 func (x *respGetEntityGetLegacyStuff) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
@@ -3916,10 +3848,6 @@ func newReqGetEntityGetCtxCollision() *reqGetEntityGetCtxCollision {
         SetCtxNonCompat(0)
 }
 
-func (x *reqGetEntityGetCtxCollision) GetCtxNonCompat() int64 {
-    return x.Ctx
-}
-
 func (x *reqGetEntityGetCtxCollision) GetCtx() int64 {
     return x.Ctx
 }
@@ -4048,10 +3976,6 @@ type GetEntityGetCtxCollisionResultDeprecated = respGetEntityGetCtxCollision
 
 func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
     return (&respGetEntityGetCtxCollision{})
-}
-
-func (x *respGetEntityGetCtxCollision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetCtxCollision) GetSuccess() int32 {
@@ -4206,16 +4130,8 @@ func newReqGetEntityGetCtx1Collision() *reqGetEntityGetCtx1Collision {
         SetCtx1NonCompat(0)
 }
 
-func (x *reqGetEntityGetCtx1Collision) GetCtxNonCompat() int64 {
-    return x.Ctx
-}
-
 func (x *reqGetEntityGetCtx1Collision) GetCtx() int64 {
     return x.Ctx
-}
-
-func (x *reqGetEntityGetCtx1Collision) GetCtx1NonCompat() int64 {
-    return x.Ctx1
 }
 
 func (x *reqGetEntityGetCtx1Collision) GetCtx1() int64 {
@@ -4397,10 +4313,6 @@ func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
     return (&respGetEntityGetCtx1Collision{})
 }
 
-func (x *respGetEntityGetCtx1Collision) GetSuccessNonCompat() *int32 {
-    return x.Success
-}
-
 func (x *respGetEntityGetCtx1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
@@ -4551,10 +4463,6 @@ func newReqGetEntityGetContextCollision() *reqGetEntityGetContextCollision {
         SetContextNonCompat(0)
 }
 
-func (x *reqGetEntityGetContextCollision) GetContextNonCompat() int64 {
-    return x.Context
-}
-
 func (x *reqGetEntityGetContextCollision) GetContext() int64 {
     return x.Context
 }
@@ -4683,10 +4591,6 @@ type GetEntityGetContextCollisionResultDeprecated = respGetEntityGetContextColli
 
 func newRespGetEntityGetContextCollision() *respGetEntityGetContextCollision {
     return (&respGetEntityGetContextCollision{})
-}
-
-func (x *respGetEntityGetContextCollision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetContextCollision) GetSuccess() int32 {
@@ -4839,10 +4743,6 @@ func newReqGetEntityGetOutCollision() *reqGetEntityGetOutCollision {
         SetOutNonCompat(0)
 }
 
-func (x *reqGetEntityGetOutCollision) GetOutNonCompat() int64 {
-    return x.Out
-}
-
 func (x *reqGetEntityGetOutCollision) GetOut() int64 {
     return x.Out
 }
@@ -4971,10 +4871,6 @@ type GetEntityGetOutCollisionResultDeprecated = respGetEntityGetOutCollision
 
 func newRespGetEntityGetOutCollision() *respGetEntityGetOutCollision {
     return (&respGetEntityGetOutCollision{})
-}
-
-func (x *respGetEntityGetOutCollision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetOutCollision) GetSuccess() int32 {
@@ -5129,16 +5025,8 @@ func newReqGetEntityGetOut1Collision() *reqGetEntityGetOut1Collision {
         SetOut1NonCompat(0)
 }
 
-func (x *reqGetEntityGetOut1Collision) GetOutNonCompat() int64 {
-    return x.Out
-}
-
 func (x *reqGetEntityGetOut1Collision) GetOut() int64 {
     return x.Out
-}
-
-func (x *reqGetEntityGetOut1Collision) GetOut1NonCompat() int64 {
-    return x.Out1
 }
 
 func (x *reqGetEntityGetOut1Collision) GetOut1() int64 {
@@ -5320,10 +5208,6 @@ func newRespGetEntityGetOut1Collision() *respGetEntityGetOut1Collision {
     return (&respGetEntityGetOut1Collision{})
 }
 
-func (x *respGetEntityGetOut1Collision) GetSuccessNonCompat() *int32 {
-    return x.Success
-}
-
 func (x *respGetEntityGetOut1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
@@ -5474,10 +5358,6 @@ func newReqGetEntityGetInCollision() *reqGetEntityGetInCollision {
         SetInNonCompat(0)
 }
 
-func (x *reqGetEntityGetInCollision) GetInNonCompat() int64 {
-    return x.In
-}
-
 func (x *reqGetEntityGetInCollision) GetIn() int64 {
     return x.In
 }
@@ -5606,10 +5486,6 @@ type GetEntityGetInCollisionResultDeprecated = respGetEntityGetInCollision
 
 func newRespGetEntityGetInCollision() *respGetEntityGetInCollision {
     return (&respGetEntityGetInCollision{})
-}
-
-func (x *respGetEntityGetInCollision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetInCollision) GetSuccess() int32 {
@@ -5764,16 +5640,8 @@ func newReqGetEntityGetIn1Collision() *reqGetEntityGetIn1Collision {
         SetIn1NonCompat(0)
 }
 
-func (x *reqGetEntityGetIn1Collision) GetInNonCompat() int64 {
-    return x.In
-}
-
 func (x *reqGetEntityGetIn1Collision) GetIn() int64 {
     return x.In
-}
-
-func (x *reqGetEntityGetIn1Collision) GetIn1NonCompat() int64 {
-    return x.In1
 }
 
 func (x *reqGetEntityGetIn1Collision) GetIn1() int64 {
@@ -5955,10 +5823,6 @@ func newRespGetEntityGetIn1Collision() *respGetEntityGetIn1Collision {
     return (&respGetEntityGetIn1Collision{})
 }
 
-func (x *respGetEntityGetIn1Collision) GetSuccessNonCompat() *int32 {
-    return x.Success
-}
-
 func (x *respGetEntityGetIn1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
@@ -6109,10 +5973,6 @@ func newReqGetEntityGetErrCollision() *reqGetEntityGetErrCollision {
         SetErrNonCompat(0)
 }
 
-func (x *reqGetEntityGetErrCollision) GetErrNonCompat() int64 {
-    return x.Err
-}
-
 func (x *reqGetEntityGetErrCollision) GetErr() int64 {
     return x.Err
 }
@@ -6241,10 +6101,6 @@ type GetEntityGetErrCollisionResultDeprecated = respGetEntityGetErrCollision
 
 func newRespGetEntityGetErrCollision() *respGetEntityGetErrCollision {
     return (&respGetEntityGetErrCollision{})
-}
-
-func (x *respGetEntityGetErrCollision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetErrCollision) GetSuccess() int32 {
@@ -6399,16 +6255,8 @@ func newReqGetEntityGetErr1Collision() *reqGetEntityGetErr1Collision {
         SetErr1NonCompat(0)
 }
 
-func (x *reqGetEntityGetErr1Collision) GetErrNonCompat() int64 {
-    return x.Err
-}
-
 func (x *reqGetEntityGetErr1Collision) GetErr() int64 {
     return x.Err
-}
-
-func (x *reqGetEntityGetErr1Collision) GetErr1NonCompat() int64 {
-    return x.Err1
 }
 
 func (x *reqGetEntityGetErr1Collision) GetErr1() int64 {
@@ -6588,10 +6436,6 @@ type GetEntityGetErr1CollisionResultDeprecated = respGetEntityGetErr1Collision
 
 func newRespGetEntityGetErr1Collision() *respGetEntityGetErr1Collision {
     return (&respGetEntityGetErr1Collision{})
-}
-
-func (x *respGetEntityGetErr1Collision) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respGetEntityGetErr1Collision) GetSuccess() int32 {

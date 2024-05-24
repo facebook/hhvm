@@ -102,32 +102,16 @@ func NewColor() *Color {
         SetAlphaNonCompat(0.0)
 }
 
-func (x *Color) GetRedNonCompat() float64 {
-    return x.Red
-}
-
 func (x *Color) GetRed() float64 {
     return x.Red
-}
-
-func (x *Color) GetGreenNonCompat() float64 {
-    return x.Green
 }
 
 func (x *Color) GetGreen() float64 {
     return x.Green
 }
 
-func (x *Color) GetBlueNonCompat() float64 {
-    return x.Blue
-}
-
 func (x *Color) GetBlue() float64 {
     return x.Blue
-}
-
-func (x *Color) GetAlphaNonCompat() float64 {
-    return x.Alpha
 }
 
 func (x *Color) GetAlpha() float64 {
@@ -410,20 +394,12 @@ func NewVehicle() *Vehicle {
         SetHasACNonCompat(false)
 }
 
-func (x *Vehicle) GetColorNonCompat() *Color {
-    return x.Color
-}
-
 func (x *Vehicle) GetColor() *Color {
     if !x.IsSetColor() {
         return nil
     }
 
     return x.Color
-}
-
-func (x *Vehicle) GetLicensePlateNonCompat() *string {
-    return x.LicensePlate
 }
 
 func (x *Vehicle) GetLicensePlate() string {
@@ -434,10 +410,6 @@ func (x *Vehicle) GetLicensePlate() string {
     return *x.LicensePlate
 }
 
-func (x *Vehicle) GetDescriptionNonCompat() *string {
-    return x.Description
-}
-
 func (x *Vehicle) GetDescription() string {
     if !x.IsSetDescription() {
         return ""
@@ -446,20 +418,12 @@ func (x *Vehicle) GetDescription() string {
     return *x.Description
 }
 
-func (x *Vehicle) GetNameNonCompat() *string {
-    return x.Name
-}
-
 func (x *Vehicle) GetName() string {
     if !x.IsSetName() {
         return ""
     }
 
     return *x.Name
-}
-
-func (x *Vehicle) GetHasACNonCompat() *bool {
-    return x.HasAC
 }
 
 func (x *Vehicle) GetHasAC() bool {
@@ -865,24 +829,12 @@ func NewPerson() *Person {
         SetNameNonCompat("")
 }
 
-func (x *Person) GetIdNonCompat() PersonID {
-    return x.Id
-}
-
 func (x *Person) GetId() PersonID {
     return x.Id
 }
 
-func (x *Person) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Person) GetName() string {
     return x.Name
-}
-
-func (x *Person) GetAgeNonCompat() *int16 {
-    return x.Age
 }
 
 func (x *Person) GetAge() int16 {
@@ -893,20 +845,12 @@ func (x *Person) GetAge() int16 {
     return *x.Age
 }
 
-func (x *Person) GetAddressNonCompat() *string {
-    return x.Address
-}
-
 func (x *Person) GetAddress() string {
     if !x.IsSetAddress() {
         return ""
     }
 
     return *x.Address
-}
-
-func (x *Person) GetFavoriteColorNonCompat() *Color {
-    return x.FavoriteColor
 }
 
 func (x *Person) GetFavoriteColor() *Color {
@@ -917,20 +861,12 @@ func (x *Person) GetFavoriteColor() *Color {
     return x.FavoriteColor
 }
 
-func (x *Person) GetFriendsNonCompat() []PersonID {
-    return x.Friends
-}
-
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
         return make([]PersonID, 0)
     }
 
     return x.Friends
-}
-
-func (x *Person) GetBestFriendNonCompat() *PersonID {
-    return x.BestFriend
 }
 
 func (x *Person) GetBestFriend() PersonID {
@@ -941,10 +877,6 @@ func (x *Person) GetBestFriend() PersonID {
     return *x.BestFriend
 }
 
-func (x *Person) GetPetNamesNonCompat() map[Animal]string {
-    return x.PetNames
-}
-
 func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
         return make(map[Animal]string)
@@ -953,20 +885,12 @@ func (x *Person) GetPetNames() map[Animal]string {
     return x.PetNames
 }
 
-func (x *Person) GetAfraidOfAnimalNonCompat() *Animal {
-    return x.AfraidOfAnimal
-}
-
 func (x *Person) GetAfraidOfAnimal() Animal {
     if !x.IsSetAfraidOfAnimal() {
         return 0
     }
 
     return *x.AfraidOfAnimal
-}
-
-func (x *Person) GetVehiclesNonCompat() []*Vehicle {
-    return x.Vehicles
 }
 
 func (x *Person) GetVehicles() []*Vehicle {

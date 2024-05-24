@@ -335,10 +335,6 @@ func NewBoolPatch() *BoolPatch {
         SetInvertNonCompat(false)
 }
 
-func (x *BoolPatch) GetAssignNonCompat() *bool {
-    return x.Assign
-}
-
 func (x *BoolPatch) GetAssign() bool {
     if !x.IsSetAssign() {
         return false
@@ -347,16 +343,8 @@ func (x *BoolPatch) GetAssign() bool {
     return *x.Assign
 }
 
-func (x *BoolPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *BoolPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *BoolPatch) GetInvertNonCompat() bool {
-    return x.Invert
 }
 
 func (x *BoolPatch) GetInvert() bool {
@@ -600,10 +588,6 @@ func NewBytePatch() *BytePatch {
         SetAddNonCompat(0)
 }
 
-func (x *BytePatch) GetAssignNonCompat() *int8 {
-    return x.Assign
-}
-
 func (x *BytePatch) GetAssign() int8 {
     if !x.IsSetAssign() {
         return 0
@@ -612,16 +596,8 @@ func (x *BytePatch) GetAssign() int8 {
     return *x.Assign
 }
 
-func (x *BytePatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *BytePatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *BytePatch) GetAddNonCompat() int8 {
-    return x.Add
 }
 
 func (x *BytePatch) GetAdd() int8 {
@@ -867,10 +843,6 @@ func NewI16Patch() *I16Patch {
         SetAddNonCompat(0)
 }
 
-func (x *I16Patch) GetAssignNonCompat() *int16 {
-    return x.Assign
-}
-
 func (x *I16Patch) GetAssign() int16 {
     if !x.IsSetAssign() {
         return 0
@@ -879,16 +851,8 @@ func (x *I16Patch) GetAssign() int16 {
     return *x.Assign
 }
 
-func (x *I16Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *I16Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *I16Patch) GetAddNonCompat() int16 {
-    return x.Add
 }
 
 func (x *I16Patch) GetAdd() int16 {
@@ -1132,10 +1096,6 @@ func NewI32Patch() *I32Patch {
         SetAddNonCompat(0)
 }
 
-func (x *I32Patch) GetAssignNonCompat() *int32 {
-    return x.Assign
-}
-
 func (x *I32Patch) GetAssign() int32 {
     if !x.IsSetAssign() {
         return 0
@@ -1144,16 +1104,8 @@ func (x *I32Patch) GetAssign() int32 {
     return *x.Assign
 }
 
-func (x *I32Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *I32Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *I32Patch) GetAddNonCompat() int32 {
-    return x.Add
 }
 
 func (x *I32Patch) GetAdd() int32 {
@@ -1397,10 +1349,6 @@ func NewI64Patch() *I64Patch {
         SetAddNonCompat(0)
 }
 
-func (x *I64Patch) GetAssignNonCompat() *int64 {
-    return x.Assign
-}
-
 func (x *I64Patch) GetAssign() int64 {
     if !x.IsSetAssign() {
         return 0
@@ -1409,16 +1357,8 @@ func (x *I64Patch) GetAssign() int64 {
     return *x.Assign
 }
 
-func (x *I64Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *I64Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *I64Patch) GetAddNonCompat() int64 {
-    return x.Add
 }
 
 func (x *I64Patch) GetAdd() int64 {
@@ -1662,10 +1602,6 @@ func NewFloatPatch() *FloatPatch {
         SetAddNonCompat(0.0)
 }
 
-func (x *FloatPatch) GetAssignNonCompat() *float32 {
-    return x.Assign
-}
-
 func (x *FloatPatch) GetAssign() float32 {
     if !x.IsSetAssign() {
         return 0.0
@@ -1674,16 +1610,8 @@ func (x *FloatPatch) GetAssign() float32 {
     return *x.Assign
 }
 
-func (x *FloatPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *FloatPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *FloatPatch) GetAddNonCompat() float32 {
-    return x.Add
 }
 
 func (x *FloatPatch) GetAdd() float32 {
@@ -1927,10 +1855,6 @@ func NewDoublePatch() *DoublePatch {
         SetAddNonCompat(0.0)
 }
 
-func (x *DoublePatch) GetAssignNonCompat() *float64 {
-    return x.Assign
-}
-
 func (x *DoublePatch) GetAssign() float64 {
     if !x.IsSetAssign() {
         return 0.0
@@ -1939,16 +1863,8 @@ func (x *DoublePatch) GetAssign() float64 {
     return *x.Assign
 }
 
-func (x *DoublePatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *DoublePatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *DoublePatch) GetAddNonCompat() float64 {
-    return x.Add
 }
 
 func (x *DoublePatch) GetAdd() float64 {
@@ -2194,10 +2110,6 @@ func NewStringPatch() *StringPatch {
         SetAppendNonCompat("")
 }
 
-func (x *StringPatch) GetAssignNonCompat() *string {
-    return x.Assign
-}
-
 func (x *StringPatch) GetAssign() string {
     if !x.IsSetAssign() {
         return ""
@@ -2206,24 +2118,12 @@ func (x *StringPatch) GetAssign() string {
     return *x.Assign
 }
 
-func (x *StringPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *StringPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *StringPatch) GetPrependNonCompat() string {
-    return x.Prepend
-}
-
 func (x *StringPatch) GetPrepend() string {
     return x.Prepend
-}
-
-func (x *StringPatch) GetAppendNonCompat() string {
-    return x.Append
 }
 
 func (x *StringPatch) GetAppend() string {
@@ -2518,10 +2418,6 @@ func NewBinaryPatch() *BinaryPatch {
         SetAppendNonCompat(standard.NewByteBuffer())
 }
 
-func (x *BinaryPatch) GetAssignNonCompat() standard.ByteBuffer {
-    return x.Assign
-}
-
 func (x *BinaryPatch) GetAssign() standard.ByteBuffer {
     if !x.IsSetAssign() {
         return standard.NewByteBuffer()
@@ -2530,16 +2426,8 @@ func (x *BinaryPatch) GetAssign() standard.ByteBuffer {
     return x.Assign
 }
 
-func (x *BinaryPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *BinaryPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *BinaryPatch) GetPrependNonCompat() standard.ByteBuffer {
-    return x.Prepend
 }
 
 func (x *BinaryPatch) GetPrepend() standard.ByteBuffer {
@@ -2548,10 +2436,6 @@ func (x *BinaryPatch) GetPrepend() standard.ByteBuffer {
     }
 
     return x.Prepend
-}
-
-func (x *BinaryPatch) GetAppendNonCompat() standard.ByteBuffer {
-    return x.Append
 }
 
 func (x *BinaryPatch) GetAppend() standard.ByteBuffer {

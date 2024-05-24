@@ -1247,16 +1247,8 @@ func NewMyAnnotation() *MyAnnotation {
           )
 }
 
-func (x *MyAnnotation) GetSignatureNonCompat() string {
-    return x.Signature
-}
-
 func (x *MyAnnotation) GetSignature() string {
     return x.Signature
-}
-
-func (x *MyAnnotation) GetColorNonCompat() Color {
-    return x.Color
 }
 
 func (x *MyAnnotation) GetColor() Color {
@@ -1454,16 +1446,8 @@ func NewFoo() *Foo {
         SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
 }
 
-func (x *Foo) GetIntFieldNonCompat() I32_5137 {
-    return x.IntField
-}
-
 func (x *Foo) GetIntField() I32_5137 {
     return x.IntField
-}
-
-func (x *Foo) GetOptionalIntFieldNonCompat() *I32_5137 {
-    return x.OptionalIntField
 }
 
 func (x *Foo) GetOptionalIntField() I32_5137 {
@@ -1474,16 +1458,8 @@ func (x *Foo) GetOptionalIntField() I32_5137 {
     return *x.OptionalIntField
 }
 
-func (x *Foo) GetIntFieldWithDefaultNonCompat() I32_5137 {
-    return x.IntFieldWithDefault
-}
-
 func (x *Foo) GetIntFieldWithDefault() I32_5137 {
     return x.IntFieldWithDefault
-}
-
-func (x *Foo) GetSetFieldNonCompat() SetWithAdapter {
-    return x.SetField
 }
 
 func (x *Foo) GetSetField() SetWithAdapter {
@@ -1494,20 +1470,12 @@ func (x *Foo) GetSetField() SetWithAdapter {
     return x.SetField
 }
 
-func (x *Foo) GetOptionalSetFieldNonCompat() SetWithAdapter {
-    return x.OptionalSetField
-}
-
 func (x *Foo) GetOptionalSetField() SetWithAdapter {
     if !x.IsSetOptionalSetField() {
         return NewSetWithAdapter()
     }
 
     return x.OptionalSetField
-}
-
-func (x *Foo) GetMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
-    return x.MapField
 }
 
 func (x *Foo) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
@@ -1518,20 +1486,12 @@ func (x *Foo) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     return x.MapField
 }
 
-func (x *Foo) GetOptionalMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
-    return x.OptionalMapField
-}
-
 func (x *Foo) GetOptionalMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetOptionalMapField() {
         return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
 
     return x.OptionalMapField
-}
-
-func (x *Foo) GetBinaryFieldNonCompat() Binary_5673 {
-    return x.BinaryField
 }
 
 func (x *Foo) GetBinaryField() Binary_5673 {
@@ -1542,24 +1502,12 @@ func (x *Foo) GetBinaryField() Binary_5673 {
     return x.BinaryField
 }
 
-func (x *Foo) GetLongFieldNonCompat() MyI64 {
-    return x.LongField
-}
-
 func (x *Foo) GetLongField() MyI64 {
     return x.LongField
 }
 
-func (x *Foo) GetAdaptedLongFieldNonCompat() MyI64 {
-    return x.AdaptedLongField
-}
-
 func (x *Foo) GetAdaptedLongField() MyI64 {
     return x.AdaptedLongField
-}
-
-func (x *Foo) GetDoubleAdaptedFieldNonCompat() DoubleTypedefI64 {
-    return x.DoubleAdaptedField
 }
 
 func (x *Foo) GetDoubleAdaptedField() DoubleTypedefI64 {
@@ -2234,20 +2182,12 @@ func NewBaz() *Baz {
     return (&Baz{})
 }
 
-func (x *Baz) GetIntFieldNonCompat() *I32_5137 {
-    return x.IntField
-}
-
 func (x *Baz) GetIntField() I32_5137 {
     if !x.IsSetIntField() {
         return NewI32_5137()
     }
 
     return *x.IntField
-}
-
-func (x *Baz) GetSetFieldNonCompat() SetWithAdapter {
-    return x.SetField
 }
 
 func (x *Baz) GetSetField() SetWithAdapter {
@@ -2258,10 +2198,6 @@ func (x *Baz) GetSetField() SetWithAdapter {
     return x.SetField
 }
 
-func (x *Baz) GetMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
-    return x.MapField
-}
-
 func (x *Baz) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetMapField() {
         return NewMapString_ListWithElemAdapterWithAdapter_8454()
@@ -2270,20 +2206,12 @@ func (x *Baz) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     return x.MapField
 }
 
-func (x *Baz) GetBinaryFieldNonCompat() Binary_5673 {
-    return x.BinaryField
-}
-
 func (x *Baz) GetBinaryField() Binary_5673 {
     if !x.IsSetBinaryField() {
         return NewBinary_5673()
     }
 
     return x.BinaryField
-}
-
-func (x *Baz) GetLongFieldNonCompat() *MyI64 {
-    return x.LongField
 }
 
 func (x *Baz) GetLongField() MyI64 {
@@ -2703,20 +2631,12 @@ func NewBar() *Bar {
         SetAdaptedStructFieldNonCompat(*NewDirectlyAdapted())
 }
 
-func (x *Bar) GetStructFieldNonCompat() *Foo_6868 {
-    return x.StructField
-}
-
 func (x *Bar) GetStructField() *Foo_6868 {
     if !x.IsSetStructField() {
         return nil
     }
 
     return x.StructField
-}
-
-func (x *Bar) GetOptionalStructFieldNonCompat() *Foo_3943 {
-    return x.OptionalStructField
 }
 
 func (x *Bar) GetOptionalStructField() *Foo_3943 {
@@ -2727,20 +2647,12 @@ func (x *Bar) GetOptionalStructField() *Foo_3943 {
     return x.OptionalStructField
 }
 
-func (x *Bar) GetStructListFieldNonCompat() []*FooWithAdapter_9317 {
-    return x.StructListField
-}
-
 func (x *Bar) GetStructListField() []*FooWithAdapter_9317 {
     if !x.IsSetStructListField() {
         return make([]*FooWithAdapter_9317, 0)
     }
 
     return x.StructListField
-}
-
-func (x *Bar) GetOptionalStructListFieldNonCompat() []*FooWithAdapter_9317 {
-    return x.OptionalStructListField
 }
 
 func (x *Bar) GetOptionalStructListField() []*FooWithAdapter_9317 {
@@ -2751,10 +2663,6 @@ func (x *Bar) GetOptionalStructListField() []*FooWithAdapter_9317 {
     return x.OptionalStructListField
 }
 
-func (x *Bar) GetUnionFieldNonCompat() *Baz_7352 {
-    return x.UnionField
-}
-
 func (x *Bar) GetUnionField() *Baz_7352 {
     if !x.IsSetUnionField() {
         return nil
@@ -2763,20 +2671,12 @@ func (x *Bar) GetUnionField() *Baz_7352 {
     return x.UnionField
 }
 
-func (x *Bar) GetOptionalUnionFieldNonCompat() *Baz_7352 {
-    return x.OptionalUnionField
-}
-
 func (x *Bar) GetOptionalUnionField() *Baz_7352 {
     if !x.IsSetOptionalUnionField() {
         return nil
     }
 
     return x.OptionalUnionField
-}
-
-func (x *Bar) GetAdaptedStructFieldNonCompat() *DirectlyAdapted {
-    return x.AdaptedStructField
 }
 
 func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
@@ -3362,10 +3262,6 @@ func NewDirectlyAdapted() *DirectlyAdapted {
         SetFieldNonCompat(0)
 }
 
-func (x *DirectlyAdapted) GetFieldNonCompat() int32 {
-    return x.Field
-}
-
 func (x *DirectlyAdapted) GetField() int32 {
     return x.Field
 }
@@ -3492,10 +3388,6 @@ var _ thrift.Struct = (*IndependentDirectlyAdapted)(nil)
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
     return (&IndependentDirectlyAdapted{}).
         SetFieldNonCompat(0)
-}
-
-func (x *IndependentDirectlyAdapted) GetFieldNonCompat() int32 {
-    return x.Field
 }
 
 func (x *IndependentDirectlyAdapted) GetField() int32 {
@@ -3630,24 +3522,12 @@ func NewStructWithFieldAdapter() *StructWithFieldAdapter {
         SetSharedFieldNonCompat(0)
 }
 
-func (x *StructWithFieldAdapter) GetFieldNonCompat() int32 {
-    return x.Field
-}
-
 func (x *StructWithFieldAdapter) GetField() int32 {
     return x.Field
 }
 
-func (x *StructWithFieldAdapter) GetSharedFieldNonCompat() int32 {
-    return x.SharedField
-}
-
 func (x *StructWithFieldAdapter) GetSharedField() int32 {
     return x.SharedField
-}
-
-func (x *StructWithFieldAdapter) GetOptSharedFieldNonCompat() *int32 {
-    return x.OptSharedField
 }
 
 func (x *StructWithFieldAdapter) GetOptSharedField() int32 {
@@ -3656,10 +3536,6 @@ func (x *StructWithFieldAdapter) GetOptSharedField() int32 {
     }
 
     return *x.OptSharedField
-}
-
-func (x *StructWithFieldAdapter) GetOptBoxedFieldNonCompat() *int32 {
-    return x.OptBoxedField
 }
 
 func (x *StructWithFieldAdapter) GetOptBoxedField() int32 {
@@ -3969,24 +3845,12 @@ func NewTerseAdaptedFields() *TerseAdaptedFields {
         SetSetFieldNonCompat(make([]int32, 0))
 }
 
-func (x *TerseAdaptedFields) GetIntFieldNonCompat() int32 {
-    return x.IntField
-}
-
 func (x *TerseAdaptedFields) GetIntField() int32 {
     return x.IntField
 }
 
-func (x *TerseAdaptedFields) GetStringFieldNonCompat() string {
-    return x.StringField
-}
-
 func (x *TerseAdaptedFields) GetStringField() string {
     return x.StringField
-}
-
-func (x *TerseAdaptedFields) GetSetFieldNonCompat() []int32 {
-    return x.SetField
 }
 
 func (x *TerseAdaptedFields) GetSetField() []int32 {
@@ -4252,10 +4116,6 @@ func NewB() *B {
         SetANonCompat(*NewAdaptedA())
 }
 
-func (x *B) GetANonCompat() *AdaptedA {
-    return x.A
-}
-
 func (x *B) GetA() *AdaptedA {
     if !x.IsSetA() {
         return nil
@@ -4478,10 +4338,6 @@ func NewConfig() *Config {
         SetPathNonCompat("")
 }
 
-func (x *Config) GetPathNonCompat() string {
-    return x.Path
-}
-
 func (x *Config) GetPath() string {
     return x.Path
 }
@@ -4612,16 +4468,8 @@ func NewMyStruct() *MyStruct {
         SetSetStringNonCompat(NewSetWithAdapter())
 }
 
-func (x *MyStruct) GetFieldNonCompat() int32 {
-    return x.Field
-}
-
 func (x *MyStruct) GetField() int32 {
     return x.Field
-}
-
-func (x *MyStruct) GetSetStringNonCompat() SetWithAdapter {
-    return x.SetString
 }
 
 func (x *MyStruct) GetSetString() SetWithAdapter {
@@ -4828,16 +4676,8 @@ func NewAdaptTestStruct() *AdaptTestStruct {
         SetBinaryDataNonCompat([]byte(""))
 }
 
-func (x *AdaptTestStruct) GetDelayNonCompat() DurationMs {
-    return x.Delay
-}
-
 func (x *AdaptTestStruct) GetDelay() DurationMs {
     return x.Delay
-}
-
-func (x *AdaptTestStruct) GetCustomNonCompat() CustomProtocolType {
-    return x.Custom
 }
 
 func (x *AdaptTestStruct) GetCustom() CustomProtocolType {
@@ -4848,64 +4688,32 @@ func (x *AdaptTestStruct) GetCustom() CustomProtocolType {
     return x.Custom
 }
 
-func (x *AdaptTestStruct) GetTimeoutNonCompat() int64 {
-    return x.Timeout
-}
-
 func (x *AdaptTestStruct) GetTimeout() int64 {
     return x.Timeout
-}
-
-func (x *AdaptTestStruct) GetDataNonCompat() int64 {
-    return x.Data
 }
 
 func (x *AdaptTestStruct) GetData() int64 {
     return x.Data
 }
 
-func (x *AdaptTestStruct) GetMetaNonCompat() string {
-    return x.Meta
-}
-
 func (x *AdaptTestStruct) GetMeta() string {
     return x.Meta
-}
-
-func (x *AdaptTestStruct) GetIndirectionStringNonCompat() IndirectionString {
-    return x.IndirectionString
 }
 
 func (x *AdaptTestStruct) GetIndirectionString() IndirectionString {
     return x.IndirectionString
 }
 
-func (x *AdaptTestStruct) GetStringDataNonCompat() string {
-    return x.StringData
-}
-
 func (x *AdaptTestStruct) GetStringData() string {
     return x.StringData
-}
-
-func (x *AdaptTestStruct) GetDoubleWrappedBoolNonCompat() AdaptedBool {
-    return x.DoubleWrappedBool
 }
 
 func (x *AdaptTestStruct) GetDoubleWrappedBool() AdaptedBool {
     return x.DoubleWrappedBool
 }
 
-func (x *AdaptTestStruct) GetDoubleWrappedIntegerNonCompat() AdaptedInteger {
-    return x.DoubleWrappedInteger
-}
-
 func (x *AdaptTestStruct) GetDoubleWrappedInteger() AdaptedInteger {
     return x.DoubleWrappedInteger
-}
-
-func (x *AdaptTestStruct) GetBinaryDataNonCompat() []byte {
-    return x.BinaryData
 }
 
 func (x *AdaptTestStruct) GetBinaryData() []byte {
@@ -5550,64 +5358,32 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
         SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedBoolNonCompat() AdaptedBool {
-    return x.AdaptedBool
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedBool() AdaptedBool {
     return x.AdaptedBool
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedByteNonCompat() AdaptedByte {
-    return x.AdaptedByte
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedByte() AdaptedByte {
     return x.AdaptedByte
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedShortNonCompat() AdaptedShort {
-    return x.AdaptedShort
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedShort() AdaptedShort {
     return x.AdaptedShort
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedIntegerNonCompat() AdaptedInteger {
-    return x.AdaptedInteger
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedInteger() AdaptedInteger {
     return x.AdaptedInteger
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedLongNonCompat() AdaptedLong {
-    return x.AdaptedLong
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedLong() AdaptedLong {
     return x.AdaptedLong
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedDoubleNonCompat() AdaptedDouble {
-    return x.AdaptedDouble
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedDouble() AdaptedDouble {
     return x.AdaptedDouble
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedStringNonCompat() AdaptedString {
-    return x.AdaptedString
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedString() AdaptedString {
     return x.AdaptedString
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedListNonCompat() []int64 {
-    return x.AdaptedList
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
@@ -5618,20 +5394,12 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
     return x.AdaptedList
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedSetNonCompat() []int64 {
-    return x.AdaptedSet
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedSet() []int64 {
     if !x.IsSetAdaptedSet() {
         return make([]int64, 0)
     }
 
     return x.AdaptedSet
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedMapNonCompat() map[int64]int64 {
-    return x.AdaptedMap
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMap() map[int64]int64 {
@@ -5642,72 +5410,36 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMap() map[int64]int64 {
     return x.AdaptedMap
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedBoolDefaultNonCompat() AdaptedBool {
-    return x.AdaptedBoolDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedBoolDefault() AdaptedBool {
     return x.AdaptedBoolDefault
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedByteDefaultNonCompat() AdaptedByte {
-    return x.AdaptedByteDefault
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedByteDefault() AdaptedByte {
     return x.AdaptedByteDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedShortDefaultNonCompat() AdaptedShort {
-    return x.AdaptedShortDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedShortDefault() AdaptedShort {
     return x.AdaptedShortDefault
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedIntegerDefaultNonCompat() AdaptedInteger {
-    return x.AdaptedIntegerDefault
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedIntegerDefault() AdaptedInteger {
     return x.AdaptedIntegerDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedLongDefaultNonCompat() AdaptedLong {
-    return x.AdaptedLongDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedLongDefault() AdaptedLong {
     return x.AdaptedLongDefault
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedDoubleDefaultNonCompat() AdaptedDouble {
-    return x.AdaptedDoubleDefault
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedDoubleDefault() AdaptedDouble {
     return x.AdaptedDoubleDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedStringDefaultNonCompat() AdaptedString {
-    return x.AdaptedStringDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedStringDefault() AdaptedString {
     return x.AdaptedStringDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedEnumNonCompat() AdaptedEnum {
-    return x.AdaptedEnum
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedEnum() AdaptedEnum {
     return x.AdaptedEnum
-}
-
-func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
-    return x.AdaptedListDefault
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
@@ -5720,10 +5452,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     return x.AdaptedListDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
-    return x.AdaptedSetDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
         return []int64{
@@ -5734,10 +5462,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     return x.AdaptedSetDefault
 }
 
-func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefaultNonCompat() map[int64]int64 {
-    return x.AdaptedMapDefault
-}
-
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
         return map[int64]int64{
@@ -5746,10 +5470,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     }
 
     return x.AdaptedMapDefault
-}
-
-func (x *AdaptTemplatedTestStruct) GetDoubleTypedefBoolNonCompat() DoubleTypedefBool {
-    return x.DoubleTypedefBool
 }
 
 func (x *AdaptTemplatedTestStruct) GetDoubleTypedefBool() DoubleTypedefBool {
@@ -7157,10 +6877,6 @@ func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
         SetAdaptedStructNonCompat(*NewAdaptTemplatedTestStruct())
 }
 
-func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStructNonCompat() *AdaptTemplatedTestStruct {
-    return x.AdaptedStruct
-}
-
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestStruct {
     if !x.IsSetAdaptedStruct() {
         return nil
@@ -7310,20 +7026,12 @@ func NewAdaptTestUnion() *AdaptTestUnion {
     return (&AdaptTestUnion{})
 }
 
-func (x *AdaptTestUnion) GetDelayNonCompat() *DurationMs {
-    return x.Delay
-}
-
 func (x *AdaptTestUnion) GetDelay() DurationMs {
     if !x.IsSetDelay() {
         return NewDurationMs()
     }
 
     return *x.Delay
-}
-
-func (x *AdaptTestUnion) GetCustomNonCompat() CustomProtocolType {
-    return x.Custom
 }
 
 func (x *AdaptTestUnion) GetCustom() CustomProtocolType {
@@ -7547,10 +7255,6 @@ func NewAdaptedStruct() *AdaptedStruct {
         SetDataNonCompat(0)
 }
 
-func (x *AdaptedStruct) GetDataNonCompat() int64 {
-    return x.Data
-}
-
 func (x *AdaptedStruct) GetData() int64 {
     return x.Data
 }
@@ -7677,10 +7381,6 @@ var _ thrift.Struct = (*DirectlyAdaptedStruct)(nil)
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
     return (&DirectlyAdaptedStruct{}).
         SetDataNonCompat(0)
-}
-
-func (x *DirectlyAdaptedStruct) GetDataNonCompat() int64 {
-    return x.Data
 }
 
 func (x *DirectlyAdaptedStruct) GetData() int64 {
@@ -7817,20 +7517,12 @@ func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
         SetTypedefOfAdaptedNonCompat(*NewTypedefOfDirect())
 }
 
-func (x *StructFieldAdaptedStruct) GetAdaptedStructNonCompat() *AdaptedStruct {
-    return x.AdaptedStruct
-}
-
 func (x *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
     if !x.IsSetAdaptedStruct() {
         return nil
     }
 
     return x.AdaptedStruct
-}
-
-func (x *StructFieldAdaptedStruct) GetAdaptedTypedefNonCompat() *AdaptedTypedef {
-    return x.AdaptedTypedef
 }
 
 func (x *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
@@ -7841,20 +7533,12 @@ func (x *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
     return x.AdaptedTypedef
 }
 
-func (x *StructFieldAdaptedStruct) GetDirectlyAdaptedNonCompat() *DirectlyAdaptedStruct {
-    return x.DirectlyAdapted
-}
-
 func (x *StructFieldAdaptedStruct) GetDirectlyAdapted() *DirectlyAdaptedStruct {
     if !x.IsSetDirectlyAdapted() {
         return nil
     }
 
     return x.DirectlyAdapted
-}
-
-func (x *StructFieldAdaptedStruct) GetTypedefOfAdaptedNonCompat() *TypedefOfDirect {
-    return x.TypedefOfAdapted
 }
 
 func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
@@ -8204,10 +7888,6 @@ func NewCircularAdaptee() *CircularAdaptee {
         SetFieldNonCompat(*NewCircularStruct())
 }
 
-func (x *CircularAdaptee) GetFieldNonCompat() *CircularStruct {
-    return x.Field
-}
-
 func (x *CircularAdaptee) GetField() *CircularStruct {
     if !x.IsSetField() {
         return nil
@@ -8354,10 +8034,6 @@ var _ thrift.Struct = (*CircularStruct)(nil)
 
 func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
-}
-
-func (x *CircularStruct) GetFieldNonCompat() *AdaptedCircularAdaptee {
-    return x.Field
 }
 
 func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
@@ -8507,10 +8183,6 @@ var _ thrift.Struct = (*ReorderedStruct)(nil)
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{}).
         SetReorderedDependentAdaptedNonCompat(*NewDeclaredAfterStruct())
-}
-
-func (x *ReorderedStruct) GetReorderedDependentAdaptedNonCompat() *DeclaredAfterStruct {
-    return x.ReorderedDependentAdapted
 }
 
 func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
@@ -8735,10 +8407,6 @@ func NewRenamedStruct() *RenamedStruct {
         SetDataNonCompat(0)
 }
 
-func (x *RenamedStruct) GetDataNonCompat() int64 {
-    return x.Data
-}
-
 func (x *RenamedStruct) GetData() int64 {
     return x.Data
 }
@@ -8865,10 +8533,6 @@ var _ thrift.Struct = (*SameNamespaceStruct)(nil)
 func NewSameNamespaceStruct() *SameNamespaceStruct {
     return (&SameNamespaceStruct{}).
         SetDataNonCompat(0)
-}
-
-func (x *SameNamespaceStruct) GetDataNonCompat() int64 {
-    return x.Data
 }
 
 func (x *SameNamespaceStruct) GetData() int64 {
@@ -9072,10 +8736,6 @@ func NewMoveOnly() *MoveOnly {
         SetPtrNonCompat(*NewHeapAllocated())
 }
 
-func (x *MoveOnly) GetPtrNonCompat() *HeapAllocated {
-    return x.Ptr
-}
-
 func (x *MoveOnly) GetPtr() *HeapAllocated {
     if !x.IsSetPtr() {
         return nil
@@ -9223,10 +8883,6 @@ var _ thrift.Struct = (*AlsoMoveOnly)(nil)
 func NewAlsoMoveOnly() *AlsoMoveOnly {
     return (&AlsoMoveOnly{}).
         SetPtrNonCompat(0)
-}
-
-func (x *AlsoMoveOnly) GetPtrNonCompat() int64 {
-    return x.Ptr
 }
 
 func (x *AlsoMoveOnly) GetPtr() int64 {
@@ -9504,10 +9160,6 @@ func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
 }
 
-func (x *CountingStruct) GetRegularIntNonCompat() *int64 {
-    return x.RegularInt
-}
-
 func (x *CountingStruct) GetRegularInt() int64 {
     if !x.IsSetRegularInt() {
         return 0
@@ -9516,20 +9168,12 @@ func (x *CountingStruct) GetRegularInt() int64 {
     return *x.RegularInt
 }
 
-func (x *CountingStruct) GetCountingIntNonCompat() *CountingInt {
-    return x.CountingInt
-}
-
 func (x *CountingStruct) GetCountingInt() CountingInt {
     if !x.IsSetCountingInt() {
         return NewCountingInt()
     }
 
     return *x.CountingInt
-}
-
-func (x *CountingStruct) GetRegularStringNonCompat() *string {
-    return x.RegularString
 }
 
 func (x *CountingStruct) GetRegularString() string {
@@ -9799,10 +9443,6 @@ func NewPerson() *Person {
         SetNameNonCompat("")
 }
 
-func (x *Person) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Person) GetName() string {
     return x.Name
 }
@@ -9929,10 +9569,6 @@ var _ thrift.Struct = (*Person2)(nil)
 func NewPerson2() *Person2 {
     return (&Person2{}).
         SetNameNonCompat("")
-}
-
-func (x *Person2) GetNameNonCompat() string {
-    return x.Name
 }
 
 func (x *Person2) GetName() string {

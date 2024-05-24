@@ -116,24 +116,12 @@ func newReqServiceFunc() *reqServiceFunc {
         SetArg3NonCompat(*NewFoo())
 }
 
-func (x *reqServiceFunc) GetArg1NonCompat() StringWithAdapter_7208 {
-    return x.Arg1
-}
-
 func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
     return x.Arg1
 }
 
-func (x *reqServiceFunc) GetArg2NonCompat() string {
-    return x.Arg2
-}
-
 func (x *reqServiceFunc) GetArg2() string {
     return x.Arg2
-}
-
-func (x *reqServiceFunc) GetArg3NonCompat() *Foo {
-    return x.Arg3
 }
 
 func (x *reqServiceFunc) GetArg3() *Foo {
@@ -384,10 +372,6 @@ type ServiceFuncResultDeprecated = respServiceFunc
 
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{})
-}
-
-func (x *respServiceFunc) GetSuccessNonCompat() *MyI32_4873 {
-    return x.Success
 }
 
 func (x *respServiceFunc) GetSuccess() MyI32_4873 {
@@ -816,10 +800,6 @@ func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{})
 }
 
-func (x *respAdapterServiceCount) GetSuccessNonCompat() *CountingStruct {
-    return x.Success
-}
-
 func (x *respAdapterServiceCount) GetSuccess() *CountingStruct {
     if !x.IsSetSuccess() {
         return nil
@@ -975,10 +955,6 @@ func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
         SetArgNonCompat(*NewHeapAllocated())
 }
 
-func (x *reqAdapterServiceAdaptedTypes) GetArgNonCompat() *HeapAllocated {
-    return x.Arg
-}
-
 func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
     if !x.IsSetArg() {
         return nil
@@ -1128,10 +1104,6 @@ type AdapterServiceAdaptedTypesResultDeprecated = respAdapterServiceAdaptedTypes
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{})
-}
-
-func (x *respAdapterServiceAdaptedTypes) GetSuccessNonCompat() *HeapAllocated {
-    return x.Success
 }
 
 func (x *respAdapterServiceAdaptedTypes) GetSuccess() *HeapAllocated {

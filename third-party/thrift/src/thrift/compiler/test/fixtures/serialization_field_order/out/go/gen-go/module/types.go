@@ -31,24 +31,12 @@ func NewFoo() *Foo {
         SetField1NonCompat(0)
 }
 
-func (x *Foo) GetField2NonCompat() int32 {
-    return x.Field2
-}
-
 func (x *Foo) GetField2() int32 {
     return x.Field2
 }
 
-func (x *Foo) GetField3NonCompat() int32 {
-    return x.Field3
-}
-
 func (x *Foo) GetField3() int32 {
     return x.Field3
-}
-
-func (x *Foo) GetField1NonCompat() int32 {
-    return x.Field1
 }
 
 func (x *Foo) GetField1() int32 {
@@ -281,24 +269,12 @@ func NewFoo2() *Foo2 {
         SetField1NonCompat(0)
 }
 
-func (x *Foo2) GetField2NonCompat() int32 {
-    return x.Field2
-}
-
 func (x *Foo2) GetField2() int32 {
     return x.Field2
 }
 
-func (x *Foo2) GetField3NonCompat() int32 {
-    return x.Field3
-}
-
 func (x *Foo2) GetField3() int32 {
     return x.Field3
-}
-
-func (x *Foo2) GetField1NonCompat() int32 {
-    return x.Field1
 }
 
 func (x *Foo2) GetField1() int32 {

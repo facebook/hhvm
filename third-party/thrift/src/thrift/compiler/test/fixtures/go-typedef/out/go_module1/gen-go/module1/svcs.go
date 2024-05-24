@@ -160,10 +160,6 @@ func newReqFinderByPlate() *reqFinderByPlate {
         SetPlateNonCompat(NewPlate())
 }
 
-func (x *reqFinderByPlate) GetPlateNonCompat() Plate {
-    return x.Plate
-}
-
 func (x *reqFinderByPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -293,10 +289,6 @@ type FinderByPlateResultDeprecated = respFinderByPlate
 
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{})
-}
-
-func (x *respFinderByPlate) GetSuccessNonCompat() *Automobile {
-    return x.Success
 }
 
 func (x *respFinderByPlate) GetSuccess() *Automobile {
@@ -454,10 +446,6 @@ func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
         SetPlateNonCompat(NewPlate())
 }
 
-func (x *reqFinderAliasByPlate) GetPlateNonCompat() Plate {
-    return x.Plate
-}
-
 func (x *reqFinderAliasByPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -587,10 +575,6 @@ type FinderAliasByPlateResultDeprecated = respFinderAliasByPlate
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{})
-}
-
-func (x *respFinderAliasByPlate) GetSuccessNonCompat() *Car {
-    return x.Success
 }
 
 func (x *respFinderAliasByPlate) GetSuccess() *Car {
@@ -748,10 +732,6 @@ func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
         SetPlateNonCompat(NewPlate())
 }
 
-func (x *reqFinderPreviousPlate) GetPlateNonCompat() Plate {
-    return x.Plate
-}
-
 func (x *reqFinderPreviousPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -881,10 +861,6 @@ type FinderPreviousPlateResultDeprecated = respFinderPreviousPlate
 
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{})
-}
-
-func (x *respFinderPreviousPlate) GetSuccessNonCompat() *Plate {
-    return x.Success
 }
 
 func (x *respFinderPreviousPlate) GetSuccess() Plate {

@@ -166,10 +166,6 @@ func NewTypeUri() *TypeUri {
     return (&TypeUri{})
 }
 
-func (x *TypeUri) GetUriNonCompat() *string {
-    return x.Uri
-}
-
 func (x *TypeUri) GetUri() string {
     if !x.IsSetUri() {
         return ""
@@ -178,20 +174,12 @@ func (x *TypeUri) GetUri() string {
     return *x.Uri
 }
 
-func (x *TypeUri) GetTypeHashPrefixSha2_256NonCompat() ByteString {
-    return x.TypeHashPrefixSha2_256
-}
-
 func (x *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
     if !x.IsSetTypeHashPrefixSha2_256() {
         return NewByteString()
     }
 
     return x.TypeHashPrefixSha2_256
-}
-
-func (x *TypeUri) GetScopedNameNonCompat() *string {
-    return x.ScopedName
 }
 
 func (x *TypeUri) GetScopedName() string {
@@ -493,20 +481,12 @@ func NewTypeName() *TypeName {
     return (&TypeName{})
 }
 
-func (x *TypeName) GetBoolTypeNonCompat() *Void {
-    return x.BoolType
-}
-
 func (x *TypeName) GetBoolType() Void {
     if !x.IsSetBoolType() {
         return 0
     }
 
     return *x.BoolType
-}
-
-func (x *TypeName) GetByteTypeNonCompat() *Void {
-    return x.ByteType
 }
 
 func (x *TypeName) GetByteType() Void {
@@ -517,20 +497,12 @@ func (x *TypeName) GetByteType() Void {
     return *x.ByteType
 }
 
-func (x *TypeName) GetI16TypeNonCompat() *Void {
-    return x.I16Type
-}
-
 func (x *TypeName) GetI16Type() Void {
     if !x.IsSetI16Type() {
         return 0
     }
 
     return *x.I16Type
-}
-
-func (x *TypeName) GetI32TypeNonCompat() *Void {
-    return x.I32Type
 }
 
 func (x *TypeName) GetI32Type() Void {
@@ -541,20 +513,12 @@ func (x *TypeName) GetI32Type() Void {
     return *x.I32Type
 }
 
-func (x *TypeName) GetI64TypeNonCompat() *Void {
-    return x.I64Type
-}
-
 func (x *TypeName) GetI64Type() Void {
     if !x.IsSetI64Type() {
         return 0
     }
 
     return *x.I64Type
-}
-
-func (x *TypeName) GetFloatTypeNonCompat() *Void {
-    return x.FloatType
 }
 
 func (x *TypeName) GetFloatType() Void {
@@ -565,20 +529,12 @@ func (x *TypeName) GetFloatType() Void {
     return *x.FloatType
 }
 
-func (x *TypeName) GetDoubleTypeNonCompat() *Void {
-    return x.DoubleType
-}
-
 func (x *TypeName) GetDoubleType() Void {
     if !x.IsSetDoubleType() {
         return 0
     }
 
     return *x.DoubleType
-}
-
-func (x *TypeName) GetStringTypeNonCompat() *Void {
-    return x.StringType
 }
 
 func (x *TypeName) GetStringType() Void {
@@ -589,20 +545,12 @@ func (x *TypeName) GetStringType() Void {
     return *x.StringType
 }
 
-func (x *TypeName) GetBinaryTypeNonCompat() *Void {
-    return x.BinaryType
-}
-
 func (x *TypeName) GetBinaryType() Void {
     if !x.IsSetBinaryType() {
         return 0
     }
 
     return *x.BinaryType
-}
-
-func (x *TypeName) GetEnumTypeNonCompat() *TypeUri {
-    return x.EnumType
 }
 
 func (x *TypeName) GetEnumType() *TypeUri {
@@ -613,20 +561,12 @@ func (x *TypeName) GetEnumType() *TypeUri {
     return x.EnumType
 }
 
-func (x *TypeName) GetStructTypeNonCompat() *TypeUri {
-    return x.StructType
-}
-
 func (x *TypeName) GetStructType() *TypeUri {
     if !x.IsSetStructType() {
         return nil
     }
 
     return x.StructType
-}
-
-func (x *TypeName) GetUnionTypeNonCompat() *TypeUri {
-    return x.UnionType
 }
 
 func (x *TypeName) GetUnionType() *TypeUri {
@@ -637,20 +577,12 @@ func (x *TypeName) GetUnionType() *TypeUri {
     return x.UnionType
 }
 
-func (x *TypeName) GetExceptionTypeNonCompat() *TypeUri {
-    return x.ExceptionType
-}
-
 func (x *TypeName) GetExceptionType() *TypeUri {
     if !x.IsSetExceptionType() {
         return nil
     }
 
     return x.ExceptionType
-}
-
-func (x *TypeName) GetListTypeNonCompat() *Void {
-    return x.ListType
 }
 
 func (x *TypeName) GetListType() Void {
@@ -661,10 +593,6 @@ func (x *TypeName) GetListType() Void {
     return *x.ListType
 }
 
-func (x *TypeName) GetSetTypeNonCompat() *Void {
-    return x.SetType
-}
-
 func (x *TypeName) GetSetType() Void {
     if !x.IsSetSetType() {
         return 0
@@ -673,20 +601,12 @@ func (x *TypeName) GetSetType() Void {
     return *x.SetType
 }
 
-func (x *TypeName) GetMapTypeNonCompat() *Void {
-    return x.MapType
-}
-
 func (x *TypeName) GetMapType() Void {
     if !x.IsSetMapType() {
         return 0
     }
 
     return *x.MapType
-}
-
-func (x *TypeName) GetTypedefTypeNonCompat() *TypeUri {
-    return x.TypedefType
 }
 
 func (x *TypeName) GetTypedefType() *TypeUri {

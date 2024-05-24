@@ -367,32 +367,16 @@ func NewSomeStruct() *SomeStruct {
           )
 }
 
-func (x *SomeStruct) GetReasonableNonCompat() Metasyntactic {
-    return x.Reasonable
-}
-
 func (x *SomeStruct) GetReasonable() Metasyntactic {
     return x.Reasonable
-}
-
-func (x *SomeStruct) GetFineNonCompat() Metasyntactic {
-    return x.Fine
 }
 
 func (x *SomeStruct) GetFine() Metasyntactic {
     return x.Fine
 }
 
-func (x *SomeStruct) GetQuestionableNonCompat() Metasyntactic {
-    return x.Questionable
-}
-
 func (x *SomeStruct) GetQuestionable() Metasyntactic {
     return x.Questionable
-}
-
-func (x *SomeStruct) GetTagsNonCompat() []int32 {
-    return x.Tags
 }
 
 func (x *SomeStruct) GetTags() []int32 {
@@ -725,32 +709,16 @@ func NewMyStruct() *MyStruct {
           )
 }
 
-func (x *MyStruct) GetMe2_3NonCompat() MyEnum2 {
-    return x.Me2_3
-}
-
 func (x *MyStruct) GetMe2_3() MyEnum2 {
     return x.Me2_3
-}
-
-func (x *MyStruct) GetMe3N3NonCompat() MyEnum3 {
-    return x.Me3N3
 }
 
 func (x *MyStruct) GetMe3N3() MyEnum3 {
     return x.Me3N3
 }
 
-func (x *MyStruct) GetMe1T1NonCompat() MyEnum1 {
-    return x.Me1T1
-}
-
 func (x *MyStruct) GetMe1T1() MyEnum1 {
     return x.Me1T1
-}
-
-func (x *MyStruct) GetMe1T2NonCompat() MyEnum1 {
-    return x.Me1T2
 }
 
 func (x *MyStruct) GetMe1T2() MyEnum1 {

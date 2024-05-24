@@ -27,10 +27,6 @@ func NewFoo() *Foo {
         SetMyIntNonCompat(0)
 }
 
-func (x *Foo) GetMyIntNonCompat() int64 {
-    return x.MyInt
-}
-
 func (x *Foo) GetMyInt() int64 {
     return x.MyInt
 }

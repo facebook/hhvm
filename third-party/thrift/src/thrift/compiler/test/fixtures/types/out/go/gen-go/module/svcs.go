@@ -135,10 +135,6 @@ func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
         SetMNonCompat(included.NewSomeMap())
 }
 
-func (x *reqSomeServiceBounceMap) GetMNonCompat() included.SomeMap {
-    return x.M
-}
-
 func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     if !x.IsSetM() {
         return included.NewSomeMap()
@@ -276,10 +272,6 @@ type SomeServiceBounceMapResultDeprecated = respSomeServiceBounceMap
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{})
-}
-
-func (x *respSomeServiceBounceMap) GetSuccessNonCompat() included.SomeMap {
-    return x.Success
 }
 
 func (x *respSomeServiceBounceMap) GetSuccess() included.SomeMap {
@@ -427,10 +419,6 @@ type SomeServiceBinaryKeyedMapArgsDeprecated = reqSomeServiceBinaryKeyedMap
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
         SetRNonCompat(make([]int64, 0))
-}
-
-func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
-    return x.R
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
@@ -598,10 +586,6 @@ type SomeServiceBinaryKeyedMapResultDeprecated = respSomeServiceBinaryKeyedMap
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{})
-}
-
-func (x *respSomeServiceBinaryKeyedMap) GetSuccessNonCompat() map[*TBinary]int64 {
-    return x.Success
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetSuccess() map[*TBinary]int64 {

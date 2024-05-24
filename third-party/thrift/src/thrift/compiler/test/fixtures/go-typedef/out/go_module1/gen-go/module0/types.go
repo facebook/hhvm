@@ -29,16 +29,8 @@ func NewAccessory() *Accessory {
         SetNameNonCompat("")
 }
 
-func (x *Accessory) GetInventoryIdNonCompat() int32 {
-    return x.InventoryId
-}
-
 func (x *Accessory) GetInventoryId() int32 {
     return x.InventoryId
-}
-
-func (x *Accessory) GetNameNonCompat() string {
-    return x.Name
 }
 
 func (x *Accessory) GetName() string {
@@ -220,16 +212,8 @@ func NewPartName() *PartName {
         SetNameNonCompat("")
 }
 
-func (x *PartName) GetInventoryIdNonCompat() int32 {
-    return x.InventoryId
-}
-
 func (x *PartName) GetInventoryId() int32 {
     return x.InventoryId
-}
-
-func (x *PartName) GetNameNonCompat() string {
-    return x.Name
 }
 
 func (x *PartName) GetName() string {

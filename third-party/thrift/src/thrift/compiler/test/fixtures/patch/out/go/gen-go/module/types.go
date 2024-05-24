@@ -70,16 +70,8 @@ func NewMyData() *MyData {
         SetData2NonCompat(0)
 }
 
-func (x *MyData) GetData1NonCompat() string {
-    return x.Data1
-}
-
 func (x *MyData) GetData1() string {
     return x.Data1
-}
-
-func (x *MyData) GetData2NonCompat() int32 {
-    return x.Data2
 }
 
 func (x *MyData) GetData2() int32 {
@@ -261,16 +253,8 @@ func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
         SetData2NonCompat(2)
 }
 
-func (x *MyDataWithCustomDefault) GetData1NonCompat() string {
-    return x.Data1
-}
-
 func (x *MyDataWithCustomDefault) GetData1() string {
     return x.Data1
-}
-
-func (x *MyDataWithCustomDefault) GetData2NonCompat() int32 {
-    return x.Data2
 }
 
 func (x *MyDataWithCustomDefault) GetData2() int32 {
@@ -449,10 +433,6 @@ func NewInnerUnion() *InnerUnion {
     return (&InnerUnion{})
 }
 
-func (x *InnerUnion) GetInnerOptionNonCompat() []byte {
-    return x.InnerOption
-}
-
 func (x *InnerUnion) GetInnerOption() []byte {
     if !x.IsSetInnerOption() {
         return []byte("")
@@ -609,10 +589,6 @@ func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
 
-func (x *MyUnion) GetOption1NonCompat() *string {
-    return x.Option1
-}
-
 func (x *MyUnion) GetOption1() string {
     if !x.IsSetOption1() {
         return ""
@@ -621,20 +597,12 @@ func (x *MyUnion) GetOption1() string {
     return *x.Option1
 }
 
-func (x *MyUnion) GetOption2NonCompat() *int32 {
-    return x.Option2
-}
-
 func (x *MyUnion) GetOption2() int32 {
     if !x.IsSetOption2() {
         return 0
     }
 
     return *x.Option2
-}
-
-func (x *MyUnion) GetOption3NonCompat() *InnerUnion {
-    return x.Option3
 }
 
 func (x *MyUnion) GetOption3() *InnerUnion {
@@ -982,10 +950,6 @@ func NewMyStruct() *MyStruct {
           )
 }
 
-func (x *MyStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
-    return x.StructWithCustomDefault
-}
-
 func (x *MyStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
     if !x.IsSetStructWithCustomDefault() {
         return nil
@@ -994,16 +958,8 @@ func (x *MyStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
     return x.StructWithCustomDefault
 }
 
-func (x *MyStruct) GetI32WithCustomDefaultNonCompat() int32 {
-    return x.I32WithCustomDefault
-}
-
 func (x *MyStruct) GetI32WithCustomDefault() int32 {
     return x.I32WithCustomDefault
-}
-
-func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
-    return x.MapMap
 }
 
 func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
@@ -1014,20 +970,12 @@ func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
     return x.MapMap
 }
 
-func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
-    return x.ListMap
-}
-
 func (x *MyStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
         return make([]map[string]int32, 0)
     }
 
     return x.ListMap
-}
-
-func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
-    return x.OptMapVal
 }
 
 func (x *MyStruct) GetOptMapVal() map[string]string {
@@ -1038,20 +986,12 @@ func (x *MyStruct) GetOptMapVal() map[string]string {
     return x.OptMapVal
 }
 
-func (x *MyStruct) GetOptSetValNonCompat() []string {
-    return x.OptSetVal
-}
-
 func (x *MyStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
         return make([]string, 0)
     }
 
     return x.OptSetVal
-}
-
-func (x *MyStruct) GetOptListValNonCompat() []int16 {
-    return x.OptListVal
 }
 
 func (x *MyStruct) GetOptListVal() []int16 {
@@ -1062,20 +1002,12 @@ func (x *MyStruct) GetOptListVal() []int16 {
     return x.OptListVal
 }
 
-func (x *MyStruct) GetOptLateStructValNonCompat() *LateDefStruct {
-    return x.OptLateStructVal
-}
-
 func (x *MyStruct) GetOptLateStructVal() *LateDefStruct {
     if !x.IsSetOptLateStructVal() {
         return nil
     }
 
     return x.OptLateStructVal
-}
-
-func (x *MyStruct) GetOptStructValNonCompat() *MyData {
-    return x.OptStructVal
 }
 
 func (x *MyStruct) GetOptStructVal() *MyData {
@@ -1086,20 +1018,12 @@ func (x *MyStruct) GetOptStructVal() *MyData {
     return x.OptStructVal
 }
 
-func (x *MyStruct) GetOptEnumValNonCompat() *MyEnum {
-    return x.OptEnumVal
-}
-
 func (x *MyStruct) GetOptEnumVal() MyEnum {
     if !x.IsSetOptEnumVal() {
         return 0
     }
 
     return *x.OptEnumVal
-}
-
-func (x *MyStruct) GetOptBinaryValNonCompat() []byte {
-    return x.OptBinaryVal
 }
 
 func (x *MyStruct) GetOptBinaryVal() []byte {
@@ -1110,20 +1034,12 @@ func (x *MyStruct) GetOptBinaryVal() []byte {
     return x.OptBinaryVal
 }
 
-func (x *MyStruct) GetOptStringValNonCompat() *string {
-    return x.OptStringVal
-}
-
 func (x *MyStruct) GetOptStringVal() string {
     if !x.IsSetOptStringVal() {
         return ""
     }
 
     return *x.OptStringVal
-}
-
-func (x *MyStruct) GetOptDoubleValNonCompat() *float64 {
-    return x.OptDoubleVal
 }
 
 func (x *MyStruct) GetOptDoubleVal() float64 {
@@ -1134,20 +1050,12 @@ func (x *MyStruct) GetOptDoubleVal() float64 {
     return *x.OptDoubleVal
 }
 
-func (x *MyStruct) GetOptFloatValNonCompat() *float32 {
-    return x.OptFloatVal
-}
-
 func (x *MyStruct) GetOptFloatVal() float32 {
     if !x.IsSetOptFloatVal() {
         return 0.0
     }
 
     return *x.OptFloatVal
-}
-
-func (x *MyStruct) GetOptI64ValNonCompat() *int64 {
-    return x.OptI64Val
 }
 
 func (x *MyStruct) GetOptI64Val() int64 {
@@ -1158,20 +1066,12 @@ func (x *MyStruct) GetOptI64Val() int64 {
     return *x.OptI64Val
 }
 
-func (x *MyStruct) GetOptI32ValNonCompat() *int32 {
-    return x.OptI32Val
-}
-
 func (x *MyStruct) GetOptI32Val() int32 {
     if !x.IsSetOptI32Val() {
         return 0
     }
 
     return *x.OptI32Val
-}
-
-func (x *MyStruct) GetOptI16ValNonCompat() *int16 {
-    return x.OptI16Val
 }
 
 func (x *MyStruct) GetOptI16Val() int16 {
@@ -1182,20 +1082,12 @@ func (x *MyStruct) GetOptI16Val() int16 {
     return *x.OptI16Val
 }
 
-func (x *MyStruct) GetOptByteValNonCompat() *int8 {
-    return x.OptByteVal
-}
-
 func (x *MyStruct) GetOptByteVal() int8 {
     if !x.IsSetOptByteVal() {
         return 0
     }
 
     return *x.OptByteVal
-}
-
-func (x *MyStruct) GetOptBoolValNonCompat() *bool {
-    return x.OptBoolVal
 }
 
 func (x *MyStruct) GetOptBoolVal() bool {
@@ -1206,20 +1098,12 @@ func (x *MyStruct) GetOptBoolVal() bool {
     return *x.OptBoolVal
 }
 
-func (x *MyStruct) GetLateStructValNonCompat() *LateDefStruct {
-    return x.LateStructVal
-}
-
 func (x *MyStruct) GetLateStructVal() *LateDefStruct {
     if !x.IsSetLateStructVal() {
         return nil
     }
 
     return x.LateStructVal
-}
-
-func (x *MyStruct) GetUnionValNonCompat() *MyUnion {
-    return x.UnionVal
 }
 
 func (x *MyStruct) GetUnionVal() *MyUnion {
@@ -1230,10 +1114,6 @@ func (x *MyStruct) GetUnionVal() *MyUnion {
     return x.UnionVal
 }
 
-func (x *MyStruct) GetStructValNonCompat() *MyData {
-    return x.StructVal
-}
-
 func (x *MyStruct) GetStructVal() *MyData {
     if !x.IsSetStructVal() {
         return nil
@@ -1242,16 +1122,8 @@ func (x *MyStruct) GetStructVal() *MyData {
     return x.StructVal
 }
 
-func (x *MyStruct) GetEnumValNonCompat() MyEnum {
-    return x.EnumVal
-}
-
 func (x *MyStruct) GetEnumVal() MyEnum {
     return x.EnumVal
-}
-
-func (x *MyStruct) GetBinaryValNonCompat() []byte {
-    return x.BinaryVal
 }
 
 func (x *MyStruct) GetBinaryVal() []byte {
@@ -1262,72 +1134,36 @@ func (x *MyStruct) GetBinaryVal() []byte {
     return x.BinaryVal
 }
 
-func (x *MyStruct) GetStringValNonCompat() string {
-    return x.StringVal
-}
-
 func (x *MyStruct) GetStringVal() string {
     return x.StringVal
-}
-
-func (x *MyStruct) GetDoubleValNonCompat() float64 {
-    return x.DoubleVal
 }
 
 func (x *MyStruct) GetDoubleVal() float64 {
     return x.DoubleVal
 }
 
-func (x *MyStruct) GetFloatValNonCompat() float32 {
-    return x.FloatVal
-}
-
 func (x *MyStruct) GetFloatVal() float32 {
     return x.FloatVal
-}
-
-func (x *MyStruct) GetI64ValNonCompat() int64 {
-    return x.I64Val
 }
 
 func (x *MyStruct) GetI64Val() int64 {
     return x.I64Val
 }
 
-func (x *MyStruct) GetI32ValNonCompat() int32 {
-    return x.I32Val
-}
-
 func (x *MyStruct) GetI32Val() int32 {
     return x.I32Val
-}
-
-func (x *MyStruct) GetI16ValNonCompat() int16 {
-    return x.I16Val
 }
 
 func (x *MyStruct) GetI16Val() int16 {
     return x.I16Val
 }
 
-func (x *MyStruct) GetByteValNonCompat() int8 {
-    return x.ByteVal
-}
-
 func (x *MyStruct) GetByteVal() int8 {
     return x.ByteVal
 }
 
-func (x *MyStruct) GetBoolValNonCompat() bool {
-    return x.BoolVal
-}
-
 func (x *MyStruct) GetBoolVal() bool {
     return x.BoolVal
-}
-
-func (x *MyStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
-    return x.StructWithFieldCustomDefault
 }
 
 func (x *MyStruct) GetStructWithFieldCustomDefault() *MyData {
@@ -3649,10 +3485,6 @@ func NewRecursive() *Recursive {
         SetNodesNonCompat(make(map[string]*Recursive))
 }
 
-func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
-    return x.Nodes
-}
-
 func (x *Recursive) GetNodes() map[string]*Recursive {
     if !x.IsSetNodes() {
         return make(map[string]*Recursive)
@@ -3836,10 +3668,6 @@ func NewBar() *Bar {
         SetLoopNonCompat(*NewLoop())
 }
 
-func (x *Bar) GetLoopNonCompat() *Loop {
-    return x.Loop
-}
-
 func (x *Bar) GetLoop() *Loop {
     if !x.IsSetLoop() {
         return nil
@@ -3987,10 +3815,6 @@ var _ thrift.Struct = (*Loop)(nil)
 func NewLoop() *Loop {
     return (&Loop{}).
         SetBarNonCompat(*NewBar())
-}
-
-func (x *Loop) GetBarNonCompat() *Bar {
-    return x.Bar
 }
 
 func (x *Loop) GetBar() *Bar {
@@ -4150,20 +3974,12 @@ func NewRefFields() *RefFields {
         SetSharedMustableNonCompat(make([]int32, 0))
 }
 
-func (x *RefFields) GetUniqueNonCompat() []int32 {
-    return x.Unique
-}
-
 func (x *RefFields) GetUnique() []int32 {
     if !x.IsSetUnique() {
         return make([]int32, 0)
     }
 
     return x.Unique
-}
-
-func (x *RefFields) GetSharedConstNonCompat() []int32 {
-    return x.SharedConst
 }
 
 func (x *RefFields) GetSharedConst() []int32 {
@@ -4174,20 +3990,12 @@ func (x *RefFields) GetSharedConst() []int32 {
     return x.SharedConst
 }
 
-func (x *RefFields) GetSharedMustableNonCompat() []int32 {
-    return x.SharedMustable
-}
-
 func (x *RefFields) GetSharedMustable() []int32 {
     if !x.IsSetSharedMustable() {
         return make([]int32, 0)
     }
 
     return x.SharedMustable
-}
-
-func (x *RefFields) GetOptUniqueNonCompat() []int32 {
-    return x.OptUnique
 }
 
 func (x *RefFields) GetOptUnique() []int32 {
@@ -4198,10 +4006,6 @@ func (x *RefFields) GetOptUnique() []int32 {
     return x.OptUnique
 }
 
-func (x *RefFields) GetOptSharedConstNonCompat() []int32 {
-    return x.OptSharedConst
-}
-
 func (x *RefFields) GetOptSharedConst() []int32 {
     if !x.IsSetOptSharedConst() {
         return make([]int32, 0)
@@ -4210,20 +4014,12 @@ func (x *RefFields) GetOptSharedConst() []int32 {
     return x.OptSharedConst
 }
 
-func (x *RefFields) GetOptSharedMustableNonCompat() []int32 {
-    return x.OptSharedMustable
-}
-
 func (x *RefFields) GetOptSharedMustable() []int32 {
     if !x.IsSetOptSharedMustable() {
         return make([]int32, 0)
     }
 
     return x.OptSharedMustable
-}
-
-func (x *RefFields) GetOptBoxNonCompat() []int32 {
-    return x.OptBox
 }
 
 func (x *RefFields) GetOptBox() []int32 {
@@ -4908,10 +4704,6 @@ func NewMyDataPatch() *MyDataPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *MyDataPatch) GetAssignNonCompat() *MyData {
-    return x.Assign
-}
-
 func (x *MyDataPatch) GetAssign() *MyData {
     if !x.IsSetAssign() {
         return nil
@@ -4920,16 +4712,8 @@ func (x *MyDataPatch) GetAssign() *MyData {
     return x.Assign
 }
 
-func (x *MyDataPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyDataPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyDataPatch) GetPatchPriorNonCompat() *MyDataFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *MyDataPatch) GetPatchPrior() *MyDataFieldPatch {
@@ -4940,10 +4724,6 @@ func (x *MyDataPatch) GetPatchPrior() *MyDataFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyDataPatch) GetEnsureNonCompat() *MyDataEnsureStruct {
-    return x.Ensure
-}
-
 func (x *MyDataPatch) GetEnsure() *MyDataEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -4952,20 +4732,12 @@ func (x *MyDataPatch) GetEnsure() *MyDataEnsureStruct {
     return x.Ensure
 }
 
-func (x *MyDataPatch) GetPatchNonCompat() *MyDataFieldPatch {
-    return x.Patch
-}
-
 func (x *MyDataPatch) GetPatch() *MyDataFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *MyDataPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *MyDataPatch) GetRemove() patch.FieldIdList {
@@ -5420,20 +5192,12 @@ func NewMyDataFieldPatch() *MyDataFieldPatch {
         SetData2NonCompat(*patch.NewI32Patch())
 }
 
-func (x *MyDataFieldPatch) GetData1NonCompat() *patch.StringPatch {
-    return x.Data1
-}
-
 func (x *MyDataFieldPatch) GetData1() *patch.StringPatch {
     if !x.IsSetData1() {
         return nil
     }
 
     return x.Data1
-}
-
-func (x *MyDataFieldPatch) GetData2NonCompat() *patch.I32Patch {
-    return x.Data2
 }
 
 func (x *MyDataFieldPatch) GetData2() *patch.I32Patch {
@@ -5651,20 +5415,12 @@ func NewMyDataEnsureStruct() *MyDataEnsureStruct {
     return (&MyDataEnsureStruct{})
 }
 
-func (x *MyDataEnsureStruct) GetData1NonCompat() *string {
-    return x.Data1
-}
-
 func (x *MyDataEnsureStruct) GetData1() string {
     if !x.IsSetData1() {
         return ""
     }
 
     return *x.Data1
-}
-
-func (x *MyDataEnsureStruct) GetData2NonCompat() *int32 {
-    return x.Data2
 }
 
 func (x *MyDataEnsureStruct) GetData2() int32 {
@@ -5874,16 +5630,8 @@ func NewMyDataSafePatch() *MyDataSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *MyDataSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *MyDataSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *MyDataSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *MyDataSafePatch) GetData() []byte {
@@ -6080,10 +5828,6 @@ func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetAssignNonCompat() *MyDataWithCustomDefault {
-    return x.Assign
-}
-
 func (x *MyDataWithCustomDefaultPatch) GetAssign() *MyDataWithCustomDefault {
     if !x.IsSetAssign() {
         return nil
@@ -6092,16 +5836,8 @@ func (x *MyDataWithCustomDefaultPatch) GetAssign() *MyDataWithCustomDefault {
     return x.Assign
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyDataWithCustomDefaultPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyDataWithCustomDefaultPatch) GetPatchPriorNonCompat() *MyDataWithCustomDefaultFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *MyDataWithCustomDefaultPatch) GetPatchPrior() *MyDataWithCustomDefaultFieldPatch {
@@ -6112,10 +5848,6 @@ func (x *MyDataWithCustomDefaultPatch) GetPatchPrior() *MyDataWithCustomDefaultF
     return x.PatchPrior
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetEnsureNonCompat() *MyDataWithCustomDefaultEnsureStruct {
-    return x.Ensure
-}
-
 func (x *MyDataWithCustomDefaultPatch) GetEnsure() *MyDataWithCustomDefaultEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -6124,20 +5856,12 @@ func (x *MyDataWithCustomDefaultPatch) GetEnsure() *MyDataWithCustomDefaultEnsur
     return x.Ensure
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetPatchNonCompat() *MyDataWithCustomDefaultFieldPatch {
-    return x.Patch
-}
-
 func (x *MyDataWithCustomDefaultPatch) GetPatch() *MyDataWithCustomDefaultFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *MyDataWithCustomDefaultPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *MyDataWithCustomDefaultPatch) GetRemove() patch.FieldIdList {
@@ -6592,20 +6316,12 @@ func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
         SetData2NonCompat(*patch.NewI32Patch())
 }
 
-func (x *MyDataWithCustomDefaultFieldPatch) GetData1NonCompat() *patch.StringPatch {
-    return x.Data1
-}
-
 func (x *MyDataWithCustomDefaultFieldPatch) GetData1() *patch.StringPatch {
     if !x.IsSetData1() {
         return nil
     }
 
     return x.Data1
-}
-
-func (x *MyDataWithCustomDefaultFieldPatch) GetData2NonCompat() *patch.I32Patch {
-    return x.Data2
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) GetData2() *patch.I32Patch {
@@ -6823,20 +6539,12 @@ func NewMyDataWithCustomDefaultEnsureStruct() *MyDataWithCustomDefaultEnsureStru
     return (&MyDataWithCustomDefaultEnsureStruct{})
 }
 
-func (x *MyDataWithCustomDefaultEnsureStruct) GetData1NonCompat() *string {
-    return x.Data1
-}
-
 func (x *MyDataWithCustomDefaultEnsureStruct) GetData1() string {
     if !x.IsSetData1() {
         return ""
     }
 
     return *x.Data1
-}
-
-func (x *MyDataWithCustomDefaultEnsureStruct) GetData2NonCompat() *int32 {
-    return x.Data2
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) GetData2() int32 {
@@ -7046,16 +6754,8 @@ func NewMyDataWithCustomDefaultSafePatch() *MyDataWithCustomDefaultSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *MyDataWithCustomDefaultSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *MyDataWithCustomDefaultSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *MyDataWithCustomDefaultSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *MyDataWithCustomDefaultSafePatch) GetData() []byte {
@@ -7250,10 +6950,6 @@ func NewInnerUnionPatch() *InnerUnionPatch {
         SetPatchNonCompat(*NewInnerUnionFieldPatch())
 }
 
-func (x *InnerUnionPatch) GetAssignNonCompat() *InnerUnion {
-    return x.Assign
-}
-
 func (x *InnerUnionPatch) GetAssign() *InnerUnion {
     if !x.IsSetAssign() {
         return nil
@@ -7262,16 +6958,8 @@ func (x *InnerUnionPatch) GetAssign() *InnerUnion {
     return x.Assign
 }
 
-func (x *InnerUnionPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *InnerUnionPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *InnerUnionPatch) GetPatchPriorNonCompat() *InnerUnionFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *InnerUnionPatch) GetPatchPrior() *InnerUnionFieldPatch {
@@ -7282,20 +6970,12 @@ func (x *InnerUnionPatch) GetPatchPrior() *InnerUnionFieldPatch {
     return x.PatchPrior
 }
 
-func (x *InnerUnionPatch) GetEnsureNonCompat() *InnerUnion {
-    return x.Ensure
-}
-
 func (x *InnerUnionPatch) GetEnsure() *InnerUnion {
     if !x.IsSetEnsure() {
         return nil
     }
 
     return x.Ensure
-}
-
-func (x *InnerUnionPatch) GetPatchNonCompat() *InnerUnionFieldPatch {
-    return x.Patch
 }
 
 func (x *InnerUnionPatch) GetPatch() *InnerUnionFieldPatch {
@@ -7694,10 +7374,6 @@ func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
         SetInnerOptionNonCompat(*patch.NewBinaryPatch())
 }
 
-func (x *InnerUnionFieldPatch) GetInnerOptionNonCompat() *patch.BinaryPatch {
-    return x.InnerOption
-}
-
 func (x *InnerUnionFieldPatch) GetInnerOption() *patch.BinaryPatch {
     if !x.IsSetInnerOption() {
         return nil
@@ -7849,16 +7525,8 @@ func NewInnerUnionSafePatch() *InnerUnionSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *InnerUnionSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *InnerUnionSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *InnerUnionSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *InnerUnionSafePatch) GetData() []byte {
@@ -8053,10 +7721,6 @@ func NewMyUnionPatch() *MyUnionPatch {
         SetPatchNonCompat(*NewMyUnionFieldPatch())
 }
 
-func (x *MyUnionPatch) GetAssignNonCompat() *MyUnion {
-    return x.Assign
-}
-
 func (x *MyUnionPatch) GetAssign() *MyUnion {
     if !x.IsSetAssign() {
         return nil
@@ -8065,16 +7729,8 @@ func (x *MyUnionPatch) GetAssign() *MyUnion {
     return x.Assign
 }
 
-func (x *MyUnionPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyUnionPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyUnionPatch) GetPatchPriorNonCompat() *MyUnionFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *MyUnionPatch) GetPatchPrior() *MyUnionFieldPatch {
@@ -8085,20 +7741,12 @@ func (x *MyUnionPatch) GetPatchPrior() *MyUnionFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyUnionPatch) GetEnsureNonCompat() *MyUnion {
-    return x.Ensure
-}
-
 func (x *MyUnionPatch) GetEnsure() *MyUnion {
     if !x.IsSetEnsure() {
         return nil
     }
 
     return x.Ensure
-}
-
-func (x *MyUnionPatch) GetPatchNonCompat() *MyUnionFieldPatch {
-    return x.Patch
 }
 
 func (x *MyUnionPatch) GetPatch() *MyUnionFieldPatch {
@@ -8501,10 +8149,6 @@ func NewMyUnionFieldPatch() *MyUnionFieldPatch {
         SetOption3NonCompat(*NewInnerUnionPatch())
 }
 
-func (x *MyUnionFieldPatch) GetOption1NonCompat() *patch.StringPatch {
-    return x.Option1
-}
-
 func (x *MyUnionFieldPatch) GetOption1() *patch.StringPatch {
     if !x.IsSetOption1() {
         return nil
@@ -8513,20 +8157,12 @@ func (x *MyUnionFieldPatch) GetOption1() *patch.StringPatch {
     return x.Option1
 }
 
-func (x *MyUnionFieldPatch) GetOption2NonCompat() *patch.I32Patch {
-    return x.Option2
-}
-
 func (x *MyUnionFieldPatch) GetOption2() *patch.I32Patch {
     if !x.IsSetOption2() {
         return nil
     }
 
     return x.Option2
-}
-
-func (x *MyUnionFieldPatch) GetOption3NonCompat() *InnerUnionPatch {
-    return x.Option3
 }
 
 func (x *MyUnionFieldPatch) GetOption3() *InnerUnionPatch {
@@ -8812,16 +8448,8 @@ func NewMyUnionSafePatch() *MyUnionSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *MyUnionSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *MyUnionSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *MyUnionSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *MyUnionSafePatch) GetData() []byte {
@@ -9018,10 +8646,6 @@ func NewMyStructPatch() *MyStructPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *MyStructPatch) GetAssignNonCompat() *MyStruct {
-    return x.Assign
-}
-
 func (x *MyStructPatch) GetAssign() *MyStruct {
     if !x.IsSetAssign() {
         return nil
@@ -9030,16 +8654,8 @@ func (x *MyStructPatch) GetAssign() *MyStruct {
     return x.Assign
 }
 
-func (x *MyStructPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructPatch) GetPatchPriorNonCompat() *MyStructFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *MyStructPatch) GetPatchPrior() *MyStructFieldPatch {
@@ -9050,10 +8666,6 @@ func (x *MyStructPatch) GetPatchPrior() *MyStructFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyStructPatch) GetEnsureNonCompat() *MyStructEnsureStruct {
-    return x.Ensure
-}
-
 func (x *MyStructPatch) GetEnsure() *MyStructEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -9062,20 +8674,12 @@ func (x *MyStructPatch) GetEnsure() *MyStructEnsureStruct {
     return x.Ensure
 }
 
-func (x *MyStructPatch) GetPatchNonCompat() *MyStructFieldPatch {
-    return x.Patch
-}
-
 func (x *MyStructPatch) GetPatch() *MyStructFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *MyStructPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *MyStructPatch) GetRemove() patch.FieldIdList {
@@ -9529,20 +9133,12 @@ func NewMyStructField10Patch() *MyStructField10Patch {
         SetClearNonCompat(false)
 }
 
-func (x *MyStructField10Patch) GetAssignNonCompat() *MyEnum {
-    return x.Assign
-}
-
 func (x *MyStructField10Patch) GetAssign() MyEnum {
     if !x.IsSetAssign() {
         return 0
     }
 
     return *x.Assign
-}
-
-func (x *MyStructField10Patch) GetClearNonCompat() bool {
-    return x.Clear
 }
 
 func (x *MyStructField10Patch) GetClear() bool {
@@ -9736,20 +9332,12 @@ func NewMyStructField23Patch() *MyStructField23Patch {
         SetClearNonCompat(false)
 }
 
-func (x *MyStructField23Patch) GetAssignNonCompat() *MyEnum {
-    return x.Assign
-}
-
 func (x *MyStructField23Patch) GetAssign() MyEnum {
     if !x.IsSetAssign() {
         return 0
     }
 
     return *x.Assign
-}
-
-func (x *MyStructField23Patch) GetClearNonCompat() bool {
-    return x.Clear
 }
 
 func (x *MyStructField23Patch) GetClear() bool {
@@ -9947,10 +9535,6 @@ func NewMyStructField26Patch() *MyStructField26Patch {
         SetAppendNonCompat(make([]int16, 0))
 }
 
-func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
-    return x.Assign
-}
-
 func (x *MyStructField26Patch) GetAssign() []int16 {
     if !x.IsSetAssign() {
         return make([]int16, 0)
@@ -9959,16 +9543,8 @@ func (x *MyStructField26Patch) GetAssign() []int16 {
     return x.Assign
 }
 
-func (x *MyStructField26Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField26Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
-    return x.Prepend
 }
 
 func (x *MyStructField26Patch) GetPrepend() []int16 {
@@ -9977,10 +9553,6 @@ func (x *MyStructField26Patch) GetPrepend() []int16 {
     }
 
     return x.Prepend
-}
-
-func (x *MyStructField26Patch) GetAppendNonCompat() []int16 {
-    return x.Append
 }
 
 func (x *MyStructField26Patch) GetAppend() []int16 {
@@ -10370,10 +9942,6 @@ func NewMyStructField27Patch() *MyStructField27Patch {
         SetAddNonCompat(make([]string, 0))
 }
 
-func (x *MyStructField27Patch) GetAssignNonCompat() []string {
-    return x.Assign
-}
-
 func (x *MyStructField27Patch) GetAssign() []string {
     if !x.IsSetAssign() {
         return make([]string, 0)
@@ -10382,16 +9950,8 @@ func (x *MyStructField27Patch) GetAssign() []string {
     return x.Assign
 }
 
-func (x *MyStructField27Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField27Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField27Patch) GetRemoveNonCompat() []string {
-    return x.Remove
 }
 
 func (x *MyStructField27Patch) GetRemove() []string {
@@ -10400,10 +9960,6 @@ func (x *MyStructField27Patch) GetRemove() []string {
     }
 
     return x.Remove
-}
-
-func (x *MyStructField27Patch) GetAddNonCompat() []string {
-    return x.Add
 }
 
 func (x *MyStructField27Patch) GetAdd() []string {
@@ -10799,10 +10355,6 @@ func NewMyStructField28Patch() *MyStructField28Patch {
         SetPutNonCompat(make(map[string]string))
 }
 
-func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
-    return x.Assign
-}
-
 func (x *MyStructField28Patch) GetAssign() map[string]string {
     if !x.IsSetAssign() {
         return make(map[string]string)
@@ -10811,16 +10363,8 @@ func (x *MyStructField28Patch) GetAssign() map[string]string {
     return x.Assign
 }
 
-func (x *MyStructField28Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField28Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField28Patch) GetPatchPriorNonCompat() map[string]*patch.StringPatch {
-    return x.PatchPrior
 }
 
 func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
@@ -10831,20 +10375,12 @@ func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
     return x.PatchPrior
 }
 
-func (x *MyStructField28Patch) GetAddNonCompat() map[string]string {
-    return x.Add
-}
-
 func (x *MyStructField28Patch) GetAdd() map[string]string {
     if !x.IsSetAdd() {
         return make(map[string]string)
     }
 
     return x.Add
-}
-
-func (x *MyStructField28Patch) GetPatchNonCompat() map[string]*patch.StringPatch {
-    return x.Patch
 }
 
 func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
@@ -10855,20 +10391,12 @@ func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
     return x.Patch
 }
 
-func (x *MyStructField28Patch) GetRemoveNonCompat() []string {
-    return x.Remove
-}
-
 func (x *MyStructField28Patch) GetRemove() []string {
     if !x.IsSetRemove() {
         return make([]string, 0)
     }
 
     return x.Remove
-}
-
-func (x *MyStructField28Patch) GetPutNonCompat() map[string]string {
-    return x.Put
 }
 
 func (x *MyStructField28Patch) GetPut() map[string]string {
@@ -11591,10 +11119,6 @@ func NewMyStructField29Patch() *MyStructField29Patch {
         SetAppendNonCompat(make([]map[string]int32, 0))
 }
 
-func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
-    return x.Assign
-}
-
 func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
     if !x.IsSetAssign() {
         return make([]map[string]int32, 0)
@@ -11603,16 +11127,8 @@ func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
     return x.Assign
 }
 
-func (x *MyStructField29Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField29Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
-    return x.Prepend
 }
 
 func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
@@ -11621,10 +11137,6 @@ func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
     }
 
     return x.Prepend
-}
-
-func (x *MyStructField29Patch) GetAppendNonCompat() []map[string]int32 {
-    return x.Append
 }
 
 func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
@@ -12158,10 +11670,6 @@ func NewMyStructField30Patch() *MyStructField30Patch {
         SetPutNonCompat(make(map[string]map[string]int32))
 }
 
-func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 {
-    return x.Assign
-}
-
 func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
     if !x.IsSetAssign() {
         return make(map[string]map[string]int32)
@@ -12170,16 +11678,8 @@ func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
     return x.Assign
 }
 
-func (x *MyStructField30Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField30Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField30Patch) GetPatchPriorNonCompat() map[string]*MyStructField30Patch1 {
-    return x.PatchPrior
 }
 
 func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1 {
@@ -12190,20 +11690,12 @@ func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1
     return x.PatchPrior
 }
 
-func (x *MyStructField30Patch) GetAddNonCompat() map[string]map[string]int32 {
-    return x.Add
-}
-
 func (x *MyStructField30Patch) GetAdd() map[string]map[string]int32 {
     if !x.IsSetAdd() {
         return make(map[string]map[string]int32)
     }
 
     return x.Add
-}
-
-func (x *MyStructField30Patch) GetPatchNonCompat() map[string]*MyStructField30Patch1 {
-    return x.Patch
 }
 
 func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
@@ -12214,20 +11706,12 @@ func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
     return x.Patch
 }
 
-func (x *MyStructField30Patch) GetRemoveNonCompat() []string {
-    return x.Remove
-}
-
 func (x *MyStructField30Patch) GetRemove() []string {
     if !x.IsSetRemove() {
         return make([]string, 0)
     }
 
     return x.Remove
-}
-
-func (x *MyStructField30Patch) GetPutNonCompat() map[string]map[string]int32 {
-    return x.Put
 }
 
 func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
@@ -13094,10 +12578,6 @@ func NewMyStructField30Patch1() *MyStructField30Patch1 {
         SetPutNonCompat(make(map[string]int32))
 }
 
-func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
-    return x.Assign
-}
-
 func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
     if !x.IsSetAssign() {
         return make(map[string]int32)
@@ -13106,16 +12586,8 @@ func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
     return x.Assign
 }
 
-func (x *MyStructField30Patch1) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *MyStructField30Patch1) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField30Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Patch {
-    return x.PatchPrior
 }
 
 func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
@@ -13126,20 +12598,12 @@ func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
     return x.PatchPrior
 }
 
-func (x *MyStructField30Patch1) GetAddNonCompat() map[string]int32 {
-    return x.Add
-}
-
 func (x *MyStructField30Patch1) GetAdd() map[string]int32 {
     if !x.IsSetAdd() {
         return make(map[string]int32)
     }
 
     return x.Add
-}
-
-func (x *MyStructField30Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
-    return x.Patch
 }
 
 func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
@@ -13150,20 +12614,12 @@ func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
     return x.Patch
 }
 
-func (x *MyStructField30Patch1) GetRemoveNonCompat() []string {
-    return x.Remove
-}
-
 func (x *MyStructField30Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
         return make([]string, 0)
     }
 
     return x.Remove
-}
-
-func (x *MyStructField30Patch1) GetPutNonCompat() map[string]int32 {
-    return x.Put
 }
 
 func (x *MyStructField30Patch1) GetPut() map[string]int32 {
@@ -13945,20 +13401,12 @@ func NewMyStructFieldPatch() *MyStructFieldPatch {
         SetStructWithFieldCustomDefaultNonCompat(*NewMyDataPatch())
 }
 
-func (x *MyStructFieldPatch) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefaultPatch {
-    return x.StructWithCustomDefault
-}
-
 func (x *MyStructFieldPatch) GetStructWithCustomDefault() *MyDataWithCustomDefaultPatch {
     if !x.IsSetStructWithCustomDefault() {
         return nil
     }
 
     return x.StructWithCustomDefault
-}
-
-func (x *MyStructFieldPatch) GetI32WithCustomDefaultNonCompat() *patch.I32Patch {
-    return x.I32WithCustomDefault
 }
 
 func (x *MyStructFieldPatch) GetI32WithCustomDefault() *patch.I32Patch {
@@ -13969,20 +13417,12 @@ func (x *MyStructFieldPatch) GetI32WithCustomDefault() *patch.I32Patch {
     return x.I32WithCustomDefault
 }
 
-func (x *MyStructFieldPatch) GetMapMapNonCompat() *MyStructField30Patch {
-    return x.MapMap
-}
-
 func (x *MyStructFieldPatch) GetMapMap() *MyStructField30Patch {
     if !x.IsSetMapMap() {
         return nil
     }
 
     return x.MapMap
-}
-
-func (x *MyStructFieldPatch) GetListMapNonCompat() *MyStructField29Patch {
-    return x.ListMap
 }
 
 func (x *MyStructFieldPatch) GetListMap() *MyStructField29Patch {
@@ -13993,20 +13433,12 @@ func (x *MyStructFieldPatch) GetListMap() *MyStructField29Patch {
     return x.ListMap
 }
 
-func (x *MyStructFieldPatch) GetOptMapValNonCompat() *MyStructField28Patch {
-    return x.OptMapVal
-}
-
 func (x *MyStructFieldPatch) GetOptMapVal() *MyStructField28Patch {
     if !x.IsSetOptMapVal() {
         return nil
     }
 
     return x.OptMapVal
-}
-
-func (x *MyStructFieldPatch) GetOptSetValNonCompat() *MyStructField27Patch {
-    return x.OptSetVal
 }
 
 func (x *MyStructFieldPatch) GetOptSetVal() *MyStructField27Patch {
@@ -14017,20 +13449,12 @@ func (x *MyStructFieldPatch) GetOptSetVal() *MyStructField27Patch {
     return x.OptSetVal
 }
 
-func (x *MyStructFieldPatch) GetOptListValNonCompat() *MyStructField26Patch {
-    return x.OptListVal
-}
-
 func (x *MyStructFieldPatch) GetOptListVal() *MyStructField26Patch {
     if !x.IsSetOptListVal() {
         return nil
     }
 
     return x.OptListVal
-}
-
-func (x *MyStructFieldPatch) GetOptLateStructValNonCompat() *LateDefStructPatch {
-    return x.OptLateStructVal
 }
 
 func (x *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
@@ -14041,20 +13465,12 @@ func (x *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
     return x.OptLateStructVal
 }
 
-func (x *MyStructFieldPatch) GetOptStructValNonCompat() *MyDataPatch {
-    return x.OptStructVal
-}
-
 func (x *MyStructFieldPatch) GetOptStructVal() *MyDataPatch {
     if !x.IsSetOptStructVal() {
         return nil
     }
 
     return x.OptStructVal
-}
-
-func (x *MyStructFieldPatch) GetOptEnumValNonCompat() *MyStructField23Patch {
-    return x.OptEnumVal
 }
 
 func (x *MyStructFieldPatch) GetOptEnumVal() *MyStructField23Patch {
@@ -14065,20 +13481,12 @@ func (x *MyStructFieldPatch) GetOptEnumVal() *MyStructField23Patch {
     return x.OptEnumVal
 }
 
-func (x *MyStructFieldPatch) GetOptBinaryValNonCompat() *patch.BinaryPatch {
-    return x.OptBinaryVal
-}
-
 func (x *MyStructFieldPatch) GetOptBinaryVal() *patch.BinaryPatch {
     if !x.IsSetOptBinaryVal() {
         return nil
     }
 
     return x.OptBinaryVal
-}
-
-func (x *MyStructFieldPatch) GetOptStringValNonCompat() *patch.StringPatch {
-    return x.OptStringVal
 }
 
 func (x *MyStructFieldPatch) GetOptStringVal() *patch.StringPatch {
@@ -14089,20 +13497,12 @@ func (x *MyStructFieldPatch) GetOptStringVal() *patch.StringPatch {
     return x.OptStringVal
 }
 
-func (x *MyStructFieldPatch) GetOptDoubleValNonCompat() *patch.DoublePatch {
-    return x.OptDoubleVal
-}
-
 func (x *MyStructFieldPatch) GetOptDoubleVal() *patch.DoublePatch {
     if !x.IsSetOptDoubleVal() {
         return nil
     }
 
     return x.OptDoubleVal
-}
-
-func (x *MyStructFieldPatch) GetOptFloatValNonCompat() *patch.FloatPatch {
-    return x.OptFloatVal
 }
 
 func (x *MyStructFieldPatch) GetOptFloatVal() *patch.FloatPatch {
@@ -14113,20 +13513,12 @@ func (x *MyStructFieldPatch) GetOptFloatVal() *patch.FloatPatch {
     return x.OptFloatVal
 }
 
-func (x *MyStructFieldPatch) GetOptI64ValNonCompat() *patch.I64Patch {
-    return x.OptI64Val
-}
-
 func (x *MyStructFieldPatch) GetOptI64Val() *patch.I64Patch {
     if !x.IsSetOptI64Val() {
         return nil
     }
 
     return x.OptI64Val
-}
-
-func (x *MyStructFieldPatch) GetOptI32ValNonCompat() *patch.I32Patch {
-    return x.OptI32Val
 }
 
 func (x *MyStructFieldPatch) GetOptI32Val() *patch.I32Patch {
@@ -14137,20 +13529,12 @@ func (x *MyStructFieldPatch) GetOptI32Val() *patch.I32Patch {
     return x.OptI32Val
 }
 
-func (x *MyStructFieldPatch) GetOptI16ValNonCompat() *patch.I16Patch {
-    return x.OptI16Val
-}
-
 func (x *MyStructFieldPatch) GetOptI16Val() *patch.I16Patch {
     if !x.IsSetOptI16Val() {
         return nil
     }
 
     return x.OptI16Val
-}
-
-func (x *MyStructFieldPatch) GetOptByteValNonCompat() *patch.BytePatch {
-    return x.OptByteVal
 }
 
 func (x *MyStructFieldPatch) GetOptByteVal() *patch.BytePatch {
@@ -14161,20 +13545,12 @@ func (x *MyStructFieldPatch) GetOptByteVal() *patch.BytePatch {
     return x.OptByteVal
 }
 
-func (x *MyStructFieldPatch) GetOptBoolValNonCompat() *patch.BoolPatch {
-    return x.OptBoolVal
-}
-
 func (x *MyStructFieldPatch) GetOptBoolVal() *patch.BoolPatch {
     if !x.IsSetOptBoolVal() {
         return nil
     }
 
     return x.OptBoolVal
-}
-
-func (x *MyStructFieldPatch) GetLateStructValNonCompat() *LateDefStructPatch {
-    return x.LateStructVal
 }
 
 func (x *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
@@ -14185,20 +13561,12 @@ func (x *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
     return x.LateStructVal
 }
 
-func (x *MyStructFieldPatch) GetUnionValNonCompat() *MyUnionPatch {
-    return x.UnionVal
-}
-
 func (x *MyStructFieldPatch) GetUnionVal() *MyUnionPatch {
     if !x.IsSetUnionVal() {
         return nil
     }
 
     return x.UnionVal
-}
-
-func (x *MyStructFieldPatch) GetStructValNonCompat() *MyDataPatch {
-    return x.StructVal
 }
 
 func (x *MyStructFieldPatch) GetStructVal() *MyDataPatch {
@@ -14209,20 +13577,12 @@ func (x *MyStructFieldPatch) GetStructVal() *MyDataPatch {
     return x.StructVal
 }
 
-func (x *MyStructFieldPatch) GetEnumValNonCompat() *MyStructField10Patch {
-    return x.EnumVal
-}
-
 func (x *MyStructFieldPatch) GetEnumVal() *MyStructField10Patch {
     if !x.IsSetEnumVal() {
         return nil
     }
 
     return x.EnumVal
-}
-
-func (x *MyStructFieldPatch) GetBinaryValNonCompat() *patch.BinaryPatch {
-    return x.BinaryVal
 }
 
 func (x *MyStructFieldPatch) GetBinaryVal() *patch.BinaryPatch {
@@ -14233,20 +13593,12 @@ func (x *MyStructFieldPatch) GetBinaryVal() *patch.BinaryPatch {
     return x.BinaryVal
 }
 
-func (x *MyStructFieldPatch) GetStringValNonCompat() *patch.StringPatch {
-    return x.StringVal
-}
-
 func (x *MyStructFieldPatch) GetStringVal() *patch.StringPatch {
     if !x.IsSetStringVal() {
         return nil
     }
 
     return x.StringVal
-}
-
-func (x *MyStructFieldPatch) GetDoubleValNonCompat() *patch.DoublePatch {
-    return x.DoubleVal
 }
 
 func (x *MyStructFieldPatch) GetDoubleVal() *patch.DoublePatch {
@@ -14257,20 +13609,12 @@ func (x *MyStructFieldPatch) GetDoubleVal() *patch.DoublePatch {
     return x.DoubleVal
 }
 
-func (x *MyStructFieldPatch) GetFloatValNonCompat() *patch.FloatPatch {
-    return x.FloatVal
-}
-
 func (x *MyStructFieldPatch) GetFloatVal() *patch.FloatPatch {
     if !x.IsSetFloatVal() {
         return nil
     }
 
     return x.FloatVal
-}
-
-func (x *MyStructFieldPatch) GetI64ValNonCompat() *patch.I64Patch {
-    return x.I64Val
 }
 
 func (x *MyStructFieldPatch) GetI64Val() *patch.I64Patch {
@@ -14281,20 +13625,12 @@ func (x *MyStructFieldPatch) GetI64Val() *patch.I64Patch {
     return x.I64Val
 }
 
-func (x *MyStructFieldPatch) GetI32ValNonCompat() *patch.I32Patch {
-    return x.I32Val
-}
-
 func (x *MyStructFieldPatch) GetI32Val() *patch.I32Patch {
     if !x.IsSetI32Val() {
         return nil
     }
 
     return x.I32Val
-}
-
-func (x *MyStructFieldPatch) GetI16ValNonCompat() *patch.I16Patch {
-    return x.I16Val
 }
 
 func (x *MyStructFieldPatch) GetI16Val() *patch.I16Patch {
@@ -14305,10 +13641,6 @@ func (x *MyStructFieldPatch) GetI16Val() *patch.I16Patch {
     return x.I16Val
 }
 
-func (x *MyStructFieldPatch) GetByteValNonCompat() *patch.BytePatch {
-    return x.ByteVal
-}
-
 func (x *MyStructFieldPatch) GetByteVal() *patch.BytePatch {
     if !x.IsSetByteVal() {
         return nil
@@ -14317,20 +13649,12 @@ func (x *MyStructFieldPatch) GetByteVal() *patch.BytePatch {
     return x.ByteVal
 }
 
-func (x *MyStructFieldPatch) GetBoolValNonCompat() *patch.BoolPatch {
-    return x.BoolVal
-}
-
 func (x *MyStructFieldPatch) GetBoolVal() *patch.BoolPatch {
     if !x.IsSetBoolVal() {
         return nil
     }
 
     return x.BoolVal
-}
-
-func (x *MyStructFieldPatch) GetStructWithFieldCustomDefaultNonCompat() *MyDataPatch {
-    return x.StructWithFieldCustomDefault
 }
 
 func (x *MyStructFieldPatch) GetStructWithFieldCustomDefault() *MyDataPatch {
@@ -16625,20 +15949,12 @@ func NewMyStructEnsureStruct() *MyStructEnsureStruct {
     return (&MyStructEnsureStruct{})
 }
 
-func (x *MyStructEnsureStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
-    return x.StructWithCustomDefault
-}
-
 func (x *MyStructEnsureStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
     if !x.IsSetStructWithCustomDefault() {
         return nil
     }
 
     return x.StructWithCustomDefault
-}
-
-func (x *MyStructEnsureStruct) GetI32WithCustomDefaultNonCompat() *int32 {
-    return x.I32WithCustomDefault
 }
 
 func (x *MyStructEnsureStruct) GetI32WithCustomDefault() int32 {
@@ -16649,20 +15965,12 @@ func (x *MyStructEnsureStruct) GetI32WithCustomDefault() int32 {
     return *x.I32WithCustomDefault
 }
 
-func (x *MyStructEnsureStruct) GetMapMapNonCompat() map[string]map[string]int32 {
-    return x.MapMap
-}
-
 func (x *MyStructEnsureStruct) GetMapMap() map[string]map[string]int32 {
     if !x.IsSetMapMap() {
         return make(map[string]map[string]int32)
     }
 
     return x.MapMap
-}
-
-func (x *MyStructEnsureStruct) GetListMapNonCompat() []map[string]int32 {
-    return x.ListMap
 }
 
 func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
@@ -16673,20 +15981,12 @@ func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
     return x.ListMap
 }
 
-func (x *MyStructEnsureStruct) GetOptMapValNonCompat() map[string]string {
-    return x.OptMapVal
-}
-
 func (x *MyStructEnsureStruct) GetOptMapVal() map[string]string {
     if !x.IsSetOptMapVal() {
         return make(map[string]string)
     }
 
     return x.OptMapVal
-}
-
-func (x *MyStructEnsureStruct) GetOptSetValNonCompat() []string {
-    return x.OptSetVal
 }
 
 func (x *MyStructEnsureStruct) GetOptSetVal() []string {
@@ -16697,20 +15997,12 @@ func (x *MyStructEnsureStruct) GetOptSetVal() []string {
     return x.OptSetVal
 }
 
-func (x *MyStructEnsureStruct) GetOptListValNonCompat() []int16 {
-    return x.OptListVal
-}
-
 func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
         return make([]int16, 0)
     }
 
     return x.OptListVal
-}
-
-func (x *MyStructEnsureStruct) GetOptLateStructValNonCompat() *LateDefStruct {
-    return x.OptLateStructVal
 }
 
 func (x *MyStructEnsureStruct) GetOptLateStructVal() *LateDefStruct {
@@ -16721,20 +16013,12 @@ func (x *MyStructEnsureStruct) GetOptLateStructVal() *LateDefStruct {
     return x.OptLateStructVal
 }
 
-func (x *MyStructEnsureStruct) GetOptStructValNonCompat() *MyData {
-    return x.OptStructVal
-}
-
 func (x *MyStructEnsureStruct) GetOptStructVal() *MyData {
     if !x.IsSetOptStructVal() {
         return nil
     }
 
     return x.OptStructVal
-}
-
-func (x *MyStructEnsureStruct) GetOptEnumValNonCompat() *MyEnum {
-    return x.OptEnumVal
 }
 
 func (x *MyStructEnsureStruct) GetOptEnumVal() MyEnum {
@@ -16745,20 +16029,12 @@ func (x *MyStructEnsureStruct) GetOptEnumVal() MyEnum {
     return *x.OptEnumVal
 }
 
-func (x *MyStructEnsureStruct) GetOptBinaryValNonCompat() []byte {
-    return x.OptBinaryVal
-}
-
 func (x *MyStructEnsureStruct) GetOptBinaryVal() []byte {
     if !x.IsSetOptBinaryVal() {
         return []byte("")
     }
 
     return x.OptBinaryVal
-}
-
-func (x *MyStructEnsureStruct) GetOptStringValNonCompat() *string {
-    return x.OptStringVal
 }
 
 func (x *MyStructEnsureStruct) GetOptStringVal() string {
@@ -16769,20 +16045,12 @@ func (x *MyStructEnsureStruct) GetOptStringVal() string {
     return *x.OptStringVal
 }
 
-func (x *MyStructEnsureStruct) GetOptDoubleValNonCompat() *float64 {
-    return x.OptDoubleVal
-}
-
 func (x *MyStructEnsureStruct) GetOptDoubleVal() float64 {
     if !x.IsSetOptDoubleVal() {
         return 0.0
     }
 
     return *x.OptDoubleVal
-}
-
-func (x *MyStructEnsureStruct) GetOptFloatValNonCompat() *float32 {
-    return x.OptFloatVal
 }
 
 func (x *MyStructEnsureStruct) GetOptFloatVal() float32 {
@@ -16793,20 +16061,12 @@ func (x *MyStructEnsureStruct) GetOptFloatVal() float32 {
     return *x.OptFloatVal
 }
 
-func (x *MyStructEnsureStruct) GetOptI64ValNonCompat() *int64 {
-    return x.OptI64Val
-}
-
 func (x *MyStructEnsureStruct) GetOptI64Val() int64 {
     if !x.IsSetOptI64Val() {
         return 0
     }
 
     return *x.OptI64Val
-}
-
-func (x *MyStructEnsureStruct) GetOptI32ValNonCompat() *int32 {
-    return x.OptI32Val
 }
 
 func (x *MyStructEnsureStruct) GetOptI32Val() int32 {
@@ -16817,20 +16077,12 @@ func (x *MyStructEnsureStruct) GetOptI32Val() int32 {
     return *x.OptI32Val
 }
 
-func (x *MyStructEnsureStruct) GetOptI16ValNonCompat() *int16 {
-    return x.OptI16Val
-}
-
 func (x *MyStructEnsureStruct) GetOptI16Val() int16 {
     if !x.IsSetOptI16Val() {
         return 0
     }
 
     return *x.OptI16Val
-}
-
-func (x *MyStructEnsureStruct) GetOptByteValNonCompat() *int8 {
-    return x.OptByteVal
 }
 
 func (x *MyStructEnsureStruct) GetOptByteVal() int8 {
@@ -16841,20 +16093,12 @@ func (x *MyStructEnsureStruct) GetOptByteVal() int8 {
     return *x.OptByteVal
 }
 
-func (x *MyStructEnsureStruct) GetOptBoolValNonCompat() *bool {
-    return x.OptBoolVal
-}
-
 func (x *MyStructEnsureStruct) GetOptBoolVal() bool {
     if !x.IsSetOptBoolVal() {
         return false
     }
 
     return *x.OptBoolVal
-}
-
-func (x *MyStructEnsureStruct) GetLateStructValNonCompat() *LateDefStruct {
-    return x.LateStructVal
 }
 
 func (x *MyStructEnsureStruct) GetLateStructVal() *LateDefStruct {
@@ -16865,20 +16109,12 @@ func (x *MyStructEnsureStruct) GetLateStructVal() *LateDefStruct {
     return x.LateStructVal
 }
 
-func (x *MyStructEnsureStruct) GetUnionValNonCompat() *MyUnion {
-    return x.UnionVal
-}
-
 func (x *MyStructEnsureStruct) GetUnionVal() *MyUnion {
     if !x.IsSetUnionVal() {
         return nil
     }
 
     return x.UnionVal
-}
-
-func (x *MyStructEnsureStruct) GetStructValNonCompat() *MyData {
-    return x.StructVal
 }
 
 func (x *MyStructEnsureStruct) GetStructVal() *MyData {
@@ -16889,20 +16125,12 @@ func (x *MyStructEnsureStruct) GetStructVal() *MyData {
     return x.StructVal
 }
 
-func (x *MyStructEnsureStruct) GetEnumValNonCompat() *MyEnum {
-    return x.EnumVal
-}
-
 func (x *MyStructEnsureStruct) GetEnumVal() MyEnum {
     if !x.IsSetEnumVal() {
         return 0
     }
 
     return *x.EnumVal
-}
-
-func (x *MyStructEnsureStruct) GetBinaryValNonCompat() []byte {
-    return x.BinaryVal
 }
 
 func (x *MyStructEnsureStruct) GetBinaryVal() []byte {
@@ -16913,20 +16141,12 @@ func (x *MyStructEnsureStruct) GetBinaryVal() []byte {
     return x.BinaryVal
 }
 
-func (x *MyStructEnsureStruct) GetStringValNonCompat() *string {
-    return x.StringVal
-}
-
 func (x *MyStructEnsureStruct) GetStringVal() string {
     if !x.IsSetStringVal() {
         return ""
     }
 
     return *x.StringVal
-}
-
-func (x *MyStructEnsureStruct) GetDoubleValNonCompat() *float64 {
-    return x.DoubleVal
 }
 
 func (x *MyStructEnsureStruct) GetDoubleVal() float64 {
@@ -16937,20 +16157,12 @@ func (x *MyStructEnsureStruct) GetDoubleVal() float64 {
     return *x.DoubleVal
 }
 
-func (x *MyStructEnsureStruct) GetFloatValNonCompat() *float32 {
-    return x.FloatVal
-}
-
 func (x *MyStructEnsureStruct) GetFloatVal() float32 {
     if !x.IsSetFloatVal() {
         return 0.0
     }
 
     return *x.FloatVal
-}
-
-func (x *MyStructEnsureStruct) GetI64ValNonCompat() *int64 {
-    return x.I64Val
 }
 
 func (x *MyStructEnsureStruct) GetI64Val() int64 {
@@ -16961,20 +16173,12 @@ func (x *MyStructEnsureStruct) GetI64Val() int64 {
     return *x.I64Val
 }
 
-func (x *MyStructEnsureStruct) GetI32ValNonCompat() *int32 {
-    return x.I32Val
-}
-
 func (x *MyStructEnsureStruct) GetI32Val() int32 {
     if !x.IsSetI32Val() {
         return 0
     }
 
     return *x.I32Val
-}
-
-func (x *MyStructEnsureStruct) GetI16ValNonCompat() *int16 {
-    return x.I16Val
 }
 
 func (x *MyStructEnsureStruct) GetI16Val() int16 {
@@ -16985,10 +16189,6 @@ func (x *MyStructEnsureStruct) GetI16Val() int16 {
     return *x.I16Val
 }
 
-func (x *MyStructEnsureStruct) GetByteValNonCompat() *int8 {
-    return x.ByteVal
-}
-
 func (x *MyStructEnsureStruct) GetByteVal() int8 {
     if !x.IsSetByteVal() {
         return 0
@@ -16997,20 +16197,12 @@ func (x *MyStructEnsureStruct) GetByteVal() int8 {
     return *x.ByteVal
 }
 
-func (x *MyStructEnsureStruct) GetBoolValNonCompat() *bool {
-    return x.BoolVal
-}
-
 func (x *MyStructEnsureStruct) GetBoolVal() bool {
     if !x.IsSetBoolVal() {
         return false
     }
 
     return *x.BoolVal
-}
-
-func (x *MyStructEnsureStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
-    return x.StructWithFieldCustomDefault
 }
 
 func (x *MyStructEnsureStruct) GetStructWithFieldCustomDefault() *MyData {
@@ -19393,16 +18585,8 @@ func NewMyStructSafePatch() *MyStructSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *MyStructSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *MyStructSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *MyStructSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *MyStructSafePatch) GetData() []byte {
@@ -19599,10 +18783,6 @@ func NewLateDefStructPatch() *LateDefStructPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *LateDefStructPatch) GetAssignNonCompat() *LateDefStruct {
-    return x.Assign
-}
-
 func (x *LateDefStructPatch) GetAssign() *LateDefStruct {
     if !x.IsSetAssign() {
         return nil
@@ -19611,16 +18791,8 @@ func (x *LateDefStructPatch) GetAssign() *LateDefStruct {
     return x.Assign
 }
 
-func (x *LateDefStructPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *LateDefStructPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *LateDefStructPatch) GetPatchPriorNonCompat() *LateDefStructFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *LateDefStructPatch) GetPatchPrior() *LateDefStructFieldPatch {
@@ -19631,10 +18803,6 @@ func (x *LateDefStructPatch) GetPatchPrior() *LateDefStructFieldPatch {
     return x.PatchPrior
 }
 
-func (x *LateDefStructPatch) GetEnsureNonCompat() *LateDefStructEnsureStruct {
-    return x.Ensure
-}
-
 func (x *LateDefStructPatch) GetEnsure() *LateDefStructEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -19643,20 +18811,12 @@ func (x *LateDefStructPatch) GetEnsure() *LateDefStructEnsureStruct {
     return x.Ensure
 }
 
-func (x *LateDefStructPatch) GetPatchNonCompat() *LateDefStructFieldPatch {
-    return x.Patch
-}
-
 func (x *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *LateDefStructPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *LateDefStructPatch) GetRemove() patch.FieldIdList {
@@ -20257,16 +19417,8 @@ func NewLateDefStructSafePatch() *LateDefStructSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *LateDefStructSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *LateDefStructSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *LateDefStructSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *LateDefStructSafePatch) GetData() []byte {
@@ -20463,10 +19615,6 @@ func NewRecursivePatch() *RecursivePatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *RecursivePatch) GetAssignNonCompat() *Recursive {
-    return x.Assign
-}
-
 func (x *RecursivePatch) GetAssign() *Recursive {
     if !x.IsSetAssign() {
         return nil
@@ -20475,16 +19623,8 @@ func (x *RecursivePatch) GetAssign() *Recursive {
     return x.Assign
 }
 
-func (x *RecursivePatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *RecursivePatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *RecursivePatch) GetPatchPriorNonCompat() *RecursiveFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *RecursivePatch) GetPatchPrior() *RecursiveFieldPatch {
@@ -20495,10 +19635,6 @@ func (x *RecursivePatch) GetPatchPrior() *RecursiveFieldPatch {
     return x.PatchPrior
 }
 
-func (x *RecursivePatch) GetEnsureNonCompat() *RecursiveEnsureStruct {
-    return x.Ensure
-}
-
 func (x *RecursivePatch) GetEnsure() *RecursiveEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -20507,20 +19643,12 @@ func (x *RecursivePatch) GetEnsure() *RecursiveEnsureStruct {
     return x.Ensure
 }
 
-func (x *RecursivePatch) GetPatchNonCompat() *RecursiveFieldPatch {
-    return x.Patch
-}
-
 func (x *RecursivePatch) GetPatch() *RecursiveFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *RecursivePatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *RecursivePatch) GetRemove() patch.FieldIdList {
@@ -20974,20 +20102,12 @@ func NewRecursiveField1Patch() *RecursiveField1Patch {
         SetClearNonCompat(false)
 }
 
-func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
-    return x.Assign
-}
-
 func (x *RecursiveField1Patch) GetAssign() map[string]*Recursive {
     if !x.IsSetAssign() {
         return make(map[string]*Recursive)
     }
 
     return x.Assign
-}
-
-func (x *RecursiveField1Patch) GetClearNonCompat() bool {
-    return x.Clear
 }
 
 func (x *RecursiveField1Patch) GetClear() bool {
@@ -21222,10 +20342,6 @@ func NewRecursiveFieldPatch() *RecursiveFieldPatch {
         SetNodesNonCompat(*NewRecursiveField1Patch())
 }
 
-func (x *RecursiveFieldPatch) GetNodesNonCompat() *RecursiveField1Patch {
-    return x.Nodes
-}
-
 func (x *RecursiveFieldPatch) GetNodes() *RecursiveField1Patch {
     if !x.IsSetNodes() {
         return nil
@@ -21372,10 +20488,6 @@ var _ thrift.Struct = (*RecursiveEnsureStruct)(nil)
 
 func NewRecursiveEnsureStruct() *RecursiveEnsureStruct {
     return (&RecursiveEnsureStruct{})
-}
-
-func (x *RecursiveEnsureStruct) GetNodesNonCompat() map[string]*Recursive {
-    return x.Nodes
 }
 
 func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
@@ -21567,16 +20679,8 @@ func NewRecursiveSafePatch() *RecursiveSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *RecursiveSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *RecursiveSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *RecursiveSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *RecursiveSafePatch) GetData() []byte {
@@ -21773,10 +20877,6 @@ func NewBarPatch() *BarPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *BarPatch) GetAssignNonCompat() *Bar {
-    return x.Assign
-}
-
 func (x *BarPatch) GetAssign() *Bar {
     if !x.IsSetAssign() {
         return nil
@@ -21785,16 +20885,8 @@ func (x *BarPatch) GetAssign() *Bar {
     return x.Assign
 }
 
-func (x *BarPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *BarPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *BarPatch) GetPatchPriorNonCompat() *BarFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *BarPatch) GetPatchPrior() *BarFieldPatch {
@@ -21805,10 +20897,6 @@ func (x *BarPatch) GetPatchPrior() *BarFieldPatch {
     return x.PatchPrior
 }
 
-func (x *BarPatch) GetEnsureNonCompat() *BarEnsureStruct {
-    return x.Ensure
-}
-
 func (x *BarPatch) GetEnsure() *BarEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -21817,20 +20905,12 @@ func (x *BarPatch) GetEnsure() *BarEnsureStruct {
     return x.Ensure
 }
 
-func (x *BarPatch) GetPatchNonCompat() *BarFieldPatch {
-    return x.Patch
-}
-
 func (x *BarPatch) GetPatch() *BarFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *BarPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *BarPatch) GetRemove() patch.FieldIdList {
@@ -22283,10 +21363,6 @@ func NewBarFieldPatch() *BarFieldPatch {
         SetLoopNonCompat(*NewLoopPatch())
 }
 
-func (x *BarFieldPatch) GetLoopNonCompat() *LoopPatch {
-    return x.Loop
-}
-
 func (x *BarFieldPatch) GetLoop() *LoopPatch {
     if !x.IsSetLoop() {
         return nil
@@ -22433,10 +21509,6 @@ var _ thrift.Struct = (*BarEnsureStruct)(nil)
 
 func NewBarEnsureStruct() *BarEnsureStruct {
     return (&BarEnsureStruct{})
-}
-
-func (x *BarEnsureStruct) GetLoopNonCompat() *Loop {
-    return x.Loop
 }
 
 func (x *BarEnsureStruct) GetLoop() *Loop {
@@ -22590,16 +21662,8 @@ func NewBarSafePatch() *BarSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *BarSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *BarSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *BarSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *BarSafePatch) GetData() []byte {
@@ -22788,20 +21852,12 @@ func NewLoopPatch() *LoopPatch {
         SetClearNonCompat(false)
 }
 
-func (x *LoopPatch) GetAssignNonCompat() *Loop {
-    return x.Assign
-}
-
 func (x *LoopPatch) GetAssign() *Loop {
     if !x.IsSetAssign() {
         return nil
     }
 
     return x.Assign
-}
-
-func (x *LoopPatch) GetClearNonCompat() bool {
-    return x.Clear
 }
 
 func (x *LoopPatch) GetClear() bool {
@@ -23000,16 +22056,8 @@ func NewLoopSafePatch() *LoopSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *LoopSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *LoopSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *LoopSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *LoopSafePatch) GetData() []byte {
@@ -23206,10 +22254,6 @@ func NewRefFieldsPatch() *RefFieldsPatch {
         SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
-func (x *RefFieldsPatch) GetAssignNonCompat() *RefFields {
-    return x.Assign
-}
-
 func (x *RefFieldsPatch) GetAssign() *RefFields {
     if !x.IsSetAssign() {
         return nil
@@ -23218,16 +22262,8 @@ func (x *RefFieldsPatch) GetAssign() *RefFields {
     return x.Assign
 }
 
-func (x *RefFieldsPatch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *RefFieldsPatch) GetClear() bool {
     return x.Clear
-}
-
-func (x *RefFieldsPatch) GetPatchPriorNonCompat() *RefFieldsFieldPatch {
-    return x.PatchPrior
 }
 
 func (x *RefFieldsPatch) GetPatchPrior() *RefFieldsFieldPatch {
@@ -23238,10 +22274,6 @@ func (x *RefFieldsPatch) GetPatchPrior() *RefFieldsFieldPatch {
     return x.PatchPrior
 }
 
-func (x *RefFieldsPatch) GetEnsureNonCompat() *RefFieldsEnsureStruct {
-    return x.Ensure
-}
-
 func (x *RefFieldsPatch) GetEnsure() *RefFieldsEnsureStruct {
     if !x.IsSetEnsure() {
         return nil
@@ -23250,20 +22282,12 @@ func (x *RefFieldsPatch) GetEnsure() *RefFieldsEnsureStruct {
     return x.Ensure
 }
 
-func (x *RefFieldsPatch) GetPatchNonCompat() *RefFieldsFieldPatch {
-    return x.Patch
-}
-
 func (x *RefFieldsPatch) GetPatch() *RefFieldsFieldPatch {
     if !x.IsSetPatch() {
         return nil
     }
 
     return x.Patch
-}
-
-func (x *RefFieldsPatch) GetRemoveNonCompat() patch.FieldIdList {
-    return x.Remove
 }
 
 func (x *RefFieldsPatch) GetRemove() patch.FieldIdList {
@@ -23721,10 +22745,6 @@ func NewRefFieldsField1Patch() *RefFieldsField1Patch {
         SetAppendNonCompat(make([]int32, 0))
 }
 
-func (x *RefFieldsField1Patch) GetAssignNonCompat() []int32 {
-    return x.Assign
-}
-
 func (x *RefFieldsField1Patch) GetAssign() []int32 {
     if !x.IsSetAssign() {
         return make([]int32, 0)
@@ -23733,16 +22753,8 @@ func (x *RefFieldsField1Patch) GetAssign() []int32 {
     return x.Assign
 }
 
-func (x *RefFieldsField1Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *RefFieldsField1Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *RefFieldsField1Patch) GetPrependNonCompat() []int32 {
-    return x.Prepend
 }
 
 func (x *RefFieldsField1Patch) GetPrepend() []int32 {
@@ -23751,10 +22763,6 @@ func (x *RefFieldsField1Patch) GetPrepend() []int32 {
     }
 
     return x.Prepend
-}
-
-func (x *RefFieldsField1Patch) GetAppendNonCompat() []int32 {
-    return x.Append
 }
 
 func (x *RefFieldsField1Patch) GetAppend() []int32 {
@@ -24144,10 +23152,6 @@ func NewRefFieldsField4Patch() *RefFieldsField4Patch {
         SetAppendNonCompat(make([]int32, 0))
 }
 
-func (x *RefFieldsField4Patch) GetAssignNonCompat() []int32 {
-    return x.Assign
-}
-
 func (x *RefFieldsField4Patch) GetAssign() []int32 {
     if !x.IsSetAssign() {
         return make([]int32, 0)
@@ -24156,16 +23160,8 @@ func (x *RefFieldsField4Patch) GetAssign() []int32 {
     return x.Assign
 }
 
-func (x *RefFieldsField4Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *RefFieldsField4Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *RefFieldsField4Patch) GetPrependNonCompat() []int32 {
-    return x.Prepend
 }
 
 func (x *RefFieldsField4Patch) GetPrepend() []int32 {
@@ -24174,10 +23170,6 @@ func (x *RefFieldsField4Patch) GetPrepend() []int32 {
     }
 
     return x.Prepend
-}
-
-func (x *RefFieldsField4Patch) GetAppendNonCompat() []int32 {
-    return x.Append
 }
 
 func (x *RefFieldsField4Patch) GetAppend() []int32 {
@@ -24567,10 +23559,6 @@ func NewRefFieldsField7Patch() *RefFieldsField7Patch {
         SetAppendNonCompat(make([]int32, 0))
 }
 
-func (x *RefFieldsField7Patch) GetAssignNonCompat() []int32 {
-    return x.Assign
-}
-
 func (x *RefFieldsField7Patch) GetAssign() []int32 {
     if !x.IsSetAssign() {
         return make([]int32, 0)
@@ -24579,16 +23567,8 @@ func (x *RefFieldsField7Patch) GetAssign() []int32 {
     return x.Assign
 }
 
-func (x *RefFieldsField7Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
 func (x *RefFieldsField7Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *RefFieldsField7Patch) GetPrependNonCompat() []int32 {
-    return x.Prepend
 }
 
 func (x *RefFieldsField7Patch) GetPrepend() []int32 {
@@ -24597,10 +23577,6 @@ func (x *RefFieldsField7Patch) GetPrepend() []int32 {
     }
 
     return x.Prepend
-}
-
-func (x *RefFieldsField7Patch) GetAppendNonCompat() []int32 {
-    return x.Append
 }
 
 func (x *RefFieldsField7Patch) GetAppend() []int32 {
@@ -24989,10 +23965,6 @@ func NewRefFieldsFieldPatch() *RefFieldsFieldPatch {
         SetOptBoxNonCompat(*NewRefFieldsField7Patch())
 }
 
-func (x *RefFieldsFieldPatch) GetUniqueNonCompat() *RefFieldsField1Patch {
-    return x.Unique
-}
-
 func (x *RefFieldsFieldPatch) GetUnique() *RefFieldsField1Patch {
     if !x.IsSetUnique() {
         return nil
@@ -25001,20 +23973,12 @@ func (x *RefFieldsFieldPatch) GetUnique() *RefFieldsField1Patch {
     return x.Unique
 }
 
-func (x *RefFieldsFieldPatch) GetOptUniqueNonCompat() *RefFieldsField4Patch {
-    return x.OptUnique
-}
-
 func (x *RefFieldsFieldPatch) GetOptUnique() *RefFieldsField4Patch {
     if !x.IsSetOptUnique() {
         return nil
     }
 
     return x.OptUnique
-}
-
-func (x *RefFieldsFieldPatch) GetOptBoxNonCompat() *RefFieldsField7Patch {
-    return x.OptBox
 }
 
 func (x *RefFieldsFieldPatch) GetOptBox() *RefFieldsField7Patch {
@@ -25303,20 +24267,12 @@ func NewRefFieldsEnsureStruct() *RefFieldsEnsureStruct {
     return (&RefFieldsEnsureStruct{})
 }
 
-func (x *RefFieldsEnsureStruct) GetUniqueNonCompat() []int32 {
-    return x.Unique
-}
-
 func (x *RefFieldsEnsureStruct) GetUnique() []int32 {
     if !x.IsSetUnique() {
         return make([]int32, 0)
     }
 
     return x.Unique
-}
-
-func (x *RefFieldsEnsureStruct) GetSharedConstNonCompat() []int32 {
-    return x.SharedConst
 }
 
 func (x *RefFieldsEnsureStruct) GetSharedConst() []int32 {
@@ -25327,20 +24283,12 @@ func (x *RefFieldsEnsureStruct) GetSharedConst() []int32 {
     return x.SharedConst
 }
 
-func (x *RefFieldsEnsureStruct) GetSharedMustableNonCompat() []int32 {
-    return x.SharedMustable
-}
-
 func (x *RefFieldsEnsureStruct) GetSharedMustable() []int32 {
     if !x.IsSetSharedMustable() {
         return make([]int32, 0)
     }
 
     return x.SharedMustable
-}
-
-func (x *RefFieldsEnsureStruct) GetOptUniqueNonCompat() []int32 {
-    return x.OptUnique
 }
 
 func (x *RefFieldsEnsureStruct) GetOptUnique() []int32 {
@@ -25351,10 +24299,6 @@ func (x *RefFieldsEnsureStruct) GetOptUnique() []int32 {
     return x.OptUnique
 }
 
-func (x *RefFieldsEnsureStruct) GetOptSharedConstNonCompat() []int32 {
-    return x.OptSharedConst
-}
-
 func (x *RefFieldsEnsureStruct) GetOptSharedConst() []int32 {
     if !x.IsSetOptSharedConst() {
         return make([]int32, 0)
@@ -25363,20 +24307,12 @@ func (x *RefFieldsEnsureStruct) GetOptSharedConst() []int32 {
     return x.OptSharedConst
 }
 
-func (x *RefFieldsEnsureStruct) GetOptSharedMustableNonCompat() []int32 {
-    return x.OptSharedMustable
-}
-
 func (x *RefFieldsEnsureStruct) GetOptSharedMustable() []int32 {
     if !x.IsSetOptSharedMustable() {
         return make([]int32, 0)
     }
 
     return x.OptSharedMustable
-}
-
-func (x *RefFieldsEnsureStruct) GetOptBoxNonCompat() []int32 {
-    return x.OptBox
 }
 
 func (x *RefFieldsEnsureStruct) GetOptBox() []int32 {
@@ -26066,16 +25002,8 @@ func NewRefFieldsSafePatch() *RefFieldsSafePatch {
         SetDataNonCompat([]byte(""))
 }
 
-func (x *RefFieldsSafePatch) GetVersionNonCompat() int32 {
-    return x.Version
-}
-
 func (x *RefFieldsSafePatch) GetVersion() int32 {
     return x.Version
-}
-
-func (x *RefFieldsSafePatch) GetDataNonCompat() []byte {
-    return x.Data
 }
 
 func (x *RefFieldsSafePatch) GetData() []byte {

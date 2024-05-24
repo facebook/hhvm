@@ -27,10 +27,6 @@ func NewFieldWrapper() *FieldWrapper {
         SetNameNonCompat("")
 }
 
-func (x *FieldWrapper) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *FieldWrapper) GetName() string {
     return x.Name
 }
@@ -163,24 +159,12 @@ func NewWrapper() *Wrapper {
         SetExtraNamespaceNonCompat("thrift_adapted_types")
 }
 
-func (x *Wrapper) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Wrapper) GetName() string {
     return x.Name
 }
 
-func (x *Wrapper) GetUnderlyingNameNonCompat() string {
-    return x.UnderlyingName
-}
-
 func (x *Wrapper) GetUnderlyingName() string {
     return x.UnderlyingName
-}
-
-func (x *Wrapper) GetExtraNamespaceNonCompat() string {
-    return x.ExtraNamespace
 }
 
 func (x *Wrapper) GetExtraNamespace() string {
@@ -409,10 +393,6 @@ func NewAdapter() *Adapter {
         SetNameNonCompat("")
 }
 
-func (x *Adapter) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -539,10 +519,6 @@ var _ thrift.Struct = (*SkipCodegen)(nil)
 func NewSkipCodegen() *SkipCodegen {
     return (&SkipCodegen{}).
         SetReasonNonCompat("")
-}
-
-func (x *SkipCodegen) GetReasonNonCompat() string {
-    return x.Reason
 }
 
 func (x *SkipCodegen) GetReason() string {
@@ -675,16 +651,8 @@ func NewName() *Name {
         SetReasonNonCompat("")
 }
 
-func (x *Name) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Name) GetName() string {
     return x.Name
-}
-
-func (x *Name) GetReasonNonCompat() string {
-    return x.Reason
 }
 
 func (x *Name) GetReason() string {
@@ -864,10 +832,6 @@ func NewUnionEnumAttributes() *UnionEnumAttributes {
         SetAttributesNonCompat(make([]string, 0))
 }
 
-func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
-    return x.Attributes
-}
-
 func (x *UnionEnumAttributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
         return make([]string, 0)
@@ -1033,10 +997,6 @@ func NewStructTrait() *StructTrait {
         SetNameNonCompat("")
 }
 
-func (x *StructTrait) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *StructTrait) GetName() string {
     return x.Name
 }
@@ -1163,10 +1123,6 @@ var _ thrift.Struct = (*Attributes)(nil)
 func NewAttributes() *Attributes {
     return (&Attributes{}).
         SetAttributesNonCompat(make([]string, 0))
-}
-
-func (x *Attributes) GetAttributesNonCompat() []string {
-    return x.Attributes
 }
 
 func (x *Attributes) GetAttributes() []string {

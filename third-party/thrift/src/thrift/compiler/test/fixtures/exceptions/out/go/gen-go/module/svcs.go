@@ -419,10 +419,6 @@ func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
 }
 
-func (x *respRaiserDoRaise) GetBNonCompat() *Banal {
-    return x.B
-}
-
 func (x *respRaiserDoRaise) GetB() *Banal {
     if !x.IsSetB() {
         return nil
@@ -431,20 +427,12 @@ func (x *respRaiserDoRaise) GetB() *Banal {
     return x.B
 }
 
-func (x *respRaiserDoRaise) GetFNonCompat() *Fiery {
-    return x.F
-}
-
 func (x *respRaiserDoRaise) GetF() *Fiery {
     if !x.IsSetF() {
         return nil
     }
 
     return x.F
-}
-
-func (x *respRaiserDoRaise) GetSNonCompat() *Serious {
-    return x.S
 }
 
 func (x *respRaiserDoRaise) GetS() *Serious {
@@ -818,10 +806,6 @@ func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{})
 }
 
-func (x *respRaiserGet200) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respRaiserGet200) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
@@ -1050,20 +1034,12 @@ func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{})
 }
 
-func (x *respRaiserGet500) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respRaiserGet500) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
 
     return *x.Success
-}
-
-func (x *respRaiserGet500) GetFNonCompat() *Fiery {
-    return x.F
 }
 
 func (x *respRaiserGet500) GetF() *Fiery {
@@ -1074,20 +1050,12 @@ func (x *respRaiserGet500) GetF() *Fiery {
     return x.F
 }
 
-func (x *respRaiserGet500) GetBNonCompat() *Banal {
-    return x.B
-}
-
 func (x *respRaiserGet500) GetB() *Banal {
     if !x.IsSetB() {
         return nil
     }
 
     return x.B
-}
-
-func (x *respRaiserGet500) GetSNonCompat() *Serious {
-    return x.S
 }
 
 func (x *respRaiserGet500) GetS() *Serious {

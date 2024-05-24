@@ -173,10 +173,6 @@ func NewName() *Name {
         SetNameNonCompat("")
 }
 
-func (x *Name) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Name) GetName() string {
     return x.Name
 }
@@ -307,16 +303,8 @@ func NewAdapter() *Adapter {
         SetTypeHintNonCompat("")
 }
 
-func (x *Adapter) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Adapter) GetName() string {
     return x.Name
-}
-
-func (x *Adapter) GetTypeHintNonCompat() string {
-    return x.TypeHint
 }
 
 func (x *Adapter) GetTypeHint() string {
@@ -494,10 +482,6 @@ var _ thrift.Struct = (*UseCAPI)(nil)
 func NewUseCAPI() *UseCAPI {
     return (&UseCAPI{}).
         SetSerializeNonCompat(false)
-}
-
-func (x *UseCAPI) GetSerializeNonCompat() bool {
-    return x.Serialize
 }
 
 func (x *UseCAPI) GetSerialize() bool {

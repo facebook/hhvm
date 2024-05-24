@@ -40,9 +40,6 @@ class codegen_data {
   // whether to generate code compatible with the old Go generator
   // (to make the migration easier)
   bool compat = true;
-  // whether to generate "legacy" getters which do not properly support optional
-  // fields (to make the migration easier)
-  bool compat_getters = true;
   // whether to generate "legacy" setters which do not properly support optional
   // fields (to make the migration easier)
   bool compat_setters = true;

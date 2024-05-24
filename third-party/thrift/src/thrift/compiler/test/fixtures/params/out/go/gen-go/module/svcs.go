@@ -202,10 +202,6 @@ func newReqNestedContainersMapList() *reqNestedContainersMapList {
         SetFooNonCompat(make(map[int32][]int32))
 }
 
-func (x *reqNestedContainersMapList) GetFooNonCompat() map[int32][]int32 {
-    return x.Foo
-}
-
 func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
     if !x.IsSetFoo() {
         return make(map[int32][]int32)
@@ -497,10 +493,6 @@ type NestedContainersMapSetArgsDeprecated = reqNestedContainersMapSet
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
     return (&reqNestedContainersMapSet{}).
         SetFooNonCompat(make(map[int32][]int32))
-}
-
-func (x *reqNestedContainersMapSet) GetFooNonCompat() map[int32][]int32 {
-    return x.Foo
 }
 
 func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
@@ -796,10 +788,6 @@ func newReqNestedContainersListMap() *reqNestedContainersListMap {
         SetFooNonCompat(make([]map[int32]int32, 0))
 }
 
-func (x *reqNestedContainersListMap) GetFooNonCompat() []map[int32]int32 {
-    return x.Foo
-}
-
 func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     if !x.IsSetFoo() {
         return make([]map[int32]int32, 0)
@@ -1093,10 +1081,6 @@ func newReqNestedContainersListSet() *reqNestedContainersListSet {
         SetFooNonCompat(make([][]int32, 0))
 }
 
-func (x *reqNestedContainersListSet) GetFooNonCompat() [][]int32 {
-    return x.Foo
-}
-
 func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     if !x.IsSetFoo() {
         return make([][]int32, 0)
@@ -1371,10 +1355,6 @@ type NestedContainersTurtlesArgsDeprecated = reqNestedContainersTurtles
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{}).
         SetFooNonCompat(make([][]map[int32]map[int32][]int32, 0))
-}
-
-func (x *reqNestedContainersTurtles) GetFooNonCompat() [][]map[int32]map[int32][]int32 {
-    return x.Foo
 }
 
 func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {

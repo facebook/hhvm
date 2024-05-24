@@ -27,10 +27,6 @@ func NewName() *Name {
         SetNameNonCompat("")
 }
 
-func (x *Name) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Name) GetName() string {
     return x.Name
 }
@@ -157,10 +153,6 @@ var _ thrift.Struct = (*Tag)(nil)
 func NewTag() *Tag {
     return (&Tag{}).
         SetTagNonCompat("")
-}
-
-func (x *Tag) GetTagNonCompat() string {
-    return x.Tag
 }
 
 func (x *Tag) GetTag() string {

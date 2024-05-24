@@ -116,10 +116,6 @@ func NewA() *A {
         SetUselessFieldNonCompat(0)
 }
 
-func (x *A) GetUselessFieldNonCompat() int32 {
-    return x.UselessField
-}
-
 func (x *A) GetUselessField() int32 {
     return x.UselessField
 }
@@ -248,20 +244,12 @@ func NewU() *U {
     return (&U{})
 }
 
-func (x *U) GetINonCompat() *int32 {
-    return x.I
-}
-
 func (x *U) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
 
     return *x.I
-}
-
-func (x *U) GetSNonCompat() *string {
-    return x.S
 }
 
 func (x *U) GetS() string {
@@ -485,10 +473,6 @@ var _ thrift.Struct = (*Bang)(nil)
 func NewBang() *Bang {
     return (&Bang{}).
         SetMessageNonCompat("")
-}
-
-func (x *Bang) GetMessageNonCompat() string {
-    return x.Message
 }
 
 func (x *Bang) GetMessage() string {

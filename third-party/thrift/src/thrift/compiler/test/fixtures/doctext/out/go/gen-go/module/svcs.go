@@ -295,24 +295,12 @@ func newReqCThing() *reqCThing {
         SetCNonCompat(make([]int32, 0))
 }
 
-func (x *reqCThing) GetANonCompat() int32 {
-    return x.A
-}
-
 func (x *reqCThing) GetA() int32 {
     return x.A
 }
 
-func (x *reqCThing) GetBNonCompat() string {
-    return x.B
-}
-
 func (x *reqCThing) GetB() string {
     return x.B
-}
-
-func (x *reqCThing) GetCNonCompat() []int32 {
-    return x.C
 }
 
 func (x *reqCThing) GetC() []int32 {
@@ -581,20 +569,12 @@ func newRespCThing() *respCThing {
     return (&respCThing{})
 }
 
-func (x *respCThing) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respCThing) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
 
     return *x.Success
-}
-
-func (x *respCThing) GetBangNonCompat() *Bang {
-    return x.Bang
 }
 
 func (x *respCThing) GetBang() *Bang {

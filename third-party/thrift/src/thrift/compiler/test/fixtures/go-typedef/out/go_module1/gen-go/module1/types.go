@@ -300,16 +300,8 @@ func NewAutomobile() *Automobile {
         SetPartNamesNonCompat(make(map[int32]*CarPartName))
 }
 
-func (x *Automobile) GetPlateNonCompat() Plate {
-    return x.Plate
-}
-
 func (x *Automobile) GetPlate() Plate {
     return x.Plate
-}
-
-func (x *Automobile) GetPreviousPlateNonCompat() *Plate {
-    return x.PreviousPlate
 }
 
 func (x *Automobile) GetPreviousPlate() Plate {
@@ -320,10 +312,6 @@ func (x *Automobile) GetPreviousPlate() Plate {
     return *x.PreviousPlate
 }
 
-func (x *Automobile) GetFirstPlateNonCompat() *Plate {
-    return x.FirstPlate
-}
-
 func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
         return "0000"
@@ -332,16 +320,8 @@ func (x *Automobile) GetFirstPlate() Plate {
     return *x.FirstPlate
 }
 
-func (x *Automobile) GetYearNonCompat() Year {
-    return x.Year
-}
-
 func (x *Automobile) GetYear() Year {
     return x.Year
-}
-
-func (x *Automobile) GetDriversNonCompat() Drivers {
-    return x.Drivers
 }
 
 func (x *Automobile) GetDrivers() Drivers {
@@ -352,20 +332,12 @@ func (x *Automobile) GetDrivers() Drivers {
     return x.Drivers
 }
 
-func (x *Automobile) GetAccessoriesNonCompat() []*Accessory {
-    return x.Accessories
-}
-
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
         return make([]*Accessory, 0)
     }
 
     return x.Accessories
-}
-
-func (x *Automobile) GetPartNamesNonCompat() map[int32]*CarPartName {
-    return x.PartNames
 }
 
 func (x *Automobile) GetPartNames() map[int32]*CarPartName {
@@ -914,16 +886,8 @@ func NewMapKey() *MapKey {
         SetStrvalNonCompat("")
 }
 
-func (x *MapKey) GetNumNonCompat() int64 {
-    return x.Num
-}
-
 func (x *MapKey) GetNum() int64 {
     return x.Num
-}
-
-func (x *MapKey) GetStrvalNonCompat() string {
-    return x.Strval
 }
 
 func (x *MapKey) GetStrval() string {
@@ -1101,10 +1065,6 @@ var _ thrift.Struct = (*MapContainer)(nil)
 func NewMapContainer() *MapContainer {
     return (&MapContainer{}).
         SetMapvalNonCompat(make(map[MapKey]string))
-}
-
-func (x *MapContainer) GetMapvalNonCompat() map[MapKey]string {
-    return x.Mapval
 }
 
 func (x *MapContainer) GetMapval() map[MapKey]string {
@@ -1292,20 +1252,12 @@ func NewPair() *Pair {
         SetCarNonCompat(*NewCar())
 }
 
-func (x *Pair) GetAutomobileNonCompat() *Automobile {
-    return x.Automobile
-}
-
 func (x *Pair) GetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
         return nil
     }
 
     return x.Automobile
-}
-
-func (x *Pair) GetCarNonCompat() *Car {
-    return x.Car
 }
 
 func (x *Pair) GetCar() *Car {
@@ -1525,20 +1477,12 @@ func NewCollection() *Collection {
         SetCarsNonCompat(make([]*Car, 0))
 }
 
-func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
-    return x.Automobiles
-}
-
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
         return make([]*Automobile, 0)
     }
 
     return x.Automobiles
-}
-
-func (x *Collection) GetCarsNonCompat() []*Car {
-    return x.Cars
 }
 
 func (x *Collection) GetCars() []*Car {

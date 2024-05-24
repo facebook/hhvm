@@ -27,10 +27,6 @@ func NewName() *Name {
         SetNameNonCompat("")
 }
 
-func (x *Name) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Name) GetName() string {
     return x.Name
 }
@@ -670,10 +666,6 @@ func NewType() *Type {
         SetNameNonCompat("")
 }
 
-func (x *Type) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Type) GetName() string {
     return x.Name
 }
@@ -802,10 +794,6 @@ func NewAdapter() *Adapter {
         SetNameNonCompat("")
 }
 
-func (x *Adapter) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -932,10 +920,6 @@ var _ thrift.Struct = (*Derive)(nil)
 func NewDerive() *Derive {
     return (&Derive{}).
         SetDerivesNonCompat(make([]string, 0))
-}
-
-func (x *Derive) GetDerivesNonCompat() []string {
-    return x.Derives
 }
 
 func (x *Derive) GetDerives() []string {
@@ -1101,10 +1085,6 @@ var _ thrift.Struct = (*ServiceExn)(nil)
 func NewServiceExn() *ServiceExn {
     return (&ServiceExn{}).
         SetAnyhowToApplicationExnNonCompat(false)
-}
-
-func (x *ServiceExn) GetAnyhowToApplicationExnNonCompat() bool {
-    return x.AnyhowToApplicationExn
 }
 
 func (x *ServiceExn) GetAnyhowToApplicationExn() bool {

@@ -27,10 +27,6 @@ func NewFiery() *Fiery {
         SetMessageNonCompat("")
 }
 
-func (x *Fiery) GetMessageNonCompat() string {
-    return x.Message
-}
-
 func (x *Fiery) GetMessage() string {
     return x.Message
 }
@@ -159,10 +155,6 @@ var _ thrift.Struct = (*Serious)(nil)
 
 func NewSerious() *Serious {
     return (&Serious{})
-}
-
-func (x *Serious) GetSonnetNonCompat() *string {
-    return x.Sonnet
 }
 
 func (x *Serious) GetSonnet() string {
@@ -314,16 +306,8 @@ func NewComplexFieldNames() *ComplexFieldNames {
         SetInternalErrorMessageNonCompat("")
 }
 
-func (x *ComplexFieldNames) GetErrorMessageNonCompat() string {
-    return x.ErrorMessage
-}
-
 func (x *ComplexFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
-}
-
-func (x *ComplexFieldNames) GetInternalErrorMessageNonCompat() string {
-    return x.InternalErrorMessage
 }
 
 func (x *ComplexFieldNames) GetInternalErrorMessage() string {
@@ -508,16 +492,8 @@ func NewCustomFieldNames() *CustomFieldNames {
         SetInternalErrorMessageNonCompat("")
 }
 
-func (x *CustomFieldNames) GetErrorMessageNonCompat() string {
-    return x.ErrorMessage
-}
-
 func (x *CustomFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
-}
-
-func (x *CustomFieldNames) GetInternalErrorMessageNonCompat() string {
-    return x.InternalErrorMessage
 }
 
 func (x *CustomFieldNames) GetInternalErrorMessage() string {
@@ -702,16 +678,8 @@ func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
         SetErrorCodeNonCompat(0)
 }
 
-func (x *ExceptionWithPrimitiveField) GetMessageNonCompat() string {
-    return x.Message
-}
-
 func (x *ExceptionWithPrimitiveField) GetMessage() string {
     return x.Message
-}
-
-func (x *ExceptionWithPrimitiveField) GetErrorCodeNonCompat() int32 {
-    return x.ErrorCode
 }
 
 func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
@@ -896,16 +864,8 @@ func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
         SetErrorCodeNonCompat(0)
 }
 
-func (x *ExceptionWithStructuredAnnotation) GetMessageFieldNonCompat() string {
-    return x.MessageField
-}
-
 func (x *ExceptionWithStructuredAnnotation) GetMessageField() string {
     return x.MessageField
-}
-
-func (x *ExceptionWithStructuredAnnotation) GetErrorCodeNonCompat() int32 {
-    return x.ErrorCode
 }
 
 func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {

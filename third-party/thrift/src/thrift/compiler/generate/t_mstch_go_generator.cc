@@ -75,8 +75,6 @@ class mstch_go_program : public mstch_program {
             {"program:docs?", &mstch_go_program::go_has_docs},
             {"program:docs", &mstch_go_program::go_doc_comment},
             {"program:compat?", &mstch_go_program::go_gen_compat},
-            {"program:compat_getters?",
-             &mstch_go_program::go_gen_compat_getters},
             {"program:compat_setters?",
              &mstch_go_program::go_gen_compat_setters},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
@@ -108,7 +106,6 @@ class mstch_go_program : public mstch_program {
   mstch::node go_has_docs() { return program_->has_doc(); }
   mstch::node go_doc_comment() { return doc_comment(program_); }
   mstch::node go_gen_compat() { return data_.compat; }
-  mstch::node go_gen_compat_getters() { return data_.compat_getters; }
   mstch::node go_gen_compat_setters() { return data_.compat_setters; }
   mstch::node thrift_imports() {
     mstch::array a;

@@ -193,24 +193,12 @@ func NewMyStruct() *MyStruct {
         SetNoHackCodegenFieldNonCompat("")
 }
 
-func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
-    return x.MyIntField
-}
-
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
 
-func (x *MyStruct) GetMyStringFieldNonCompat() string {
-    return x.MyStringField
-}
-
 func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
-}
-
-func (x *MyStruct) GetMyDataFieldNonCompat() *MyDataItemAlias {
-    return x.MyDataField
 }
 
 func (x *MyStruct) GetMyDataField() *MyDataItemAlias {
@@ -221,40 +209,20 @@ func (x *MyStruct) GetMyDataField() *MyDataItemAlias {
     return x.MyDataField
 }
 
-func (x *MyStruct) GetMyEnumNonCompat() MyEnum {
-    return x.MyEnum
-}
-
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
-}
-
-func (x *MyStruct) GetOnewayNonCompat() bool {
-    return x.Oneway
 }
 
 func (x *MyStruct) GetOneway() bool {
     return x.Oneway
 }
 
-func (x *MyStruct) GetReadonlyNonCompat() bool {
-    return x.Readonly
-}
-
 func (x *MyStruct) GetReadonly() bool {
     return x.Readonly
 }
 
-func (x *MyStruct) GetIdempotentNonCompat() bool {
-    return x.Idempotent
-}
-
 func (x *MyStruct) GetIdempotent() bool {
     return x.Idempotent
-}
-
-func (x *MyStruct) GetFloatSetNonCompat() []float32 {
-    return x.FloatSet
 }
 
 func (x *MyStruct) GetFloatSet() []float32 {
@@ -263,10 +231,6 @@ func (x *MyStruct) GetFloatSet() []float32 {
     }
 
     return x.FloatSet
-}
-
-func (x *MyStruct) GetNoHackCodegenFieldNonCompat() string {
-    return x.NoHackCodegenField
 }
 
 func (x *MyStruct) GetNoHackCodegenField() string {
@@ -915,20 +879,12 @@ func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
 
-func (x *MyUnion) GetMyEnumNonCompat() *MyEnumAlias {
-    return x.MyEnum
-}
-
 func (x *MyUnion) GetMyEnum() MyEnumAlias {
     if !x.IsSetMyEnum() {
         return NewMyEnumAlias()
     }
 
     return *x.MyEnum
-}
-
-func (x *MyUnion) GetMyStructNonCompat() *MyStruct {
-    return x.MyStruct
 }
 
 func (x *MyUnion) GetMyStruct() *MyStruct {
@@ -939,20 +895,12 @@ func (x *MyUnion) GetMyStruct() *MyStruct {
     return x.MyStruct
 }
 
-func (x *MyUnion) GetMyDataItemNonCompat() *MyDataItem {
-    return x.MyDataItem
-}
-
 func (x *MyUnion) GetMyDataItem() *MyDataItem {
     if !x.IsSetMyDataItem() {
         return nil
     }
 
     return x.MyDataItem
-}
-
-func (x *MyUnion) GetFloatSetNonCompat() []float32 {
-    return x.FloatSet
 }
 
 func (x *MyUnion) GetFloatSet() []float32 {
@@ -1342,10 +1290,6 @@ func NewReservedKeyword() *ReservedKeyword {
         SetReservedFieldNonCompat(0)
 }
 
-func (x *ReservedKeyword) GetReservedFieldNonCompat() int32 {
-    return x.ReservedField
-}
-
 func (x *ReservedKeyword) GetReservedField() int32 {
     return x.ReservedField
 }
@@ -1471,10 +1415,6 @@ var _ thrift.Struct = (*UnionToBeRenamed)(nil)
 
 func NewUnionToBeRenamed() *UnionToBeRenamed {
     return (&UnionToBeRenamed{})
-}
-
-func (x *UnionToBeRenamed) GetReservedFieldNonCompat() *int32 {
-    return x.ReservedField
 }
 
 func (x *UnionToBeRenamed) GetReservedField() int32 {

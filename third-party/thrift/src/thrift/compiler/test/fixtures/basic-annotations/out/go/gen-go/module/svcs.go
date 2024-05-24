@@ -319,10 +319,6 @@ func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
 
-func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
-    return x.MyExcept
-}
-
 func (x *respMyServicePing) GetMyExcept() *MyException {
     if !x.IsSetMyExcept() {
         return nil
@@ -556,10 +552,6 @@ func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
 }
 
-func (x *respMyServiceGetRandomData) GetSuccessNonCompat() *string {
-    return x.Success
-}
-
 func (x *respMyServiceGetRandomData) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
@@ -710,10 +702,6 @@ func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
         SetIdNonCompat(0)
 }
 
-func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
@@ -842,10 +830,6 @@ type MyServiceHasDataByIdResultDeprecated = respMyServiceHasDataById
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
-}
-
-func (x *respMyServiceHasDataById) GetSuccessNonCompat() *bool {
-    return x.Success
 }
 
 func (x *respMyServiceHasDataById) GetSuccess() bool {
@@ -998,10 +982,6 @@ func newReqMyServiceGoGetDataById() *reqMyServiceGoGetDataById {
         SetIdNonCompat(0)
 }
 
-func (x *reqMyServiceGoGetDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceGoGetDataById) GetId() int64 {
     return x.Id
 }
@@ -1130,10 +1110,6 @@ type MyServiceGoGetDataByIdResultDeprecated = respMyServiceGoGetDataById
 
 func newRespMyServiceGoGetDataById() *respMyServiceGoGetDataById {
     return (&respMyServiceGoGetDataById{})
-}
-
-func (x *respMyServiceGoGetDataById) GetSuccessNonCompat() *string {
-    return x.Success
 }
 
 func (x *respMyServiceGoGetDataById) GetSuccess() string {
@@ -1288,16 +1264,8 @@ func newReqMyServicePutDataById() *reqMyServicePutDataById {
         SetDataNonCompat("")
 }
 
-func (x *reqMyServicePutDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
-}
-
-func (x *reqMyServicePutDataById) GetDataNonCompat() string {
-    return x.Data
 }
 
 func (x *reqMyServicePutDataById) GetData() string {
@@ -1561,16 +1529,8 @@ func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
         SetDataNonCompat("")
 }
 
-func (x *reqMyServiceLobDataById) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
-}
-
-func (x *reqMyServiceLobDataById) GetDataNonCompat() string {
-    return x.Data
 }
 
 func (x *reqMyServiceLobDataById) GetData() string {
@@ -3438,10 +3398,6 @@ type BadServiceBarResultDeprecated = respBadServiceBar
 
 func newRespBadServiceBar() *respBadServiceBar {
     return (&respBadServiceBar{})
-}
-
-func (x *respBadServiceBar) GetSuccessNonCompat() *int32 {
-    return x.Success
 }
 
 func (x *respBadServiceBar) GetSuccess() int32 {

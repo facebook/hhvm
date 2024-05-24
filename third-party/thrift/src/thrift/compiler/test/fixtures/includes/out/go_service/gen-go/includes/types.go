@@ -86,16 +86,8 @@ func NewIncluded() *Included {
           )
 }
 
-func (x *Included) GetMyIntFieldNonCompat() int64 {
-    return x.MyIntField
-}
-
 func (x *Included) GetMyIntField() int64 {
     return x.MyIntField
-}
-
-func (x *Included) GetMyTransitiveFieldNonCompat() *transitive.Foo {
-    return x.MyTransitiveField
 }
 
 func (x *Included) GetMyTransitiveField() *transitive.Foo {

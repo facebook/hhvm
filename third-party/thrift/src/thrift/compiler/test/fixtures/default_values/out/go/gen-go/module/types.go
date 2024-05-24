@@ -27,10 +27,6 @@ func NewTrivialStruct() *TrivialStruct {
         SetIntValueNonCompat(0)
 }
 
-func (x *TrivialStruct) GetIntValueNonCompat() int32 {
-    return x.IntValue
-}
-
 func (x *TrivialStruct) GetIntValue() int32 {
     return x.IntValue
 }
@@ -167,16 +163,8 @@ func NewStructWithNoCustomDefaultValues() *StructWithNoCustomDefaultValues {
         SetRequiredStructNonCompat(*NewTrivialStruct())
 }
 
-func (x *StructWithNoCustomDefaultValues) GetUnqualifiedIntegerNonCompat() int32 {
-    return x.UnqualifiedInteger
-}
-
 func (x *StructWithNoCustomDefaultValues) GetUnqualifiedInteger() int32 {
     return x.UnqualifiedInteger
-}
-
-func (x *StructWithNoCustomDefaultValues) GetOptionalIntegerNonCompat() *int32 {
-    return x.OptionalInteger
 }
 
 func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
@@ -187,16 +175,8 @@ func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
     return *x.OptionalInteger
 }
 
-func (x *StructWithNoCustomDefaultValues) GetRequiredIntegerNonCompat() int32 {
-    return x.RequiredInteger
-}
-
 func (x *StructWithNoCustomDefaultValues) GetRequiredInteger() int32 {
     return x.RequiredInteger
-}
-
-func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStructNonCompat() *TrivialStruct {
-    return x.UnqualifiedStruct
 }
 
 func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
@@ -207,20 +187,12 @@ func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct 
     return x.UnqualifiedStruct
 }
 
-func (x *StructWithNoCustomDefaultValues) GetOptionalStructNonCompat() *TrivialStruct {
-    return x.OptionalStruct
-}
-
 func (x *StructWithNoCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
     }
 
     return x.OptionalStruct
-}
-
-func (x *StructWithNoCustomDefaultValues) GetRequiredStructNonCompat() *TrivialStruct {
-    return x.RequiredStruct
 }
 
 func (x *StructWithNoCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
@@ -682,16 +654,8 @@ func NewStructWithCustomDefaultValues() *StructWithCustomDefaultValues {
           )
 }
 
-func (x *StructWithCustomDefaultValues) GetUnqualifiedIntegerNonCompat() int32 {
-    return x.UnqualifiedInteger
-}
-
 func (x *StructWithCustomDefaultValues) GetUnqualifiedInteger() int32 {
     return x.UnqualifiedInteger
-}
-
-func (x *StructWithCustomDefaultValues) GetOptionalIntegerNonCompat() *int32 {
-    return x.OptionalInteger
 }
 
 func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
@@ -702,16 +666,8 @@ func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
     return *x.OptionalInteger
 }
 
-func (x *StructWithCustomDefaultValues) GetRequiredIntegerNonCompat() int32 {
-    return x.RequiredInteger
-}
-
 func (x *StructWithCustomDefaultValues) GetRequiredInteger() int32 {
     return x.RequiredInteger
-}
-
-func (x *StructWithCustomDefaultValues) GetUnqualifiedStructNonCompat() *TrivialStruct {
-    return x.UnqualifiedStruct
 }
 
 func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
@@ -722,20 +678,12 @@ func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
     return x.UnqualifiedStruct
 }
 
-func (x *StructWithCustomDefaultValues) GetOptionalStructNonCompat() *TrivialStruct {
-    return x.OptionalStruct
-}
-
 func (x *StructWithCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
     }
 
     return x.OptionalStruct
-}
-
-func (x *StructWithCustomDefaultValues) GetRequiredStructNonCompat() *TrivialStruct {
-    return x.RequiredStruct
 }
 
 func (x *StructWithCustomDefaultValues) GetRequiredStruct() *TrivialStruct {

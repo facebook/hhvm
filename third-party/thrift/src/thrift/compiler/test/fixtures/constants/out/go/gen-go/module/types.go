@@ -327,24 +327,12 @@ func NewInternship() *Internship {
         SetTitleNonCompat("")
 }
 
-func (x *Internship) GetWeeksNonCompat() int32 {
-    return x.Weeks
-}
-
 func (x *Internship) GetWeeks() int32 {
     return x.Weeks
 }
 
-func (x *Internship) GetTitleNonCompat() string {
-    return x.Title
-}
-
 func (x *Internship) GetTitle() string {
     return x.Title
-}
-
-func (x *Internship) GetEmployerNonCompat() *Company {
-    return x.Employer
 }
 
 func (x *Internship) GetEmployer() Company {
@@ -355,20 +343,12 @@ func (x *Internship) GetEmployer() Company {
     return *x.Employer
 }
 
-func (x *Internship) GetCompensationNonCompat() *float64 {
-    return x.Compensation
-}
-
 func (x *Internship) GetCompensation() float64 {
     if !x.IsSetCompensation() {
         return 0.0
     }
 
     return *x.Compensation
-}
-
-func (x *Internship) GetSchoolNonCompat() *string {
-    return x.School
 }
 
 func (x *Internship) GetSchool() string {
@@ -738,16 +718,8 @@ func NewRange() *Range {
         SetMaxNonCompat(0)
 }
 
-func (x *Range) GetMinNonCompat() int32 {
-    return x.Min
-}
-
 func (x *Range) GetMin() int32 {
     return x.Min
-}
-
-func (x *Range) GetMaxNonCompat() int32 {
-    return x.Max
 }
 
 func (x *Range) GetMax() int32 {
@@ -929,16 +901,8 @@ func NewStruct1() *Struct1 {
         SetBNonCompat("<uninitialized>")
 }
 
-func (x *Struct1) GetANonCompat() int32 {
-    return x.A
-}
-
 func (x *Struct1) GetA() int32 {
     return x.A
-}
-
-func (x *Struct1) GetBNonCompat() string {
-    return x.B
 }
 
 func (x *Struct1) GetB() string {
@@ -1124,24 +1088,12 @@ func NewStruct2() *Struct2 {
         SetDNonCompat(make([]int32, 0))
 }
 
-func (x *Struct2) GetANonCompat() int32 {
-    return x.A
-}
-
 func (x *Struct2) GetA() int32 {
     return x.A
 }
 
-func (x *Struct2) GetBNonCompat() string {
-    return x.B
-}
-
 func (x *Struct2) GetB() string {
     return x.B
-}
-
-func (x *Struct2) GetCNonCompat() *Struct1 {
-    return x.C
 }
 
 func (x *Struct2) GetC() *Struct1 {
@@ -1150,10 +1102,6 @@ func (x *Struct2) GetC() *Struct1 {
     }
 
     return x.C
-}
-
-func (x *Struct2) GetDNonCompat() []int32 {
-    return x.D
 }
 
 func (x *Struct2) GetD() []int32 {
@@ -1489,24 +1437,12 @@ func NewStruct3() *Struct3 {
         SetCNonCompat(*NewStruct2())
 }
 
-func (x *Struct3) GetANonCompat() string {
-    return x.A
-}
-
 func (x *Struct3) GetA() string {
     return x.A
 }
 
-func (x *Struct3) GetBNonCompat() int32 {
-    return x.B
-}
-
 func (x *Struct3) GetB() int32 {
     return x.B
-}
-
-func (x *Struct3) GetCNonCompat() *Struct2 {
-    return x.C
 }
 
 func (x *Struct3) GetC() *Struct2 {
@@ -1758,16 +1694,8 @@ func NewStruct4() *Struct4 {
         SetANonCompat(0)
 }
 
-func (x *Struct4) GetANonCompat() int32 {
-    return x.A
-}
-
 func (x *Struct4) GetA() int32 {
     return x.A
-}
-
-func (x *Struct4) GetBNonCompat() *float64 {
-    return x.B
 }
 
 func (x *Struct4) GetB() float64 {
@@ -1776,10 +1704,6 @@ func (x *Struct4) GetB() float64 {
     }
 
     return *x.B
-}
-
-func (x *Struct4) GetCNonCompat() *int8 {
-    return x.C
 }
 
 func (x *Struct4) GetC() int8 {
@@ -2037,20 +1961,12 @@ func NewUnion1() *Union1 {
     return (&Union1{})
 }
 
-func (x *Union1) GetINonCompat() *int32 {
-    return x.I
-}
-
 func (x *Union1) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
 
     return *x.I
-}
-
-func (x *Union1) GetDNonCompat() *float64 {
-    return x.D
 }
 
 func (x *Union1) GetD() float64 {
@@ -2278,20 +2194,12 @@ func NewUnion2() *Union2 {
     return (&Union2{})
 }
 
-func (x *Union2) GetINonCompat() *int32 {
-    return x.I
-}
-
 func (x *Union2) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
 
     return *x.I
-}
-
-func (x *Union2) GetDNonCompat() *float64 {
-    return x.D
 }
 
 func (x *Union2) GetD() float64 {
@@ -2302,20 +2210,12 @@ func (x *Union2) GetD() float64 {
     return *x.D
 }
 
-func (x *Union2) GetSNonCompat() *Struct1 {
-    return x.S
-}
-
 func (x *Union2) GetS() *Struct1 {
     if !x.IsSetS() {
         return nil
     }
 
     return x.S
-}
-
-func (x *Union2) GetUNonCompat() *Union1 {
-    return x.U
 }
 
 func (x *Union2) GetU() *Union1 {

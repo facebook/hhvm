@@ -27,10 +27,6 @@ func NewGetEntityRequest() *GetEntityRequest {
         SetIdNonCompat("")
 }
 
-func (x *GetEntityRequest) GetIdNonCompat() string {
-    return x.Id
-}
-
 func (x *GetEntityRequest) GetId() string {
     return x.Id
 }
@@ -157,10 +153,6 @@ var _ thrift.Struct = (*GetEntityResponse)(nil)
 func NewGetEntityResponse() *GetEntityResponse {
     return (&GetEntityResponse{}).
         SetEntityNonCompat("")
-}
-
-func (x *GetEntityResponse) GetEntityNonCompat() string {
-    return x.Entity
 }
 
 func (x *GetEntityResponse) GetEntity() string {
@@ -295,16 +287,8 @@ func NewNonComparableStruct() *NonComparableStruct {
         SetBazNonCompat(make(map[*NonComparableStruct]int64))
 }
 
-func (x *NonComparableStruct) GetFooNonCompat() string {
-    return x.Foo
-}
-
 func (x *NonComparableStruct) GetFoo() string {
     return x.Foo
-}
-
-func (x *NonComparableStruct) GetBarNonCompat() []string {
-    return x.Bar
 }
 
 func (x *NonComparableStruct) GetBar() []string {
@@ -313,10 +297,6 @@ func (x *NonComparableStruct) GetBar() []string {
     }
 
     return x.Bar
-}
-
-func (x *NonComparableStruct) GetBazNonCompat() map[*NonComparableStruct]int64 {
-    return x.Baz
 }
 
 func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {

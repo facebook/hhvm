@@ -151,20 +151,12 @@ func NewReserveIds() *ReserveIds {
         SetIdRangesNonCompat(make(map[int32]int32))
 }
 
-func (x *ReserveIds) GetIdsNonCompat() []int32 {
-    return x.Ids
-}
-
 func (x *ReserveIds) GetIds() []int32 {
     if !x.IsSetIds() {
         return make([]int32, 0)
     }
 
     return x.Ids
-}
-
-func (x *ReserveIds) GetIdRangesNonCompat() map[int32]int32 {
-    return x.IdRanges
 }
 
 func (x *ReserveIds) GetIdRanges() map[int32]int32 {
@@ -429,10 +421,6 @@ var _ thrift.Struct = (*RequiresBackwardCompatibility)(nil)
 func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
     return (&RequiresBackwardCompatibility{}).
         SetFieldNameNonCompat(false)
-}
-
-func (x *RequiresBackwardCompatibility) GetFieldNameNonCompat() bool {
-    return x.FieldName
 }
 
 func (x *RequiresBackwardCompatibility) GetFieldName() bool {
@@ -1001,10 +989,6 @@ func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
         SetNameNonCompat("")
 }
 
-func (x *GenerateRuntimeSchema) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *GenerateRuntimeSchema) GetName() string {
     return x.Name
 }
@@ -1279,10 +1263,6 @@ func NewUri() *Uri {
         SetValueNonCompat("")
 }
 
-func (x *Uri) GetValueNonCompat() string {
-    return x.Value
-}
-
 func (x *Uri) GetValue() string {
     return x.Value
 }
@@ -1409,10 +1389,6 @@ var _ thrift.Struct = (*Priority)(nil)
 func NewPriority() *Priority {
     return (&Priority{}).
         SetLevelNonCompat(0)
-}
-
-func (x *Priority) GetLevelNonCompat() RpcPriority {
-    return x.Level
 }
 
 func (x *Priority) GetLevel() RpcPriority {
@@ -1542,10 +1518,6 @@ var _ thrift.Struct = (*DeprecatedUnvalidatedAnnotations)(nil)
 func NewDeprecatedUnvalidatedAnnotations() *DeprecatedUnvalidatedAnnotations {
     return (&DeprecatedUnvalidatedAnnotations{}).
         SetItemsNonCompat(make(map[string]string))
-}
-
-func (x *DeprecatedUnvalidatedAnnotations) GetItemsNonCompat() map[string]string {
-    return x.Items
 }
 
 func (x *DeprecatedUnvalidatedAnnotations) GetItems() map[string]string {

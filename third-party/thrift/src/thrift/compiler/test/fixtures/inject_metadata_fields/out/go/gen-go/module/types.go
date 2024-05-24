@@ -29,10 +29,6 @@ func NewFields() *Fields {
         SetInjectedFieldNonCompat("")
 }
 
-func (x *Fields) GetInjectedFieldNonCompat() string {
-    return x.InjectedField
-}
-
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
 }
@@ -159,10 +155,6 @@ var _ thrift.Struct = (*FieldsInjectedToEmptyStruct)(nil)
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
     return (&FieldsInjectedToEmptyStruct{}).
         SetInjectedFieldNonCompat("")
-}
-
-func (x *FieldsInjectedToEmptyStruct) GetInjectedFieldNonCompat() string {
-    return x.InjectedField
 }
 
 func (x *FieldsInjectedToEmptyStruct) GetInjectedField() string {
@@ -295,16 +287,8 @@ func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
         SetStringFieldNonCompat("")
 }
 
-func (x *FieldsInjectedToStruct) GetInjectedFieldNonCompat() string {
-    return x.InjectedField
-}
-
 func (x *FieldsInjectedToStruct) GetInjectedField() string {
     return x.InjectedField
-}
-
-func (x *FieldsInjectedToStruct) GetStringFieldNonCompat() string {
-    return x.StringField
 }
 
 func (x *FieldsInjectedToStruct) GetStringField() string {
@@ -488,20 +472,12 @@ func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
         SetStringFieldNonCompat("")
 }
 
-func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationFieldNonCompat() *string {
-    return x.InjectedUnstructuredAnnotationField
-}
-
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationField() string {
     if !x.IsSetInjectedUnstructuredAnnotationField() {
         return ""
     }
 
     return *x.InjectedUnstructuredAnnotationField
-}
-
-func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationFieldNonCompat() *string {
-    return x.InjectedStructuredAnnotationField
 }
 
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField() string {
@@ -512,16 +488,8 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField(
     return *x.InjectedStructuredAnnotationField
 }
 
-func (x *FieldsInjectedWithIncludedStruct) GetInjectedFieldNonCompat() string {
-    return x.InjectedField
-}
-
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedField() string {
     return x.InjectedField
-}
-
-func (x *FieldsInjectedWithIncludedStruct) GetStringFieldNonCompat() string {
-    return x.StringField
 }
 
 func (x *FieldsInjectedWithIncludedStruct) GetStringField() string {

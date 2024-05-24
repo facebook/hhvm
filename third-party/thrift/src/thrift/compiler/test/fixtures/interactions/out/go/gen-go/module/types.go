@@ -27,10 +27,6 @@ func NewCustomException() *CustomException {
         SetMessageNonCompat("")
 }
 
-func (x *CustomException) GetMessageNonCompat() string {
-    return x.Message
-}
-
 func (x *CustomException) GetMessage() string {
     return x.Message
 }

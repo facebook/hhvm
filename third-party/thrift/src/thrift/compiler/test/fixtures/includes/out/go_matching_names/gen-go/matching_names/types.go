@@ -29,10 +29,6 @@ func NewIncludesAlso() *IncludesAlso {
         SetAlsoNonCompat(*includesAlso.NewAlso())
 }
 
-func (x *IncludesAlso) GetAlsoNonCompat() *includesAlso.Also {
-    return x.Also
-}
-
 func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     if !x.IsSetAlso() {
         return nil

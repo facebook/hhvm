@@ -179,10 +179,6 @@ func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
         SetNameNonCompat("")
 }
 
-func (x *MyStructNestedAnnotation) GetNameNonCompat() string {
-    return x.Name
-}
-
 func (x *MyStructNestedAnnotation) GetName() string {
     return x.Name
 }
@@ -488,64 +484,32 @@ func NewMyStruct() *MyStruct {
         SetMyUnionNonCompat(*NewMyUnion())
 }
 
-func (x *MyStruct) GetAbstractNameNonCompat() string {
-    return x.AbstractName
-}
-
 func (x *MyStruct) GetAbstractName() string {
     return x.AbstractName
-}
-
-func (x *MyStruct) GetMajorVerNonCompat() int64 {
-    return x.MajorVer
 }
 
 func (x *MyStruct) GetMajorVer() int64 {
     return x.MajorVer
 }
 
-func (x *MyStruct) GetAnnotationWithQuoteNonCompat() string {
-    return x.AnnotationWithQuote
-}
-
 func (x *MyStruct) GetAnnotationWithQuote() string {
     return x.AnnotationWithQuote
-}
-
-func (x *MyStruct) GetClass_NonCompat() string {
-    return x.Class_
 }
 
 func (x *MyStruct) GetClass_() string {
     return x.Class_
 }
 
-func (x *MyStruct) GetAnnotationWithTrailingCommaNonCompat() string {
-    return x.AnnotationWithTrailingComma
-}
-
 func (x *MyStruct) GetAnnotationWithTrailingComma() string {
     return x.AnnotationWithTrailingComma
-}
-
-func (x *MyStruct) GetEmptyAnnotationsNonCompat() string {
-    return x.EmptyAnnotations
 }
 
 func (x *MyStruct) GetEmptyAnnotations() string {
     return x.EmptyAnnotations
 }
 
-func (x *MyStruct) GetMyEnumNonCompat() MyEnum {
-    return x.MyEnum
-}
-
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
-}
-
-func (x *MyStruct) GetCppTypeAnnotationNonCompat() ListString_6884 {
-    return x.CppTypeAnnotation
 }
 
 func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
@@ -554,10 +518,6 @@ func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
     }
 
     return x.CppTypeAnnotation
-}
-
-func (x *MyStruct) GetMyUnionNonCompat() *MyUnion {
-    return x.MyUnion
 }
 
 func (x *MyStruct) GetMyUnion() *MyUnion {
@@ -1109,16 +1069,8 @@ func NewSecretStruct() *SecretStruct {
         SetPasswordNonCompat("")
 }
 
-func (x *SecretStruct) GetIdNonCompat() int64 {
-    return x.Id
-}
-
 func (x *SecretStruct) GetId() int64 {
     return x.Id
-}
-
-func (x *SecretStruct) GetPasswordNonCompat() string {
-    return x.Password
 }
 
 func (x *SecretStruct) GetPassword() string {

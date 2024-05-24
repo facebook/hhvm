@@ -35,10 +35,6 @@ func NewMyStruct() *MyStruct {
         SetMyIncludedIntNonCompat(42)
 }
 
-func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
-    return x.MyIncludedField
-}
-
 func (x *MyStruct) GetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
         return nil
@@ -47,20 +43,12 @@ func (x *MyStruct) GetMyIncludedField() *includes.Included {
     return x.MyIncludedField
 }
 
-func (x *MyStruct) GetMyOtherIncludedFieldNonCompat() *includes.Included {
-    return x.MyOtherIncludedField
-}
-
 func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
     if !x.IsSetMyOtherIncludedField() {
         return nil
     }
 
     return x.MyOtherIncludedField
-}
-
-func (x *MyStruct) GetMyIncludedIntNonCompat() includes.IncludedInt64 {
-    return x.MyIncludedInt
 }
 
 func (x *MyStruct) GetMyIncludedInt() includes.IncludedInt64 {

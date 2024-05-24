@@ -22,8 +22,9 @@ import itertools
 import unittest
 
 from folly.iobuf import IOBuf
+from thrift.python.test.containers.thrift_types import Foo, Lists
 
-from testing.thrift_types import (
+from thrift.python.test.lists.thrift_types import (
     easy,
     EasyList,
     I32List,
@@ -31,7 +32,6 @@ from testing.thrift_types import (
     StringList,
     StrList2D,
 )
-from thrift.python.test.containers.thrift_types import Foo, Lists
 
 
 class ListTests(unittest.TestCase):

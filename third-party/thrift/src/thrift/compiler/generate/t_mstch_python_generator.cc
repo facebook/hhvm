@@ -129,7 +129,7 @@ class python_mstch_program : public mstch_program {
   python_mstch_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
@@ -137,7 +137,6 @@ class python_mstch_program : public mstch_program {
              &python_mstch_program::py_deprecated_module_path},
             {"program:py_asyncio_module_path",
              &python_mstch_program::py_asyncio_module_path},
-            {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
             {"program:base_library_package",
@@ -149,6 +148,11 @@ class python_mstch_program : public mstch_program {
              &python_mstch_program::adapter_type_hint_modules},
             {"program:py3_auto_migrate?",
              &python_mstch_program::py3_auto_migrate},
+        });
+    register_methods(
+        this,
+        {
+            {"program:is_types_file?", &python_mstch_program::is_types_file},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -416,7 +420,7 @@ class python_mstch_service : public mstch_service {
       const t_program* prog,
       const t_service* containing_service = nullptr)
       : mstch_service(s, ctx, pos, containing_service), prog_(prog) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"service:module_path", &python_mstch_service::module_path},
@@ -526,7 +530,7 @@ class python_mstch_function : public mstch_function {
       mstch_element_position pos,
       const t_interface* iface)
       : mstch_function(f, ctx, pos, iface) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"function:created_interaction",
@@ -589,18 +593,22 @@ class python_mstch_type : public mstch_type {
         adapter_annotation_(find_structured_adapter_annotation(*type)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*type)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:module_path", &python_mstch_type::module_path},
             {"type:program_name", &python_mstch_type::program_name},
             {"type:metadata_path", &python_mstch_type::metadata_path},
             {"type:py3_namespace", &python_mstch_type::py3_namespace},
-            {"type:need_module_path?", &python_mstch_type::need_module_path},
             {"type:external_program?", &python_mstch_type::is_external_program},
             {"type:integer?", &python_mstch_type::is_integer},
             {"type:iobuf?", &python_mstch_type::is_iobuf},
             {"type:has_adapter?", &python_mstch_type::adapter},
+        });
+    register_methods(
+        this,
+        {
+            {"type:need_module_path?", &python_mstch_type::need_module_path},
         });
   }
 
@@ -671,7 +679,7 @@ class python_mstch_typedef : public mstch_typedef {
       const t_typedef* t, mstch_context& ctx, mstch_element_position pos)
       : mstch_typedef(t, ctx, pos),
         adapter_annotation_(find_structured_adapter_annotation(*t)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"typedef:has_adapter?", &python_mstch_typedef::adapter},
@@ -692,7 +700,7 @@ class python_mstch_struct : public mstch_struct {
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos),
         adapter_annotation_(find_structured_adapter_annotation(*s)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"struct:py_name", &python_mstch_struct::py_name},
@@ -754,7 +762,7 @@ class python_mstch_field : public mstch_field {
         adapter_annotation_(find_structured_adapter_annotation(*field)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*field)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"field:py_name", &python_mstch_field::py_name},
@@ -826,7 +834,7 @@ class python_mstch_enum : public mstch_enum {
   python_mstch_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum:flags?", &python_mstch_enum::has_flags},
@@ -849,7 +857,7 @@ class python_mstch_enum_value : public mstch_enum_value {
   python_mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum_value:py_name", &python_mstch_enum_value::py_name},
@@ -963,7 +971,7 @@ class python_mstch_const : public mstch_const {
         adapter_annotation_(find_structured_adapter_annotation(*c)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*c)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"constant:has_adapter?", &python_mstch_const::has_adapter},
@@ -1017,7 +1025,7 @@ class python_mstch_const_value : public mstch_const_value {
       const t_const* current_const,
       const t_type* expected_type)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"value:py3_enum_value_name",
@@ -1127,7 +1135,7 @@ class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   python_mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"annotation:value?",

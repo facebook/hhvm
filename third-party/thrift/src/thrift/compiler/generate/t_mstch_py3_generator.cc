@@ -134,7 +134,7 @@ class py3_mstch_program : public mstch_program {
   py3_mstch_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"program:unique_functions_by_return_type",
@@ -414,7 +414,7 @@ class py3_mstch_service : public mstch_service {
       const t_program* prog,
       const t_service* containing_service = nullptr)
       : mstch_service(service, ctx, pos, containing_service), prog_{prog} {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"service:externalProgram?", &py3_mstch_service::isExternalProgram},
@@ -497,7 +497,7 @@ class py3_mstch_interaction : public py3_mstch_service {
       const t_service* containing_service,
       const t_program* prog)
       : py3_mstch_service(interaction, ctx, pos, prog, containing_service) {
-    register_methods(
+    register_cached_methods(
         this,
         {{"interaction:parent_service_cpp_name",
           &py3_mstch_interaction::parent_service_cpp_name}});
@@ -516,7 +516,7 @@ class py3_mstch_function : public mstch_function {
       mstch_element_position pos,
       const t_interface* iface)
       : mstch_function(f, ctx, pos, iface), cppName_(cpp2::get_name(f)) {
-    register_methods(
+    register_cached_methods(
         this,
         {{"function:eb", &py3_mstch_function::event_based},
          {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
@@ -566,11 +566,10 @@ class py3_mstch_type : public mstch_type {
         prog_(d.program),
         cached_props_(get_cached_props(type, d)) {
     strip_cpp_comments_and_newlines(cached_props_.cppType);
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:modulePath", &py3_mstch_type::modulePath},
-            {"type:need_module_path?", &py3_mstch_type::need_module_path},
             {"type:flat_name", &py3_mstch_type::flatName},
             {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
@@ -593,6 +592,11 @@ class py3_mstch_type : public mstch_type {
             {"type:simple?", &py3_mstch_type::isSimple},
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
+        });
+    register_methods(
+        this,
+        {
+            {"type:need_module_path?", &py3_mstch_type::need_module_path},
         });
   }
 
@@ -785,7 +789,7 @@ class py3_mstch_struct : public mstch_struct {
   py3_mstch_struct(
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"struct:size", &py3_mstch_struct::getSize},
@@ -893,7 +897,7 @@ class py3_mstch_field : public mstch_field {
       : mstch_field(field, ctx, pos, field_context),
         pyName_(py3::get_py3_name(*field)),
         cppName_(cpp2::get_name(field)) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"field:py_name", &py3_mstch_field::pyName},
@@ -1013,7 +1017,7 @@ class py3_mstch_enum : public mstch_enum {
   py3_mstch_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum:flags?", &py3_mstch_enum::hasFlags},
@@ -1033,7 +1037,7 @@ class py3_mstch_enum_value : public mstch_enum_value {
   py3_mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum_value:py_name", &py3_mstch_enum_value::pyName},
@@ -1056,7 +1060,7 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   py3_mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"annotation:value?", &py3_mstch_deprecated_annotation::has_value},

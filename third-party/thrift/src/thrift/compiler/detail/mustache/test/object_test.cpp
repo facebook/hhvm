@@ -25,7 +25,7 @@ class test_mstch_object : public internal::object_t<node> {
  public:
   void register_method(
       const std::string& name, const std::function<node()>& method) {
-    internal::object_t<node>::register_method(name, method);
+    internal::object_t<node>::register_volatile_method(name, method);
   }
 
   node method1() { return true; }

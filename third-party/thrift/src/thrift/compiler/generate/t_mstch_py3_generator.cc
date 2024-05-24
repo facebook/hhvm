@@ -593,7 +593,7 @@ class py3_mstch_type : public mstch_type {
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"type:need_module_path?", &py3_mstch_type::need_module_path},

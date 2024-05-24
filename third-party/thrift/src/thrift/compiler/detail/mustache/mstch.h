@@ -54,14 +54,14 @@ class object_t {
   }
 
  protected:
-  // Uncached methods are re-invoked every time their value is needed during a
-  // template evaluation.
+  // Volatile (uncached) methods are re-invoked every time their value is needed
+  // during a template evaluation.
   //
   // This is potentially useful if mutating state during evaluation, but has a
   // performance cost. There are usually better ways to express such logic.
   template <typename F>
-  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>> register_method(
-      std::string name, F method) {
+  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>
+  register_volatile_method(std::string name, F method) {
     do_register_method(
         std::move(name),
         [method = std::move(method),
@@ -87,10 +87,10 @@ class object_t {
   }
 
   template <class S>
-  void register_methods(
+  void register_volatile_methods(
       S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
     for (const auto& method : methods) {
-      register_method(std::move(method.first), [s, m = method.second] {
+      register_volatile_method(std::move(method.first), [s, m = method.second] {
         return (s->*m)();
       });
     }

@@ -149,7 +149,7 @@ class python_mstch_program : public mstch_program {
             {"program:py3_auto_migrate?",
              &python_mstch_program::py3_auto_migrate},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
@@ -605,7 +605,7 @@ class python_mstch_type : public mstch_type {
             {"type:iobuf?", &python_mstch_type::is_iobuf},
             {"type:has_adapter?", &python_mstch_type::adapter},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"type:need_module_path?", &python_mstch_type::need_module_path},

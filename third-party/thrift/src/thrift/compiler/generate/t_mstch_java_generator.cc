@@ -716,7 +716,7 @@ class mstch_java_function : public mstch_function {
             {"function:javaName", &mstch_java_function::java_name},
             {"function:voidType", &mstch_java_function::is_void_type},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"function:nestedDepth", &mstch_java_function::get_nested_depth},
@@ -820,7 +820,7 @@ class mstch_java_field : public mstch_field {
             {"field:FieldNameUnmangled?",
              &mstch_java_field::is_field_name_unmangled},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"field:nestedDepth", &mstch_java_field::get_nested_depth},
@@ -1225,7 +1225,7 @@ class mstch_java_type : public mstch_type {
             {"type:typeClassName",
              &mstch_java_type::get_structured_type_class_name},
         });
-    register_methods(
+    register_volatile_methods(
         this,
         {
             {"type:setIsMapKey", &mstch_java_type::set_is_map_key},

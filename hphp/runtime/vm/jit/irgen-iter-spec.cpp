@@ -240,7 +240,9 @@ struct Accessor {
   virtual SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const = 0;
 
   // Given a base and an "elm value", this method returns the key of that elm.
-  virtual SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
+  // Keysets use the already loaded val to avoid duplicate load.
+  virtual SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp* val) const
+    = 0;
 
   // Given a base and an "elm value", this method returns the val of that elm.
   virtual SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
@@ -272,7 +274,7 @@ struct VecAccessor : public Accessor {
     return pos;
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
     // is_ptr_iter is only true when the iterator doesn't output a key,
     // and this method is only called when the iterator *does* output a key.
     always_assert(!is_ptr_iter);
@@ -319,7 +321,7 @@ struct DictAccessor : public Accessor {
     return is_ptr_iter ? pos : gen(env, GetDictPtrIter, arr, pos);
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
     return gen(env, LdPtrIterKey, key_jit_type, arr, elm);
   }
 
@@ -368,8 +370,8 @@ struct KeysetAccessor : public Accessor {
     return is_ptr_iter ? pos : gen(env, GetKeysetPtrIter, arr, pos);
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return getVal(env, arr, elm);
+  SSATmp* getKey(IRGS&, SSATmp*, SSATmp*, SSATmp* val) const override {
+    return val;
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
@@ -409,7 +411,7 @@ struct BespokeAccessor : public Accessor {
     return pos;
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
     return gen(env, BespokeIterGetKey, arr, elm);
   }
 
@@ -605,7 +607,7 @@ Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 
   auto const finish = [&](SSATmp* elm, SSATmp* val) {
     auto const keyed = data.hasKey();
-    auto const key = keyed ? accessor.getKey(env, arr, elm) : nullptr;
+    auto const key = keyed ? accessor.getKey(env, arr, elm, val) : nullptr;
     iterStore(env, data.valId, val);
     if (keyed) iterStore(env, data.keyId, key);
     gen(env, StIterPos, IterId(data.iterId), fp(env),

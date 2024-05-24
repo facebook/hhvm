@@ -822,7 +822,17 @@ and localize_class_instantiation
                   (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
             | Decl_entry.Found (Some ty) -> localize ~ety_env env ty
           in
-          (env, mk (r, Tnewtype (name, [], cstr)))
+          let enum_ty = mk (r, Tnewtype (name, [], cstr)) in
+          let r_dyn = r in
+          let enum_ty =
+            if ety_env.ish_weakening then
+              MakeType.intersection
+                r_dyn
+                [MakeType.locl_like r_dyn enum_ty; MakeType.arraykey r_dyn]
+            else
+              enum_ty
+          in
+          (env, enum_ty)
     else
       let tparams = Cls.tparams class_info in
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
@@ -1549,7 +1559,8 @@ let localize_targs
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env
  *)
-let localize_no_subst_ env ~wildcard_action ~on_error ?report_cycle ty =
+let localize_no_subst_
+    env ~wildcard_action ~ish_weakening ~on_error ?report_cycle ty =
   let ety_env =
     {
       empty_expand_env with
@@ -1557,6 +1568,7 @@ let localize_no_subst_ env ~wildcard_action ~on_error ?report_cycle ty =
         Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
       on_error;
       wildcard_action;
+      ish_weakening;
     }
   in
   localize env ty ~ety_env
@@ -1572,17 +1584,22 @@ let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
       else
         Some (Typing_error.Reasons_callback.invalid_type_hint pos))
     ~wildcard_action:Wildcard_illegal
+    ~ish_weakening:false
     ?report_cycle
     h
 
-let localize_hint_for_refinement env h =
-  let (pos, _) = h in
-  let h = Decl_hint.hint env.decl_env h in
-  localize_no_subst_
-    env
-    ~on_error:(Some (Typing_error.Reasons_callback.invalid_type_hint pos))
-    ~wildcard_action:Wildcard_fresh_generic
-    h
+let localize_hint_for_refinement env hint =
+  let (pos, _) = hint in
+  let h = Decl_hint.hint env.decl_env hint in
+  let ((env, ty_err_opt), hint_ty) =
+    localize_no_subst_
+      env
+      ~on_error:(Some (Typing_error.Reasons_callback.invalid_type_hint pos))
+      ~wildcard_action:Wildcard_fresh_generic
+      ~ish_weakening:(Env.get_tcopt env |> TypecheckerOptions.pessimise_builtins)
+      h
+  in
+  ((env, ty_err_opt), hint_ty)
 
 let localize_hint_for_lambda env h =
   let (pos, _) = h in
@@ -1591,6 +1608,7 @@ let localize_hint_for_lambda env h =
     env
     ~on_error:(Some (Typing_error.Reasons_callback.invalid_type_hint pos))
     ~wildcard_action:Wildcard_fresh_tyvar
+    ~ish_weakening:false
     h
 
 let localize_no_subst env ~ignore_errors ty =
@@ -1604,6 +1622,7 @@ let localize_no_subst env ~ignore_errors ty =
           (Typing_error.Reasons_callback.invalid_type_hint
              (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty)))
     ~wildcard_action:Wildcard_illegal
+    ~ish_weakening:false
     ty
 
 let localize_targs_and_check_constraints

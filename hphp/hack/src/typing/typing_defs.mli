@@ -224,6 +224,10 @@ type expand_env = {
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;
+  ish_weakening: bool;
+      (** If true, for refinement hints (is/as), approximate E by ~E & arraykey to account
+       * for intish and stringish casts
+       *)
 }
 
 val empty_expand_env : expand_env

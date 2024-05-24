@@ -2060,42 +2060,13 @@ let refine_and_simplify_intersection
     ty
     hint_ty
 
-let ish_weakening env hint hint_ty =
-  match hint with
-  | (_, Aast.Happly ((_, name), _)) ->
-    let enum_opt =
-      Option.(Env.get_enum env name |> Decl_entry.to_option >>= Cls.enum_type)
-    in
-    begin
-      match enum_opt with
-      | Some { te_base; _ } -> begin
-        match Typing_defs.get_node te_base with
-        | Typing_defs.(Tprim Tarraykey) -> hint_ty
-        | _ ->
-          MakeType.intersection
-            Reason.Rnone
-            [
-              MakeType.locl_like Reason.Rnone hint_ty;
-              MakeType.arraykey Reason.Rnone;
-            ]
-      end
-      | _ -> hint_ty
-    end
-  | _ -> hint_ty
-
 let refine_for_hint
     ~hint_first ~expr_pos ~refinement_reason env tparamet ty hint =
   let ((env, ty_err_opt), hint_ty) =
     Phase.localize_hint_for_refinement env hint
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  let hint_ty = strip_supportdyn hint_ty in
-  let hint_ty =
-    if Env.get_tcopt env |> TCO.pessimise_builtins then
-      ish_weakening env hint hint_ty
-    else
-      hint_ty
-  in
+  let (_, env, hint_ty) = Typing_utils.strip_supportdyn env hint_ty in
   let (env, hint_ty) =
     if not tparamet then
       Inter.negate_type env refinement_reason hint_ty ~approx:TUtils.ApproxUp
@@ -4462,13 +4433,7 @@ end = struct
         Phase.localize_hint_for_refinement env hint
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-      let hint_ty = strip_supportdyn hint_ty in
-      let hint_ty =
-        if TCO.pessimise_builtins (Env.get_tcopt env) then
-          ish_weakening env hint hint_ty
-        else
-          hint_ty
-      in
+      let (_, env, hint_ty) = Typing_utils.strip_supportdyn env hint_ty in
       let ((env, ty_err_opt2), hint_ty) =
         if Typing_defs.is_dynamic hint_ty then
           let enable_sound_dynamic = TCO.enable_sound_dynamic env.genv.tcopt in

@@ -4,7 +4,7 @@ enum G: arraykey {
   MEANING = "42";
 }
 
-function takes_g(G $_): void {}
+function takes_g(~G $_): void {}
 
 function test_opaque_is_arraykeyish(): void {
   $e = 42;
@@ -30,7 +30,7 @@ enum H: arraykey as arraykey {
   MEANING = "42";
 }
 
-function takes_h(H $_): void {}
+function takes_h(~H $_): void {}
 
 function test_transparent_is_arraykeyish(): void {
   $e = 42;

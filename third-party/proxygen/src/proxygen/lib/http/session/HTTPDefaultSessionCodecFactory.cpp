@@ -34,9 +34,8 @@ std::unique_ptr<HTTPCodec> HTTPDefaultSessionCodecFactory::getCodec(
     return codec;
   } else if (nextProtocol.empty() ||
              HTTP1xCodec::supportsNextProtocol(nextProtocol)) {
-    auto codec = std::make_unique<HTTP1xCodec>(direction,
-                                               /* force1_1 = */ true,
-                                               useStrictValidation());
+    auto codec = std::make_unique<HTTP1xCodec>(
+        direction, accConfig_.forceHTTP1_0_to_1_1, useStrictValidation());
     if (!isTLS) {
       codec->setAllowedUpgradeProtocols(
           accConfig_.allowedPlaintextUpgradeProtocols);

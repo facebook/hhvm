@@ -58,6 +58,13 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
   std::list<std::string> allowedPlaintextUpgradeProtocols;
 
   /**
+   * True if HTTP/1.0 messages should always be serialized as HTTP/1.1
+   *
+   * Maximizes connection re-use
+   */
+  bool forceHTTP1_0_to_1_1{false};
+
+  /**
    * HTTP/2 or SPDY settings for this acceptor
    */
   SettingsList egressSettings;

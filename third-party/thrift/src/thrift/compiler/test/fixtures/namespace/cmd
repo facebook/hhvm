@@ -7,3 +7,7 @@ python_hsmodule: mstch_python:root_module_prefix=python_module_root src/hsmodule
 py3_emptyns: mstch_py3 src/emptyns.thrift
 python_emptyns: mstch_python src/emptyns.thrift
 python_capi_emptyns: mstch_python_capi src/emptyns.thrift
+go: mstch_go src/module.thrift
+go_extend: mstch_go src/extend.thrift
+go_hsmodule: mstch_go src/hsmodule.thrift
+go_emptyns: mstch_go src/emptyns.thrift

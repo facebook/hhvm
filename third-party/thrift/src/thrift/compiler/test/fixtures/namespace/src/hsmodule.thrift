@@ -16,6 +16,7 @@
 
 namespace hs My.Namespacing.Test
 namespace py3 my.namespacing.test
+namespace go my.namespacing.test
 
 struct HsFoo {
   1: i64 MyInt;

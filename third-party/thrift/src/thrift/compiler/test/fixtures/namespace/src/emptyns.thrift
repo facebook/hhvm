@@ -15,6 +15,7 @@
  */
 
 namespace py3 ""
+namespace go ""
 
 struct Foo {
   1: i64 MyInt;

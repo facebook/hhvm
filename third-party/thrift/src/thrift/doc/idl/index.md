@@ -866,11 +866,11 @@ map_entry        ::=  initializer ":" initializer
 Constants can also be of list, set, or map types.
 
 ```
-list<i32> AList = [2, 3, 5, 7]
+const list<i32> AList = [2, 3, 5, 7]
 
-set<string> ASet = ["foo", "bar", "baz"]
+const set<string> ASet = ["foo", "bar", "baz"]
 
-map<string, list<i32>> AMap = {
+const map<string, list<i32>> AMap = {
   "foo" : [1, 2, 3, 4],
   "bar" : [10, 32, 54],
 }

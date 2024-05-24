@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <functional>
 #include <stack>
 #include <type_traits>
@@ -23,6 +24,7 @@
 
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
+#include <folly/Conv.h>
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/op/Encode.h>
@@ -527,8 +529,8 @@ void setMaskedDataFull(
   auto cursor = prot.getCursor();
   apache::thrift::skip(prot, arg_type);
   cursor.clone(encodedValue.data().emplace(), prot.getCursor() - cursor);
-  maskedData.full_ref() =
-      type::ValueId{apache::thrift::util::i32ToZigzag(values.size() - 1)};
+  const auto pos = folly::to<int32_t>(values.size() - 1);
+  maskedData.full_ref() = type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
 }
 
 // parseValue with readMaskRef and writeMaskRef
@@ -631,8 +633,9 @@ MaskedDecodeResultValue parseValueWithMask(
           if (!apache::thrift::empty(nestedResult.excluded)) {
             auto& keys = protocolData.keys().ensure();
             keys.push_back(keyValue);
-            type::ValueId id = type::ValueId{
-                apache::thrift::util::i32ToZigzag(keys.size() - 1)};
+            const auto pos = folly::to<int32_t>(keys.size() - 1);
+            type::ValueId id =
+                type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
             result.excluded.values_ref().ensure()[id] =
                 std::move(nestedResult.excluded);
           }

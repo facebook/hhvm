@@ -117,6 +117,13 @@ struct SkipNoopString {
 // Checks if bool hold a valid value (true or false) and throws exception
 // otherwise. Without the check we may produce undeserializable data.
 inline bool validate_bool(uint8_t value) {
+  static constexpr char kUndefinedBehaviorMsg[] =
+      "Undefined behavior detected! Thrift code has detected an invalid bool "
+      "value that almost certainly indicates ongoing memory corruption in this "
+      "process. This issue is most likely not related to Thrift, but is "
+      "detected here in a best-effort attempt at early detection of undefined "
+      "behavior. The process is terminated to prevent further corruption and "
+      "raise awareness of the ongoing issue.";
 #if defined(__x86_64__) && defined(__GNUC__) && \
     (!defined(__clang_major__) || __clang_major__ >= 9)
   // An optimized version that avoid extra load/store.
@@ -135,7 +142,7 @@ inline bool validate_bool(uint8_t value) {
       : invalid);
   return value;
 invalid:
-  LOG(FATAL) << "invalid bool value";
+  LOG(FATAL) << kUndefinedBehaviorMsg;
   return false;
 #else
   // Store in a volatile variable to prevent the compiler from optimizing the
@@ -143,7 +150,7 @@ invalid:
   volatile uint8_t volatileByte = value;
   uint8_t byte = volatileByte;
   if (!(byte == 0 || byte == 1)) {
-    LOG(FATAL) << "invalid bool value";
+    LOG(FATAL) << kUndefinedBehaviorMsg;
   }
   return byte != 0;
 #endif

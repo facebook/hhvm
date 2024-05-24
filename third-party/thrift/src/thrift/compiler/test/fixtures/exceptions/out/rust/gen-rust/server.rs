@@ -680,11 +680,11 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from Raiser
-                "doBland",
-                "doRaise",
-                "get200",
-                "get500",
+            // From module.Raiser:
+            "doBland",
+            "doRaise",
+            "get200",
+            "get500",
         ]
     }
 

@@ -368,8 +368,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from Service
-                "func",
+            // From module.Service:
+            "func",
         ]
     }
 
@@ -846,9 +846,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from AdapterService
-                "count",
-                "adaptedTypes",
+            // From module.AdapterService:
+            "count",
+            "adaptedTypes",
         ]
     }
 

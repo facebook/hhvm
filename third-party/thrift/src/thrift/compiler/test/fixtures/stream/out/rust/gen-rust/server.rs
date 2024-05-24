@@ -1787,16 +1787,16 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from PubSubStreamingService
-                "returnstream",
-                "streamthrows",
-                "servicethrows",
-                "servicethrows2",
-                "boththrows",
-                "responseandstreamstreamthrows",
-                "responseandstreamservicethrows",
-                "responseandstreamboththrows",
-                "returnstreamFast",
+            // From module.PubSubStreamingService:
+            "returnstream",
+            "streamthrows",
+            "servicethrows",
+            "servicethrows2",
+            "boththrows",
+            "responseandstreamstreamthrows",
+            "responseandstreamservicethrows",
+            "responseandstreamboththrows",
+            "returnstreamFast",
         ]
     }
 

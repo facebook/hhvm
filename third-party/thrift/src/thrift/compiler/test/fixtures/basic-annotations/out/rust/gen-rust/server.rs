@@ -1126,14 +1126,14 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyService
-                "ping",
-                "getRandomData",
-                "hasDataById",
-                "getDataById",
-                "putDataById",
-                "lobDataById",
-                "doNothing",
+            // From module.MyService:
+            "ping",
+            "getRandomData",
+            "hasDataById",
+            "getDataById",
+            "putDataById",
+            "lobDataById",
+            "doNothing",
         ]
     }
 
@@ -1599,9 +1599,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyServicePrioParent
-                "ping",
-                "pong",
+            // From module.MyServicePrioParent:
+            "ping",
+            "pong",
         ]
     }
 
@@ -1957,11 +1957,12 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyServicePrioParent
-                "ping",
-                "pong",
-                // from MyServicePrioChild
-                "pang",
+            // From module.MyServicePrioChild:
+            "pang",
+
+            // From module.MyServicePrioParent:
+            "ping",
+            "pong",
         ]
     }
 
@@ -2324,8 +2325,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // From module.BadInteraction:
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
         ]
     }
 
@@ -2670,9 +2672,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from BadService
-                "bar",
-                "BadInteraction.foo",
+            // From module.BadService:
+            "bar",
+            "BadInteraction.foo",
         ]
     }
 
@@ -3255,10 +3257,10 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from FooBarBazService
-                "foo",
-                "bar",
-                "baz",
+            // From module.FooBarBazService:
+            "foo",
+            "bar",
+            "baz",
         ]
     }
 

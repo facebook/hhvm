@@ -340,8 +340,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from TestService
-                "init",
+            // From module.TestService:
+            "init",
         ]
     }
 

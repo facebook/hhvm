@@ -347,8 +347,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from FooService
-                "simple_rpc",
+            // From module.FooService:
+            "simple_rpc",
         ]
     }
 
@@ -708,8 +708,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from FB303Service
-                "simple_rpc",
+            // From module.FB303Service:
+            "simple_rpc",
         ]
     }
 
@@ -2199,17 +2199,17 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyService
-                "ping",
-                "getRandomData",
-                "sink",
-                "putDataById",
-                "hasDataById",
-                "getDataById",
-                "deleteDataById",
-                "lobDataById",
-                "invalid_return_for_hack",
-                "rpc_skipped_codegen",
+            // From module.MyService:
+            "ping",
+            "getRandomData",
+            "sink",
+            "putDataById",
+            "hasDataById",
+            "getDataById",
+            "deleteDataById",
+            "lobDataById",
+            "invalid_return_for_hack",
+            "rpc_skipped_codegen",
         ]
     }
 
@@ -2697,9 +2697,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from DbMixedStackArguments
-                "getDataByKey0",
-                "getDataByKey1",
+            // From module.DbMixedStackArguments:
+            "getDataByKey0",
+            "getDataByKey1",
         ]
     }
 

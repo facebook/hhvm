@@ -341,8 +341,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyRoot
-                "do_root",
+            // From module.MyRoot:
+            "do_root",
         ]
     }
 
@@ -698,10 +698,11 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyRoot
-                "do_root",
-                // from MyNode
-                "do_mid",
+            // From module.MyNode:
+            "do_mid",
+
+            // From module.MyRoot:
+            "do_root",
         ]
     }
 
@@ -1061,14 +1062,14 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyRoot
-                "do_root",
-                // from MyNode
-                "do_mid",
-                // from MyRoot
-                "do_root",
-                // from MyLeaf
-                "do_leaf",
+            // From module.MyLeaf:
+            "do_leaf",
+
+            // From module.MyNode:
+            "do_mid",
+
+            // From module.MyRoot:
+            "do_root",
         ]
     }
 

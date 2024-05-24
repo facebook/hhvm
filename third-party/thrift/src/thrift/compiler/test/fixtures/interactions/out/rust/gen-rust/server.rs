@@ -626,8 +626,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // From module.MyInteraction:
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
         ]
     }
 
@@ -1227,8 +1228,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // From module.MyInteractionFast:
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
         ]
     }
 
@@ -1556,8 +1558,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // From module.SerialInteraction:
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
         ]
     }
 
@@ -2374,20 +2377,20 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyService
-                "foo",
-                "interact",
-                "interactFast",
-                "serialize",
-                "MyInteraction.frobnicate",
-                "MyInteraction.ping",
-                "MyInteraction.truthify",
-                "MyInteraction.encode",
-                "MyInteractionFast.frobnicate",
-                "MyInteractionFast.ping",
-                "MyInteractionFast.truthify",
-                "MyInteractionFast.encode",
-                "SerialInteraction.frobnicate",
+            // From module.MyService:
+            "foo",
+            "interact",
+            "interactFast",
+            "serialize",
+            "MyInteraction.frobnicate",
+            "MyInteraction.ping",
+            "MyInteraction.truthify",
+            "MyInteraction.encode",
+            "MyInteractionFast.frobnicate",
+            "MyInteractionFast.ping",
+            "MyInteractionFast.truthify",
+            "MyInteractionFast.encode",
+            "SerialInteraction.frobnicate",
         ]
     }
 

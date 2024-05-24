@@ -468,9 +468,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from Foo
-                "return",
-                "super",
+            // From mod.Foo:
+            "return",
+            "super",
         ]
     }
 

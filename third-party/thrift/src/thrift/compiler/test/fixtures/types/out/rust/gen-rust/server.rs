@@ -468,9 +468,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from SomeService
-                "bounce_map",
-                "binary_keyed_map",
+            // From module.SomeService:
+            "bounce_map",
+            "binary_keyed_map",
         ]
     }
 

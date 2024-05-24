@@ -852,12 +852,12 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from NestedContainers
-                "mapList",
-                "mapSet",
-                "listMap",
-                "listSet",
-                "turtles",
+            // From module.NestedContainers:
+            "mapList",
+            "mapSet",
+            "listMap",
+            "listSet",
+            "turtles",
         ]
     }
 

@@ -638,10 +638,10 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from C
-                "f",
-                "numbers",
-                "thing",
+            // From module.C:
+            "f",
+            "numbers",
+            "thing",
         ]
     }
 

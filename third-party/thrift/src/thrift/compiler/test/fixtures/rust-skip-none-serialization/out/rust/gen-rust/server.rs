@@ -980,13 +980,13 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyService
-                "ping",
-                "getRandomData",
-                "hasDataById",
-                "getDataById",
-                "putDataById",
-                "lobDataById",
+            // From module.MyService:
+            "ping",
+            "getRandomData",
+            "hasDataById",
+            "getDataById",
+            "putDataById",
+            "lobDataById",
         ]
     }
 

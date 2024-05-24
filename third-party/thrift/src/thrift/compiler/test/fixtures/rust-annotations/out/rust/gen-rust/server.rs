@@ -360,8 +360,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from S1
-                "r",
+            // From module.S1:
+            "r",
         ]
     }
 
@@ -710,8 +710,8 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from S2
-                "r",
+            // From module.S2:
+            "r",
         ]
     }
 
@@ -1177,9 +1177,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from AllMethods
-                "foo",
-                "bar",
+            // From module.AllMethods:
+            "foo",
+            "bar",
         ]
     }
 
@@ -1645,9 +1645,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from OneMethod
-                "foo",
-                "bar",
+            // From module.OneMethod:
+            "foo",
+            "bar",
         ]
     }
 
@@ -2113,9 +2113,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from OneMethodOptOut
-                "foo",
-                "bar",
+            // From module.OneMethodOptOut:
+            "foo",
+            "bar",
         ]
     }
 

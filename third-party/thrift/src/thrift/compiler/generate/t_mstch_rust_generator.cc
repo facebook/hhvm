@@ -983,7 +983,8 @@ class rust_mstch_service : public mstch_service {
          {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
          {"service:parent_service_name",
-          &rust_mstch_service::parent_service_name}});
+          &rust_mstch_service::parent_service_name},
+         {"service:program_name", &rust_mstch_service::program_name}});
   }
   mstch::node rust_name() { return named_rust_name(service_); }
   mstch::node rust_functions();
@@ -1048,6 +1049,7 @@ class rust_mstch_service : public mstch_service {
     return extended_services;
   }
   virtual mstch::node parent_service_name() { return service_->get_name(); }
+  mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node rust_all_exceptions();
   mstch::node rust_has_doc() { return service_->has_doc(); }

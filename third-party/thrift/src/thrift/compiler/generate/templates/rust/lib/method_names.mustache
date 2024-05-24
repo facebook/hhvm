@@ -15,19 +15,20 @@
   limitations under the License.
 
 }}
-{{#service:extends?}}{{#service:extendedServers}}{{#extendedService:service}}
-{{>lib/method_names}}
-{{/extendedService:service}}{{/service:extendedServers}}{{/service:extends?}}
+            // From {{service:program_name}}.{{service:name}}:
 {{^service:interaction?}}
-                // from {{service:name}}
 {{#service:rustFunctions}}{{^function:starts_interaction?}}
-                "{{function:name}}",
+            "{{function:name}}",
 {{/function:starts_interaction?}}{{/service:rustFunctions}}
 {{#service:interactions}}{{#service:rustFunctions}}
-                "{{service:name}}.{{function:name}}",
+            "{{service:name}}.{{function:name}}",
 {{/service:rustFunctions}}{{/service:interactions}}
 {{/service:interaction?}}
 {{#service:interaction?}}
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
 {{/service:interaction?}}
+{{#service:extends}}
+
+{{>lib/method_names}}
+{{/service:extends}}

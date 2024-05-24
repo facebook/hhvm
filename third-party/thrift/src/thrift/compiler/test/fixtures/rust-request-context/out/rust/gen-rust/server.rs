@@ -344,8 +344,9 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // interaction's method names are never queried directly.
-                // they are always queried from the "main" processor.
+            // From module.MyInteraction:
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
         ]
     }
 
@@ -2037,18 +2038,18 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         &[
-                // from MyService
-                "ping",
-                "getRandomData",
-                "hasDataById",
-                "getDataById",
-                "putDataById",
-                "lobDataById",
-                "streamById",
-                "streamByIdWithException",
-                "streamByIdWithResponse",
-                "startPingInteraction",
-                "MyInteraction.ping",
+            // From module.MyService:
+            "ping",
+            "getRandomData",
+            "hasDataById",
+            "getDataById",
+            "putDataById",
+            "lobDataById",
+            "streamById",
+            "streamByIdWithException",
+            "streamByIdWithResponse",
+            "startPingInteraction",
+            "MyInteraction.ping",
         ]
     }
 

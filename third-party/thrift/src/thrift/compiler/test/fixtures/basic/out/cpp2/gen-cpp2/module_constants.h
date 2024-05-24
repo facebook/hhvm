@@ -14,6 +14,42 @@ namespace test::fixtures::basic {
 
 struct module_constants {
 
+  static constexpr bool const FLAG_ = true;
+  static constexpr bool FLAG() {
+    return FLAG_;
+  }
+
+  static constexpr ::std::int8_t const OFFSET_ = static_cast<::std::int8_t>(-10);
+  static constexpr ::std::int8_t OFFSET() {
+    return OFFSET_;
+  }
+
+  static constexpr ::std::int16_t const COUNT_ = static_cast<::std::int16_t>(200);
+  static constexpr ::std::int16_t COUNT() {
+    return COUNT_;
+  }
+
+  static constexpr ::std::int32_t const MASK_ = static_cast<::std::int32_t>(16388846);
+  static constexpr ::std::int32_t MASK() {
+    return MASK_;
+  }
+
+  static constexpr double const E_ = static_cast<double>(2.718281828459);
+  static constexpr double E() {
+    return E_;
+  }
+
+  static constexpr char const * const DATE_ = "June 28, 2017";
+  static constexpr char const * DATE() {
+    return DATE_;
+  }
+
+  static ::std::vector<::std::int32_t> const& AList();
+
+  static ::std::set<::std::string> const& ASet();
+
+  static ::std::map<::std::string, ::std::vector<::std::int32_t>> const& AMap();
+
 };
 
 } // namespace test::fixtures::basic

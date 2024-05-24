@@ -3,3 +3,46 @@
 
 //! Thrift constant definitions for `module`.
 
+pub const FLAG: ::std::primitive::bool = true;
+
+pub const OFFSET: ::std::primitive::i8 = -10;
+
+pub const COUNT: ::std::primitive::i16 = 200;
+
+pub const MASK: ::std::primitive::i32 = 16388846;
+
+pub const E: ::std::primitive::f64 = 2.718281828459;
+
+pub const DATE: &::std::primitive::str = "June 28, 2017";
+
+pub static AList: ::once_cell::sync::Lazy<::std::vec::Vec<::std::primitive::i32>> = ::once_cell::sync::Lazy::new(|| vec![
+            2,
+            3,
+            5,
+            7,
+        ]);
+
+pub static ASet: ::once_cell::sync::Lazy<::std::collections::BTreeSet<::std::string::String>> = ::once_cell::sync::Lazy::new(|| {
+            let mut set = ::std::collections::BTreeSet::new();
+            set.insert("foo".to_owned());
+            set.insert("bar".to_owned());
+            set.insert("baz".to_owned());
+            set
+        });
+
+pub static AMap: ::once_cell::sync::Lazy<::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>> = ::once_cell::sync::Lazy::new(|| {
+            let mut map = ::std::collections::BTreeMap::new();
+            map.insert("foo".to_owned(), vec![
+                1,
+                2,
+                3,
+                4,
+            ]);
+            map.insert("bar".to_owned(), vec![
+                10,
+                32,
+                54,
+            ]);
+            map
+        });
+

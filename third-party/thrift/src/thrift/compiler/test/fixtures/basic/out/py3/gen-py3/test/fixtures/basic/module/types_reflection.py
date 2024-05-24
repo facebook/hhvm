@@ -265,3 +265,23 @@ def get_reflection__Set__float() -> __SetSpec:
         kind=__NumberType.FLOAT,
      )
 
+def get_reflection__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+    )
+
+def get_reflection__Set__string() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=str,
+        kind=__NumberType.NOT_A_NUMBER,
+     )
+
+def get_reflection__Map__string_List__i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_test_fixtures_basic_module_types.List__i32,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+

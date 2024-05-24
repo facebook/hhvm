@@ -19,3 +19,42 @@ if sys.version_info[0] >= 3:
 
 from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, MyDataItem, MyUnion, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
 
+FLAG = True
+
+OFFSET = -10
+
+COUNT = 200
+
+MASK = 16388846
+
+E = 2.71828
+
+DATE = "June 28, 2017"
+
+AList = [
+  2,
+  3,
+  5,
+  7,
+]
+
+ASet = set([
+  "foo",
+  "bar",
+  "baz",
+])
+
+AMap = {
+  "foo" : [
+    1,
+    2,
+    3,
+    4,
+  ],
+  "bar" : [
+    10,
+    32,
+    54,
+  ],
+}
+

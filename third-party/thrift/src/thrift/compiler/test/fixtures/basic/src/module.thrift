@@ -23,6 +23,19 @@ namespace hack.module hack.module.test
 
 include "thrift/annotation/hack.thrift"
 
+const bool FLAG = true;
+const byte OFFSET = -10; // byte is an 8-bit signed integer
+const i16 COUNT = 200;
+const i32 MASK = 0xFA12EE;
+const double E = 2.718281828459;
+const string DATE = "June 28, 2017";
+
+const list<i32> AList = [2, 3, 5, 7];
+
+const set<string> ASet = ["foo", "bar", "baz"];
+
+const map<string, list<i32>> AMap = {"foo": [1, 2, 3, 4], "bar": [10, 32, 54]};
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,

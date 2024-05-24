@@ -256,4 +256,35 @@ cdef class Set__float(thrift.py3.types.Set):
     @staticmethod
     cdef shared_ptr[cset[float]] _make_instance(object items) except *
 
+cdef class List__i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
+    @staticmethod
+    cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *
 
+cdef class Set__string(thrift.py3.types.Set):
+    cdef shared_ptr[cset[string]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cset[string]])
+    @staticmethod
+    cdef shared_ptr[cset[string]] _make_instance(object items) except *
+
+cdef class Map__string_List__i32(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,vector[cint32_t]]])
+    @staticmethod
+    cdef shared_ptr[cmap[string,vector[cint32_t]]] _make_instance(object items) except *
+
+
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_constants.h" namespace "::test::fixtures::basic":
+    cdef cbool cFLAG "::test::fixtures::basic::module_constants::FLAG"
+    cdef cint8_t cOFFSET "::test::fixtures::basic::module_constants::OFFSET"
+    cdef cint16_t cCOUNT "::test::fixtures::basic::module_constants::COUNT"
+    cdef cint32_t cMASK "::test::fixtures::basic::module_constants::MASK"
+    cdef double cE "::test::fixtures::basic::module_constants::E"
+    cdef const char* cDATE "::test::fixtures::basic::module_constants::DATE"()
+    cdef vector[cint32_t] cAList "::test::fixtures::basic::module_constants::AList"()
+    cdef cset[string] cASet "::test::fixtures::basic::module_constants::ASet"()
+    cdef cmap[string,vector[cint32_t]] cAMap "::test::fixtures::basic::module_constants::AMap"()

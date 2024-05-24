@@ -194,15 +194,15 @@ public class MyUnion extends TUnion<MyUnion> implements Comparable<MyUnion> {
         if (__field.type == FLOAT_SET_FIELD_DESC.type) {
           Set<Float> floatSet;
           {
-            TSet _set4 = iprot.readSetBegin();
-            floatSet = new HashSet<Float>(Math.max(0, 2*_set4.size));
-            for (int _i5 = 0; 
-                 (_set4.size < 0) ? iprot.peekSet() : (_i5 < _set4.size); 
-                 ++_i5)
+            TSet _set6 = iprot.readSetBegin();
+            floatSet = new HashSet<Float>(Math.max(0, 2*_set6.size));
+            for (int _i7 = 0; 
+                 (_set6.size < 0) ? iprot.peekSet() : (_i7 < _set6.size); 
+                 ++_i7)
             {
-              float _elem6;
-              _elem6 = iprot.readFloat();
-              floatSet.add(_elem6);
+              float _elem8;
+              _elem8 = iprot.readFloat();
+              floatSet.add(_elem8);
             }
             iprot.readSetEnd();
           }
@@ -233,8 +233,8 @@ public class MyUnion extends TUnion<MyUnion> implements Comparable<MyUnion> {
         Set<Float> floatSet = (Set<Float>)getFieldValue();
         {
           oprot.writeSetBegin(new TSet(TType.FLOAT, floatSet.size()));
-          for (float _iter7 : floatSet)          {
-            oprot.writeFloat(_iter7);
+          for (float _iter9 : floatSet)          {
+            oprot.writeFloat(_iter9);
           }
           oprot.writeSetEnd();
         }

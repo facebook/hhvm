@@ -524,16 +524,16 @@ public class MyService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void ping(AsyncMethodCallback resultHandler33) throws TException {
+    public void ping(AsyncMethodCallback resultHandler35) throws TException {
       checkReady();
-      ping_call method_call = new ping_call(resultHandler33, this, ___protocolFactory, ___transport);
+      ping_call method_call = new ping_call(resultHandler35, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class ping_call extends TAsyncMethodCall {
-      public ping_call(AsyncMethodCallback resultHandler34, TAsyncClient client30, TProtocolFactory protocolFactory31, TNonblockingTransport transport32) throws TException {
-        super(client30, protocolFactory31, transport32, resultHandler34, false);
+      public ping_call(AsyncMethodCallback resultHandler36, TAsyncClient client32, TProtocolFactory protocolFactory33, TNonblockingTransport transport34) throws TException {
+        super(client32, protocolFactory33, transport34, resultHandler36, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -553,16 +553,16 @@ public class MyService {
       }
     }
 
-    public void getRandomData(AsyncMethodCallback resultHandler38) throws TException {
+    public void getRandomData(AsyncMethodCallback resultHandler40) throws TException {
       checkReady();
-      getRandomData_call method_call = new getRandomData_call(resultHandler38, this, ___protocolFactory, ___transport);
+      getRandomData_call method_call = new getRandomData_call(resultHandler40, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class getRandomData_call extends TAsyncMethodCall {
-      public getRandomData_call(AsyncMethodCallback resultHandler39, TAsyncClient client35, TProtocolFactory protocolFactory36, TNonblockingTransport transport37) throws TException {
-        super(client35, protocolFactory36, transport37, resultHandler39, false);
+      public getRandomData_call(AsyncMethodCallback resultHandler41, TAsyncClient client37, TProtocolFactory protocolFactory38, TNonblockingTransport transport39) throws TException {
+        super(client37, protocolFactory38, transport39, resultHandler41, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -582,17 +582,17 @@ public class MyService {
       }
     }
 
-    public void sink(Long sink, AsyncMethodCallback resultHandler43) throws TException {
+    public void sink(Long sink, AsyncMethodCallback resultHandler45) throws TException {
       checkReady();
-      sink_call method_call = new sink_call(sink, resultHandler43, this, ___protocolFactory, ___transport);
+      sink_call method_call = new sink_call(sink, resultHandler45, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class sink_call extends TAsyncMethodCall {
       private Long sink;
-      public sink_call(Long sink, AsyncMethodCallback resultHandler44, TAsyncClient client40, TProtocolFactory protocolFactory41, TNonblockingTransport transport42) throws TException {
-        super(client40, protocolFactory41, transport42, resultHandler44, false);
+      public sink_call(Long sink, AsyncMethodCallback resultHandler46, TAsyncClient client42, TProtocolFactory protocolFactory43, TNonblockingTransport transport44) throws TException {
+        super(client42, protocolFactory43, transport44, resultHandler46, false);
         this.sink = sink;
       }
 
@@ -614,9 +614,9 @@ public class MyService {
       }
     }
 
-    public void putDataById(Long id, String data, AsyncMethodCallback resultHandler48) throws TException {
+    public void putDataById(Long id, String data, AsyncMethodCallback resultHandler50) throws TException {
       checkReady();
-      putDataById_call method_call = new putDataById_call(id, data, resultHandler48, this, ___protocolFactory, ___transport);
+      putDataById_call method_call = new putDataById_call(id, data, resultHandler50, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -624,8 +624,8 @@ public class MyService {
     public static class putDataById_call extends TAsyncMethodCall {
       private Long id;
       private String data;
-      public putDataById_call(Long id, String data, AsyncMethodCallback resultHandler49, TAsyncClient client45, TProtocolFactory protocolFactory46, TNonblockingTransport transport47) throws TException {
-        super(client45, protocolFactory46, transport47, resultHandler49, false);
+      public putDataById_call(Long id, String data, AsyncMethodCallback resultHandler51, TAsyncClient client47, TProtocolFactory protocolFactory48, TNonblockingTransport transport49) throws TException {
+        super(client47, protocolFactory48, transport49, resultHandler51, false);
         this.id = id;
         this.data = data;
       }
@@ -649,17 +649,17 @@ public class MyService {
       }
     }
 
-    public void hasDataById(Long id, AsyncMethodCallback resultHandler53) throws TException {
+    public void hasDataById(Long id, AsyncMethodCallback resultHandler55) throws TException {
       checkReady();
-      hasDataById_call method_call = new hasDataById_call(id, resultHandler53, this, ___protocolFactory, ___transport);
+      hasDataById_call method_call = new hasDataById_call(id, resultHandler55, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class hasDataById_call extends TAsyncMethodCall {
       private Long id;
-      public hasDataById_call(Long id, AsyncMethodCallback resultHandler54, TAsyncClient client50, TProtocolFactory protocolFactory51, TNonblockingTransport transport52) throws TException {
-        super(client50, protocolFactory51, transport52, resultHandler54, false);
+      public hasDataById_call(Long id, AsyncMethodCallback resultHandler56, TAsyncClient client52, TProtocolFactory protocolFactory53, TNonblockingTransport transport54) throws TException {
+        super(client52, protocolFactory53, transport54, resultHandler56, false);
         this.id = id;
       }
 
@@ -681,17 +681,17 @@ public class MyService {
       }
     }
 
-    public void getDataById(Long id, AsyncMethodCallback resultHandler58) throws TException {
+    public void getDataById(Long id, AsyncMethodCallback resultHandler60) throws TException {
       checkReady();
-      getDataById_call method_call = new getDataById_call(id, resultHandler58, this, ___protocolFactory, ___transport);
+      getDataById_call method_call = new getDataById_call(id, resultHandler60, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class getDataById_call extends TAsyncMethodCall {
       private Long id;
-      public getDataById_call(Long id, AsyncMethodCallback resultHandler59, TAsyncClient client55, TProtocolFactory protocolFactory56, TNonblockingTransport transport57) throws TException {
-        super(client55, protocolFactory56, transport57, resultHandler59, false);
+      public getDataById_call(Long id, AsyncMethodCallback resultHandler61, TAsyncClient client57, TProtocolFactory protocolFactory58, TNonblockingTransport transport59) throws TException {
+        super(client57, protocolFactory58, transport59, resultHandler61, false);
         this.id = id;
       }
 
@@ -713,17 +713,17 @@ public class MyService {
       }
     }
 
-    public void deleteDataById(Long id, AsyncMethodCallback resultHandler63) throws TException {
+    public void deleteDataById(Long id, AsyncMethodCallback resultHandler65) throws TException {
       checkReady();
-      deleteDataById_call method_call = new deleteDataById_call(id, resultHandler63, this, ___protocolFactory, ___transport);
+      deleteDataById_call method_call = new deleteDataById_call(id, resultHandler65, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class deleteDataById_call extends TAsyncMethodCall {
       private Long id;
-      public deleteDataById_call(Long id, AsyncMethodCallback resultHandler64, TAsyncClient client60, TProtocolFactory protocolFactory61, TNonblockingTransport transport62) throws TException {
-        super(client60, protocolFactory61, transport62, resultHandler64, false);
+      public deleteDataById_call(Long id, AsyncMethodCallback resultHandler66, TAsyncClient client62, TProtocolFactory protocolFactory63, TNonblockingTransport transport64) throws TException {
+        super(client62, protocolFactory63, transport64, resultHandler66, false);
         this.id = id;
       }
 
@@ -745,9 +745,9 @@ public class MyService {
       }
     }
 
-    public void lobDataById(Long id, String data, AsyncMethodCallback resultHandler68) throws TException {
+    public void lobDataById(Long id, String data, AsyncMethodCallback resultHandler70) throws TException {
       checkReady();
-      lobDataById_call method_call = new lobDataById_call(id, data, resultHandler68, this, ___protocolFactory, ___transport);
+      lobDataById_call method_call = new lobDataById_call(id, data, resultHandler70, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -755,8 +755,8 @@ public class MyService {
     public static class lobDataById_call extends TAsyncMethodCall {
       private Long id;
       private String data;
-      public lobDataById_call(Long id, String data, AsyncMethodCallback resultHandler69, TAsyncClient client65, TProtocolFactory protocolFactory66, TNonblockingTransport transport67) throws TException {
-        super(client65, protocolFactory66, transport67, resultHandler69, true);
+      public lobDataById_call(Long id, String data, AsyncMethodCallback resultHandler71, TAsyncClient client67, TProtocolFactory protocolFactory68, TNonblockingTransport transport69) throws TException {
+        super(client67, protocolFactory68, transport69, resultHandler71, true);
         this.id = id;
         this.data = data;
       }
@@ -779,16 +779,16 @@ public class MyService {
       }
     }
 
-    public void invalid_return_for_hack(AsyncMethodCallback resultHandler73) throws TException {
+    public void invalid_return_for_hack(AsyncMethodCallback resultHandler75) throws TException {
       checkReady();
-      invalid_return_for_hack_call method_call = new invalid_return_for_hack_call(resultHandler73, this, ___protocolFactory, ___transport);
+      invalid_return_for_hack_call method_call = new invalid_return_for_hack_call(resultHandler75, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class invalid_return_for_hack_call extends TAsyncMethodCall {
-      public invalid_return_for_hack_call(AsyncMethodCallback resultHandler74, TAsyncClient client70, TProtocolFactory protocolFactory71, TNonblockingTransport transport72) throws TException {
-        super(client70, protocolFactory71, transport72, resultHandler74, false);
+      public invalid_return_for_hack_call(AsyncMethodCallback resultHandler76, TAsyncClient client72, TProtocolFactory protocolFactory73, TNonblockingTransport transport74) throws TException {
+        super(client72, protocolFactory73, transport74, resultHandler76, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -808,16 +808,16 @@ public class MyService {
       }
     }
 
-    public void rpc_skipped_codegen(AsyncMethodCallback resultHandler78) throws TException {
+    public void rpc_skipped_codegen(AsyncMethodCallback resultHandler80) throws TException {
       checkReady();
-      rpc_skipped_codegen_call method_call = new rpc_skipped_codegen_call(resultHandler78, this, ___protocolFactory, ___transport);
+      rpc_skipped_codegen_call method_call = new rpc_skipped_codegen_call(resultHandler80, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class rpc_skipped_codegen_call extends TAsyncMethodCall {
-      public rpc_skipped_codegen_call(AsyncMethodCallback resultHandler79, TAsyncClient client75, TProtocolFactory protocolFactory76, TNonblockingTransport transport77) throws TException {
-        super(client75, protocolFactory76, transport77, resultHandler79, false);
+      public rpc_skipped_codegen_call(AsyncMethodCallback resultHandler81, TAsyncClient client77, TProtocolFactory protocolFactory78, TNonblockingTransport transport79) throws TException {
+        super(client77, protocolFactory78, transport79, resultHandler81, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -3202,15 +3202,15 @@ public class MyService {
           case SUCCESS:
             if (__field.type == TType.SET) {
               {
-                TSet _set80 = iprot.readSetBegin();
-                tmp_success = new HashSet<Float>(Math.max(0, 2*_set80.size));
-                for (int _i81 = 0; 
-                     (_set80.size < 0) ? iprot.peekSet() : (_i81 < _set80.size); 
-                     ++_i81)
+                TSet _set82 = iprot.readSetBegin();
+                tmp_success = new HashSet<Float>(Math.max(0, 2*_set82.size));
+                for (int _i83 = 0; 
+                     (_set82.size < 0) ? iprot.peekSet() : (_i83 < _set82.size); 
+                     ++_i83)
                 {
-                  Float _elem82;
-                  _elem82 = iprot.readFloat();
-                  tmp_success.add(_elem82);
+                  Float _elem84;
+                  _elem84 = iprot.readFloat();
+                  tmp_success.add(_elem84);
                 }
                 iprot.readSetEnd();
               }
@@ -3241,8 +3241,8 @@ public class MyService {
         oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.FLOAT, this.success.size()));
-          for (Float _iter83 : this.success)          {
-            oprot.writeFloat(_iter83);
+          for (Float _iter85 : this.success)          {
+            oprot.writeFloat(_iter85);
           }
           oprot.writeSetEnd();
         }

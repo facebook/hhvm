@@ -274,7 +274,7 @@ class mstch_base : public mstch::object {
  public:
   mstch_base(mstch_context& ctx, mstch_element_position pos)
       : context_(ctx), pos_(pos) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"first?", &mstch_base::first},
@@ -411,7 +411,7 @@ class mstch_program : public mstch_base {
   mstch_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), program_(p) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"program:name", &mstch_program::name},
@@ -500,7 +500,7 @@ class mstch_service : public mstch_base {
         containing_service_(containing_service) {
     assert(!service_->is_interaction() == !containing_service);
 
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"service:name", &mstch_service::name},
@@ -524,7 +524,7 @@ class mstch_service : public mstch_base {
         });
 
     if (service_->is_interaction()) {
-      register_methods(
+      register_cached_methods(
           this,
           {
               {"interaction:serial?", &mstch_service::is_serial_interaction},
@@ -615,7 +615,7 @@ class mstch_function : public mstch_base {
       mstch_element_position pos,
       const t_interface* iface)
       : mstch_base(ctx, pos), function_(f), interface_(iface) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"function:name", &mstch_function::name},
@@ -787,7 +787,7 @@ class mstch_type : public mstch_base {
 
   mstch_type(const t_type* t, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), type_(t), resolved_type_(t->get_true_type()) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"type:name", &mstch_type::name},
@@ -880,7 +880,7 @@ class mstch_typedef : public mstch_base {
   mstch_typedef(
       const t_typedef* t, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), typedef_(t) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"typedef:type", &mstch_typedef::type},
@@ -915,7 +915,7 @@ class mstch_struct : public mstch_base {
   mstch_struct(
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), struct_(s) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"struct:name", &mstch_struct::name},
@@ -1029,7 +1029,7 @@ class mstch_field : public mstch_base {
       mstch_element_position pos,
       const field_generator_context* field_context)
       : mstch_base(ctx, pos), field_(f), field_context_(field_context) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"field:name", &mstch_field::name},
@@ -1173,7 +1173,7 @@ class mstch_enum : public mstch_base {
 
   mstch_enum(const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), enum_(e) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum:name", &mstch_enum::name},
@@ -1258,7 +1258,7 @@ class mstch_enum_value : public mstch_base {
   mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), enum_value_(ev) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"enum_value:name", &mstch_enum_value::name},
@@ -1288,7 +1288,7 @@ class mstch_const : public mstch_base {
         current_const_(current_const),
         expected_type_(expected_type),
         field_(field) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"constant:name", &mstch_const::name},
@@ -1329,7 +1329,7 @@ class mstch_const_value : public mstch_base {
         current_const_(current_const),
         expected_type_(expected_type),
         type_(cv->kind()) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"value:bool?", &mstch_const_value::is_bool},
@@ -1433,7 +1433,7 @@ class mstch_const_map_element : public mstch_base {
         element_(*e),
         current_const_(current_const),
         expected_types_(expected_types) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"element:key", &mstch_const_map_element::element_key},
@@ -1456,7 +1456,7 @@ class mstch_structured_annotation : public mstch_base {
   mstch_structured_annotation(
       const t_const* c, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), const_(*c) {
-    register_methods(
+    register_cached_methods(
         this,
         {{"structured_annotation:const",
           &mstch_structured_annotation::constant},
@@ -1488,7 +1488,7 @@ class mstch_deprecated_annotation : public mstch_base {
   mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), key_(a->first), val_(a->second) {
-    register_methods(
+    register_cached_methods(
         this,
         {
             {"annotation:key", &mstch_deprecated_annotation::key},

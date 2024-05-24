@@ -11,6 +11,7 @@
 #include <glog/logging.h>
 
 #include <folly/Singleton.h>
+#include <folly/init/Init.h>
 
 #include "mcrouter/StandaloneUtils.h"
 #include "mcrouter/options.h"
@@ -27,10 +28,10 @@ McrouterStandaloneOptions standaloneOpts;
 } // anonymous namespace
 
 int main(int argc, char** argv) {
-  folly::SingletonVault::singleton()->registrationComplete();
   FLAGS_v = 1;
   FLAGS_logtostderr = 1;
-  google::InitGoogleLogging(argv[0]);
+  folly::Init init(
+      &argc, &argv, folly::InitOptions{}.removeFlags(false).useGFlags(false));
 
   CmdLineOptions cmdLineOpts =
       parseCmdLineOptions(argc, argv, MCROUTER_PACKAGE_STRING);

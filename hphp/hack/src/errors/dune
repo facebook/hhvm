@@ -14,6 +14,16 @@
 )
 
 (library
+ (name warnings_saved_state)
+ (wrapped false)
+ (modules
+  warnings_saved_state)
+ (libraries)
+ (preprocess
+   (pps
+    ppx_deriving.std)))
+
+(library
   (name user_error)
   (wrapped false)
   (preprocess
@@ -104,6 +114,7 @@
   utils_exit
   utils_multifile
   user_error
+  warnings_saved_state
   (select
    error_message_sentinel.ml
    from

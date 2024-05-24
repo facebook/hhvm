@@ -9,6 +9,7 @@ pub mod aast_impl;
 pub mod ast_defs_impl;
 pub mod custom_error_config_impl;
 pub mod direct_decl_parser;
+pub mod error_hash_set;
 pub mod errors_impl;
 pub mod global_options_impl;
 pub mod i_map;
@@ -41,6 +42,7 @@ pub mod typing_logic;
 pub mod typing_reason_impl;
 pub mod typing_set;
 pub mod user_error_impl;
+pub mod warnings_saved_state_impl;
 
 mod decl_fold_options_impl;
 mod decl_parser_options_impl;

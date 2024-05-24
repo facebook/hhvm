@@ -301,7 +301,7 @@ let filter_out_mergebase_warnings env errors =
       | User_error.Err -> true
       | User_error.Warning ->
         not
-          (ISet.mem
+          (Warnings_saved_state.mem
              (Errors.Error.hash_for_saved_state error)
              env.init_env.mergebase_warning_hashes))
 

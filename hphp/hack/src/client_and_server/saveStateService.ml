@@ -26,15 +26,15 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
   Marshal.to_channel chan contents [];
   Stdlib.close_out chan
 
-(* If the contents doesn't contain the value of the expected type, the result
-   is undefined behavior. We may crash, or we may continue with a bogus value. *)
+(** If the contents doesn't contain the value of the expected type, the result
+  is undefined behavior. We may crash, or we may continue with a bogus value. *)
 let load_contents_unsafe (input_filename : string) : 'a =
   let ic = Stdlib.open_in_bin input_filename in
   let contents = Marshal.from_channel ic in
   Stdlib.close_in ic;
   contents
 
-(* Loads the file info and the errors, if any. *)
+(** Loads the file info and the errors, if any. *)
 let load_saved_state_exn
     ~(naming_table_fallback_path : string option)
     ~(errors_path : string)
@@ -76,10 +76,13 @@ let load_saved_state_exn
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  let (old_warnings : warning_hashes) =
-    if not (Sys.file_exists warning_hashes_path) then
-      ISet.empty
-    else
+  let (old_warnings : Warnings_saved_state.t) =
+    if not (Sys.file_exists warning_hashes_path) then (
+      Hh_logger.warn
+        "Was expecting warning saved state file at %s but file does not exists."
+        warning_hashes_path;
+      Warnings_saved_state.empty
+    ) else
       Marshal.from_channel (In_channel.create ~binary:true warning_hashes_path)
   in
   (old_naming_table, { old_errors; old_warnings })
@@ -99,7 +102,7 @@ let get_hot_classes (filename : string) : SSet.t =
     |> SSet.of_list
 
 (** Dumps the naming-table (a saveable form of FileInfo), and errors if any,
-and hot class decls. *)
+  and hot class decls. *)
 let dump_naming_and_errors
     (output_filename : string)
     (naming_table : Naming_table.t)

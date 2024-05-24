@@ -95,7 +95,8 @@ external hash_error_for_saved_state : error -> int
 module Error = struct
   type t = error [@@deriving ord]
 
-  let hash_for_saved_state (error : t) : int = hash_error_for_saved_state error
+  let hash_for_saved_state (error : t) : Warnings_saved_state.ErrorHash.t =
+    hash_error_for_saved_state error
 end
 
 module ErrorSet = Stdlib.Set.Make (Error)

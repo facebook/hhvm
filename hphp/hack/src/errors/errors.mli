@@ -29,7 +29,7 @@ val iter : t -> f:(error -> unit) -> unit
 module Error : sig
   type t = error
 
-  val hash_for_saved_state : t -> int
+  val hash_for_saved_state : t -> Warnings_saved_state.ErrorHash.t
 end
 
 module ErrorSet : Stdlib.Set.S with type elt := error

@@ -26,6 +26,7 @@ pub use manual::aast_impl;
 pub use manual::ast_defs_impl;
 pub use manual::custom_error_config_impl;
 pub use manual::direct_decl_parser;
+pub use manual::error_hash_set;
 pub use manual::errors_impl;
 pub use manual::global_options_impl;
 pub use manual::i_map;
@@ -57,6 +58,7 @@ pub use manual::typing_logic;
 pub use manual::typing_reason_impl;
 pub use manual::typing_set;
 pub use manual::user_error_impl;
+pub use manual::warnings_saved_state_impl;
 
 mod stubs;
 
@@ -127,4 +129,5 @@ pub use gen::typing_tyvar_occurrences;
 pub use gen::user_error;
 pub use gen::user_error_flags;
 pub use gen::validation_err;
+pub use gen::warnings_saved_state;
 pub use gen::xhp_attribute;

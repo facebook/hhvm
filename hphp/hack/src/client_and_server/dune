@@ -269,7 +269,8 @@
   typing_defs
   typing_deps
   utils_lint
-  version)
+  version
+  warnings_saved_state)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum)))
 

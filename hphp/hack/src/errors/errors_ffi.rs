@@ -5,7 +5,7 @@
 
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::errors::Error;
-use oxidized::errors_impl::ErrorHash;
+use oxidized::warnings_saved_state::ErrorHash;
 
 ocaml_ffi! {
     fn hash_error_for_saved_state(error: Error) -> ErrorHash {

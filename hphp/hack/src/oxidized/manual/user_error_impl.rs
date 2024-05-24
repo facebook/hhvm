@@ -11,6 +11,7 @@ use hh_hash::Hasher;
 
 use crate::user_error::Severity;
 use crate::user_error::UserError;
+use crate::warnings_saved_state::ErrorHash;
 
 impl Severity {
     pub fn to_all_caps_string(&self) -> &'static str {
@@ -28,10 +29,8 @@ impl Severity {
     }
 }
 
-pub type UserErrorHash = isize;
-
 impl<PrimPos: Hash, Pos: Hash> UserError<PrimPos, Pos> {
-    pub fn hash_for_saved_state(&self) -> UserErrorHash {
+    pub fn hash_for_saved_state(&self) -> ErrorHash {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
         hasher.finish() as isize

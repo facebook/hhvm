@@ -667,7 +667,8 @@ cdef class MapTypeInfo(TypeInfoBase):
         if not isinstance(other, MapTypeInfo):
             return False
 
-        return self.val_info == (<MapTypeInfo>other).val_info
+        return (self.key_info == (<MapTypeInfo>other).key_info
+            and self.val_info == (<MapTypeInfo>other).val_info)
 
 cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):

@@ -286,6 +286,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(map_type_info.same_as(map_type_info))
         self.ut.assertTrue(MapTypeInfo(typeinfo_string, typeinfo_i64).same_as(map_type_info))
         self.ut.assertFalse(MapTypeInfo(typeinfo_string, typeinfo_i32).same_as(map_type_info))
+        self.ut.assertFalse(MapTypeInfo(typeinfo_i32, typeinfo_i64).same_as(map_type_info))
 
     def test_MapTypeInfo_nested(self) -> None:
         # Map[str, Map[int, List[int]]]

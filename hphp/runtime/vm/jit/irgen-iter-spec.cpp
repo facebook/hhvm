@@ -215,9 +215,10 @@ const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
 // so that in the emitSpecialized* functions below, we can simply describe the
 // high-level structure of the code.
 struct Accessor {
-  Type arr_type;
-  bool is_ptr_iter;
-  ArrayLayout layout = ArrayLayout::Top();
+  Accessor(Type arrType, bool isPtrIter)
+    : m_arrType(arrType)
+    , m_isPtrIter(isPtrIter)
+  {}
 
   virtual ~Accessor() {}
 
@@ -228,7 +229,7 @@ struct Accessor {
   // we should use as the iter's pos (e.g. a pointer, for pointer iters).
   //
   // This method assumes that we've already constrained arr to DataTypeSpecific
-  // and that the type of arr overlaps with arr_type.
+  // and that the type is an arrType().
   virtual SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const = 0;
 
   // Given a pos and a constant offset, this method returns an updated pos.
@@ -246,28 +247,29 @@ struct Accessor {
 
   // Given a base and an "elm value", this method returns the val of that elm.
   virtual SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
+
+  Type arrType() const { return m_arrType; }
+  bool isPtrIter() const { return m_isPtrIter; }
+
+private:
+  const Type m_arrType;
+  const bool m_isPtrIter;
 };
 
 struct VecAccessor : public Accessor {
-  explicit VecAccessor(
-    bool baseConst,
-    bool outputKey
-  ) {
-    is_ptr_iter =
-      baseConst && !outputKey && VanillaVec::stores_unaligned_typed_values;
-    arr_type = TVec;
-    if (allowBespokeArrayLikes()) {
-      arr_type = arr_type.narrowToVanilla();
-    }
-    layout = ArrayLayout::Vanilla();
-  }
+  explicit VecAccessor(bool baseConst, bool outputKey)
+    : Accessor(
+        allowBespokeArrayLikes() ? TVanillaVec : TVec,
+        baseConst && !outputKey && VanillaVec::stores_unaligned_typed_values
+      )
+  {}
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
-    return gen(env, CheckType, exit, arr_type, base);
+    return gen(env, CheckType, exit, arrType(), base);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetVecPtrIter, arr, idx) : idx;
+    return isPtrIter() ? gen(env, GetVecPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
@@ -275,54 +277,49 @@ struct VecAccessor : public Accessor {
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
-    // is_ptr_iter is only true when the iterator doesn't output a key,
+    // isPtrIter() is only true when the iterator doesn't output a key,
     // and this method is only called when the iterator *does* output a key.
-    always_assert(!is_ptr_iter);
+    always_assert(!isPtrIter());
     return elm;
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return is_ptr_iter
+    return isPtrIter()
       ? gen(env, LdPtrIterVal, TInitCell, arr, elm)
       : gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return is_ptr_iter
+    return isPtrIter()
       ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
 };
 
 struct DictAccessor : public Accessor {
-  explicit DictAccessor(bool baseConst, ArrayKeyTypes keyTypes) {
-    is_ptr_iter = baseConst;
-    arr_type = TDict;
-    if (allowBespokeArrayLikes()) {
-      arr_type = arr_type.narrowToVanilla();
-    }
-    key_types = keyTypes;
-    key_types.toJitType(key_jit_type);
-    layout = ArrayLayout::Vanilla();
+  explicit DictAccessor(bool baseConst, ArrayKeyTypes keyTypes)
+    : Accessor(allowBespokeArrayLikes() ? TVanillaDict : TDict, baseConst)
+    , m_keyTypes(keyTypes) {
+    keyTypes.toJitType(m_keyJitType);
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
-    auto const data = ArrayKeyTypesData{key_types};
-    auto const arr = gen(env, CheckType, exit, arr_type, base);
-    gen(env, CheckDictKeys, exit, data, key_jit_type, arr);
+    auto const arr = gen(env, CheckType, exit, arrType(), base);
+    auto const data = ArrayKeyTypesData{m_keyTypes};
+    gen(env, CheckDictKeys, exit, data, m_keyJitType, arr);
     return arr;
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetDictPtrIter, arr, idx) : idx;
+    return isPtrIter() ? gen(env, GetDictPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return is_ptr_iter ? pos : gen(env, GetDictPtrIter, arr, pos);
+    return isPtrIter() ? pos : gen(env, GetDictPtrIter, arr, pos);
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
-    return gen(env, LdPtrIterKey, key_jit_type, arr, elm);
+    return gen(env, LdPtrIterKey, m_keyJitType, arr, elm);
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
@@ -330,28 +327,23 @@ struct DictAccessor : public Accessor {
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return is_ptr_iter
+    return isPtrIter()
       ? gen(env, AdvanceDictPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
 
 private:
-  ArrayKeyTypes key_types;
-  Type key_jit_type;
+  const ArrayKeyTypes m_keyTypes;
+  Type m_keyJitType;
 };
 
 struct KeysetAccessor : public Accessor {
-  explicit KeysetAccessor(bool baseConst) {
-    is_ptr_iter = baseConst;
-    arr_type = TKeyset;
-    if (allowBespokeArrayLikes()) {
-      arr_type = arr_type.narrowToVanilla();
-    }
-    layout = ArrayLayout::Vanilla();
-  }
+  explicit KeysetAccessor(bool baseConst)
+    : Accessor(allowBespokeArrayLikes() ? TVanillaKeyset : TKeyset, baseConst)
+  {}
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
-    auto const keyset = gen(env, CheckType, exit, arr_type, base);
+    auto const keyset = gen(env, CheckType, exit, arrType(), base);
 
     // Side-exit if there are tombstones.
     auto const size = gen(env, CountKeyset, keyset);
@@ -363,11 +355,11 @@ struct KeysetAccessor : public Accessor {
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetKeysetPtrIter, arr, idx) : idx;
+    return isPtrIter() ? gen(env, GetKeysetPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return is_ptr_iter ? pos : gen(env, GetKeysetPtrIter, arr, pos);
+    return isPtrIter() ? pos : gen(env, GetKeysetPtrIter, arr, pos);
   }
 
   SSATmp* getKey(IRGS&, SSATmp*, SSATmp*, SSATmp* val) const override {
@@ -379,21 +371,19 @@ struct KeysetAccessor : public Accessor {
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return is_ptr_iter
+    return isPtrIter()
       ? gen(env, AdvanceKeysetPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
 };
 
 struct BespokeAccessor : public Accessor {
-  explicit BespokeAccessor(Type baseType) {
-    is_ptr_iter = false;
-    arr_type = baseType;
-    layout = baseType.arrSpec().layout();
-  }
+  explicit BespokeAccessor(Type baseType)
+    : Accessor(baseType, false)
+  {}
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
-    auto const result = gen(env, CheckType, exit, arr_type, base);
+    auto const result = gen(env, CheckType, exit, arrType(), base);
     if (result->isA(TDict)) {
       auto const size = gen(env, Count, result);
       auto const used = gen(env, BespokeIterEnd, result);
@@ -456,7 +446,7 @@ std::unique_ptr<Accessor> getAccessor(
 // so we can assert that the type of the base matches the iterator type.
 SSATmp* iterBase(IRGS& env, const Accessor& accessor,
                  const IterArgs& data, uint32_t baseLocalId) {
-  auto const type = accessor.arr_type;
+  auto const type = accessor.arrType();
   gen(env, AssertLoc, type, LocalId(baseLocalId), fp(env));
   return gen(env, LdLoc, type, LocalId(baseLocalId), fp(env));
 }
@@ -502,7 +492,7 @@ void iterStore(IRGS& env, uint32_t local, SSATmp* cell) {
 
 // Convert an iterator position to an integer representation.
 SSATmp* posAsInt(IRGS& env, const Accessor& accessor, SSATmp* pos) {
-  if (!accessor.is_ptr_iter) return pos;
+  if (!accessor.isPtrIter()) return pos;
   return gen(env, PtrToElemAsInt, pos);
 }
 
@@ -567,7 +557,7 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
   auto block = env.irb->curBlock();
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const pos = label->dst(0);
-  pos->setType(accessor.is_ptr_iter ? TPtrToElem : TInt);
+  pos->setType(accessor.isPtrIter() ? TPtrToElem : TInt);
   return pos;
 }
 
@@ -643,7 +633,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
   accessor.checkBase(env, base, makeExitSlow(env));
 
   auto const asIterPosType = [&](SSATmp* iterPos) {
-    if (!accessor.is_ptr_iter) return iterPos;
+    if (!accessor.isPtrIter()) return iterPos;
     return gen(env, IntAsPtrToElem, iterPos);
   };
 
@@ -654,7 +644,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
 
   ifThen(env,
     [&](Block* taken) {
-      auto const eq = accessor.is_ptr_iter ? EqPtrIter : EqInt;
+      auto const eq = accessor.isPtrIter() ? EqPtrIter : EqInt;
       auto const done = gen(env, eq, pos, end);
       gen(env, JmpNZero, taken, done);
       gen(env, Jmp, footer, pos);
@@ -741,7 +731,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout, keyTypes});
 
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
-  assertx(base->type().maybe(accessor->arr_type));
+  assertx(base->type().maybe(accessor->arrType()));
 
   auto const iterKey = std::make_tuple(
     body, baseDT, layout.toUint16(), keyTypes.toBits());
@@ -790,7 +780,7 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   }
 
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
-  assertx(base->type().maybe(accessor->arr_type));
+  assertx(base->type().maybe(accessor->arrType()));
 
   auto const iterKey = std::make_tuple(
     body, baseDT, layout.toUint16(), keyTypes.toBits());

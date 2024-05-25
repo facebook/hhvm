@@ -658,6 +658,13 @@ inline SSATmp* ldCtxCls(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Other common helpers
 
+inline bool classIsPersistentOrCtxParent(IRGS& env, const Class* cls) {
+  if (!cls) return false;
+  if (classHasPersistentRDS(cls)) return true;
+  if (!curClass(env)) return false;
+  return curClass(env)->classof(cls);
+}
+
 inline const Class* lookupUniqueClass(IRGS& env,
                                       const StringData* name,
                                       bool trustUnit = false) {
@@ -665,10 +672,6 @@ inline const Class* lookupUniqueClass(IRGS& env,
   // trust the unit.
   return Class::lookupUniqueInContext(
     name, curClass(env), trustUnit ? curUnit(env) : nullptr);
-}
-
-inline bool classIsTrusted(IRGS& env, const Class* cls) {
-  return Class::lookupUniqueInContext(cls, curClass(env), nullptr) != nullptr;
 }
 
 inline SSATmp* ldCls(IRGS& env,
@@ -679,13 +682,15 @@ inline SSATmp* ldCls(IRGS& env,
   if (lazyClassOrName->hasConstVal()) {
     auto const cnameStr = isLazy ? lazyClassOrName->lclsVal().name() :
                                    lazyClassOrName->strVal();
-    auto const cls = lookupUniqueClass(env, cnameStr);
-    if (cls) {
+    if (auto const cls = lookupUniqueClass(env, cnameStr)) {
+      if (!classIsPersistentOrCtxParent(env, cls)) {
+        auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
+        gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+      }
       return cns(env, cls);
-    } else {
-      auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-      return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
     }
+    auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
+    return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
   }
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);

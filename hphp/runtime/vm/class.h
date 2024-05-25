@@ -1510,9 +1510,6 @@ public:
   static const Class* lookupUniqueInContext(const StringData* name,
                                             const Class* ctx,
                                             const Unit* unit);
-  static const Class* lookupUniqueInContext(const Class* cls,
-                                            const Class* ctx,
-                                            const Unit* unit);
 
   /*
    * Same as Class::load but also checks for module boundary violations

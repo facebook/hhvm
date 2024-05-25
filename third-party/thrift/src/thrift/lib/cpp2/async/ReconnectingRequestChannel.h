@@ -117,7 +117,11 @@ class ReconnectingRequestChannel : public RequestChannel,
 
   uint16_t getProtocolId() override {
     if (!isChannelGood()) {
-      reconnectRequestChannel();
+      if (useRequestQueue_) {
+        reconnectRequestChannelWithCallback();
+      } else {
+        reconnectRequestChannel();
+      }
     }
     return impl_->getProtocolId();
   }

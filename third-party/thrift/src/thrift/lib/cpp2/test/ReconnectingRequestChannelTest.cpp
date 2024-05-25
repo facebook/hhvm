@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/async/ReconnectingRequestChannel.h>
-
+#include <functional>
 #include <folly/Portability.h>
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/BlockingWait.h>
@@ -26,6 +25,7 @@
 #include <folly/io/async/test/ScopedBoundPort.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
+#include <thrift/lib/cpp2/async/ReconnectingRequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -87,7 +87,13 @@ class ReconnectingRequestChannelTest : public Test {
     auto channel = PooledRequestChannel::newChannel(
         executor, ioThread_, [this](folly::EventBase& evb) {
           return ReconnectingRequestChannel::newChannel(
-              evb, [this](folly::EventBase& evb) {
+              evb,
+              [this](
+                  folly::EventBase& evb,
+                  folly::AsyncSocket::ConnectCallback& cb) {
+                SCOPE_EXIT {
+                  cb.connectSuccess();
+                };
                 auto socket =
                     AsyncSocket::UniquePtr(new AsyncSocket(&evb, up_addr));
                 return RocketClientChannel::newChannel(std::move(socket));
@@ -102,8 +108,14 @@ class ReconnectingRequestChannelTest : public Test {
 
 TEST_F(ReconnectingRequestChannelTest, ReconnectHeader) {
   auto channel = ReconnectingRequestChannel::newChannel(
-      *eb, [this](folly::EventBase& eb) mutable {
+      *eb,
+      [this](
+          folly::EventBase& eb,
+          folly::AsyncSocket::ConnectCallback& cb) mutable {
         connection_count_++;
+        SCOPE_EXIT {
+          cb.connectSuccess();
+        };
         return HeaderClientChannel::newChannel(
             AsyncSocket::newSocket(&eb, up_addr));
       });
@@ -113,8 +125,15 @@ TEST_F(ReconnectingRequestChannelTest, ReconnectHeader) {
 
 TEST_F(ReconnectingRequestChannelTest, ReconnectRocket) {
   auto channel = ReconnectingRequestChannel::newChannel(
-      *eb, [this](folly::EventBase& eb) mutable {
+      *eb,
+      [this](
+          folly::EventBase& eb,
+          folly::AsyncSocket::ConnectCallback& cb) mutable {
         connection_count_++;
+        SCOPE_EXIT {
+          cb.connectSuccess();
+        };
+
         return RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
             new folly::AsyncSocket(&eb, up_addr)));
       });

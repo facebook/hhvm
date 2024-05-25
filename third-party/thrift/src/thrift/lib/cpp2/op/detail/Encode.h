@@ -21,6 +21,7 @@
 #include <folly/Overload.h>
 #include <folly/Range.h>
 #include <folly/Utility.h>
+#include <folly/container/Reserve.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRef.h>
@@ -856,7 +857,7 @@ struct Decode<type::list<Tag>> {
           Decode<Tag>{}(prot, elem);
         }
       } else {
-        apache::thrift::detail::pm::reserve_if_possible(&list, s);
+        folly::reserve_if_available(list, s);
         while (s--) {
           consumeElem();
         }
@@ -917,7 +918,7 @@ struct Decode<type::set<Tag>> {
 
     bool sorted = true;
     typename Set::container_type tmp(set.get_allocator());
-    apache::thrift::detail::pm::reserve_if_possible(&tmp, set_size);
+    folly::reserve_if_available(tmp, set_size);
     {
       auto& elem0 = apache::thrift::detail::pm::emplace_back_default(tmp);
       Decode<Tag>{}(prot, elem0);
@@ -937,7 +938,7 @@ struct Decode<type::set<Tag>> {
   static std::enable_if_t<
       !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>
   decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
-    apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
+    folly::reserve_if_available(set, set_size);
 
     for (auto i = set_size; i > 0; i--) {
       typename Set::value_type value =
@@ -989,7 +990,7 @@ struct Decode<type::map<Key, Value>> {
 
     bool sorted = true;
     typename Map::container_type tmp(map.get_allocator());
-    apache::thrift::detail::pm::reserve_if_possible(&tmp, map_size);
+    folly::reserve_if_available(tmp, map_size);
     {
       auto& elem0 =
           apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
@@ -1013,7 +1014,7 @@ struct Decode<type::map<Key, Value>> {
   static std::enable_if_t<
       !apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>
   decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
-    apache::thrift::detail::pm::reserve_if_possible(&map, map_size);
+    folly::reserve_if_available(map, map_size);
 
     for (auto i = map_size; i--;) {
       typename Map::key_type key = apache::thrift::detail::default_map_key(map);

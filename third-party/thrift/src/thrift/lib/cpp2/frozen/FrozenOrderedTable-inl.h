@@ -16,6 +16,7 @@
 
 #include <type_traits>
 #include <folly/Traits.h>
+#include <folly/container/Reserve.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 namespace apache {
@@ -66,7 +67,7 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
       out = T{folly::sorted_unique, std::move(outBuffer)};
     } else {
       out.clear();
-      apache::thrift::detail::pm::reserve_if_possible(&out, v.size());
+      folly::reserve_if_available(out, v.size());
       for (auto it = v.begin(); it != v.end(); ++it) {
         out.insert(out.end(), it.thaw());
       }

@@ -29,6 +29,7 @@
 #include <folly/Conv.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
+#include <folly/container/Reserve.h>
 #include <folly/container/View.h>
 #include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
@@ -91,23 +92,11 @@ namespace detail {
 namespace pm {
 
 template <typename C, typename... A>
-using detect_reserve = decltype(FOLLY_DECLVAL(C).reserve(FOLLY_DECLVAL(A)...));
-template <typename C, typename... A>
 using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
 template <typename C, typename... A>
 using detect_resize_without_initialization =
     decltype(folly::resizeWithoutInitialization(
         FOLLY_DECLVAL(C&), FOLLY_DECLVAL(A)...));
-
-template <typename Container, typename Size>
-auto reserve_if_possible(Container* t, Size size) {
-  if constexpr (folly::is_detected_v<detect_reserve, Container&, Size>) {
-    t->reserve(size);
-    return std::true_type{};
-  } else {
-    return std::false_type{};
-  }
-}
 
 template <typename Container>
 typename Container::reference emplace_back_default(Container& c) {
@@ -199,7 +188,7 @@ deserialize_known_length_map(
 
   bool sorted = true;
   typename Map::container_type tmp(map.get_allocator());
-  reserve_if_possible(&tmp, map_size);
+  folly::reserve_if_available(tmp, map_size);
   {
     decltype(auto) elem0 = emplace_back_default_map(tmp, map);
     kr(elem0.first);
@@ -225,7 +214,7 @@ deserialize_known_length_map(
     std::uint32_t map_size,
     const KeyDeserializer& kr,
     const MappedDeserializer& mr) {
-  reserve_if_possible(&map, map_size);
+  folly::reserve_if_available(map, map_size);
 
   for (auto i = map_size; i--;) {
     typename Map::key_type key = detail::default_map_key(map);
@@ -245,7 +234,7 @@ deserialize_known_length_map(
     std::uint32_t map_size,
     const KeyDeserializer& kr,
     const MappedDeserializer& mr) {
-  reserve_if_possible(&map, map_size);
+  folly::reserve_if_available(map, map_size);
 
   for (auto i = map_size; i--;) {
     deserialize_key_val_into_map(map, kr, mr);
@@ -262,7 +251,7 @@ deserialize_known_length_set(
 
   bool sorted = true;
   typename Set::container_type tmp(set.get_allocator());
-  reserve_if_possible(&tmp, set_size);
+  folly::reserve_if_available(tmp, set_size);
   {
     auto& elem0 = emplace_back_default(tmp);
     vr(elem0);
@@ -283,7 +272,7 @@ typename std::enable_if<
     set_emplace_hint_is_invocable_v<Set>>::type
 deserialize_known_length_set(
     Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
-  reserve_if_possible(&set, set_size);
+  folly::reserve_if_available(set, set_size);
 
   for (auto i = set_size; i--;) {
     typename Set::value_type value = detail::default_set_element(set);
@@ -298,7 +287,7 @@ typename std::enable_if<
     !set_emplace_hint_is_invocable_v<Set>>::type
 deserialize_known_length_set(
     Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
-  reserve_if_possible(&set, set_size);
+  folly::reserve_if_available(set, set_size);
 
   for (auto i = set_size; i--;) {
     typename Set::value_type value = detail::default_set_element(set);
@@ -595,7 +584,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
             elem_methods::read(protocol, elem);
           }
         } else {
-          reserve_if_possible(&out, list_size);
+          folly::reserve_if_available(out, list_size);
           while (list_size--) {
             read_one(protocol, out);
           }

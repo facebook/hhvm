@@ -26,6 +26,7 @@
 #include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/Utility.h>
+#include <folly/container/Reserve.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
@@ -1127,7 +1128,7 @@ struct ProtocolValueToThriftValue<type::list<Tag>> {
       return false;
     }
     list.clear();
-    apache::thrift::detail::pm::reserve_if_possible(&list, p->size());
+    folly::reserve_if_available(list, p->size());
     for (auto&& v : *p) {
       if (!ProtocolValueToThriftValue<Tag>{}(v, list.emplace_back())) {
         return false;
@@ -1150,7 +1151,7 @@ struct ProtocolValueToThriftValue<type::set<Tag>> {
     }
 
     set.clear();
-    apache::thrift::detail::pm::reserve_if_possible(&set, p->size());
+    folly::reserve_if_available(set, p->size());
     for (auto&& v : *p) {
       apache::thrift::op::clear<Tag>(elem);
       if (!ProtocolValueToThriftValue<Tag>{}(v, elem)) {
@@ -1174,7 +1175,7 @@ struct ProtocolValueToThriftValue<type::map<KeyTag, ValueTag>> {
       return false;
     }
     map.clear();
-    apache::thrift::detail::pm::reserve_if_possible(&map, p->size());
+    folly::reserve_if_available(map, p->size());
     for (auto&& [k, v] : *p) {
       apache::thrift::op::clear<KeyTag>(key);
       apache::thrift::op::clear<ValueTag>(val);

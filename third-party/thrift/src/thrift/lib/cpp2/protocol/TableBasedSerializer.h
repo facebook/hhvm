@@ -29,6 +29,7 @@
 #include <folly/Range.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
+#include <folly/container/Reserve.h>
 #include <folly/container/View.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
@@ -477,7 +478,7 @@ void readMap(
     void (*keyReader)(const void* /*context*/, void* /*key*/),
     void (*valueReader)(const void* /*context*/, void* /*val*/)) {
   Map& out = *static_cast<Map*>(object);
-  ::apache::thrift::detail::pm::reserve_if_possible(&out, mapSize);
+  folly::reserve_if_available(out, mapSize);
 
   for (auto i = mapSize; i--;) {
     typename Map::key_type key;
@@ -513,8 +514,8 @@ void readKnownLengthSet(
     void* object,
     std::uint32_t setSize,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
-  ::apache::thrift::detail::pm::reserve_if_possible(
-      static_cast<Set*>(object), setSize);
+  Set& out = *static_cast<Set*>(object);
+  folly::reserve_if_available(out, setSize);
 
   while (setSize--) {
     consumeSetElem<Set>(context, object, reader);
@@ -530,7 +531,7 @@ void readList(
   List& out = *static_cast<List*>(object);
   using traits = std::iterator_traits<typename List::iterator>;
   using cat = typename traits::iterator_category;
-  if (::apache::thrift::detail::pm::reserve_if_possible(&out, listSize) ||
+  if (folly::reserve_if_available(out, listSize) ||
       std::is_same<cat, std::bidirectional_iterator_tag>::value) {
     while (listSize--) {
       consumeListElem<List>(context, object, reader);

@@ -317,6 +317,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case DictGetQuiet:
   case DictIdx:
   case DictIsset:
+  case DictIterEnd:
   case KeysetGet:
   case KeysetGetK:
   case KeysetGetQuiet:

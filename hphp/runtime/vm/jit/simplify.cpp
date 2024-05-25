@@ -319,6 +319,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckRDSInitialized,
                    CheckVecBounds,
                    CheckDictKeys,
+                   CheckPtrIterTombstone,
                    CheckMissingKeyInArrLike,
                    CheckDictOffset,
                    CheckKeysetOffset));
@@ -3109,6 +3110,11 @@ SSATmp* simplifyGetVecPtrIter(State& env, const IRInstruction* inst) {
   return cns(env, Type::cns(elm, outputType(inst)));
 }
 
+SSATmp* simplifyCheckPtrIterTombstone(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->isA(TStaticArrLike)) return gen(env, Nop);
+  return mergeBranchDests(env, inst);
+}
+
 SSATmp* simplifyCheckDictKeys(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return mergeBranchDests(env, inst);
@@ -3238,6 +3244,20 @@ X(CountDict)
 X(CountKeyset)
 
 #undef X
+
+SSATmp* simplifyDictIterEnd(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+
+  if (arr->hasConstVal()) {
+    auto const dict = VanillaDict::as(arr->type().arrLikeVal());
+    return cns(env, dict->iterLimit());
+  }
+
+  // Static dicts do not have tombstones.
+  if (arr->isA(TStaticDict)) return gen(env, CountDict, arr);
+
+  return nullptr;
+}
 
 SSATmp* simplifyKeysetIterEnd(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
@@ -4112,6 +4132,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(CountVec)
       X(CountDict)
       X(CountKeyset)
+      X(DictIterEnd)
       X(KeysetIterEnd)
       X(DecRef)
       X(DecRefNZ)
@@ -4266,6 +4287,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(GetDictPtrIter)
       X(GetKeysetPtrIter)
       X(GetVecPtrIter)
+      X(CheckPtrIterTombstone)
       X(CheckDictKeys)
       X(CheckDictOffset)
       X(CheckKeysetOffset)

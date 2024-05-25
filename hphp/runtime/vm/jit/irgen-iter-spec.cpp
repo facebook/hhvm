@@ -222,8 +222,16 @@ struct Accessor {
 
   virtual ~Accessor() {}
 
+  // Returns whether the iterated array may contain tombstones.
+  virtual bool mayContainTombstones() const = 0;
+
   // Branches to exit if the base doesn't match the iter's specialized type.
   virtual SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const = 0;
+
+  // Get index of the end iteration position. This is different from Count
+  // instruction in presence of tombstones.
+  // Might be used only when mayContainTombstones() is true.
+  virtual SSATmp* getEndIdx(IRGS& env, SSATmp* base) const = 0;
 
   // Given a base and a logical iter index, this method returns the value that
   // we should use as the iter's pos (e.g. a pointer, for pointer iters).
@@ -239,6 +247,12 @@ struct Accessor {
   // can use to share arithmetic between key and val. (For example, for dict
   // index iters, we compute a pointer that's only valid for this iteration.)
   virtual SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const = 0;
+
+  // Given a base and an "elm value", this method checks whether the elm
+  // corresponds to a tombstone. If so, branches to taken.
+  // Might be used only when mayContainTombstones() is true.
+  virtual void checkTombstone(IRGS& env, SSATmp* arr, SSATmp* elm, Block* taken)
+    const = 0;
 
   // Given a base and an "elm value", this method returns the key of that elm.
   // Keysets use the already loaded val to avoid duplicate load.
@@ -264,8 +278,16 @@ struct VecAccessor : public Accessor {
       )
   {}
 
+  bool mayContainTombstones() const override {
+    return false;
+  }
+
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     return gen(env, CheckType, exit, arrType(), base);
+  }
+
+  SSATmp* getEndIdx(IRGS&, SSATmp*) const override {
+    always_assert(false);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -274,6 +296,10 @@ struct VecAccessor : public Accessor {
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
     return pos;
+  }
+
+  void checkTombstone(IRGS&, SSATmp*, SSATmp*, Block*) const override {
+    always_assert(false);
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
@@ -303,11 +329,20 @@ struct DictAccessor : public Accessor {
     keyTypes.toJitType(m_keyJitType);
   }
 
+  bool mayContainTombstones() const override {
+    return m_keyTypes.mayIncludeTombstone();
+  }
+
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     auto const arr = gen(env, CheckType, exit, arrType(), base);
     auto const data = ArrayKeyTypesData{m_keyTypes};
     gen(env, CheckDictKeys, exit, data, m_keyJitType, arr);
     return arr;
+  }
+
+  SSATmp* getEndIdx(IRGS& env, SSATmp* base) const override {
+    assertx(mayContainTombstones());
+    return gen(env, DictIterEnd, base);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -316,6 +351,12 @@ struct DictAccessor : public Accessor {
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
     return isPtrIter() ? pos : gen(env, GetDictPtrIter, arr, pos);
+  }
+
+  void checkTombstone(IRGS& env, SSATmp* arr, SSATmp* elm, Block* taken)
+    const override {
+    assertx(mayContainTombstones());
+    gen(env, CheckPtrIterTombstone, taken, arr, elm);
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
@@ -342,16 +383,17 @@ struct KeysetAccessor : public Accessor {
     : Accessor(allowBespokeArrayLikes() ? TVanillaKeyset : TKeyset, baseConst)
   {}
 
+  bool mayContainTombstones() const override {
+    return true;
+  }
+
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
-    auto const keyset = gen(env, CheckType, exit, arrType(), base);
+    return gen(env, CheckType, exit, arrType(), base);
+  }
 
-    // Side-exit if there are tombstones.
-    auto const size = gen(env, CountKeyset, keyset);
-    auto const used = gen(env, KeysetIterEnd, keyset);
-    auto const same = gen(env, EqInt, size, used);
-    gen(env, JmpZero, exit, same);
-
-    return keyset;
+  SSATmp* getEndIdx(IRGS& env, SSATmp* base) const override {
+    assertx(mayContainTombstones());
+    return gen(env, KeysetIterEnd, base);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -360,6 +402,12 @@ struct KeysetAccessor : public Accessor {
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
     return isPtrIter() ? pos : gen(env, GetKeysetPtrIter, arr, pos);
+  }
+
+  void checkTombstone(IRGS& env, SSATmp* arr, SSATmp* elm, Block* taken)
+    const override {
+    assertx(mayContainTombstones());
+    gen(env, CheckPtrIterTombstone, taken, arr, elm);
   }
 
   SSATmp* getKey(IRGS&, SSATmp*, SSATmp*, SSATmp* val) const override {
@@ -382,9 +430,23 @@ struct BespokeAccessor : public Accessor {
     : Accessor(baseType, false)
   {}
 
+  bool mayContainTombstones() const override {
+    // checkBase() side-exits if we have tombstones
+    return false;
+  }
+
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     auto const result = gen(env, CheckType, exit, arrType(), base);
-    if (result->isA(TDict)) {
+    auto const mayActuallyContainTombstones = [&] {
+      // We don't yet support fast iteration over bespoke arrays with
+      // tombstones. Currently only the MonotypeDict may contain them.
+      if (!RO::EvalEmitBespokeMonotypes) return false;
+      if (arrType() <= TVec) return false;
+      if (arrType().arrSpec().is_struct()) return false;
+      if (arrType().arrSpec().is_type_structure()) return false;
+      return true;
+    }();
+    if (mayActuallyContainTombstones) {
       auto const size = gen(env, Count, result);
       auto const used = gen(env, BespokeIterEnd, result);
       auto const same = gen(env, EqInt, size, used);
@@ -393,12 +455,20 @@ struct BespokeAccessor : public Accessor {
     return result;
   }
 
+  SSATmp* getEndIdx(IRGS&, SSATmp*) const override {
+    always_assert(false);
+  }
+
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
     return idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
     return pos;
+  }
+
+  void checkTombstone(IRGS&, SSATmp*, SSATmp*, Block*) const override {
+    always_assert(false);
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
@@ -581,9 +651,32 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
-  auto const endPos = accessor.getPos(env, arr, size);
+  auto const endIdx = accessor.mayContainTombstones()
+    ? accessor.getEndIdx(env, arr)
+    : size;
+  auto const endPos = accessor.getPos(env, arr, endIdx);
   gen(env, StIterEnd, id, fp(env), posAsInt(env, accessor, endPos));
-  gen(env, Jmp, header, accessor.getPos(env, arr, cns(env, 0)));
+
+  auto const beginPos = accessor.getPos(env, arr, cns(env, 0));
+  if (accessor.mayContainTombstones()) {
+    auto const next = defBlock(env);
+    gen(env, Jmp, next, beginPos);
+
+    env.irb->appendBlock(next);
+    auto const pos = phiIterPos(env, accessor);
+    auto const elm = accessor.getElm(env, arr, pos);
+    iterIfThen(
+      env,
+      [&](Block* taken) { accessor.checkTombstone(env, arr, elm, taken); },
+      [&] {
+        auto const nextPos = accessor.advancePos(env, pos, 1);
+        gen(env, Jmp, next, nextPos);
+      }
+    );
+    gen(env, Jmp, header, pos);
+  } else {
+    gen(env, Jmp, header, beginPos);
+  }
 }
 
 Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
@@ -630,7 +723,7 @@ Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
                          SSATmp* base) {
-  accessor.checkBase(env, base, makeExitSlow(env));
+  base = accessor.checkBase(env, base, makeExitSlow(env));
 
   auto const asIterPosType = [&](SSATmp* iterPos) {
     if (!accessor.isPtrIter()) return iterPos;
@@ -640,21 +733,40 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
   auto const id = IterId(data.iterId);
   auto const old = asIterPosType(gen(env, LdIterPos, id, fp(env)));
   auto const end = asIterPosType(gen(env, LdIterEnd, id, fp(env)));
-  auto const pos = accessor.advancePos(env, old, 1);
 
-  ifThen(env,
-    [&](Block* taken) {
-      auto const eq = accessor.isPtrIter() ? EqPtrIter : EqInt;
-      auto const done = gen(env, eq, pos, end);
-      gen(env, JmpNZero, taken, done);
-      gen(env, Jmp, footer, pos);
-    },
-    [&]{
-      auto const next = getBlock(env, nextSrcKey(env));
-      env.irb->curBlock()->setProfCount(next->profCount());
-      gen(env, KillIter, id, fp(env));
-    }
-  );
+  auto const done = defBlock(env);
+  auto const checkDone = [&] (SSATmp* pos) {
+    auto const eq = accessor.isPtrIter() ? EqPtrIter : EqInt;
+    gen(env, JmpNZero, done, gen(env, eq, pos, end));
+  };
+
+  if (accessor.mayContainTombstones()) {
+    auto const next = defBlock(env);
+    gen(env, Jmp, next, old);
+
+    env.irb->appendBlock(next);
+    auto const phi = phiIterPos(env, accessor);
+    auto const cur = accessor.advancePos(env, phi, 1);
+    checkDone(cur);
+
+    auto const elm = accessor.getElm(env, base, cur);
+    iterIfThen(
+      env,
+      [&](Block* taken) { accessor.checkTombstone(env, base, elm, taken); },
+      [&] { gen(env, Jmp, next, cur); }
+    );
+
+    gen(env, Jmp, footer, cur);
+  } else {
+    auto const cur = accessor.advancePos(env, old, 1);
+    checkDone(cur);
+    gen(env, Jmp, footer, cur);
+  }
+
+  env.irb->appendBlock(done);
+  auto const next = getBlock(env, nextSrcKey(env));
+  env.irb->curBlock()->setProfCount(next->profCount());
+  gen(env, KillIter, id, fp(env));
 }
 
 Block* emitSpecializedFooter(IRGS& env, const Accessor& accessor,
@@ -703,12 +815,6 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
   auto const keyTypes = profiledResult.key_types;
-
-  if (keyTypes.mayIncludeTombstone()) {
-    FTRACE(2, "Failure to specialize IterInit: may include tombstones.\n");
-    return false;
-  }
-
   auto const layout = getProfiledLayout(env, base);
 
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",

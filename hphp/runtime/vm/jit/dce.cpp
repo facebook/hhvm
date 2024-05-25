@@ -251,6 +251,7 @@ bool canDCE(const IRInstruction& inst) {
   case DictFirstKey:
   case DictLast:
   case DictLastKey:
+  case DictIterEnd:
   case KeysetFirst:
   case KeysetLast:
   case KeysetIterEnd:
@@ -345,6 +346,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckNullptr:
   case CheckTypeMem:
   case CheckDictKeys:
+  case CheckPtrIterTombstone:
   case CheckSmashableClass:
   case CheckLoc:
   case CheckStk:

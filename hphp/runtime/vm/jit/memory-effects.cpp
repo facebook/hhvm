@@ -1239,6 +1239,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemAny };
 
   case BespokeIterGetVal:
+  case CheckPtrIterTombstone:
     return may_load_store(AElemAny, AEmpty);
 
   case ElemDictK:
@@ -1537,6 +1538,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
   case DefRegSP:
+  case DictIterEnd:
   case EndGuards:
   case EnterPrologue:
   case EnterTranslation:

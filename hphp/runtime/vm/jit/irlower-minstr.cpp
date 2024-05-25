@@ -518,6 +518,13 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgDictIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(VanillaDict::usedSize() == 4);
+  auto const dict = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  vmain(env) << loadzlq{dict[VanillaDict::usedOff()], dst};
+}
+
 void cgKeysetIterEnd(IRLS& env, const IRInstruction* inst) {
   static_assert(VanillaKeyset::usedSize() == 4);
   auto const keyset = srcLoc(env, inst, 0).reg();
@@ -803,6 +810,17 @@ void cgEqPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpq{s1, s0, sf};
   v << setcc{CC_E, sf, d};
+}
+
+void cgCheckPtrIterTombstone(IRLS& env, const IRInstruction* inst) {
+  auto const elm = srcLoc(env, inst, 1).reg();
+  auto const taken = label(env, inst->taken());
+
+  auto& v = vmain(env);
+  auto constexpr tombstone = static_cast<data_type_t>(kInvalidDataType);
+  auto const sf = v.makeReg();
+  v << cmpbim{tombstone, elm[TVOFF(m_type)], sf};
+  ifThen(v, CC_E, sf, taken);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

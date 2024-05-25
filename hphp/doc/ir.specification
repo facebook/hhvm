@@ -2850,6 +2850,11 @@ ReqBindJmp and CallFuncEntry.
 
   Compares two pointer iterators for equality.
 
+| CheckPtrIterTombstone, ND, S(Dict,Keyset) S(PtrToElem), B
+
+  Check whether the element pointed to by S1 of an array S0 contains
+  a tombstone. If so, branch to block B.
+
 
 17. Member instruction support
 
@@ -3537,6 +3542,11 @@ fields of that struct for holding intermediate values.
 
   Returns the last key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
+
+| DictIterEnd, D(Int), S(Dict), NF
+
+  Returns the "end" iterator position for the given dict. Unlike the "last"
+  iterator position, the end is never a valid iterator position.
 
 | KeysetFirst, DFirstElem, S(Keyset), NF
 

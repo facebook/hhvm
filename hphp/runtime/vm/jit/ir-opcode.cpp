@@ -527,6 +527,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckMissingKeyInArrLike:
   case CheckNonNull:
   case CheckNullptr:
+  case CheckPtrIterTombstone:
   case CheckRDSInitialized:
   case CheckRange:
   case CheckSmashableClass:
@@ -613,6 +614,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DictGetQuiet:
   case DictIdx:
   case DictIsset:
+  case DictIterEnd:
   case DictLast:
   case DictLastKey:
   case DirFromFilepath:

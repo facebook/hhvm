@@ -145,9 +145,15 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
   }
 
   void readDataAvailable(size_t len) noexcept override {
-    refreshTimeout();
-    bufQueue_.postallocate(len);
-    getContext()->fireRead(bufQueue_);
+    try {
+      refreshTimeout();
+      bufQueue_.postallocate(len);
+      getContext()->fireRead(bufQueue_);
+    } catch (std::exception& ex) {
+      LOG(ERROR) << "Exception in readDataAvailable. len = " << len
+                 << ", exception: " << ex.what();
+      close(getContext());
+    }
   }
 
   void readEOF() noexcept override {

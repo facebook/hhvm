@@ -599,6 +599,7 @@ public:
    */
   bool classof(const Class*) const;
   bool classofNonIFace(const Class*) const;
+  bool subtypeOf(const Class*) const;
 
   /*
    * Whether this class implements an interface called `name'.
@@ -610,6 +611,12 @@ public:
    * return their lowest common ancestor, or nullptr if they're unrelated.
    */
   const Class* commonAncestor(const Class* cls) const;
+
+  /*
+   * Given that this class exists, return a class named "name" that is
+   * also guaranteed to exist, or nullptr if there is none.
+   */
+  const Class* getClassDependency(const StringData* name) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]

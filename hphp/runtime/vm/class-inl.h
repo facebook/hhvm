@@ -239,6 +239,8 @@ inline bool Class::classof(const Class* cls) const {
   return classofNonIFace(cls);
 }
 
+inline bool Class::subtypeOf(const Class* cls) const { return classof(cls); }
+
 inline bool Class::ifaceofDirect(const StringData* name) const {
   return m_interfaces.contains(name);
 }
@@ -772,7 +774,7 @@ inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
   if (cls->attrs() & AttrPersistent) return cls;
   if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
-  return ctx->classof(cls) ? cls : nullptr;
+  return ctx->getClassDependency(cls->name());
 }
 
 inline const Class* Class::lookupUniqueInContext(const StringData* name,

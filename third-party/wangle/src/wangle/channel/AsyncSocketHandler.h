@@ -150,9 +150,8 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
       bufQueue_.postallocate(len);
       getContext()->fireRead(bufQueue_);
     } catch (std::exception& ex) {
-      LOG(ERROR) << "Exception in readDataAvailable. len = " << len
-                 << ", exception: " << ex.what();
-      close(getContext());
+      LOG(ERROR) << "Caught exception in readDataAvailable(" << len
+                 << "): " << folly::exceptionStr(ex);
     }
   }
 

@@ -1,7 +1,6 @@
 <?hh
 
 class SomeClass {
-  public function __construct (){}
   function some_method() :mixed{}
 }
 

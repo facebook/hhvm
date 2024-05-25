@@ -69,7 +69,7 @@ const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
     if (RO::RepoAuthoritative) PUNT(Bad-Dyn-Override);
     return cls;
   }
-  return lookupKnownWithUnit(env, fca.context);
+  return lookupUniqueClass(env, fca.context, true /* trustUnit */);
 }
 
 bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
@@ -769,7 +769,7 @@ void fcallObjMethodUnknown(
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = lookupKnownWithUnit(env, fca.context);
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -1094,7 +1094,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
     if (!methodName->hasConstVal()) return notFound;
 
     if (!clsHint->empty()) {
-      auto const cls = lookupKnownWithUnit(env, clsHint);
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls && isNormalClass(cls)) {
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
         auto const callCtx =
@@ -1389,7 +1389,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const func = lookupImmutableFunc(funcName);
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = lookupKnownWithUnit(env, fca.context);
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -1444,7 +1444,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
   auto const methodName = func->methCallerMethName();
 
   auto const ok = [&] () -> bool {
-    auto const cls = lookupKnownWithUnit(env, className);
+    auto const cls = lookupUniqueClass(env, className);
     if (cls && !isTrait(cls)) {
       auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
       auto const res = lookupImmutableObjMethod(cls, methodName, callCtx, false);
@@ -1541,7 +1541,7 @@ void emitNewObj(IRGS& env) {
 }
 
 void emitNewObjD(IRGS& env, const StringData* className) {
-  auto const cls = lookupKnownWithUnit(env, className);
+  auto const cls = lookupUniqueClass(env, className);
 
   auto const knownClass = [&]() {
     bool const canInstantiate = isNormalClass(cls) && !isAbstract(cls);
@@ -1590,7 +1590,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
 
   auto const exactCls = [&] {
     if (!clsHint->empty()) {
-      auto const cls = lookupKnownWithUnit(env, clsHint);
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls && isNormalClass(cls)) return cls;
     }
     return obj->type().clsSpec().exactCls();
@@ -1716,7 +1716,7 @@ void emitFCallClsMethodD(IRGS& env,
                          FCallArgs fca,
                          const StringData* className,
                          const StringData* methodName) {
-  auto const cls = lookupKnownWithUnit(env, className);
+  auto const cls = lookupUniqueClass(env, className);
   if (cls) {
     auto const callCtx =
       MemberLookupContext(callContext(env, fca, cls), curFunc(env));
@@ -1730,7 +1730,7 @@ void emitFCallClsMethodD(IRGS& env,
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
-    auto const ret = lookupKnownWithUnit(env, fca.context);
+    auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
     if (!ret) PUNT(no-context);
     return ret;
   }();
@@ -1837,7 +1837,7 @@ void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
 void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
                             const StringData* className) {
   gen(env, CheckClsMethFunc, cns(env, func));
-  if (!classIsKnown(env, cls)) {
+  if (!classIsTrusted(env, cls)) {
     gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
   }
   ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
@@ -1870,7 +1870,7 @@ void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
 
 void emitResolveClsMethodD(IRGS& env, const StringData* className,
                            const StringData* methodName) {
-  auto const cls = lookupKnownWithUnit(env, className);
+  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
@@ -1916,7 +1916,7 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
     return interpOne(env);
   }
 
-  auto const cls = lookupKnownWithUnit(env, className);
+  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
@@ -1996,7 +1996,7 @@ void fcallClsMethodCommon(IRGS& env,
   auto const methodName = methVal->strVal();
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
     if (!clsHint->empty()) {
-      auto const cls = lookupKnownWithUnit(env, clsHint);
+      auto const cls = lookupUniqueClass(env, clsHint);
       if (cls && isNormalClass(cls)) return std::make_pair(cls, true);
     }
 

@@ -625,7 +625,8 @@ To string conversions:
 | InstanceOfIface, D(Bool), S(Cls) CStr, NF
 
   Fast path for interface checks. Sets D based on whether S0 implements S1, but
-  S1 must be a known interface.
+  S1 must be a unique interface. This should only be used in repo-authoritative
+  mode.
 
 | InstanceOfIfaceVtable<iface,canOptimize>, D(Bool), S(Cls), NF
 

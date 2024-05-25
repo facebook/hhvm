@@ -24,4 +24,7 @@
     {{field:nestedDepth++}}{{!
   }}{{/type:hasAdapter?}}{{!
   }}{{> WriteType}}{{!
+  }}{{#type:hasAdapter?}}{{!
+    }}{{field:nestedDepth--}}{{!
+  }}{{/type:hasAdapter?}}{{!
 }}{{field:nestedDepth--}}

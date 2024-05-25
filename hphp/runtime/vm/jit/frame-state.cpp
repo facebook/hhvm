@@ -66,9 +66,10 @@ bool merge_util(T& oldVal, const T& newVal) {
  * "all" possible sources of the type and constrain them.
  */
 bool merge_into(TypeSourceSet& dst, const TypeSourceSet& src) {
-  auto changed = false;
-  for (auto x : src) changed = dst.insert(x).second || changed;
-  return changed;
+  assertx(&dst != &src);
+  auto initialSize = dst.size();
+  dst.insert(boost::container::ordered_unique_range, src.begin(), src.end());
+  return dst.size() > initialSize;
 }
 
 Type bound_type(Type type, Type limit) {

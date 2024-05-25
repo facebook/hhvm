@@ -133,6 +133,10 @@ DEFINE_bool(
     writer_backpressure,
     false,
     "Enable backpressure in the batch writer. Only for non-batched writer");
+DEFINE_bool(use_l4s_ecn, false, "Whether to use L4S for ECN marking");
+DEFINE_bool(read_ecn,
+            false,
+            "Whether to read and echo ecn marking from ingress packets");
 
 namespace quic::samples {
 
@@ -289,6 +293,21 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.initiateKeyUpdate = FLAGS_initiate_key_updates;
   hqParams.transportSettings.keyUpdatePacketCountInterval =
       FLAGS_key_update_interval;
+
+  if (FLAGS_use_l4s_ecn) {
+    hqParams.transportSettings.enableEcnOnEgress = true;
+    hqParams.transportSettings.useL4sEcn = true;
+    hqParams.transportSettings.minBurstPackets = 1;
+    hqParams.transportSettings.experimentalPacer = true;
+    hqParams.transportSettings.ccaConfig.onlyGrowCwndWhenLimited = true;
+    hqParams.transportSettings.ccaConfig.leaveHeadroomForCwndLimited = true;
+  }
+
+  if (FLAGS_read_ecn) {
+    hqParams.transportSettings.readEcnOnIngress = FLAGS_read_ecn;
+    hqParams.transportSettings.shouldRecvBatch = false;
+  }
+
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

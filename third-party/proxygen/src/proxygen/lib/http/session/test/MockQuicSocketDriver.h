@@ -980,9 +980,11 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
           stream.readCB = nullptr;
           stream.peekCB = nullptr;
           if (rcb) {
-            rcb->readError(it.first, QuicError(error.code, error.message));
+            rcb->readError(it.first,
+                           QuicError(error.code, std::string(error.message)));
           } else {
-            pcb->peekError(it.first, QuicError(error.code, error.message));
+            pcb->peekError(it.first,
+                           QuicError(error.code, std::string(error.message)));
           }
         }
         stream.readState = ERROR;

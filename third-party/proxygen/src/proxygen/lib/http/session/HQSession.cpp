@@ -800,9 +800,10 @@ void HQSession::closeWhenIdle() {
 }
 
 void HQSession::dropConnection(const std::string& errorMsg) {
-  auto msg = errorMsg.empty() ? "Stopping" : errorMsg;
-  dropConnectionSync(quic::QuicError(HTTP3::ErrorCode::HTTP_NO_ERROR, msg),
-                     kErrorDropped);
+  std::string msg = errorMsg.empty() ? "Stopping" : errorMsg;
+  dropConnectionSync(
+      quic::QuicError(HTTP3::ErrorCode::HTTP_NO_ERROR, std::move(msg)),
+      kErrorDropped);
 }
 
 void HQSession::dropConnectionAsync(quic::QuicError errorCode,
@@ -1851,7 +1852,8 @@ void HQSession::handleSessionError(HQStreamBase* stream,
   // close received from the remote, we may have other readError callbacks on
   // other streams after this one. So run in the next loop callback, in this
   // same loop
-  dropConnectionAsync(quic::QuicError(appError, appErrorMsg), proxygenError);
+  dropConnectionAsync(quic::QuicError(appError, std::move(appErrorMsg)),
+                      proxygenError);
 }
 
 uint64_t HQSession::writeRequestStreams(uint64_t maxEgress) noexcept {

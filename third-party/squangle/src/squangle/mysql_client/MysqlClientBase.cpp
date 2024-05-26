@@ -17,22 +17,18 @@ class InitMysqlLibrary {
   InitMysqlLibrary() {
     mysql_library_init(-1, nullptr, nullptr);
   }
-  ~InitMysqlLibrary() {
-    mysql_library_end();
-  }
 };
 
 } // namespace
 
 namespace facebook::common::mysql_client {
 
-// mysql_library_init() and mysql_library_end() need to run on the same thread
-[[maybe_unused]] static InitMysqlLibrary unused;
-
 MysqlClientBase::MysqlClientBase(
     std::unique_ptr<db::SquangleLoggerBase> db_logger,
     std::unique_ptr<db::DBCounterBase> db_stats)
-    : db_logger_(std::move(db_logger)), client_stats_(std::move(db_stats)) {}
+    : db_logger_(std::move(db_logger)), client_stats_(std::move(db_stats)) {
+  static InitMysqlLibrary unused;
+}
 
 void MysqlClientBase::logQuerySuccess(
     const db::QueryLoggingData& logging_data,

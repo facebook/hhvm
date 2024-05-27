@@ -38,8 +38,8 @@ val make :
   cache:Decl_store.class_entries SMap.t ->
   inherited
 
-(** [find_overridden_method cls ~get_method] finds in the parents of
-  [cls] a method overriden by [cls]. *)
+(** [find_overridden_method cls ~get_method] finds in the parents and
+  used traits of [cls] a method overridden by [cls]. *)
 val find_overridden_method :
   Shallow_decl_defs.shallow_class ->
   get_method:(decl_ty -> class_elt option) ->

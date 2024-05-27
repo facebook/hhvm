@@ -63,7 +63,7 @@ val get_module :
   module_decl option
 
 (** This assumes that [class_name] defines and overrides [method_name]
-  and returns the method from an ancestor of [class_name] that would
+  and returns the method from an ancestor or trait of [class_name] that would
   have been inherited by [class_name] had it not overridden it. *)
 val get_overridden_method :
   Provider_context.t ->

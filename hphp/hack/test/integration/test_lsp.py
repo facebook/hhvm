@@ -2590,10 +2590,10 @@ class TestLsp(TestCase[LspTestDriver]):
                     {
                         "uri": "${php_file_uri}",
                         "range": {
-                            "start": {"line": 3, "character": 18},
-                            "end": {"line": 3, "character": 21},
+                            "start": {"line": 7, "character": 18},
+                            "end": {"line": 7, "character": 21},
                         },
-                        "title": "MyParent::foo",
+                        "title": "MyTrait::foo",
                     }
                 ],
                 powered_by="serverless_ide",

@@ -246,11 +246,11 @@ struct RangeState {
   // the operation was successful.
   bool tryFreeLow(void* ptr, size_t size) {
     auto const p = reinterpret_cast<uintptr_t>(ptr);
-    assertx(p < low_use.load(std::memory_order_relaxed));
+    assertx(p < low_use.load(std::memory_order_acquire));
     assertx(p >= low());
     uintptr_t expected = p + size;
     return low_use.compare_exchange_strong(expected, p,
-                                           std::memory_order_relaxed);
+                                           std::memory_order_acq_rel);
   }
 
   std::atomic<uintptr_t> low_use{0};

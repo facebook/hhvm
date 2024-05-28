@@ -120,13 +120,13 @@ private:
   }
 
   static uint32_t get_ref(T* p) {
-    return get_ref_ptr(p)->load(std::memory_order_relaxed);
+    return get_ref_ptr(p)->load(std::memory_order_acquire);
   }
 
   static void dec_ref(T* p) {
     if (!p) return;
     auto ref = get_ref_ptr(p);
-    if (ref->fetch_sub(1, std::memory_order_relaxed) == 1) {
+    if (ref->fetch_sub(1, std::memory_order_acq_rel) == 1) {
       p->~T();
       ref->~refcount_type();
       std::free(ref);
@@ -135,7 +135,7 @@ private:
 
   static void inc_ref(T* p) {
     if (!p) return;
-    get_ref_ptr(p)->fetch_add(1, std::memory_order_relaxed);
+    get_ref_ptr(p)->fetch_add(1, std::memory_order_acq_rel);
   }
 };
 

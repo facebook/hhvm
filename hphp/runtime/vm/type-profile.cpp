@@ -68,7 +68,7 @@ void profileWarmupEnd() {
 }
 
 uint64_t requestCount() {
-  return numRequests.load(std::memory_order_relaxed);
+  return numRequests.load(std::memory_order_acquire);
 }
 
 static inline RequestKind getRequestKind() {
@@ -126,7 +126,7 @@ void profileRequestStart() {
 
 void profileRequestEnd() {
   if (!isStandardRequest()) return;
-  numRequests.fetch_add(1, std::memory_order_relaxed);
+  numRequests.fetch_add(1, std::memory_order_acq_rel);
   static auto const requestSeries = ServiceData::createTimeSeries(
     "vm.requests",
     {ServiceData::StatsType::RATE, ServiceData::StatsType::SUM},

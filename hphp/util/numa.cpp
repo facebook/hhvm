@@ -123,7 +123,7 @@ uint32_t next_numa_node(std::atomic<uint32_t>& curr_node) {
   if (!use_numa) return 0;
   uint32_t node;
   do {
-    node = curr_node.fetch_add(1u, std::memory_order_relaxed);
+    node = curr_node.fetch_add(1u, std::memory_order_acq_rel);
     node &= numa_node_mask;
   } while (!((numa_node_set >> node) & 1));
   return node;

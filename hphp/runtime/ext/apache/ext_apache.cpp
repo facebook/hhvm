@@ -114,7 +114,7 @@ Array HHVM_FUNCTION(apache_get_config) {
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
-    queued -= HttpServer::QueueDiscount.load(std::memory_order_relaxed);
+    queued -= HttpServer::QueueDiscount.load(std::memory_order_acquire);
     if (queued < 0)
       queued = 0;
     health_level = (int)(ApacheExtension::GetHealthLevel());

@@ -626,7 +626,7 @@ bool retranslateAllEnabled() {
 void checkRetranslateAll(bool force, bool skipSerialize) {
   assertx(IMPLIES(skipSerialize, force));
 
-  if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
+  if (s_retranslateAllScheduled.load(std::memory_order_acquire) ||
       !retranslateAllEnabled()) {
     assertx(!force);
     return;
@@ -706,10 +706,10 @@ bool retranslateAllComplete() {
 }
 
 int getActiveWorker() {
-  if (s_retranslateAllComplete.load(std::memory_order_relaxed)) {
+  if (s_retranslateAllComplete.load(std::memory_order_acquire)) {
     return 0;
   }
-  if (auto disp = s_dispatcher.load(std::memory_order_relaxed)) {
+  if (auto disp = s_dispatcher.load(std::memory_order_acquire)) {
     return disp->getActiveWorker();
   }
   return 0;
@@ -726,8 +726,8 @@ CompactVector<Trace::BumpRelease> unbumpFunctions() {
 }
 
 void checkSerializeOptProf() {
-  if (!s_serializeOptProfScheduled.load(std::memory_order_relaxed) ||
-      s_serializeOptProfTriggered.load(std::memory_order_relaxed)) {
+  if (!s_serializeOptProfScheduled.load(std::memory_order_acquire) ||
+      s_serializeOptProfTriggered.load(std::memory_order_acquire)) {
     return;
   }
 
@@ -737,9 +737,9 @@ void checkSerializeOptProf() {
 
   auto const uptime = HHVM_FN(server_uptime)(); // may be -1
   auto const triggerSeconds =
-    s_serializeOptProfSeconds.load(std::memory_order_relaxed);
+    s_serializeOptProfSeconds.load(std::memory_order_acquire);
   auto const triggerRequest =
-    s_serializeOptProfRequest.load(std::memory_order_relaxed);
+    s_serializeOptProfRequest.load(std::memory_order_acquire);
   const bool trigger =
     ((triggerSeconds > 0 && uptime >= 0 && uptime >= triggerSeconds) ||
      (triggerRequest > 0 && requestCount() >= triggerRequest));

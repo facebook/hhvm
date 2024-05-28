@@ -69,7 +69,7 @@ void UserAttributeMap::lookup(Map&& m) {
   static tbb::concurrent_unordered_set<copy_ptr<Map>,
                                        UserAttributeMap::MapCompare,
                                        UserAttributeMap::MapCompare> s_maps;
-  s_count.fetch_add(1, std::memory_order_relaxed);
+  s_count.fetch_add(1, std::memory_order_acq_rel);
   m_map.emplace(std::move(m));
 
   auto ret = s_maps.insert(m_map);
@@ -77,7 +77,7 @@ void UserAttributeMap::lookup(Map&& m) {
     FTRACE(3, "Adding User Attributes {}; {} out of {}\n",
            user_attrs(this),
            s_maps.size(),
-           s_count.load(std::memory_order_relaxed));
+           s_count.load(std::memory_order_acquire));
   } else {
     m_map = *ret.first;
   }

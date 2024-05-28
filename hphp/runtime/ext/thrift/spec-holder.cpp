@@ -305,7 +305,7 @@ const StructSpec& SpecHolder::getSpec(const Class* cls) {
     void* expected = nullptr;
     if (specSlot->compare_exchange_strong(
           expected, (void*)compiled.get(),
-          std::memory_order_release, std::memory_order_relaxed)) {
+          std::memory_order_acq_rel, std::memory_order_relaxed)) {
       return *compiled.release();
     }
     return *static_cast<StructSpec*>(expected);

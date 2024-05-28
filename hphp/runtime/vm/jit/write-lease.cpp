@@ -229,10 +229,10 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
       tl_ownedFunc.insert(fid);
       m_acquiredFunc = true;
       if (!isWorker && level == LockLevel::Func && !isProfiling(kind)) {
-        auto threads = s_jittingThreads.load(std::memory_order_relaxed);
+        auto threads = s_jittingThreads.load(std::memory_order_acquire);
         if (threads >= Cfg::Jit::Threads) return;
 
-        threads = s_jittingThreads.fetch_add(1, std::memory_order_relaxed);
+        threads = s_jittingThreads.fetch_add(1, std::memory_order_acq_rel);
         m_acquiredThread = true;
         if (threads >= Cfg::Jit::Threads) return;
       }
@@ -264,7 +264,7 @@ bool LeaseHolder::acquireKind(TransKind kind) {
 
 void LeaseHolder::dropLocks() {
   if (m_acquiredThread) {
-    s_jittingThreads.fetch_sub(1, std::memory_order_relaxed);
+    s_jittingThreads.fetch_sub(1, std::memory_order_acq_rel);
     m_acquiredThread = false;
   }
 

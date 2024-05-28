@@ -697,7 +697,7 @@ std::vector<SinkTypeData> populateSortedCounts(
     const std::atomic<uint64_t> (&counts)[N], Fn fn) {
   std::vector<SinkTypeData> result;
   for (auto i = 0; i < N; i++) {
-    auto const count = counts[i].load(std::memory_order_relaxed);
+    auto const count = counts[i].load(std::memory_order_acquire);
     if (count) result.push_back({fn(i), count});
   }
   std::sort(result.begin(), result.end());
@@ -770,8 +770,8 @@ struct SinkOutputData {
     keyCounts = populateSortedCounts(profile->data->keyCounts, getKeyTypeStr);
     valCounts = populateSortedCounts(profile->data->valCounts, getValTypeStr);
 
-    sampledCount = profile->data->sampledCount.load(std::memory_order_relaxed);
-    unsampledCount = profile->data->unsampledCount.load(std::memory_order_relaxed);
+    sampledCount = profile->data->sampledCount.load(std::memory_order_acquire);
+    unsampledCount = profile->data->unsampledCount.load(std::memory_order_acquire);
 
     weight = sampledCount + unsampledCount;
 
@@ -1180,10 +1180,10 @@ LoggingProfile* getLoggingProfile(APCKey ak) {
 }
 
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct) {
-  auto const profile = runtimeStruct->m_profile.load(std::memory_order_relaxed);
+  auto const profile = runtimeStruct->m_profile.load(std::memory_order_acquire);
   if (profile) return profile;
   auto const newProfile = getLoggingProfile(LoggingProfileKey(runtimeStruct));
-  runtimeStruct->m_profile.store(newProfile, std::memory_order_relaxed);
+  runtimeStruct->m_profile.store(newProfile, std::memory_order_release);
   return newProfile;
 }
 

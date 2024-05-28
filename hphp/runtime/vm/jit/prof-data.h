@@ -260,41 +260,41 @@ struct ProfData {
   };
 
   static bool triedDeserialization() {
-    return s_triedDeserialization.load(std::memory_order_relaxed);
+    return s_triedDeserialization.load(std::memory_order_acquire);
   }
   static void setTriedDeserialization() {
-    s_triedDeserialization.store(true, std::memory_order_relaxed);
+    s_triedDeserialization.store(true, std::memory_order_release);
     s_tried_deserialze->setValue(1);
   }
 
   static bool wasDeserialized() {
-    return s_wasDeserialized.load(std::memory_order_relaxed);
+    return s_wasDeserialized.load(std::memory_order_acquire);
   }
   static int64_t buildTime() {
-    return s_buildTime.load(std::memory_order_relaxed);
+    return s_buildTime.load(std::memory_order_acquire);
   }
   static const StringData* buildHost() {
-    return s_buildHost.load(std::memory_order_relaxed);
+    return s_buildHost.load(std::memory_order_acquire);
   }
   static const StringData* tag() {
-    return s_tag.load(std::memory_order_relaxed);
+    return s_tag.load(std::memory_order_acquire);
   }
   static void setDeserialized(const std::string& buildHost,
                               const std::string& tag,
                               int64_t buildTime) {
-    s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
-    s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
-    s_buildTime.store(buildTime, std::memory_order_relaxed);
-    s_wasDeserialized.store(true, std::memory_order_relaxed);
+    s_buildHost.store(makeStaticString(buildHost), std::memory_order_release);
+    s_tag.store(makeStaticString(tag), std::memory_order_release);
+    s_buildTime.store(buildTime, std::memory_order_release);
+    s_wasDeserialized.store(true, std::memory_order_release);
     s_deserialize_succ->setValue(1);
   }
 
   static size_t prevProfSize() {
-    return s_prevProfSize.load(std::memory_order_relaxed);
+    return s_prevProfSize.load(std::memory_order_acquire);
   }
   static void setPrevProfSize(size_t s) {
     assertx(isJitSerializing());
-    s_prevProfSize.store(s, std::memory_order_relaxed);
+    s_prevProfSize.store(s, std::memory_order_release);
   }
 
   /*
@@ -428,7 +428,7 @@ struct ProfData {
     DEBUG_ONLY auto const previousValue =
       func->atomicFlags().set(Func::Flags::Optimized);
     assertx(!previousValue);
-    m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
+    m_optimizedFuncCount.fetch_add(1, std::memory_order_acq_rel);
     s_optimized_funcs_counter->increment();
     // reset the counter for live translations.
     func->resetJitReqCount();
@@ -438,7 +438,7 @@ struct ProfData {
     DEBUG_ONLY auto const previousValue =
       func->atomicFlags().unset(Func::Flags::Optimized);
     assertx(previousValue);
-    m_optimizedFuncCount.fetch_sub(1, std::memory_order_relaxed);
+    m_optimizedFuncCount.fetch_sub(1, std::memory_order_acq_rel);
     s_optimized_funcs_counter->decrement();
   }
   void setOptimized(SrcKey sk) {
@@ -482,7 +482,7 @@ struct ProfData {
     }
 
     auto const bcSize = func->bclen();
-    m_profilingBCSize.fetch_add(bcSize, std::memory_order_relaxed);
+    m_profilingBCSize.fetch_add(bcSize, std::memory_order_acq_rel);
 
     static auto const bcSizeCounter =
       ServiceData::createCounter("jit.profile-bc-size");
@@ -509,7 +509,7 @@ struct ProfData {
     return m_profilingFuncs.size();
   }
   int64_t optimizedFuncs() const {
-    return m_optimizedFuncCount.load(std::memory_order_relaxed);
+    return m_optimizedFuncCount.load(std::memory_order_acquire);
   }
 
   /*
@@ -517,7 +517,7 @@ struct ProfData {
    * profiling.
    */
   int64_t profilingBCSize() const {
-    return m_profilingBCSize.load(std::memory_order_relaxed);
+    return m_profilingBCSize.load(std::memory_order_acquire);
   }
 
   /*

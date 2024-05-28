@@ -51,7 +51,7 @@ AtomicGrowableVector<T,D>::~AtomicGrowableVector() {
   FTRACE(1, "{} {} destructing\n",
          type_name<T>(), this);
 
-  delete m_next.load(std::memory_order_relaxed);
+  delete m_next.load(std::memory_order_acquire);
 }
 
 template<typename T, typename D>

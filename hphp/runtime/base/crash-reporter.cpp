@@ -111,7 +111,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
     // We're the first crashing thread, go ahead and report everything.
     if (RuntimeOption::StackTraceTimeout > 0) {
       signal(SIGALRM, bt_timeout_handler);

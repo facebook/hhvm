@@ -209,7 +209,7 @@ inline bool Class::classofNonIFace(const Class* cls) const {
 }
 
 inline bool Class::classof(const Class* cls) const {
-  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_relaxed);
+  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_acquire);
   assertx(bit == kNoInstanceBit || kProfileInstanceBit || bit > 0);
   if (bit > 0) {
     return m_instanceBits.test(bit);

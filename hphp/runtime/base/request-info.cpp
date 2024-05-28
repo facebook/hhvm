@@ -117,11 +117,11 @@ int RequestInfo::SetPendingGCForAllOnRequest() {
 }
 
 void RequestInfo::InvokeOOMKiller(int maxToKill) {
-  auto pendingOOMs = s_pendingOOMs.load(std::memory_order_relaxed);
+  auto pendingOOMs = s_pendingOOMs.load(std::memory_order_acquire);
   while (!s_pendingOOMs.compare_exchange_weak(pendingOOMs,
                                               std::max(pendingOOMs, maxToKill),
-                                              std::memory_order_relaxed,
-                                              std::memory_order_relaxed));
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acq_rel));
   ExecutePerRequest(
     [] (RequestInfo* t) {
       t->m_reqInjectionData.setHostOOMFlag();
@@ -324,7 +324,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       // TODO(#T25950158): add flags to indicate whether a request is safe to
       // retry, etc. to help the OOM killer to make better decisions.
       if (currUsage > RequestInfo::OOMKillThreshold() && !p.shouldOOMAbort() &&
-          s_pendingOOMs.fetch_sub(1, std::memory_order_relaxed) > 0) {
+          s_pendingOOMs.fetch_sub(1, std::memory_order_acq_rel) > 0) {
         p.setRequestOOMAbort();
       }
       if (p.shouldOOMAbort()) {

@@ -179,7 +179,7 @@ void MemoryManager::resetAllStats() {
 
   // Reset this memory managers portion of the bytes used across all memory
   // managers.
-  s_req_heap_usage.fetch_sub(m_lastUsage, std::memory_order_relaxed);
+  s_req_heap_usage.fetch_sub(m_lastUsage, std::memory_order_acq_rel);
   m_lastUsage = 0;
 
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
@@ -298,7 +298,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 void MemoryManager::refreshStats() {
   refreshStatsImpl(m_stats);
   auto usage = m_stats.usage();
-  s_req_heap_usage.fetch_add(usage - m_lastUsage, std::memory_order_relaxed);
+  s_req_heap_usage.fetch_add(usage - m_lastUsage, std::memory_order_acq_rel);
   m_lastUsage = usage;
   if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();

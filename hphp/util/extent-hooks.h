@@ -98,7 +98,7 @@ struct MultiRangeExtentAllocator {
   void appendMapper(RangeMapper* m);
 
   size_t allocatedSize() const {
-    return m_allocatedSize.load(std::memory_order_relaxed);
+    return m_allocatedSize.load(std::memory_order_acquire);
   }
 
   size_t maxCapacity() const;

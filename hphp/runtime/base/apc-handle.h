@@ -225,13 +225,13 @@ struct APCHandle {
     assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
-    return m_obj_attempted.load(std::memory_order_relaxed);
+    return m_obj_attempted.load(std::memory_order_acquire);
   }
   void setObjAttempted() {
     assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
-    m_obj_attempted.store(true, std::memory_order_relaxed);
+    m_obj_attempted.store(true, std::memory_order_release);
   }
 
   /*

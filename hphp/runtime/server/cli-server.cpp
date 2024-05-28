@@ -497,22 +497,22 @@ private:
   void waitFor(State s) {
     auto lock = lockState();
     m_stateCV.wait(lock, [=] {
-      return m_state.load(std::memory_order_relaxed) == s;
+      return m_state.load(std::memory_order_acquire) == s;
     });
   }
   void waitWhile(State s) {
     auto lock = lockState();
     m_stateCV.wait(lock, [=] {
-      return m_state.load(std::memory_order_relaxed) != s;
+      return m_state.load(std::memory_order_acquire) != s;
     });
   }
   void setState(State s) {
     auto lock = lockState();
-    m_state.store(s, std::memory_order_relaxed);
+    m_state.store(s, std::memory_order_release);
     lock.unlock();
     m_stateCV.notify_all();
   }
-  State getState() const { return m_state.load(std::memory_order_relaxed); }
+  State getState() const { return m_state.load(std::memory_order_acquire); }
 
   folly::EventBase* m_ev{nullptr};
   std::atomic<State> m_state{State::UNINIT};

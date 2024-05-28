@@ -1551,16 +1551,16 @@ private:
     explicit AtomicAttr(Attr attrs) : m_attrs{attrs} {}
 
     AtomicAttr(const AtomicAttr& o)
-      : m_attrs{o.m_attrs.load(std::memory_order_relaxed)}
+      : m_attrs{o.m_attrs.load(std::memory_order_acquire)}
     {}
 
     AtomicAttr& operator=(Attr attrs) {
-      m_attrs.store(attrs, std::memory_order_relaxed);
+      m_attrs.store(attrs, std::memory_order_release);
       return *this;
     }
 
     /* implicit */ operator Attr() const {
-      return m_attrs.load(std::memory_order_relaxed);
+      return m_attrs.load(std::memory_order_acquire);
     }
 
   private:
@@ -1607,7 +1607,7 @@ private:
 
     // Assignments
     UnionWrapper& operator=(UnionWrapper r) {
-      m_u.store(r.m_u, std::memory_order_relaxed);
+      m_u.store(r.m_u, std::memory_order_release);
       return *this;
     }
 
@@ -1615,15 +1615,15 @@ private:
     void setCls(Class *cls) {
       U u;
       u.m_cls = to_low(cls);
-      m_u.store(u, std::memory_order_relaxed);
+      m_u.store(u, std::memory_order_release);
     }
     Class* cls() const {
-      auto cls = m_u.load(std::memory_order_relaxed).m_cls;
+      auto cls = m_u.load(std::memory_order_acquire).m_cls;
       assertx(!(cls & kMethCallerBit));
       return reinterpret_cast<Class*>(cls);
     }
     StringData* name() const {
-     auto n = m_u.load(std::memory_order_relaxed).m_methCallerClsName;
+     auto n = m_u.load(std::memory_order_acquire).m_methCallerClsName;
      assertx(n & kMethCallerBit);
      return reinterpret_cast<StringData*>(n - kMethCallerBit);
     }

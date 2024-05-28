@@ -39,26 +39,26 @@ struct MemoryStats {
 
   static void ResetStaticStringSize() {
     s_allocCounts[static_cast<unsigned>(AllocKind::StaticString)]
-      .store(0, std::memory_order_relaxed);
+      .store(0, std::memory_order_release);
     s_allocSizes[static_cast<unsigned>(AllocKind::StaticString)]
-      .store(0, std::memory_order_relaxed);
+      .store(0, std::memory_order_release);
   }
 
   static void LogAlloc(AllocKind kind, size_t bytes) {
     s_allocCounts[static_cast<unsigned>(kind)]
-      .fetch_add(1, std::memory_order_relaxed);
+      .fetch_add(1, std::memory_order_acq_rel);
     s_allocSizes[static_cast<unsigned>(kind)]
-      .fetch_add(bytes, std::memory_order_relaxed);
+      .fetch_add(bytes, std::memory_order_acq_rel);
   }
 
   static auto Count(AllocKind kind) {
     return s_allocCounts[static_cast<unsigned>(kind)]
-      .load(std::memory_order_relaxed);
+      .load(std::memory_order_acquire);
   }
 
   static size_t TotalSize(AllocKind kind) {
     return s_allocSizes[static_cast<unsigned>(kind)]
-      .load(std::memory_order_relaxed);
+      .load(std::memory_order_acquire);
   }
 
  private:

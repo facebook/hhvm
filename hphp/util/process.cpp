@@ -427,7 +427,7 @@ void ProcStatus::update() {
       } else if (!strncmp(line, "HugetlbPages:", 13)) {
         hugetlb = readSize(line, true);
       } else if (!strncmp(line, "Threads:", 8)) {
-        threads.store(readSize(line, false), std::memory_order_relaxed);
+        threads.store(readSize(line, false), std::memory_order_release);
       }
     }
     fclose(f);
@@ -435,11 +435,11 @@ void ProcStatus::update() {
       // Invalid
       lastUpdate.store(0, std::memory_order_release);
     } else {
-      VmSizeKb.store(vmsize, std::memory_order_relaxed);
-      VmRSSKb.store(vmrss, std::memory_order_relaxed);
-      VmSwapKb.store(vmswap, std::memory_order_relaxed);
-      VmHWMKb.store(vmhwm + hugetlb, std::memory_order_relaxed);
-      HugetlbPagesKb.store(hugetlb, std::memory_order_relaxed);
+      VmSizeKb.store(vmsize, std::memory_order_release);
+      VmRSSKb.store(vmrss, std::memory_order_release);
+      VmSwapKb.store(vmswap, std::memory_order_release);
+      VmHWMKb.store(vmhwm + hugetlb, std::memory_order_release);
+      HugetlbPagesKb.store(hugetlb, std::memory_order_release);
       lastUpdate.store(time(), std::memory_order_release);
     }
 #ifdef USE_JEMALLOC

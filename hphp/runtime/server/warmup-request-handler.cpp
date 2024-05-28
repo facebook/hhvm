@@ -71,7 +71,7 @@ std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
 void WarmupRequestHandlerFactory::bumpReqCount() {
   // Bump the request count.  When we hit m_warmupReqThreshold,
   // add additional threads to the server.
-  auto const oldReqNum = m_reqNumber.fetch_add(1, std::memory_order_relaxed);
+  auto const oldReqNum = m_reqNumber.fetch_add(1, std::memory_order_acq_rel);
   if (oldReqNum != m_warmupReqThreshold) {
     return;
   }

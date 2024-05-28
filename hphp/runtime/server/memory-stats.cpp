@@ -55,14 +55,14 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   }
   w->beginObject("Memory");
 
-  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_relaxed));
-  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
-  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_acquire));
+  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_acquire));
+  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_acquire));
   w->writeEntry("PeakUsage",
-                ProcStatus::VmHWMKb.load(std::memory_order_relaxed));
-  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_relaxed));
+                ProcStatus::VmHWMKb.load(std::memory_order_acquire));
+  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_acquire));
   w->writeEntry("HugetlbPages",
-                ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed));
+                ProcStatus::HugetlbPagesKb.load(std::memory_order_acquire));
   w->writeEntry("adjustedRSS", ProcStatus::adjustedRssKb());
   w->writeEntry("mem.rss_adjusted", ProcStatus::adjustedRssKb());
 
@@ -106,15 +106,15 @@ ServiceData::CounterCallback s_counters(
     counters["mem.struct-layout-count"] = bespoke::numStructLayouts();
 
     counters["mem.huge-tlb-pages-kb"] =
-      ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed);
+      ProcStatus::HugetlbPagesKb.load(std::memory_order_acquire);
     counters["mem.vm-size-kb"] =
-      ProcStatus::VmSizeKb.load(std::memory_order_relaxed);
+      ProcStatus::VmSizeKb.load(std::memory_order_acquire);
     counters["mem.vm-rss-kb"] =
-      ProcStatus::VmRSSKb.load(std::memory_order_relaxed);
+      ProcStatus::VmRSSKb.load(std::memory_order_acquire);
     counters["mem.peak-usage-kb"] =
-      ProcStatus::VmHWMKb.load(std::memory_order_relaxed);
+      ProcStatus::VmHWMKb.load(std::memory_order_acquire);
     counters["mem.vm-swap-kb"] =
-      ProcStatus::VmSwapKb.load(std::memory_order_relaxed);
+      ProcStatus::VmSwapKb.load(std::memory_order_acquire);
     if (ProcStatus::valid()) {
       counters["mem.vm-rss-adjusted-kb"] = ProcStatus::adjustedRssKb();
     }

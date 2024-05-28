@@ -106,8 +106,8 @@ void block_and_raise(int signo, siginfo_t* info, void* args) {
     auto canStore = g_state.m_siState.compare_exchange_strong(
       state,
       StoredInfoState::Recording,
-      std::memory_order_acquire,
-      std::memory_order_relaxed
+      std::memory_order_acq_rel,
+      std::memory_order_acquire
     );
     if (canStore) {
       g_state.m_storedInfo.store(*info, std::memory_order::release);

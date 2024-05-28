@@ -100,7 +100,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
          typeToName(type), showShort(sk), spOff.offset);
   assertx(!sk.prologue());
 
-  if (s_fullForStub.load(std::memory_order_relaxed)) {
+  if (s_fullForStub.load(std::memory_order_acquire)) {
     FTRACE(4, "  no space for {}, bailing\n", showShort(sk));
     return nullptr;
   }
@@ -149,7 +149,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   // just get a nullptr address.
   if (!start) {
     FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
-    s_fullForStub.store(true, std::memory_order_relaxed);
+    s_fullForStub.store(true, std::memory_order_release);
     return nullptr;
   }
 
@@ -206,7 +206,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   FTRACE(2, "interp_no_translate_stub @{} {}\n", showShort(sk), spOff.offset);
 
   // No point on trying to emit if we already failed once.
-  if (s_fullForStub.load(std::memory_order_relaxed)) {
+  if (s_fullForStub.load(std::memory_order_acquire)) {
     FTRACE(4, "  no space for {}, bailing\n", showShort(sk));
     return nullptr;
   }
@@ -234,7 +234,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   // just get a nullptr address.
   if (!start) {
     FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
-    s_fullForStub.store(true, std::memory_order_relaxed);
+    s_fullForStub.store(true, std::memory_order_release);
   }
   FTRACE(4, "  emitted stub {} for {}\n", start, showShort(sk));
   return start;

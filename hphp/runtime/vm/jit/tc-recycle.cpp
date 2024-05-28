@@ -142,7 +142,7 @@ Optional<Job> dequeueJob() {
     return !s_running.load(std::memory_order_acquire) || !s_jobq.empty();
   });
 
-  if (!s_running.load(std::memory_order_relaxed)) return std::nullopt;
+  if (!s_running.load(std::memory_order_acquire)) return std::nullopt;
   assertx(!s_jobq.empty());
   auto ret = s_jobq.front();
   s_jobq.pop();

@@ -199,9 +199,9 @@ void recordTranslationSizes(const TransRec& tr) {
   auto constexpr iMain   = static_cast<size_t>(AreaIndex::Main);
   auto constexpr iCold   = static_cast<size_t>(AreaIndex::Cold);
   auto constexpr iFrozen = static_cast<size_t>(AreaIndex::Frozen);
-  trans_counter[iMain].fetch_add(tr.aLen, std::memory_order_relaxed);
-  trans_counter[iCold].fetch_add(tr.acoldLen, std::memory_order_relaxed);
-  trans_counter[iFrozen].fetch_add(tr.afrozenLen, std::memory_order_relaxed);
+  trans_counter[iMain].fetch_add(tr.aLen, std::memory_order_acq_rel);
+  trans_counter[iCold].fetch_add(tr.acoldLen, std::memory_order_acq_rel);
+  trans_counter[iFrozen].fetch_add(tr.afrozenLen, std::memory_order_acq_rel);
 }
 
 void updateCodeSizeCounters() {
@@ -232,19 +232,19 @@ void updateCodeSizeCounters() {
 size_t getLiveMainUsage() {
   constexpr auto liveIdx = static_cast<size_t>(TransKind::Live);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 size_t getProfMainUsage() {
   constexpr auto profIdx = static_cast<size_t>(TransKind::Profile);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[profIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[profIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 size_t getOptMainUsage() {
   constexpr auto optIdx = static_cast<size_t>(TransKind::Optimize);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[optIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[optIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 /*
@@ -510,7 +510,7 @@ std::string warmupStatusString() {
   // Three conditions necessary for the jit to qualify as "warmed-up":
   std::string status_str;
 
-  if (!s_warmedUp.load(std::memory_order_relaxed)) {
+  if (!s_warmedUp.load(std::memory_order_acquire)) {
     if (jit::mcgen::retranslateAllPending()) {
       status_str = "Waiting on retranslateAll().\n";
     } else {
@@ -543,7 +543,7 @@ std::string warmupStatusString() {
       if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
         status_str = "JIT running in SerializeAndExit mode";
       } else {
-        s_warmedUp.store(true, std::memory_order_relaxed);
+        s_warmedUp.store(true, std::memory_order_release);
       }
     }
   }

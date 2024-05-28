@@ -48,10 +48,10 @@ bool Bump1GMapper::addMappingImpl() {
   if (get_huge1g_info().free_hugepages <= 0) return false;
 
   auto _ = m_state.lock();
-  auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
+  auto const currFrontier = m_state.low_map.load(std::memory_order_acquire);
   if (currFrontier % size1g != 0) return false;
   auto const newFrontier = currFrontier + size1g;
-  if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
+  if (newFrontier > m_state.high_map.load(std::memory_order_acquire)) {
     return false;
   }
 #ifdef HAVE_NUMA
@@ -97,13 +97,13 @@ bool Bump2MMapper::addMappingImpl() {
 
   auto _ = m_state.lock();
   // Recheck the mapping frontiers after grabbing the lock
-  auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
+  auto const currFrontier = m_state.low_map.load(std::memory_order_acquire);
   if (currFrontier % size2m != 0) return false;
   auto nPages = std::min(m_maxHugePages - m_currHugePages, freePages);
   if (nPages <= 0) return false;
   auto const hugeSize = std::min(kChunkSize, size2m * nPages);
   auto const newFrontier = currFrontier + hugeSize;
-  if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
+  if (newFrontier > m_state.high_map.load(std::memory_order_acquire)) {
     return false;
   }
   void* newPages = mmap((void*)currFrontier, hugeSize,
@@ -146,8 +146,8 @@ bool Bump2MMapper::addMappingImpl() {
 template<Direction D>
 bool BumpNormalMapper<D>::addMappingImpl() {
   auto _ = m_state.lock();
-  auto const high = m_state.high_map.load(std::memory_order_relaxed);
-  auto const low = m_state.low_map.load(std::memory_order_relaxed);
+  auto const high = m_state.high_map.load(std::memory_order_acquire);
+  auto const low = m_state.low_map.load(std::memory_order_acquire);
   auto const maxSize = static_cast<size_t>(high - low);
   if (maxSize == 0) return false;       // fully mapped
   auto const size = std::min(kChunkSize, maxSize);

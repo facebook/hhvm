@@ -2022,9 +2022,9 @@ struct KeysetAppendInit : KeysetInit {
 struct DCls::IsectWrapper {
   IsectSet isects;
   std::atomic<uint32_t> refcount{1};
-  void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
+  void acquire() { refcount.fetch_add(1, std::memory_order_acq_rel); }
   void release() {
-    if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
+    if (refcount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
       delete this;
     }
   }
@@ -2034,9 +2034,9 @@ struct DCls::IsectAndExactWrapper {
   res::Class exact;
   IsectSet isects;
   std::atomic<uint32_t> refcount{1};
-  void acquire() { refcount.fetch_add(1, std::memory_order_relaxed); }
+  void acquire() { refcount.fetch_add(1, std::memory_order_acq_rel); }
   void release() {
-    if (refcount.fetch_sub(1, std::memory_order_relaxed) == 1) {
+    if (refcount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
       delete this;
     }
   }

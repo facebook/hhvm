@@ -126,7 +126,7 @@ Unit::Unit()
 
 Unit::~Unit() {
   if (RuntimeOption::EvalEnableReverseDataMap &&
-      m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+      m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
@@ -351,13 +351,13 @@ bool isEvalName(const StringData* name) {
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+  if (m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     return;
   }
 
   auto const nrecord = RuntimeOption::EvalRecordFirstUnits;
-  if (s_loadedUnits.load(std::memory_order_relaxed) < nrecord) {
-    auto const index = s_loadedUnits.fetch_add(1, std::memory_order_relaxed);
+  if (s_loadedUnits.load(std::memory_order_acquire) < nrecord) {
+    auto const index = s_loadedUnits.fetch_add(1, std::memory_order_acq_rel);
     if (index < nrecord) {
       StructuredLogEntry ent;
       ent.setStr("path", m_origFilepath->data());
@@ -380,11 +380,11 @@ void Unit::initialMerge() {
     );
   }
 
-  m_mergeState.store(MergeState::InitialMerged, std::memory_order_relaxed);
+  m_mergeState.store(MergeState::InitialMerged, std::memory_order_release);
 }
 
 void Unit::merge() {
-  auto mergeState = m_mergeState.load(std::memory_order_relaxed);
+  auto mergeState = m_mergeState.load(std::memory_order_acquire);
   if (mergeState == MergeState::Merged) return;
 
   if (m_fatalInfo) {
@@ -396,7 +396,7 @@ void Unit::merge() {
   if (mergeState == MergeState::Unmerged) {
     SimpleLock lock(unitInitLock);
     initialMerge();
-    mergeState = m_mergeState.load(std::memory_order_relaxed);
+    mergeState = m_mergeState.load(std::memory_order_acquire);
     assertx(mergeState >= MergeState::InitialMerged);
   }
 
@@ -434,9 +434,9 @@ void Unit::merge() {
 
   if (RuntimeOption::RepoAuthoritative ||
     (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
-    m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
+    m_mergeState.store(MergeState::Merged, std::memory_order_release);
   } else {
-    m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_relaxed);
+    m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_release);
   }
 }
 
@@ -584,7 +584,7 @@ static bool defineSymbols(
 
 template<bool mergeOnlyNonPersistentFuncs>
 void Unit::mergeImpl() {
-  assertx(m_mergeState.load(std::memory_order_relaxed) >=
+  assertx(m_mergeState.load(std::memory_order_acquire) >=
           MergeState::InitialMerged);
   autoTypecheck(this);
 

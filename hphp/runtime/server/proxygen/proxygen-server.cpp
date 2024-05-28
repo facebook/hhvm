@@ -730,7 +730,7 @@ void ProxygenServer::forceStop() {
   evb->checkIsInEventBaseThread();
   if (getStatus() == RunStatus::STOPPED) return;
   Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
-               this, m_port, m_enqueuedCount.load(std::memory_order_relaxed),
+               this, m_port, m_enqueuedCount.load(std::memory_order_acquire),
                getLibEventConnectionCount());
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
@@ -926,7 +926,7 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
-  if (CrashingThread.load(std::memory_order_relaxed) != 0) {
+  if (CrashingThread.load(std::memory_order_acquire) != 0) {
     Logger::Error("Discarding request while crashing");
     if (m_shutdownState == ShutdownState::SHUTDOWN_NONE) {
       m_shutdownState = ShutdownState::DRAINING_READS;

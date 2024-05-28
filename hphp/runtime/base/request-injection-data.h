@@ -172,7 +172,7 @@ struct RequestInjectionData {
   }
   void clearHostOOMFlag() {
     clearFlag(MemExceededFlag);
-    m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+    m_hostOutOfMemory.store(false, std::memory_order_release);
   }
   bool hostOOMFlag() const {
     return m_hostOutOfMemory.load(std::memory_order_acquire);

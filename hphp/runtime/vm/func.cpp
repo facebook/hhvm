@@ -380,12 +380,12 @@ std::pair<const StringData*, const StringData*> Func::getMethCallerNames(
 // FuncId manipulation.
 
 FuncId::Int Func::maxFuncIdNum() {
-  return s_nextFuncId.load(std::memory_order_relaxed);
+  return s_nextFuncId.load(std::memory_order_acquire);
 }
 
 #ifdef USE_LOWPTR
 void Func::setNewFuncId() {
-  s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+  s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
   s_funcid_counter->increment();
 }
 
@@ -401,7 +401,7 @@ bool Func::isFuncIdValid(FuncId id) {
 #else
 void Func::setNewFuncId() {
   assertx(m_funcId.isInvalid());
-  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_relaxed)};
+  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_acq_rel)};
   s_funcid_counter->increment();
 
   s_funcVec.ensureSize(m_funcId.toInt() + 1);

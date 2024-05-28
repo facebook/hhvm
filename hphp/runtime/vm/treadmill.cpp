@@ -68,8 +68,8 @@ struct TreadmillRequestInfo {
 pthread_mutex_t s_stateLock = PTHREAD_MUTEX_INITIALIZER;
 std::vector<TreadmillRequestInfo> s_inflightRequests;
 
-// Start time of the oldest request in flight. We use std::memory_order_relaxed,
-// as all writes happen under the s_stateLock.
+// Start time of the oldest request in flight. All writes happen under the
+// s_stateLock.
 std::atomic<Clock::time_point> s_oldestRequestInFlight{kNoStartTime};
 
 std::string s_killMessage;
@@ -100,7 +100,7 @@ struct StateGuard {
 int64_t requestIdx() {
   if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
     *rl_thisRequestIdx =
-      g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
+      g_nextThreadIdx.fetch_add(1, std::memory_order_acq_rel);
   }
   return *rl_thisRequestIdx;
 }
@@ -280,10 +280,10 @@ void startRequest(SessionKind session_kind) {
   // Set the oldest request in flight if there is none set yet. We obtained
   // the monotonic timestamp under the state guard, so there can't be a later
   // one set.
-  auto const oldest = s_oldestRequestInFlight.load(std::memory_order_relaxed);
+  auto const oldest = s_oldestRequestInFlight.load(std::memory_order_acquire);
   assertx(oldest <= startTime);
   if (oldest == kNoStartTime) {
-    s_oldestRequestInFlight.store(startTime, std::memory_order_relaxed);
+    s_oldestRequestInFlight.store(startTime, std::memory_order_release);
   }
 
   if (!RequestInfo::s_requestInfo.isNull()) {
@@ -307,7 +307,7 @@ void finishRequest() {
     // to fire and update the time of the oldest request in flight.
     // However if the request just finished is not the current oldest we
     // don't need to check anything as there cannot be any WorkItem to run.
-    if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == startTime) {
+    if (s_oldestRequestInFlight.load(std::memory_order_acquire) == startTime) {
       auto limit = Clock::time_point::max();
       for (auto& val : s_inflightRequests) {
         if (val.startTime != kNoStartTime && val.startTime < limit) {
@@ -317,7 +317,7 @@ void finishRequest() {
       // update "oldest in flight" or kill it if there are no running requests
       s_oldestRequestInFlight.store(
         limit == Clock::time_point::max() ? kNoStartTime : limit,
-        std::memory_order_relaxed
+        std::memory_order_release
       );
 
       // collect WorkItems to run
@@ -369,7 +369,7 @@ void finishRequest() {
 }
 
 Clock::time_point getOldestRequestStartTime() {
-  return s_oldestRequestInFlight.load(std::memory_order_relaxed);
+  return s_oldestRequestInFlight.load(std::memory_order_acquire);
 }
 
 Clock::time_point getRequestStartTime() {

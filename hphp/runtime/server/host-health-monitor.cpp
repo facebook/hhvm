@@ -116,7 +116,7 @@ void HostHealthMonitor::monitor() {
                                   {ServiceData::StatsType::AVG},
                                   {std::chrono::seconds(5),
                                    std::chrono::seconds(60)});
-  m_stopped.store(false, std::memory_order_relaxed);
+  m_stopped.store(false, std::memory_order_release);
   std::unique_lock<std::mutex> guard(m_condvar_lock);
   std::chrono::milliseconds dura(MaxUpdatePeriod);
   auto next = std::chrono::steady_clock::now();

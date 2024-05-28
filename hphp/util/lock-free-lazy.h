@@ -150,7 +150,7 @@ const T& LockFreeLazy<T>::get(const F& f) {
       // that we're updating the value.
     } else if (m_state.compare_exchange_weak(current,
                                              State::Updating,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
       // We updated the state, so we're responsible now for updating
       // the value.
       SCOPE_FAIL{
@@ -190,7 +190,7 @@ template<typename T> bool LockFreeLazy<T>::reset() {
       );
     } else if (m_state.compare_exchange_weak(current,
                                              State::Updating,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
       std::launder(reinterpret_cast<T*>(&m_storage))->~T();
       m_state.store(State::Empty, std::memory_order_release);
       futex_wake(reinterpret_cast<std::atomic<uint32_t>*>(&m_state), INT_MAX);

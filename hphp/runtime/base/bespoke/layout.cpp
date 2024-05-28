@@ -593,7 +593,7 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
                                     std::atomic<ArrayData*>& cache,
                                     Bespokify bespokify) {
   if (!profile->data) return ad;
-  auto const bad = cache.load(std::memory_order_relaxed);
+  auto const bad = cache.load(std::memory_order_acquire);
   if (bad) return bad;
 
   auto const result = bespokify(ad, profile);

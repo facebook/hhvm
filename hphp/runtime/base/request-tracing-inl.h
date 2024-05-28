@@ -35,8 +35,8 @@ struct AtomicEventStats {
 
   operator EventStats() {
     return {
-      total_duration.load(std::memory_order_relaxed),
-      total_count.load(std::memory_order_relaxed)
+      total_duration.load(std::memory_order_acquire),
+      total_count.load(std::memory_order_acquire)
     };
   }
 
@@ -351,4 +351,3 @@ void visit_process_stats(F&& fun) {
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

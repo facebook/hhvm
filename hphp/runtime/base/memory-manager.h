@@ -783,7 +783,7 @@ struct MemoryManager {
    * to track it are performed with relaxed ordering constraints.
    */
   static ssize_t getAllMMUsage() {
-    return s_req_heap_usage.load(std::memory_order_relaxed);
+    return s_req_heap_usage.load(std::memory_order_acquire);
   }
 
   /*

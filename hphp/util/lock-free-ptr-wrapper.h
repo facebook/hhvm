@@ -166,9 +166,9 @@ struct LockFreePtrWrapper {
 
   T update_and_unlock(T&& v);
 
-  raw_type raw() const { return bits.load(std::memory_order_relaxed); }
+  raw_type raw() const { return bits.load(std::memory_order_acquire); }
   const bool notLocked() {
-    return !(low_bits.load(std::memory_order_relaxed) & ~kPtrMask);
+    return !(low_bits.load(std::memory_order_acquire) & ~kPtrMask);
   }
 
   template<typename U>
@@ -260,7 +260,7 @@ struct UnsafeLockFreePtrWrapper : LockFreePtrWrapper<T> {
     : LockFreePtrWrapper<T>(o.raw()) {}
   auto const& operator=(const UnsafeLockFreePtrWrapper& o) {
     assertx(notLocked());
-    LockFreePtrWrapper<T>::bits.store(o.raw(), std::memory_order_relaxed);
+    LockFreePtrWrapper<T>::bits.store(o.raw(), std::memory_order_release);
     assertx(notLocked());
     return *this;
   }
@@ -280,14 +280,14 @@ LockFreePtrWrapper<T>::lock_for_update() {
     auto c = raw() & kPtrMask;
     // writing is expected to be unusual, so start by assuming the low
     // two bits are clear, and attempt to set the appropriate low bit.
-    if (bits.compare_exchange_weak(c, c + lockBit, std::memory_order_relaxed)) {
+    if (bits.compare_exchange_weak(c, c + lockBit, std::memory_order_acq_rel)) {
       return ScopedLock{*this};
     }
     // We didn't get the lock, so someone else had it. c holds the
     // value we found there.
     if (c & kLockNoWaitersBit) {
       auto const desired = (c & kPtrMask) + kLockWithWaitersBit;
-      if (!bits.compare_exchange_weak(c, desired, std::memory_order_relaxed)) {
+      if (!bits.compare_exchange_weak(c, desired, std::memory_order_acq_rel)) {
         // We failed, so someone else got in before us. start over.
         continue;
       }
@@ -313,7 +313,7 @@ LockFreePtrWrapper<T>::try_lock_for_update() {
   auto const success = bits.compare_exchange_weak(
     c,
     c + kLockNoWaitersBit,
-    std::memory_order_relaxed
+    std::memory_order_acq_rel
   );
   if (!success) return std::nullopt;
   return ScopedLock{*this};

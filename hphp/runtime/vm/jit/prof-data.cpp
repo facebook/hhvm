@@ -250,11 +250,11 @@ RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
 void processInitProfData() {
   if (!Cfg::Jit::PGO) return;
 
-  s_profData.store(new ProfData(), std::memory_order_relaxed);
+  s_profData.store(new ProfData(), std::memory_order_release);
 }
 
 void requestInitProfData() {
-  *rl_profData = s_profData.load(std::memory_order_relaxed);
+  *rl_profData = s_profData.load(std::memory_order_acquire);
 }
 
 void requestExitProfData() {
@@ -262,16 +262,16 @@ void requestExitProfData() {
 }
 
 const ProfData* globalProfData() {
-  return s_profData.load(std::memory_order_relaxed);
+  return s_profData.load(std::memory_order_acquire);
 }
 
 void discardProfData() {
-  if (s_profData.load(std::memory_order_relaxed) == nullptr) return;
+  if (s_profData.load(std::memory_order_acquire) == nullptr) return;
 
   // Make sure s_profData is nullptr so any new requests won't try to use the
   // object we're deleting, then send it to the Treadmill for deletion.
   std::unique_ptr<ProfData> data{
-    s_profData.exchange(nullptr, std::memory_order_relaxed)
+    s_profData.exchange(nullptr, std::memory_order_acq_rel)
   };
   if (data != nullptr) {
     if (RuntimeOption::ServerExecutionMode()) {
@@ -287,7 +287,7 @@ void ProfData::maybeResetCounters() {
   if (requestCount() < Cfg::Jit::ResetProfCountersRequest) return;
 
   std::unique_lock lock{m_transLock};
-  if (m_countersReset.load(std::memory_order_relaxed)) return;
+  if (m_countersReset.load(std::memory_order_acquire)) return;
   m_counters.resetAllCounters(Cfg::Jit::PGOThreshold);
   m_countersReset.store(true, std::memory_order_release);
 }

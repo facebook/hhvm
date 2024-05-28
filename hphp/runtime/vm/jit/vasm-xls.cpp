@@ -3061,7 +3061,7 @@ void dumpStats(const Vunit& unit, const ResolutionPlan& resolution) {
 
 void allocateRegistersWithXLS(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_reg_alloc, unit.log_entry);
-  auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
+  auto const counter = s_counter.fetch_add(1, std::memory_order_acq_rel);
 
   assertx(check(unit));
   assertx(checkNoCriticalEdges(unit));

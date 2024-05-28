@@ -75,21 +75,21 @@ struct ProcStatus {
 
  public:
   static auto totalRssKb() {            // include hugetlb pages
-    return VmRSSKb.load(std::memory_order_relaxed) +
-      HugetlbPagesKb.load(std::memory_order_relaxed);
+    return VmRSSKb.load(std::memory_order_acquire) +
+      HugetlbPagesKb.load(std::memory_order_acquire);
   }
   static auto adjustedRssKb() {
     assert(valid());
-    return VmRSSKb.load(std::memory_order_relaxed)
-      + VmSwapKb.load(std::memory_order_relaxed)
-      + HugetlbPagesKb.load(std::memory_order_relaxed)
-      - UnusedKb.load(std::memory_order_relaxed);
+    return VmRSSKb.load(std::memory_order_acquire)
+      + VmSwapKb.load(std::memory_order_acquire)
+      + HugetlbPagesKb.load(std::memory_order_acquire)
+      - UnusedKb.load(std::memory_order_acquire);
   }
   static auto nThreads() {
-    return threads.load(std::memory_order_relaxed);
+    return threads.load(std::memory_order_acquire);
   }
   static void updateUnused(int64_t unusedKb) {
-    UnusedKb.store(unusedKb, std::memory_order_relaxed);
+    UnusedKb.store(unusedKb, std::memory_order_release);
   }
   static bool valid() {
     return static_cast<bool>(lastUpdate.load(std::memory_order_acquire));

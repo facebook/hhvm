@@ -117,7 +117,7 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
     // RangeMapper::addMappingImpl() holds the lock on RangeState when adding
     // new mappings, so no additional locking is needed here.
     if (auto addr = rangeMapper->alloc(size, alignment)) {
-      extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_relaxed);
+      extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_acq_rel);
       return addr;
     }
   }

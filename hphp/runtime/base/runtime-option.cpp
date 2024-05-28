@@ -166,8 +166,8 @@ struct CachedRepoOptions {
   CachedRepoOptions(const CachedRepoOptions& opts)
     : options(nullptr)
   {
-    if (auto o = opts.options.load(std::memory_order_relaxed)) {
-      options.store(new RepoOptions(*o), std::memory_order_relaxed);
+    if (auto o = opts.options.load(std::memory_order_acquire)) {
+      options.store(new RepoOptions(*o), std::memory_order_release);
     }
   }
   ~CachedRepoOptions() {
@@ -175,7 +175,7 @@ struct CachedRepoOptions {
   }
 
   CachedRepoOptions& operator=(const CachedRepoOptions& opts) {
-    auto const o = opts.options.load(std::memory_order_relaxed);
+    auto const o = opts.options.load(std::memory_order_acquire);
     auto const old = options.exchange(o ? new RepoOptions(*o) : nullptr);
     if (old) Treadmill::enqueue([old] { delete old; });
     return *this;
@@ -206,7 +206,7 @@ struct CachedRepoOptions {
   }
 
   const RepoOptions* fetch(const RepoOptionStats& st) const {
-    auto const opts = options.load(std::memory_order_relaxed);
+    auto const opts = options.load(std::memory_order_acquire);
     return opts && !isChanged(opts, st) ? opts : nullptr;
   }
 

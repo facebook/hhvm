@@ -350,7 +350,7 @@ inline const StringData* Unit::moduleName() const {
 // Merge.
 
 inline bool Unit::isEmpty() const {
-  return m_mergeState.load(std::memory_order_relaxed) == MergeState::Merged;
+  return m_mergeState.load(std::memory_order_acquire) == MergeState::Merged;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

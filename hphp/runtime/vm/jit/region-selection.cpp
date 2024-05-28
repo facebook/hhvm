@@ -685,14 +685,14 @@ RegionDesc::Block::Block(BlockId     id,
   , m_profTransID(kInvalidTransID)
 {
   if (id == kInvalidTransID) {
-    m_id = s_nextId.fetch_sub(1, std::memory_order_relaxed);
+    m_id = s_nextId.fetch_sub(1, std::memory_order_acq_rel);
   } else {
     m_id = id;
     while (true) {
-      auto expected = s_nextId.load(std::memory_order_relaxed);
+      auto expected = s_nextId.load(std::memory_order_acquire);
       if (id > expected) break;
       if (s_nextId.compare_exchange_weak(expected, id - 1,
-                                         std::memory_order_relaxed)) {
+                                         std::memory_order_acq_rel)) {
         break;
       }
     }

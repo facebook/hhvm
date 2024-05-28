@@ -415,7 +415,7 @@ DefaultArena* next_extra_arena(int node) {
   if (node < 0) node = 0;
   auto const n = static_cast<unsigned>(node);
   auto counter = s_extra_arenas[n].second;
-  auto const next = counter->fetch_add(1, std::memory_order_relaxed);
+  auto const next = counter->fetch_add(1, std::memory_order_acq_rel);
   return s_extra_arenas[n].first[next % s_extra_arena_per_node];
 }
 

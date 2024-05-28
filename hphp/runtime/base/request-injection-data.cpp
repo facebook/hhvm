@@ -109,11 +109,11 @@ void RequestTimer::setTimeout(int seconds) {
     }
   }
   if (m_timeoutSeconds) {
-    m_timerActive.store(true, std::memory_order_relaxed);
+    m_timerActive.store(true, std::memory_order_release);
     ts.it_value.tv_sec = m_timeoutSeconds;
     timer_settime(m_timerId, 0, &ts, nullptr);
   } else {
-    m_timerActive.store(false, std::memory_order_relaxed);
+    m_timerActive.store(false, std::memory_order_release);
   }
 }
 
@@ -454,7 +454,7 @@ void RequestInjectionData::setCPUTimeout(int seconds) {
 
 void RequestInjectionData::setUserTimeout(int seconds) {
   if (seconds == 0) {
-    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_release);
   }
 
   m_userTimeoutTimer.setTimeout(seconds);
@@ -559,7 +559,7 @@ void RequestInjectionData::resetUserTimeoutTimer(int seconds /* = 0 */) {
 void RequestInjectionData::reset() {
   m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
   m_timeoutFlags.fetch_and(TimeoutNone);
-  m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  m_hostOutOfMemory.store(false, std::memory_order_release);
   m_OOMAbort = false;
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_jittingDisabled = false;
@@ -624,7 +624,7 @@ int RequestInjectionData::getAndClearNextPendingSignal() {
       assertx(index);
       --index;             // folly::findFirstSet() returns 1-64 instead of 0-63
       // Clear the bit.
-      chunk.fetch_and(~(1ull << index), std::memory_order_relaxed);
+      chunk.fetch_and(~(1ull << index), std::memory_order_acq_rel);
       return i * 64 + index;
     }
   }

@@ -63,7 +63,7 @@ struct Decision {
 };
 
 uint64_t load(const std::atomic<uint64_t>& x) {
-  return x.load(std::memory_order_relaxed);
+  return x.load(std::memory_order_acquire);
 }
 
 double probabilityOfEscalation(const LoggingProfile& profile) {

@@ -294,8 +294,8 @@ private:
 };
 
 template<class T,
-         std::memory_order read_order = std::memory_order_relaxed,
-         std::memory_order write_order = std::memory_order_relaxed>
+         std::memory_order read_order = std::memory_order_acquire,
+         std::memory_order write_order = std::memory_order_release>
 using AtomicLowPtr =
   detail::LowPtrImpl<T, detail::AtomicStorage<detail::low_storage_t,
                                               read_order,
@@ -330,4 +330,3 @@ template<class T> class FormatValue<HPHP::LowPtr<T>> {
   const HPHP::LowPtr<T> m_val;
 };
 }
-

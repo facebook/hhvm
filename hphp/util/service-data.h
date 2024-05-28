@@ -245,15 +245,15 @@ Optional<int64_t> exportCounterByKey(const std::string& key);
 // Interface for a flat counter. All methods are thread safe.
 struct ExportedCounter {
   ExportedCounter() : m_value(0) {}
-  void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
-  void decrement() { m_value.fetch_sub(1, std::memory_order_relaxed); }
+  void increment() { m_value.fetch_add(1, std::memory_order_acq_rel); }
+  void decrement() { m_value.fetch_sub(1, std::memory_order_acq_rel); }
   void addValue(int64_t value) {
-    m_value.fetch_add(value, std::memory_order_relaxed);
+    m_value.fetch_add(value, std::memory_order_acq_rel);
   }
   void setValue(int64_t value) {
-    m_value.store(value, std::memory_order_relaxed);
+    m_value.store(value, std::memory_order_release);
   }
-  int64_t getValue() const { return m_value.load(std::memory_order_relaxed); }
+  int64_t getValue() const { return m_value.load(std::memory_order_acquire); }
 
  private:
   friend struct detail::FriendDeleter<ExportedCounter>;

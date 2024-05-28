@@ -28,7 +28,7 @@ std::atomic<int64_t> s_nextRequestId{1};
 
 RequestId RequestId::allocate() {
   RequestId ret;
-  ret.m_id = s_nextRequestId.fetch_add(1, std::memory_order_relaxed);
+  ret.m_id = s_nextRequestId.fetch_add(1, std::memory_order_acq_rel);
   return ret;
 }
 

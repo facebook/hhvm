@@ -227,7 +227,7 @@ void syncVMRegsWork(bool soft) {
 static std::atomic<int32_t> s_nextFakeAddress{-1};
 
 int32_t getNextFakeReturnAddress() {
-  return s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+  return s_nextFakeAddress.fetch_sub(1, std::memory_order_acq_rel);
 }
 
 }}

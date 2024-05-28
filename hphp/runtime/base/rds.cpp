@@ -328,7 +328,7 @@ Handle alloc(Mode mode, size_t numBytes,
           return handle;
         }
 
-        auto const oldFrontier = s_normal_frontier.load(std::memory_order_relaxed);
+        auto const oldFrontier = s_normal_frontier.load(std::memory_order_acquire);
         s_normal_frontier.store(roundUp(oldFrontier, align), std::memory_order_release);
 
         addFreeBlock(s_normal_free_lists, oldFrontier,

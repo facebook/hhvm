@@ -56,8 +56,8 @@ template<typename AHM>
 void checkAHMSubMaps(const AHM& map, folly::StringPiece mapName,
                      std::atomic<bool>& done) {
   if (LIKELY(map.numSubMaps() == 1) ||
-      done.load(std::memory_order_relaxed) ||
-      done.exchange(true, std::memory_order_relaxed)) {
+      done.load(std::memory_order_acquire) ||
+      done.exchange(true, std::memory_order_acq_rel)) {
     return;
   }
 

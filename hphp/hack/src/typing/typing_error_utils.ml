@@ -1566,6 +1566,107 @@ end = struct
           true (* Soft *)
   end
 
+  module Eval_package = struct
+    let get_package_str p_opt =
+      match p_opt with
+      | Some s -> Printf.sprintf "package `%s`" s
+      | None -> "the default package"
+
+    let cross_pkg_access
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (package_pos : Pos.t)
+        (current_package_opt : string option)
+        (target_package_opt : string option)
+        (current_filename : Relative_path.t)
+        (target_filename : Relative_path.t)
+        (soft : bool) =
+      let current_filename = Relative_path.suffix current_filename in
+      let target_filename = Relative_path.suffix target_filename in
+      let current_package = get_package_str current_package_opt in
+      let target_package = get_package_str target_package_opt in
+      let relationship =
+        if soft then
+          "only soft includes"
+        else
+          "does not include"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element which belongs to %s from %s"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This is from %s, which belongs to %s"
+                target_filename
+                target_package );
+            ( Pos_or_decl.of_raw_pos package_pos,
+              Printf.sprintf
+                "But %s is in %s, and %s %s %s"
+                current_filename
+                current_package
+                current_package
+                relationship
+                target_package );
+          ]
+      in
+      let error_code =
+        if soft then
+          Error_code.InvalidCrossPackageSoft
+        else
+          Error_code.InvalidCrossPackage
+      in
+      (error_code, claim, reason, [], User_error_flags.empty)
+
+    let to_error t ~env:_ =
+      let open Typing_error.Primary.Package in
+      match t with
+      | Cross_pkg_access
+          {
+            pos;
+            decl_pos;
+            package_pos;
+            current_package_opt;
+            target_package_opt;
+            current_filename;
+            target_filename;
+          } ->
+        cross_pkg_access
+          pos
+          decl_pos
+          package_pos
+          current_package_opt
+          target_package_opt
+          current_filename
+          target_filename
+          false (* Soft *)
+      | Soft_included_access
+          {
+            pos;
+            decl_pos;
+            package_pos;
+            current_package_opt;
+            target_package_opt;
+            current_filename;
+            target_filename;
+          } ->
+        cross_pkg_access
+          pos
+          decl_pos
+          package_pos
+          current_package_opt
+          target_package_opt
+          current_filename
+          target_filename
+          true (* Soft *)
+  end
+
   module Eval_xhp = struct
     let xhp_required pos why_xhp ty_reason_msg =
       let claim = lazy (pos, "An XHP instance was expected") in
@@ -4844,6 +4945,7 @@ end = struct
     | Enum err -> Eval_enum.to_error err ~env
     | Expr_tree err -> Eval_expr_tree.to_error err ~env
     | Modules err -> Eval_modules.to_error err ~env
+    | Package err -> Eval_package.to_error err ~env
     | Readonly err -> Eval_readonly.to_error err ~env
     | Shape err -> Eval_shape.to_error err ~env
     | Wellformedness err -> Eval_wellformedness.to_error err ~env

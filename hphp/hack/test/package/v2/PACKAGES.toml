@@ -1,0 +1,7 @@
+[packages]
+
+[packages.pkg1]
+include_paths=["./subdir_FOR_TEST/*"]
+
+[packages.pkg2]
+include_paths=["subdir_FOR_TEST/include_paths_bad1.php--foo.php"]

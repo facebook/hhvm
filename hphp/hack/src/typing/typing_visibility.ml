@@ -11,6 +11,7 @@ open Aast
 open Typing_defs
 open Utils
 open Typing_error.Primary.Modules
+open Typing_error.Primary.Package
 module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Folded_class
@@ -111,6 +112,7 @@ let is_internal_visible env target =
       ~env
       ~current:(Env.get_current_module env)
       ~target:(Some target)
+      Pos_or_decl.none (* only called from autocompleteService *)
   with
   | `Yes -> None
   | `Disjoint (current, target) ->
@@ -130,6 +132,7 @@ let check_internal_access ~in_signature env target pos decl_pos =
         ~env
         ~current:(Env.get_current_module env)
         ~target
+        decl_pos
     with
     | `Yes when in_signature && not (Env.get_internal env) ->
       Some (Module_hint { pos; decl_pos })
@@ -158,12 +161,13 @@ let check_public_access env use_pos def_pos target =
       ~env
       ~current:(Env.get_current_module env)
       ~target
+      def_pos
   with
   | `Yes -> None
   | `PackageNotSatisfied
       Typing_modules.
         {
-          current_module_pos;
+          current_module_pos_or_filename = `ModulePos current_module_pos;
           current_package_pos;
           current_package_name;
           target_package_name;
@@ -181,10 +185,30 @@ let check_public_access env use_pos def_pos target =
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
+  | `PackageNotSatisfied
+      Typing_modules.
+        {
+          current_module_pos_or_filename = `FileName current_filename;
+          current_package_pos;
+          current_package_name;
+          target_package_name;
+        } ->
+    Some
+      (Typing_error.package
+         (Cross_pkg_access
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              current_filename;
+              target_filename = Pos_or_decl.filename def_pos;
+              package_pos = current_package_pos;
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
+            }))
   | `PackageSoftIncludes
       Typing_modules.
         {
-          current_module_pos;
+          current_module_pos_or_filename = `ModulePos current_module_pos;
           current_package_pos;
           current_package_name;
           target_package_name;
@@ -199,6 +223,26 @@ let check_public_access env use_pos def_pos target =
               package_pos = current_package_pos;
               current_module_opt = Env.get_current_module env;
               target_module_opt = target;
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
+            }))
+  | `PackageSoftIncludes
+      Typing_modules.
+        {
+          current_module_pos_or_filename = `FileName current_filename;
+          current_package_pos;
+          current_package_name;
+          target_package_name;
+        } ->
+    Some
+      (Typing_error.package
+         (Soft_included_access
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              current_filename;
+              target_filename = Pos_or_decl.filename def_pos;
+              package_pos = current_package_pos;
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
@@ -360,7 +404,11 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
       | x -> x
     in
     let current_pkg =
-      Option.bind ~f:(Env.get_package_for_module env) current_module
+      if not (TypecheckerOptions.package_v2 @@ Env.get_tcopt env) then
+        Option.bind ~f:(Env.get_package_for_module env) current_module
+      else
+        let current_file = Env.get_file env in
+        Env.get_package_for_file env current_file
     in
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_modules.get_package_violation env current_pkg target_pkg with

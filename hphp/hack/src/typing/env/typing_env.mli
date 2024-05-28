@@ -545,6 +545,8 @@ val mark_inconsistent : env -> env
 
 val get_package_for_module : env -> string -> Package.t option
 
+val get_package_for_file : env -> Relative_path.t -> Package.t option
+
 val get_package_by_name : env -> string -> Package.t option
 
 val load_packages : env -> SSet.t -> env
@@ -554,6 +556,8 @@ val load_cross_packages_from_attr : env -> ('a, 'b) Aast.user_attributes -> env
 val with_packages : env -> SSet.t -> (env -> env * 'a) -> env * 'a
 
 val is_package_loaded : env -> string -> bool
+
+val package_v2 : env -> bool
 
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :

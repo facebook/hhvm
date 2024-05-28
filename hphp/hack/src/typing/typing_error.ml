@@ -354,6 +354,29 @@ module Primary = struct
     [@@deriving show]
   end
 
+  module Package = struct
+    type t =
+      | Cross_pkg_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+          current_filename: Relative_path.t;
+          target_filename: Relative_path.t;
+        }
+      | Soft_included_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+          current_filename: Relative_path.t;
+          target_filename: Relative_path.t;
+        }
+    [@@deriving show]
+  end
+
   module Xhp = struct
     type t =
       | Xhp_required of {
@@ -396,6 +419,7 @@ module Primary = struct
     | Enum of Enum.t
     | Expr_tree of Expr_tree.t
     | Modules of Modules.t
+    | Package of Package.t
     | Readonly of Readonly.t
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
@@ -1354,6 +1378,8 @@ module rec Error : sig
 
   val modules : Primary.Modules.t -> t
 
+  val package : Primary.Package.t -> t
+
   val readonly : Primary.Readonly.t -> t
 
   val shape : Primary.Shape.t -> t
@@ -1409,6 +1435,8 @@ end = struct
   let expr_tree err = primary @@ Primary.Expr_tree err
 
   let modules err = primary @@ Primary.Modules err
+
+  let package err = primary @@ Primary.Package err
 
   let readonly err = primary @@ Primary.Readonly err
 

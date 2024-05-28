@@ -70,7 +70,13 @@ let get_package_for_file (info : t) (file : Relative_path.t) : Package.t option
             let abs_path =
               Relative_path.(to_absolute @@ create_detect_prefix path)
             in
-            if String.is_prefix ~prefix:abs_path @@ file_abs_path then
+            let prefix =
+              if String.is_suffix ~suffix:"*" abs_path then
+                String.sub abs_path ~pos:0 ~len:(String.length abs_path - 1)
+              else
+                abs_path
+            in
+            if String.is_prefix ~prefix file_abs_path then
               Some abs_path
             else
               None)

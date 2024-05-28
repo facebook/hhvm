@@ -6349,6 +6349,7 @@ function unsaved_bar(): string { return "hello"; }
             spec,
             variables,
             fall_back_to_full_index=False,
+            lsp_extra_args=["--ignore-hh-version"],
         )
 
     def test_workspace_symbol(self) -> None:

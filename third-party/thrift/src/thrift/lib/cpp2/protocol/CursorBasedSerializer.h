@@ -836,7 +836,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     static_assert(
         field_id::value < FieldId{std::numeric_limits<int16_t>::max()},
         "Preventing overflow");
-    if (field_id::value <= fieldId_) {
+    if (!is_thrift_union_v<T> && field_id::value <= fieldId_) {
       folly::throw_exception<std::runtime_error>("Writing field out of order");
     }
     if (is_thrift_union_v<T> && fieldId_ != FieldId{0}) {

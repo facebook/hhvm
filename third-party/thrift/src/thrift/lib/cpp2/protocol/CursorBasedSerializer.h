@@ -419,7 +419,9 @@ class StructuredCursorReader : detail::BaseCursorReader {
  */
 template <typename Tag, bool Contiguous>
 class ContainerCursorReader : detail::BaseCursorReader {
-  using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
+  using ElementType = detail::lift_view_t<
+      typename detail::ContainerTraits<Tag>::ElementType,
+      Contiguous>;
   using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
   template <typename CTag, typename OwnTag>
   using enable_cursor_for = std::enable_if_t<
@@ -569,7 +571,7 @@ class ContainerCursorReader : detail::BaseCursorReader {
     return true;
   }
 
-  typename detail::ContainerTraits<Tag>::ElementType& currentValue() {
+  ElementType& currentValue() {
     checkState(State::Active);
     DCHECK(lastRead_);
     return *lastRead_;
@@ -579,7 +581,7 @@ class ContainerCursorReader : detail::BaseCursorReader {
 
   // remaining_ includes the element cached in the reader as lastRead_.
   uint32_t remaining_;
-  std::optional<typename detail::ContainerTraits<Tag>::ElementType> lastRead_;
+  std::optional<ElementType> lastRead_;
 
   template <typename, bool>
   friend class StructuredCursorReader;

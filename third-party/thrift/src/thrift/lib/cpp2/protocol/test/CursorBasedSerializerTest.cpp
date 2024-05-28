@@ -231,6 +231,18 @@ TEST(CursorSerializer, ContainerRead) {
   }
   reader.endRead(std::move(listReader));
   wrapper.endRead(std::move(reader));
+
+  // Contiguous buffer means string turns into std::string_view
+  Containers containers;
+  containers.list_of_string() = {"foo", "bar"};
+  CursorSerializationWrapper containersWrapper(containers);
+  auto containersReader = containersWrapper.beginRead();
+  auto listOfStringReader = containersReader.beginRead<ident::list_of_string>();
+  for (std::string_view& str : listOfStringReader) {
+    EXPECT_TRUE(str == "foo" || str == "bar");
+  }
+  containersReader.endRead(std::move(listOfStringReader));
+  containersWrapper.endRead(std::move(containersReader));
 }
 
 TEST(CursorSerializer, NestedStructRead) {

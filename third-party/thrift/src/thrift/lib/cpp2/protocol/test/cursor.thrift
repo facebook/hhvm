@@ -88,6 +88,10 @@ struct OutOfOrder {
   11: optional i16 field6;
 }
 
+struct Containers {
+  1: list<string> list_of_string;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

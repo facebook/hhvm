@@ -73,7 +73,6 @@ add_library(
   ast/t_structured.cc
   ast/t_type.cc
   ast/t_typedef.cc
-  ast/visitor.cc
 )
 target_link_libraries(
   compiler_ast

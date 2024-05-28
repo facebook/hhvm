@@ -116,6 +116,7 @@ pub enum UnstableFeatures {
     FunctionTypeOptionalParams,
     ExpressionTreeMap,
     ExpressionTreeNest,
+    SealedMethods,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -153,6 +154,7 @@ impl UnstableFeatures {
             UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
             UnstableFeatures::ExpressionTreeMap => OngoingRelease,
             UnstableFeatures::ExpressionTreeNest => Preview,
+            UnstableFeatures::SealedMethods => Unstable,
         }
     }
 }
@@ -2239,6 +2241,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         || errors::async_not_last,
                         modifiers,
                     );
+                };
+
+                if self.attr_spec_contains_sealed(method_attrs) {
+                    self.check_can_use_feature(node, &UnstableFeatures::SealedMethods);
                 }
             }
             _ => {}

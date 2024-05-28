@@ -518,10 +518,10 @@ module UserAttributes = struct
             } );
           ( uaSealed,
             {
-              contexts = [cls; enumcls; enum];
+              contexts = [cls; enumcls; enum; mthd];
               autocomplete = true;
               doc =
-                "Only the named classes can extend this class or interface."
+                "Only the named classes can extend this class or interface, or override this method."
                 ^ " Child classes may still be extended unless they are marked `final`.";
             } );
           ( uaLateInit,

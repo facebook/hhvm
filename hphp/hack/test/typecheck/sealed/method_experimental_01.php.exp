@@ -1,0 +1,2 @@
+ERROR: File "method_experimental_01.php", line 4, characters 3-57:
+Cannot use unstable feature: `sealed_methods` (Parsing[1002])

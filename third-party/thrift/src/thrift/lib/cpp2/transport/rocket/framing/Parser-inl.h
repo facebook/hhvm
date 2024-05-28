@@ -229,13 +229,6 @@ void Parser<T>::resizeBuffer() {
   bufferSize_ = kMaxBufferSize;
 }
 
-template <class T>
-constexpr size_t Parser<T>::kMinBufferSize;
-template <class T>
-constexpr size_t Parser<T>::kMaxBufferSize;
-template <class T>
-constexpr std::chrono::milliseconds Parser<T>::kDefaultBufferResizeInterval;
-
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

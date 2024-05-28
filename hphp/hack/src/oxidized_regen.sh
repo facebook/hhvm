@@ -40,6 +40,7 @@ summary "Write oxidized/gen/"
   --regen-command "$REGEN_COMMAND"                                            \
   --rustfmt-path "$RUSTFMT_PATH"                                              \
   --copy-types-file hphp/hack/src/oxidized/copy_types.txt                     \
+  --safe-ints-types-file hphp/hack/src/oxidized/safe_ints_types.txt           \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \

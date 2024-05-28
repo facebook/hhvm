@@ -107,7 +107,14 @@ let convert_single_file env filename regen_command =
   let header = make_header regen_command in
   printf "%s\n%s" header (read out_filename)
 
-let parse_types_file filename =
+let parse_types_line line filename =
+  if String.is_substring line ~substring:"::" then
+    line
+  else
+    failwith
+      (Printf.sprintf "Failed to parse line in types file %S: %S" filename line)
+
+let parse_file filename parse_line =
   let lines = ref [] in
   let ic = Stdlib.open_in filename in
   (try
@@ -117,26 +124,21 @@ let parse_types_file filename =
      Stdlib.close_in ic
    with
   | End_of_file -> Stdlib.close_in ic);
-  List.filter_map !lines ~f:(fun name ->
+  List.filter_map !lines ~f:(fun line ->
       (* Ignore comments beginning with '#' *)
-      let name =
-        match String.index name '#' with
-        | Some idx -> String.sub name ~pos:0 ~len:idx
-        | None -> name
+      let line =
+        match String.index line '#' with
+        | Some idx -> String.sub line ~pos:0 ~len:idx
+        | None -> line
       in
       (* Strip whitespace *)
-      let name = String.strip name in
-      if String.is_substring name ~substring:"::" then
-        Some name
-      else (
-        if String.(name <> "") then
-          failwith
-            (Printf.sprintf
-               "Failed to parse line in types file %S: %S"
-               filename
-               name);
+      let line = String.strip line in
+      if String.equal line "" then
         None
-      ))
+      else
+        Some (parse_line line filename))
+
+let parse_types_file filename = parse_file filename parse_types_line
 
 let parse_extern_types_file filename =
   parse_types_file filename
@@ -164,6 +166,8 @@ let parse_extern_types_file filename =
 let parse_owned_types_file filename = SSet.of_list (parse_types_file filename)
 
 let parse_copy_types_file filename = SSet.of_list (parse_types_file filename)
+
+let parse_safe_ints_file filename = SSet.of_list (parse_types_file filename)
 
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
@@ -194,6 +198,7 @@ let parse_args () =
   let extern_types_file = ref None in
   let owned_types_file = ref None in
   let copy_types_file = ref None in
+  let safe_ints_types_file = ref None in
   let options =
     [
       ( "--out-dir",
@@ -220,6 +225,10 @@ let parse_args () =
         Arg.String (fun s -> copy_types_file := Some s),
         " Do not use references for the types listed in this file"
         ^ " (when --by-ref is enabled)" );
+      ( "--safe-ints-types-file",
+        Arg.String (fun s -> safe_ints_types_file := Some s),
+        " Convert integers to ocamlrep::OCamlInt (instead of isize) for these type declarations"
+      );
     ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
@@ -234,8 +243,20 @@ let parse_args () =
     | Some filename -> parse_owned_types_file filename
   in
   let copy_types = Option.map !copy_types_file ~f:parse_copy_types_file in
+  let safe_ints_types =
+    Option.value_map
+      !safe_ints_types_file
+      ~f:parse_safe_ints_file
+      ~default:SSet.empty
+  in
   Configuration.set
-    { Configuration.mode = !mode; extern_types; owned_types; copy_types };
+    {
+      Configuration.mode = !mode;
+      extern_types;
+      owned_types;
+      copy_types;
+      safe_ints_types;
+    };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   let regen_command = !regen_command in
   match !files with

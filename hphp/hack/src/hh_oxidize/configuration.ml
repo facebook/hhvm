@@ -18,6 +18,8 @@ type t = {
   extern_types: string SMap.t;
   owned_types: SSet.t;
   copy_types: SSet.t option;
+  safe_ints_types: SSet.t;
+      (** Types for which any ocaml int will be converted to ocamlrep::OCamlInt rather than isize *)
 }
 
 let default =
@@ -26,6 +28,7 @@ let default =
     mode = ByBox;
     owned_types = SSet.empty;
     copy_types = None;
+    safe_ints_types = SSet.empty;
   }
 
 let config : t option ref = ref None
@@ -79,3 +82,8 @@ let is_known v b =
   match v with
   | `Known k -> Bool.equal b k
   | _ -> false
+
+let safe_ints ~mod_name ~name =
+  SSet.mem
+    (Option.value_exn !config).safe_ints_types
+    (Printf.sprintf "%s::%s" mod_name name)

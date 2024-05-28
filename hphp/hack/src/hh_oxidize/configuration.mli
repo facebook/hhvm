@@ -37,6 +37,8 @@ type t = {
           implement Copy, and should not be put behind a reference (so that
           hh_oxidize need not use global knowledge of all types being converted
           to track which do and do not implement Copy). *)
+  safe_ints_types: SSet.t;
+      (** Types for which any ocaml int will be converted to ocamlrep::OCamlInt rather than isize *)
 }
 
 val default : t
@@ -64,3 +66,7 @@ val copy_type : string -> [ `Known of bool | `Unknown ]
 
 (** Test if the given value is the right kind of `Known *)
 val is_known : [> `Known of bool ] -> bool -> bool
+
+(** Whether OCaml ints should be converted to ocamlrep::OCamlInt instead of
+  isize for this type declarartion *)
+val safe_ints : mod_name:string -> name:string -> bool

@@ -6,9 +6,13 @@
  *
  *)
 
-val core_type : Parsetree.core_type -> Rust_type.t
+val core_type : safe_ints:bool -> Parsetree.core_type -> Rust_type.t
 
-val tuple : ?seen_indirection:bool -> Parsetree.core_type list -> Rust_type.t
+val tuple :
+  ?seen_indirection:bool ->
+  safe_ints:bool ->
+  Parsetree.core_type list ->
+  Rust_type.t
 
 val is_copy : Rust_type.t -> bool
 

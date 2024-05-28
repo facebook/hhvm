@@ -48,6 +48,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::basic::Containers>
+    : public BaseExtractor<::test::fixtures::basic::Containers> {
+  ExtractorResult<::test::fixtures::basic::Containers> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::Containers>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::Containers>> {
+  ExtractorResult<::test::fixtures::basic::Containers> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic::Containers>
+    : public BaseConstructor<::test::fixtures::basic::Containers> {
+  PyObject* operator()(const ::test::fixtures::basic::Containers& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::Containers>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::Containers>> {
+  PyObject* operator()(const ::test::fixtures::basic::Containers& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic::MyDataItem>
     : public BaseExtractor<::test::fixtures::basic::MyDataItem> {
   ExtractorResult<::test::fixtures::basic::MyDataItem> operator()(PyObject* obj);

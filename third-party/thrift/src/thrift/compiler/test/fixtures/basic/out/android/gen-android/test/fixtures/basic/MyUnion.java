@@ -107,15 +107,15 @@ public class MyUnion extends TUnion<MyUnion> {
         if (__field.type == FLOAT_SET_FIELD_DESC.type) {
           Set<Float> floatSet;
           {
-            TSet _set6 = iprot.readSetBegin();
-            floatSet = new HashSet<Float>(Math.max(0, 2*_set6.size));
-            for (int _i7 = 0; 
-                 (_set6.size < 0) ? iprot.peekSet() : (_i7 < _set6.size); 
-                 ++_i7)
+            TSet _set19 = iprot.readSetBegin();
+            floatSet = new HashSet<Float>(Math.max(0, 2*_set19.size));
+            for (int _i20 = 0; 
+                 (_set19.size < 0) ? iprot.peekSet() : (_i20 < _set19.size); 
+                 ++_i20)
             {
-              Float _elem8;
-              _elem8 = iprot.readFloat();
-              floatSet.add(_elem8);
+              Float _elem21;
+              _elem21 = iprot.readFloat();
+              floatSet.add(_elem21);
             }
             iprot.readSetEnd();
           }
@@ -146,8 +146,8 @@ public class MyUnion extends TUnion<MyUnion> {
         Set<Float> floatSet = (Set<Float>)getFieldValue();
         {
           oprot.writeSetBegin(new TSet(TType.FLOAT, floatSet.size()));
-          for (Float _iter9 : floatSet)          {
-            oprot.writeFloat(_iter9);
+          for (Float _iter22 : floatSet)          {
+            oprot.writeFloat(_iter22);
           }
           oprot.writeSetEnd();
         }

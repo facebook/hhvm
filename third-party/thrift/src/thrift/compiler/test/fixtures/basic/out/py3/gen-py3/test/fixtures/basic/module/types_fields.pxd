@@ -63,6 +63,19 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_8(self, _fbthrift_value) except *
 
 
+ctypedef void (*__Containers_FieldsSetterFunc)(__Containers_FieldsSetter, object) except *
+
+cdef class __Containers_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_basic_module_types.cContainers* _struct_cpp_obj
+    cdef cumap[__cstring_view, __Containers_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __Containers_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cContainers* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+
+
 ctypedef void (*__MyDataItem_FieldsSetterFunc)(__MyDataItem_FieldsSetter, object) except *
 
 cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):

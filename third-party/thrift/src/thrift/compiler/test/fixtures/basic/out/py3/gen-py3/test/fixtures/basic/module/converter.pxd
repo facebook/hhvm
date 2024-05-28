@@ -13,6 +13,9 @@ cimport test.fixtures.basic.module.types as _fbthrift_ctypes
 cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct)
 
+cdef shared_ptr[_fbthrift_ctypes.cContainers] Containers_convert_to_cpp(object inst) except*
+cdef object Containers_from_cpp(const shared_ptr[_fbthrift_ctypes.cContainers]& c_struct)
+
 cdef shared_ptr[_fbthrift_ctypes.cMyDataItem] MyDataItem_convert_to_cpp(object inst) except*
 cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyDataItem]& c_struct)
 

@@ -39,6 +39,20 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "floatSet", self.floatSet
         yield "no_hack_codegen_field", self.no_hack_codegen_field
 
+_fbthrift_struct_type__Containers = _test_fixtures_basic_module_types.Containers
+class Containers_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__Containers
+
+    def __init__(self):
+        self.I32List: _typing.Optional[list] = None
+        self.StringSet: _typing.Optional[set] = None
+        self.StringToI64Map: _typing.Optional[dict] = None
+
+    def __iter__(self):
+        yield "I32List", self.I32List
+        yield "StringSet", self.StringSet
+        yield "StringToI64Map", self.StringToI64Map
+
 _fbthrift_struct_type__MyDataItem = _test_fixtures_basic_module_types.MyDataItem
 class MyDataItem_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__MyDataItem

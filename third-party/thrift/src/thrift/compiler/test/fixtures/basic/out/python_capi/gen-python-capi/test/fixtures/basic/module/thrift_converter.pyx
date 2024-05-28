@@ -18,6 +18,12 @@ cdef cMyStruct MyStruct_convert_to_cpp(object inst) except *:
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct):
     return cpp_to_python[cMyStruct](c_struct)
 
+cdef cContainers Containers_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cContainers](inst))
+
+cdef object Containers_from_cpp(const cContainers& c_struct):
+    return cpp_to_python[cContainers](c_struct)
+
 cdef cMyDataItem MyDataItem_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cMyDataItem](inst))
 

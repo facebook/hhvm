@@ -51,7 +51,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'MyDataItem', 'MyUnion', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
 
 class MyEnum:
   MyValue1 = 0
@@ -354,6 +354,203 @@ class MyStruct:
   def _to_py_deprecated(self):
     return self
 
+class Containers:
+  r"""
+  Attributes:
+   - I32List
+   - StringSet
+   - StringToI64Map
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.I32List = []
+          (_etype12, _size9) = iprot.readListBegin()
+          if _size9 >= 0:
+            for _i13 in range(_size9):
+              _elem14 = iprot.readI32()
+              self.I32List.append(_elem14)
+          else: 
+            while iprot.peekList():
+              _elem15 = iprot.readI32()
+              self.I32List.append(_elem15)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.SET:
+          self.StringSet = set()
+          (_etype19, _size16) = iprot.readSetBegin()
+          if _size16 >= 0:
+            for _i20 in range(_size16):
+              _elem21 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.StringSet.add(_elem21)
+          else: 
+            while iprot.peekSet():
+              _elem22 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.StringSet.add(_elem22)
+          iprot.readSetEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.MAP:
+          self.StringToI64Map = {}
+          (_ktype24, _vtype25, _size23 ) = iprot.readMapBegin() 
+          if _size23 >= 0:
+            for _i27 in range(_size23):
+              _key28 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val29 = iprot.readI64()
+              self.StringToI64Map[_key28] = _val29
+          else: 
+            while iprot.peekMap():
+              _key30 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val31 = iprot.readI64()
+              self.StringToI64Map[_key30] = _val31
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Containers')
+    if self.I32List != None:
+      oprot.writeFieldBegin('I32List', TType.LIST, 1)
+      oprot.writeListBegin(TType.I32, len(self.I32List))
+      for iter32 in self.I32List:
+        oprot.writeI32(iter32)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.StringSet != None:
+      oprot.writeFieldBegin('StringSet', TType.SET, 2)
+      oprot.writeSetBegin(TType.STRING, len(self.StringSet))
+      for iter33 in self.StringSet:
+        oprot.writeString(iter33.encode('utf-8')) if UTF8STRINGS and not isinstance(iter33, bytes) else oprot.writeString(iter33)
+      oprot.writeSetEnd()
+      oprot.writeFieldEnd()
+    if self.StringToI64Map != None:
+      oprot.writeFieldBegin('StringToI64Map', TType.MAP, 3)
+      oprot.writeMapBegin(TType.STRING, TType.I64, len(self.StringToI64Map))
+      for kiter34,viter35 in self.StringToI64Map.items():
+        oprot.writeString(kiter34.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter34, bytes) else oprot.writeString(kiter34)
+        oprot.writeI64(viter35)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'I32List' in json_obj and json_obj['I32List'] is not None:
+      self.I32List = []
+      for _tmp_e36 in json_obj['I32List']:
+        if _tmp_e36 > 0x7fffffff or _tmp_e36 < -0x80000000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+        self.I32List.append(_tmp_e36)
+    if 'StringSet' in json_obj and json_obj['StringSet'] is not None:
+      self.StringSet = set_cls()
+      for _tmp_e37 in json_obj['StringSet']:
+        self.StringSet.add(_tmp_e37)
+    if 'StringToI64Map' in json_obj and json_obj['StringToI64Map'] is not None:
+      self.StringToI64Map = dict_cls()
+      for _tmp_k38, _tmp_v39 in json_obj['StringToI64Map'].items():
+        _tmp_kp40 = _tmp_k38
+        self.StringToI64Map[_tmp_kp40] = _tmp_v39
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.I32List is not None:
+      value = pprint.pformat(self.I32List, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    I32List=%s' % (value))
+    if self.StringSet is not None:
+      value = pprint.pformat(self.StringSet, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    StringSet=%s' % (value))
+    if self.StringToI64Map is not None:
+      value = pprint.pformat(self.StringToI64Map, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    StringToI64Map=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'I32List',
+      'StringSet',
+      'StringToI64Map',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Containers, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("test.fixtures.basic.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Containers, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class MyDataItem:
 
   thrift_spec = None
@@ -564,15 +761,15 @@ class MyUnion(object):
       elif fid == 4:
         if ftype == TType.SET:
           _fbthrift_floatSet = set()
-          (_etype12, _size9) = iprot.readSetBegin()
-          if _size9 >= 0:
-            for _i13 in range(_size9):
-              _elem14 = iprot.readFloat()
-              _fbthrift_floatSet.add(_elem14)
+          (_etype44, _size41) = iprot.readSetBegin()
+          if _size41 >= 0:
+            for _i45 in range(_size41):
+              _elem46 = iprot.readFloat()
+              _fbthrift_floatSet.add(_elem46)
           else: 
             while iprot.peekSet():
-              _elem15 = iprot.readFloat()
-              _fbthrift_floatSet.add(_elem15)
+              _elem47 = iprot.readFloat()
+              _fbthrift_floatSet.add(_elem47)
           iprot.readSetEnd()
           assert self.field == 0 and self.value is None
           self.set_floatSet(_fbthrift_floatSet)
@@ -610,8 +807,8 @@ class MyUnion(object):
       oprot.writeFieldBegin('floatSet', TType.SET, 4)
       floatSet = self.value
       oprot.writeSetBegin(TType.FLOAT, len(floatSet))
-      for iter16 in floatSet:
-        oprot.writeFloat(iter16)
+      for iter48 in floatSet:
+        oprot.writeFloat(iter48)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -661,8 +858,8 @@ class MyUnion(object):
       self.set_myDataItem(_fbthrift_myDataItem)
     if 'floatSet' in obj:
       _fbthrift_floatSet = set_cls()
-      for _tmp_e17 in obj['floatSet']:
-        _fbthrift_floatSet.add(float(_tmp_e17))
+      for _tmp_e49 in obj['floatSet']:
+        _fbthrift_floatSet.add(float(_tmp_e49))
       self.set_floatSet(_fbthrift_floatSet)
 
   def __eq__(self, other):
@@ -982,6 +1179,34 @@ def MyStruct__setstate__(self, state):
 
 MyStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStruct.__setstate__ = MyStruct__setstate__
+
+all_structs.append(Containers)
+Containers.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.LIST, 'I32List', (TType.I32,None), None, 2, ), # 1
+  (2, TType.SET, 'StringSet', (TType.STRING,True), None, 2, ), # 2
+  (3, TType.MAP, 'StringToI64Map', (TType.STRING,True,TType.I64,None), None, 2, ), # 3
+)))
+
+Containers.thrift_struct_annotations = {
+}
+Containers.thrift_field_annotations = {
+}
+
+def Containers__init__(self, I32List=None, StringSet=None, StringToI64Map=None,):
+  self.I32List = I32List
+  self.StringSet = StringSet
+  self.StringToI64Map = StringToI64Map
+
+Containers.__init__ = Containers__init__
+
+def Containers__setstate__(self, state):
+  state.setdefault('I32List', None)
+  state.setdefault('StringSet', None)
+  state.setdefault('StringToI64Map', None)
+  self.__dict__ = state
+
+Containers.__getstate__ = lambda self: self.__dict__.copy()
+Containers.__setstate__ = Containers__setstate__
 
 all_structs.append(MyDataItem)
 MyDataItem.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((

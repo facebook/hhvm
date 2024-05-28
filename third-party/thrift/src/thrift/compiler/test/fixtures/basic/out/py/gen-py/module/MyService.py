@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, MyDataItem, MyUnion, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
+from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
 from thrift.Thrift import TProcessor
 import pprint
 import warnings
@@ -1915,15 +1915,15 @@ class invalid_return_for_hack_result:
       if fid == 0:
         if ftype == TType.SET:
           self.success = set()
-          (_etype21, _size18) = iprot.readSetBegin()
-          if _size18 >= 0:
-            for _i22 in range(_size18):
-              _elem23 = iprot.readFloat()
-              self.success.add(_elem23)
+          (_etype53, _size50) = iprot.readSetBegin()
+          if _size50 >= 0:
+            for _i54 in range(_size50):
+              _elem55 = iprot.readFloat()
+              self.success.add(_elem55)
           else: 
             while iprot.peekSet():
-              _elem24 = iprot.readFloat()
-              self.success.add(_elem24)
+              _elem56 = iprot.readFloat()
+              self.success.add(_elem56)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -1943,8 +1943,8 @@ class invalid_return_for_hack_result:
     if self.success != None:
       oprot.writeFieldBegin('success', TType.SET, 0)
       oprot.writeSetBegin(TType.FLOAT, len(self.success))
-      for iter25 in self.success:
-        oprot.writeFloat(iter25)
+      for iter57 in self.success:
+        oprot.writeFloat(iter57)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1970,8 +1970,8 @@ class invalid_return_for_hack_result:
       json_obj = loads(json)
     if 'success' in json_obj and json_obj['success'] is not None:
       self.success = set_cls()
-      for _tmp_e26 in json_obj['success']:
-        self.success.add(float(_tmp_e26))
+      for _tmp_e58 in json_obj['success']:
+        self.success.add(float(_tmp_e58))
 
   def __repr__(self):
     L = []

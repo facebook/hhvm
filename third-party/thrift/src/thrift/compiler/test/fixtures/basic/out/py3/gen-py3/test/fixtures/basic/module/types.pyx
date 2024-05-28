@@ -439,6 +439,146 @@ cdef class MyStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 @__cython.auto_pickle(False)
+cdef class Containers(thrift.py3.types.Struct):
+    def __init__(Containers self, **kwargs):
+        self._cpp_obj = make_shared[cContainers]()
+        self._fields_setter = _fbthrift_types_fields.__Containers_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(Containers self, **kwargs):
+        if not kwargs:
+            return self
+        cdef Containers __fbthrift_inst = Containers.__new__(Containers)
+        __fbthrift_inst._cpp_obj = make_shared[cContainers](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Containers_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("Containers", {
+          "I32List": deref(self._cpp_obj).I32List_ref().has_value(),
+          "StringSet": deref(self._cpp_obj).StringSet_ref().has_value(),
+          "StringToI64Map": deref(self._cpp_obj).StringToI64Map_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cContainers] cpp_obj):
+        __fbthrift_inst = <Containers>Containers.__new__(Containers)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline I32List_impl(self):
+
+        if self.__fbthrift_cached_I32List is None:
+            self.__fbthrift_cached_I32List = List__i32._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).I32List_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_I32List
+
+    @property
+    def I32List(self):
+        return self.I32List_impl()
+
+    cdef inline StringSet_impl(self):
+
+        if self.__fbthrift_cached_StringSet is None:
+            self.__fbthrift_cached_StringSet = Set__string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).StringSet_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_StringSet
+
+    @property
+    def StringSet(self):
+        return self.StringSet_impl()
+
+    cdef inline StringToI64Map_impl(self):
+
+        if self.__fbthrift_cached_StringToI64Map is None:
+            self.__fbthrift_cached_StringToI64Map = Map__string_i64._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).StringToI64Map_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_StringToI64Map
+
+    @property
+    def StringToI64Map(self):
+        return self.StringToI64Map_impl()
+
+
+    def __hash__(Containers self):
+        return super().__hash__()
+
+    def __repr__(Containers self):
+        return super().__repr__()
+
+    def __str__(Containers self):
+        return super().__str__()
+
+
+    def __copy__(Containers self):
+        cdef shared_ptr[cContainers] cpp_obj = make_shared[cContainers](
+            deref(self._cpp_obj)
+        )
+        return Containers._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cContainers](
+            self._cpp_obj,
+            (<Containers>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Containers()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cContainers].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Containers"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cContainers](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 3
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Containers self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cContainers](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(Containers self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cContainers]()
+        with nogil:
+            needed = serializer.cdeserialize[cContainers](buf, self._cpp_obj.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.basic.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.Containers, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Containers, self)
+@__cython.auto_pickle(False)
 cdef class MyDataItem(thrift.py3.types.Struct):
     def __init__(MyDataItem self, **kwargs):
         self._cpp_obj = make_shared[cMyDataItem]()
@@ -1223,6 +1363,102 @@ cdef class Set__string(thrift.py3.types.Set):
 
 
 Set.register(Set__string)
+
+@__cython.auto_pickle(False)
+cdef class Map__string_i64(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, Map__string_i64):
+            self._cpp_obj = (<Map__string_i64> items)._cpp_obj
+        else:
+            self._cpp_obj = Map__string_i64._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cint64_t]] c_items):
+        __fbthrift_inst = <Map__string_i64>Map__string_i64.__new__(Map__string_i64)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(Map__string_i64 self):
+        cdef shared_ptr[cmap[string,cint64_t]] cpp_obj = make_shared[cmap[string,cint64_t]](
+            deref(self._cpp_obj)
+        )
+        return Map__string_i64._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[cmap[string,cint64_t]] _make_instance(object items) except *:
+        cdef shared_ptr[cmap[string,cint64_t]] c_inst = make_shared[cmap[string,cint64_t]]()
+        if items is not None:
+            for key, item in items.items():
+                if not isinstance(key, str):
+                    raise TypeError(f"{key!r} is not of type str")
+                if not isinstance(item, int):
+                    raise TypeError(f"{item!r} is not of type int")
+                item = <cint64_t> item
+
+                deref(c_inst)[key.encode('UTF-8')] = item
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, str):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef string ckey = key.encode('UTF-8')
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef cint64_t citem = 0
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return citem
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cint64_t]] itr = __map_iter[cmap[string,cint64_t]](self._cpp_obj)
+        cdef string citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield bytes(citem).decode('UTF-8')
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef string ckey = key.encode('UTF-8')
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cint64_t]] itr = __map_iter[cmap[string,cint64_t]](self._cpp_obj)
+        cdef cint64_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield citem
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cint64_t]] itr = __map_iter[cmap[string,cint64_t]](self._cpp_obj)
+        cdef string ckey
+        cdef cint64_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey.data().decode('UTF-8'), citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_i64()
+
+Mapping.register(Map__string_i64)
 
 @__cython.auto_pickle(False)
 cdef class Map__string_List__i32(thrift.py3.types.Map):

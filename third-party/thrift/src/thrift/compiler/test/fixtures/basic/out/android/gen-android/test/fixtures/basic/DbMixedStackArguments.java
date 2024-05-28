@@ -180,17 +180,17 @@ public class DbMixedStackArguments {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void getDataByKey0(String key, AsyncMethodCallback resultHandler91) throws TException {
+    public void getDataByKey0(String key, AsyncMethodCallback resultHandler104) throws TException {
       checkReady();
-      getDataByKey0_call method_call = new getDataByKey0_call(key, resultHandler91, this, ___protocolFactory, ___transport);
+      getDataByKey0_call method_call = new getDataByKey0_call(key, resultHandler104, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class getDataByKey0_call extends TAsyncMethodCall {
       private String key;
-      public getDataByKey0_call(String key, AsyncMethodCallback resultHandler92, TAsyncClient client88, TProtocolFactory protocolFactory89, TNonblockingTransport transport90) throws TException {
-        super(client88, protocolFactory89, transport90, resultHandler92, false);
+      public getDataByKey0_call(String key, AsyncMethodCallback resultHandler105, TAsyncClient client101, TProtocolFactory protocolFactory102, TNonblockingTransport transport103) throws TException {
+        super(client101, protocolFactory102, transport103, resultHandler105, false);
         this.key = key;
       }
 
@@ -212,17 +212,17 @@ public class DbMixedStackArguments {
       }
     }
 
-    public void getDataByKey1(String key, AsyncMethodCallback resultHandler96) throws TException {
+    public void getDataByKey1(String key, AsyncMethodCallback resultHandler109) throws TException {
       checkReady();
-      getDataByKey1_call method_call = new getDataByKey1_call(key, resultHandler96, this, ___protocolFactory, ___transport);
+      getDataByKey1_call method_call = new getDataByKey1_call(key, resultHandler109, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class getDataByKey1_call extends TAsyncMethodCall {
       private String key;
-      public getDataByKey1_call(String key, AsyncMethodCallback resultHandler97, TAsyncClient client93, TProtocolFactory protocolFactory94, TNonblockingTransport transport95) throws TException {
-        super(client93, protocolFactory94, transport95, resultHandler97, false);
+      public getDataByKey1_call(String key, AsyncMethodCallback resultHandler110, TAsyncClient client106, TProtocolFactory protocolFactory107, TNonblockingTransport transport108) throws TException {
+        super(client106, protocolFactory107, transport108, resultHandler110, false);
         this.key = key;
       }
 

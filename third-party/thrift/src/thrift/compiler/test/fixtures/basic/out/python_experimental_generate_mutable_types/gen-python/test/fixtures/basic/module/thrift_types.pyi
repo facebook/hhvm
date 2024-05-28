@@ -84,6 +84,33 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_Containers:
+    pass
+
+
+class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Containers):
+    I32List: _typing.Final[_typing.Sequence[int]] = ...
+    StringSet: _typing.Final[_typing.AbstractSet[str]] = ...
+    StringToI64Map: _typing.Final[_typing.Mapping[str, int]] = ...
+    def __init__(
+        self, *,
+        I32List: _typing.Optional[_typing.Sequence[int]]=...,
+        StringSet: _typing.Optional[_typing.AbstractSet[str]]=...,
+        StringToI64Map: _typing.Optional[_typing.Mapping[str, int]]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        I32List: _typing.Optional[_typing.Sequence[int]]=...,
+        StringSet: _typing.Optional[_typing.AbstractSet[str]]=...,
+        StringToI64Map: _typing.Optional[_typing.Mapping[str, int]]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_MyDataItem:
     pass
 

@@ -10,6 +10,8 @@
 cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h":
     cdef cppclass cMyStruct "::test::fixtures::basic::MyStruct":
         cMyStruct()
+    cdef cppclass cContainers "::test::fixtures::basic::Containers":
+        cContainers()
     cdef cppclass cMyDataItem "::test::fixtures::basic::MyDataItem":
         cMyDataItem()
     cdef cppclass cMyUnion "::test::fixtures::basic::MyUnion":
@@ -26,6 +28,9 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h":
         pass
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except*
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct)
+
+cdef cContainers Containers_convert_to_cpp(object inst) except*
+cdef object Containers_from_cpp(const cContainers& c_struct)
 
 cdef cMyDataItem MyDataItem_convert_to_cpp(object inst) except*
 cdef object MyDataItem_from_cpp(const cMyDataItem& c_struct)

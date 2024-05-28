@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_662baa07 implements TypeList {
+public class __fbthrift_TypeList_e0f412ec implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -21,6 +21,7 @@ public class __fbthrift_TypeList_662baa07 implements TypeList {
 
   private static void addToList0() {
     add("test.dev/fixtures/basic/MyStruct", "test.fixtures.basic.MyStruct");
+    add("test.dev/fixtures/basic/Containers", "test.fixtures.basic.Containers");
     add("test.dev/fixtures/basic/MyDataItem", "test.fixtures.basic.MyDataItem");
     add("test.dev/fixtures/basic/MyUnion", "test.fixtures.basic.MyUnion");
     add("test.dev/fixtures/basic/ReservedKeyword", "test.fixtures.basic.ReservedKeyword");

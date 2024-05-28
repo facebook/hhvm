@@ -55,6 +55,22 @@ var (
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_float),
             )
+    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            )
+    premadeThriftType_list_i32 = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_i32),
+            )
+    premadeThriftType_set_string = metadata.NewThriftType().SetTSet(
+        metadata.NewThriftSetType().
+            SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_map_string_i64 = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_string).
+            SetValueType(premadeThriftType_i64),
+            )
     premadeThriftType_module_MyEnumAlias = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.MyEnumAlias").
@@ -63,9 +79,6 @@ var (
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-            )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
             )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
@@ -130,6 +143,28 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("no_hack_codegen_field").
     SetIsOptional(false).
     SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("module.Containers").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("I32List").
+    SetIsOptional(false).
+    SetType(premadeThriftType_list_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("StringSet").
+    SetIsOptional(false).
+    SetType(premadeThriftType_set_string),
+            metadata.NewThriftField().
+    SetId(3).
+    SetName("StringToI64Map").
+    SetIsOptional(false).
+    SetType(premadeThriftType_map_string_i64),
         },
     ),
     metadata.NewThriftStruct().

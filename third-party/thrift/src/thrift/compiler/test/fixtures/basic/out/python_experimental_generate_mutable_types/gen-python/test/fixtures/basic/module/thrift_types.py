@@ -139,6 +139,72 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 
+class Containers(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "I32List",  # name
+            "I32List",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "StringSet",  # name
+            "StringSet",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "StringToI64Map",  # name
+            "StringToI64Map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Containers"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/Containers"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_Containers()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Containers, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Containers, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Containers, self)
+
+
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -403,6 +469,8 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_MyStruct()
+def _fbthrift_metadata__struct_Containers():
+    return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_Containers()
 def _fbthrift_metadata__struct_MyDataItem():
     return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_MyDataItem()
 def _fbthrift_metadata__struct_MyUnion():
@@ -414,6 +482,7 @@ def _fbthrift_metadata__struct_UnionToBeRenamed():
 
 _fbthrift_all_structs = [
     MyStruct,
+    Containers,
     MyDataItem,
     MyUnion,
     ReservedKeyword,

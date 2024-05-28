@@ -36,6 +36,19 @@ pub struct MyStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq)]
+pub struct Containers {
+    pub I32List: ::std::vec::Vec<::std::primitive::i32>,
+    pub StringSet: ::std::collections::BTreeSet<::std::string::String>,
+    pub StringToI64Map: ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyDataItem {
     // This field forces `..Default::default()` when instantiating this
@@ -508,6 +521,131 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::Containers {
+    fn default() -> Self {
+        Self {
+            I32List: ::std::default::Default::default(),
+            StringSet: ::std::default::Default::default(),
+            StringToI64Map: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::Containers {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Containers")
+            .field("I32List", &self.I32List)
+            .field("StringSet", &self.StringSet)
+            .field("StringToI64Map", &self.StringToI64Map)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::Containers {}
+unsafe impl ::std::marker::Sync for self::Containers {}
+impl ::std::marker::Unpin for self::Containers {}
+impl ::std::panic::RefUnwindSafe for self::Containers {}
+impl ::std::panic::UnwindSafe for self::Containers {}
+
+impl ::fbthrift::GetTType for self::Containers {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::Containers {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/basic/Containers"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::Containers
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("Containers");
+        p.write_field_begin("I32List", ::fbthrift::TType::List, 1);
+        ::fbthrift::Serialize::write(&self.I32List, p);
+        p.write_field_end();
+        p.write_field_begin("StringSet", ::fbthrift::TType::Set, 2);
+        ::fbthrift::Serialize::write(&self.StringSet, p);
+        p.write_field_end();
+        p.write_field_begin("StringToI64Map", ::fbthrift::TType::Map, 3);
+        ::fbthrift::Serialize::write(&self.StringToI64Map, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::Containers
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("I32List", ::fbthrift::TType::List, 1),
+            ::fbthrift::Field::new("StringSet", ::fbthrift::TType::Set, 2),
+            ::fbthrift::Field::new("StringToI64Map", ::fbthrift::TType::Map, 3),
+        ];
+        let mut field_I32List = ::std::option::Option::None;
+        let mut field_StringSet = ::std::option::Option::None;
+        let mut field_StringToI64Map = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Containers")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::List, 1) => field_I32List = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 2) => field_StringSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 3) => field_StringToI64Map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            I32List: field_I32List.unwrap_or_default(),
+            StringSet: field_StringSet.unwrap_or_default(),
+            StringToI64Map: field_StringToI64Map.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for Containers {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            3 => {
             },
             _ => {}
         }

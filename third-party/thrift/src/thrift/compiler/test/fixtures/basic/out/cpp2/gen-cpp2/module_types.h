@@ -22,6 +22,9 @@ struct readonly;
 struct idempotent;
 struct floatSet;
 struct no_hack_codegen_field;
+struct I32List;
+struct StringSet;
+struct StringToI64Map;
 struct myEnum;
 struct myStruct;
 struct myDataItem;
@@ -65,6 +68,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(floatSet);
 #ifndef APACHE_THRIFT_ACCESSOR_no_hack_codegen_field
 #define APACHE_THRIFT_ACCESSOR_no_hack_codegen_field
 APACHE_THRIFT_DEFINE_ACCESSOR(no_hack_codegen_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_I32List
+#define APACHE_THRIFT_ACCESSOR_I32List
+APACHE_THRIFT_DEFINE_ACCESSOR(I32List);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_StringSet
+#define APACHE_THRIFT_ACCESSOR_StringSet
+APACHE_THRIFT_DEFINE_ACCESSOR(StringSet);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_StringToI64Map
+#define APACHE_THRIFT_ACCESSOR_StringToI64Map
+APACHE_THRIFT_DEFINE_ACCESSOR(StringToI64Map);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_myEnum
 #define APACHE_THRIFT_ACCESSOR_myEnum
@@ -174,6 +189,7 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
 // BEGIN forward_declare
 namespace test::fixtures::basic {
 class MyStruct;
+class Containers;
 class MyDataItem;
 class MyUnion;
 class ReservedKeyword;
@@ -875,6 +891,262 @@ class MyStruct final  {
 
 template <class Protocol_>
 unsigned long MyStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class Containers final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::I32List,
+    ::apache::thrift::ident::StringSet,
+    ::apache::thrift::ident::StringToI64Map
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i64_t>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = Containers;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Containers();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Containers(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> I32List__arg, ::std::set<::std::string> StringSet__arg, ::std::map<::std::string, ::std::int64_t> StringToI64Map__arg);
+
+  Containers(Containers&&) noexcept;
+
+  Containers(const Containers& src);
+
+
+  Containers& operator=(Containers&&) noexcept;
+  Containers& operator=(const Containers& src);
+
+  ~Containers();
+
+ private:
+  ::std::vector<::std::int32_t> __fbthrift_field_I32List;
+ private:
+  ::std::set<::std::string> __fbthrift_field_StringSet;
+ private:
+  ::std::map<::std::string, ::std::int64_t> __fbthrift_field_StringToI64Map;
+ private:
+  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const Containers&) const;
+  bool operator<(const Containers&) const;
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> I32List_ref() const& {
+    return {this->__fbthrift_field_I32List, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> I32List_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_I32List), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> I32List_ref() & {
+    return {this->__fbthrift_field_I32List, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> I32List_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_I32List), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> I32List() const& {
+    return {this->__fbthrift_field_I32List, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> I32List() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_I32List), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> I32List() & {
+    return {this->__fbthrift_field_I32List, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> I32List() && {
+    return {static_cast<T&&>(this->__fbthrift_field_I32List), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> StringSet_ref() const& {
+    return {this->__fbthrift_field_StringSet, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> StringSet_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_StringSet), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> StringSet_ref() & {
+    return {this->__fbthrift_field_StringSet, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> StringSet_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_StringSet), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> StringSet() const& {
+    return {this->__fbthrift_field_StringSet, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> StringSet() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_StringSet), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> StringSet() & {
+    return {this->__fbthrift_field_StringSet, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> StringSet() && {
+    return {static_cast<T&&>(this->__fbthrift_field_StringSet), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> StringToI64Map_ref() const& {
+    return {this->__fbthrift_field_StringToI64Map, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> StringToI64Map_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_StringToI64Map), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> StringToI64Map_ref() & {
+    return {this->__fbthrift_field_StringToI64Map, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> StringToI64Map_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_StringToI64Map), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> StringToI64Map() const& {
+    return {this->__fbthrift_field_StringToI64Map, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> StringToI64Map() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_StringToI64Map), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> StringToI64Map() & {
+    return {this->__fbthrift_field_StringToI64Map, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::string, ::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> StringToI64Map() && {
+    return {static_cast<T&&>(this->__fbthrift_field_StringToI64Map), __isset.at(2), __isset.bit(2)};
+  }
+  const ::std::vector<::std::int32_t>& get_I32List() const&;
+  ::std::vector<::std::int32_t> get_I32List() &&;
+
+  template <typename T_Containers_I32List_struct_setter = ::std::vector<::std::int32_t>>
+  [[deprecated("Use `FOO.I32List_ref() = BAR;` instead of `FOO.set_I32List(BAR);`")]]
+  ::std::vector<::std::int32_t>& set_I32List(T_Containers_I32List_struct_setter&& I32List_) {
+    I32List_ref() = std::forward<T_Containers_I32List_struct_setter>(I32List_);
+    return __fbthrift_field_I32List;
+  }
+  const ::std::set<::std::string>& get_StringSet() const&;
+  ::std::set<::std::string> get_StringSet() &&;
+
+  template <typename T_Containers_StringSet_struct_setter = ::std::set<::std::string>>
+  [[deprecated("Use `FOO.StringSet_ref() = BAR;` instead of `FOO.set_StringSet(BAR);`")]]
+  ::std::set<::std::string>& set_StringSet(T_Containers_StringSet_struct_setter&& StringSet_) {
+    StringSet_ref() = std::forward<T_Containers_StringSet_struct_setter>(StringSet_);
+    return __fbthrift_field_StringSet;
+  }
+  const ::std::map<::std::string, ::std::int64_t>& get_StringToI64Map() const&;
+  ::std::map<::std::string, ::std::int64_t> get_StringToI64Map() &&;
+
+  template <typename T_Containers_StringToI64Map_struct_setter = ::std::map<::std::string, ::std::int64_t>>
+  [[deprecated("Use `FOO.StringToI64Map_ref() = BAR;` instead of `FOO.set_StringToI64Map(BAR);`")]]
+  ::std::map<::std::string, ::std::int64_t>& set_StringToI64Map(T_Containers_StringToI64Map_struct_setter&& StringToI64Map_) {
+    StringToI64Map_ref() = std::forward<T_Containers_StringToI64Map_struct_setter>(StringToI64Map_);
+    return __fbthrift_field_StringToI64Map;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Containers>;
+  friend void swap(Containers& a, Containers& b);
+};
+
+template <class Protocol_>
+unsigned long Containers::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

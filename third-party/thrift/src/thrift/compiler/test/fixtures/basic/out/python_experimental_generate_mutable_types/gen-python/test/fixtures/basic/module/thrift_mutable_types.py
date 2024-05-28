@@ -186,6 +186,58 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return immutable_types.MyStruct(**dataclasses.asdict(self))
 
 
+class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "I32List",  # name
+            "I32List", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "StringSet",  # name
+            "StringSet", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "StringToI64Map",  # name
+            "StringToI64Map", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Containers"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/Containers"
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.Containers(**dataclasses.asdict(self))
+
+
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
     )
@@ -246,6 +298,7 @@ MyDataItemAlias = MyDataItem
 
 _fbthrift_all_structs = [
     MyStruct,
+    Containers,
     MyDataItem,
     ReservedKeyword,
 ]

@@ -11,6 +11,7 @@
 // BEGIN forward_declare
 namespace test::fixtures::basic {
 class MyStruct;
+class Containers;
 class MyDataItem;
 class MyUnion;
 class ReservedKeyword;

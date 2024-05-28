@@ -18,6 +18,11 @@ cdef api int can_extract__test__fixtures__basic__module__MyStruct(object) except
 
 cdef api object init__test__fixtures__basic__module__MyStruct(object data)
 
+cdef api int can_extract__test__fixtures__basic__module__Containers(object) except -1
+
+
+cdef api object init__test__fixtures__basic__module__Containers(object data)
+
 cdef api int can_extract__test__fixtures__basic__module__MyDataItem(object) except -1
 
 

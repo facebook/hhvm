@@ -30,6 +30,16 @@ struct ForEachField<::test::fixtures::basic::MyStruct> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::basic::Containers> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).I32List_ref()...);
+    f(1, static_cast<T&&>(t).StringSet_ref()...);
+    f(2, static_cast<T&&>(t).StringToI64Map_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic::MyDataItem> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {

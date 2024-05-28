@@ -149,6 +149,53 @@ def get_reflection__MyStruct() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__Containers() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="Containers",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="I32List",
+            py_name="I32List",
+            type=_test_fixtures_basic_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="StringSet",
+            py_name="StringSet",
+            type=_test_fixtures_basic_module_types.Set__string,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="StringToI64Map",
+            py_name="StringToI64Map",
+            type=_test_fixtures_basic_module_types.Map__string_i64,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 def get_reflection__MyDataItem() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
         name="MyDataItem",
@@ -276,6 +323,14 @@ def get_reflection__Set__string() -> __SetSpec:
         value=str,
         kind=__NumberType.NOT_A_NUMBER,
      )
+
+def get_reflection__Map__string_i64() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I64,
+    )
 
 def get_reflection__Map__string_List__i32() -> __MapSpec:
     return __MapSpec._fbthrift_create(

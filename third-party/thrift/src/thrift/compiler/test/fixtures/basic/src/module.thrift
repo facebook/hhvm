@@ -58,6 +58,12 @@ struct MyStruct {
   9: string no_hack_codegen_field;
 }
 
+struct Containers {
+  1: list<i32> I32List;
+  2: set<string> StringSet;
+  3: map<string, i64> StringToI64Map;
+}
+
 struct MyDataItem {}
 typedef MyDataItem MyDataItemAlias
 

@@ -97,6 +97,20 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_cust
         __field_ref[string] no_hack_codegen_field_ref "no_hack_codegen_field_ref" ()
 
 
+    cdef cppclass cContainers "::test::fixtures::basic::Containers":
+        cContainers() except +
+        cContainers(const cContainers&) except +
+        bint operator==(cContainers&)
+        bint operator!=(cContainers&)
+        bint operator<(cContainers&)
+        bint operator>(cContainers&)
+        bint operator<=(cContainers&)
+        bint operator>=(cContainers&)
+        __field_ref[vector[cint32_t]] I32List_ref "I32List_ref" ()
+        __field_ref[cset[string]] StringSet_ref "StringSet_ref" ()
+        __field_ref[cmap[string,cint64_t]] StringToI64Map_ref "StringToI64Map_ref" ()
+
+
     cdef cppclass cMyDataItem "::test::fixtures::basic::MyDataItem":
         cMyDataItem() except +
         cMyDataItem(const cMyDataItem&) except +
@@ -186,6 +200,21 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 
+cdef class Containers(thrift.py3.types.Struct):
+    cdef shared_ptr[cContainers] _cpp_obj
+    cdef _fbthrift_types_fields.__Containers_FieldsSetter _fields_setter
+    cdef inline object I32List_impl(self)
+    cdef inline object StringSet_impl(self)
+    cdef inline object StringToI64Map_impl(self)
+    cdef List__i32 __fbthrift_cached_I32List
+    cdef Set__string __fbthrift_cached_StringSet
+    cdef Map__string_i64 __fbthrift_cached_StringToI64Map
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cContainers])
+
+
+
 cdef class MyDataItem(thrift.py3.types.Struct):
     cdef shared_ptr[cMyDataItem] _cpp_obj
     cdef _fbthrift_types_fields.__MyDataItem_FieldsSetter _fields_setter
@@ -269,6 +298,13 @@ cdef class Set__string(thrift.py3.types.Set):
     cdef _fbthrift_create(shared_ptr[cset[string]])
     @staticmethod
     cdef shared_ptr[cset[string]] _make_instance(object items) except *
+
+cdef class Map__string_i64(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cint64_t]])
+    @staticmethod
+    cdef shared_ptr[cmap[string,cint64_t]] _make_instance(object items) except *
 
 cdef class Map__string_List__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj

@@ -96,6 +96,22 @@ inline void reset_field<::test::fixtures::basic::MyStruct>(
 }
 
 template<>
+inline void reset_field<::test::fixtures::basic::Containers>(
+    ::test::fixtures::basic::Containers& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.I32List_ref().copy_from(default_inst<::test::fixtures::basic::Containers>().I32List_ref());
+      return;
+    case 1:
+      obj.StringSet_ref().copy_from(default_inst<::test::fixtures::basic::Containers>().StringSet_ref());
+      return;
+    case 2:
+      obj.StringToI64Map_ref().copy_from(default_inst<::test::fixtures::basic::Containers>().StringToI64Map_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::test::fixtures::basic::MyDataItem>(
     ::test::fixtures::basic::MyDataItem& obj, uint16_t index) {
   switch (index) {
@@ -115,6 +131,16 @@ inline void reset_field<::test::fixtures::basic::ReservedKeyword>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::MyStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::basic::Containers>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

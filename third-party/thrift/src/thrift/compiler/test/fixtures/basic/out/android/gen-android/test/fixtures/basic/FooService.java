@@ -128,16 +128,16 @@ public class FooService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void simple_rpc(AsyncMethodCallback resultHandler14) throws TException {
+    public void simple_rpc(AsyncMethodCallback resultHandler27) throws TException {
       checkReady();
-      simple_rpc_call method_call = new simple_rpc_call(resultHandler14, this, ___protocolFactory, ___transport);
+      simple_rpc_call method_call = new simple_rpc_call(resultHandler27, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class simple_rpc_call extends TAsyncMethodCall {
-      public simple_rpc_call(AsyncMethodCallback resultHandler15, TAsyncClient client11, TProtocolFactory protocolFactory12, TNonblockingTransport transport13) throws TException {
-        super(client11, protocolFactory12, transport13, resultHandler15, false);
+      public simple_rpc_call(AsyncMethodCallback resultHandler28, TAsyncClient client24, TProtocolFactory protocolFactory25, TNonblockingTransport transport26) throws TException {
+        super(client24, protocolFactory25, transport26, resultHandler28, false);
       }
 
       public void write_args(TProtocol prot) throws TException {

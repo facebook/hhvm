@@ -795,6 +795,372 @@ func (x *MyStruct) String() string {
     return sb.String()
 }
 
+type Containers struct {
+    I32List []int32 `thrift:"I32List,1" json:"I32List" db:"I32List"`
+    StringSet []string `thrift:"StringSet,2" json:"StringSet" db:"StringSet"`
+    StringToI64Map map[string]int64 `thrift:"StringToI64Map,3" json:"StringToI64Map" db:"StringToI64Map"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*Containers)(nil)
+
+func NewContainers() *Containers {
+    return (&Containers{}).
+        SetI32ListNonCompat(make([]int32, 0)).
+        SetStringSetNonCompat(make([]string, 0)).
+        SetStringToI64MapNonCompat(make(map[string]int64))
+}
+
+func (x *Containers) GetI32List() []int32 {
+    if !x.IsSetI32List() {
+        return make([]int32, 0)
+    }
+
+    return x.I32List
+}
+
+func (x *Containers) GetStringSet() []string {
+    if !x.IsSetStringSet() {
+        return make([]string, 0)
+    }
+
+    return x.StringSet
+}
+
+func (x *Containers) GetStringToI64Map() map[string]int64 {
+    if !x.IsSetStringToI64Map() {
+        return make(map[string]int64)
+    }
+
+    return x.StringToI64Map
+}
+
+func (x *Containers) SetI32ListNonCompat(value []int32) *Containers {
+    x.I32List = value
+    return x
+}
+
+func (x *Containers) SetI32List(value []int32) *Containers {
+    x.I32List = value
+    return x
+}
+
+func (x *Containers) SetStringSetNonCompat(value []string) *Containers {
+    x.StringSet = value
+    return x
+}
+
+func (x *Containers) SetStringSet(value []string) *Containers {
+    x.StringSet = value
+    return x
+}
+
+func (x *Containers) SetStringToI64MapNonCompat(value map[string]int64) *Containers {
+    x.StringToI64Map = value
+    return x
+}
+
+func (x *Containers) SetStringToI64Map(value map[string]int64) *Containers {
+    x.StringToI64Map = value
+    return x
+}
+
+func (x *Containers) IsSetI32List() bool {
+    return x != nil && x.I32List != nil
+}
+
+func (x *Containers) IsSetStringSet() bool {
+    return x != nil && x.StringSet != nil
+}
+
+func (x *Containers) IsSetStringToI64Map() bool {
+    return x != nil && x.StringToI64Map != nil
+}
+
+func (x *Containers) writeField1(p thrift.Format) error {  // I32List
+    if err := p.WriteFieldBegin("I32List", thrift.LIST, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.I32List
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Containers) writeField2(p thrift.Format) error {  // StringSet
+    if err := p.WriteFieldBegin("StringSet", thrift.SET, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.StringSet
+    if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Containers) writeField3(p thrift.Format) error {  // StringToI64Map
+    if err := p.WriteFieldBegin("StringToI64Map", thrift.MAP, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.StringToI64Map
+    if err := p.WriteMapBegin(thrift.STRING, thrift.I64, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteI64(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Containers) readField1(p thrift.Format) error {  // I32List
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.I32List = result
+    return nil
+}
+
+func (x *Containers) readField2(p thrift.Format) error {  // StringSet
+    _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+
+    x.StringSet = result
+    return nil
+}
+
+func (x *Containers) readField3(p thrift.Format) error {  // StringToI64Map
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[string]int64, size)
+for i := 0; i < size; i++ {
+    var key string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value int64
+    {
+        result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.StringToI64Map = result
+    return nil
+}
+
+func (x *Containers) toString1() string {  // I32List
+    return fmt.Sprintf("%v", x.I32List)
+}
+
+func (x *Containers) toString2() string {  // StringSet
+    return fmt.Sprintf("%v", x.StringSet)
+}
+
+func (x *Containers) toString3() string {  // StringToI64Map
+    return fmt.Sprintf("%v", x.StringToI64Map)
+}
+
+
+
+func (x *Containers) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("Containers"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Containers) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // I32List
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.SET)):  // StringSet
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        case (id == 3 && wireType == thrift.Type(thrift.MAP)):  // StringToI64Map
+            if err := x.readField3(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Containers) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Containers({")
+    sb.WriteString(fmt.Sprintf("I32List:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("StringSet:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("StringToI64Map:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -1572,6 +1938,7 @@ func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("test.dev/fixtures/basic/MyStruct", func() any { return NewMyStruct() })
+    registry.RegisterType("test.dev/fixtures/basic/Containers", func() any { return NewContainers() })
     registry.RegisterType("test.dev/fixtures/basic/MyDataItem", func() any { return NewMyDataItem() })
     registry.RegisterType("test.dev/fixtures/basic/MyUnion", func() any { return NewMyUnion() })
     registry.RegisterType("test.dev/fixtures/basic/ReservedKeyword", func() any { return NewReservedKeyword() })

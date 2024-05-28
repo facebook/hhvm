@@ -16,6 +16,7 @@ namespace basic {
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<HackEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Containers>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyDataItem>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReservedKeyword>::gen(metadata);

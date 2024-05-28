@@ -90,6 +90,33 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures:
   8,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::Containers>::name = "Containers";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_names = { {
+  "I32List"sv,
+  "StringSet"sv,
+  "StringToI64Map"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_ids = { {
+  1,
+  2,
+  3,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_types = { {
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::basic::Containers>::storage_names = { {
+  "__fbthrift_field_I32List"sv,
+  "__fbthrift_field_StringSet"sv,
+  "__fbthrift_field_StringToI64Map"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::basic::Containers>::isset_indexes = { {
+  0,
+  1,
+  2,
+}};
+
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyDataItem>::name = "MyDataItem";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = { {
 }};

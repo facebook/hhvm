@@ -223,6 +223,143 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic::Containers>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::Containers>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test::fixtures::basic {
+
+const char* Containers::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic/Containers";
+}
+
+std::string_view Containers::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<Containers>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view Containers::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Containers>::name;
+}
+
+Containers::Containers(const Containers&) = default;
+Containers& Containers::operator=(const Containers&) = default;
+Containers::Containers() {
+}
+
+
+Containers::~Containers() {}
+
+Containers::Containers([[maybe_unused]] Containers&& other) noexcept :
+    __fbthrift_field_I32List(std::move(other.__fbthrift_field_I32List)),
+    __fbthrift_field_StringSet(std::move(other.__fbthrift_field_StringSet)),
+    __fbthrift_field_StringToI64Map(std::move(other.__fbthrift_field_StringToI64Map)),
+    __isset(other.__isset) {
+}
+
+Containers& Containers::operator=([[maybe_unused]] Containers&& other) noexcept {
+    this->__fbthrift_field_I32List = std::move(other.__fbthrift_field_I32List);
+    this->__fbthrift_field_StringSet = std::move(other.__fbthrift_field_StringSet);
+    this->__fbthrift_field_StringToI64Map = std::move(other.__fbthrift_field_StringToI64Map);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> I32List__arg, ::std::set<::std::string> StringSet__arg, ::std::map<::std::string, ::std::int64_t> StringToI64Map__arg) :
+    __fbthrift_field_I32List(std::move(I32List__arg)),
+    __fbthrift_field_StringSet(std::move(StringSet__arg)),
+    __fbthrift_field_StringToI64Map(std::move(StringToI64Map__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+}
+
+
+void Containers::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_I32List.clear();
+  this->__fbthrift_field_StringSet.clear();
+  this->__fbthrift_field_StringToI64Map.clear();
+  __isset = {};
+}
+
+void Containers::__fbthrift_clear_terse_fields() {
+}
+
+bool Containers::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool Containers::operator==([[maybe_unused]] const Containers& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool Containers::operator<([[maybe_unused]] const Containers& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>& Containers::get_I32List() const& {
+  return __fbthrift_field_I32List;
+}
+
+::std::vector<::std::int32_t> Containers::get_I32List() && {
+  return std::move(__fbthrift_field_I32List);
+}
+
+const ::std::set<::std::string>& Containers::get_StringSet() const& {
+  return __fbthrift_field_StringSet;
+}
+
+::std::set<::std::string> Containers::get_StringSet() && {
+  return std::move(__fbthrift_field_StringSet);
+}
+
+const ::std::map<::std::string, ::std::int64_t>& Containers::get_StringToI64Map() const& {
+  return __fbthrift_field_StringToI64Map;
+}
+
+::std::map<::std::string, ::std::int64_t> Containers::get_StringToI64Map() && {
+  return std::move(__fbthrift_field_StringToI64Map);
+}
+
+
+void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_I32List, b.__fbthrift_field_I32List);
+  swap(a.__fbthrift_field_StringSet, b.__fbthrift_field_StringSet);
+  swap(a.__fbthrift_field_StringToI64Map, b.__fbthrift_field_StringToI64Map);
+  swap(a.__isset, b.__isset);
+}
+
+template void Containers::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Containers::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Containers::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Containers::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Containers::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Containers::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Containers::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Containers::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace test::fixtures::basic
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,

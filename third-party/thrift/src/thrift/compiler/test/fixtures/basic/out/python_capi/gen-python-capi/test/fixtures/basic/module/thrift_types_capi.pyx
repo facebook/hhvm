@@ -26,6 +26,13 @@ cdef api int can_extract__test__fixtures__basic__module__MyStruct(object __obj) 
 cdef api object init__test__fixtures__basic__module__MyStruct(object data):
     return __thrift_types.MyStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__basic__module__Containers(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.Containers) else 0
+
+
+cdef api object init__test__fixtures__basic__module__Containers(object data):
+    return __thrift_types.Containers._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__basic__module__MyDataItem(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataItem) else 0
 

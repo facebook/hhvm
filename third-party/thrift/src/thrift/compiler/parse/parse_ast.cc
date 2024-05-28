@@ -915,13 +915,7 @@ class ast_builder : public parser_actions {
     return t_const_value::make_identifier(name.loc, name_str, program_);
   }
 
-  std::unique_ptr<t_const_value> on_integer(
-      source_location loc, int64_t value) override {
-    if (!params_.allow_64bit_consts &&
-        (value < INT32_MIN || value > INT32_MAX)) {
-      diags_.warning(
-          loc, "64-bit constant {} may not work in all languages", value);
-    }
+  std::unique_ptr<t_const_value> on_integer(int64_t value) override {
     auto node = std::make_unique<t_const_value>();
     node->set_integer(value);
     return node;

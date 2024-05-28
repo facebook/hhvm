@@ -874,7 +874,6 @@ class parser {
   //   integer | float | string_literal | bool_literal | identifier |
   //   list_initializer | map_initializer | struct_initializer
   std::unique_ptr<t_const_value> parse_initializer() {
-    auto range = track_range();
     auto s = sign::plus;
     switch (token_.kind) {
       case tok::bool_literal:
@@ -885,14 +884,14 @@ class parser {
       case to_tok('+'):
         consume_token();
         if (token_.kind == tok::int_literal) {
-          return actions_.on_integer(range, parse_integer(s));
+          return actions_.on_integer(parse_integer(s));
         } else if (token_.kind == tok::float_literal) {
           return actions_.on_float(parse_float(s));
         }
         report_expected("number");
         break;
       case tok::int_literal:
-        return actions_.on_integer(range, parse_integer());
+        return actions_.on_integer(parse_integer());
       case tok::float_literal:
         return actions_.on_float(parse_float());
       case tok::string_literal:

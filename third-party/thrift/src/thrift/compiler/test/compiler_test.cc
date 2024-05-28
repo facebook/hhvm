@@ -342,16 +342,6 @@ TEST(CompilerTest, enum_underflow) {
 
 TEST(CompilerTest, integer_overflow_underflow) {
   check_compile(R"(
-    const i64 overflowInt = 9223372036854775808;  # max int64 + 1
-      # expected-error@-1: integer constant 9223372036854775808 is too large
-      # expected-warning@-2: 64-bit constant -9223372036854775808 may not work in all languages
-  )");
-  check_compile(R"(
-    const i64 underflowInt = -9223372036854775809; # min int64 - 1
-      # expected-error@-1: integer constant -9223372036854775809 is too small
-      # expected-warning@-2: 64-bit constant 9223372036854775807 may not work in all languages
-  )");
-  check_compile(R"(
     # Unsigned Ints
     const i64 overflowUint = 18446744073709551615;  # max uint64
       # expected-error@-1: integer constant 18446744073709551615 is too large
@@ -435,13 +425,11 @@ TEST(CompilerTest, const_i32_value) {
   check_compile(R"(
     const i32 c1 = 2147483647;
     const i32 c2 = 2147483648;
-    # expected-warning@-1: 64-bit constant 2147483648 may not work in all languages
-    # expected-error@-2: value error: const `c2` has an invalid custom default value.
+    # expected-error@-1: value error: const `c2` has an invalid custom default value.
 
     const i32 c3 = -2147483648;
     const i32 c4 = -2147483649;
-    # expected-warning@-1: 64-bit constant -2147483649 may not work in all languages
-    # expected-error@-2: value error: const `c4` has an invalid custom default value.
+    # expected-error@-1: value error: const `c4` has an invalid custom default value.
   )");
 }
 
@@ -471,12 +459,10 @@ TEST(CompilerTest, const_double_value) {
     const double c2 = -1.7976931348623157e+308;
 
     const float c3 = 10000000000000001;
-    # expected-warning@-1: 64-bit constant 10000000000000001 may not work in all languages
-    # expected-error@-2: value error: const `c3` cannot be represented precisely as `float` or `double`.
+    # expected-error@-1: value error: const `c3` cannot be represented precisely as `float` or `double`.
 
     const float c4 = -10000000000000001;
-    # expected-warning@-1: 64-bit constant -10000000000000001 may not work in all languages
-    # expected-error@-2: value error: const `c4` cannot be represented precisely as `float` or `double`.
+    # expected-error@-1: value error: const `c4` cannot be represented precisely as `float` or `double`.
   )");
 }
 

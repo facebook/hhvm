@@ -50,7 +50,7 @@ fn convert_base(ty: &BaseType) -> textual::Ty {
         BaseType::Arraykey => textual::Ty::SpecialPtr(textual::SpecialTy::Arraykey),
         BaseType::Bool => textual::Ty::SpecialPtr(textual::SpecialTy::Bool),
         BaseType::Class(cid) => textual::Ty::named_type_ptr(TypeName::Class(*cid)),
-        BaseType::Classname => textual::Ty::named_type_ptr(TypeName::UnmangledRef("Classname")),
+        BaseType::Classname => textual::Ty::named_type_ptr(TypeName::UnmangledRef("HH::classname")),
         BaseType::Dict => textual::Ty::SpecialPtr(textual::SpecialTy::Dict),
         BaseType::Float => textual::Ty::SpecialPtr(textual::SpecialTy::Float),
         BaseType::Int => textual::Ty::SpecialPtr(textual::SpecialTy::Int),

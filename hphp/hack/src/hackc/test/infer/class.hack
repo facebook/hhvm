@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --hide-static-coeffects --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
-// CHECK: type C$static = .kind="class" .static {
+// CHECK: type C$static extends HH::classname = .kind="class" .static {
 // CHECK:   prop3: .public *HackFloat;
 // CHECK:   prop4: .public .SomeAttribute *HackMixed;
 // CHECK:   MY_CONSTANT: .public .constant *HackInt

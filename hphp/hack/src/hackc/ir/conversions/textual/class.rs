@@ -148,11 +148,18 @@ impl ClassState<'_, '_> {
         extends.extend(self.class.implements.iter());
         extends.extend(self.class.uses.iter());
 
-        let extends = extends
+        let mut extends = extends
             .into_iter()
             .map(|id| TypeName::class(id, is_static))
             .collect_vec();
 
+        if compute_base(&self.class).is_none() && is_static.as_bool() {
+            // We need to add a base class for static classes.
+            extends.push(TypeName::class(
+                ir::ClassName::intern("HH\\classname"),
+                IsStatic::NonStatic,
+            ));
+        }
         let cname = TypeName::class(self.class.name, is_static);
         self.txf.define_type(
             &cname,

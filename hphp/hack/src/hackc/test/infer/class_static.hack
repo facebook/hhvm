@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
-// CHECK: type C$static = .kind="class" .static {
+// CHECK: type C$static extends HH::classname = .kind="class" .static {
 // CHECK:   a: .public *HackInt
 // CHECK: }
 

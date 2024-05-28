@@ -222,7 +222,7 @@ function fcall_meth_caller(C $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.fcall_cls_method
-// CHECK: define $root.fcall_cls_method($this: *void, $a: *Classname) : *void {
+// CHECK: define $root.fcall_cls_method($this: *void, $a: *HH::classname) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("HH\\classname"))
 // CHECK:   n1: *HackMixed = load &$a

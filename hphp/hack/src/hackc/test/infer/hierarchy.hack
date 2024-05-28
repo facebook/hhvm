@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: type A$static
-// CHECK: type A$static = .kind="class" .static {
+// CHECK: type A$static extends HH::classname = .kind="class" .static {
 // CHECK: }
 
 // TEST-CHECK-BAL: "type A "
@@ -11,7 +11,7 @@
 class A { }
 
 // TEST-CHECK-BAL: type I0$static
-// CHECK: type I0$static = .kind="interface" .static {
+// CHECK: type I0$static extends HH::classname = .kind="interface" .static {
 // CHECK: }
 
 // TEST-CHECK-BAL: "type I0 "
@@ -21,7 +21,7 @@ class A { }
 interface I0 { }
 
 // TEST-CHECK-BAL: type I1$static
-// CHECK: type I1$static extends I0$static = .kind="interface" .static {
+// CHECK: type I1$static extends I0$static, HH::classname = .kind="interface" .static {
 // CHECK: }
 
 // TEST-CHECK-BAL: "type I1 "
@@ -31,7 +31,7 @@ interface I0 { }
 interface I1 extends I0 { }
 
 // TEST-CHECK-BAL: type T$static
-// CHECK: type T$static = .kind="trait" .static {
+// CHECK: type T$static extends HH::classname = .kind="trait" .static {
 // CHECK: }
 
 // TEST-CHECK-BAL: "type T "

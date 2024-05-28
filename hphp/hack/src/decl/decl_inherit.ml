@@ -719,6 +719,9 @@ end = struct
 
   let rev : t -> t = List.rev_map ~f:(Tuple2.map_snd ~f:List.rev)
 
+  (** Apply [f] to each parent to obtain a result and a precedence.
+    Return the result with the highest precedence.
+    If two results have the same highest precedence, return the first one. *)
   let find_map_first_with_highest_precedence
       (type res)
       (t : t)

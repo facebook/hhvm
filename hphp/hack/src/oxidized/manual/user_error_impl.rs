@@ -33,6 +33,13 @@ impl<PrimPos: Hash, Pos: Hash> UserError<PrimPos, Pos> {
     pub fn hash_for_saved_state(&self) -> ErrorHash {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
-        hasher.finish() as isize
+        let hash = hasher.finish();
+        make_msb_equal_msb2(hash) as isize
     }
+}
+
+fn make_msb_equal_msb2(u: u64) -> u64 {
+    let msb2 = u >> 62 & 1;
+    let with_unset_msb = u & !(1 << 63);
+    with_unset_msb | (msb2 << 63)
 }

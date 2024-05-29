@@ -25,18 +25,6 @@ class SetStruct;
 class MapStruct;
 class ComposeStruct;
 class Shallot;
-class MyStructPatchStruct;
-class MyStructField4PatchStruct;
-class MyStructField6PatchStruct;
-class MyStructField7PatchStruct;
-class MyStructField8PatchStruct;
-class MyStructFieldPatchStruct;
-class MyStructEnsureStruct;
-class MyStructSafePatch;
-class MyDataItemPatchStruct;
-class MyDataItemFieldPatchStruct;
-class MyDataItemEnsureStruct;
-class MyDataItemSafePatch;
 } // namespace test::fixtures::python_capi
 // END forward_declare
 

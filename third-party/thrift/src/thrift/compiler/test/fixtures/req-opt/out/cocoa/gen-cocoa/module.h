@@ -46,6 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 - (BOOL) myIntegerIsSet;
 - (BOOL) myStringIsSet;

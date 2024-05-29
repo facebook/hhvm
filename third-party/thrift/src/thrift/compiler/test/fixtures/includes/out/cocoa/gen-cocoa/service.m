@@ -42,6 +42,7 @@
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 - (BOOL) sIsSet;
 - (BOOL) iIsSet;
@@ -252,6 +253,7 @@
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 @end
 
@@ -350,6 +352,7 @@
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 - (BOOL) sIsSet;
 - (BOOL) iIsSet;
@@ -560,6 +563,7 @@
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 @end
 

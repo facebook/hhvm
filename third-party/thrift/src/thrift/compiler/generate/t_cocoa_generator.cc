@@ -673,7 +673,9 @@ void t_cocoa_generator::generate_cocoa_struct_interface(
   out << "- (void) read: (id <TProtocol>) inProtocol;" << std::endl;
   out << "- (void) write: (id <TProtocol>) outProtocol;" << std::endl;
   // validator
-  out << "- (void) validate;" << std::endl << std::endl;
+  out << "- (void) validate;" << std::endl;
+  // toDict
+  out << "- (NSDictionary *) toDict;" << std::endl << std::endl;
 
   // getters and setters
   generate_cocoa_struct_field_accessor_declarations(

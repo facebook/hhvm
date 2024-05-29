@@ -43,6 +43,7 @@ typedef Foo * TransitiveFoo;
 - (void) read: (id <TProtocol>) inProtocol;
 - (void) write: (id <TProtocol>) outProtocol;
 - (void) validate;
+- (NSDictionary *) toDict;
 
 - (BOOL) MyIntFieldIsSet;
 - (BOOL) MyTransitiveFieldIsSet;

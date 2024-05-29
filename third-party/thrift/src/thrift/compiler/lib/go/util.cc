@@ -400,10 +400,12 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
 
   auto result = out.str();
 
-  // Compat: legacy generator adds underscores to names startng
-  // with New. (to avoid name collisions with constructors)
+  // We add underscores to names starting with New to avoid name collisions with
+  // constructors. For example, if we are given a NewFoo message and a Foo
+  // message, the Foo message will generate a NewFoo constructor function, which
+  // will conflict with the NewFoo struct.
   bool starts_with_new = boost::algorithm::starts_with(result, "New");
-  if (compat && starts_with_new) {
+  if (starts_with_new) {
     result += '_';
   }
 

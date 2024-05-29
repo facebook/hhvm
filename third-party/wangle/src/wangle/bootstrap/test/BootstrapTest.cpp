@@ -65,7 +65,7 @@ class TestAcceptor : public Acceptor {
   EventBase base_;
 
  public:
-  TestAcceptor() : Acceptor(ServerSocketConfig()) {
+  TestAcceptor() : Acceptor(std::make_shared<ServerSocketConfig>()) {
     Acceptor::init(nullptr, &base_);
   }
   void onNewConnection(

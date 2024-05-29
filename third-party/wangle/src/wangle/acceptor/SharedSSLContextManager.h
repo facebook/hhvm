@@ -36,8 +36,9 @@ namespace wangle {
 
 class SharedSSLContextManager {
  public:
-  SharedSSLContextManager(ServerSocketConfig config)
-      : config_(config), seeds_(config.initialTicketSeeds) {}
+  explicit SharedSSLContextManager(
+      std::shared_ptr<const ServerSocketConfig> config)
+      : config_(std::move(config)), seeds_(config_->initialTicketSeeds) {}
   virtual ~SharedSSLContextManager() = default;
 
   virtual std::shared_ptr<fizz::server::CertManager> getCertManager() {
@@ -67,7 +68,7 @@ class SharedSSLContextManager {
   virtual void reloadSSLContextConfigs() = 0;
 
  protected:
-  wangle::ServerSocketConfig config_;
+  std::shared_ptr<const ServerSocketConfig> config_;
   std::shared_ptr<fizz::server::CertManager> certManager_;
   std::shared_ptr<wangle::SSLContextManager> ctxManager_;
   std::shared_ptr<fizz::server::FizzServerContext> fizzContext_;
@@ -82,13 +83,14 @@ class SharedSSLContextManager {
 template <typename FizzConfigUtilT>
 class SharedSSLContextManagerImpl : public SharedSSLContextManager {
  public:
-  explicit SharedSSLContextManagerImpl(ServerSocketConfig config)
-      : SharedSSLContextManager(config) {
+  explicit SharedSSLContextManagerImpl(
+      std::shared_ptr<const ServerSocketConfig> config)
+      : SharedSSLContextManager(std::move(config)) {
     try {
-      reloadContexts();
+      createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
       LOG(INFO) << "Initialized SSL context configs";
     } catch (const std::runtime_error& ex) {
-      if (config_.strictSSL) {
+      if (config_->strictSSL) {
         throw;
       } else {
         if (ctxManager_) {
@@ -105,7 +107,7 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   void updateTLSTicketKeys(TLSTicketKeySeeds seeds) override {
     try {
       seeds_ = seeds;
-      reloadContexts();
+      createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
       updateAcceptors();
       LOG(INFO) << "Updated TLS ticket keys";
 
@@ -118,14 +120,9 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   /*
    * Updates the config and reloads shared fizz, SSL contexts data
    */
-  void updateSSLConfigAndReloadContexts(SSLContextConfig ssl) override {
-    for (auto& sslContext : config_.sslContextConfigs) {
-      sslContext = ssl;
-    }
-    for (auto& sniConfig : config_.sniConfigs) {
-      sniConfig.contextConfig = ssl;
-    }
-    reloadSSLContextConfigs();
+  void updateSSLConfigAndReloadContexts(
+      SSLContextConfig sslContextConfig) override {
+    createContextManagers({std::move(sslContextConfig)}, {});
   }
 
   /*
@@ -133,7 +130,7 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
    */
   void reloadSSLContextConfigs() override {
     try {
-      reloadContexts();
+      createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
       updateAcceptors();
       LOG(INFO) << "Reloaded Fizz and SSL context configs";
 
@@ -144,46 +141,51 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   }
 
  protected:
-  // recreates contexts using config_ and seeds_
-  void reloadContexts() {
-    if (config_.fizzConfig.enableFizz) {
+  /*
+   * Creates certManager_, fizzContext_, and ctxManager_ with the given SSL
+   * context configs and sni configs.
+   */
+  void createContextManagers(
+      const std::vector<SSLContextConfig>& sslContextConfigs,
+      const std::vector<SNIConfig>& sniConfigs) {
+    if (config_->fizzConfig.enableFizz) {
       certManager_ = FizzConfigUtilT::createCertManager(
-          config_.sslContextConfigs,
+          sslContextConfigs,
           /* pwFactory = */ nullptr,
-          config_.strictSSL);
+          config_->strictSSL);
       fizzContext_ = FizzConfigUtilT::createFizzContext(
-          config_.sslContextConfigs, config_.fizzConfig, config_.strictSSL);
+          sslContextConfigs, config_->fizzConfig, config_->strictSSL);
       if (fizzContext_) {
         fizzContext_->setCertManager(certManager_);
         auto fizzTicketCipher = FizzConfigUtilT::createFizzTicketCipher(
             seeds_,
-            config_.sslCacheOptions.sslCacheTimeout,
-            config_.sslCacheOptions.handshakeValidity,
+            config_->sslCacheOptions.sslCacheTimeout,
+            config_->sslCacheOptions.handshakeValidity,
             fizzContext_->getFactoryPtr(),
             certManager_,
-            getPskContext(config_));
+            getPskContext(*config_));
         fizzContext_->setTicketCipher(fizzTicketCipher);
       }
     }
     auto ctxManager = std::make_shared<SSLContextManager>(
-        "vip_" + config_.name,
-        SSLContextManagerSettings().setStrict(config_.strictSSL),
+        "vip_" + config_->name,
+        SSLContextManagerSettings().setStrict(config_->strictSSL),
         nullptr);
-    for (const auto& sslCtxConfig : config_.sslContextConfigs) {
+    for (const auto& sslContextConfig : sslContextConfigs) {
       ctxManager->addSSLContextConfig(
-          sslCtxConfig,
-          config_.sslCacheOptions,
+          sslContextConfig,
+          config_->sslCacheOptions,
           &seeds_,
-          config_.bindAddress,
+          config_->bindAddress,
           cacheProvider_);
     }
-    for (const auto& sniConfig : config_.sniConfigs) {
+    for (const auto& sniConfig : sniConfigs) {
       ctxManager->addSSLContextConfig(
           sniConfig.snis,
           sniConfig.contextConfig,
-          config_.sslCacheOptions,
+          config_->sslCacheOptions,
           &seeds_,
-          config_.bindAddress,
+          config_->bindAddress,
           cacheProvider_);
     }
     ctxManager_ = std::move(ctxManager);

@@ -85,7 +85,7 @@ class HTTPServer final {
   };
 
   struct AcceptorFactoryConfig {
-    AcceptorConfiguration accConfig;
+    std::shared_ptr<const AcceptorConfiguration> accConfig;
     std::shared_ptr<HTTPCodecFactory> codecFactory;
   };
 

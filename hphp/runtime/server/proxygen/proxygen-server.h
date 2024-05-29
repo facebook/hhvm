@@ -53,7 +53,7 @@ struct HPHPWorkerThread;
 
 struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     ProxygenServer *server,
     HPHPWorkerThread *worker);
   ~HPHPSessionAcceptor() override {}
@@ -269,7 +269,7 @@ struct ProxygenServer : Server,
   void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
   virtual std::unique_ptr<HPHPSessionAcceptor> createAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     HPHPWorkerThread *worker);
 
   // Forbidden copy constructor and assignment operator
@@ -287,8 +287,10 @@ struct ProxygenServer : Server,
   folly::EventBaseManager m_eventBaseManager;
   // The main worker that handles accepting connections is at index 0.
   std::vector<std::unique_ptr<HPHPWorkerThread>> m_workers;
-  proxygen::AcceptorConfiguration m_httpConfig;
-  proxygen::AcceptorConfiguration m_httpsConfig;
+  std::shared_ptr<proxygen::AcceptorConfiguration> m_httpConfig =
+    std::make_shared<proxygen::AcceptorConfiguration>();
+  std::shared_ptr<proxygen::AcceptorConfiguration> m_httpsConfig =
+    std::make_shared<proxygen::AcceptorConfiguration>();
   std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpAcceptors;
   std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpsAcceptors;
   std::unique_ptr<wangle::FilePoller> m_filePoller;

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/services/AcceptorConfiguration.h>
 
@@ -16,7 +18,7 @@ namespace proxygen {
 class HTTPDefaultSessionCodecFactory : public HTTPCodecFactory {
  public:
   explicit HTTPDefaultSessionCodecFactory(
-      const AcceptorConfiguration& accConfig);
+      std::shared_ptr<const AcceptorConfiguration> accConfig);
   ~HTTPDefaultSessionCodecFactory() override {
   }
 
@@ -28,7 +30,7 @@ class HTTPDefaultSessionCodecFactory : public HTTPCodecFactory {
                                       bool isTLS) override;
 
  protected:
-  const AcceptorConfiguration& accConfig_;
+  std::shared_ptr<const AcceptorConfiguration> accConfig_;
   folly::Optional<bool> alwaysUseHTTP2_{};
 };
 

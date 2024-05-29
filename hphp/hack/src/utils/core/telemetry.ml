@@ -128,6 +128,23 @@ let duration
   let ms = int_of_float (1000.0 *. seconds) in
   (key, Hh_json.int_ ms) :: telemetry
 
+let with_duration ~(description : string) (telemetry : t) (f : unit -> 'a) :
+    'a * t =
+  let start_time = Unix.gettimeofday () in
+  let res = f () in
+  let end_time = Unix.gettimeofday () in
+  let seconds = end_time -. start_time in
+  let ms = int_of_float (1000.0 *. seconds) in
+  let key =
+    let suffix = "duration_ms" in
+    if String.is_empty description then
+      suffix
+    else
+      Printf.sprintf "%s_%s" description suffix
+  in
+  let telemetry = (key, Hh_json.int_ ms) :: telemetry in
+  (res, telemetry)
+
 let float_ ~(key : string) ~(value : float) (telemetry : t) : t =
   (key, Hh_json.float_ value) :: telemetry
 

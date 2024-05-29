@@ -61,7 +61,8 @@ module Level : sig
   val passes_min_level : t -> bool
 
   (** logs the message and how long the presumed operation took, assuming that
-      the float argument is the start time and that the end time is now *)
+      the float argument is the start time and that the end time is now.
+      Return said end time. *)
   val log_duration : t -> ?category:string -> string -> float -> float
 end
 

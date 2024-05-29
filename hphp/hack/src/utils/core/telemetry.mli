@@ -72,6 +72,11 @@ val object_opt : key:string -> value:t option -> t -> t
 
 val duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
 
+(** [with_duration ~description telemetry f] runs [f] and adds
+  in [telemetry] the duration [f] took in milliseconds
+  at key "[description]_duration_ms" *)
+val with_duration : description:string -> t -> (unit -> 'res) -> 'res * t
+
 val float_ : key:string -> value:float -> t -> t
 
 val float_opt : key:string -> value:float option -> t -> t

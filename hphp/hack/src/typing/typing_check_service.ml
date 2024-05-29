@@ -845,19 +845,16 @@ let process_with_hh_distc
       tcopt
     |> Result.ok_or_failwith
   in
-  let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
   let re_session_id = Hh_distc_ffi.get_re_session_id hh_distc_handle in
   Hh_logger.log "hh_distc RE session id: %s" re_session_id;
   Server_progress.write "hh_distc running";
-  let handlers =
-    interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
-  in
   event_loop
     ~done_count:0
     ~total_count:0
     ~interrupt
-    ~handlers
-    ~fd_distc
+    ~handlers:
+      (interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env)
+    ~fd_distc:(Hh_distc_ffi.get_fd hh_distc_handle)
     ~handle:hh_distc_handle
     ~check_info
     ~hhdg_path

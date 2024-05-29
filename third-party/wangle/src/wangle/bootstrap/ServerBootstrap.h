@@ -68,9 +68,8 @@ class ServerBootstrap {
     return this;
   }
 
-  ServerBootstrap* acceptorConfig(
-      std::shared_ptr<const ServerSocketConfig> accConfig) {
-    accConfig_ = std::move(accConfig);
+  ServerBootstrap* acceptorConfig(const ServerSocketConfig& accConfig) {
+    accConfig_ = accConfig;
     return this;
   }
 
@@ -179,7 +178,7 @@ class ServerBootstrap {
     std::shared_ptr<folly::AsyncServerSocket> socket(
         s.release(), AsyncServerSocketFactory::ThreadSafeDestructor());
     socket->setMaxNumMessagesInQueue(
-        accConfig_->maxNumPendingConnectionsPerWorker);
+        accConfig_.maxNumPendingConnectionsPerWorker);
 
     folly::via(acceptor_group_.get(), [&] {
       if (socketConfig.useZeroCopy) {
@@ -224,7 +223,7 @@ class ServerBootstrap {
     }
 
     bool reusePort = reusePort_ || (acceptor_group_->numThreads() > 1) ||
-        accConfig_->reusePort;
+        accConfig_.reusePort;
 
     std::mutex sock_lock;
     std::vector<std::shared_ptr<folly::AsyncSocketBase>> new_sockets;
@@ -376,8 +375,7 @@ class ServerBootstrap {
   std::shared_ptr<ServerSocketFactory> socketFactory_{
       std::make_shared<AsyncServerSocketFactory>()};
 
-  std::shared_ptr<const ServerSocketConfig> accConfig_ =
-      std::make_shared<ServerSocketConfig>();
+  ServerSocketConfig accConfig_;
 
   bool reusePort_{false};
 

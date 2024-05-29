@@ -33,9 +33,8 @@ const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 class HTTPTargetSessionAcceptor : public HTTPSessionAcceptor {
  public:
-  explicit HTTPTargetSessionAcceptor(
-      std::shared_ptr<const AcceptorConfiguration> accConfig)
-      : HTTPSessionAcceptor(std::move(accConfig)) {
+  explicit HTTPTargetSessionAcceptor(const AcceptorConfiguration& accConfig)
+      : HTTPSessionAcceptor(accConfig) {
   }
 
   HTTPTransaction::Handler* newHandler(HTTPTransaction& /*txn*/,
@@ -87,7 +86,7 @@ class HTTPSessionAcceptorTestBase
   }
 
   void SetUp() override {
-    config_ = std::make_shared<AcceptorConfiguration>();
+    config_ = std::make_unique<AcceptorConfiguration>();
     SocketAddress address("127.0.0.1", 0);
     config_->bindAddress = address;
     setupSSL();
@@ -95,13 +94,13 @@ class HTTPSessionAcceptorTestBase
   }
 
   void newAcceptor() {
-    acceptor_ = std::make_unique<HTTPTargetSessionAcceptor>(config_);
+    acceptor_ = std::make_unique<HTTPTargetSessionAcceptor>(*config_);
     EXPECT_CALL(mockServerSocket_, addAcceptCallback(_, _, _));
     acceptor_->init(&mockServerSocket_, &eventBase_);
   }
 
  protected:
-  std::shared_ptr<AcceptorConfiguration> config_;
+  std::unique_ptr<AcceptorConfiguration> config_;
   wangle::SSLContextConfig sslCtxConfig_;
   std::unique_ptr<HTTPTargetSessionAcceptor> acceptor_;
   folly::EventBase eventBase_;

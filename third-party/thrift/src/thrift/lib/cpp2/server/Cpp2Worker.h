@@ -272,7 +272,7 @@ class Cpp2Worker : public IOWorkerContext,
       DoNotUse /* ignored, never call constructor directly */)
       : Acceptor(
             server ? server->getServerSocketConfig()
-                   : std::make_shared<wangle::ServerSocketConfig>()),
+                   : wangle::ServerSocketConfig()),
         wangle::PeekingAcceptorHandshakeHelper::PeekCallback(kPeekCount),
         server_(server),
         activeRequests_(0),

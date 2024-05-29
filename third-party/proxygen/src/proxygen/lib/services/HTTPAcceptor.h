@@ -19,8 +19,8 @@ namespace proxygen {
 
 class HTTPAcceptor : public wangle::Acceptor {
  public:
-  explicit HTTPAcceptor(std::shared_ptr<const AcceptorConfiguration> accConfig)
-      : Acceptor(std::move(accConfig)) {
+  explicit HTTPAcceptor(const AcceptorConfiguration& accConfig)
+      : Acceptor(accConfig), accConfig_(accConfig) {
   }
 
   void init(folly::AsyncServerSocket* serverSocket,
@@ -32,9 +32,11 @@ class HTTPAcceptor : public wangle::Acceptor {
     Acceptor::init(serverSocket, eventBase, nullptr, fizzCtx);
   }
 
-  [[nodiscard]] std::shared_ptr<const AcceptorConfiguration> getConfig() const {
-    return std::static_pointer_cast<const AcceptorConfiguration>(
-        Acceptor::getConfig());
+  const AcceptorConfiguration& getConfig() const {
+    return accConfig_;
+  }
+  const wangle::ServerSocketConfig& getServerSocketConfig() {
+    return Acceptor::getConfig();
   }
 
   /**
@@ -45,12 +47,13 @@ class HTTPAcceptor : public wangle::Acceptor {
   }
 
  protected:
+  AcceptorConfiguration accConfig_;
   std::unique_ptr<WheelTimerInstance> timer_;
 
   virtual std::unique_ptr<WheelTimerInstance> createTransactionTimeoutSet(
       folly::EventBase* eventBase) {
     return std::make_unique<WheelTimerInstance>(
-        getConfig()->transactionIdleTimeout, eventBase);
+        accConfig_.transactionIdleTimeout, eventBase);
   }
 };
 

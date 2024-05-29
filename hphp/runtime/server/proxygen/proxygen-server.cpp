@@ -46,10 +46,10 @@ using folly::AsyncServerSocket;
 using wangle::Acceptor;
 
 HPHPSessionAcceptor::HPHPSessionAcceptor(
-    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
+    const proxygen::AcceptorConfiguration& config,
     ProxygenServer *server,
     HPHPWorkerThread *worker)
-      : HTTPSessionAcceptor(std::move(config)),
+      : HTTPSessionAcceptor(config),
         m_server(server),
         m_worker(worker),
         m_controllerPtr(new proxygen::SimpleController(this)) {
@@ -251,9 +251,9 @@ ProxygenServer::ProxygenServer(
   } else {
     address.setFromHostPort(options.m_address, options.m_port);
   }
-  m_httpConfig->bindAddress = address;
-  m_httpConfig->acceptBacklog = Cfg::Server::Backlog;
-  m_httpsConfig->acceptBacklog = Cfg::Server::Backlog;
+  m_httpConfig.bindAddress = address;
+  m_httpConfig.acceptBacklog = Cfg::Server::Backlog;
+  m_httpsConfig.acceptBacklog = Cfg::Server::Backlog;
   // TODO: proxygen only supports downstream keep-alive
   std::chrono::seconds timeout;
   if (Cfg::Server::ConnectionTimeoutSeconds > 0) {
@@ -262,20 +262,20 @@ ProxygenServer::ProxygenServer(
     // default to 50s (to match libevent)
     timeout = std::chrono::seconds(50);
   }
-  m_httpConfig->connectionIdleTimeout = timeout;
-  m_httpConfig->transactionIdleTimeout = timeout;
-  m_httpsConfig->connectionIdleTimeout = timeout;
-  m_httpsConfig->transactionIdleTimeout = timeout;
+  m_httpConfig.connectionIdleTimeout = timeout;
+  m_httpConfig.transactionIdleTimeout = timeout;
+  m_httpsConfig.connectionIdleTimeout = timeout;
+  m_httpsConfig.transactionIdleTimeout = timeout;
 
   // Set flow control (for uploads) to 1MB.  We could also make this
   // configurable if needed
-  m_httpsConfig->initialReceiveWindow = kStreamFlowControl;
-  m_httpsConfig->receiveSessionWindowSize = kConnFlowControl;
+  m_httpsConfig.initialReceiveWindow = kStreamFlowControl;
+  m_httpsConfig.receiveSessionWindowSize = kConnFlowControl;
   if (Cfg::Server::EnableH2C) {
-    m_httpConfig->allowedPlaintextUpgradeProtocols = {
+    m_httpConfig.allowedPlaintextUpgradeProtocols = {
       proxygen::http2::kProtocolCleartextString };
-    m_httpConfig->initialReceiveWindow = kStreamFlowControl;
-    m_httpConfig->receiveSessionWindowSize = kConnFlowControl;
+    m_httpConfig.initialReceiveWindow = kStreamFlowControl;
+    m_httpConfig.receiveSessionWindowSize = kConnFlowControl;
   }
 
   if (!options.m_takeoverFilename.empty()) {
@@ -334,9 +334,9 @@ void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
 }
 
 std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
-    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
+    const proxygen::AcceptorConfiguration& config,
     HPHPWorkerThread *worker) {
-  return std::make_unique<HPHPSessionAcceptor>(std::move(config), this, worker);
+  return std::make_unique<HPHPSessionAcceptor>(config, this, worker);
 }
 
 void ProxygenServer::start() {
@@ -396,9 +396,9 @@ void ProxygenServer::start(bool beginAccepting) {
       Cfg::Server::StopOld || m_takeover_agent;
     m_httpServerSocket->setReusePortEnabled(allowReuse);
     try {
-      m_httpServerSocket->bind(m_httpConfig->bindAddress);
+      m_httpServerSocket->bind(m_httpConfig.bindAddress);
     } catch (const std::exception& ex) {
-      failedToListen(ex, m_httpConfig->bindAddress);
+      failedToListen(ex, m_httpConfig.bindAddress);
     }
   }
 
@@ -413,7 +413,7 @@ void ProxygenServer::start(bool beginAccepting) {
     m_httpAcceptors[i] = std::move(acceptor);
   }
 
-  if (m_httpConfig->isSSL() || m_httpsConfig->isSSL()) {
+  if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
 
     if (!Cfg::Server::SSLCertificateDir.empty()) {
       m_filePoller = std::make_unique<wangle::FilePoller>(
@@ -436,7 +436,7 @@ void ProxygenServer::start(bool beginAccepting) {
         });
     }
   }
-  if (m_httpsConfig->isSSL()) {
+  if (m_httpsConfig.isSSL()) {
     m_httpsServerSocket.reset(
       new AsyncServerSocket(m_workers[0]->getEventBase()));
     try {
@@ -447,10 +447,10 @@ void ProxygenServer::start(bool beginAccepting) {
           folly::NetworkSocket::fromFd(m_accept_sock_ssl));
       } else {
         m_httpsServerSocket->setReusePortEnabled(Cfg::Server::StopOld);
-        m_httpsServerSocket->bind(m_httpsConfig->bindAddress);
+        m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpsConfig->bindAddress);
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
     for (int i = 0; i < m_workers.size(); i++) {
@@ -460,14 +460,14 @@ void ProxygenServer::start(bool beginAccepting) {
                        m_workers[i]->getEventBase());
       } catch (const std::exception& ex) {
         // Could be some cert thing
-        failedToListen(ex, m_httpsConfig->bindAddress);
+        failedToListen(ex, m_httpsConfig.bindAddress);
       }
       m_httpsAcceptors[i] = std::move(acceptor);
     }
   }
 
   if (!Cfg::Server::SSLTicketSeedFile.empty() &&
-      (!m_httpsAcceptors.empty() || m_httpConfig->isSSL())) {
+      (!m_httpsAcceptors.empty() || m_httpConfig.isSSL())) {
     // setup ticket seed watcher
     const auto& ticketPath = Cfg::Server::SSLTicketSeedFile;
     auto seeds = wangle::TLSCredProcessor::processTLSTickets(ticketPath);
@@ -484,16 +484,16 @@ void ProxygenServer::start(bool beginAccepting) {
 
   if (needListen) {
     try {
-      m_httpServerSocket->listen(m_httpConfig->acceptBacklog);
+      m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpConfig->bindAddress);
+      failedToListen(ex, m_httpConfig.bindAddress);
     }
   }
   if (m_httpsServerSocket) {
     try {
-      m_httpsServerSocket->listen(m_httpsConfig->acceptBacklog);
+      m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpsConfig->bindAddress);
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
 
@@ -839,10 +839,10 @@ void ProxygenServer::resetSSLContextConfigs(
   for (int i = 0; i < m_workers.size(); i++) {
     auto evb = m_workers[i]->getEventBase();
     evb->runInEventBaseThread([this, configs, i] {
-        if (m_httpsAcceptors[i] && m_httpsConfig->isSSL()) {
+        if (m_httpsAcceptors[i] && m_httpsConfig.isSSL()) {
           m_httpsAcceptors[i]->resetSSLContextConfigs(configs);
         }
-        if (m_httpAcceptors[i] && m_httpConfig->isSSL()) {
+        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
           m_httpAcceptors[i]->resetSSLContextConfigs(configs);
         }
     });
@@ -857,7 +857,7 @@ void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
           m_httpsAcceptors[i]->setTLSTicketSecrets(
               seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
         }
-        if (m_httpAcceptors[i] && m_httpConfig->isSSL()) {
+        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
           m_httpAcceptors[i]->setTLSTicketSecrets(
               seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
         }
@@ -869,13 +869,13 @@ bool ProxygenServer::enableSSL(int port) {
   if (port == 0) {
     return false;
   }
-  SocketAddress address = m_httpConfig->bindAddress;
+  SocketAddress address = m_httpConfig.bindAddress;
   address.setPort(port);
 
-  m_httpsConfig->bindAddress = address;
-  m_httpsConfig->strictSSL = false;
+  m_httpsConfig.bindAddress = address;
+  m_httpsConfig.strictSSL = false;
 
-  m_httpsConfig->sslContextConfigs.emplace_back(
+  m_httpsConfig.sslContextConfigs.emplace_back(
       createContextConfig({
         Cfg::Server::SSLCertificateFile,
         Cfg::Server::SSLCertificateKeyFile}, true));
@@ -884,12 +884,12 @@ bool ProxygenServer::enableSSL(int port) {
 }
 
 bool ProxygenServer::enableSSLWithPlainText() {
-  m_httpConfig->strictSSL = false;
-  m_httpConfig->sslContextConfigs.emplace_back(
+  m_httpConfig.strictSSL = false;
+  m_httpConfig.sslContextConfigs.emplace_back(
       createContextConfig({
         Cfg::Server::SSLCertificateFile,
         Cfg::Server::SSLCertificateKeyFile}, true));
-  m_httpConfig->allowInsecureConnectionsOnSecureServer = true;
+  m_httpConfig.allowInsecureConnectionsOnSecureServer = true;
   return true;
 }
 

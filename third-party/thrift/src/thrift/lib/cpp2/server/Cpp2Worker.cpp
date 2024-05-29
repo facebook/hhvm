@@ -317,7 +317,7 @@ wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::createSSLHelper(
     const folly::SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
     wangle::TransportInfo& tInfo) {
-  if (accConfig_->fizzConfig.enableFizz) {
+  if (accConfig_.fizzConfig.enableFizz) {
     auto helper =
         fizzPeeker_.getThriftHelper(bytes, clientAddr, acceptTime, tInfo);
     if (!helper) {
@@ -352,7 +352,7 @@ bool Cpp2Worker::shouldPerformSSL(
 std::optional<ThriftParametersContext> Cpp2Worker::getThriftParametersContext(
     const folly::SocketAddress& clientAddr) {
   auto thriftConfigBase =
-      folly::get_ptr(accConfig_->customConfigMap, "thrift_tls_config");
+      folly::get_ptr(accConfig_.customConfigMap, "thrift_tls_config");
   if (!thriftConfigBase) {
     return std::nullopt;
   }

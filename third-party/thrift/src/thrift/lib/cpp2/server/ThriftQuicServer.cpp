@@ -96,14 +96,14 @@ void ThriftQuicServer::startAdditionalServers() {
   auto wangleConfig = getServerSocketConfig();
   auto fizzCertManager = std::shared_ptr<fizz::server::CertManager>(
       wangle::FizzConfigUtil::createCertManager(
-          wangleConfig->sslContextConfigs,
+          wangleConfig.sslContextConfigs,
           /* pwFactory = */ nullptr,
-          wangleConfig->strictSSL)
+          wangleConfig.strictSSL)
           .release());
   auto fizzContext = wangle::FizzConfigUtil::createFizzContext(
-      wangleConfig->sslContextConfigs,
-      wangleConfig->fizzConfig,
-      wangleConfig->strictSSL);
+      wangleConfig.sslContextConfigs,
+      wangleConfig.fizzConfig,
+      wangleConfig.strictSSL);
   fizzContext->setCertManager(fizzCertManager);
 
   quicServer_->setFizzContext(std::move(fizzContext));

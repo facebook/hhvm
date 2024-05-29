@@ -2537,27 +2537,28 @@ TEST(ThriftServer, IdleServerTimeout) {
 TEST(ThriftServer, ServerConfigTest) {
   ThriftServer server;
 
+  wangle::ServerSocketConfig defaultConfig;
   // If nothing is set, expect defaults
   auto serverConfig = server.getServerSocketConfig();
   EXPECT_EQ(
-      serverConfig->sslHandshakeTimeout, std::chrono::milliseconds::zero());
+      serverConfig.sslHandshakeTimeout, std::chrono::milliseconds::zero());
 
   // Idle timeout of 0 with no SSL handshake set, expect it to be 0.
   server.setIdleTimeout(std::chrono::milliseconds::zero());
   serverConfig = server.getServerSocketConfig();
   EXPECT_EQ(
-      serverConfig->sslHandshakeTimeout, std::chrono::milliseconds::zero());
+      serverConfig.sslHandshakeTimeout, std::chrono::milliseconds::zero());
 
   // Expect the explicit to always win
   server.setSSLHandshakeTimeout(std::chrono::milliseconds(100));
   serverConfig = server.getServerSocketConfig();
-  EXPECT_EQ(serverConfig->sslHandshakeTimeout, std::chrono::milliseconds(100));
+  EXPECT_EQ(serverConfig.sslHandshakeTimeout, std::chrono::milliseconds(100));
 
   // Clear it and expect it to be zero again (due to idle timeout = 0)
   server.setSSLHandshakeTimeout(std::nullopt);
   serverConfig = server.getServerSocketConfig();
   EXPECT_EQ(
-      serverConfig->sslHandshakeTimeout, std::chrono::milliseconds::zero());
+      serverConfig.sslHandshakeTimeout, std::chrono::milliseconds::zero());
 }
 
 TEST(ThriftServer, MultiPort) {

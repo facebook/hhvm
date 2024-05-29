@@ -2410,40 +2410,40 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     return sslCacheOptions_;
   }
 
-  std::shared_ptr<wangle::ServerSocketConfig> getServerSocketConfig() {
-    auto config = std::make_shared<wangle::ServerSocketConfig>();
+  wangle::ServerSocketConfig getServerSocketConfig() {
+    wangle::ServerSocketConfig config;
     if (sslContextObserver_.has_value()) {
-      config->sslContextConfigs.push_back(*sslContextObserver_->getSnapshot());
+      config.sslContextConfigs.push_back(*sslContextObserver_->getSnapshot());
     }
     if (sslCacheOptions_) {
-      config->sslCacheOptions = *sslCacheOptions_;
+      config.sslCacheOptions = *sslCacheOptions_;
     }
-    config->connectionIdleTimeout = getIdleTimeout();
-    config->connectionAgeTimeout = getConnectionAgeTimeout();
-    config->acceptBacklog = getListenBacklog();
+    config.connectionIdleTimeout = getIdleTimeout();
+    config.connectionAgeTimeout = getConnectionAgeTimeout();
+    config.acceptBacklog = getListenBacklog();
     if (ticketSeeds_) {
-      config->initialTicketSeeds = *ticketSeeds_;
+      config.initialTicketSeeds = *ticketSeeds_;
     }
     if (enableTFO_) {
-      config->enableTCPFastOpen = *enableTFO_;
-      config->fastOpenQueueSize = fastOpenQueueSize_;
+      config.enableTCPFastOpen = *enableTFO_;
+      config.fastOpenQueueSize = fastOpenQueueSize_;
     }
     if (sslHandshakeTimeout_) {
-      config->sslHandshakeTimeout = *sslHandshakeTimeout_;
+      config.sslHandshakeTimeout = *sslHandshakeTimeout_;
     } else if (getIdleTimeout() == std::chrono::milliseconds::zero()) {
       // make sure a handshake that takes too long doesn't kill the connection
-      config->sslHandshakeTimeout = std::chrono::milliseconds::zero();
+      config.sslHandshakeTimeout = std::chrono::milliseconds::zero();
     }
     // By default, we set strictSSL to false. This means the server will start
     // even if cert/key is missing as it may become available later
-    config->strictSSL = getStrictSSL() || getSSLPolicy() == SSLPolicy::REQUIRED;
-    config->fizzConfig = fizzConfig_;
-    config->customConfigMap["thrift_tls_config"] =
+    config.strictSSL = getStrictSSL() || getSSLPolicy() == SSLPolicy::REQUIRED;
+    config.fizzConfig = fizzConfig_;
+    config.customConfigMap["thrift_tls_config"] =
         std::make_shared<ThriftTlsConfig>(thriftTlsConfig_);
-    config->socketMaxReadsPerEvent = socketMaxReadsPerEvent_;
+    config.socketMaxReadsPerEvent = socketMaxReadsPerEvent_;
 
-    config->useZeroCopy = !!zeroCopyEnableFunc_;
-    config->preferIoUring = preferIoUring_;
+    config.useZeroCopy = !!zeroCopyEnableFunc_;
+    config.preferIoUring = preferIoUring_;
     return config;
   }
 

@@ -306,7 +306,7 @@ class RocketTestServerAcceptor final : public wangle::Acceptor {
       folly::Function<std::unique_ptr<RocketServerHandler>()>
           frameHandlerFactory,
       std::promise<void> shutdownPromise)
-      : Acceptor(std::make_shared<wangle::ServerSocketConfig>()),
+      : Acceptor(wangle::ServerSocketConfig{}),
         frameHandlerFactory_(std::move(frameHandlerFactory)),
         shutdownPromise_(std::move(shutdownPromise)) {}
 

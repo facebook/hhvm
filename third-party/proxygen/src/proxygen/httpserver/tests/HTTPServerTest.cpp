@@ -228,8 +228,8 @@ class AcceptorFactoryForTest : public wangle::AcceptorFactory {
  public:
   std::shared_ptr<wangle::Acceptor> newAcceptor(
       folly::EventBase* /*eventBase*/) override {
-    auto config = std::make_shared<wangle::ServerSocketConfig>();
-    auto acc = std::make_shared<wangle::Acceptor>(std::move(config));
+    wangle::ServerSocketConfig config;
+    auto acc = std::make_shared<wangle::Acceptor>(config);
     return acc;
   }
 };

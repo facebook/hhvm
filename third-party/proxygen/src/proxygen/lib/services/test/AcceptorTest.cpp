@@ -44,8 +44,8 @@ class TestConnection : public wangle::ManagedConnection {
 
 class TestAcceptor : public Acceptor {
  public:
-  explicit TestAcceptor(std::shared_ptr<const ServerSocketConfig> accConfig)
-      : Acceptor(std::move(accConfig)) {
+  explicit TestAcceptor(const ServerSocketConfig& accConfig)
+      : Acceptor(accConfig) {
   }
 
   void onNewConnection(folly::AsyncTransport::UniquePtr /*sock*/,
@@ -63,7 +63,7 @@ TEST(AcceptorTest, Basic) {
 
   EventBase base;
   auto socket = AsyncServerSocket::newSocket(&base);
-  auto config = std::make_shared<ServerSocketConfig>();
+  ServerSocketConfig config;
 
   TestAcceptor acceptor(config);
   socket->addAcceptCallback(&acceptor, &base);

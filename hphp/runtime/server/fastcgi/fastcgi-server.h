@@ -39,9 +39,9 @@ struct FastCGIServer;
  * each one in a FastCGISession.
  */
 struct FastCGIAcceptor : public wangle::Acceptor {
-  FastCGIAcceptor(std::shared_ptr<const wangle::ServerSocketConfig> config,
+  FastCGIAcceptor(const wangle::ServerSocketConfig& config,
                   FastCGIServer *server)
-    : wangle::Acceptor(std::move(config))
+    : wangle::Acceptor(config)
     , m_server(server)
   {}
 
@@ -175,7 +175,7 @@ private:
   JobQueueDispatcher<FastCGIWorker> m_dispatcher;
 
   // Configuration for accepting webserver connections
-  std::shared_ptr<const wangle::ServerSocketConfig> m_socketConfig;
+  wangle::ServerSocketConfig m_socketConfig;
   std::unique_ptr<FastCGIAcceptor> m_acceptor;
 };
 

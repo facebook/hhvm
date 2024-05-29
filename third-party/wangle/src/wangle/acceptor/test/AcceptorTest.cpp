@@ -51,8 +51,8 @@ class TestConnection : public wangle::ManagedConnection {
 
 class TestAcceptor : public Acceptor {
  public:
-  explicit TestAcceptor(std::shared_ptr<const ServerSocketConfig> accConfig)
-      : Acceptor(std::move(accConfig)) {}
+  explicit TestAcceptor(const ServerSocketConfig& accConfig)
+      : Acceptor(accConfig) {}
 
   void onNewConnection(
       folly::AsyncTransportWrapper::UniquePtr /*sock*/,
@@ -95,17 +95,17 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
   std::tuple<std::shared_ptr<TestAcceptor>, std::shared_ptr<AsyncServerSocket>>
   initTestAcceptorAndSocket() {
     TestSSLConfig testConfig = GetParam();
-    auto config = std::make_shared<ServerSocketConfig>();
+    ServerSocketConfig config;
     if (testConfig == TestSSLConfig::SSL ||
         testConfig == TestSSLConfig::SSL_MULTI_CA) {
-      config->sslContextConfigs.emplace_back(getTestSslContextConfig());
+      config.sslContextConfigs.emplace_back(getTestSslContextConfig());
     }
-    return initTestAcceptorAndSocket(std::move(config));
+    return initTestAcceptorAndSocket(config);
   }
 
   std::tuple<std::shared_ptr<TestAcceptor>, std::shared_ptr<AsyncServerSocket>>
-  initTestAcceptorAndSocket(std::shared_ptr<ServerSocketConfig> config) {
-    auto acceptor = std::make_shared<TestAcceptor>(std::move(config));
+  initTestAcceptorAndSocket(ServerSocketConfig config) {
+    auto acceptor = std::make_shared<TestAcceptor>(config);
     auto socket = AsyncServerSocket::newSocket(&evb_);
     socket->addAcceptCallback(acceptor.get(), &evb_);
     acceptor->init(socket.get(), &evb_);
@@ -446,7 +446,8 @@ TEST_P(AcceptorTest, AcceptObserverStopAcceptorThenRemoveCallback) {
 }
 
 TEST_P(AcceptorTest, AcceptDrain) {
-  TestAcceptor acceptor(std::make_shared<ServerSocketConfig>());
+  ServerSocketConfig config;
+  TestAcceptor acceptor(config);
   acceptor.stop();
 }
 

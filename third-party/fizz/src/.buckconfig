@@ -8,9 +8,10 @@ none = none
 [cell_aliases]
 config = prelude
 ovr_config = prelude
-fbcode = none
-fbsource = none
+fbcode = shim
+fbsource = shim
 fbcode_macros = shim
+bazel_skylib = shim
 buck = none
 
 [parser]
@@ -18,3 +19,6 @@ target_platform_detector_spec = target:root//...->prelude//platforms:default
 
 [external_cells]
 prelude = bundled
+
+[oss_depends_on]
+folly = True

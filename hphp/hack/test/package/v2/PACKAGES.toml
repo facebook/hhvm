@@ -1,7 +1,7 @@
 [packages]
 
 [packages.pkg1]
-include_paths=["./subdir_FOR_TEST/*"]
+include_paths=["./package_access/*"]
 
 [packages.pkg2]
-include_paths=["subdir_FOR_TEST/include_paths_bad1.php--foo.php"]
+include_paths=["package_access/include_paths_bad1.php--foo.php"]

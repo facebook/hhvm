@@ -1,0 +1,8 @@
+error: Naming[2049] Unbound name: TFoo [1]
+
+include_paths_bad1.php--bar.php:3:13
+    1 | <?hh
+    2 | // package pkg1
+[1] 3 | type TBar = TFoo;
+
+1 error found.

@@ -729,13 +729,15 @@ void RocketServerConnection::close(folly::exception_wrapper ew) {
 
   socketDrainer_.activate();
 
-  if (!ew.with_exception<RocketException>([this](RocketException rex) {
-        sendError(StreamId{0}, std::move(rex));
-      })) {
-    auto rex = ew
-        ? RocketException(ErrorCode::CONNECTION_ERROR, ew.what())
-        : RocketException(ErrorCode::CONNECTION_CLOSE, "Closing connection");
-    sendError(StreamId{0}, std::move(rex));
+  if (!socket_->error()) {
+    if (!ew.with_exception<RocketException>([this](RocketException rex) {
+          sendError(StreamId{0}, std::move(rex));
+        })) {
+      auto rex = ew
+          ? RocketException(ErrorCode::CONNECTION_ERROR, ew.what())
+          : RocketException(ErrorCode::CONNECTION_CLOSE, "Closing connection");
+      sendError(StreamId{0}, std::move(rex));
+    }
   }
 
   state_ = ConnectionState::CLOSING;

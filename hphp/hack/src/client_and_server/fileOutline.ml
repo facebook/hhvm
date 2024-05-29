@@ -124,8 +124,7 @@ let summarize_class_const ~(source_text : string option) class_name cc =
     Option.map source_text ~f:(fun source_text ->
         let ty : string =
           match pos_of_hint cc.cc_type with
-          | Some p when not Pos.(equal none p) ->
-            Pos.get_text_from_pos ~content:source_text p ^ " "
+          | Some p -> Pos.get_text_from_pos ~content:source_text p ^ " "
           | _ -> ""
         in
         ty ^ Pos.get_text_from_pos ~content:source_text span)

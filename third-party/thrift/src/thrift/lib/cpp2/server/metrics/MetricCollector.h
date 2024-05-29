@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <variant>
+#include <memory>
 
-#include <thrift/lib/cpp2/server/Overload.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollectorBackend.h>
+#include <thrift/lib/cpp2/server/metrics/Scope.h>
 
 #pragma once
 
 namespace apache::thrift {
 
-class IMetricCollector {
+/* MetricCollector
+ *
+ * A wrapper around IMetricCollectorBackend that allows for easier and cleaner
+ * instrumentation of various Thrift Server components.
+ */
+class MetricCollector {
  public:
-  virtual ~IMetricCollector() = default;
+  MetricCollector() = default;
 
-  virtual void requestReceived() = 0;
+  explicit MetricCollector(std::shared_ptr<IMetricCollectorBackend> backend)
+      : backend_{std::move(backend)} {}
 
-  struct RequestRejectedScope {
-    // Reasons
-    struct Unknown {};
+  void setBackend(std::shared_ptr<IMetricCollectorBackend> backend);
 
-    struct ServerOverloaded {
-      const LoadShedder loadShedder;
-    };
+  // IMetricCollectorBackend interface wrapper methods
+  void requestReceived() const;
 
-    using Reason = std::variant<Unknown, ServerOverloaded>;
+  void requestRejected(const RequestRejectedScope&) const;
 
-    const Reason reason{Unknown{}};
-  };
-
-  virtual void requestRejected(const RequestRejectedScope&) = 0;
+ private:
+  std::shared_ptr<IMetricCollectorBackend> backend_{nullptr};
 };
 
 } // namespace apache::thrift

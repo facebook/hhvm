@@ -14,46 +14,27 @@
  * limitations under the License.
  */
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
+#include <thrift/lib/cpp2/server/metrics/Scope.h>
 #include <thrift/lib/cpp2/server/metrics/tests/Utils.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
-#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace apache::thrift;
-using MockMetricCollector = apache::thrift::testing::MockMetricCollector;
+using MockMetricCollectorBackend =
+    apache::thrift::testing::MockMetricCollectorBackend;
 
-TEST(MetricCollectorTest, testServerSetMetricCollector) {
-  ThriftServer server1;
+TEST(MetricCollectorTest, testBackendDelegation) {
+  MetricCollector metricCollector;
+  auto metricCollectorBackend = std::make_shared<MockMetricCollectorBackend>();
+  metricCollector.setBackend(metricCollectorBackend);
 
-  EXPECT_NO_THROW(
-      server1.setMetricCollector(std::make_unique<MockMetricCollector>()));
+  EXPECT_CALL(*metricCollectorBackend, requestReceived()).Times(1);
+  metricCollector.requestReceived();
 
-  // Test calling set more than once fails
-  EXPECT_THROW(
-      server1.setMetricCollector(std::make_unique<MockMetricCollector>()),
-      std::logic_error);
-
-  // Test calling set after the server starts fails
-  ScopedServerInterfaceThread ssit{std::make_shared<TestInterface>()};
-  EXPECT_DEATH(
-      ssit.getThriftServer().setMetricCollector(
-          std::make_unique<MockMetricCollector>()),
-      "Check failed: configMutable()");
-}
-
-TEST(MetricCollectorTest, testServerGetMetricCollector) {
-  auto collector = std::make_unique<MockMetricCollector>();
-  auto* collectorPtr = collector.get();
-
-  ThriftServer server;
-
-  // No metric collector set yet
-  EXPECT_EQ(server.getMetricCollector(), nullptr);
-
-  server.setMetricCollector(std::move(collector));
-
-  // Return previously set metric collector
-  EXPECT_EQ(server.getMetricCollector(), collectorPtr);
+  RequestRejectedScope scope;
+  EXPECT_CALL(*metricCollectorBackend, requestRejected(::testing::Ref(scope)))
+      .Times(1);
+  metricCollector.requestRejected(scope);
 }

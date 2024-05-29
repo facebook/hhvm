@@ -122,9 +122,7 @@ ThriftRequestCore::ThriftRequestCore(
   if (auto* observer = serverConfigs_.getObserver()) {
     observer->receivedRequest(&reqContext_.getMethodName());
   }
-  if (metricCollector_) {
-    metricCollector_->requestReceived();
-  }
+  metricCollector_.requestReceived();
 }
 
 bool ThriftRequestCore::includeInRecentRequestsCount(

@@ -920,12 +920,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
 
   // MetricCollector instance used for collecting server metrics
-  //
-  // NOTE: once metricCollector_ has been set, it cannot be set again and will
-  //       remain alive for (at least) the lifetime of *this. The
-  //       metricCollectorPtr_ serves as a cache for the raw IMetricCollector*.
-  folly::Synchronized<std::shared_ptr<IMetricCollector>> metricCollector_;
-  std::atomic<IMetricCollector*> metricCollectorPtr_{nullptr};
+  MetricCollector metricCollector_{};
 
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
@@ -1032,19 +1027,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     return observer_.copy();
   }
 
-  void setMetricCollector(std::shared_ptr<IMetricCollector> metricCollector) {
-    CHECK(configMutable());
+  MetricCollector& getMetricCollector() override { return metricCollector_; }
 
-    auto locked = metricCollector_.wlock();
-    if (*locked) {
-      throw std::logic_error("Server already has a MetricCollector installed");
-    }
-    metricCollectorPtr_.store(metricCollector.get());
-    *locked = std::move(metricCollector);
-  }
-
-  IMetricCollector* getMetricCollector() const override {
-    return metricCollectorPtr_.load(std::memory_order_relaxed);
+  const MetricCollector& getMetricCollector() const override {
+    return metricCollector_;
   }
 
   AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {

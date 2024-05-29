@@ -574,7 +574,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
  protected:
   server::ServerConfigs& serverConfigs_;
   const RpcKind kind_;
-  IMetricCollector* const metricCollector_{nullptr};
+  const MetricCollector& metricCollector_;
 
  private:
   bool checksumRequested_{false};

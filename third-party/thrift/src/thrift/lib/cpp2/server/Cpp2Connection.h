@@ -298,7 +298,7 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   bool connectionAdded_{false};
 
  private:
-  IMetricCollector* const metricCollector_;
+  const MetricCollector& metricCollector_;
 };
 
 } // namespace thrift

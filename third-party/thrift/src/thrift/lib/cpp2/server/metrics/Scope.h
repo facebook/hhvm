@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GMock.h>
+#include <cstdint>
+#include <variant>
 
-#include <thrift/lib/cpp2/server/metrics/MetricCollectorBackend.h>
+#include <thrift/lib/cpp2/server/Overload.h>
 
 #pragma once
 
-namespace apache {
-namespace thrift {
-namespace testing {
+namespace apache::thrift {
 
-class MockMetricCollectorBackend : public IMetricCollectorBackend {
- public:
-  MOCK_METHOD(void, requestReceived, (), (override));
-  MOCK_METHOD(void, requestRejected, (const RequestRejectedScope&), (override));
+// Scope parameter for MetricCollector::requestRejected
+struct RequestRejectedScope {
+  // Reasons
+  struct Unknown {};
+
+  struct ServerOverloaded {
+    const LoadShedder loadShedder;
+  };
+
+  using Reason = std::variant<Unknown, ServerOverloaded>;
+
+  const Reason reason{Unknown{}};
 };
 
-} // namespace testing
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -40,7 +40,7 @@ namespace thrift {
 
 class AsyncProcessor;
 class Cpp2ConnContext;
-class IMetricCollector;
+class MetricCollector;
 class RequestRpcMetadata;
 class ThriftRequestCore;
 using ThriftRequestCoreUniquePtr =
@@ -128,7 +128,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 
   folly::once_flag setupLoggingFlag_;
 
-  IMetricCollector* const metricCollector_;
+  const MetricCollector& metricCollector_;
 
   template <class F>
   void handleRequestCommon(

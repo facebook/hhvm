@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GMock.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 
-#include <thrift/lib/cpp2/server/metrics/MetricCollectorBackend.h>
+namespace apache::thrift {
 
-#pragma once
+void MetricCollector::setBackend(
+    std::shared_ptr<IMetricCollectorBackend> backend) {
+  backend_ = std::move(backend);
+}
 
-namespace apache {
-namespace thrift {
-namespace testing {
+void MetricCollector::requestReceived() const {
+  if (backend_) {
+    backend_->requestReceived();
+  }
+}
 
-class MockMetricCollectorBackend : public IMetricCollectorBackend {
- public:
-  MOCK_METHOD(void, requestReceived, (), (override));
-  MOCK_METHOD(void, requestRejected, (const RequestRejectedScope&), (override));
-};
+void MetricCollector::requestRejected(const RequestRejectedScope& scope) const {
+  if (backend_) {
+    backend_->requestRejected(scope);
+  }
+}
 
-} // namespace testing
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

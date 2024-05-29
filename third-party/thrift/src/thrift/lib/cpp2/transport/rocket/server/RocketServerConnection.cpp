@@ -65,8 +65,7 @@ RocketServerConnection::RocketServerConnection(
     std::unique_ptr<RocketServerHandler> frameHandler,
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
-    const Config& cfg,
-    IMetricCollector* metricCollector)
+    const Config& cfg)
     : evb_(*socket->getEventBase()),
       socket_(std::move(socket)),
       rawSocket_(
@@ -87,7 +86,6 @@ RocketServerConnection::RocketServerConnection(
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
       egressMemoryTracker_(egressMemoryTracker),
-      metricCollector_{metricCollector},
       observerContainer_(this) {
   CHECK(socket_);
   CHECK(frameHandler_);

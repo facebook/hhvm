@@ -48,7 +48,7 @@ namespace thrift {
 class Cpp2Connection;
 class ThriftServer;
 class ThriftQuicServer;
-class IMetricCollector;
+class MetricCollector;
 
 /**
  * Cpp2Worker drives the actual I/O for ThriftServer connections.
@@ -276,7 +276,7 @@ class Cpp2Worker : public IOWorkerContext,
         wangle::PeekingAcceptorHandshakeHelper::PeekCallback(kPeekCount),
         server_(server),
         activeRequests_(0),
-        metricCollector_{server ? server->getMetricCollector() : nullptr} {
+        metricCollector_{server ? &server->getMetricCollector() : nullptr} {
     if (server) {
       // Leave enough headroom to close connections ungracefully before the
       // worker join timeout expires.
@@ -411,7 +411,7 @@ class Cpp2Worker : public IOWorkerContext,
   std::unique_ptr<MemoryTracker> ingressMemoryTracker_;
   std::unique_ptr<MemoryTracker> egressMemoryTracker_;
   std::unique_ptr<folly::WorkerProvider> workerProvider_;
-  IMetricCollector* const metricCollector_;
+  const MetricCollector* const metricCollector_;
 
   void initRequestsRegistry();
 

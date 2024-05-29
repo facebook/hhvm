@@ -71,7 +71,7 @@ class RocketRoutingHandler : public TransportRoutingHandler {
  private:
   std::atomic<bool> listening_{true};
   std::vector<std::unique_ptr<rocket::SetupFrameHandler>> setupFrameHandlers_;
-  IMetricCollector* const metricCollector_;
+  const MetricCollector& metricCollector_;
 };
 } // namespace thrift
 } // namespace apache

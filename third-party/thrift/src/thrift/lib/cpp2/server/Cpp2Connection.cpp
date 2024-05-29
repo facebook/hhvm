@@ -194,9 +194,7 @@ void Cpp2Connection::stop() {
       if (auto* observer = worker_->getServer()->getObserver()) {
         observer->taskKilled();
       }
-      if (metricCollector_) {
-        metricCollector_->requestRejected({});
-      }
+      metricCollector_.requestRejected({});
     }
   }
 
@@ -302,9 +300,7 @@ void Cpp2Connection::killRequest(
   if (auto* observer = server->getObserver()) {
     observer->taskKilled();
   }
-  if (metricCollector_) {
-    metricCollector_->requestRejected({});
-  }
+  metricCollector_.requestRejected({});
 
   // Nothing to do for Thrift oneway request.
   if (req->isOneway()) {
@@ -325,11 +321,8 @@ void Cpp2Connection::killRequestServerOverloaded(
   if (auto* observer = server->getObserver()) {
     observer->serverOverloaded();
   }
-  if (metricCollector_) {
-    metricCollector_->requestRejected(
-        {IMetricCollector::RequestRejectedScope::ServerOverloaded{
-            overloadResult.loadShedder}});
-  }
+  metricCollector_.requestRejected(
+      {RequestRejectedScope::ServerOverloaded{overloadResult.loadShedder}});
 
   // Nothing to do for Thrift oneway request.
   if (req->isOneway()) {
@@ -503,9 +496,7 @@ void Cpp2Connection::requestReceived(
   if (observer) {
     observer->receivedRequest(&methodName);
   }
-  if (metricCollector_) {
-    metricCollector_->requestReceived();
-  }
+  metricCollector_.requestReceived();
 
   auto injectedFailure = server->maybeInjectFailure();
   switch (injectedFailure) {

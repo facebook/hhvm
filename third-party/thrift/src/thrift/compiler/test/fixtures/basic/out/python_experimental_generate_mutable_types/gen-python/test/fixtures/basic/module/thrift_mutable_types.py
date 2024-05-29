@@ -283,6 +283,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -293,6 +294,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -303,6 +305,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -313,6 +316,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -378,6 +382,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 

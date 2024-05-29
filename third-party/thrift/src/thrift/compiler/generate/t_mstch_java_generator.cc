@@ -1089,14 +1089,9 @@ class mstch_java_enum : public mstch_enum {
             {"enum:javaCapitalName", &mstch_java_enum::java_capital_name},
             {"enum:skipEnumNameMap?",
              &mstch_java_enum::java_skip_enum_name_map},
-        });
-    register_volatile_methods(
-        this,
-        {
-            {"enum:ordinal++", &mstch_java_enum::get_ordinal},
+            {"enum:numValues", &mstch_java_enum::num_values},
         });
   }
-  int32_t ordinal = 0;
   mstch::node java_package() {
     return get_namespace_or_default(*enum_->program());
   }
@@ -1106,7 +1101,9 @@ class mstch_java_enum : public mstch_enum {
   mstch::node java_skip_enum_name_map() {
     return enum_->has_annotation("java.swift.skip_enum_name_map");
   }
-  mstch::node get_ordinal() { return ordinal++; }
+  mstch::node num_values() {
+    return static_cast<int>(enum_->get_enum_values().size());
+  }
 };
 
 class mstch_java_enum_value : public mstch_enum_value {
@@ -1119,11 +1116,13 @@ class mstch_java_enum_value : public mstch_enum_value {
         {
             {"enum_value:javaConstantName",
              &mstch_java_enum_value::java_constant_name},
+            {"enum_value:ordinal", &mstch_java_enum_value::ordinal},
         });
   }
   mstch::node java_constant_name() {
     return java::mangle_java_constant_name(enum_value_->get_name());
   }
+  mstch::node ordinal() { return pos_.index; }
 };
 
 class mstch_java_const : public mstch_const {

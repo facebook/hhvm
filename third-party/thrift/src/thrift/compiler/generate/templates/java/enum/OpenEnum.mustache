@@ -42,9 +42,9 @@ public class {{enum:javaCapitalName}} extends ThriftEnum<{{enum:javaCapitalName}
 
   private static void init() {
 {{#enum:values}}
-    hm.put({{enum_value:value}}, new Value({{enum:ordinal++}}, "{{enum_value:javaConstantName}}", {{enum_value:javaConstantName}}));
+    hm.put({{enum_value:value}}, new Value({{enum_value:ordinal}}, "{{enum_value:javaConstantName}}", {{enum_value:javaConstantName}}));
 {{/enum:values}}
-    hm.put(UNRECOGNIZED_VALUE, new Value({{enum:ordinal++}}, "UNRECOGNIZED", null));
+    hm.put(UNRECOGNIZED_VALUE, new Value({{enum:numValues}}, "UNRECOGNIZED", null));
   }
 
   static {

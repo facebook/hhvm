@@ -27,7 +27,7 @@ import (
 func TestEnsureTransportsAreRich(t *testing.T) {
 	buf := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	http, err := newHTTPPostClientWithOptions("http://127.0.0.1", httpClientOptions{})
+	http, err := NewHTTPPostClient("http://127.0.0.1")
 	if err != nil {
 		t.Fatal(err)
 	}

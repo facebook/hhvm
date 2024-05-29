@@ -252,7 +252,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(Transport) Format) {
 		func() Transport { return NewMemoryBufferLen(1024) },
 		func() Transport { return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH) },
 		func() Transport {
-			http, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpClientOptions{})
+			http, err := NewHTTPPostClient("http://" + l.Addr().String())
 			if err != nil {
 				panic(err)
 			}

@@ -24,7 +24,7 @@ import (
 	"strconv"
 )
 
-// Default to using the shared http client. Library users are
+// DefaultHTTPClient is the shared http client. Library users are
 // free to change this global client or specify one through
 // httpClientOptions.
 var DefaultHTTPClient *http.Client = http.DefaultClient
@@ -40,46 +40,22 @@ type HTTPClient struct {
 	nsecReadTimeout    int64
 }
 
-type httpClientOptions struct {
-	// If nil, DefaultHTTPClient is used
-	Client *http.Client
-}
-
-func newHTTPClientWithOptions(urlstr string, options httpClientOptions) (Transport, error) {
-	parsedURL, err := url.Parse(urlstr)
-	if err != nil {
-		return nil, err
-	}
-	response, err := http.Get(urlstr)
-	if err != nil {
-		return nil, err
-	}
-	client := options.Client
-	if client == nil {
-		client = DefaultHTTPClient
-	}
-	return &HTTPClient{client: client, response: response, url: parsedURL}, nil
-}
-
-func NewHTTPClient(urlstr string) (Transport, error) {
-	return newHTTPClientWithOptions(urlstr, httpClientOptions{})
-}
-
-func newHTTPPostClientWithOptions(urlstr string, options httpClientOptions) (Transport, error) {
+func newHTTPPostClientWithOptions(urlstr string, httpTransport http.RoundTripper) (Transport, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
 	}
 	buf := make([]byte, 0, 1024)
-	client := options.Client
-	if client == nil {
-		client = DefaultHTTPClient
+	client := DefaultHTTPClient
+	if httpTransport != nil {
+		client = &http.Client{Transport: httpTransport}
 	}
 	return &HTTPClient{client: client, url: parsedURL, requestBuffer: bytes.NewBuffer(buf), header: http.Header{}}, nil
 }
 
+// NewHTTPPostClient creates a new HTTP POST client.
 func NewHTTPPostClient(urlstr string) (Transport, error) {
-	return newHTTPPostClientWithOptions(urlstr, httpClientOptions{})
+	return newHTTPPostClientWithOptions(urlstr, nil)
 }
 
 // Set the HTTP Header for this specific Thrift Transport
@@ -102,7 +78,7 @@ func (p *HTTPClient) GetHeader(key string) string {
 	return p.header.Get(key)
 }
 
-// Deletes the HTTP Header given a Header Key for this specific Thrift Transport
+// DelHeader deletes the HTTP Header given a Header Key for this specific Thrift Transport
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //

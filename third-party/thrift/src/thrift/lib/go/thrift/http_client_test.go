@@ -55,11 +55,7 @@ func TestHTTPCustomClient(t *testing.T) {
 
 	httpTransport := &customHTTPTransport{}
 
-	trans, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpClientOptions{
-		Client: &http.Client{
-			Transport: httpTransport,
-		},
-	})
+	trans, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpTransport)
 	if err != nil {
 		l.Close()
 		t.Fatalf("Unable to connect to %s: %s", l.Addr().String(), err)

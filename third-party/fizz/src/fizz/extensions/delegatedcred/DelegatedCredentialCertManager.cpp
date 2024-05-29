@@ -30,7 +30,7 @@ CertManager::CertMatch DelegatedCredentialCertManager::getCert(
       return dcRes;
     }
   }
-  return mainMgr_.getCert(
+  return CertManager::getCert(
       sni, supportedSigSchemes, peerSigSchemes, peerExtensions);
 }
 
@@ -38,14 +38,7 @@ CertManager::CertMatch DelegatedCredentialCertManager::getCert(
 std::shared_ptr<SelfCert> DelegatedCredentialCertManager::getCert(
     const std::string& identity) const {
   auto dcRes = dcMgr_.getCert(identity);
-  return dcRes ? dcRes : mainMgr_.getCert(identity);
-}
-
-void DelegatedCredentialCertManager::addCert(
-    std::shared_ptr<SelfCert> cert,
-    bool defaultCert) {
-  VLOG(8) << "Adding undelegated cert";
-  mainMgr_.addCert(std::move(cert), defaultCert);
+  return dcRes ? dcRes : CertManager::getCert(identity);
 }
 
 void DelegatedCredentialCertManager::addDelegatedCredential(

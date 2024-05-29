@@ -27,15 +27,11 @@ class DelegatedCredentialCertManager : public server::CertManager {
 
   std::shared_ptr<SelfCert> getCert(const std::string& identity) const override;
 
-  void addCert(std::shared_ptr<SelfCert> cert, bool defaultCert = false)
-      override;
-
   void addDelegatedCredential(
       std::shared_ptr<SelfDelegatedCredential> cred,
       bool defaultCert = false);
 
  protected:
-  server::CertManager mainMgr_;
   server::CertManager dcMgr_;
 };
 } // namespace extensions

@@ -48,7 +48,9 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
+  if (m_timerActive.exchange(false, std::memory_order_acq_rel)) {
+    m_reqInjectionData->onTimeout(this);
+  }
 }
 
 RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
@@ -81,7 +83,7 @@ void RequestTimer::setTimeout(int seconds) {
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
     if (timer_create(m_clockType, &sev, &m_timerId)) {
-      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+      raise_error("Failed to create timer: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;
   }
@@ -96,22 +98,30 @@ void RequestTimer::setTimeout(int seconds) {
    */
   itimerspec ts = {};
   itimerspec old;
-  timer_settime(m_timerId, 0, &ts, &old);
+  if (timer_settime(m_timerId, 0, &ts, &old)) {
+    raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+  }
   if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
     // the timer has gone off...
     if (m_timerActive.load(std::memory_order_acquire)) {
-      // but m_timerActive is still set, so we haven't processed
-      // the signal yet.
-      // spin until its done.
-      while (m_timerActive.load(std::memory_order_acquire)) {
-        std::this_thread::yield();
+      // but m_timerActive is still set, so we haven't processed the signal yet.
+      std::this_thread::yield();
+      if (m_timerActive.load(std::memory_order_acquire)) {
+        // We are unlikely to reach here, but when we do, either the system is
+        // too overloaded to deliver the signal on time, or the signal has been
+        // lost (e.g., maybe when multiple signals arrive simultaneously). Wait
+        // a short while and proceed. Avoid spinning indefinitely.
+        /* sleep override */ usleep(10);
       }
     }
   }
   if (m_timeoutSeconds) {
     m_timerActive.store(true, std::memory_order_release);
     ts.it_value.tv_sec = m_timeoutSeconds;
-    timer_settime(m_timerId, 0, &ts, nullptr);
+    if (timer_settime(m_timerId, 0, &ts, nullptr)) {
+      m_timerActive.store(false, std::memory_order_release);
+      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+    }
   } else {
     m_timerActive.store(false, std::memory_order_release);
   }
@@ -432,13 +442,10 @@ void RequestInjectionData::onSessionInit() {
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
     triggerTimeout(TimeoutTime);
-    m_timer.m_timerActive.store(false, std::memory_order_release);
   } else if (timer == &m_cpuTimer) {
     triggerTimeout(TimeoutCPUTime);
-    m_cpuTimer.m_timerActive.store(false, std::memory_order_release);
   } else if (timer == &m_userTimeoutTimer) {
     triggerTimeout(TimeoutSoft);
-    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_release);
   } else {
     always_assert(false && "Unknown timer fired");
   }
@@ -476,7 +483,7 @@ void RequestInjectionData::invokeUserTimeoutCallback(c_WaitableWaitHandle* wh) {
 
 void RequestInjectionData::triggerTimeout(TimeoutKindFlag kind) {
   // Add the flags. The surprise handling queries those in a certain order
-  m_timeoutFlags.fetch_or(kind);
+  m_timeoutFlags.fetch_or(kind, std::memory_order_acq_rel);
   setFlag(TimedOutFlag);
 }
 
@@ -557,8 +564,8 @@ void RequestInjectionData::resetUserTimeoutTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
-  m_timeoutFlags.fetch_and(TimeoutNone);
+  m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask, std::memory_order_acq_rel);
+  m_timeoutFlags.fetch_and(TimeoutNone, std::memory_order_acq_rel);
   m_hostOutOfMemory.store(false, std::memory_order_release);
   m_OOMAbort = false;
   m_coverage = RuntimeOption::RecordCodeCoverage;
@@ -591,14 +598,14 @@ void RequestInjectionData::updateJit() {
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
   if (m_sflagsAndStkPtr != nullptr) {
-    m_sflagsAndStkPtr->fetch_and(~flag);
+    m_sflagsAndStkPtr->fetch_and(~flag, std::memory_order_acq_rel);
   }
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
   if (m_sflagsAndStkPtr != nullptr) {
-    m_sflagsAndStkPtr->fetch_or(flag);
+    m_sflagsAndStkPtr->fetch_or(flag, std::memory_order_acq_rel);
   }
 }
 

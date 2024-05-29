@@ -67,7 +67,7 @@ private:
   bool m_hasTimer{false};
 
   /* Set true when we activate a timer, cleared when the signal handler runs. */
-  std::atomic<bool> m_timerActive{false};
+  std::atomic_bool m_timerActive{false};
 };
 
 //////////////////////////////////////////////////////////////////////

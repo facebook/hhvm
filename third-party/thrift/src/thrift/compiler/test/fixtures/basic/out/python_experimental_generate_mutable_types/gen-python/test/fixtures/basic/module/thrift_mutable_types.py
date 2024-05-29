@@ -85,6 +85,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -95,6 +96,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -105,6 +107,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -115,6 +118,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -125,6 +129,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            1, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             6,  # id
@@ -135,6 +140,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            1, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             7,  # id
@@ -145,6 +151,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            1, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             8,  # id
@@ -155,6 +162,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             9,  # id
@@ -165,6 +173,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -197,6 +206,7 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -207,6 +217,7 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -217,6 +228,7 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -333,6 +345,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 

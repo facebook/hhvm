@@ -383,6 +383,92 @@ mstch::node mstch_field::type() {
       field_->get_type(), context_, pos_);
 }
 
+mstch::node mstch_field::idl_type() {
+  // Copied from 'thrift/lib/cpp2/type/BaseType.h' for now,
+  // DO_BEFORE(alperyoney,20240701): it should be moved to a common place where
+  // both runtime and compiler can include.
+  enum class BaseType {
+    Void = 0,
+
+    // Integer types.
+    Bool = 1,
+    Byte = 2,
+    I16 = 3,
+    I32 = 4,
+    I64 = 5,
+
+    // Floating point types.
+    Float = 6,
+    Double = 7,
+
+    // String types.
+    String = 8,
+    Binary = 9,
+
+    // Enum type class.
+    Enum = 10,
+
+    // Structured type classes.
+    Struct = 11,
+    Union = 12,
+    Exception = 13,
+
+    // Container type classes.
+    List = 14,
+    Set = 15,
+    Map = 16
+  };
+
+  // Mapping from compiler implementation details `type_t::type` to a public
+  // enum `BaseType`
+  auto idl_type = std::invoke([&]() -> std::optional<BaseType> {
+    switch (field_->get_type()->get_true_type()->get_type_value()) {
+      case t_type::type::t_void:
+        return BaseType::Void;
+      case t_type::type::t_bool:
+        return BaseType::Bool;
+      case t_type::type::t_byte:
+        return BaseType::Byte;
+      case t_type::type::t_i16:
+        return BaseType::I16;
+      case t_type::type::t_i32:
+        return BaseType::I32;
+      case t_type::type::t_i64:
+        return BaseType::I64;
+      case t_type::type::t_float:
+        return BaseType::Float;
+      case t_type::type::t_double:
+        return BaseType::Double;
+      case t_type::type::t_string:
+        return BaseType::String;
+      case t_type::type::t_binary:
+        return BaseType::Binary;
+      case t_type::type::t_list:
+        return BaseType::List;
+      case t_type::type::t_set:
+        return BaseType::Set;
+      case t_type::type::t_map:
+        return BaseType::Map;
+      case t_type::type::t_enum:
+        return BaseType::Enum;
+      case t_type::type::t_structured:
+        return BaseType::Struct;
+      case t_type::type::t_service:
+      case t_type::type::t_stream:
+      case t_type::type::t_program:
+        return std::nullopt;
+    }
+  });
+
+  if (idl_type == std::nullopt) {
+    throw std::runtime_error(fmt::format(
+        "Mapping Error: Failed to map value '{}' from 't_type::type' to 'BaseType'",
+        field_->get_type()->get_true_type()->get_type_value()));
+  }
+
+  return static_cast<std::underlying_type_t<BaseType>>(*idl_type);
+}
+
 mstch::node mstch_struct::fields() {
   return make_mstch_fields(struct_->get_members());
 }

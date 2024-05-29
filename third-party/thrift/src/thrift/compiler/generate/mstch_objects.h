@@ -1036,6 +1036,7 @@ class mstch_field : public mstch_base {
             {"field:key", &mstch_field::key},
             {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
+            {"field:idl_type", &mstch_field::idl_type},
             {"field:index", &mstch_field::index},
             {"field:required?", &mstch_field::is_required},
             {"field:terse?", &mstch_field::is_terse},
@@ -1057,6 +1058,15 @@ class mstch_field : public mstch_base {
   mstch::node key() { return std::to_string(field_->get_key()); }
   mstch::node value();
   mstch::node type();
+  /**
+   * Integer corresponding to the Thrift IDL type of the field, as defined by
+   * `enum BaseType`.
+   *
+   * This corresponds to the "true" IDL type (i.e., after resolving aliases) and
+   * does not include type parameters (such as map key and values, container
+   * element types, etc.).
+   */
+  mstch::node idl_type();
   mstch::node index() { return std::to_string(pos_.index); }
   mstch::node is_terse() {
     return field_->qualifier() == t_field_qualifier::terse;

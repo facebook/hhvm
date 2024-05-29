@@ -12,13 +12,19 @@ module Lint = Lints_core
 
 type result = Pos.absolute Lint.t list
 
-let output_json ?(pretty = false) oc el =
+let output_json ?(from_test = false) ?(pretty = false) oc el =
   let errors_json = List.map el ~f:Lint.to_json in
+  let version =
+    if from_test then
+      ""
+    else
+      Hh_version.version
+  in
   let res =
     Hh_json.JSON_Object
       [
         ("errors", Hh_json.JSON_Array errors_json);
-        ("version", Hh_json.JSON_String Hh_version.version);
+        ("version", Hh_json.JSON_String version);
       ]
   in
   Out_channel.output_string oc (Hh_json.json_to_string ~pretty res);

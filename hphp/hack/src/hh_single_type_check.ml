@@ -1865,7 +1865,7 @@ let handle_mode
         json_errors
     in
     let json_errors = List.map ~f:Lints_core.to_absolute json_errors in
-    ServerLintTypes.output_json ~pretty:true stdout json_errors;
+    ServerLintTypes.output_json ~from_test:true ~pretty:true stdout json_errors;
     exit 2
   | Dump_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn _fileinfo ->

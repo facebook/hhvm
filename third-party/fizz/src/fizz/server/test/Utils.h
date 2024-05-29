@@ -44,7 +44,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
         std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
             std::move(certData.key), std::move(certChain));
     auto certManager = std::make_unique<CertManager>();
-    certManager->addCert(std::move(fizzCert), true);
+    certManager->addCertAndSetDefault(std::move(fizzCert));
     ctx_ = std::make_shared<FizzServerContext>();
     ctx_->setCertManager(std::move(certManager));
 
@@ -102,7 +102,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
 
   void setCertificate(std::unique_ptr<SelfCert> cert) {
     auto certManager = std::make_unique<CertManager>();
-    certManager->addCert(std::move(cert), true);
+    certManager->addCertAndSetDefault(std::move(cert));
     ctx_->setCertManager(std::move(certManager));
   }
 

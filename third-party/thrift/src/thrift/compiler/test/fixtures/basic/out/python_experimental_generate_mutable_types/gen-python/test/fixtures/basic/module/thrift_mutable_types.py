@@ -260,6 +260,68 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return immutable_types.MyDataItem(**dataclasses.asdict(self))
 
 
+class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myEnum",  # name
+            "myEnum", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myStruct",  # name
+            "myStruct", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myDataItem",  # name
+            "myDataItem", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyDataItem),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "floatSet",  # name
+            "floatSet", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyUnion"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/MyUnion"
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.MyUnion(**dataclasses.asdict(self))
+
+
 class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -292,6 +354,38 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         return immutable_types.ReservedKeyword(**dataclasses.asdict(self))
 
 
+class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "reserved_field",  # name
+            "reserved_field", # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.UnionToBeRenamed"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/UnionToBeRenamed"
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.UnionToBeRenamed(**dataclasses.asdict(self))
+
+
 
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem
@@ -300,6 +394,8 @@ _fbthrift_all_structs = [
     MyStruct,
     Containers,
     MyDataItem,
+    MyUnion,
     ReservedKeyword,
+    UnionToBeRenamed,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)

@@ -33,10 +33,12 @@ import {{module_path}}
 {{> enums/thrift_enums }}
 
 {{!
-For now, process all structs that are neither exceptions nor unions.
-}}{{#program:structs}}{{^struct:exception?}}{{^struct:union?}}
+Iterate over structs and unions (but not exceptions).
+}}{{#program:structs}}{{^struct:exception?}}
 
-class {{> structs/unadapted_name}}(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+class {{> structs/unadapted_name}}(metaclass={{!
+        }}{{#struct:union?}}_fbthrift_python_mutable_types.MutableUnionMeta{{/struct:union?}}{{!
+        }}{{^struct:union?}}_fbthrift_python_mutable_types.MutableStructMeta{{/struct:union?}}):
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}
         _fbthrift_python_types.FieldInfo(
@@ -74,15 +76,13 @@ class {{> structs/unadapted_name}}(metaclass=_fbthrift_python_mutable_types.Muta
 {{#struct:has_adapter?}}
 raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
 {{/struct:has_adapter?}}{{!
-}}{{/struct:union?}}{{/struct:exception?}}{{/program:structs}}
+}}{{/struct:exception?}}{{/program:structs}}
 
 {{> common/typedef }}
 
 _fbthrift_all_structs = [
     {{#program:structs}}
-    {{^struct:union?}}
     {{> structs/unadapted_name}},
-    {{/struct:union?}}
     {{/program:structs}}
 ]
 {{#program:structs?}}

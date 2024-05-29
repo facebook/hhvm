@@ -511,3 +511,15 @@ class MutableStructMeta(type):
         cdef MutableStructInfo mutable_struct_info = cls._fbthrift_mutable_struct_info
         for name in mutable_struct_info.name_to_index.keys():
             yield name, None
+
+
+class MutableUnionMeta(type):
+    """Metaclass for all generated (mutable) thrift-python Union types."""
+
+    def __new__(cls, cls_name, bases, dct):
+        """
+        Returns a new Thrift Union class with the given name and members.
+        """
+        raise NotImplementedError(
+            "Mutable thrift-python Unions are not implemented yet."
+        )

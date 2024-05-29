@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import enum
+import importlib
 import unittest
 
 from thrift.test.thrift_python.union_test.thrift_types import (
@@ -204,3 +205,15 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             TestUnionImmutable(int_field=41),
             TestUnionImmutable(int_field=42),
         )
+
+
+class ThriftPython_MutableUnion_Test(unittest.TestCase):
+    def setUp(self) -> None:
+        # Disable maximum printed diff length.
+        self.maxDiff = None
+
+    def test_import_fails_not_implemented_yet(self) -> None:
+        with self.assertRaises(NotImplementedError):
+            importlib.import_module(
+                "thrift.test.thrift_python.union_test.thrift_mutable_types"
+            )

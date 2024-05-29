@@ -7,21 +7,24 @@
  *)
 open Hh_prelude
 
-(** These severity levels are based on those provided by Arcanist. "Advice"
- * means notify the user of the lint without requiring confirmation if the lint
- * is benign; "Warning" will raise a confirmation prompt if the lint applies to
- * a line that was changed in the given diff; and "Error" will always raise a
- * confirmation prompt, regardless of where the lint occurs in the file. *)
+(** These severity levels are based on those provided by Arcanist:
+  - Error: when it fires, it will require confirmation
+  - Warning: when it fires, it shows up visibly before landing
+  - Advice: Similar to warning, but implies lesser severity
+  - Disabled: Hidden from most UI, but it is useful for telemetry
+ *)
 type severity =
   | Lint_error
   | Lint_warning
   | Lint_advice
+  | Lint_disabled
 [@@deriving show]
 
 let string_of_severity = function
   | Lint_error -> "error"
   | Lint_warning -> "warning"
   | Lint_advice -> "advice"
+  | Lint_disabled -> "disabled"
 
 type 'pos t = {
   code: int;
@@ -88,7 +91,9 @@ let to_contextual_string lint =
     match lint.severity with
     | Lint_error -> Tty.Red
     | Lint_warning -> Tty.Yellow
-    | Lint_advice -> Tty.Default
+    | Lint_advice
+    | Lint_disabled ->
+      Tty.Default
   in
   User_error.make_absolute
     User_error.Warning

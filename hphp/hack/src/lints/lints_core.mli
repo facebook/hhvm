@@ -10,6 +10,7 @@ type severity =
   | Lint_error
   | Lint_warning
   | Lint_advice
+  | Lint_disabled
 
 type 'pos t = {
   code: int;

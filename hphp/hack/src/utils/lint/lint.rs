@@ -18,11 +18,11 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-/// These severity levels are based on those provided by Arcanist. "Advice"
-/// means notify the user of the lint without requiring confirmation if the lint
-/// is benign; "Warning" will raise a confirmation prompt if the lint applies to
-/// a line that was changed in the given diff; and "Error" will always raise a
-/// confirmation prompt, regardless of where the lint occurs in the file.
+/// These severity levels are based on those provided by Arcanist:
+/// - Error: when it fires, it will require confirmation
+/// - Warning: when it fires, it shows up visibly before landing
+/// - Advice: Similar to warning, but implies lesser severity
+/// - Disabled: Hidden from most UI, but it is useful for telemetry
 #[derive(
     Clone,
     Copy,
@@ -48,6 +48,8 @@ pub enum Severity {
     LintWarning,
     #[rust_to_ocaml(name = "Lint_advice")]
     LintAdvice,
+    #[rust_to_ocaml(name = "Lint_disabled")]
+    LintDisabled,
 }
 impl TrivialDrop for Severity {}
 arena_deserializer::impl_deserialize_in_arena!(Severity);

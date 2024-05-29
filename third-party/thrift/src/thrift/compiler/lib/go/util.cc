@@ -310,7 +310,19 @@ std::string get_go_package_base_name(
     const t_program* program, std::string name_override) {
   auto go_package = get_go_package_name(program, name_override);
   std::vector<std::string> parts;
-  boost::split(parts, go_package, boost::is_any_of("."));
+  // The go package name can be seperated by slashes or dots.
+  // Slashes can only be used if it was quoted, for example `namespace go
+  // 'foo/bar'`. These quotes are already removed, when we get to this function.
+  // Either way the go package name is always the last part.
+  // e.g. 'foo/bar' -> bar
+  //      foo -> foo
+  //      foo.bar -> bar
+  //      foo.bar.baz -> baz
+  if (go_package.find('/') != std::string::npos) {
+    boost::split(parts, go_package, boost::is_any_of("/"));
+  } else {
+    boost::split(parts, go_package, boost::is_any_of("."));
+  }
   auto base_name = go_package;
   if (parts.size() > 0) {
     base_name = parts.back();

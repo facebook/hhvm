@@ -1089,6 +1089,10 @@ class mstch_java_enum : public mstch_enum {
             {"enum:javaCapitalName", &mstch_java_enum::java_capital_name},
             {"enum:skipEnumNameMap?",
              &mstch_java_enum::java_skip_enum_name_map},
+        });
+    register_volatile_methods(
+        this,
+        {
             {"enum:ordinal++", &mstch_java_enum::get_ordinal},
         });
   }

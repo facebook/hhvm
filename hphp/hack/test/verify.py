@@ -145,7 +145,7 @@ def check_output(
     default_expect_regex: Optional[str],
     ignore_error_text: bool,
     only_compare_error_lines: bool,
-    check_regex_match: bool,
+    normalize_paths: bool,
     verify_pessimisation: VerifyPessimisationOptions,
     check_expected_included_in_actual: bool,
 ) -> Result:
@@ -170,7 +170,7 @@ def check_output(
             case,
             default_expect_regex,
             ignore_error_text,
-            check_regex_match,
+            normalize_paths,
             verify_pessimisation,
             check_expected_included_in_actual=check_expected_included_in_actual,
             out=output,
@@ -194,7 +194,7 @@ def run_batch_tests(
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     out_extension: str,
-    check_regex_match: bool,
+    normalize_paths: bool,
     verify_pessimisation: VerifyPessimisationOptions,
     check_expected_included_in_actual: bool,
     only_compare_error_lines: bool = False,
@@ -266,7 +266,7 @@ def run_batch_tests(
                 default_expect_regex=default_expect_regex,
                 ignore_error_text=ignore_error_text,
                 only_compare_error_lines=only_compare_error_lines,
-                check_regex_match=check_regex_match,
+                normalize_paths=normalize_paths,
                 verify_pessimisation=verify_pessimisation,
                 check_expected_included_in_actual=check_expected_included_in_actual,
             )
@@ -300,7 +300,7 @@ def run_test_program(
     ignore_error_text: bool,
     no_stderr: bool,
     force_color: bool,
-    check_regex_match: bool,
+    normalize_paths: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     verify_pessimisation: VerifyPessimisationOptions,
@@ -351,7 +351,7 @@ def run_test_program(
             test_case,
             default_expect_regex,
             ignore_error_text,
-            check_regex_match,
+            normalize_paths,
             verify_pessimisation,
             check_expected_included_in_actual=check_expected_included_in_actual,
             out=output,
@@ -376,6 +376,16 @@ def filter_ocaml_stacktrace(text: str) -> str:
         else:
             out.append(x)
     return "\n".join(out)
+
+
+def filter_cwd(text: str) -> str:
+    """take a string and remove all instances of the current cwd"""
+    assert isinstance(text, str)
+    # Get the absolute path of the current working directory
+    cwd = os.path.abspath(os.getcwd())
+    # Normalize the path separators to work on different operating systems
+    cwd = cwd.replace("\\", "/")
+    return text.replace(cwd, "/")
 
 
 def filter_temp_hhi_path(text: str) -> str:
@@ -431,7 +441,7 @@ def check_result(
     test_case: TestCase,
     default_expect_regex: Optional[str],
     ignore_error_messages: bool,
-    check_regex_match: bool,
+    normalize_paths: bool,
     verify_pessimisation: VerifyPessimisationOptions,
     check_expected_included_in_actual: bool,
     out: str,
@@ -443,7 +453,7 @@ def check_result(
             test_case,
             default_expect_regex,
             ignore_error_messages,
-            check_regex_match,
+            normalize_paths,
             verify_pessimisation,
             out,
         )
@@ -453,7 +463,7 @@ def check_expected_equal_actual(
     test_case: TestCase,
     default_expect_regex: Optional[str],
     ignore_error_messages: bool,
-    check_regex_match: bool,
+    normalize_paths: bool,
     verify_pessimisation: VerifyPessimisationOptions,
     out: str,
 ) -> Result:
@@ -468,6 +478,7 @@ def check_expected_equal_actual(
         if verify_pessimisation == "no"
         else strip_pess_suffix(filter_temp_hhi_path(strip_lines(out)))
     )
+    out = filter_cwd(normalized_out) if normalize_paths else out
     is_ok = (
         expected == normalized_out
         or (
@@ -484,7 +495,7 @@ def check_expected_equal_actual(
             and re.search(default_expect_regex, normalized_out) is not None
             and expected == ""
         )
-        or (check_regex_match and re.search(expected, normalized_out) is not None)
+        or (normalize_paths and (expected == out))
     )
     return Result(test_case=test_case, output=out, is_failure=not is_ok)
 
@@ -712,7 +723,7 @@ def run_tests(
     ignore_error_text: bool,
     no_stderr: bool,
     force_color: bool,
-    check_regex_match: bool,
+    normalize_paths: bool,
     verify_pessimisation: VerifyPessimisationOptions,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
@@ -741,7 +752,7 @@ def run_tests(
             mode_flag,
             get_flags,
             out_extension,
-            check_regex_match,
+            normalize_paths,
             verify_pessimisation,
             check_expected_included_in_actual,
             only_compare_error_lines,
@@ -754,7 +765,7 @@ def run_tests(
             ignore_error_text,
             no_stderr,
             force_color,
-            check_regex_match,
+            normalize_paths,
             mode_flag,
             get_flags,
             verify_pessimisation,
@@ -794,7 +805,7 @@ def run_idempotence_tests(
     default_expect_regex: Optional[str],
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
-    check_regex_match: bool,
+    normalize_paths: bool,
     check_expected_included_in_actual: bool,
 ) -> None:
     idempotence_test_cases = [
@@ -813,7 +824,7 @@ def run_idempotence_tests(
         False,
         False,
         False,
-        check_regex_match,
+        normalize_paths,
         mode_flag,
         get_flags,
         VerifyPessimisationOptions.no,
@@ -945,9 +956,9 @@ def main() -> None:
         help="Experimental test suite for hh_pessimisation",
     )
     parser.add_argument(
-        "--check-regex-match",
+        "--normalize-paths",
         action="store_true",
-        help="Check for regex match instead of exact match between the expected and the actual",
+        help="Match on normalized file paths in error messages",
     )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
@@ -1011,7 +1022,7 @@ def main() -> None:
         args.ignore_error_text,
         args.no_stderr,
         args.force_color,
-        args.check_regex_match,
+        args.normalize_paths,
         args.verify_pessimisation,
         mode_flag,
         get_flags,
@@ -1032,7 +1043,7 @@ def main() -> None:
             args.default_expect_regex,
             mode_flag,
             get_flags,
-            args.check_regex_match,
+            args.normalize_paths,
             check_expected_included_in_actual=args.check_expected_included_in_actual,
         )
 

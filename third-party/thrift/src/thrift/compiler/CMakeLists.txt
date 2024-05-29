@@ -130,6 +130,7 @@ add_library(
   lib/go/util.cc
   lib/java/util.cc
   lib/rust/util.cc
+  lib/python/util.cc
 )
 target_link_libraries(
   compiler

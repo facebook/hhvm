@@ -12,6 +12,8 @@ File "array_sgrep.php", line 9, characters 3-30:
 use simply array_create_set_from_keys() (Lint[5542])
 File "array_sgrep.php", line 10, characters 3-5:
 The 3rd parameter for idx defaults to null. Calling idx() with two parameters is enough. (Lint[5542])
+File "array_sgrep.php", line 15, characters 13-18:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
 File "array_sgrep.php", line 16, characters 3-4:
 This is inefficient because PHP has to copy the entire array. Use array_extend() instead. (Lint[5542])
 File "array_sgrep.php", line 17, characters 3-4:

@@ -22,6 +22,10 @@ File "branches_returning_same_value.php", line 55, characters 12-24:
 There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 57, characters 12-24:
 There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 63, characters 12-38:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 65, characters 12-38:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
 File "branches_returning_same_value.php", line 95, characters 12-14:
 There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 97, characters 10-12:
@@ -72,6 +76,10 @@ File "branches_returning_same_value.php", line 218, characters 14-26:
 There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 220, characters 14-26:
 There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 226, characters 14-17:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 228, characters 14-17:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
 File "branches_returning_same_value.php", line 258, characters 14-20:
 There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 260, characters 14-20:

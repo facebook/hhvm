@@ -1,0 +1,2 @@
+File "unsurfaced_exception.bad.php", line 9, characters 33-34:
+A generic exception is caught but not surfaced either by rethrowing or by using the exception object in a meaningful manner. This will lead to silent reliability failures that are hard to debug. (Lint[5811])

@@ -17,8 +17,8 @@ open Hh_prelude
  * <----------------------------><----------------------><------->X
  *       beginning of line                 line            column
  *
- * - (bol)  beginning of line (byte offset from start of file) starts at 0,
-            maximum is 2^30-1 = 1,073,741,823
+ * - (bol)  beginning of line (byte offset from start of file).
+              Starts at 0, maximum is 2^30-1 = 1,073,741,823
  * - (line) line number starts at 1, maximum is 2^24-1 = 16,777,215
  * - (col)  column number starts at 0, maximum is 2^9-1 = 511
  *            This is saturating, i.e. every column past 511 has column

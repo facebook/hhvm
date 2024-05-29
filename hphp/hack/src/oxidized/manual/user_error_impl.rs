@@ -9,6 +9,7 @@ use std::hash::Hash;
 use ansi_term::Color;
 use hh_hash::Hasher;
 use ocamlrep::OCamlInt;
+use rc_pos::with_erased_lines::WithErasedLines;
 
 use crate::user_error::Severity;
 use crate::user_error::UserError;
@@ -30,11 +31,41 @@ impl Severity {
     }
 }
 
-impl<PrimPos: Hash, Pos: Hash> UserError<PrimPos, Pos> {
+impl<PrimPos: Hash + WithErasedLines + Clone, Pos: Hash + WithErasedLines + Clone>
+    UserError<PrimPos, Pos>
+{
     pub fn hash_for_saved_state(&self) -> ErrorHash {
         let mut hasher = DefaultHasher::new();
-        self.hash(&mut hasher);
+        self.clone().with_erased_lines().hash(&mut hasher);
         let hash = hasher.finish();
         OCamlInt::new_erase_msb(hash as isize)
+    }
+}
+
+impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserError<PrimPos, Pos> {
+    fn with_erased_lines(self) -> UserError<PrimPos, Pos> {
+        let UserError {
+            severity,
+            code,
+            claim,
+            reasons,
+            quickfixes,
+            custom_msgs,
+            is_fixmed,
+            flags,
+        } = self;
+        UserError {
+            severity,
+            code,
+            claim: claim.with_erased_lines(),
+            reasons: reasons.into_iter().map(|r| r.with_erased_lines()).collect(),
+            quickfixes: quickfixes
+                .into_iter()
+                .map(|q| q.with_erased_lines())
+                .collect(),
+            custom_msgs,
+            is_fixmed,
+            flags,
+        }
     }
 }

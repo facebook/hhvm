@@ -228,6 +228,24 @@ impl PosSpanTiny {
     }
 }
 
+impl From<PosSpanTiny> for PosSpanRaw {
+    fn from(value: PosSpanTiny) -> Self {
+        value.to_raw_span()
+    }
+}
+
+#[derive(Debug)]
+pub struct PosSpanTooLarge();
+
+impl TryFrom<PosSpanRaw> for PosSpanTiny {
+    type Error = PosSpanTooLarge;
+
+    fn try_from(value: PosSpanRaw) -> Result<Self, Self::Error> {
+        let PosSpanRaw { start, end } = value;
+        Self::make(&start, &end).ok_or(PosSpanTooLarge())
+    }
+}
+
 impl Ord for PosSpanTiny {
     // Intended to match the implementation of `Pos.compare` in OCaml.
     fn cmp(&self, other: &Self) -> Ordering {
@@ -261,6 +279,19 @@ impl<'a> FromOcamlRepIn<'a> for PosSpanTiny {
         _alloc: &'a ocamlrep::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
         Self::from_ocamlrep(value)
+    }
+}
+
+impl fmt::Debug for PosSpanTiny {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "PosSpanTiny {{ from {}:{} to {}:{} }}",
+            self.start_line_number(),
+            self.start_column(),
+            self.end_line_number(),
+            self.end_column()
+        )
     }
 }
 
@@ -443,18 +474,5 @@ mod test {
         let span_read_back = PosSpanTiny::from_ocamlrep(value).ok().unwrap();
 
         assert_eq!(span, span_read_back);
-    }
-}
-
-impl fmt::Debug for PosSpanTiny {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "PosSpanTiny {{ from {}:{} to {}:{} }}",
-            self.start_line_number(),
-            self.start_column(),
-            self.end_line_number(),
-            self.end_column()
-        )
     }
 }

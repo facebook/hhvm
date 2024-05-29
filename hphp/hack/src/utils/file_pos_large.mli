@@ -16,7 +16,7 @@
 type t = {
   pos_lnum: int;  (** line number. Starts at 1. *)
   pos_bol: int;
-      (** character number of the beginning of line of this position.
+      (** character offset (from the beginning of file) of the beginning of line of this position.
           The column number is therefore offset - bol.
           Starts at 0. *)
   pos_offset: int;

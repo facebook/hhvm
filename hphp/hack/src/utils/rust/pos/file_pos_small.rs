@@ -12,6 +12,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::file_pos::FilePos;
+use crate::file_pos_large::FilePosLarge;
 
 // Three values packed into one 64-bit integer:
 //
@@ -159,6 +160,18 @@ impl FilePosSmall {
             None => FilePosSmall(DUMMY),
             Some(pos) => pos,
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct PosTooLarge();
+
+impl TryFrom<FilePosLarge> for FilePosSmall {
+    type Error = PosTooLarge;
+
+    fn try_from(value: FilePosLarge) -> Result<Self, Self::Error> {
+        Self::from_lnum_bol_offset(value.line(), value.beg_of_line(), value.offset())
+            .ok_or(PosTooLarge())
     }
 }
 

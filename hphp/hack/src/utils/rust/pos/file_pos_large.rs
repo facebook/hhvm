@@ -11,12 +11,13 @@ use serde::Serialize;
 
 use crate::file_pos::FilePos;
 use crate::file_pos_small::FilePosSmall;
+use crate::with_erased_lines::WithErasedLines;
 
 #[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct FilePosLarge {
     /// line number. Starts at 1.
     lnum: usize,
-    /// character number of the beginning of line of this position.
+    /// character offset (from the beginning of file) of the beginning of line of this position.
     /// The column number is therefore offset - bol
     /// Starts at 0
     bol: usize,
@@ -177,5 +178,32 @@ impl<'a> FromOcamlRepIn<'a> for FilePosLarge {
         _alloc: &'a ocamlrep::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
         Self::from_ocamlrep(value)
+    }
+}
+
+impl WithErasedLines for (FilePosLarge, FilePosLarge) {
+    fn with_erased_lines(self) -> Self {
+        let (start, end) = self;
+        let FilePosLarge {
+            lnum: start_lnum,
+            bol: start_bol,
+            offset: start_offset,
+        } = start;
+        let FilePosLarge {
+            lnum: end_lnum,
+            bol: end_bol,
+            offset: end_offset,
+        } = end;
+        let start = FilePosLarge {
+            lnum: 1,
+            bol: 0,
+            offset: start_offset - start_bol,
+        };
+        let end = FilePosLarge {
+            lnum: end_lnum - start_lnum + 1,
+            bol: end_bol - start_bol,
+            offset: end_offset - start_bol,
+        };
+        (start, end)
     }
 }

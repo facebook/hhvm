@@ -21,6 +21,7 @@ use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::pos_span_raw::PosSpanRaw;
 use crate::pos_span_tiny::PosSpanTiny;
+use crate::with_erased_lines::WithErasedLines;
 
 #[derive(Clone, Deserialize, Hash, Serialize)]
 enum PosImpl {
@@ -546,6 +547,13 @@ impl no_pos_hash::NoPosHash for Pos {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
 }
 
+impl WithErasedLines for Pos {
+    fn with_erased_lines(self) -> Self {
+        let file = self.filename_rc();
+        let span = self.to_raw_span().with_erased_lines();
+        Self::from_raw_span(file, span)
+    }
+}
 pub mod map {
     pub type Map<T> = std::collections::BTreeMap<super::Pos, T>;
 }

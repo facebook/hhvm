@@ -8,6 +8,7 @@ pub mod file_pos_large;
 pub mod file_pos_small;
 pub mod pos_span_raw;
 pub mod pos_span_tiny;
+pub mod with_erased_lines;
 
 mod pos_impl;
 pub use pos_impl::map;

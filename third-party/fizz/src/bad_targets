@@ -1,0 +1,6 @@
+# This is a list of bad targets that do not build in OSS. Ideally this list goes away
+# with time.
+root//fizz/experimental/crypto/exchange:oqs_key_exchange
+root//fizz/extensions/javacrypto:java_crypto
+root//fizz/tool:fizz
+root//fizz/backend:openssl

@@ -27,6 +27,8 @@ class IMetricCollector {
  public:
   virtual ~IMetricCollector() = default;
 
+  virtual void requestReceived() = 0;
+
   struct RequestRejectedScope {
     // Reasons
     struct Unknown {};

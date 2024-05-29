@@ -503,6 +503,9 @@ void Cpp2Connection::requestReceived(
   if (observer) {
     observer->receivedRequest(&methodName);
   }
+  if (metricCollector_) {
+    metricCollector_->requestReceived();
+  }
 
   auto injectedFailure = server->maybeInjectFailure();
   switch (injectedFailure) {

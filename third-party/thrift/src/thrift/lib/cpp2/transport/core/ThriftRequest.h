@@ -42,6 +42,7 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
@@ -573,6 +574,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
  protected:
   server::ServerConfigs& serverConfigs_;
   const RpcKind kind_;
+  IMetricCollector* const metricCollector_{nullptr};
 
  private:
   bool checksumRequested_{false};

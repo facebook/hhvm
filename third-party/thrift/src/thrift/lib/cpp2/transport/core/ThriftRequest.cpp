@@ -50,6 +50,7 @@ ThriftRequestCore::ThriftRequestCore(
     : serverConfigs_(serverConfigs),
       kind_(metadata.kind_ref().value_or(
           RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)),
+      metricCollector_{serverConfigs_.getMetricCollector()},
       checksumRequested_(metadata.crc32c_ref().has_value()),
       loadMetric_(
           metadata.loadMetric_ref()
@@ -120,6 +121,9 @@ ThriftRequestCore::ThriftRequestCore(
 
   if (auto* observer = serverConfigs_.getObserver()) {
     observer->receivedRequest(&reqContext_.getMethodName());
+  }
+  if (metricCollector_) {
+    metricCollector_->requestReceived();
   }
 }
 

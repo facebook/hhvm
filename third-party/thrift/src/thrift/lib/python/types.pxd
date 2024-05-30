@@ -84,8 +84,9 @@ cdef class TypeInfoBase:
 cdef class TypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
     cdef tuple pytypes
+    cdef str singleton_name
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, pytypes)
+    cdef create(const cTypeInfo& cpp_obj, pytypes, str singleton_name)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)
@@ -94,24 +95,27 @@ cdef class IntegerTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
     cdef int64_t min_value
     cdef int64_t max_value
+    cdef str singleton_name
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, min_value, max_value)
+    cdef create(const cTypeInfo& cpp_obj, min_value, max_value, str singleton_name)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class StringTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
+    cdef str singleton_name
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj)
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)
 
 cdef class IOBufTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
+    cdef str singleton_name
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj)
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)

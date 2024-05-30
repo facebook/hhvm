@@ -106,10 +106,11 @@ cdef class TypeInfoBase:
 
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, pytypes):
+    cdef create(const cTypeInfo& cpp_obj, pytypes, str singleton_name):
         cdef TypeInfo inst = TypeInfo.__new__(TypeInfo)
         inst.cpp_obj = &cpp_obj
         inst.pytypes = pytypes
+        inst.singleton_name = singleton_name
         return inst
 
     # validate and convert to format serializer may understand
@@ -138,13 +139,19 @@ cdef class TypeInfo(TypeInfoBase):
         return (self.cpp_obj.type == (<TypeInfo>other).cpp_obj.type and
                 self.pytypes == (<TypeInfo>other).pytypes)
 
+    def __reduce__(self):
+        # For primitives use the singleton pickling strategy (i.e. return the name of a global variable)
+        # instead of repeatedly constructing TypeInfo instances
+        return self.singleton_name
+
 cdef class IntegerTypeInfo(TypeInfoBase):
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, min_value, max_value):
+    cdef create(const cTypeInfo& cpp_obj, min_value, max_value, str singleton_name):
         cdef IntegerTypeInfo inst = IntegerTypeInfo.__new__(IntegerTypeInfo)
         inst.cpp_obj = &cpp_obj
         inst.min_value = min_value
         inst.max_value = max_value
+        inst.singleton_name = singleton_name
         return inst
 
     # validate and convert to format serializer may understand
@@ -177,11 +184,15 @@ cdef class IntegerTypeInfo(TypeInfoBase):
         return (self.min_value == other_typeinfo.min_value and
             self.max_value == other_typeinfo.max_value)
 
+    def __reduce__(self):
+        return self.singleton_name
+
 cdef class StringTypeInfo(TypeInfoBase):
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj):
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name):
         cdef StringTypeInfo inst = StringTypeInfo.__new__(StringTypeInfo)
         inst.cpp_obj = &cpp_obj
+        inst.singleton_name = singleton_name
         return inst
 
     # validate and convert to format serializer may understand
@@ -227,11 +238,15 @@ cdef class StringTypeInfo(TypeInfoBase):
 
         return isinstance(other, StringTypeInfo)
 
+    def __reduce__(self):
+        return self.singleton_name
+
 cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj):
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name):
         cdef IOBufTypeInfo inst = IOBufTypeInfo.__new__(IOBufTypeInfo)
         inst.cpp_obj = &cpp_obj
+        inst.singleton_name = singleton_name
         return inst
 
     cpdef to_internal_data(self, object value):
@@ -252,16 +267,20 @@ cdef class IOBufTypeInfo(TypeInfoBase):
 
         return isinstance(other, IOBufTypeInfo)
 
-typeinfo_bool = TypeInfo.create(boolTypeInfo, (pbool,))
-typeinfo_byte = IntegerTypeInfo.create(byteTypeInfo, -128, 127)
-typeinfo_i16 = IntegerTypeInfo.create(i16TypeInfo, -1<<15, (1<<15)-1)
-typeinfo_i32 = IntegerTypeInfo.create(i32TypeInfo, -1<<31, (1<<31)-1)
-typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1)
-typeinfo_double = TypeInfo.create(doubleTypeInfo, (pfloat, pint))
-typeinfo_float = TypeInfo.create(floatTypeInfo, (pfloat, pint))
-typeinfo_string = StringTypeInfo.create(stringTypeInfo)
-typeinfo_binary = TypeInfo.create(binaryTypeInfo, (bytes,))
-typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
+    def __reduce__(self):
+        return self.singleton_name
+
+
+typeinfo_bool = TypeInfo.create(boolTypeInfo, (pbool,), "typeinfo_bool")
+typeinfo_byte = IntegerTypeInfo.create(byteTypeInfo, -128, 127, "typeinfo_byte")
+typeinfo_i16 = IntegerTypeInfo.create(i16TypeInfo, -1<<15, (1<<15)-1, "typeinfo_i16")
+typeinfo_i32 = IntegerTypeInfo.create(i32TypeInfo, -1<<31, (1<<31)-1, "typeinfo_i32")
+typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1, "typeinfo_i64")
+typeinfo_double = TypeInfo.create(doubleTypeInfo, (pfloat, pint), "typeinfo_double")
+typeinfo_float = TypeInfo.create(floatTypeInfo, (pfloat, pint), "typeinfo_float")
+typeinfo_string = StringTypeInfo.create(stringTypeInfo, "typeinfo_string")
+typeinfo_binary = TypeInfo.create(binaryTypeInfo, (bytes,), "typeinfo_binary")
+typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo, "typeinfo_iobuf")
 
 
 StructOrError = cython.fused_type(Struct, GeneratedError)
@@ -571,6 +590,9 @@ cdef class ListTypeInfo(TypeInfoBase):
 
         return self.val_info == (<ListTypeInfo>other).val_info
 
+    def __reduce__(self):
+        return (ListTypeInfo, (self.val_info,))
+
 cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -617,6 +639,9 @@ cdef class SetTypeInfo(TypeInfoBase):
             return False
 
         return self.val_info == (<SetTypeInfo>other).val_info
+
+    def __reduce__(self):
+        return (SetTypeInfo, (self.val_info,))
 
 cdef class MapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
@@ -680,6 +705,9 @@ cdef class MapTypeInfo(TypeInfoBase):
 
         return (self.key_info == (<MapTypeInfo>other).key_info
             and self.val_info == (<MapTypeInfo>other).val_info)
+
+    def __reduce__(self):
+        return (MapTypeInfo, (self.key_info, self.val_info))
 
 cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
@@ -747,6 +775,9 @@ cdef class StructTypeInfo(TypeInfoBase):
 
         return self._class == (<StructTypeInfo>other)._class
 
+    def __reduce__(self):
+        return (StructTypeInfo, (self._class,))
+
 cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
@@ -806,6 +837,9 @@ cdef class EnumTypeInfo(TypeInfoBase):
 
         return self._class == (<EnumTypeInfo>other)._class
 
+    def __reduce__(self):
+        return (EnumTypeInfo, (self._class,))
+
 cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
         self._orig_type_info = orig_type_info
@@ -849,6 +883,10 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
         # should be part of the comparison below.
         return (self._orig_type_info == other_typeinfo._orig_type_info and
             self._adapter_info == other_typeinfo._adapter_info)
+
+    def __reduce__(self):
+        return (AdaptedTypeInfo, (self._orig_type_info, self._adapter_info, self._transitive_annotation))
+
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
     """

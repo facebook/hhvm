@@ -45,13 +45,20 @@ from testing.thrift_types import (
     ComplexUnion,
     Digits,
     easy,
+    EasyList,
+    EasySet,
     hard,
     I32List,
     Integers,
     IOBufListStruct,
     Reserved,
     SetI32,
+    SetI32Lists,
+    StrEasyMap,
+    StrI32ListMap,
     StringBucket,
+    StringList,
+    StrList2D,
     StrStrMap,
 )
 from thrift.python.exceptions import Error
@@ -143,8 +150,11 @@ class SerializerTests(unittest.TestCase):
         self.thrift_serialization_round_trip(control)
 
     def test_pickle_easy_struct(self) -> None:
-        control = easy(val=0, val_list=[5, 6, 7])
-        self.pickle_round_trip(control)
+        val = easy(val=0, val_list=[5, 6, 7])
+        self.pickle_round_trip(control=val)
+        self.pickle_round_trip(control=EasyList([val]))
+        self.pickle_round_trip(control=EasySet({val}))
+        self.pickle_round_trip(control=StrEasyMap({"foo": val}))
 
     def test_serialize_hard_struct(self) -> None:
         control = hard(
@@ -167,25 +177,22 @@ class SerializerTests(unittest.TestCase):
         control = Integers(large=2**32)
         self.pickle_round_trip(control)
 
-    @unittest.skip("Pickling containers doesn't work yet")
     def test_pickle_sequence(self) -> None:
-        control = I32List([1, 2, 3, 4])
-        self.pickle_round_trip(control)
+        self.pickle_round_trip(control=I32List([1, 2, 3, 4]))
+        self.pickle_round_trip(control=StrList2D([StringList(["foo", "bar"])]))
 
         digits = Digits(data=[Integers(tiny=1), Integers(tiny=2), Integers(large=0)])
         data = digits.data
         assert data
         self.pickle_round_trip(data)
 
-    @unittest.skip("Pickling containers doesn't work yet")
     def test_pickle_set(self) -> None:
-        control = SetI32({1, 2, 3, 4})
-        self.pickle_round_trip(control)
+        self.pickle_round_trip(control=SetI32({1, 2, 3, 4}))
+        self.pickle_round_trip(control=SetI32Lists({I32List([1, 2]), I32List([3, 4])}))
 
-    @unittest.skip("Pickling containers doesn't work yet")
     def test_pickle_mapping(self) -> None:
-        control = StrStrMap({"test": "test", "foo": "bar"})
-        self.pickle_round_trip(control)
+        self.pickle_round_trip(control=StrStrMap({"test": "test", "foo": "bar"}))
+        self.pickle_round_trip(control=StrI32ListMap({"a": I32List([1, 2])}))
 
     def test_serialize_Complex(self) -> None:
         control = Complex(

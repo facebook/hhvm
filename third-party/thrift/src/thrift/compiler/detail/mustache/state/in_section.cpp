@@ -45,8 +45,7 @@ std::string in_section::render(render_context& ctx, const token& token) {
       std::string out;
 
       if (m_type == type::normal && !node.visit(is_node_empty())) {
-        out =
-            node.visit(render_section(ctx, m_section, m_start_token.delims()));
+        out = node.visit(render_section(ctx, m_section));
       } else if (m_type == type::inverted && node.visit(is_node_empty())) {
         out = render_context::push(ctx).render(m_section);
       }

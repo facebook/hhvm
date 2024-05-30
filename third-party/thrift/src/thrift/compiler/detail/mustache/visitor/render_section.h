@@ -43,9 +43,8 @@ class render_section {
   render_section(
       render_context& ctx,
       const template_type& section,
-      const delim_type& delims,
       flag p_flag = flag::none)
-      : m_ctx(ctx), m_section(section), m_delims(delims), m_flag(p_flag) {}
+      : m_ctx(ctx), m_section(section), m_flag(p_flag) {}
 
   template <class T>
   std::string operator()(const T& t) const {
@@ -68,15 +67,13 @@ class render_section {
       return render_context::push(m_ctx, array).render(m_section);
     else
       for (auto& item : array)
-        out += item.visit(
-            render_section(m_ctx, m_section, m_delims, flag::keep_array));
+        out += item.visit(render_section(m_ctx, m_section, flag::keep_array));
     return out;
   }
 
  private:
   render_context& m_ctx;
   const template_type& m_section;
-  const delim_type& m_delims;
   flag m_flag;
 };
 

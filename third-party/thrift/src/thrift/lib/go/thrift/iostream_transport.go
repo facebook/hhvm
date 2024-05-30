@@ -54,10 +54,6 @@ func NewStreamTransportRW(rw io.ReadWriter) *StreamTransport {
 	return &StreamTransport{Reader: bufrw, Writer: bufrw, isReadWriter: true}
 }
 
-func (p *StreamTransport) IsOpen() bool {
-	return !p.closed
-}
-
 // implicitly opened on creation, can't be reopened once closed
 func (p *StreamTransport) Open() error {
 	if !p.closed {

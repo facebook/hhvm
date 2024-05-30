@@ -65,10 +65,6 @@ func newPipe() *pipe {
 	}
 }
 
-func (p *pipe) IsOpen() bool {
-	return true
-}
-
 func (p *pipe) Open() error {
 	return nil
 }

@@ -28,17 +28,11 @@ func TestStreamTransport(t *testing.T) {
 
 func TestStreamTransportOpenClose(t *testing.T) {
 	trans := NewStreamTransportRW(bytes.NewBuffer(make([]byte, 0, 1024)))
-	if !trans.IsOpen() {
-		t.Fatal("StreamTransport should be already open")
-	}
 	if trans.Open() == nil {
 		t.Fatal("StreamTransport should return error when open twice")
 	}
 	if trans.Close() != nil {
 		t.Fatal("StreamTransport should not return error when closing open transport")
-	}
-	if trans.IsOpen() {
-		t.Fatal("StreamTransport should not be open after close")
 	}
 	if trans.Close() == nil {
 		t.Fatal("StreamTransport should return error when closing a non open transport")

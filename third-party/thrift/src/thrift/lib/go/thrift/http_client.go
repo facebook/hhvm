@@ -81,10 +81,6 @@ func (p *HTTPClient) Open() error {
 	return nil
 }
 
-func (p *HTTPClient) IsOpen() bool {
-	return p.response != nil || p.requestBuffer != nil
-}
-
 func (p *HTTPClient) closeResponse() error {
 	p.response = nil
 	p.responseBuffer.Reset()

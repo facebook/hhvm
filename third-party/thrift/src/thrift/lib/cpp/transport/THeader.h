@@ -402,6 +402,8 @@ class THeader final {
   }
   std::optional<LoggingContext>& loggingContext() { return c_.loggingContext_; }
 
+  bool isClientLoggingEnabled() const;
+
   folly::SocketFds fds; // No accessor, since this type **is** the API.
 
   // 0 and 16th bits must be 0 to differentiate from framed & unframed

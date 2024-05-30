@@ -200,6 +200,33 @@ TEST(THeaderTest, asciiData3) {
   testAsciiHeaderData("random data", expected);
 }
 
+TEST(THeaderTest, clientLoggingEnabled0) {
+  THeader header;
+  ASSERT_FALSE(header.isClientLoggingEnabled());
+}
+
+TEST(THeaderTest, clientLoggingEnabled1) {
+  THeader header;
+  auto& ctx = header.loggingContext().emplace();
+  ctx.logSampleRatio() = 1000;
+  ASSERT_TRUE(header.isClientLoggingEnabled());
+}
+
+TEST(THeaderTest, clientLoggingEnabled2) {
+  THeader header;
+  auto& ctx = header.loggingContext().emplace();
+  ctx.logErrorSampleRatio() = 1000;
+  ASSERT_TRUE(header.isClientLoggingEnabled());
+}
+
+TEST(THeaderTest, clientLoggingEnabled3) {
+  THeader header;
+  auto& ctx = header.loggingContext().emplace();
+  ctx.logSampleRatio() = 0;
+  ctx.logErrorSampleRatio() = 0;
+  ASSERT_FALSE(header.isClientLoggingEnabled());
+}
+
 } // namespace transport
 } // namespace thrift
 } // namespace apache

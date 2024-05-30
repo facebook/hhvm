@@ -1145,6 +1145,13 @@ std::optional<std::string> THeader::extractHeader(std::string_view key) {
   }
   return res;
 }
+
+bool THeader::isClientLoggingEnabled() const {
+  if (const auto& lctx = loggingContext()) {
+    return *lctx->logSampleRatio() > 0 || *lctx->logErrorSampleRatio() > 0;
+  }
+  return false;
+}
 } // namespace transport
 } // namespace thrift
 } // namespace apache

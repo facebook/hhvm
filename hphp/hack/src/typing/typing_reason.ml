@@ -1332,6 +1332,7 @@ let explain_asymm_prj prj =
    and ensure we handle all cases statically *)
 let rec explain_witness = function
   | Rhint pos -> (pos, "this hint")
+  | Ris pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
   | Rmissing_field -> (Pos_or_decl.none, "nothing")
   | Rwitness_from_decl pos -> (pos, "this declaration")

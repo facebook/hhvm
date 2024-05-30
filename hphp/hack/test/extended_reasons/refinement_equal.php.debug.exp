@@ -1,0 +1,62 @@
+error: Typing[4110] Invalid return type
+
+Expected `~C` because the type of this return is implicitly a like-type
+
+ 6 | function inter_equal(?A $a, C $c): »C« {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+
+File "refinement_equal.php", line 6, character 36 - line 6, character 36:
+
+But got `?C`
+
+ 6 | function inter_equal(»?A« $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+
+File "refinement_equal.php", line 6, character 22 - line 6, character 23:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    {
+      "Rpessimised_return":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

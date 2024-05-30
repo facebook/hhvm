@@ -1,0 +1,100 @@
+error: Typing[4110] Invalid return type
+
+Expected `C`
+
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+But got `(A & I)` from this `is` expression test
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a is I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+Here's why: this `is` expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a is I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+flows *into* this expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = »$a«;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 10 - line 9, character 11:
+
+which itself flows *into* this expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     »$z« = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 5 - line 9, character 6:
+
+which itself flows *into* this expression, via the union type
+
+  7 | function inter_is(A $a, C $c): C {
+  8 |   »if($a is I) {
+  9 |     $z = $a;
+ 10 |   } else {
+ 11 |     $z = $c;
+ 12 |   }«
+ 13 |   return $z;
+ 14 | }
+
+File "refinment_is.php", line 8, character 3 - line 12, character 3:
+
+which itself flows *into* this expression
+
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
+which itself flows *into* this expression
+
+ 12 |   }
+ 13 |   »return $z;«
+ 14 | }
+
+File "refinment_is.php", line 13, character 3 - line 13, character 12:
+
+which itself flows *into* this hint
+
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+1 error found.

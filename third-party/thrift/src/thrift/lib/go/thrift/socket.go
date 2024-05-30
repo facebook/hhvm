@@ -92,94 +92,94 @@ func NewSocket(options ...SocketOption) (Socket, error) {
 }
 
 // Sets the socket timeout
-func (p *socket) SetTimeout(timeout time.Duration) error {
-	p.timeout = timeout
+func (s *socket) SetTimeout(timeout time.Duration) error {
+	s.timeout = timeout
 	return nil
 }
 
-func (p *socket) pushDeadline(read, write bool) {
+func (s *socket) pushDeadline(read, write bool) {
 	var t time.Time
-	if p.timeout > 0 {
-		t = time.Now().Add(time.Duration(p.timeout))
+	if s.timeout > 0 {
+		t = time.Now().Add(time.Duration(s.timeout))
 	}
 	if read && write {
-		p.conn.SetDeadline(t)
+		s.conn.SetDeadline(t)
 	} else if read {
-		p.conn.SetReadDeadline(t)
+		s.conn.SetReadDeadline(t)
 	} else if write {
-		p.conn.SetWriteDeadline(t)
+		s.conn.SetWriteDeadline(t)
 	}
 }
 
 // Open connects the socket to a server, creating a new socket object if necessary.
-func (p *socket) Open() error {
-	if p.conn != nil {
+func (s *socket) Open() error {
+	if s.conn != nil {
 		return NewTransportException(ALREADY_OPEN, "Socket already connected.")
 	}
-	if p.addr == nil {
+	if s.addr == nil {
 		return NewTransportException(NOT_OPEN, "Cannot open nil address.")
 	}
-	if len(p.addr.Network()) == 0 {
+	if len(s.addr.Network()) == 0 {
 		return NewTransportException(NOT_OPEN, "Cannot open bad network name.")
 	}
-	if len(p.addr.String()) == 0 {
+	if len(s.addr.String()) == 0 {
 		return NewTransportException(NOT_OPEN, "Cannot open bad address.")
 	}
 	var err error
-	if p.conn, err = net.DialTimeout(p.addr.Network(), p.addr.String(), p.timeout); err != nil {
+	if s.conn, err = net.DialTimeout(s.addr.Network(), s.addr.String(), s.timeout); err != nil {
 		return NewTransportException(NOT_OPEN, err.Error())
 	}
 	return nil
 }
 
 // Addr returns the address the Socket is listening on.
-func (p *socket) Addr() net.Addr {
-	return p.addr
+func (s *socket) Addr() net.Addr {
+	return s.addr
 }
 
 // Conn retrieves the underlying net.Conn
-func (p *socket) Conn() net.Conn {
-	return p.conn
+func (s *socket) Conn() net.Conn {
+	return s.conn
 }
 
 // Close cleans up all resources used by the Socket.
-func (p *socket) Close() error {
+func (s *socket) Close() error {
 	// Close the socket
-	if p.conn != nil {
-		err := p.conn.Close()
+	if s.conn != nil {
+		err := s.conn.Close()
 		if err != nil {
 			return err
 		}
-		p.conn = nil
+		s.conn = nil
 	}
 	return nil
 }
 
-func (p *socket) Read(buf []byte) (int, error) {
-	if p.conn == nil {
+func (s *socket) Read(buf []byte) (int, error) {
+	if s.conn == nil {
 		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
-	p.pushDeadline(true, false)
-	n, err := p.conn.Read(buf)
+	s.pushDeadline(true, false)
+	n, err := s.conn.Read(buf)
 	return n, NewTransportExceptionFromError(err)
 }
 
-func (p *socket) Write(buf []byte) (int, error) {
-	if p.conn == nil {
+func (s *socket) Write(buf []byte) (int, error) {
+	if s.conn == nil {
 		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
-	p.pushDeadline(false, true)
-	return p.conn.Write(buf)
+	s.pushDeadline(false, true)
+	return s.conn.Write(buf)
 }
 
 // Flush is not implementable by lower-level transports but must still be kept
 // for interface compatibility with Thrift1.
-func (p *socket) Flush() error {
+func (s *socket) Flush() error {
 	return nil
 }
 
 // RemainingBytes is not implementable by lower-level transports but must still
 // be kept for interface compatibility with Thrift1.
-func (p *socket) RemainingBytes() uint64 {
+func (s *socket) RemainingBytes() uint64 {
 	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

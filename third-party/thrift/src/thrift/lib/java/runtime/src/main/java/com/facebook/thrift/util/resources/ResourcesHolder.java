@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
+import reactor.netty.resources.LoopResources;
 
 class ResourcesHolder implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourcesHolder.class);
@@ -51,6 +52,7 @@ class ResourcesHolder implements Closeable {
 
   private final HashedWheelTimer timer;
   private final EventLoopGroup eventLoopGroup;
+  private final LoopResources loopResources;
   private final StatsScheduler offLoopScheduler;
   private final StatsScheduler clientOffLoopScheduler;
 
@@ -59,6 +61,7 @@ class ResourcesHolder implements Closeable {
     this.eventLoopGroup =
         com.facebook.thrift.util.NettyUtil.createEventLoopGroup(
             numThreadsForEventLoop, eventLoopGroupThreadPrefix);
+    this.loopResources = (preferNative) -> eventLoopGroup;
     this.offLoopScheduler = createOffLoopScheduler();
     this.clientOffLoopScheduler =
         separateOffLoopScheduler ? createClientOffLoopScheduler() : offLoopScheduler;
@@ -75,6 +78,10 @@ class ResourcesHolder implements Closeable {
 
   public EventLoopGroup getEventLoopGroup() {
     return eventLoopGroup;
+  }
+
+  public LoopResources getLoopResources() {
+    return loopResources;
   }
 
   public Scheduler getOffLoopScheduler() {

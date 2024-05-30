@@ -21,31 +21,31 @@ import com.facebook.thrift.metadata.ThriftTransportType;
 import com.facebook.thrift.util.NettyUtil;
 import com.facebook.thrift.util.RpcClientUtils;
 import com.facebook.thrift.util.resources.RpcResources;
-import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import io.rsocket.DuplexConnection;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.TcpDuplexConnection;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
+import reactor.netty.resources.LoopResources;
 import reactor.netty.tcp.SslProvider;
 import reactor.netty.tcp.TcpClient;
 
 public class ReactorClientTransport implements ClientTransport {
   private final SocketAddress socketAddress;
-  private final EventLoopGroup eventLoopGroup;
+  private final LoopResources loopResources;
   private final SslContext sslContext;
 
   public ReactorClientTransport(SocketAddress socketAddress, ThriftClientConfig config) {
     this.socketAddress = socketAddress;
-    this.eventLoopGroup = RpcResources.getEventLoopGroup();
+    this.loopResources = RpcResources.getLoopResources();
     this.sslContext = RpcClientUtils.getSslContext(config, socketAddress);
   }
 
   public ReactorClientTransport(
       SocketAddress socketAddress, ThriftClientConfig config, ThriftTransportType transportType) {
     this.socketAddress = socketAddress;
-    this.eventLoopGroup = RpcResources.getEventLoopGroup();
+    this.loopResources = RpcResources.getLoopResources();
     this.sslContext = RpcClientUtils.getSslContext(config, socketAddress, transportType);
   }
 
@@ -61,7 +61,7 @@ public class ReactorClientTransport implements ClientTransport {
 
     return tcpClient
         .remoteAddress(() -> socketAddress)
-        .runOn(eventLoopGroup)
+        .runOn(loopResources)
         .doOnConnected(
             c ->
                 c.addHandlerLast(NettyUtil.getDefaultThriftFlushConsolidationHandler())

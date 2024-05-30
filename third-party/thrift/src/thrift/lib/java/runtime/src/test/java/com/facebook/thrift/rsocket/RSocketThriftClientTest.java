@@ -174,6 +174,95 @@ public class RSocketThriftClientTest {
   }
 
   @Test
+  public void testSocketExhaustWhenDestExist() {
+    System.out.println("create server handler");
+    RpcServerHandler serverHandler =
+        new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
+
+    System.out.println("starting server");
+    RSocketServerTransportFactory transportFactory =
+        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+    RSocketServerTransport transport =
+        transportFactory.createServerTransport(serverHandler).block();
+    InetSocketAddress address = (InetSocketAddress) transport.getAddress();
+
+    System.out.println("creating client");
+
+    RpcClientFactory factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableRSocket(false)
+            .setDisableReconnectingClient(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
+    PingService.Reactive client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(factory, address);
+
+    /// Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available
+    // ports
+    for (int i = 0; i < 400; i++) {
+      client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
+      System.out.println("Sent call " + i);
+    }
+  }
+
+  @Test
+  public void testSocketExhaustWhenDestComesUp() {
+    //  Create Client factory
+    RpcClientFactory factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableRSocket(false)
+            .setDisableReconnectingClient(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
+    InetSocketAddress address = new InetSocketAddress(12345);
+    PingService.Reactive client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(factory, address);
+
+    // Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available ports
+    for (int i = 0; i < 400; i++) {
+      try {
+        client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
+      } catch (Exception e) {
+      }
+    }
+
+    System.out.println("create server handler");
+    RpcServerHandler serverHandler =
+        new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
+
+    System.out.println("starting server");
+    RSocketServerTransportFactory transportFactory =
+        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+    RSocketServerTransport transport =
+        transportFactory.createServerTransport(serverHandler).block();
+    address = (InetSocketAddress) transport.getAddress();
+
+    System.out.println("creating client");
+    client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(factory, address);
+
+    // These calls should succeed.
+    for (int i = 0; i < 400; i++) {
+      client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
+      System.out.println("Sent call " + i);
+    }
+  }
+
+  @Test
   public void testPingBinary() {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =

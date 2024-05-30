@@ -55,7 +55,11 @@ bool FizzConfigUtil::addCertsToManager(
           selfCert =
               CertUtils::makeSelfCert(std::move(x509Chain), std::move(pkey));
         }
-        manager.addCert(std::move(selfCert), sslConfig.isDefault);
+        if (sslConfig.isDefault) {
+          manager.addCertAndSetDefault(std::move(selfCert));
+        } else {
+          manager.addCert(std::move(selfCert));
+        }
         loadedCert = true;
       } catch (const std::runtime_error& ex) {
         auto msg = folly::sformat(

@@ -1094,7 +1094,11 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
       auto cert = openssl::CertUtils::makeSelfCert(
           std::move(certs), std::move(pkey.second), compressors);
-      certManager->addCert(std::move(cert), first);
+      if (first) {
+        certManager->addCertAndSetDefault(std::move(cert));
+      } else {
+        certManager->addCert(std::move(cert));
+      }
       if (first) {
         if (fallback) {
           // Fallback mode requires additional callback work for SNI to be
@@ -1114,7 +1118,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     auto cert =
         std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
             std::move(certData.key), std::move(certChain), compressors);
-    certManager->addCert(std::move(cert), true);
+    certManager->addCertAndSetDefault(std::move(cert));
   }
 
   if (credentialMatchNeeded) {

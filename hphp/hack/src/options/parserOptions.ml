@@ -37,7 +37,6 @@ type t = {
   disallow_silence: bool;
   no_parser_readonly_check: bool;
   parser_errors_only: bool;
-  nameof_precedence: bool;
   disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
 }
@@ -75,7 +74,6 @@ let default =
     disallow_silence = false;
     no_parser_readonly_check = false;
     parser_errors_only = false;
-    nameof_precedence = false;
     disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
   }

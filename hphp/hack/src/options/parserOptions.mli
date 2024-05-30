@@ -60,7 +60,6 @@ type t = {
   parser_errors_only: bool;
       (** Ignore all errors except those that can influence the shape of syntax tree
          (skipping post parse error checks) *)
-  nameof_precedence: bool;  (** Make nameof bind tighter *)
   disable_hh_ignore_error: int;
       (** Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
   allowed_decl_fixme_codes: ISet.t;

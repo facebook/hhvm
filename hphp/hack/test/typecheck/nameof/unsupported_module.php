@@ -7,5 +7,5 @@ module a.b;
 <?hh
 
 function f(): void {
-  nameof a.b;
+  nameof a.b; // (nameof a).b
 }

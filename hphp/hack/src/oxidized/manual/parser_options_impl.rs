@@ -41,7 +41,6 @@ impl Default for ParserOptions {
             parser_errors_only: false,
             allowed_decl_fixme_codes: i_set::ISet::new(),
             disable_hh_ignore_error: 0,
-            nameof_precedence: false,
         }
     }
 }

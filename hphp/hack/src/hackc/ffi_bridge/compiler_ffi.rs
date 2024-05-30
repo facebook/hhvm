@@ -542,7 +542,6 @@ impl ffi::NativeEnv {
                     auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))
                         .collect(),
-                    nameof_precedence: true,
                     ..self.parser_flags.to_parser_options()
                 },
             },

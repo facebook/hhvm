@@ -282,8 +282,6 @@ impl HhConfig {
                 "disallow_direct_superglobals_refs",
                 default.disallow_direct_superglobals_refs,
             )?,
-            nameof_precedence: hhconfig
-                .get_bool_or("nameof_precedence", default.nameof_precedence)?,
             stack_size: default.stack_size,
         };
         let default = GlobalOptions::default();

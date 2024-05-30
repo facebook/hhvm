@@ -847,7 +847,6 @@ let parse_options () =
         unwrap_concurrent = default.unwrap_concurrent;
         parser_errors_only = default.parser_errors_only;
         no_parser_readonly_check = default.no_parser_readonly_check;
-        nameof_precedence = default.nameof_precedence;
         (* These are set specifically for single type check *)
         allow_unstable_features = true;
         (* The remainder are set in the config file *)

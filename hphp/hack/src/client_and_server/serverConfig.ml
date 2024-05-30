@@ -332,8 +332,6 @@ let load_config config options =
           >?? po_opt.union_intersection_type_hints;
         disallow_silence =
           bool_opt "disallow_silence" config >?? po_opt.disallow_silence;
-        nameof_precedence =
-          bool_opt "nameof_precedence" config >?? po_opt.nameof_precedence;
         allowed_decl_fixme_codes =
           prepare_allowed_decl_fixme_codes config
           >?? po_opt.allowed_decl_fixme_codes;

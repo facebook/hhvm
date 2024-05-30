@@ -421,8 +421,10 @@ mstch::node mstch_field::idl_type() {
 
   // Mapping from compiler implementation details `type_t::type` to a public
   // enum `BaseType`
+  t_type::type compiler_type =
+      field_->get_type()->get_true_type()->get_type_value();
   auto idl_type = std::invoke([&]() -> std::optional<BaseType> {
-    switch (field_->get_type()->get_true_type()->get_type_value()) {
+    switch (compiler_type) {
       case t_type::type::t_void:
         return BaseType::Void;
       case t_type::type::t_bool:
@@ -463,7 +465,7 @@ mstch::node mstch_field::idl_type() {
   if (idl_type == std::nullopt) {
     throw std::runtime_error(fmt::format(
         "Mapping Error: Failed to map value '{}' from 't_type::type' to 'BaseType'",
-        field_->get_type()->get_true_type()->get_type_value()));
+        static_cast<std::underlying_type_t<t_type::type>>(compiler_type)));
   }
 
   return static_cast<std::underlying_type_t<BaseType>>(*idl_type);

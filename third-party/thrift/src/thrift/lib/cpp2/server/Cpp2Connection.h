@@ -160,14 +160,32 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     friend class QueueTimeout;
     friend class TaskTimeout;
 
+    using ServiceInterceptorsStorage =
+        apache::thrift::detail::ServiceInterceptorRequestStorageContext;
+    using ColocatedConstructionParams =
+        RequestsRegistry::ColocatedData<ServiceInterceptorsStorage>;
+
     template <typename... Args>
     static auto colocateWithDebugStub(
-        RequestsRegistry::DebugStubColocator& /* alloc */, Args&...) {
-      return [](auto&& /* make */) { return folly::unit; };
+        RequestsRegistry::DebugStubColocator& alloc,
+        server::ServerConfigs& server,
+        Args&...) {
+      auto numServiceInterceptors = server.getServiceInterceptors().size();
+      using RequestStorage =
+          apache::thrift::detail::ServiceInterceptorOnRequestStorage;
+      return [numServiceInterceptors,
+              onRequest = alloc.array<RequestStorage>(numServiceInterceptors)](
+                 auto make) mutable {
+        return ServiceInterceptorsStorage{
+            numServiceInterceptors,
+            make(std::move(onRequest), [] { return RequestStorage(); }),
+        };
+      };
     }
 
     Cpp2Request(
-        RequestsRegistry::ColocatedData<folly::Unit> colocationParams,
+        ColocatedConstructionParams colocationParams,
+        apache::thrift::ThriftServer& server,
         std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
         std::shared_ptr<folly::RequestContext> rctx,
         std::shared_ptr<Cpp2Connection> con,

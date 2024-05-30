@@ -46,7 +46,9 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 ThriftRequestCore::ThriftRequestCore(
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
-    Cpp2ConnContext& connContext)
+    Cpp2ConnContext& connContext,
+    apache::thrift::detail::ServiceInterceptorRequestStorageContext
+        serviceInterceptorsStorage)
     : serverConfigs_(serverConfigs),
       kind_(metadata.kind_ref().value_or(
           RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)),
@@ -60,7 +62,8 @@ ThriftRequestCore::ThriftRequestCore(
           &connContext,
           &header_,
           metadata.name_ref() ? std::move(*metadata.name_ref()).str()
-                              : std::string{}),
+                              : std::string{},
+          std::move(serviceInterceptorsStorage)),
       queueTimeout_(*this),
       taskTimeout_(*this, serverConfigs_),
       stateMachine_(

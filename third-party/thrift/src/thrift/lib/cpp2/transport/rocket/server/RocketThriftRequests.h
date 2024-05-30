@@ -23,6 +23,7 @@
 #include <folly/Function.h>
 
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
@@ -46,16 +47,31 @@ class RocketServerFrameContext;
 
 class RocketThriftRequest : public ThriftRequestCore {
  protected:
-  using CreateWithColocationParams =
-      RequestsRegistry::ColocatedData<folly::Unit>;
+  using ServiceInterceptorsStorage =
+      apache::thrift::detail::ServiceInterceptorRequestStorageContext;
+  using ColocatedConstructionParams =
+      RequestsRegistry::ColocatedData<ServiceInterceptorsStorage>;
 
  public:
   folly::EventBase* getEventBase() noexcept final { return &evb_; }
 
   template <typename... Args>
   static auto colocateWithDebugStub(
-      RequestsRegistry::DebugStubColocator& /* alloc */, Args&...) {
-    return [](auto&& /* make */) { return folly::unit; };
+      RequestsRegistry::DebugStubColocator& alloc,
+      folly::EventBase&,
+      server::ServerConfigs& server,
+      Args&...) {
+    auto numServiceInterceptors = server.getServiceInterceptors().size();
+    using RequestStorage =
+        apache::thrift::detail::ServiceInterceptorOnRequestStorage;
+    return [numServiceInterceptors,
+            onRequest = alloc.array<RequestStorage>(numServiceInterceptors)](
+               auto make) mutable {
+      return ServiceInterceptorsStorage{
+          numServiceInterceptors,
+          make(std::move(onRequest), [] { return RequestStorage(); }),
+      };
+    };
   }
 
  protected:
@@ -63,6 +79,7 @@ class RocketThriftRequest : public ThriftRequestCore {
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
       Cpp2ConnContext& connContext,
+      ServiceInterceptorsStorage serviceInterceptorsStorage,
       folly::EventBase& evb,
       RocketServerFrameContext&& context);
 
@@ -75,7 +92,7 @@ class RocketThriftRequest : public ThriftRequestCore {
 class ThriftServerRequestResponse final : public RocketThriftRequest {
  public:
   ThriftServerRequestResponse(
-      CreateWithColocationParams colocationParams,
+      ColocatedConstructionParams colocationParams,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -117,7 +134,7 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
 class ThriftServerRequestFnf final : public RocketThriftRequest {
  public:
   ThriftServerRequestFnf(
-      CreateWithColocationParams colocationParams,
+      ColocatedConstructionParams colocationParams,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -157,7 +174,7 @@ class ThriftServerRequestFnf final : public RocketThriftRequest {
 class ThriftServerRequestStream final : public RocketThriftRequest {
  public:
   ThriftServerRequestStream(
-      CreateWithColocationParams colocationParams,
+      ColocatedConstructionParams colocationParams,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -214,7 +231,7 @@ class ThriftServerRequestStream final : public RocketThriftRequest {
 class ThriftServerRequestSink final : public RocketThriftRequest {
  public:
   ThriftServerRequestSink(
-      CreateWithColocationParams colocationParams,
+      ColocatedConstructionParams colocationParams,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,

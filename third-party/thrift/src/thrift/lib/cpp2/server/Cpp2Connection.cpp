@@ -604,6 +604,7 @@ void Cpp2Connection::requestReceived(
   context_.setClientType(hreq->getHeader()->getClientType());
 
   auto t2r = RequestsRegistry::makeRequest<Cpp2Request>(
+      *server,
       std::move(hreq),
       std::move(reqCtx),
       this_,
@@ -699,7 +700,8 @@ void Cpp2Connection::removeRequest(Cpp2Request* req) {
 }
 
 Cpp2Connection::Cpp2Request::Cpp2Request(
-    RequestsRegistry::ColocatedData<folly::Unit> colocationParams,
+    ColocatedConstructionParams colocationParams,
+    apache::thrift::ThriftServer& server,
     std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
     std::shared_ptr<folly::RequestContext> rctx,
     std::shared_ptr<Cpp2Connection> con,
@@ -710,13 +712,14 @@ Cpp2Connection::Cpp2Request::Cpp2Request(
       // Note: tricky ordering here; see the note on connection_ in the class
       // definition.
       reqContext_(
-          &connection_->context_, req_->getHeader(), std::move(methodName)),
+          &connection_->context_,
+          req_->getHeader(),
+          std::move(methodName),
+          std::move(colocationParams.data)),
       stateMachine_(
           util::includeInRecentRequestsCount(reqContext_.getMethodName()),
-          connection_->getWorker()
-              ->getServer()
-              ->getAdaptiveConcurrencyController(),
-          connection_->getWorker()->getServer()->getCPUConcurrencyController()),
+          server.getAdaptiveConcurrencyController(),
+          server.getCPUConcurrencyController()),
       activeRequestsGuard_(connection_->getWorker()->getActiveRequestsGuard()) {
   new (colocationParams.debugStubToInit) RequestsRegistry::DebugStub(
       *connection_->getWorker()->getRequestsRegistry(),

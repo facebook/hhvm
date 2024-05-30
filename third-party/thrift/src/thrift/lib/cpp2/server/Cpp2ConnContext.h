@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/TypeErasedStorage.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <wangle/ssl/SSLUtil.h>
@@ -545,21 +546,27 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
    * because this may result in a security SEV**/
   Cpp2RequestContext(
       Cpp2ConnContext* ctx,
+      apache::thrift::detail::ServiceInterceptorRequestStorageContext
+          serviceInterceptorsStorage,
       detail::RequestInternalFieldsT internalFields,
       apache::thrift::transport::THeader* header = nullptr,
       std::string methodName = std::string{})
       : TConnectionContext(header),
         ctx_(ctx),
         methodName_(std::move(methodName)),
+        serviceInterceptorsStorage_(std::move(serviceInterceptorsStorage)),
         internalFields_(std::move(internalFields)) {}
 
  public:
   explicit Cpp2RequestContext(
       Cpp2ConnContext* ctx,
       apache::thrift::transport::THeader* header = nullptr,
-      std::string methodName = std::string{})
+      std::string methodName = std::string{},
+      apache::thrift::detail::ServiceInterceptorRequestStorageContext
+          serviceInterceptorsStorage = {})
       : Cpp2RequestContext(
             ctx,
+            std::move(serviceInterceptorsStorage),
             detail::createPerRequestInternalFields(),
             header,
             std::move(methodName)) {}
@@ -756,6 +763,8 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   concurrency::ThreadManager::ExecutionScope executionScope_{
       concurrency::PRIORITY::NORMAL};
   folly::IOBuf frameworkMetadata_;
+  apache::thrift::detail::ServiceInterceptorRequestStorageContext
+      serviceInterceptorsStorage_;
   detail::RequestInternalFieldsT internalFields_;
 };
 

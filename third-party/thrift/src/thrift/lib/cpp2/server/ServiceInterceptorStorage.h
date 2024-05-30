@@ -18,11 +18,18 @@
 
 #include <cstddef>
 
+#include <thrift/lib/cpp2/util/AllocationColocator.h>
 #include <thrift/lib/cpp2/util/TypeErasedStorage.h>
 
 namespace apache::thrift::detail {
 
 using ServiceInterceptorOnRequestStorage =
     util::TypeErasedValue<64, alignof(std::max_align_t)>;
+
+struct ServiceInterceptorRequestStorageContext {
+  std::size_t count = 0;
+  util::AllocationColocator<>::ArrayPtr<ServiceInterceptorOnRequestStorage>
+      onRequest = nullptr;
+};
 
 } // namespace apache::thrift::detail

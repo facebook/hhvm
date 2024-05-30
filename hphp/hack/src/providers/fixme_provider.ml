@@ -260,6 +260,24 @@ let is_disallowed pos code =
   |> Option.value ~default:IMap.empty
   |> IMap.find_opt code
 
+let inf_err_codes = [4110; 4323]
+
+let is_inf_err_code =
+  let inf_err_codes = ISet.of_list inf_err_codes in
+  (fun err_code -> ISet.mem err_code inf_err_codes)
+
+let any_inf_err_code imap =
+  let rec aux = function
+    | [] -> None
+    | code :: codes ->
+      let fixme_opt = IMap.find_opt code imap in
+      if Option.is_none fixme_opt then
+        aux codes
+      else
+        fixme_opt
+  in
+  aux inf_err_codes
+
 let () =
   (Errors.get_hh_fixme_pos :=
      fun err_pos err_code ->
@@ -271,11 +289,7 @@ let () =
            Some err_pos
        else
          match IMap.find_opt err_code imap with
-         | None ->
-           if err_code = 4110 then
-             IMap.find_opt 4323 imap
-           else
-             None
+         | None when is_inf_err_code err_code -> any_inf_err_code imap
          | x -> x);
   (Errors.is_hh_fixme :=
      fun err_pos err_code ->

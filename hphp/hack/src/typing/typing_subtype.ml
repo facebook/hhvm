@@ -3676,14 +3676,13 @@ end = struct
               env
             ||| try_bounds tyl
         in
+
         (* Turn error into a generic error about the type parameter *)
         let bounds = Typing_set.elements other_lower_bounds in
 
         let env_prop = try_bounds bounds env in
-        if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
-          env_prop
-        else
-          if_unsat (invalid ~fail) env_prop)
+
+        if_unsat (invalid ~fail) env_prop)
     (* -- C-Nonnull-R ------------------------------------------------------- *)
     | ( ( _,
           ( Tprim

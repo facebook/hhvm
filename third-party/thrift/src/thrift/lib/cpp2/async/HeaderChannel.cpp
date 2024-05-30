@@ -99,6 +99,9 @@ void HeaderChannel::preprocessHeader(
       header->setDesiredCompressionConfig(compressionConfig);
     }
   }
+  if (loggingContext_) {
+    header->loggingContext() = *loggingContext_;
+  }
 }
 } // namespace thrift
 } // namespace apache

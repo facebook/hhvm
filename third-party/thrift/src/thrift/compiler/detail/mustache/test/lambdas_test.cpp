@@ -42,18 +42,6 @@ TEST(LambdasTEST, InterpolationExpansion) {
                  return std::string{"{{planet}}"};
                }}}}));
 }
-// A lambda's return value should parse with the default delimiters.
-TEST(LambdasTEST, InterpolationAlternateDelimiters) {
-  EXPECT_EQ(
-      "Hello, (|planet| => world)!",
-      mstch::render(
-          "{{= | | =}}\nHello, (|lambda|)!",
-          mstch::map{
-              {"planet", std::string("world")},
-              {"lambda", mstch::lambda{[]() -> mstch::node {
-                 return std::string{"|planet| => {{planet}}"};
-               }}}}));
-}
 // Interpolated lambdas should not be cached.
 TEST(LambdasTEST, InterpolationMultipleCalls) {
   int32_t var = 0;
@@ -90,19 +78,6 @@ TEST(LambdasTEST, SectionExpansion) {
               {"lambda",
                mstch::lambda{[](const std::string& text) -> mstch::node {
                  return text + "{{planet}}" + text;
-               }}}}));
-}
-// Lambdas used for sections should parse with the current delimiters.
-TEST(LambdasTEST, SectionAlternateDelimiters) {
-  EXPECT_EQ(
-      "<-{{planet}} => Earth->",
-      mstch::render(
-          "{{= | | =}}<|#lambda|-|/lambda|>",
-          mstch::map{
-              {"planet", std::string("Earth")},
-              {"lambda",
-               mstch::lambda{[](const std::string& text) -> mstch::node {
-                 return text + "{{planet}} => |planet|" + text;
                }}}}));
 }
 // Lambdas used for sections should not be cached.

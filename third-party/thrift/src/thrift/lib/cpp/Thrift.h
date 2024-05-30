@@ -161,8 +161,6 @@ class FOLLY_EXPORT TLibraryException : public virtual TException {
 
   TLibraryException(const char* message, int errnoValue);
 
-  ~TLibraryException() noexcept override {}
-
   const char* what() const noexcept override {
     if (message_.empty()) {
       return "Default TLibraryException.";

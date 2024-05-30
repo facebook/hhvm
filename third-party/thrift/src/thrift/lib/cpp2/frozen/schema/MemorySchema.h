@@ -68,7 +68,6 @@ namespace schema {
 class MemoryField {
  public:
   MemoryField() = default;
-  ~MemoryField() = default;
 
   inline size_t hash() const {
     return folly::hash::hash_combine(id, layoutId, offset);

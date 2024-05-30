@@ -100,8 +100,6 @@ class FOLLY_EXPORT TTransportException
       : TTransportException(
             TTransportExceptionType(ex.getType()), ex.what(), ex.getErrno()) {}
 
-  ~TTransportException() noexcept override {}
-
   /**
    * Returns an error code that provides information about the type of error
    * that has occurred.

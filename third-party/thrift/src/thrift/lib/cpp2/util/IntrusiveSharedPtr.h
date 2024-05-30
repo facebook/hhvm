@@ -64,6 +64,13 @@ namespace apache::thrift::util {
  * concurrent code, this might be impossible to ensure. This is why it's
  * considered unsafe.
  *
+ * An alternative to unsafeRelease(), named leak(), is provided.
+ * This API is similar to unsafeRelease() except that the ref-count is not
+ * decremented, and thus unique ownership is not required. If the ref-count is
+ * not eventually decremented, the pointed-to object will never be deleted
+ * (memory leak). One way to do this is call fromLeaked() on the released
+ * pointer.
+ *
  * The embedded control block has some implications on the capabilities:
  *   - No std::weak_ptr equivalent — the control block's lifetime is confined by
  *     the pointed-to object, which means that weak references are
@@ -218,6 +225,13 @@ class IntrusiveSharedPtr {
     return nullptr;
   }
 
+  pointer leak() && noexcept {
+    if (ptr_ != nullptr) {
+      return std::exchange(ptr_, nullptr);
+    }
+    return nullptr;
+  }
+
   std::default_delete<T>& get_deleter() noexcept { return deleter_; }
   const std::default_delete<T>& get_deleter() const noexcept {
     return deleter_;
@@ -232,12 +246,19 @@ class IntrusiveSharedPtr {
   IntrusiveSharedPtr(UnsafelyFromRawPointer, pointer ptr) noexcept
       : IntrusiveSharedPtr(ptr) {}
 
+  static IntrusiveSharedPtr fromLeaked(pointer ptr) noexcept {
+    return IntrusiveSharedPtr(FromLeakedRawPointer{}, ptr);
+  }
+
  private:
   explicit IntrusiveSharedPtr(pointer ptr) noexcept : ptr_(ptr) {
     if (ptr_ != nullptr) {
       TAccess::acquireRef(*ptr_);
     }
   }
+
+  struct FromLeakedRawPointer {};
+  IntrusiveSharedPtr(FromLeakedRawPointer, pointer ptr) noexcept : ptr_(ptr) {}
 
   void resetImpl(pointer ptr) noexcept {
     if (ptr_ == ptr) {

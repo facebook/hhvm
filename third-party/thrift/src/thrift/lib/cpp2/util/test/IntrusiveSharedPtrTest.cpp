@@ -540,6 +540,22 @@ TEST(IntrusiveSharedPtrDeathTest, NonUniqueRelease) {
       "Tried to release non-unique InstrusiveSharedPtr");
 }
 
+TEST(IntrusiveSharedPtrTest, Leak) {
+  LifetimeTracker::Counts counts;
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make(&counts);
+
+  auto ptr = std::move(p1).leak();
+  EXPECT_EQ(ptr->numAcquires(), 1);
+  EXPECT_EQ(ptr->numReleases(), 0);
+  // @lint-ignore CLANGTIDY bugprone-use-after-move
+  EXPECT_EQ(p1, nullptr);
+
+  LifetimeTracker::Ptr p2 = LifetimeTracker::Ptr::fromLeaked(ptr);
+  EXPECT_EQ(ptr->numAcquires(), 1);
+  EXPECT_EQ(ptr->numReleases(), 0);
+  EXPECT_EQ(p2.get(), ptr);
+}
+
 namespace {
 template <class T>
 auto hash(T&& value) {

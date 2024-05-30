@@ -58,8 +58,7 @@ class render_section {
       section_str += token.raw();
     template_type interpreted{
         fun([this](const node& n) { return n.visit(render_node(m_ctx)); },
-            section_str),
-        m_delims};
+            section_str)};
     return render_context::push(m_ctx).render(interpreted);
   }
 

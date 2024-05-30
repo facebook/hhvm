@@ -32,14 +32,7 @@ namespace apache {
 namespace thrift {
 namespace mstch {
 
-template_type::template_type(const std::string& str, const delim_type& delims)
-    : m_open(delims.first), m_close(delims.second) {
-  tokenize(str);
-  strip_whitespace();
-}
-
-template_type::template_type(const std::string& str)
-    : m_open("{{"), m_close("}}") {
+template_type::template_type(const std::string& str) {
   tokenize(str);
   strip_whitespace();
 }
@@ -62,17 +55,17 @@ void template_type::tokenize(const std::string& tmp) {
   auto npos = std::string::npos;
 
   for (std::size_t cur_pos = 0; cur_pos < tmp.size();) {
-    auto open_pos = tmp.find(m_open, cur_pos);
+    auto open_pos = tmp.find(kOpen, cur_pos);
     auto close_pos =
-        tmp.find(m_close, open_pos == npos ? open_pos : open_pos + 1);
+        tmp.find(kClose, open_pos == npos ? open_pos : open_pos + 1);
 
     if (close_pos != npos && open_pos != npos) {
       process_text(beg + cur_pos, beg + open_pos);
-      cur_pos = close_pos + m_close.size();
+      cur_pos = close_pos + kClose.size();
       m_tokens.push_back(
-          {{beg + open_pos, beg + close_pos + m_close.size()},
-           m_open.size(),
-           m_close.size()});
+          {{beg + open_pos, beg + close_pos + kClose.size()},
+           kOpen.size(),
+           kClose.size()});
 
       if (cur_pos == tmp.size()) {
         m_tokens.push_back({{""}});

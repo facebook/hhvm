@@ -205,7 +205,7 @@ public class RSocketThriftClientTest {
 
     /// Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available
     // ports
-    for (int i = 0; i < 400; i++) {
+    for (int i = 0; i < 50000; i++) {
       client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       System.out.println("Sent call " + i);
     }
@@ -231,7 +231,7 @@ public class RSocketThriftClientTest {
             .build(factory, address);
 
     // Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available ports
-    for (int i = 0; i < 400; i++) {
+    for (int i = 0; i < 50000; i++) {
       try {
         client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       } catch (Exception e) {
@@ -256,7 +256,7 @@ public class RSocketThriftClientTest {
             .build(factory, address);
 
     // These calls should succeed.
-    for (int i = 0; i < 400; i++) {
+    for (int i = 0; i < 50000; i++) {
       client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       System.out.println("Sent call " + i);
     }

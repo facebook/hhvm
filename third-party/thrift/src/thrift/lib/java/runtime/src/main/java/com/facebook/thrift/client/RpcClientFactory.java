@@ -47,6 +47,7 @@ public interface RpcClientFactory {
     private List<ThriftClientEventHandler> clientEventHandlers;
     private int connectionPoolSize = RpcResources.getNumEventLoopThreads();
     private boolean handleHeaderResponse = false;
+    private boolean cacheClient = true;
 
     private ThriftClientConfig thriftClientConfig;
     private ThriftClientStats thriftClientStats = ThriftClientStatsHolder.getThriftClientStats();
@@ -131,6 +132,10 @@ public interface RpcClientFactory {
         } else {
           rpcClientFactory = new RSocketRpcClientFactory(thriftClientConfig);
           ClientInfo.addTransport(ClientInfo.Transport.ROCKET);
+        }
+        // If cache is enabled, wrap it with CachedRpcClientFactory
+        if (cacheClient) {
+          rpcClientFactory = new CachedRpcClientFactory(rpcClientFactory);
         }
       }
 

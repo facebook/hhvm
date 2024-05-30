@@ -71,7 +71,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "assign_local.php", line 11, character 3 - line 11, character 5:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  7 | function »foo«(Sub $_): void {}
  8 | 

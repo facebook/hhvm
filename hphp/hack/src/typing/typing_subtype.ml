@@ -3704,11 +3704,14 @@ end = struct
     (* supportdyn<t> <: nonnull iff t <: nonnull *)
     | ((r, Tnewtype (name, [tyarg], _)), (r_nonnull, Tnonnull))
       when String.equal name SN.Classes.cSupportDyn ->
+      let ty_sub =
+        Prov.(update tyarg ~env ~f:(fun into -> flow ~from:r ~into))
+      in
       env
       |> simplify
            ~subtype_env
            ~this_ty
-           ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg }
+           ~lhs:{ sub_supportdyn = Some r; ty_sub }
            ~rhs:
              {
                super_like = false;
@@ -4333,11 +4336,17 @@ end = struct
       match deref ty_sub with
       | (r, Tnewtype (name_sub, [tyarg_sub], _))
         when String.equal name_sub SN.Classes.cSupportDyn ->
+        let ty_sub =
+          Prov.(update tyarg_sub ~env ~f:(fun into -> flow ~from:r ~into))
+        and ty_super =
+          Prov.(
+            update lty_inner ~env ~f:(fun into -> flow ~from:r_supportdyn ~into))
+        in
         simplify
           ~subtype_env
           ~this_ty
-          ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg_sub }
-          ~rhs:{ super_like; super_supportdyn = true; ty_super = lty_inner }
+          ~lhs:{ sub_supportdyn = Some r; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = true; ty_super }
           env
       | (_, Tvar _) ->
         default_subtype

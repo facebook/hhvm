@@ -29,6 +29,14 @@ File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
 
 flows *into* this hint, via the (contravariant) 1st function parameter
 
+ 5 | namespace HH {
+ 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
+ 7 | }
+
+File "/tmp/BOCVAQgD9C/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+
+which itself flows *from* this hint
+
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2((function(»(function(Super): void)«): void) $f): void {
  8 |   foo_2($f);
@@ -36,7 +44,33 @@ flows *into* this hint, via the (contravariant) 1st function parameter
 
 File "fn_subtyping_contra_2.php", line 7, character 26 - line 7, character 48:
 
+which itself flows *from* this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function(»(function(Super): void)«): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 26 - line 7, character 48:
+
+which itself flows *from* this declaration
+
+ 6 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
+
 which itself flows *from* this hint, via the (contravariant) 1st function parameter
+
+ 5 | namespace HH {
+ 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
+ 7 | }
+
+File "/tmp/BOCVAQgD9C/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+
+which itself flows *into* this hint
 
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
@@ -72,7 +106,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "fn_subtyping_contra_2.php", line 8, character 3 - line 8, character 7:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  6 | function »foo_2«((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
@@ -83,12 +117,38 @@ File "fn_subtyping_contra_2.php", line 6, character 10 - line 6, character 14:
 
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 16 - line 7, character 56:
+
+which itself flows *into* this declaration
+
  6 | function foo_2(»(function((function(Sub): void)): void)« $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
  8 |   foo_2($f);
  9 | }
 
 File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
+
+which itself flows *into* this hint
+
+ 6 | function foo_2(»(function((function(Sub): void)): void)« $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
+
+which itself flows *into* this hint
+
+ 5 | namespace HH {
+ 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
+ 7 | }
+
+File "/tmp/BOCVAQgD9C/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows *from* this hint, via the (contravariant) 1st function parameter
 
@@ -98,6 +158,14 @@ which itself flows *from* this hint, via the (contravariant) 1st function parame
  9 | }
 
 File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
+
+which itself flows *from* this hint
+
+ 5 | namespace HH {
+ 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
+ 7 | }
+
+File "/tmp/BOCVAQgD9C/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 

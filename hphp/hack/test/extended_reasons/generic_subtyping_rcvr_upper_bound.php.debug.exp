@@ -99,7 +99,7 @@ Flow:
                   ]
                 },
                 {
-                  "Rwitness_from_decl":[
+                  "Rsupport_dynamic_type":[
                     {
                       "filename":"generic_subtyping_rcvr_upper_bound.php",
                       "line":7,

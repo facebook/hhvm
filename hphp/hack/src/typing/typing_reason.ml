@@ -1335,6 +1335,7 @@ let rec explain_witness = function
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
   | Rmissing_field -> (Pos_or_decl.none, "nothing")
   | Rwitness_from_decl pos -> (pos, "this declaration")
+  | Rsupport_dynamic_type pos -> (pos, "this function or method ")
   | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
   | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
   | Rcstr_on_generics (pos, _) ->

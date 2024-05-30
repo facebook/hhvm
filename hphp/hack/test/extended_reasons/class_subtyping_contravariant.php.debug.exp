@@ -60,7 +60,7 @@ Flow:
                             {
                               "Rflow":[
                                 {
-                                  "Rwitness_from_decl":[
+                                  "Rsupport_dynamic_type":[
                                     {
                                       "filename":"class_subtyping_contravariant.php",
                                       "line":11,

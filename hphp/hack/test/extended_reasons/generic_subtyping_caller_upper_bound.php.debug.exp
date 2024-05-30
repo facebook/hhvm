@@ -91,7 +91,7 @@ Flow:
                       ]
                     },
                     {
-                      "Rwitness_from_decl":[
+                      "Rsupport_dynamic_type":[
                         {
                           "filename":"generic_subtyping_caller_upper_bound.php",
                           "line":7,

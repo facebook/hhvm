@@ -6951,9 +6951,13 @@ end = struct
                   flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
-        | (_, Tnewtype (name, [ty], _))
+        | (r, Tnewtype (name, [ty], _))
           when String.equal name SN.Classes.cSupportDyn ->
-          let (env, ty) = Env.expand_type env ty in
+          (* Under extended-reasons we want to use the reason on the newtype since this is
+             the type at which we recorded the contravariant flow from the decl *)
+          let (env, ty) =
+            Env.expand_type env @@ Prov.(update ty ~env ~f:(fun _ -> r))
+          in
           begin
             match get_node ty with
             (* If we have a function type of the form supportdyn<(function(t):~u)> then it does no

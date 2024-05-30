@@ -40,7 +40,7 @@ flows *into* this hint, via the (contravariant) 2nd type parameter of the class 
 
 File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows *from* this declaration, via the (contravariant) 1st function parameter
+which itself flows *from* this function or method , via the (contravariant) 1st function parameter
 
  11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
  12 | 

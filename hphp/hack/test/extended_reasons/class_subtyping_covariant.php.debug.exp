@@ -108,7 +108,7 @@ Flow:
                                   ]
                                 },
                                 {
-                                  "Rwitness_from_decl":[
+                                  "Rsupport_dynamic_type":[
                                     {
                                       "filename":"class_subtyping_covariant.php",
                                       "line":11,

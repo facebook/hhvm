@@ -90,7 +90,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
 10 | 

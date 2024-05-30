@@ -78,7 +78,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "shape_subtyping_2.php", line 11, character 3 - line 11, character 27:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  3 | function »expects_required_a_at_int«(
  4 |   shape('a' => int) $s,

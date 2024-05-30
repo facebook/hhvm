@@ -70,7 +70,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "generic_subtyping_caller_upper_bound.php", line 10, character 3 - line 10, character 15:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  7 | function »rcvr_concrete«(B $x): void {}
  8 | 

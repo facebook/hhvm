@@ -39,55 +39,83 @@ Flow:
             {
               "Rflow":[
                 {
-                  "Rhint":[
-                    {
-                      "filename":"fn_subtyping_variadic_1.php",
-                      "line":6,
-                      "char_start":25,
-                      "char_end":51
-                    }
-                  ]
-                },
-                {
                   "Rflow":[
                     {
-                      "Rprj_symm":[
-                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                      "Rflow":[
                         {
-                          "Rflow":[
+                          "Rhint":[
                             {
-                              "Rwitness_from_decl":[
-                                {
-                                  "filename":"fn_subtyping_variadic_1.php",
-                                  "line":6,
-                                  "char_start":10,
-                                  "char_end":23
-                                }
-                              ]
-                            },
+                              "filename":"/tmp/9zCXu0XHa8/supportdynamic.hhi",
+                              "line":6,
+                              "char_start":33,
+                              "char_end":45
+                            }
+                          ]
+                        },
+                        {
+                          "Rhint":[
                             {
-                              "Rwitness":[
-                                {
-                                  "filename":"fn_subtyping_variadic_1.php",
-                                  "line":8,
-                                  "char_start":3,
-                                  "char_end":16
-                                }
-                              ]
+                              "filename":"fn_subtyping_variadic_1.php",
+                              "line":6,
+                              "char_start":25,
+                              "char_end":51
                             }
                           ]
                         }
                       ]
                     },
                     {
+                      "Rwitness_from_decl":[
+                        {
+                          "filename":"fn_subtyping_variadic_1.php",
+                          "line":6,
+                          "char_start":25,
+                          "char_end":51
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"fn_subtyping_variadic_1.php",
+                          "line":7,
+                          "char_start":25,
+                          "char_end":47
+                        }
+                      ]
+                    },
+                    {
                       "Rflow":[
                         {
-                          "Rwitness":[
+                          "Rprj_symm":[
+                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
                             {
-                              "filename":"fn_subtyping_variadic_1.php",
-                              "line":8,
-                              "char_start":18,
-                              "char_end":19
+                              "Rflow":[
+                                {
+                                  "Rsupport_dynamic_type":[
+                                    {
+                                      "filename":"fn_subtyping_variadic_1.php",
+                                      "line":6,
+                                      "char_start":10,
+                                      "char_end":23
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rwitness":[
+                                    {
+                                      "filename":"fn_subtyping_variadic_1.php",
+                                      "line":8,
+                                      "char_start":3,
+                                      "char_end":16
+                                    }
+                                  ]
+                                }
+                              ]
                             }
                           ]
                         },
@@ -97,19 +125,47 @@ Flow:
                               "Rwitness":[
                                 {
                                   "filename":"fn_subtyping_variadic_1.php",
-                                  "line":7,
-                                  "char_start":49,
-                                  "char_end":50
+                                  "line":8,
+                                  "char_start":18,
+                                  "char_end":19
                                 }
                               ]
                             },
                             {
-                              "Rhint":[
+                              "Rflow":[
                                 {
-                                  "filename":"fn_subtyping_variadic_1.php",
-                                  "line":7,
-                                  "char_start":25,
-                                  "char_end":47
+                                  "Rwitness":[
+                                    {
+                                      "filename":"fn_subtyping_variadic_1.php",
+                                      "line":7,
+                                      "char_start":49,
+                                      "char_end":50
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"fn_subtyping_variadic_1.php",
+                                          "line":7,
+                                          "char_start":25,
+                                          "char_end":47
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"/tmp/9zCXu0XHa8/supportdynamic.hhi",
+                                          "line":6,
+                                          "char_start":33,
+                                          "char_end":45
+                                        }
+                                      ]
+                                    }
+                                  ]
                                 }
                               ]
                             }

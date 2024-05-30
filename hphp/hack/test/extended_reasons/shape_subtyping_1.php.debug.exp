@@ -60,7 +60,7 @@ Flow:
                               "Rwitness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":3,"char_end":27}]
                             },
                             {
-                              "Rwitness_from_decl":[{"filename":"shape_subtyping_1.php","line":3,"char_start":10,"char_end":34}]
+                              "Rsupport_dynamic_type":[{"filename":"shape_subtyping_1.php","line":3,"char_start":10,"char_end":34}]
                             }
                           ]
                         }

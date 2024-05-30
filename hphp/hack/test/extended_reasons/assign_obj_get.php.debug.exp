@@ -55,7 +55,7 @@ Flow:
                   "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":5}]
                 },
                 {
-                  "Rwitness_from_decl":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+                  "Rsupport_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
                 }
               ]
             }

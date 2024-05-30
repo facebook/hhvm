@@ -90,7 +90,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "shape_subtyping_5.php", line 14, character 3 - line 14, character 33:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type optional_a_at_int = shape(?'a' => int);

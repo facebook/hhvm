@@ -62,7 +62,7 @@ Flow:
                   "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":5}]
                 },
                 {
-                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+                  "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
                 }
               ]
             }

@@ -52,7 +52,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "newtype1.php--file2.php", line 8, character 10 - line 8, character 20:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  3 | function »expect_bool«(bool $x): bool {
  4 |   return $x;

@@ -108,7 +108,7 @@ Flow:
                                   ]
                                 },
                                 {
-                                  "Rwitness_from_decl":[
+                                  "Rsupport_dynamic_type":[
                                     {
                                       "filename":"class_subtyping_invariant.php",
                                       "line":11,
@@ -219,7 +219,7 @@ Flow:
                             {
                               "Rflow":[
                                 {
-                                  "Rwitness_from_decl":[
+                                  "Rsupport_dynamic_type":[
                                     {
                                       "filename":"class_subtyping_invariant.php",
                                       "line":11,

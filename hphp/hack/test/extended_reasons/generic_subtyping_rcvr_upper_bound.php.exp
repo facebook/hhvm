@@ -80,7 +80,7 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
 
 File "generic_subtyping_rcvr_upper_bound.php", line 10, character 3 - line 10, character 18:
 
-which itself flows *from* this declaration
+which itself flows *from* this function or method 
 
  7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
  8 | 

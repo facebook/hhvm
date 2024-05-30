@@ -32,6 +32,10 @@ class ThriftStreamShim;
 } // namespace flowable
 } // namespace yarpl
 
+namespace testutil::testservice {
+class TestStreamProducerCallbackService;
+}
+
 namespace apache {
 namespace thrift {
 
@@ -116,6 +120,7 @@ class ServerStream {
   friend class yarpl::flowable::ThriftStreamShim;
   friend class ServerStreamMultiPublisher<T, false>;
   friend class ServerStreamMultiPublisher<T, true>;
+  friend class testutil::testservice::TestStreamProducerCallbackService;
 };
 
 template <typename Response, typename StreamElement>

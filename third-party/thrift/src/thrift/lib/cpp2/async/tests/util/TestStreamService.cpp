@@ -315,5 +315,127 @@ TestStreamMultiPublisherWithHeaderService::range(
   return stream;
 }
 
+using namespace apache::thrift::detail;
+class TestProducerCallback : public ServerGeneratorStream::ProducerCallback {
+ public:
+  TestProducerCallback(
+      int32_t from,
+      int32_t to,
+      folly::exception_wrapper&& ew,
+      folly::Executor::KeepAlive<> executor,
+      StreamElementEncoder<int32_t>* encoder)
+      : from_(from),
+        to_(to),
+        ew_(std::move(ew)),
+        executor_(executor),
+        encoder_(encoder) {}
+
+  void provideStream(ServerGeneratorStream::Ptr stream) override {
+    stream_ = std::move(stream);
+    executor_->add([this] { run(); });
+  }
+
+  void run() {
+    SCOPE_EXIT {
+      stream_->serverClose();
+      delete this;
+    };
+    for (int i = from_; i <= to_; ++i) {
+      if (credits_ == 0 && updateCreditsOrCancel()) {
+        return;
+      }
+      stream_->publish((*encoder_)(std::move(i)));
+      --credits_;
+    }
+    if (ew_) {
+      stream_->publish((*encoder_)(std::move(ew_)));
+    } else {
+      stream_->publish({});
+    }
+  }
+
+  // returns true iff stream was cancelled by client
+  bool updateCreditsOrCancel() {
+    ServerStreamConsumerBaton<folly::Baton<>> consumer;
+    if (stream_->wait(&consumer)) {
+      consumer.baton.wait();
+    }
+
+    auto queue = stream_->getMessages();
+    while (!queue.empty()) {
+      auto next = queue.front();
+      queue.pop();
+      switch (next) {
+        case StreamControl::CANCEL:
+          return true;
+        case StreamControl::PAUSE:
+        case StreamControl::RESUME:
+          // ignore pause/resume events
+          continue;
+        default:
+          credits_ += next;
+          break;
+      }
+    }
+    return false;
+  }
+
+ private:
+  int32_t from_;
+  int32_t to_;
+  uint64_t credits_{0};
+  folly::exception_wrapper ew_;
+  ServerGeneratorStream::Ptr stream_;
+  folly::Executor::KeepAlive<> executor_;
+  StreamElementEncoder<int32_t>* encoder_;
+};
+
+apache::thrift::ServerStream<int32_t> TestStreamProducerCallbackService::range(
+    int32_t from, int32_t to) {
+  return apache::thrift::ServerStream<
+      int32_t>([from, to](
+                   folly::Executor::KeepAlive<> executor,
+                   apache::thrift::detail::StreamElementEncoder<int32_t>*
+                       encoder) mutable {
+    return apache::thrift::detail::ServerGeneratorStream::fromProducerCallback(
+        new TestProducerCallback(from, to, {}, executor, encoder));
+  });
+}
+
+apache::thrift::ServerStream<int32_t>
+TestStreamProducerCallbackService::rangeThrow(int32_t from, int32_t to) {
+  return apache::thrift::ServerStream<
+      int32_t>([from, to](
+                   folly::Executor::KeepAlive<> executor,
+                   apache::thrift::detail::StreamElementEncoder<int32_t>*
+                       encoder) mutable {
+    return apache::thrift::detail::ServerGeneratorStream::fromProducerCallback(
+        new TestProducerCallback(
+            from,
+            to,
+            folly::make_exception_wrapper<std::runtime_error>(
+                "I am a search bar"),
+            executor,
+            encoder));
+  });
+}
+
+apache::thrift::ServerStream<int32_t>
+TestStreamProducerCallbackService::rangeThrowUDE(int32_t from, int32_t to) {
+  return apache::thrift::ServerStream<
+      int32_t>([from, to](
+                   folly::Executor::KeepAlive<> executor,
+                   apache::thrift::detail::StreamElementEncoder<int32_t>*
+                       encoder) mutable {
+    return apache::thrift::detail::ServerGeneratorStream::fromProducerCallback(
+        new TestProducerCallback(
+            from,
+            to,
+            folly::make_exception_wrapper<UserDefinedException>(),
+            executor,
+            encoder));
+  });
+}
+
 } // namespace testservice
 } // namespace testutil

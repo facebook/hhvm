@@ -26,6 +26,13 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 
+namespace HPHP::thrift {
+struct TServerStream;
+}
+namespace testutil::testservice {
+class TestProducerCallback;
+}
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -67,6 +74,19 @@ class ServerGeneratorStream : public TwoWayBridge<
                                   ServerGeneratorStream>,
                               private StreamServerCallback {
  public:
+  class ProducerCallback {
+   public:
+    // Producer can call stream->publish() to send serialized stream chunks.
+    // Producer needs to wait for messages from client (eg.
+    // credits/cancellation) by calling stream->wait() and then using
+    // stream->getMessages() to get the messages once they are ready.
+    // Producer needs to call stream->serverClose() and destroy the stream
+    // `Ptr` when it is done.
+    virtual void provideStream(Ptr stream) = 0;
+    virtual ~ProducerCallback() = default;
+  };
+  static ServerStreamFactory fromProducerCallback(ProducerCallback* cb);
+
   ~ServerGeneratorStream() override;
 
 #if FOLLY_HAS_COROUTINES
@@ -117,6 +137,9 @@ class ServerGeneratorStream : public TwoWayBridge<
 #if FOLLY_HAS_COROUTINES
   folly::CancellationSource cancelSource_;
 #endif
+
+  friend struct HPHP::thrift::TServerStream;
+  friend class testutil::testservice::TestProducerCallback;
 };
 
 } // namespace detail

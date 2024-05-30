@@ -31,7 +31,8 @@ using TestTypes = ::testing::Types<
     TestStreamGeneratorService,
     TestStreamPublisherService,
     TestStreamGeneratorWithHeaderService,
-    TestStreamPublisherWithHeaderService>;
+    TestStreamPublisherWithHeaderService,
+    TestStreamProducerCallbackService>;
 TYPED_TEST_CASE(StreamServiceTest, TestTypes);
 
 using RichPayloadReceived = ClientBufferedStream<int32_t>::RichPayloadReceived;

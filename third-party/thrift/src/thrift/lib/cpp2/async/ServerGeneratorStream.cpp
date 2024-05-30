@@ -34,6 +34,22 @@ ServerGeneratorStream::ServerGeneratorStream(
 
 ServerGeneratorStream::~ServerGeneratorStream() {}
 
+/* static */ ServerStreamFactory ServerGeneratorStream::fromProducerCallback(
+    ProducerCallback* cb) {
+  return ServerStreamFactory([cb](
+                                 FirstResponsePayload&& payload,
+                                 StreamClientCallback* callback,
+                                 folly::EventBase* clientEb,
+                                 TilePtr&&) mutable {
+    DCHECK(clientEb->isInEventBaseThread());
+    auto stream = new ServerGeneratorStream(callback, clientEb);
+    std::ignore =
+        callback->onFirstResponse(std::move(payload), clientEb, stream);
+    cb->provideStream(stream->copy());
+    stream->processPayloads();
+  });
+}
+
 void ServerGeneratorStream::consume() {
   clientEventBase_->add([this]() { processPayloads(); });
 }

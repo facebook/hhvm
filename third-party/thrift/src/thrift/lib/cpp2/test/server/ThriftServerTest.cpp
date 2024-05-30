@@ -2012,7 +2012,6 @@ TEST_P(OverloadTest, Test) {
   }
 
   RpcOptions rpcOptions;
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
   try {
     if (errorType == ErrorType::MethodOverload) {
       std::string dummy;

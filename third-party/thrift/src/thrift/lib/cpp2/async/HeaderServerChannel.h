@@ -32,8 +32,6 @@
 namespace apache {
 namespace thrift {
 
-constexpr folly::StringPiece kClientLoggingHeader("client_logging_enabled");
-
 /**
  * HeaderServerChannel
  *

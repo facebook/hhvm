@@ -6376,41 +6376,13 @@ end = struct
       (sub_supportdyn, tys_sub)
       rhs
       env =
-    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
-      (* Under extended reasons, record the errors for each disjunct *)
-      let rec aux tys ~errs ~props ~env =
-        match tys with
-        | [] ->
-          ( env,
-            TL.Disj
-              ( Typing_error.intersect_opt @@ List.filter_opt errs,
-                List.rev props ) )
-        | ty :: tys ->
-          let ty_sub = update_reason ty ~env in
-          let (env, prop) =
-            mk_prop
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs
-              env
-          in
-          if TL.is_valid prop then
-            (env, prop)
-          else (
-            match TL.get_error_if_unsat prop with
-            | Some err -> aux tys ~errs:(err :: errs) ~props ~env
-            | None -> aux tys ~errs ~props:(prop :: props) ~env
-          )
-      in
-      aux tys_sub ~errs:[] ~props:[] ~env
-    else
-      List.fold_left
-        tys_sub
-        ~init:(env, TL.invalid ~fail)
-        ~f:(fun res ty_sub ->
-          res
-          ||| mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs)
+    List.fold_left
+      tys_sub
+      ~init:(env, TL.invalid ~fail)
+      ~f:(fun res ty_sub ->
+        let ty_sub = update_reason ty_sub ~env in
+        res
+        ||| mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs)
 
   let simplify_generic_l
       ~subtype_env

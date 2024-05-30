@@ -17,38 +17,19 @@ intersection_subtyping.php:9:10
 
 error: Typing[4110] Invalid return type [1]
 -> Expected C [2]
--> But got A [3]
+-> But got (A & I) [3]
 -> Here's why: this hint [3]
--> flows into this hint, via the intersection type [4]
+-> flows into this expression [4]
 -> which itself flows into this expression [5]
--> which itself flows into this expression [6]
 -> which itself flows into this expression [1]
 -> which itself flows into this hint [2]
 
 intersection_subtyping.php:14:10
-          10 | }
-          11 | 
-[2,3,4,5] 12 | function inter_l((A & I) $ai): C {
-[6]       13 |   $c = $ai;
-[1]       14 |   return $c;
-          15 | }
+        10 | }
+        11 | 
+[2,3,4] 12 | function inter_l((A & I) $ai): C {
+[5]     13 |   $c = $ai;
+[1]     14 |   return $c;
+        15 | }
 
-error: Typing[4110] Invalid return type [1]
--> Expected C [2]
--> But got I [3]
--> Here's why: this hint [3]
--> flows into this hint, via the intersection type [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this hint [2]
-
-intersection_subtyping.php:14:10
-          10 | }
-          11 | 
-[2,3,4,5] 12 | function inter_l((A & I) $ai): C {
-[6]       13 |   $c = $ai;
-[1]       14 |   return $c;
-          15 | }
-
-3 errors found.
+2 errors found.

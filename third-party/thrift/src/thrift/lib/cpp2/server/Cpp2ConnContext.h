@@ -746,6 +746,13 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return nullptr;
   }
 
+  detail::ServiceInterceptorOnRequestStorage*
+  getStorageForServiceInterceptorOnRequestByIndex(std::size_t index) {
+    DCHECK_NE(serviceInterceptorsStorage_.onRequest.get(), nullptr);
+    DCHECK_LE(index, serviceInterceptorsStorage_.count);
+    return &serviceInterceptorsStorage_.onRequest[index];
+  }
+
  protected:
   apache::thrift::server::TServerObserver::CallTimestamps timestamps_;
 

@@ -991,12 +991,13 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest() {
       serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::exception_ptr> exceptions;
 
-  for (auto& interceptor : serviceInterceptors) {
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     auto connectionInfo =
         ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
-    auto requestInfo = ServiceInterceptorBase::RequestInfo{reqCtx_};
+    auto requestInfo = ServiceInterceptorBase::RequestInfo{
+        reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
     try {
-      co_await interceptor->internal_onRequest(
+      co_await serviceInterceptors[i]->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));
     } catch (...) {
       exceptions.emplace_back(std::current_exception());
@@ -1027,7 +1028,8 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
   for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
     auto connectionInfo =
         ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
-    auto responseInfo = ServiceInterceptorBase::ResponseInfo{reqCtx_};
+    auto responseInfo = ServiceInterceptorBase::ResponseInfo{
+        reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
     try {
       co_await serviceInterceptors[i]->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));

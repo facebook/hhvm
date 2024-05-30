@@ -18,6 +18,8 @@
 
 #include <folly/experimental/coro/Task.h>
 
+#include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
+
 namespace apache::thrift {
 
 class ServiceInterceptorBase;
@@ -42,12 +44,14 @@ class ServiceInterceptorBase {
 
   struct RequestInfo {
     const Cpp2RequestContext* context = nullptr;
+    detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo) = 0;
 
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;
+    detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo) = 0;

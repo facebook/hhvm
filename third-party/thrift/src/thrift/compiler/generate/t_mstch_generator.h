@@ -43,9 +43,6 @@ class t_mstch_generator : public t_generator {
 
   virtual std::string template_prefix() const = 0;
 
-  // Return true to use <% and %> as delimiters instead of {{ and }}.
-  virtual bool convert_delimiter() const { return false; }
-
  protected:
   /**
    * If true, typedefs will be automatically resolved to their underlying type.

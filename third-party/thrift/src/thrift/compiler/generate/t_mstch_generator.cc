@@ -420,10 +420,6 @@ void t_mstch_generator::gen_template_map(const std::filesystem::path& root) {
       // Remove a single '\n' or '\r\n' or '\r' at end, if present.
       chomp_last_char(&tpl, '\n');
       chomp_last_char(&tpl, '\r');
-      if (convert_delimiter()) {
-        tpl = "{{=<% %>=}}\n" + tpl;
-      }
-
       template_map_.emplace(name.generic_string(), std::move(tpl));
     }
   }

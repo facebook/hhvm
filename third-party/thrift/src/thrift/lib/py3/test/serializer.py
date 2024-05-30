@@ -39,7 +39,6 @@ from testing.types import (
     StringBucket,
     StrStrMap,
 )
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.exceptions import Error
 from thrift.py3.serializer import (
@@ -232,7 +231,6 @@ class SerializerTests(SerializerTestBase):
         control = Integers(large=2**32)
         self.pickle_round_robin(control)
 
-    @brokenInAutoMigrate()
     def test_pickle_sequence(self) -> None:
         control = I32List([1, 2, 3, 4])
         self.pickle_round_robin(control)
@@ -242,12 +240,10 @@ class SerializerTests(SerializerTestBase):
         assert data
         self.pickle_round_robin(data)
 
-    @brokenInAutoMigrate()
     def test_pickle_set(self) -> None:
         control = SetI32({1, 2, 3, 4})
         self.pickle_round_robin(control)
 
-    @brokenInAutoMigrate()
     def test_pickle_mapping(self) -> None:
         control = StrStrMap({"test": "test", "foo": "bar"})
         self.pickle_round_robin(control)

@@ -31,7 +31,7 @@ import (
 type rocketProtocol struct {
 	Format
 
-	socket rocketSocket
+	conn net.Conn
 
 	// rsocket client state
 	ctx    context.Context
@@ -54,7 +54,6 @@ type rocketProtocol struct {
 // rocketSocket is a minimal interface for thrift.Socket
 type rocketSocket interface {
 	Conn() net.Conn
-	Close() error
 }
 
 var _ rocketSocket = (*socket)(nil)
@@ -68,7 +67,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 	}
 	switch t := trans.(type) {
 	case rocketSocket:
-		p.socket = t
+		p.conn = t.Conn()
 	default:
 		panic(NewTransportException(
 			NOT_IMPLEMENTED,
@@ -173,13 +172,12 @@ func (p *rocketProtocol) open() error {
 	if p.client != nil {
 		return nil
 	}
-	conn := p.socket.Conn()
 	setupPayload, err := newRequestSetupPayloadVersion8()
 	if err != nil {
 		return err
 	}
 	transporter := func(ctx context.Context) (*transport.Transport, error) {
-		return transport.NewTCPClientTransport(conn), nil
+		return transport.NewTCPClientTransport(p.conn), nil
 	}
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	p.client, err = rsocket.Connect().
@@ -304,7 +302,7 @@ func (p *rocketProtocol) GetResponseHeaders() map[string]string {
 }
 
 func (p *rocketProtocol) Close() error {
-	if err := p.socket.Close(); err != nil {
+	if err := p.conn.Close(); err != nil {
 		return err
 	}
 	if p.client != nil {

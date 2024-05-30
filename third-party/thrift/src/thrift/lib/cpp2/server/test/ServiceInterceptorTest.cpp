@@ -222,6 +222,41 @@ CO_TEST(ServiceInterceptorTest, BasicVoidReturn) {
   }
 }
 
+TEST(ServiceInterceptorTest, OnStartServing) {
+  struct ServiceInterceptorCountOnStartServing
+      : public ServiceInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+
+    folly::coro::Task<void> co_onStartServing(InitParams) override {
+      onStartServingCount++;
+      co_return;
+    }
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        RequestInfo) override {
+      co_return folly::unit;
+    }
+
+    folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) override {
+      co_return;
+    }
+
+    int onStartServingCount = 0;
+  };
+  auto interceptor1 = std::make_shared<ServiceInterceptorCountOnStartServing>();
+  auto interceptor2 = std::make_shared<ServiceInterceptorCountOnStartServing>();
+  ScopedServerInterfaceThread runner(
+      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
+      });
+
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onStartServingCount, 1);
+  }
+}
+
 CO_TEST(ServiceInterceptorTest, OnRequestException) {
   auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnRequest>();
   auto interceptor2 =

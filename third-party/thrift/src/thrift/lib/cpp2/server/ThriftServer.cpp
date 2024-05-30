@@ -40,6 +40,7 @@
 #include <folly/executors/thread_factory/NamedThreadFactory.h>
 #include <folly/executors/thread_factory/PriorityThreadFactory.h>
 #include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/CurrentExecutor.h>
 #include <folly/experimental/coro/Invoke.h>
 #include <folly/io/GlobalShutdownSocketSet.h>
@@ -1704,6 +1705,17 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
 }
 
 void ThriftServer::callOnStartServing() {
+#if FOLLY_HAS_COROUTINES
+  {
+    ServiceInterceptorBase::InitParams initParams;
+    std::vector<folly::coro::Task<void>> tasks;
+    for (auto& serviceInterceptor : getServiceInterceptors()) {
+      tasks.emplace_back(serviceInterceptor->co_onStartServing(initParams));
+    }
+    folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
+  }
+#endif // FOLLY_HAS_COROUTINES
+
   auto handlerList = collectServiceHandlers();
   // Exception is handled in setup()
   std::vector<folly::SemiFuture<folly::Unit>> futures;

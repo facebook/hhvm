@@ -78,16 +78,6 @@ void template_type::tokenize(const std::string& tmp) {
         m_tokens.push_back({{""}});
         m_tokens.back().eol(true);
       }
-
-      if (*(beg + open_pos + m_open.size()) == '=' &&
-          *(beg + close_pos - 1) == '=') {
-        auto tok_beg = beg + open_pos + m_open.size() + 1;
-        auto tok_end = beg + close_pos - 1;
-        auto front_skip = first_not_ws(tok_beg, tok_end);
-        auto back_skip = first_not_ws(reverse(tok_end), reverse(tok_beg));
-        m_open = {front_skip, beg + tmp.find(' ', front_skip - beg)};
-        m_close = {beg + tmp.rfind(' ', back_skip - beg) + 1, back_skip + 1};
-      }
     } else {
       process_text(beg + cur_pos, tmp.end());
       cur_pos = close_pos;

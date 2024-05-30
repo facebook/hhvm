@@ -46,7 +46,6 @@ class token {
     inverted_section_open,
     comment,
     partial,
-    delimiter_change
   };
   /* implicit */ token(
       const std::string& str, std::size_t left = 0, std::size_t right = 0);

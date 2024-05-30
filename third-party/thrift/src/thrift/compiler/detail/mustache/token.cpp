@@ -53,18 +53,14 @@ token::type token::token_info(char c) {
 token::token(const std::string& str, std::size_t left, std::size_t right)
     : m_raw(str), m_eol(false), m_ws_only(false) {
   if (left != 0 && right != 0) {
-    if (str[left] == '=' && str[str.size() - right - 1] == '=') {
-      m_type = type::delimiter_change;
-    } else {
-      auto c = first_not_ws(str.begin() + left, str.end() - right);
-      m_type = token_info(*c);
-      if (m_type != type::variable) {
-        c = first_not_ws(c + 1, str.end() - right);
-      }
-      m_name = {c, first_not_ws(str.rbegin() + right, str.rend() - left) + 1};
-      m_delims = {
-          {str.begin(), str.begin() + left}, {str.end() - right, str.end()}};
+    auto c = first_not_ws(str.begin() + left, str.end() - right);
+    m_type = token_info(*c);
+    if (m_type != type::variable) {
+      c = first_not_ws(c + 1, str.end() - right);
     }
+    m_name = {c, first_not_ws(str.rbegin() + right, str.rend() - left) + 1};
+    m_delims = {
+        {str.begin(), str.begin() + left}, {str.end() - right, str.end()}};
   } else {
     m_type = type::text;
     m_eol = (str.size() > 0 && str[str.size() - 1] == '\n');

@@ -222,7 +222,8 @@ struct mixed {
   3: string unq_field = "unqualified";
   4: optional easy opt_easy_ref (cpp.ref = "True");
   6: list<string> const_container_ref (cpp.ref_type = "shared_const");
-  7: optional string some_field (py3.name = "some_field_");
+  @python.Name{name = "some_field_"}
+  7: optional string some_field;
 }
 
 struct numerical {

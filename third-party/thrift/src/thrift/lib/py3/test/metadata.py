@@ -58,6 +58,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.name, "name")
         self.assertEqual(fieldClass.name, field.name)
         self.assertEqual(fieldInstance.name, field.name)
+        self.assertEqual(fieldInstance.name, fieldInstance.pyname)
         self.assertEqual(field.is_optional, False)
         self.assertEqual(fieldClass.is_optional, False)
         self.assertEqual(fieldInstance.is_optional, False)

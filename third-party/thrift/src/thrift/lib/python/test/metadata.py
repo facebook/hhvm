@@ -61,6 +61,8 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.name, "name")
         self.assertEqual(fieldClass.name, field.name)
         self.assertEqual(fieldInstance.name, field.name)
+        # if no structured annotation, the pyname is the same as name
+        self.assertEqual(fieldInstance.name, fieldInstance.pyname)
         self.assertEqual(field.is_optional, False)
         self.assertEqual(fieldClass.is_optional, False)
         self.assertEqual(fieldInstance.is_optional, False)
@@ -83,8 +85,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.name, "some_field")
         self.assertTrue(optional.is_optional)
         self.assertFalse(non_optional.is_optional)
-        # TODO pyname
-        # self.assertEqual(field.pyname, "some_field_")
+        self.assertEqual(field.pyname, "some_field_")
 
     def test_metadata_struct_recursive(self) -> None:
         hard_struct = gen_metadata(hard)

@@ -110,12 +110,37 @@ struct FieldInfo {
 };
 
 struct UnionExt {
-  // Clear union before setting a field.
+  /**
+   * Clears the given union data object.
+   *
+   * Should be called prior to setting any field.
+   */
   VoidFuncPtr clear;
 
+  /**
+   * Offset (in bytes) from the start of the corresponding union data object to
+   * the `int` memory holding the ID of the currently active (i.e., present)
+   * field.
+   *
+   * This is used (and should be non-zero) iff `getActiveId` or `setActiveId`
+   * below are nullptr, in which case the value of the active field ID will be
+   * written and read directly into that memory.
+   */
   ptrdiff_t unionTypeOffset;
 
+  /**
+   * Returns the ID of the currently active field for the given union data
+   * object, or 0 if none.
+   *
+   * If this (or `setActiveId`) are non-nullptr, `unionTypeOffset` is not used.
+   */
   int (*getActiveId)(const void* /* object */);
+
+  /**
+   * Sets the active field ID of the union data `object` to the given value.
+   *
+   * If this (or `getActiveId`) are non-nullptr, `unionTypeOffset` is not used.
+   */
   void (*setActiveId)(void* /* object */, int /* fieldId */);
 
   FOLLY_PUSH_WARNING

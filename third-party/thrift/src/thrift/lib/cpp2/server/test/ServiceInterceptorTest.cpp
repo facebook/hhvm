@@ -74,20 +74,23 @@ struct TestHandler
   }
 };
 
+using InterceptorList = std::vector<std::shared_ptr<ServiceInterceptorBase>>;
+
 class TestModule : public apache::thrift::ServerModule {
  public:
-  explicit TestModule(std::shared_ptr<ServiceInterceptorBase> interceptor)
-      : interceptor_(std::move(interceptor)) {}
+  explicit TestModule(std::shared_ptr<ServiceInterceptorBase> interceptor) {
+    interceptors_.emplace_back(std::move(interceptor));
+  }
+
+  explicit TestModule(InterceptorList interceptors)
+      : interceptors_(std::move(interceptors)) {}
 
   std::string getName() const override { return "TestModule"; }
 
-  std::vector<std::shared_ptr<ServiceInterceptorBase>> getServiceInterceptors()
-      override {
-    return {interceptor_};
-  }
+  InterceptorList getServiceInterceptors() override { return interceptors_; }
 
  private:
-  std::shared_ptr<ServiceInterceptorBase> interceptor_;
+  InterceptorList interceptors_;
 };
 
 struct ServiceInterceptorCountWithRequestState
@@ -194,29 +197,39 @@ CO_TEST(ServiceInterceptorTest, BasicEB) {
 // void return calls HandlerCallback::done() instead of
 // HandlerCallback::result()
 CO_TEST(ServiceInterceptorTest, BasicVoidReturn) {
-  auto interceptor =
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
+  auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
       runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
   co_await client->co_noop();
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onRequestCount, 1);
+    EXPECT_EQ(interceptor->onResponseCount, 1);
+  }
 
   co_await client->co_noop();
-  EXPECT_EQ(interceptor->onRequestCount, 2);
-  EXPECT_EQ(interceptor->onResponseCount, 2);
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onRequestCount, 2);
+    EXPECT_EQ(interceptor->onResponseCount, 2);
+  }
 }
 
 CO_TEST(ServiceInterceptorTest, OnRequestException) {
-  auto interceptor = std::make_shared<ServiceInterceptorThrowOnRequest>();
+  auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnRequest>();
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -237,8 +250,10 @@ CO_TEST(ServiceInterceptorTest, OnRequestException) {
         }
       },
       apache::thrift::TApplicationException);
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
+  EXPECT_EQ(interceptor2->onRequestCount, 1);
+  EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
 CO_TEST(ServiceInterceptorTest, OnRequestExceptionEB) {
@@ -300,10 +315,13 @@ CO_TEST(ServiceInterceptorTest, OnResponseException) {
 }
 
 CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
-  auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -324,8 +342,10 @@ CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
         }
       },
       apache::thrift::TApplicationException);
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
+  EXPECT_EQ(interceptor2->onRequestCount, 1);
+  EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
 CO_TEST(ServiceInterceptorTest, OnResponseBypassedForUnsafeReleasedCallback) {
@@ -387,39 +407,53 @@ CO_TEST(
 }
 
 CO_TEST(ServiceInterceptorTest, BasicInteraction) {
-  auto interceptor =
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
+  auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
       runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
   {
     auto interaction = co_await client->co_createInteraction();
-    EXPECT_EQ(interceptor->onRequestCount, 1);
-    EXPECT_EQ(interceptor->onResponseCount, 1);
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 1);
+      EXPECT_EQ(interceptor->onResponseCount, 1);
+    }
 
     co_await interaction.co_echo("");
-    EXPECT_EQ(interceptor->onRequestCount, 2);
-    EXPECT_EQ(interceptor->onResponseCount, 2);
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 2);
+      EXPECT_EQ(interceptor->onResponseCount, 2);
+    }
 
     co_await client->co_echo("");
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 3);
+      EXPECT_EQ(interceptor->onResponseCount, 3);
+    }
+  }
+
+  for (auto& interceptor : {interceptor1, interceptor2}) {
     EXPECT_EQ(interceptor->onRequestCount, 3);
     EXPECT_EQ(interceptor->onResponseCount, 3);
   }
-
-  EXPECT_EQ(interceptor->onRequestCount, 3);
-  EXPECT_EQ(interceptor->onResponseCount, 3);
 }
 
 CO_TEST(ServiceInterceptorTest, BasicStream) {
-  auto interceptor =
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
+  auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -428,11 +462,14 @@ CO_TEST(ServiceInterceptorTest, BasicStream) {
     auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
     EXPECT_EQ((co_await stream.next()).value(), 1);
     EXPECT_EQ((co_await stream.next()).value(), 2);
-    EXPECT_EQ(interceptor->onRequestCount, 1);
-    EXPECT_EQ(interceptor->onResponseCount, 1);
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 1);
+      EXPECT_EQ(interceptor->onResponseCount, 1);
+    }
     // close stream
   }
-
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onRequestCount, 1);
+    EXPECT_EQ(interceptor->onResponseCount, 1);
+  }
 }

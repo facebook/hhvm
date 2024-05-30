@@ -174,6 +174,18 @@ module Prov = struct
     else
       ty
 
+  let update_cty cty ~f ~env =
+    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+      let (r, cstr) = deref_constraint_type cty in
+      mk_constraint_type (f r, cstr)
+    else
+      cty
+
+  let update_ity ity ~f ~env =
+    match ity with
+    | LoclType lty -> LoclType (update lty ~f ~env)
+    | ConstraintType cty -> ConstraintType (update_cty cty ~f ~env)
+
   let flow ~from ~into = Typing_reason.Rflow (from, into)
 
   let rev r = Typing_reason.Rrev r

@@ -7022,19 +7022,19 @@ end = struct
   let add_non_subtype_constraint
       ~coerce
       (env, prop)
-      var
-      cty
+      (r_sub, var_sub)
+      cty_super
       (on_error : Typing_error.Reasons_callback.t option) =
-    let ty = ConstraintType cty in
-    let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
+    let ty_super = ConstraintType cty_super in
+    let upper_bounds_before = Env.get_tyvar_upper_bounds env var_sub in
     let env =
       Env.add_tyvar_upper_bound_and_update_variances
         ~intersect:(Subtype_simplify.try_intersect_i ~ignore_tyvars:true env)
         env
-        var
-        ty
+        var_sub
+        ty_super
     in
-    let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
+    let upper_bounds_after = Env.get_tyvar_upper_bounds env var_sub in
     (* Because of [try_intersect_i], the changed upper bounds may include
        [locl_ty]s *)
     let added_upper_bounds =
@@ -7046,7 +7046,7 @@ end = struct
           | LoclType ty -> Some ty
           | _ -> failwith "constraint_type in lowerbounds")
       @@ ITySet.elements
-      @@ Env.get_tyvar_lower_bounds env var
+      @@ Env.get_tyvar_lower_bounds env var_sub
     in
     let subtype_env =
       Subtype_env.create
@@ -7058,10 +7058,17 @@ end = struct
     let (env, prop) =
       ITySet.fold
         (fun upper_bound (env, prop) ->
+          (* We're adding an upper bound to our type variable so record a flow
+             from the variable and into the bound *)
+          let upper_bound =
+            Prov.(
+              update_ity upper_bound ~env ~f:(fun r_super ->
+                  Prov.flow ~from:r_sub ~into:r_super))
+          in
           let (env, ty_err_opt) =
             Typing_subtype_tconst.make_all_type_consts_equal
               env
-              var
+              var_sub
               upper_bound
               ~on_error
               ~as_tyvar_with_cnstr:true
@@ -7102,22 +7109,30 @@ end = struct
   let add_tyvar_upper_bound_and_close
       ~coerce
       (env, prop)
-      var
-      ty
+      (r_sub, var)
+      ty_super
       (on_error : Typing_error.Reasons_callback.t option) =
-    let ty = Sd.transform_dynamic_upper_bound ~coerce env ty in
+    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
     let env =
       Env.add_tyvar_upper_bound_and_update_variances
         ~intersect:(Subtype_simplify.try_intersect_i ~ignore_tyvars:true env)
         env
         var
-        (LoclType ty)
+        (LoclType ty_super)
     in
     let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
     let added_upper_bounds =
       List.filter_map ~f:(function
-          | LoclType ty -> Some ty
+          | LoclType ty ->
+            (* We're adding an upper bound to our type variable so record a flow
+               from the variable and into the bound *)
+            let ty =
+              Prov.(
+                update ty ~env ~f:(fun r_super ->
+                    flow ~from:r_sub ~into:r_super))
+            in
+            Some ty
           | _ -> failwith "constraint_type in added upperbounds")
       @@ ITySet.elements
       @@ ITySet.diff upper_bounds_after upper_bounds_before
@@ -7184,8 +7199,8 @@ end = struct
   let add_tyvar_lower_bound_and_close
       ~coerce
       (env, prop)
-      var
-      ty
+      (r_sup, var)
+      ty_sub
       (on_error : Typing_error.Reasons_callback.t option) =
     let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
     let env =
@@ -7193,14 +7208,21 @@ end = struct
         ~union:(Subtype_simplify.try_union_i env)
         env
         var
-        (LoclType ty)
+        (LoclType ty_sub)
     in
     let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
     (* We have the invariant that lower bounds _must_ be the lhs of a constraint
        and this is always a [LoclType] *)
     let added_lower_bounds =
       List.filter_map ~f:(function
-          | LoclType ty -> Some ty
+          | LoclType ty ->
+            (* We're adding a lower bound to our type variable so record a flow
+               from the bound and into the variable *)
+            let ty =
+              Prov.(
+                update ty ~env ~f:(fun r_sub -> flow ~from:r_sub ~into:r_sup))
+            in
+            Some ty
           | _ -> failwith "constraint_type in added lowerbounds")
       @@ ITySet.elements
       @@ ITySet.diff lower_bounds_after lower_bounds_before
@@ -7414,7 +7436,7 @@ end = struct
           add_tyvar_upper_bound_and_close
             ~coerce
             (valid env)
-            var_sub
+            (get_reason lty_sub, var_sub)
             lty_super
             on_error
         in
@@ -7422,7 +7444,7 @@ end = struct
           add_tyvar_lower_bound_and_close
             ~coerce
             (valid env)
-            var_super
+            (get_reason lty_super, var_super)
             lty_sub
             on_error
         in
@@ -7440,7 +7462,7 @@ end = struct
           add_tyvar_upper_bound_and_close
             ~coerce
             (valid env)
-            var
+            (get_reason lty_sub, var)
             lty_super
             on_error
         in
@@ -7450,7 +7472,7 @@ end = struct
           add_tyvar_lower_bound_and_close
             ~coerce
             (valid env)
-            var
+            (get_reason lty_super, var)
             lty_sub
             on_error
         in
@@ -7462,7 +7484,12 @@ end = struct
       match get_node lty_sub with
       | Tvar var ->
         let (env, prop) =
-          add_non_subtype_constraint ~coerce (valid env) var cstr on_error
+          add_non_subtype_constraint
+            ~coerce
+            (valid env)
+            (get_reason lty_sub, var)
+            cstr
+            on_error
         in
         tell ty_sub ty_super env prop on_error
       | _ -> (env, None, [TL.IsSubtype (coerce, ty_sub, ty_super)])

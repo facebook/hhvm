@@ -1360,6 +1360,8 @@ let explain_witness = function
   | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
   | Rcstr_on_generics (pos, _) ->
     (pos, "the constraint on the generic parameter")
+  | Rtype_variable_generics (pos, x, y) ->
+    (Pos_or_decl.of_raw_pos pos, Format.sprintf "the generic `%s` on `%s`" x y)
   | Rimplicit_upper_bound (pos, nm) ->
     ( pos,
       Format.sprintf

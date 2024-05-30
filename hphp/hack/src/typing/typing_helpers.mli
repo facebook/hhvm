@@ -67,6 +67,18 @@ module Prov : sig
     env:Typing_env_types.env ->
     Typing_defs.locl_ty
 
+  val update_cty :
+    Typing_defs.constraint_type ->
+    f:(Typing_reason.t -> Typing_reason.t) ->
+    env:Typing_env_types.env ->
+    Typing_defs.constraint_type
+
+  val update_ity :
+    Typing_defs.internal_type ->
+    f:(Typing_reason.t -> Typing_reason.t) ->
+    env:Typing_env_types.env ->
+    Typing_defs.internal_type
+
   val flow : from:Typing_reason.t -> into:Typing_reason.t -> Typing_reason.t
 
   val rev : Typing_reason.t -> Typing_reason.t

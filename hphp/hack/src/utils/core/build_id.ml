@@ -18,6 +18,8 @@ external get_build_commit_time_string : unit -> string
 
 external get_build_mode : unit -> string = "hh_get_build_mode"
 
+external get_build_package_name : unit -> string = "hh_get_build_package_name"
+
 let build_revision = get_build_revision ()
 
 let build_commit_time = get_build_commit_time ()
@@ -26,15 +28,13 @@ let build_commit_time_string = get_build_commit_time_string ()
 
 let build_mode = get_build_mode ()
 
+let build_package_name = get_build_package_name ()
+
 let is_build_optimized =
   String.is_prefix build_mode ~prefix:"dbgo"
   || String.is_prefix build_mode ~prefix:"opt"
   || String.equal build_mode ""
 
 let is_dev_build =
-  (* FB development build hashes are empty. *)
-  String.equal build_revision ""
-  (* Dune build hashes are short. *)
-  || String.length build_revision <= 16
-
-(* fail open if we don't know build mode *)
+  (* The package name is empty when not built by fbpkg *)
+  String.equal build_package_name ""

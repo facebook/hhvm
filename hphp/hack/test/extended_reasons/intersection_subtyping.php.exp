@@ -1,195 +1,54 @@
-error: Typing[4110] Invalid return type
+error: Typing[4110] Invalid return type [1]
+-> Expected I [2]
+-> But got C [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [5]
+-> which itself flows into this hint, via the intersection type [2]
 
-Expected `I`
+intersection_subtyping.php:9:10
+          6 | class C extends A {}
+          7 | 
+[2,3,4,5] 8 | function inter_r(C $c) : (A & I) {
+[1]       9 |   return $c;
+         10 | }
+         11 | 
 
- 8 | function inter_r(C $c) : (A & »I«) {
- 9 |   return $c;
-10 | }
+error: Typing[4110] Invalid return type [1]
+-> Expected C [2]
+-> But got A [3]
+-> Here's why: this hint [3]
+-> flows into this hint, via the intersection type [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
 
-But got `C`
+intersection_subtyping.php:14:10
+          10 | }
+          11 | 
+[2,3,4,5] 12 | function inter_l((A & I) $ai): C {
+[6]       13 |   $c = $ai;
+[1]       14 |   return $c;
+          15 | }
 
- 8 | function inter_r(»C« $c) : (A & I) {
- 9 |   return $c;
-10 | }
+error: Typing[4110] Invalid return type [1]
+-> Expected C [2]
+-> But got I [3]
+-> Here's why: this hint [3]
+-> flows into this hint, via the intersection type [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
 
-Here's why: this hint
-
- 8 | function inter_r(»C« $c) : (A & I) {
- 9 |   return $c;
-10 | }
-
-flows *into* this expression
-
- 8 | function inter_r(C »$c«) : (A & I) {
- 9 |   return $c;
-10 | }
-
-which itself flows *into* this expression
-
- 8 | function inter_r(C $c) : (A & I) {
- 9 |   return »$c«;
-10 | }
-
-which itself flows *into* this expression
-
- 8 | function inter_r(C $c) : (A & I) {
- 9 |   »return $c;«
-10 | }
-
-which itself flows *into* this hint
-
- 8 | function inter_r(C $c) : »(A & I)« {
- 9 |   return $c;
-10 | }
-
-which itself flows *into* this hint, via the intersection type
-
- 8 | function inter_r(C $c) : (A & »I«) {
- 9 |   return $c;
-10 | }
-
-error: Typing[4110] Invalid return type
-
-Expected `C`
-
- 12 | function inter_l((A & I) $ai): »C« {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-But got `A`
-
- 12 | function inter_l((»A« & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-Here's why: this hint
-
- 12 | function inter_l((»A« & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-flows *into* this hint, via the intersection type
-
- 12 | function inter_l(»(A & I)« $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) »$ai«): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = »$ai«;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   »$c« = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   return »$c«;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   »return $c;«
- 15 | }
-
-which itself flows *into* this hint
-
- 12 | function inter_l((A & I) $ai): »C« {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-error: Typing[4110] Invalid return type
-
-Expected `C`
-
- 12 | function inter_l((A & I) $ai): »C« {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-But got `I`
-
- 12 | function inter_l((A & »I«) $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-Here's why: this hint
-
- 12 | function inter_l((A & »I«) $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-flows *into* this hint, via the intersection type
-
- 12 | function inter_l(»(A & I)« $ai): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) »$ai«): C {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = »$ai«;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   »$c« = $ai;
- 14 |   return $c;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   return »$c«;
- 15 | }
-
-which itself flows *into* this expression
-
- 12 | function inter_l((A & I) $ai): C {
- 13 |   $c = $ai;
- 14 |   »return $c;«
- 15 | }
-
-which itself flows *into* this hint
-
- 12 | function inter_l((A & I) $ai): »C« {
- 13 |   $c = $ai;
- 14 |   return $c;
- 15 | }
+intersection_subtyping.php:14:10
+          10 | }
+          11 | 
+[2,3,4,5] 12 | function inter_l((A & I) $ai): C {
+[6]       13 |   $c = $ai;
+[1]       14 |   return $c;
+          15 | }
 
 3 errors found.

@@ -1057,6 +1057,10 @@ end = struct
           ~this_ty
           ~fail
           ~mk_prop
+          ~update_reason:
+            Prov.(
+              update ~f:(fun from ->
+                  flow ~from ~into:(prj_intersection_left r_sub)))
           (sub_supportdyn, tyl)
           rhs
           env)
@@ -2995,7 +2999,7 @@ end = struct
         (sub_supportdyn, tyl)
         rhs
         env
-    | ((_, Tintersection tyl), (_, Tunion [])) ->
+    | ((r_sub, Tintersection tyl), (_, Tunion [])) ->
       let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
@@ -3005,6 +3009,10 @@ end = struct
         ~this_ty
         ~fail
         ~mk_prop
+        ~update_reason:
+          Prov.(
+            update ~f:(fun from ->
+                flow ~from ~into:(prj_intersection_left r_sub)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -5187,6 +5195,10 @@ end = struct
             ~this_ty
             ~fail
             ~mk_prop:simplify
+            ~update_reason:
+              Prov.(
+                update ~f:(fun from ->
+                    flow ~from ~into:(prj_intersection_left r_sub)))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5478,6 +5490,10 @@ end = struct
             ~this_ty
             ~fail
             ~mk_prop
+            ~update_reason:
+              Prov.(
+                update ~f:(fun from ->
+                    flow ~from ~into:(prj_intersection_left r_sub)))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5711,12 +5727,16 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
-    | (_, Tintersection ty_subs) ->
+    | (r_sub, Tintersection ty_subs) ->
       Common.simplify_intersection_l
         ~subtype_env
         ~this_ty
         ~fail
         ~mk_prop:simplify
+        ~update_reason:
+          Prov.(
+            update ~f:(fun from ->
+                flow ~from ~into:(prj_intersection_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6233,6 +6253,7 @@ and Common : sig
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
+    update_reason:(locl_ty -> env:env -> locl_ty) ->
     Reason.t option * locl_phase ty list ->
     'rhs ->
     env ->
@@ -6342,18 +6363,54 @@ end = struct
     let init = List.fold_left first_tyl ~init:(env, TL.valid) ~f in
     List.fold_left last_tyl ~init ~f
 
+  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+     not complete.
+     TODO(T120921930): Don't do this if require_completeness is set. *)
+
   let simplify_intersection_l
-      ~subtype_env ~this_ty ~fail ~mk_prop (sub_supportdyn, tys_sub) rhs env =
-    (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-     * not complete.
-     * TODO(T120921930): Don't do this if require_completeness is set.
-     *)
-    List.fold_left
-      tys_sub
-      ~init:(env, TL.invalid ~fail)
-      ~f:(fun res ty_sub ->
-        res
-        ||| mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs)
+      ~subtype_env
+      ~this_ty
+      ~fail
+      ~mk_prop
+      ~update_reason
+      (sub_supportdyn, tys_sub)
+      rhs
+      env =
+    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+      (* Under extended reasons, record the errors for each disjunct *)
+      let rec aux tys ~errs ~props ~env =
+        match tys with
+        | [] ->
+          ( env,
+            TL.Disj
+              ( Typing_error.intersect_opt @@ List.filter_opt errs,
+                List.rev props ) )
+        | ty :: tys ->
+          let ty_sub = update_reason ty ~env in
+          let (env, prop) =
+            mk_prop
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs
+              env
+          in
+          if TL.is_valid prop then
+            (env, prop)
+          else (
+            match TL.get_error_if_unsat prop with
+            | Some err -> aux tys ~errs:(err :: errs) ~props ~env
+            | None -> aux tys ~errs ~props:(prop :: props) ~env
+          )
+      in
+      aux tys_sub ~errs:[] ~props:[] ~env
+    else
+      List.fold_left
+        tys_sub
+        ~init:(env, TL.invalid ~fail)
+        ~f:(fun res ty_sub ->
+          res
+          ||| mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs)
 
   let simplify_generic_l
       ~subtype_env
@@ -6509,7 +6566,7 @@ end = struct
               ~mk_prop
               (sub_supportdyn, ty)
               rhs)
-    | (_, Tintersection ty_subs) ->
+    | (r_sub, Tintersection ty_subs) ->
       let mk_prop_intersection
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
         simplify_disj_r
@@ -6527,6 +6584,10 @@ end = struct
         ~this_ty
         ~fail
         ~mk_prop:mk_prop_intersection
+        ~update_reason:
+          Prov.(
+            update ~f:(fun from ->
+                flow ~from ~into:(prj_intersection_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env

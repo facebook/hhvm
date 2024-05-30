@@ -33,7 +33,7 @@ which itself flows *into* this expression
 which itself flows *into* this expression
 
  8 | function inter_r(C $c) : (A & I) {
- 9 |   return »$c«;
+ 9 |   »return $c;«
 10 | }
 
 which itself flows *into* this hint
@@ -103,7 +103,7 @@ which itself flows *into* this expression
 
  12 | function inter_l((A & I) $ai): C {
  13 |   $c = $ai;
- 14 |   return »$c«;
+ 14 |   »return $c;«
  15 | }
 
 which itself flows *into* this hint

@@ -7703,14 +7703,14 @@ end = struct
       let rty =
         Prov.(
           update rty ~env ~f:(fun from ->
-              flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
+              flow ~from ~into:(Typing_reason.Rwitness pos)))
       in
       let te =
         let (ty, pos, e) = te in
         let ty =
           Prov.(
             update ty ~env ~f:(fun from ->
-                flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
+                flow ~from ~into:(Typing_reason.Rwitness pos)))
         in
         (ty, pos, e)
       in

@@ -68,7 +68,7 @@ which itself flows *into* this expression
  14 |     $z = $y;
  15 |   }
  16 | 
- 17 |   return »$z«;
+ 17 |   »return $z;«
  18 | }
 
 which itself flows *into* this hint
@@ -118,7 +118,7 @@ which itself flows *into* this expression
 which itself flows *into* this expression
 
  21 | function union_l((A | B) $ab): C {
- 22 |   return »$ab«;
+ 22 |   »return $ab;«
  23 | }
 
 which itself flows *into* this hint
@@ -168,7 +168,7 @@ which itself flows *into* this expression
 which itself flows *into* this expression
 
  21 | function union_l((A | B) $ab): C {
- 22 |   return »$ab«;
+ 22 |   »return $ab;«
  23 | }
 
 which itself flows *into* this hint
@@ -212,7 +212,7 @@ which itself flows *into* this expression
 which itself flows *into* this expression
 
  25 | function union_r(C $c): (A|B) {
- 26 |   return »$c«;
+ 26 |   »return $c;«
  27 | }
 
 which itself flows *into* this hint

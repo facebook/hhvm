@@ -34,8 +34,6 @@ namespace apache {
 namespace thrift {
 namespace mstch {
 
-using delim_type = std::pair<std::string, std::string>;
-
 class token {
  public:
   enum class type {
@@ -53,7 +51,6 @@ class token {
   const std::string& raw() const { return m_raw; }
   const std::string& name() const { return m_name; }
   const std::string& partial_prefix() const { return m_partial_prefix; }
-  const delim_type& delims() const { return m_delims; }
   void partial_prefix(const std::string& p_partial_prefix) {
     m_partial_prefix = p_partial_prefix;
   }
@@ -66,7 +63,6 @@ class token {
   std::string m_name;
   std::string m_raw;
   std::string m_partial_prefix;
-  delim_type m_delims;
   bool m_eol;
   bool m_ws_only;
   type token_info(char c);

@@ -88,13 +88,6 @@ walkable!(CeVisibility => {
     Self::Internal(m) => [m],
 });
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep, FromOcamlRep)]
-pub enum IfcFunDecl {
-    FDPolicied(Option<Symbol>),
-    FDInferFlows,
-}
-
 // The OCaml type `tshape_field_name` includes positions, but ignores those
 // positions in its `ord` implementation. We can't do the same, though: Rust
 // hash tables require impls of Hash and Eq to agree, and our Hash impl must

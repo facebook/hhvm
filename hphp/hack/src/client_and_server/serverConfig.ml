@@ -447,6 +447,7 @@ let load_config config options =
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
     ?tco_package_v2:(bool_opt "package_v2" config)
+    ?tco_extended_reasons:(bool_opt "extended_reasons" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

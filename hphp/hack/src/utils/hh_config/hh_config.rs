@@ -414,7 +414,7 @@ impl HhConfig {
             tco_sticky_quarantine: default.tco_sticky_quarantine,
             tco_lsp_invalidation: default.tco_lsp_invalidation,
             tco_autocomplete_sort_text: default.tco_autocomplete_sort_text,
-            tco_extended_reasons:  default.tco_extended_reasons,
+            tco_extended_reasons: hhconfig.get_bool_or("extended_reasons", default.tco_extended_reasons)?,
             hack_warnings: hhconfig.get_all_or_some_ints_or("hack_warnings", default.hack_warnings)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,

@@ -108,7 +108,7 @@ Object getPatchObj3(int n) {
   return patchObj;
 }
 
-Object getObject5And6(int n) {
+Object getObjectWithMap(int n) {
   Object obj;
   auto& map = obj[FieldId{1}].emplace_map();
   while (n--) {
@@ -119,7 +119,7 @@ Object getObject5And6(int n) {
 }
 
 // Testcase 5 uses an object with map<string, string> and patch contains some
-// map elements.
+// map elements with MapPatch::Put.
 Object getPatchObj5() {
   Object patchObj;
   auto& mapPatchObj =
@@ -137,7 +137,7 @@ Object getPatchObj5() {
 }
 
 // Testcase 6 uses an object with map<string, string> and patch contains all the
-// map elements.
+// map elements with MapPatch::Put.
 Object getPatchObj6(int n) {
   Object patchObj;
   auto& mapPatchObj =
@@ -153,9 +153,54 @@ Object getPatchObj6(int n) {
   return patchObj;
 }
 
+// Testcase 7 uses an object with map<string, string> and patch contains some
+// map elements with MapPatch::PatchAfter.
+Object getPatchObj7() {
+  Value assignPatchValue;
+  assignPatchValue
+      .emplace_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
+      asValueStruct<type::binary_t>("100");
+
+  Object patchObj;
+  auto& mapPatchObj =
+      patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
+          .emplace_object()[FieldId{1}]
+          .emplace_object();
+
+  auto& put =
+      mapPatchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
+          .ensure_map();
+  put.emplace(asValueStruct<type::binary_t>("42"), assignPatchValue);
+  put.emplace(asValueStruct<type::binary_t>("43"), assignPatchValue);
+  return patchObj;
+}
+
+// Testcase 8 uses an object with map<string, string> and patch contains all the
+// map elements with MapPatch::PatchAfter.
+Object getPatchObj8(int n) {
+  Value assignPatchValue;
+  assignPatchValue
+      .emplace_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
+      asValueStruct<type::binary_t>("100");
+
+  Object patchObj;
+  auto& mapPatchObj =
+      patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
+          .emplace_object()[FieldId{1}]
+          .emplace_object();
+  while (n--) {
+    auto v = asValueStruct<type::binary_t>(folly::to<string>(n));
+    mapPatchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
+        .ensure_map()
+        .emplace(v, assignPatchValue);
+  }
+  return patchObj;
+}
+
 std::unique_ptr<folly::IOBuf> serialized1, serialized2, serialized3,
-    serialized4, serialized5, serialized6;
-Object patchObj1, patchObj2, patchObj3, patchObj4, patchObj5, patchObj6;
+    serialized4, serialized5, serialized6, serialized7, serialized8;
+Object patchObj1, patchObj2, patchObj3, patchObj4, patchObj5, patchObj6,
+    patchObj7, patchObj8;
 
 void init(int n) {
   serialized1 =
@@ -170,12 +215,18 @@ void init(int n) {
   serialized4 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject1And4(n));
   patchObj4 = getPatchObj1And4(true);
-  serialized5 =
-      serializeObject<apache::thrift::CompactProtocolWriter>(getObject5And6(n));
+  serialized5 = serializeObject<apache::thrift::CompactProtocolWriter>(
+      getObjectWithMap(n));
   patchObj5 = getPatchObj5();
-  serialized6 =
-      serializeObject<apache::thrift::CompactProtocolWriter>(getObject5And6(n));
+  serialized6 = serializeObject<apache::thrift::CompactProtocolWriter>(
+      getObjectWithMap(n));
   patchObj6 = getPatchObj6(n);
+  serialized7 = serializeObject<apache::thrift::CompactProtocolWriter>(
+      getObjectWithMap(n));
+  patchObj7 = getPatchObj7();
+  serialized8 = serializeObject<apache::thrift::CompactProtocolWriter>(
+      getObjectWithMap(n));
+  patchObj8 = getPatchObj8(n);
 }
 
 void runOriginalApproach(
@@ -222,23 +273,46 @@ BENCHMARK(patch_clear_large_fields_with_partial_deser) {
       patchObj4, *serialized4);
 }
 
-BENCHMARK(patch_few_small_map_elems_without_partial_deser) {
+BENCHMARK(patch_few_small_map_elems_without_partial_deser_with_map_patch_put) {
   runOriginalApproach(serialized5, patchObj5);
 }
 
-BENCHMARK(patch_few_small_map_elems_with_partial_deser) {
+BENCHMARK(patch_few_small_map_elems_with_partial_deser_with_map_patch_put) {
   applyPatchToSerializedData<type::StandardProtocol::Compact>(
       patchObj5, *serialized5);
 }
 
-BENCHMARK(patch_all_small_map_elems_without_partial_deser) {
+BENCHMARK(patch_all_small_map_elems_without_partial_deser_with_map_patch_put) {
   runOriginalApproach(serialized6, patchObj6);
 }
 
-BENCHMARK(patch_all_small_map_elems_with_partial_deser) {
+BENCHMARK(patch_all_small_map_elems_with_partial_deser_with_map_patch_put) {
   applyPatchToSerializedData<type::StandardProtocol::Compact>(
       patchObj6, *serialized6);
 }
+
+BENCHMARK(
+    patch_few_small_map_elems_without_partial_deser_with_map_patch_patch_after) {
+  runOriginalApproach(serialized7, patchObj7);
+}
+
+BENCHMARK(
+    patch_few_small_map_elems_with_partial_deser_with_map_patch_patch_after) {
+  applyPatchToSerializedData<type::StandardProtocol::Compact>(
+      patchObj7, *serialized7);
+}
+
+BENCHMARK(
+    patch_all_small_map_elems_without_partial_deser_with_map_patch_patch_after) {
+  runOriginalApproach(serialized8, patchObj8);
+}
+
+BENCHMARK(
+    patch_all_small_map_elems_with_partial_deser_with_map_patch_patch_after) {
+  applyPatchToSerializedData<type::StandardProtocol::Compact>(
+      patchObj8, *serialized8);
+}
+
 } // namespace apache::thrift::protocol
 
 int main(int argc, char** argv) {

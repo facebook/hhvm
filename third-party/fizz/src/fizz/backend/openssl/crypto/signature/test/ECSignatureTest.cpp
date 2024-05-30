@@ -8,6 +8,7 @@
 
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/crypto/ECCurve.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <folly/String.h>
@@ -81,7 +82,7 @@ void modifyData(folly::IOBuf* sig, std::string& msg) {
 }
 
 TEST_P(ECDSA256Test, TestSignature) {
-  auto key = getKey(P256::curveNid, GetParam());
+  auto key = getKey(openssl::Properties<P256>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P256> ecdsa;
   ecdsa.setKey(std::move(key));
   {
@@ -114,7 +115,7 @@ TEST_P(ECDSA256Test, TestSignature) {
 }
 
 TEST_P(ECDSA384Test, TestSignature) {
-  auto key = getKey(P384::curveNid, GetParam());
+  auto key = getKey(openssl::Properties<P384>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P384> ecdsa;
   ecdsa.setKey(std::move(key));
   {
@@ -147,7 +148,7 @@ TEST_P(ECDSA384Test, TestSignature) {
 }
 
 TEST_P(ECDSA521Test, TestSignature) {
-  auto key = getKey(P521::curveNid, GetParam());
+  auto key = getKey(openssl::Properties<P521>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P521> ecdsa;
   ecdsa.setKey(std::move(key));
   {

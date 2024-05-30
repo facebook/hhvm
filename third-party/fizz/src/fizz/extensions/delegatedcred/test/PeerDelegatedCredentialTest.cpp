@@ -26,9 +26,9 @@ namespace test {
 // @lint-ignore-every PRIVATEKEY
 
 /*
- *  Randomly generated ECDSA-openssl::P256 private key
+ *  Randomly generated ECDSA-P256 private key
  *  Command: openssl ecparam -name secp256r1 -genkey
- *  Output: Randomly generated ECDSA-openssl::P256 private key
+ *  Output: Randomly generated ECDSA-P256 private key
  */
 StringPiece kP256CredCertKey = R"(
 -----BEGIN PRIVATE KEY-----
@@ -66,9 +66,9 @@ zj0EAwIDSAAwRQIgB2EWbwWohYziQ2LmY8Qmn8y0WKR6Mbm5aad0rUBvtK4CIQCv
 )";
 
 /*
- *  Randomly generated ECDSA-openssl::P256 private key
+ *  Randomly generated ECDSA-P256 private key
  *  Command: openssl ecparam -name secp256r1 -genkey
- *  Output: Randomly generated ECDSA-openssl::P256 private key
+ *  Output: Randomly generated ECDSA-P256 private key
  */
 StringPiece kP256DelegatedCredKey = R"(
 -----BEGIN EC PARAMETERS-----

@@ -192,11 +192,11 @@ class ECDHTest : public ::testing::TestWithParam<Params> {};
 int getNid(const Params& param) {
   switch (param.key) {
     case KeyType::P256:
-      return P256::curveNid;
+      return openssl::Properties<P256>::curveNid;
     case KeyType::P384:
-      return P384::curveNid;
+      return openssl::Properties<P384>::curveNid;
     case KeyType::P521:
-      return P521::curveNid;
+      return openssl::Properties<P521>::curveNid;
     default:
       throw std::runtime_error("invalid key type");
   }

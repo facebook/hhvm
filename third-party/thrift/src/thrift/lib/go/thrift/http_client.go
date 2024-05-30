@@ -24,11 +24,6 @@ import (
 	"strconv"
 )
 
-// DefaultHTTPClient is the shared http client. Library users are
-// free to change this global client or specify one through
-// httpClientOptions.
-var DefaultHTTPClient *http.Client = http.DefaultClient
-
 type HTTPClient struct {
 	client             *http.Client
 	response           *http.Response
@@ -40,25 +35,18 @@ type HTTPClient struct {
 	nsecReadTimeout    int64
 }
 
-func newHTTPPostClientWithOptions(urlstr string, httpTransport http.RoundTripper) (Transport, error) {
+// NewHTTPPostClient creates a new HTTP POST client.
+func NewHTTPPostClient(urlstr string) (Transport, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
 	}
 	buf := make([]byte, 0, 1024)
-	client := DefaultHTTPClient
-	if httpTransport != nil {
-		client = &http.Client{Transport: httpTransport}
-	}
+	client := http.DefaultClient
 	return &HTTPClient{client: client, url: parsedURL, requestBuffer: bytes.NewBuffer(buf), header: http.Header{}}, nil
 }
 
-// NewHTTPPostClient creates a new HTTP POST client.
-func NewHTTPPostClient(urlstr string) (Transport, error) {
-	return newHTTPPostClientWithOptions(urlstr, nil)
-}
-
-// Set the HTTP Header for this specific Thrift Transport
+// SetHeader sets the HTTP Header for this specific Thrift Transport
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //
@@ -68,7 +56,7 @@ func (p *HTTPClient) SetHeader(key string, value string) {
 	p.header.Add(key, value)
 }
 
-// Get the HTTP Header represented by the supplied Header Key for this specific Thrift Transport
+// GetHeader gets the HTTP Header represented by the supplied Header Key for this specific Thrift Transport
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //

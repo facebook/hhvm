@@ -52,36 +52,13 @@ func TestHTTPCustomClient(t *testing.T) {
 	if l != nil {
 		defer l.Close()
 	}
-
-	httpTransport := &customHTTPTransport{}
-
-	trans, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpTransport)
-	if err != nil {
-		l.Close()
-		t.Fatalf("Unable to connect to %s: %s", l.Addr().String(), err)
-	}
-	TransportHeaderTest(t, trans, trans)
-
-	if !httpTransport.hit {
-		t.Fatalf("Custom client was not used")
-	}
-}
-
-func TestHTTPCustomClientPackageScope(t *testing.T) {
-	l := HTTPClientSetupForTest(t)
-	if l != nil {
-		defer l.Close()
-	}
-	httpTransport := &customHTTPTransport{}
-	DefaultHTTPClient = &http.Client{
-		Transport: httpTransport,
-	}
-
 	trans, err := NewHTTPPostClient("http://" + l.Addr().String())
 	if err != nil {
 		l.Close()
 		t.Fatalf("Unable to connect to %s: %s", l.Addr().String(), err)
 	}
+	httpTransport := &customHTTPTransport{}
+	trans.(*HTTPClient).client.Transport = httpTransport
 	TransportHeaderTest(t, trans, trans)
 
 	if !httpTransport.hit {

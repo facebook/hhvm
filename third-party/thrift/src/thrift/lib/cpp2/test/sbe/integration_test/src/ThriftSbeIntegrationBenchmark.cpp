@@ -38,8 +38,11 @@
 #include <thrift/lib/cpp2/test/sbe/integration_test/src/service/CustomerLookupService.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
+#include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
+
 namespace facebook::sbe::test {
 
+using namespace apache::thrift;
 using apache::thrift::Client;
 using apache::thrift::ScopedServerInterfaceThread;
 using apache::thrift::sbe::MessageWrapper;
@@ -61,11 +64,10 @@ class BenchmarkService {
           ts.setNumAcceptThreads(1);
           ts.setNumCPUWorkerThreads(10);
         });
-    client_ = runner_->newClient<Client<CustomerLookupService>>(
-        nullptr, [&](auto socket) mutable {
-          return apache::thrift::RocketClientChannel::newChannel(
-              std::move(socket));
-        });
+    client_ = makeTestClient(handler_);
+
+    binaryClient_ =
+        makeTestClient(handler_, nullptr, nullptr, protocol::T_BINARY_PROTOCOL);
 
     auto it = handler_->getCustomers().begin();
     for (int i = 0; i < kNumCustomers; ++i, ++it) {
@@ -77,6 +79,8 @@ class BenchmarkService {
   std::shared_ptr<CustomerLookupHandler> handler_;
   std::unique_ptr<ScopedServerInterfaceThread> runner_;
   std::unique_ptr<Client<::facebook::sbe::test::CustomerLookupService>> client_;
+  std::unique_ptr<Client<::facebook::sbe::test::CustomerLookupService>>
+      binaryClient_;
   std::vector<std::string> customerIds_;
 };
 
@@ -128,6 +132,7 @@ BENCHMARK_PARAM(lookupOneS_wrk, 100)
 BENCHMARK_PARAM(lookupOneS_wrk, 1000)
 BENCHMARK_PARAM(lookupOneS_wrk, 10000)
 BENCHMARK_PARAM(lookupOneS_wrk, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupOneS_eb(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -160,6 +165,7 @@ BENCHMARK_PARAM(lookupOneS_eb, 100)
 BENCHMARK_PARAM(lookupOneS_eb, 1000)
 BENCHMARK_PARAM(lookupOneS_eb, 10000)
 BENCHMARK_PARAM(lookupOneS_eb, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookOneS_noRPC(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -192,6 +198,7 @@ BENCHMARK_PARAM(lookOneS_noRPC, 100)
 BENCHMARK_PARAM(lookOneS_noRPC, 1000)
 BENCHMARK_PARAM(lookOneS_noRPC, 10000)
 BENCHMARK_PARAM(lookOneS_noRPC, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyS_wrk(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -236,6 +243,7 @@ BENCHMARK_PARAM(lookupManyS_wrk, 100)
 BENCHMARK_PARAM(lookupManyS_wrk, 1000)
 BENCHMARK_PARAM(lookupManyS_wrk, 10000)
 BENCHMARK_PARAM(lookupManyS_wrk, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyS_eb(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -280,6 +288,7 @@ BENCHMARK_PARAM(lookupManyS_eb, 100)
 BENCHMARK_PARAM(lookupManyS_eb, 1000)
 BENCHMARK_PARAM(lookupManyS_eb, 10000)
 BENCHMARK_PARAM(lookupManyS_eb, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyS_noRPC(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -314,6 +323,7 @@ BENCHMARK_PARAM(lookupManyS_noRPC, 100)
 BENCHMARK_PARAM(lookupManyS_noRPC, 1000)
 BENCHMARK_PARAM(lookupManyS_noRPC, 10000)
 BENCHMARK_PARAM(lookupManyS_noRPC, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupOneT_wrk(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -337,6 +347,7 @@ BENCHMARK_PARAM(lookupOneT_wrk, 100)
 BENCHMARK_PARAM(lookupOneT_wrk, 1000)
 BENCHMARK_PARAM(lookupOneT_wrk, 10000)
 BENCHMARK_PARAM(lookupOneT_wrk, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupOneT_eb(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -360,6 +371,7 @@ BENCHMARK_PARAM(lookupOneT_eb, 100)
 BENCHMARK_PARAM(lookupOneT_eb, 1000)
 BENCHMARK_PARAM(lookupOneT_eb, 10000)
 BENCHMARK_PARAM(lookupOneT_eb, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupOneT_noRPC(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -384,6 +396,7 @@ BENCHMARK_PARAM(lookupOneT_noRPC, 100)
 BENCHMARK_PARAM(lookupOneT_noRPC, 1000)
 BENCHMARK_PARAM(lookupOneT_noRPC, 10000)
 BENCHMARK_PARAM(lookupOneT_noRPC, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyT_wrk(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -408,9 +421,10 @@ void lookupManyT_wrk(int, int iterations) {
 BENCHMARK_PARAM(lookupManyT_wrk, 1)
 BENCHMARK_PARAM(lookupManyT_wrk, 10)
 BENCHMARK_PARAM(lookupManyT_wrk, 100)
-BENCHMARK_PARAM(lookupManyT_wrk, 1000)
-BENCHMARK_PARAM(lookupManyT_wrk, 10000)
-BENCHMARK_PARAM(lookupManyT_wrk, 100000)
+// BENCHMARK_PARAM(lookupManyT_wrk, 1000)
+//  BENCHMARK_PARAM(lookupManyT_wrk, 10000)
+//  BENCHMARK_PARAM(lookupManyT_wrk, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyT_eb(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -438,6 +452,7 @@ BENCHMARK_PARAM(lookupManyT_eb, 100)
 BENCHMARK_PARAM(lookupManyT_eb, 1000)
 BENCHMARK_PARAM(lookupManyT_eb, 10000)
 BENCHMARK_PARAM(lookupManyT_eb, 100000)
+BENCHMARK_DRAW_LINE();
 
 void lookupManyT_noRPC(int, int iterations) {
   std::vector<folly::coro::Task<void>> tasks;
@@ -466,6 +481,151 @@ BENCHMARK_PARAM(lookupManyT_noRPC, 100)
 BENCHMARK_PARAM(lookupManyT_noRPC, 1000)
 BENCHMARK_PARAM(lookupManyT_noRPC, 10000)
 BENCHMARK_PARAM(lookupManyT_noRPC, 100000)
+BENCHMARK_DRAW_LINE();
+
+void lookupOneC_wrk(int, int iterations) {
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(iterations);
+  for (int i = 0; i < iterations; ++i) {
+    auto task = [&]() -> folly::coro::Task<void> {
+      CSingleCustomerLookup lookup;
+      auto writer = lookup.beginWrite();
+      writer.write<ident::customerId>(customerId);
+      lookup.endWrite(std::move(writer));
+
+      auto res = co_await service_->binaryClient_->co_lookupOneC(lookup);
+      co_return;
+    };
+    tasks.push_back(task());
+  }
+  folly::coro::blockingWait(
+      folly::coro::collectAllWindowed(std::move(tasks), concurrency));
+}
+
+BENCHMARK_PARAM(lookupOneC_wrk, 1)
+BENCHMARK_PARAM(lookupOneC_wrk, 10)
+BENCHMARK_PARAM(lookupOneC_wrk, 100)
+BENCHMARK_PARAM(lookupOneC_wrk, 1000)
+BENCHMARK_PARAM(lookupOneC_wrk, 10000)
+BENCHMARK_PARAM(lookupOneC_wrk, 100000)
+BENCHMARK_DRAW_LINE();
+
+void lookupOneC_eb(int, int iterations) {
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(iterations);
+  for (int i = 0; i < iterations; ++i) {
+    auto task = [&]() -> folly::coro::Task<void> {
+      CSingleCustomerLookup lookup;
+      auto writer = lookup.beginWrite();
+      writer.write<ident::customerId>(customerId);
+      lookup.endWrite(std::move(writer));
+
+      auto res = co_await service_->binaryClient_->co_lookupOneCE(lookup);
+      co_return;
+    };
+    tasks.push_back(task());
+  }
+  folly::coro::blockingWait(
+      folly::coro::collectAllWindowed(std::move(tasks), concurrency));
+}
+
+BENCHMARK_PARAM(lookupOneC_eb, 1)
+BENCHMARK_PARAM(lookupOneC_eb, 10)
+BENCHMARK_PARAM(lookupOneC_eb, 100)
+BENCHMARK_PARAM(lookupOneC_eb, 1000)
+BENCHMARK_PARAM(lookupOneC_eb, 10000)
+BENCHMARK_PARAM(lookupOneC_eb, 100000)
+BENCHMARK_DRAW_LINE();
+
+void lookupOneC_noRPC(int, int iterations) {
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(iterations);
+  for (int i = 0; i < iterations; ++i) {
+    auto task = [&]() -> folly::coro::Task<void> {
+      CSingleCustomerLookup lookup;
+      auto writer = lookup.beginWrite();
+      writer.write<ident::customerId>(customerId);
+      lookup.endWrite(std::move(writer));
+
+      auto res = co_await service_->handler_->co_lookupOneC(
+          std::make_unique<CSingleCustomerLookup>(std::move(lookup)));
+      co_return;
+    };
+    tasks.push_back(task());
+  }
+  folly::coro::blockingWait(
+      folly::coro::collectAllWindowed(std::move(tasks), concurrency));
+}
+
+BENCHMARK_PARAM(lookupOneC_noRPC, 1)
+BENCHMARK_PARAM(lookupOneC_noRPC, 10)
+BENCHMARK_PARAM(lookupOneC_noRPC, 100)
+BENCHMARK_PARAM(lookupOneC_noRPC, 1000)
+BENCHMARK_PARAM(lookupOneC_noRPC, 10000)
+BENCHMARK_PARAM(lookupOneC_noRPC, 100000)
+BENCHMARK_DRAW_LINE();
+
+void lookupManyC_wrk(int, int iterations) {
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(iterations);
+  for (int i = 0; i < iterations; ++i) {
+    auto task = [&]() -> folly::coro::Task<void> {
+      auto lookup = CMultipleCustomerLookup();
+      auto writer = lookup.beginWrite();
+      auto custList = writer.beginWrite<ident::customerIds>();
+      for (auto i : service_->customerIds_) {
+        custList.write(i);
+      }
+      writer.endWrite(std::move(custList));
+      lookup.endWrite(std::move(writer));
+
+      co_await service_->binaryClient_->co_lookupManyC(lookup);
+      co_return;
+    };
+    tasks.push_back(task());
+  }
+  folly::coro::blockingWait(
+      folly::coro::collectAllWindowed(std::move(tasks), concurrency));
+}
+
+BENCHMARK_PARAM(lookupManyC_wrk, 1)
+BENCHMARK_PARAM(lookupManyC_wrk, 10)
+BENCHMARK_PARAM(lookupManyC_wrk, 100)
+BENCHMARK_PARAM(lookupManyC_wrk, 1000)
+BENCHMARK_PARAM(lookupManyC_wrk, 10000)
+BENCHMARK_PARAM(lookupManyC_wrk, 100000)
+BENCHMARK_DRAW_LINE();
+
+void lookupManyC_eb(int, int iterations) {
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(iterations);
+  for (int i = 0; i < iterations; ++i) {
+    auto task = [&]() -> folly::coro::Task<void> {
+      auto lookup = CMultipleCustomerLookup();
+      auto writer = lookup.beginWrite();
+      auto custList = writer.beginWrite<ident::customerIds>();
+      for (auto i : service_->customerIds_) {
+        custList.write(i);
+      }
+      writer.endWrite(std::move(custList));
+      lookup.endWrite(std::move(writer));
+
+      co_await service_->binaryClient_->co_lookupManyCE(lookup);
+      co_return;
+    };
+    tasks.push_back(task());
+  }
+  folly::coro::blockingWait(
+      folly::coro::collectAllWindowed(std::move(tasks), concurrency));
+}
+
+BENCHMARK_PARAM(lookupManyC_eb, 1)
+BENCHMARK_PARAM(lookupManyC_eb, 10)
+BENCHMARK_PARAM(lookupManyC_eb, 100)
+BENCHMARK_PARAM(lookupManyC_eb, 1000)
+BENCHMARK_PARAM(lookupManyC_eb, 10000)
+BENCHMARK_PARAM(lookupManyC_eb, 100000)
+BENCHMARK_DRAW_LINE();
 
 } // namespace facebook::sbe::test
 

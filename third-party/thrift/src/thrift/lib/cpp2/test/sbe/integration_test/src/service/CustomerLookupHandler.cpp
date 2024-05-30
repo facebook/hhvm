@@ -16,6 +16,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <string_view>
+#include <utility>
 #include <vector>
 #include <glog/logging.h>
 #include <thrift/lib/cpp2/sbe/MessageWrapper.h>
@@ -27,7 +29,11 @@
 #include <thrift/lib/cpp2/test/sbe/integration_test/src/facebook_sbe_test/MultipleCustomerLookup.h>
 #include <thrift/lib/cpp2/test/sbe/integration_test/src/facebook_sbe_test/SingleCustomerLookup.h>
 
+#include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
+
 namespace facebook::sbe::test {
+
+using namespace apache::thrift;
 
 using apache::thrift::sbe::MessageWrapper;
 using std::unique_ptr;
@@ -231,4 +237,89 @@ std::unique_ptr<TMultipleCustomerResponse> CustomerLookupHandler::doLookupManyT(
   return std::make_unique<TMultipleCustomerResponse>(response);
 }
 
+std::unique_ptr<CCustomerResponse> CustomerLookupHandler::doLookupOneC(
+    std::unique_ptr<CSingleCustomerLookup> request) {
+  auto reader = request->beginRead();
+  std::string_view customerId;
+  reader.read<ident::customerId>(customerId);
+  request->endRead(std::move(reader));
+
+  DLOG(INFO) << "Looking up customer " << customerId;
+  auto it = customers_.find(customerId);
+  if (it != customers_.end()) {
+    DLOG(INFO) << "Found customer " << customerId;
+    const auto& customer = it->second;
+
+    auto scr = std::make_unique<CCustomerResponse>();
+    auto crWriter = scr->beginWrite();
+    crWriter.write<ident::index>(customer.index);
+    crWriter.write<ident::customerId>(customer.customerId);
+    crWriter.write<ident::firstName>(customer.firstName);
+    crWriter.write<ident::lastName>(customer.lastName);
+    crWriter.write<ident::company>(customer.company);
+    crWriter.write<ident::city>(customer.city);
+    crWriter.write<ident::country>(customer.country);
+    crWriter.write<ident::phone1>(customer.phone1);
+    crWriter.write<ident::phone2>(customer.phone2);
+    crWriter.write<ident::email>(customer.email);
+    crWriter.write<ident::subscriptionDate>(customer.subscriptionDate);
+    crWriter.write<ident::webSite>(customer.website);
+    scr->endWrite(std::move(crWriter));
+
+    return scr;
+  } else {
+    DLOG(INFO) << "Customer " << customerId << " not found";
+    throw std::runtime_error("Customer not found");
+  }
+}
+
+std::unique_ptr<CMultipleCustomerResponse> CustomerLookupHandler::doLookupManyC(
+    std::unique_ptr<CMultipleCustomerLookup> requests) {
+  DLOG(INFO) << "Looking up many customers";
+
+  auto reader = requests->beginRead();
+  auto customerIdList = reader.beginRead<ident::customerIds>();
+  std::vector<std::string_view> customerIds(
+      customerIdList.begin(), customerIdList.end());
+  reader.endRead(std::move(customerIdList));
+  requests->endRead(std::move(reader));
+
+  auto responses = std::make_unique<CMultipleCustomerResponse>();
+  auto mcrWriter = responses->beginWrite();
+
+  auto customerResponseList = mcrWriter.beginWrite<ident::customerResponses>();
+
+  for (auto customerId : customerIds) {
+    auto it = customers_.find(customerId);
+    if (it != customers_.end()) {
+      DLOG(INFO) << "Found customer " << customerId;
+      const auto& customer = it->second;
+
+      CCustomerResponse scr;
+      auto crWriter = scr.beginWrite();
+      crWriter.write<ident::index>(customer.index);
+      crWriter.write<ident::customerId>(customer.customerId);
+      crWriter.write<ident::firstName>(customer.firstName);
+      crWriter.write<ident::lastName>(customer.lastName);
+      crWriter.write<ident::company>(customer.company);
+      crWriter.write<ident::city>(customer.city);
+      crWriter.write<ident::country>(customer.country);
+      crWriter.write<ident::phone1>(customer.phone1);
+      crWriter.write<ident::phone2>(customer.phone2);
+      crWriter.write<ident::email>(customer.email);
+      crWriter.write<ident::subscriptionDate>(customer.subscriptionDate);
+      crWriter.write<ident::webSite>(customer.website);
+      scr.endWrite(std::move(crWriter));
+
+      auto data = scr.serializedData().clone();
+
+      customerResponseList.write(data);
+    }
+  }
+
+  mcrWriter.endWrite(std::move(customerResponseList));
+  responses->endWrite(std::move(mcrWriter));
+
+  return responses;
+}
 } // namespace facebook::sbe::test

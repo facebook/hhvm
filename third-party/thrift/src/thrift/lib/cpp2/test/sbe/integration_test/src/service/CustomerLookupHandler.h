@@ -51,6 +51,16 @@ class CustomerLookupHandler
     co_return doLookupManyT(std::move(p_request));
   }
 
+  folly::coro::Task<std::unique_ptr<CCustomerResponse>> co_lookupOneC(
+      std::unique_ptr<CSingleCustomerLookup> p_request) override {
+    co_return doLookupOneC(std::move(p_request));
+  }
+
+  folly::coro::Task<std::unique_ptr<CMultipleCustomerResponse>> co_lookupManyC(
+      std::unique_ptr<CMultipleCustomerLookup> p_request) override {
+    co_return doLookupManyC(std::move(p_request));
+  }
+
   void async_eb_lookupOneE(
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<folly::IOBuf>>
           callback,
@@ -89,6 +99,22 @@ class CustomerLookupHandler
     return customers_;
   }
 
+  void async_eb_lookupOneCE(
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<CCustomerResponse>>
+          callback,
+      std::unique_ptr<CSingleCustomerLookup> p_request) override {
+    auto res = doLookupOneC(std::move(p_request));
+    callback->complete(folly::Try<decltype(res)>{std::move(res)});
+  }
+
+  void async_eb_lookupManyCE(
+      apache::thrift::HandlerCallbackPtr<
+          std::unique_ptr<CMultipleCustomerResponse>> callback,
+      std::unique_ptr<CMultipleCustomerLookup> p_request) override {
+    auto res = doLookupManyC(std::move(p_request));
+    callback->complete(folly::Try<decltype(res)>{std::move(res)});
+  }
+
  private:
   folly::F14FastMap<std::string, Customer> customers_;
   std::unique_ptr<folly::IOBuf> customerNotFound_;
@@ -102,6 +128,12 @@ class CustomerLookupHandler
 
   std::unique_ptr<TMultipleCustomerResponse> doLookupManyT(
       std::unique_ptr<TMultipleCustomerLookup>);
+
+  std::unique_ptr<CCustomerResponse> doLookupOneC(
+      std::unique_ptr<CSingleCustomerLookup>);
+
+  std::unique_ptr<CMultipleCustomerResponse> doLookupManyC(
+      std::unique_ptr<CMultipleCustomerLookup>);
 
   size_t calculateCustomerReponseSize(const Customer& customer);
 

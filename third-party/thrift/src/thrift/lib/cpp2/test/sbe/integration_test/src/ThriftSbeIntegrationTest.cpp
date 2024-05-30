@@ -33,6 +33,7 @@
 
 using namespace facebook::sbe::test;
 
+using namespace apache::thrift;
 using apache::thrift::Client;
 using apache::thrift::ScopedServerInterfaceThread;
 using apache::thrift::sbe::MessageWrapper;
@@ -128,4 +129,27 @@ TEST(IntegrationTest, TestMultipleCustomerLookup) {
     customer.wrapForDecode(view);
     EXPECT_EQ(customer->getCustomerIdAsStringView(), it->first);
   }
+}
+
+TEST(IntegrationTest, TestSingleCursorCustomerLookup) {
+  ensureSingleBufferParsing();
+  auto customerLookupHandler =
+      facebook::sbe::test::createCustomerLookupHandler(kPath);
+  ScopedServerInterfaceThread runner(customerLookupHandler);
+
+  auto client = makeTestClient(
+      customerLookupHandler, nullptr, nullptr, protocol::T_BINARY_PROTOCOL);
+
+  std::string customerId("c57Dc5cF465d279");
+  auto lookup = CSingleCustomerLookup();
+  auto writer = lookup.beginWrite();
+  writer.write<ident::customerId>(customerId);
+  lookup.endWrite(std::move(writer));
+
+  auto res = folly::coro::blockingWait(client->co_lookupOneC(lookup));
+  auto reader = res.beginRead();
+  std::string_view otherId;
+  reader.read<ident::customerId>(otherId);
+  EXPECT_EQ(otherId, customerId);
+  res.endRead(std::move(reader));
 }

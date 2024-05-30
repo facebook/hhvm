@@ -78,7 +78,9 @@ class ScopedServerInterfaceThread {
   template <class AsyncClientT>
   std::unique_ptr<AsyncClientT> newClient(
       folly::Executor* callbackExecutor = nullptr,
-      MakeChannelFunc channelFunc = RocketClientChannel::newChannel) const;
+      MakeChannelFunc channelFunc = RocketClientChannel::newChannel,
+      protocol::PROTOCOL_TYPES prot =
+          protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL) const;
 
   /**
    * Like newClient but invokes injectFault before each request and

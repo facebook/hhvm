@@ -223,9 +223,10 @@ std::unique_ptr<AsyncClientT> ScopedServerInterfaceThread::newStickyClient(
 template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> ScopedServerInterfaceThread::newClient(
     folly::Executor* callbackExecutor,
-    ScopedServerInterfaceThread::MakeChannelFunc makeChannel) const {
+    ScopedServerInterfaceThread::MakeChannelFunc makeChannel,
+    protocol::PROTOCOL_TYPES prot) const {
   return std::make_unique<AsyncClientT>(
-      newChannel(callbackExecutor, std::move(makeChannel)));
+      newChannel(callbackExecutor, std::move(makeChannel), prot));
 }
 
 template <class AsyncClientT>

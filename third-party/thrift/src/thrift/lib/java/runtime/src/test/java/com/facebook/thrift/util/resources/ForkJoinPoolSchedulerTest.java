@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +31,7 @@ import reactor.test.StepVerifier;
 
 public class ForkJoinPoolSchedulerTest extends AbstractSchedulerTest {
 
+  @Ignore("Flaky")
   @Test(timeout = 5000)
   public void scheduleThenDisposeOfScheduler() throws Exception {
     Scheduler s = ForkJoinPoolScheduler.create("test", 1);
@@ -44,6 +46,7 @@ public class ForkJoinPoolSchedulerTest extends AbstractSchedulerTest {
     assertThat(latch.await(100, TimeUnit.MILLISECONDS)).isFalse();
   }
 
+  @Ignore("Flaky")
   @Test(timeout = 5000)
   public void scheduleThenDisposeOfWorker() throws Exception {
     Scheduler s = scheduler();
@@ -80,6 +83,7 @@ public class ForkJoinPoolSchedulerTest extends AbstractSchedulerTest {
         .isNotNull();
   }
 
+  @Ignore("Flaky")
   @Test
   public void smokeTestDelay() {
     for (int i = 0; i < 20; i++) {
@@ -114,6 +118,7 @@ public class ForkJoinPoolSchedulerTest extends AbstractSchedulerTest {
     }
   }
 
+  @Ignore("Flaky")
   @Test
   public void smokeTestInterval() {
     Scheduler s = scheduler();

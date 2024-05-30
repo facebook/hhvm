@@ -1,1 +1,32 @@
-No lint errors
+File "nonredundant_generics.php", line 5, characters 19-29:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 5, characters 38-38:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 8, characters 32-32:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 8, characters 38-38:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 10, characters 38-38:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 10, characters 45-48:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 14, characters 38-38:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 14, characters 45-48:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 18, characters 47-47:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 18, characters 54-57:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 22, characters 32-32:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 22, characters 42-42:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 28, characters 41-41:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 28, characters 48-53:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 29, characters 30-30:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "nonredundant_generics.php", line 29, characters 37-42:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])

@@ -1,18 +1,52 @@
+File "redundant_generics.php", line 5, characters 19-29:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 5, characters 38-38:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "redundant_generics.php", line 9, characters 42-42:
 The generic parameter `T` is redundant because it only appears in a contravariant (input) position with useless `super` bound. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 9, characters 42-42:
+The generic parameter `T` is redundant because it only appears in a contravariant (input) position with useless `super` bound. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 9, characters 56-56:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 9, characters 63-66:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 13, characters 27-27:
+The generic parameter `T` is unused. (Lint[5624])
 File "redundant_generics.php", line 13, characters 27-27:
 The generic parameter `T` is unused. (Lint[5624])
 File "redundant_generics.php", line 14, characters 34-34:
-The generic parameter `T` is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
-File "redundant_generics.php", line 17, characters 38-38:
-The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `I` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+The generic parameter `T` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 14, characters 34-34:
+The generic parameter `T` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 17, characters 46-46:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 17, characters 54-57:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 18, characters 38-38:
+The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
 File "redundant_generics.php", line 18, characters 38-38:
 The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
 File "redundant_generics.php", line 21, characters 38-38:
 The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 21, characters 38-38:
+The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 21, characters 41-41:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 21, characters 49-57:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "redundant_generics.php", line 24, characters 34-34:
-The generic parameter `T` is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+The generic parameter `T` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 24, characters 34-34:
+The generic parameter `T` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 24, characters 37-54:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+File "redundant_generics.php", line 24, characters 63-66:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "redundant_generics.php", line 32, characters 5-8:
 The generic parameter `TEMV` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 32, characters 5-8:
+The generic parameter `TEMV` is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 43, characters 23-24:
+The generic parameter `Tv` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
 File "redundant_generics.php", line 43, characters 23-24:
 The generic parameter `Tv` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])

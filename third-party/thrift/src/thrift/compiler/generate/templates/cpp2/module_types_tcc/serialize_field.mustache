@@ -62,8 +62,8 @@
 {{#type:struct?}}
 {{#struct:union?}}  {{/struct:union?}}    } else {
 {{#struct:union?}}  {{/struct:union?}}      xfer += prot_->writeStructBegin("{{type:name}}");
-{{#struct:union?}}  {{/struct:union?}}      xfer += prot_->writeStructEnd();
 {{#struct:union?}}  {{/struct:union?}}      xfer += prot_->writeFieldStop();
+{{#struct:union?}}  {{/struct:union?}}      xfer += prot_->writeStructEnd();
 {{/type:struct?}}
 {{#struct:union?}}  {{/struct:union?}}    }
 {{/field:non_opt_cpp_ref?}}

@@ -1161,8 +1161,8 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::SmallStruct>::write(*prot_, *this->__fbthrift_field_fieldS);
     } else {
       xfer += prot_->writeStructBegin("SmallStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -1174,8 +1174,8 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::SmallStruct>::write(*prot_, *this->__fbthrift_field_fieldT);
     } else {
       xfer += prot_->writeStructBegin("SmallStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -1187,8 +1187,8 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::SmallStruct>::write(*prot_, *this->__fbthrift_field_fieldU);
     } else {
       xfer += prot_->writeStructBegin("SmallStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -1200,8 +1200,8 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::SmallStruct>::write(*prot_, *this->__fbthrift_field_fieldX);
     } else {
       xfer += prot_->writeStructBegin("SmallStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }

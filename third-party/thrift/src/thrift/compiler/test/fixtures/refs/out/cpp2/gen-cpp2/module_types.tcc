@@ -1116,8 +1116,8 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_ref);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -1129,8 +1129,8 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_req_ref);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -1335,8 +1335,8 @@ uint32_t StructWithUnion::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::MyUnion>::write(*prot_, *this->__fbthrift_field_u);
     } else {
       xfer += prot_->writeStructBegin("MyUnion");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2113,8 +2113,8 @@ uint32_t StructWithSharedConst::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_shared_const);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2126,8 +2126,8 @@ uint32_t StructWithSharedConst::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_req_shared_const);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2422,8 +2422,8 @@ uint32_t StructWithRef::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_def_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2444,8 +2444,8 @@ uint32_t StructWithRef::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_req_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2835,8 +2835,8 @@ uint32_t StructWithInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_field1);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -2848,8 +2848,8 @@ uint32_t StructWithInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_field2);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3030,8 +3030,8 @@ uint32_t StructWithTerseInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_field1);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -3045,8 +3045,8 @@ uint32_t StructWithTerseInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_field2);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -3231,8 +3231,8 @@ uint32_t AdaptedStructWithInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*prot_, *this->__fbthrift_field_field1);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3244,8 +3244,8 @@ uint32_t AdaptedStructWithInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*prot_, *this->__fbthrift_field_field2);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3426,8 +3426,8 @@ uint32_t AdaptedStructWithTerseInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*prot_, *this->__fbthrift_field_field1);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -3441,8 +3441,8 @@ uint32_t AdaptedStructWithTerseInternBox::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*prot_, *this->__fbthrift_field_field2);
     } else {
       xfer += prot_->writeStructBegin("MyField");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -3658,8 +3658,8 @@ uint32_t StructWithRefTypeUnique::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_def_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3680,8 +3680,8 @@ uint32_t StructWithRefTypeUnique::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_req_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3895,8 +3895,8 @@ uint32_t StructWithRefTypeShared::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_def_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -3917,8 +3917,8 @@ uint32_t StructWithRefTypeShared::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_req_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -4132,8 +4132,8 @@ uint32_t StructWithRefTypeSharedConst::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_def_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -4154,8 +4154,8 @@ uint32_t StructWithRefTypeSharedConst::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_req_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -4293,8 +4293,8 @@ uint32_t StructWithRefAndAnnotCppNoexceptMoveCtor::write(Protocol_* prot_) const
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_def_field);
     } else {
       xfer += prot_->writeStructBegin("Empty");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }

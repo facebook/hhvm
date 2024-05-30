@@ -4233,8 +4233,8 @@ uint32_t struct4::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::write(*prot_, *this->__fbthrift_field_field3);
     } else {
       xfer += prot_->writeStructBegin("structA");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }

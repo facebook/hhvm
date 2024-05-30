@@ -3752,8 +3752,8 @@ uint32_t ComposeStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::python_capi::ListAlias>::write(*prot_, *this->__fbthrift_field_aliased);
     } else {
       xfer += prot_->writeStructBegin("ListAlias");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }

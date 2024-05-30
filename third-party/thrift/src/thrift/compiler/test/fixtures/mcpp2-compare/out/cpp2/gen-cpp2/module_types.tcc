@@ -2090,8 +2090,8 @@ uint32_t ComplexUnion::write(Protocol_* prot_) const {
         xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct>::write(*prot_, *value_.ref_field);
       } else {
         xfer += prot_->writeStructBegin("MyStruct");
-        xfer += prot_->writeStructEnd();
         xfer += prot_->writeFieldStop();
+        xfer += prot_->writeStructEnd();
       }
       xfer += prot_->writeFieldEnd();
       break;
@@ -2104,8 +2104,8 @@ uint32_t ComplexUnion::write(Protocol_* prot_) const {
         xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct>::write(*prot_, *value_.ref_field2);
       } else {
         xfer += prot_->writeStructBegin("MyStruct");
-        xfer += prot_->writeStructEnd();
         xfer += prot_->writeFieldStop();
+        xfer += prot_->writeStructEnd();
       }
       xfer += prot_->writeFieldEnd();
       break;
@@ -5281,8 +5281,8 @@ uint32_t MyIncludedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::write(*prot_, *this->__fbthrift_field_ARefField);
     } else {
       xfer += prot_->writeStructBegin("AStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -6817,8 +6817,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->cpp_unique_ref);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -6832,8 +6832,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->cpp2_unique_ref);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -6861,8 +6861,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->req_cpp_unique_ref);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -6874,8 +6874,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->req_cpp2_unique_ref);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -6926,8 +6926,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->ref_type_unique);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   } else {
@@ -6941,8 +6941,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->ref_type_shared);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -6968,8 +6968,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->req_ref_type_shared);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }
@@ -6981,8 +6981,8 @@ uint32_t AnnotatedStruct::write(Protocol_* prot_) const {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct>::write(*prot_, *this->req_ref_type_const);
     } else {
       xfer += prot_->writeStructBegin("containerStruct");
-      xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
     }
     xfer += prot_->writeFieldEnd();
   }

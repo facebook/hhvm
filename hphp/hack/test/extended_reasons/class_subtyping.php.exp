@@ -3,23 +3,36 @@ error: Typing[4110] Invalid argument [1]
 -> But got Super [3]
 -> Here's why: this hint [3]
 -> flows into this hint, via the (contravariant) 2nd type parameter of the class \MyA [4]
+-> which itself flows from this declaration, via the (contravariant) 1st function parameter [5]
+-> which itself flows into this expression [6]
+-> which itself flows from this expression, via the (contravariant) 1st function parameter [1]
+-> which itself flows from this expression [7]
+-> which itself flows from this hint [8]
+-> which itself flows from this hint [9]
+-> which itself flows into this hint, via the (contravariant) 2nd type parameter of the class \MyA [2]
 
 class_subtyping.php:16:14
-      11 | class Sub {}
-      12 | 
-[3,4] 13 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
-      14 | 
-[2]   15 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
-[1]   16 |   takes_my_a($x);
-      17 | }
-      18 | 
+         3 | class MyA<+Tco, -Tcontra, Tinv> {}
+         4 | 
+[9]      5 | class MyB<-T1, T2> extends MyA<Sub, T1, T2> {}
+         6 | 
+         7 | class MyC<+T1, T2> extends MyA<T1, Super, T2> {}
+           :
+        11 | class Sub {}
+        12 | 
+[3,4,5] 13 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+        14 | 
+[2,7,8] 15 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+[1,6]   16 |   takes_my_a($x);
+        17 | }
+        18 | 
 
 error: Typing[4110] Invalid argument [1]
 -> Expected Super [2]
 -> But got Sub [3]
 -> Here's why: this hint [3]
 -> flows into this hint, via the (covariant) 3rd type parameter of the class \MyA [4]
--> which itself flows into this hint, via a subclass relationship [5]
+-> which itself flows into this hint [5]
 -> which itself flows into this expression [6]
 -> which itself flows into this expression [1]
 -> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
@@ -52,27 +65,40 @@ error: Typing[4110] Invalid argument [1]
 -> But got Super [3]
 -> Here's why: this hint [3]
 -> flows into this hint, via the (contravariant) 3rd type parameter of the class \MyA [4]
+-> which itself flows from this declaration, via the (contravariant) 1st function parameter [5]
+-> which itself flows into this expression [6]
+-> which itself flows from this expression, via the (contravariant) 1st function parameter [1]
+-> which itself flows from this expression [7]
+-> which itself flows from this hint [8]
+-> which itself flows from this hint [9]
+-> which itself flows into this hint, via the (contravariant) 3rd type parameter of the class \MyA [2]
 
 class_subtyping.php:20:14
-      11 | class Sub {}
-      12 | 
-[3,4] 13 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
-      14 | 
-      15 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
-      16 |   takes_my_a($x);
-      17 | }
-      18 | 
-[2]   19 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
-[1]   20 |   takes_my_a($x);
-      21 | }
-      22 | 
+         3 | class MyA<+Tco, -Tcontra, Tinv> {}
+         4 | 
+[9]      5 | class MyB<-T1, T2> extends MyA<Sub, T1, T2> {}
+         6 | 
+         7 | class MyC<+T1, T2> extends MyA<T1, Super, T2> {}
+           :
+        11 | class Sub {}
+        12 | 
+[3,4,5] 13 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+        14 | 
+        15 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+        16 |   takes_my_a($x);
+        17 | }
+        18 | 
+[2,7,8] 19 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
+[1,6]   20 |   takes_my_a($x);
+        21 | }
+        22 | 
 
 error: Typing[4110] Invalid argument [1]
 -> Expected Sub [2]
 -> But got Super [3]
 -> Here's why: this hint [3]
 -> flows into this hint, via the (covariant) 1st type parameter of the class \MyA [4]
--> which itself flows into this hint, via a subclass relationship [5]
+-> which itself flows into this hint [5]
 -> which itself flows into this expression [6]
 -> which itself flows into this expression [1]
 -> which itself flows into this expression, via the (contravariant) 1st function parameter [7]

@@ -96,12 +96,6 @@ module Prov : sig
     var:Ast_defs.variance ->
     Typing_reason.t
 
-  val prj_extends : Typing_reason.t -> Typing_reason.t
-
-  val prj_as_cstr : Typing_reason.t -> Typing_reason.t
-
-  val prj_super_cstr : Typing_reason.t -> Typing_reason.t
-
   val prj_shape :
     Typing_reason.t ->
     fld_nm:string ->

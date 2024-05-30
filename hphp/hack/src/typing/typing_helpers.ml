@@ -191,12 +191,6 @@ module Prov = struct
   let prj_newtype r ~nm ~idx ~var =
     Typing_reason.(Rprj_symm (Prj_symm_newtype (nm, idx, var), r))
 
-  let prj_extends r = Typing_reason.(Rprj_asymm (Prj_asymm_extends, r))
-
-  let prj_as_cstr r = Typing_reason.(Rprj_asymm (Prj_asymm_as_cstr, r))
-
-  let prj_super_cstr r = Typing_reason.(Rprj_asymm (Prj_asymm_super_cstr, r))
-
   let prj_shape r ~fld_nm ~fld_kind_sub ~fld_kind_super =
     Typing_reason.(
       Rprj_symm (Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super), r))

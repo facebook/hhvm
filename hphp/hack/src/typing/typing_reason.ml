@@ -106,9 +106,6 @@ type prj_asymm =
   | Prj_asymm_union
   | Prj_asymm_inter
   | Prj_asymm_neg
-  | Prj_asymm_extends
-  | Prj_asymm_as_cstr
-  | Prj_asymm_super_cstr
 [@@deriving hash]
 
 let variance_to_json = function
@@ -181,9 +178,6 @@ let prj_asymm_to_json = function
   | Prj_asymm_union -> Hh_json.JSON_String "Prj_asymm_union"
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
-  | Prj_asymm_extends -> Hh_json.JSON_String "Prj_asymm_extends"
-  | Prj_asymm_as_cstr -> Hh_json.JSON_String "Prj_asymm_as_cstr"
-  | Prj_asymm_super_cstr -> Hh_json.JSON_String "Prj_asymm_super_cstr"
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
@@ -1326,9 +1320,6 @@ let explain_asymm_prj prj =
   | Prj_asymm_union -> "via the union type"
   | Prj_asymm_inter -> "via the intersection type"
   | Prj_asymm_neg -> "via the negation type"
-  | Prj_asymm_extends -> "via a subclass relationship"
-  | Prj_asymm_as_cstr -> "via an `as` constraint"
-  | Prj_asymm_super_cstr -> "via an `super` constraint"
 
 (* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
    and ensure we handle all cases statically *)

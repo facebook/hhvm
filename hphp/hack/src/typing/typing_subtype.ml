@@ -2335,9 +2335,7 @@ end = struct
             Phase.localize ~ety_env env up_obj
           in
           let up_obj =
-            Prov.(
-              update up_obj ~env ~f:(fun from ->
-                  flow ~from ~into:(prj_extends r_sub)))
+            Prov.(update up_obj ~env ~f:(fun from -> flow ~from ~into:r_sub))
           in
           (match deref up_obj with
           | (r_sub, Tclass (class_id_sub, exact_sub, tyl_sub)) ->
@@ -3663,9 +3661,7 @@ end = struct
               env
           | ty :: tyl ->
             let ty =
-              Prov.(
-                update ty ~env ~f:(fun from ->
-                    flow ~from ~into:(prj_super_cstr r_super)))
+              Prov.(update ty ~env ~f:(fun from -> flow ~from ~into:r_super))
             in
             simplify
               ~subtype_env
@@ -6380,9 +6376,7 @@ end = struct
             this_ty
         in
 
-        let update_reason from =
-          Prov.(flow ~from ~into:(prj_as_cstr reason_generic))
-        in
+        let update_reason from = Prov.(flow ~from ~into:reason_generic) in
         (* Otherwise, we collect all the upper bounds ("as" constraints) on
            the generic parameter, and check each of these in turn against
            ty_super until one of them succeeds

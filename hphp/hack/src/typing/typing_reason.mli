@@ -72,9 +72,6 @@ type prj_asymm =
   | Prj_asymm_union
   | Prj_asymm_inter
   | Prj_asymm_neg
-  | Prj_asymm_extends
-  | Prj_asymm_as_cstr
-  | Prj_asymm_super_cstr
 [@@deriving hash]
 
 (** The reason why something is expected to have a certain type *)

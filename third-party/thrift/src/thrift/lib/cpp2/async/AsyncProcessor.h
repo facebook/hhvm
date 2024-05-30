@@ -1298,9 +1298,19 @@ class HandlerCallbackBase {
       folly::EventBase* eb,
       TilePtr interaction = {});
 
-  void exception(std::exception_ptr ex) { doException(ex); }
+  void exception(std::exception_ptr ex) {
+    handleExceptionAndExecuteServiceInterceptors(
+        [ex = std::move(ex)](HandlerCallbackBase& callback) mutable {
+          callback.doException(std::move(ex));
+        });
+  }
 
-  void exception(folly::exception_wrapper ew) { doExceptionWrapped(ew); }
+  void exception(folly::exception_wrapper ew) {
+    handleExceptionAndExecuteServiceInterceptors(
+        [ew = std::move(ew)](HandlerCallbackBase& callback) mutable {
+          callback.doExceptionWrapped(std::move(ew));
+        });
+  }
 
   // Warning: just like "throw ex", this captures the STATIC type of ex, not
   // the dynamic type.  If you need the dynamic type, then either you should
@@ -1367,6 +1377,34 @@ class HandlerCallbackBase {
     }
   }
 #endif // FOLLY_HAS_COROUTINES
+
+  template <class DoExceptionFunc>
+  void handleExceptionAndExecuteServiceInterceptors(
+      DoExceptionFunc&& doException) {
+#if FOLLY_HAS_COROUTINES
+    if (!shouldProcessServiceInterceptorsOnResponse()) {
+      std::forward<DoExceptionFunc>(doException)(*this);
+      return;
+    }
+    auto task = [](Ptr callback,
+                   DoExceptionFunc doException) -> folly::coro::Task<void> {
+      folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+          callback->processServiceInterceptorsOnResponse());
+      if (onResponseResult.hasException()) {
+        // ServiceInterceptor::onResponse should definitely avoid
+        // throwing in case there is already an exception. The
+        // application-thrown exception takes precedence.
+        LOG(ERROR) << "Exception in ServiceInterceptor::onResponse: "
+                   << folly::exceptionStr(onResponseResult.exception());
+      }
+      std::forward<DoExceptionFunc>(doException)(*callback);
+    }(sharedFromThis(), std::forward<DoExceptionFunc>(doException));
+    startOnExecutor(
+        std::move(task), executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+#else
+    std::forward<DoExceptionFunc>(doException)(*this);
+#endif // FOLLY_HAS_COROUTINES
+  }
 
   // Can be called from IO or TM thread
   virtual void doException(std::exception_ptr ex) {

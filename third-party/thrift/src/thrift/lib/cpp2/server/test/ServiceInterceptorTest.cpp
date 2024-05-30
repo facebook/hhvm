@@ -39,6 +39,9 @@ struct TestHandler
 
   folly::coro::Task<std::unique_ptr<std::string>> co_echo(
       std::unique_ptr<std::string> str) override {
+    if (*str == "throw") {
+      throw std::runtime_error("You asked for it!");
+    }
     co_return std::move(str);
   }
 
@@ -235,7 +238,7 @@ CO_TEST(ServiceInterceptorTest, OnRequestException) {
       },
       apache::thrift::TApplicationException);
   EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 0);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
 CO_TEST(ServiceInterceptorTest, OnRequestExceptionEB) {
@@ -264,7 +267,7 @@ CO_TEST(ServiceInterceptorTest, OnRequestExceptionEB) {
       },
       apache::thrift::TApplicationException);
   EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 0);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
 CO_TEST(ServiceInterceptorTest, OnResponseException) {
@@ -357,6 +360,30 @@ CO_TEST(ServiceInterceptorTest, OnResponseBypassedForUnsafeReleasedCallback) {
   co_await client->co_echo("");
   EXPECT_EQ(interceptor->onRequestCount, 2);
   EXPECT_EQ(interceptor->onResponseCount, 0);
+}
+
+CO_TEST(
+    ServiceInterceptorTest, OnResponseExceptionPreservesApplicationException) {
+  auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  ScopedServerInterfaceThread runner(
+      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->co_echo("throw");
+        } catch (const apache::thrift::TApplicationException& ex) {
+          EXPECT_THAT(std::string(ex.what()), HasSubstr("You asked for it!"));
+          throw;
+        }
+      },
+      apache::thrift::TApplicationException);
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
 CO_TEST(ServiceInterceptorTest, BasicInteraction) {

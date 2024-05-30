@@ -1063,9 +1063,7 @@ folly::coro::Task<void> processServiceInterceptorsOnRequest(
   try {
     co_await callback.processServiceInterceptorsOnRequest();
   } catch (...) {
-    // We must call doException() instead of exception() to avoid further
-    // ServiceInterceptor invocations.
-    callback.doException(std::current_exception());
+    callback.exception(std::current_exception());
     throw;
   }
 }

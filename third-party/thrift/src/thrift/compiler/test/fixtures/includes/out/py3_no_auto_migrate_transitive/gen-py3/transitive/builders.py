@@ -10,7 +10,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
 
-import transitive.types as _transitive_types
+import transitive.thrift_types as _transitive_types
 
 
 _fbthrift_struct_type__Foo = _transitive_types.Foo

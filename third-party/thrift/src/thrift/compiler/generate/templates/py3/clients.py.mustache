@@ -33,8 +33,4 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
-{{^program:no_auto_migrate?}}from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{!
-}}thrift_clients import *{{/program:no_auto_migrate?}}
-{{#program:no_auto_migrate?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.py3_clients import *
-{{/program:no_auto_migrate?}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_clients import *

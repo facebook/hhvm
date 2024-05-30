@@ -154,7 +154,6 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::capi_converter},
             {"program:intercompatible?", &py3_mstch_program::intercompatible},
             {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
-            {"program:no_auto_migrate?", &py3_mstch_program::no_auto_migrate},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
@@ -272,8 +271,6 @@ class py3_mstch_program : public mstch_program {
   mstch::node intercompatible() { return has_option("intercompatible"); }
 
   mstch::node auto_migrate() { return has_option("auto_migrate"); }
-
-  mstch::node no_auto_migrate() { return has_option("no_auto_migrate"); }
 
   mstch::node py_deprecated_module_path() {
     const std::string& module_path = program_->get_namespace("py");
@@ -1377,7 +1374,6 @@ void t_mstch_py3_generator::generate_file(
 void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> autoMigrateFiles{
       "types.py",
-      // in no_auto_migrate, .pxd contains a cimport * from types_.pxd
       // without auto_migrate, .pxd contains just bindings of cpp thrift types
       "types.pxd",
       "metadata.py",
@@ -1462,13 +1458,6 @@ void t_mstch_py3_generator::generate_services() {
       "services.py",
   };
 
-  std::vector<std::string> cythonCompatFiles{
-      "clients.py",
-      "clients.pxd",
-      "services.py",
-      "services.pxd",
-  };
-
   std::vector<std::string> normalCythonFiles{
       "clients.pxd",
       "clients.pyx",
@@ -1503,8 +1492,7 @@ void t_mstch_py3_generator::generate_services() {
 
   // TODO this logic is a complete mess and I intend to clean it up later
   // the gist is:
-  // - if auto_migrate is present, generate py3_clients and either
-  // clients.pxd or clients.py depending on if no_auto_migrate is present
+  // - if auto_migrate is present, generate py3_clients and clients.px
   // - if auto_migrate isn't present, just generate all the normal files
 
   if (has_option("auto_migrate")) {
@@ -1517,14 +1505,8 @@ void t_mstch_py3_generator::generate_services() {
     for (const auto& file : cythonFiles) {
       generate_file(file, NotTypesFile, generateRootPath_);
     }
-    if (has_option("no_auto_migrate")) {
-      for (const auto& file : cythonCompatFiles) {
-        generate_file(file, NotTypesFile, generateRootPath_);
-      }
-    } else {
-      for (const auto& file : pythonFiles) {
-        generate_file(file, NotTypesFile, generateRootPath_);
-      }
+    for (const auto& file : pythonFiles) {
+      generate_file(file, NotTypesFile, generateRootPath_);
     }
   } else {
     for (const auto& file : normalCythonFiles) {

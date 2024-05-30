@@ -10,7 +10,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
 
-import module.types as _module_types
+import module.thrift_types as _module_types
 
 
 _fbthrift_struct_type__SimpleException = _module_types.SimpleException

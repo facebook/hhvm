@@ -11,7 +11,7 @@ import thrift.py3.builder
 
 import includes.types as _includes_types
 
-import module.types as _module_types
+import module.thrift_types as _module_types
 
 
 _fbthrift_struct_type__MyStruct = _module_types.MyStruct

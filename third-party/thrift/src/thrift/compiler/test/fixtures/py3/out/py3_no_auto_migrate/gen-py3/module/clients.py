@@ -4,5 +4,4 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-
-from module.py3_clients import *
+from module.thrift_clients import *

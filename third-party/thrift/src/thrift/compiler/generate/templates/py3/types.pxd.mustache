@@ -17,10 +17,6 @@
 }}
 {{#program:auto_migrate?}}
 {{> common/auto_generated_py}}
-{{#program:no_auto_migrate?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.py3_types cimport *
-{{/program:no_auto_migrate?}}
-{{^program:no_auto_migrate?}}
 {{> types/cimport_extern }}
 
 {{#program:cppIncludes}}
@@ -38,7 +34,6 @@ cdef extern from "{{.}}":
 {{> types/struct_extern }}
 {{> types/constant_extern }}
 
-{{/program:no_auto_migrate?}}
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
 {{> py3_types.pxd }}

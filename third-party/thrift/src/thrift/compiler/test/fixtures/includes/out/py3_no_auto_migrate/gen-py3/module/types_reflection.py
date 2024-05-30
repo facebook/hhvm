@@ -21,7 +21,7 @@ from thrift.py3.reflection import (
 
 import includes.py3_types as _includes_types
 
-import module.types as _module_types
+import module.thrift_types as _module_types
 
 
 

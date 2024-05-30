@@ -11,7 +11,7 @@ import thrift.py3.builder
 
 import transitive.types as _transitive_types
 
-import includes.types as _includes_types
+import includes.thrift_types as _includes_types
 
 
 _fbthrift_struct_type__Included = _includes_types.Included

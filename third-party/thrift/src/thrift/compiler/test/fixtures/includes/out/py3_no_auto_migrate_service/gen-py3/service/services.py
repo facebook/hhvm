@@ -4,5 +4,4 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-
-from service.py3_services import *
+from service.thrift_services import *

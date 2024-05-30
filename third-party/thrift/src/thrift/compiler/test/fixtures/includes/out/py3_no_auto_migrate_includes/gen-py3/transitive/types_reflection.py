@@ -20,7 +20,7 @@ from thrift.py3.reflection import (
 )
 
 
-import transitive.types as _transitive_types
+import transitive.thrift_types as _transitive_types
 
 
 

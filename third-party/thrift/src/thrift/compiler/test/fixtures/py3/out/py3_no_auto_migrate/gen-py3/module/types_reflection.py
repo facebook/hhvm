@@ -20,7 +20,7 @@ from thrift.py3.reflection import (
 )
 
 
-import module.types as _module_types
+import module.thrift_types as _module_types
 
 
 

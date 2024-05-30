@@ -135,7 +135,7 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         if not isinstance(other, MutableListTypeInfo):
             return False
 
-        return self.val_info == (<MutableListTypeInfo>other).val_info
+        return self.val_info.same_as((<MutableListTypeInfo>other).val_info)
 
 
 cdef class MutableSetTypeInfo(TypeInfoBase):
@@ -192,4 +192,4 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
         if not isinstance(other, MutableSetTypeInfo):
             return False
 
-        return self.val_info == (<MutableSetTypeInfo>other).val_info
+        return self.val_info.same_as((<MutableSetTypeInfo>other).val_info)

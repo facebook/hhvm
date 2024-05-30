@@ -75,6 +75,11 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(ListTypeInfo(typeinfo_i64).same_as(list_type_info))
         self.ut.assertFalse(ListTypeInfo(typeinfo_i32).same_as(list_type_info))
 
+        with self.ut.assertRaisesRegex(
+            NotImplementedError,
+            "Use the 'same_as' method for comparing TypeInfoBase instances."):
+            list_type_info == list_type_info
+
     def test_ListTypeInfo_nested(self) -> None:
         element_type_info = ListTypeInfo(typeinfo_i64)
         list_type_info = ListTypeInfo(element_type_info)

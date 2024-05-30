@@ -86,6 +86,9 @@ cdef class TypeInfoBase:
     cdef const cTypeInfo* get_cTypeInfo(self):
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
+    def __eq__(self, other):
+        raise NotImplementedError("Use the 'same_as' method for comparing TypeInfoBase instances.")
+
     def same_as(TypeInfoBase self, other):
         """
         `TypeInfo` classes are a sort of bridge between Thrift IDL types and Python
@@ -588,7 +591,7 @@ cdef class ListTypeInfo(TypeInfoBase):
         if not isinstance(other, ListTypeInfo):
             return False
 
-        return self.val_info == (<ListTypeInfo>other).val_info
+        return self.val_info.same_as((<ListTypeInfo>other).val_info)
 
     def __reduce__(self):
         return (ListTypeInfo, (self.val_info,))
@@ -638,7 +641,7 @@ cdef class SetTypeInfo(TypeInfoBase):
         if not isinstance(other, SetTypeInfo):
             return False
 
-        return self.val_info == (<SetTypeInfo>other).val_info
+        return self.val_info.same_as((<SetTypeInfo>other).val_info)
 
     def __reduce__(self):
         return (SetTypeInfo, (self.val_info,))
@@ -703,8 +706,8 @@ cdef class MapTypeInfo(TypeInfoBase):
         if not isinstance(other, MapTypeInfo):
             return False
 
-        return (self.key_info == (<MapTypeInfo>other).key_info
-            and self.val_info == (<MapTypeInfo>other).val_info)
+        return (self.key_info.same_as((<MapTypeInfo>other).key_info) and
+            self.val_info.same_as((<MapTypeInfo>other).val_info))
 
     def __reduce__(self):
         return (MapTypeInfo, (self.key_info, self.val_info))
@@ -881,7 +884,7 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
         cdef AdaptedTypeInfo other_typeinfo = other
         # DO_BEFORE(alperyoney,20240603): Figure out whether `_transitive_annotation`
         # should be part of the comparison below.
-        return (self._orig_type_info == other_typeinfo._orig_type_info and
+        return (self._orig_type_info.same_as(other_typeinfo._orig_type_info) and
             self._adapter_info == other_typeinfo._adapter_info)
 
     def __reduce__(self):

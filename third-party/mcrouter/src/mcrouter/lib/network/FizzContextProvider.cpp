@@ -80,7 +80,7 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     auto selfCert =
         fizz::openssl::CertUtils::makeSelfCert(certData.str(), keyData.str());
     // add the default cert
-    certMgr->addCertAndSetDefault(std::move(selfCert));
+    certMgr->addCert(std::move(selfCert), true);
   } catch (const std::exception& ex) {
     LOG_FAILURE(
         "SSLCert",

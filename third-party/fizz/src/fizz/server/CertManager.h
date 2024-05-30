@@ -36,9 +36,9 @@ class CertManager : public CertManagerBase {
    */
   virtual std::shared_ptr<SelfCert> getCert(const std::string& identity) const;
 
-  void addCertAndSetDefault(std::shared_ptr<SelfCert> cert);
-
-  void addCert(std::shared_ptr<SelfCert> cert);
+  virtual void addCert(
+      std::shared_ptr<SelfCert> cert,
+      bool defaultCert = false);
 
  protected:
   CertMatch findCert(
@@ -49,8 +49,6 @@ class CertManager : public CertManagerBase {
   void addCertIdentity(
       std::shared_ptr<SelfCert> cert,
       const std::string& ident);
-
-  void addCert(std::shared_ptr<SelfCert> cert, bool defaultCert);
 
   static std::string getKeyFromIdent(const std::string& ident);
 

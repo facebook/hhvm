@@ -10,7 +10,6 @@
 #include <folly/portability/GTest.h>
 
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
-
 #include <fizz/extensions/delegatedcred/test/Mocks.h>
 
 #include <fizz/protocol/test/Mocks.h>
@@ -89,11 +88,11 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoMatchDefault) {
       DelegatedCredentialCertManagerTest::getCert("blah.com", {}, kRsa);
   auto cert2 =
       DelegatedCredentialCertManagerTest::getCert("blah.com", {}, kRsa);
-  DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert1);
+  DelegatedCredentialCertManagerTest::manager_.addCert(cert1, true);
   // Technically, the default flag doesn't really apply to DC certs.
   // It should always return the undelegated default cert if an exact
   // match can't be found..
-  DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert2);
+  DelegatedCredentialCertManagerTest::manager_.addCert(cert2, true);
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
       std::string("test.com"), kRsa, kRsa, TypeParam::Extensions());
   EXPECT_EQ(res->cert, cert1);
@@ -101,7 +100,7 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoMatchDefault) {
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoSniDefault) {
   auto cert = DelegatedCredentialCertManagerTest::getCert("blah.com", {}, kRsa);
-  DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
+  DelegatedCredentialCertManagerTest::manager_.addCert(cert, true);
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
       folly::none, kRsa, kRsa, TypeParam::Extensions());
   EXPECT_EQ(res->cert, cert);
@@ -110,7 +109,7 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoSniDefault) {
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcardDefault) {
   auto cert =
       DelegatedCredentialCertManagerTest::getCert("*.blah.com", {}, kRsa);
-  DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
+  DelegatedCredentialCertManagerTest::manager_.addCert(cert, true);
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
       folly::none, kRsa, kRsa, TypeParam::Extensions());
   EXPECT_EQ(res->cert, cert);
@@ -118,7 +117,7 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcardDefault) {
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestUppercaseDefault) {
   auto cert = DelegatedCredentialCertManagerTest::getCert("BLAH.com", {}, kRsa);
-  DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
+  DelegatedCredentialCertManagerTest::manager_.addCert(cert, true);
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
       folly::none, kRsa, kRsa, TypeParam::Extensions());
   EXPECT_EQ(res->cert, cert);
@@ -418,7 +417,7 @@ TEST_F(DelegatedCredentialCertManagerTest, TestUndelegatedNeverGetsCredential) {
 
   manager_.addCert(cert1);
   manager_.addCert(cert2);
-  manager_.addCertAndSetDefault(cert3);
+  manager_.addCert(cert3, true);
 
   res = manager_.getCert(host1, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert1);
@@ -456,7 +455,7 @@ TEST_F(
 
   manager_.addCert(cert1);
   manager_.addCert(cert2);
-  manager_.addCertAndSetDefault(cert3);
+  manager_.addCert(cert3, true);
 
   auto res = manager_.getCert(host1, kRsa, kRsa, DelegatedMode::Extensions());
   EXPECT_EQ(res->cert, cert1);
@@ -503,8 +502,8 @@ TEST_F(
 TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchWithDefaultSet) {
   auto cert1 = getCert("foo.test.com", {}, kRsa);
   auto cert2 = getCredential("foo.test.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert1);
-  manager_.addDelegatedCredentialAndSetDefault(cert2);
+  manager_.addCert(cert1, true);
+  manager_.addDelegatedCredential(cert2, true);
 
   auto res = manager_.getCert(
       std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());
@@ -516,8 +515,8 @@ TEST_F(
     TestDelegatedNotMatchedWithDefaultNotSet) {
   auto cert1 = getCert("foo.test.com", {}, kRsa);
   auto cert2 = getCredential("foo.test.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert1);
-  manager_.addDelegatedCredential(cert2);
+  manager_.addCert(cert1, true);
+  manager_.addDelegatedCredential(cert2, false);
 
   auto res = manager_.getCert(
       std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());

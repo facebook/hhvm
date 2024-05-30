@@ -257,10 +257,10 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
       auto batchCert =
           std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
       serverContext->setSupportedSigSchemes(batchCert->getSigSchemes());
-      certManager->addCertAndSetDefault(batchCert);
+      certManager->addCert(batchCert, true);
     } else {
       serverContext->setSupportedSigSchemes(sharedCert->getSigSchemes());
-      certManager->addCertAndSetDefault(sharedCert);
+      certManager->addCert(sharedCert, true);
     }
   }
   serverContext->setCertManager(std::move(certManager));

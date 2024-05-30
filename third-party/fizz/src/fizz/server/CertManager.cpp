@@ -120,14 +120,6 @@ void CertManager::addCertIdentity(
   }
 }
 
-void CertManager::addCert(std::shared_ptr<SelfCert> cert) {
-  addCert(std::move(cert), false);
-}
-
-void CertManager::addCertAndSetDefault(std::shared_ptr<SelfCert> cert) {
-  addCert(std::move(cert), true);
-}
-
 void CertManager::addCert(std::shared_ptr<SelfCert> cert, bool defaultCert) {
   auto primaryIdent = cert->getIdentity();
   addCertIdentity(cert, primaryIdent);

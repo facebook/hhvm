@@ -70,9 +70,10 @@ class HandshakeTest : public Test {
         std::make_shared<ZlibCertificateCompressor>(9)};
     std::vector<ssl::X509UniquePtr> rsaCerts;
     rsaCerts.emplace_back(getCert(kRSACertificate));
-    certManager->addCertAndSetDefault(
+    certManager->addCert(
         std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-            getPrivateKey(kRSAKey), std::move(rsaCerts), compressors));
+            getPrivateKey(kRSAKey), std::move(rsaCerts), compressors),
+        true);
     std::vector<ssl::X509UniquePtr> p256Certs;
     std::vector<ssl::X509UniquePtr> p384Certs;
     std::vector<ssl::X509UniquePtr> p521Certs;

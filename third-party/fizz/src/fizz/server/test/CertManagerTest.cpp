@@ -39,28 +39,28 @@ class CertManagerTest : public Test {
 
 TEST_F(CertManagerTest, TestNoMatchDefault) {
   auto cert = getCert("blah.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert);
+  manager_.addCert(cert, true);
   auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestNoSniDefault) {
   auto cert = getCert("blah.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert);
+  manager_.addCert(cert, true);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestWildcardDefault) {
   auto cert = getCert("*.blah.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert);
+  manager_.addCert(cert, true);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }
 
 TEST_F(CertManagerTest, TestUppercaseDefault) {
   auto cert = getCert("BLAH.com", {}, kRsa);
-  manager_.addCertAndSetDefault(cert);
+  manager_.addCert(cert, true);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }

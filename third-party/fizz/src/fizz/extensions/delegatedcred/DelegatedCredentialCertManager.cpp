@@ -41,16 +41,11 @@ std::shared_ptr<SelfCert> DelegatedCredentialCertManager::getCert(
   return dcRes ? dcRes : CertManager::getCert(identity);
 }
 
-void DelegatedCredentialCertManager::addDelegatedCredentialAndSetDefault(
-    std::shared_ptr<SelfDelegatedCredential> cred) {
-  VLOG(8) << "Adding delegated credential";
-  dcMgr_.addCertAndSetDefault(std::move(cred));
-}
-
 void DelegatedCredentialCertManager::addDelegatedCredential(
-    std::shared_ptr<SelfDelegatedCredential> cred) {
+    std::shared_ptr<SelfDelegatedCredential> cred,
+    bool defaultCert) {
   VLOG(8) << "Adding delegated credential";
-  dcMgr_.addCert(std::move(cred));
+  dcMgr_.addCert(std::move(cred), defaultCert);
 }
 
 } // namespace extensions

@@ -154,11 +154,11 @@ FizzServerContextPtr createFizzServerContext(const HQServerParams& params) {
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   auto certManager = std::make_shared<fizz::server::CertManager>();
-  certManager->addCertAndSetDefault(std::move(cert));
+  certManager->addCert(std::move(cert), true);
 
   auto cert2 = fizz::openssl::CertUtils::makeSelfCert(kPrime256v1CertData,
                                                       kPrime256v1KeyData);
-  certManager->addCert(std::move(cert2));
+  certManager->addCert(std::move(cert2), false);
 
   auto serverCtx = std::make_shared<fizz::server::FizzServerContext>();
   serverCtx->setCertManager(certManager);

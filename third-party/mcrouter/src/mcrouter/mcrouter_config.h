@@ -23,9 +23,9 @@ static_assert(false, "mcrouter: invalid build");
 #include <utility>
 
 #include <folly/Range.h>
-#include <folly/experimental/observer/Observer.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/observer/Observer.h>
 
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/carbon/NoopAdditionalLogger.h"

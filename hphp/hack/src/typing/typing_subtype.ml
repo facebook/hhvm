@@ -1354,57 +1354,24 @@ end = struct
        * TODO: identify under what circumstances this reduction is complete.
        * TODO(T120921930): Don't do this if require_completeness is set.
        *)
-      let rec try_disjuncts ty_supers env =
-        match ty_supers with
+      let rec try_disjuncts tys env =
+        match tys with
         | [] -> invalid_env env
         | ty :: tys ->
+          let ty_super =
+            Prov.(
+              update ty ~env ~f:(fun into ->
+                  flow ~from:(prj_union_right r_super) ~into))
+          in
           simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super = ty }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env
           ||| try_disjuncts tys
       in
-      (* Under extended reasons, we want to accumulate the error for each
-         unsuccesful proposition in the disjunction and report them all *)
-      let rec try_disjuncts_ext ty_supers ~errs ~props ~env =
-        match ty_supers with
-        | [] ->
-          ( env,
-            TL.Disj
-              ( Typing_error.intersect_opt @@ List.filter_opt errs,
-                List.rev props ) )
-        | ty_super :: ty_supers ->
-          let ty_super =
-            Prov.(
-              update ty_super ~env ~f:(fun into ->
-                  flow ~from:(prj_union_right r_super) ~into))
-          in
-          let (env, prop) =
-            simplify
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-              ~rhs:{ super_like; super_supportdyn = false; ty_super }
-              env
-          in
-          if TL.is_valid prop then
-            (env, prop)
-          else
-            let (errs, props) =
-              Option.value_map
-                ~default:(errs, prop :: props)
-                ~f:(fun err -> (err :: errs, props))
-              @@ TL.get_error_if_unsat prop
-            in
-            try_disjuncts_ext ty_supers ~errs ~props ~env
-      in
-
-      if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
-        try_disjuncts_ext lty_supers ~errs:[] ~props:[] ~env
-      else
-        try_disjuncts lty_supers env
+      env |> try_disjuncts lty_supers
 
   (* == Function subtyping ================================================== *)
   and simplify_subtype_params_with_variadic

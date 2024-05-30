@@ -1,0 +1,91 @@
+error: Typing[4110] Invalid return type [1]
+-> Expected A [2]
+-> But got B [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression, via the union type [6]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
+
+union_subtyping.php:17:10
+         8 | }
+         9 | 
+[2,3,4] 10 | function foo(bool  $p, A $x, B $y): A {
+[6]     11 |   if($p){
+[6]     12 |     $z = $x;
+[6]     13 |   } else{
+[5,6]   14 |     $z = $y;
+[6]     15 |   }
+        16 | 
+[1]     17 |   return $z;
+        18 | }
+        19 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected C [2]
+-> But got A [3]
+-> Here's why: this hint [3]
+-> flows into this hint, via the union type [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
+
+union_subtyping.php:22:10
+          19 | 
+          20 | 
+[2,3,4,5] 21 | function union_l((A | B) $ab): C {
+[1]       22 |   return $ab;
+          23 | }
+          24 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected C [2]
+-> But got B [3]
+-> Here's why: this hint [3]
+-> flows into this hint, via the union type [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [2]
+
+union_subtyping.php:22:10
+          19 | 
+          20 | 
+[2,3,4,5] 21 | function union_l((A | B) $ab): C {
+[1]       22 |   return $ab;
+          23 | }
+          24 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected A [2]
+-> But got C [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [5]
+-> which itself flows into this hint, via the union type [2]
+
+union_subtyping.php:26:10
+          23 | }
+          24 | 
+[2,3,4,5] 25 | function union_r(C $c): (A|B) {
+[1]       26 |   return $c;
+          27 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected B [2]
+-> But got C [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [1]
+-> which itself flows into this hint [5]
+-> which itself flows into this hint, via the union type [2]
+
+union_subtyping.php:26:10
+          23 | }
+          24 | 
+[2,3,4,5] 25 | function union_r(C $c): (A|B) {
+[1]       26 |   return $c;
+          27 | }
+
+5 errors found.

@@ -4,7 +4,9 @@ error: Typing[4110] Invalid return type [1]
 -> Here's why: this hint [3]
 -> flows into this expression [4]
 -> which itself flows into this expression [5]
--> which itself flows into this expression, via the union type [6]
+-> which itself flows into this expression [6]
+-> which itself flows into this expression, via the union type [7]
+-> which itself flows into this expression [1]
 -> which itself flows into this expression [1]
 -> which itself flows into this hint [2]
 
@@ -12,11 +14,11 @@ union_subtyping.php:17:10
          8 | }
          9 | 
 [2,3,4] 10 | function foo(bool  $p, A $x, B $y): A {
-[6]     11 |   if($p){
-[6]     12 |     $z = $x;
-[6]     13 |   } else{
-[5,6]   14 |     $z = $y;
-[6]     15 |   }
+[7]     11 |   if($p){
+[7]     12 |     $z = $x;
+[7]     13 |   } else{
+[5,6,7] 14 |     $z = $y;
+[7]     15 |   }
         16 | 
 [1]     17 |   return $z;
         18 | }
@@ -28,6 +30,7 @@ error: Typing[4110] Invalid return type [1]
 -> Here's why: this hint [3]
 -> flows into this hint, via the union type [4]
 -> which itself flows into this expression [5]
+-> which itself flows into this expression [1]
 -> which itself flows into this expression [1]
 -> which itself flows into this hint [2]
 
@@ -46,6 +49,7 @@ error: Typing[4110] Invalid return type [1]
 -> flows into this hint, via the union type [4]
 -> which itself flows into this expression [5]
 -> which itself flows into this expression [1]
+-> which itself flows into this expression [1]
 -> which itself flows into this hint [2]
 
 union_subtyping.php:22:10
@@ -61,6 +65,7 @@ error: Typing[4110] Invalid return type [1]
 -> But got C [3]
 -> Here's why: this hint [3]
 -> flows into this expression [4]
+-> which itself flows into this expression [1]
 -> which itself flows into this expression [1]
 -> which itself flows into this hint [5]
 -> which itself flows into this hint, via the union type [2]

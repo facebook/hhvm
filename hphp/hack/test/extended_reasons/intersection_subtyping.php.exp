@@ -4,6 +4,7 @@ error: Typing[4110] Invalid return type [1]
 -> Here's why: this hint [3]
 -> flows into this expression [4]
 -> which itself flows into this expression [1]
+-> which itself flows into this expression [1]
 -> which itself flows into this hint [5]
 -> which itself flows into this hint, via the intersection type [2]
 
@@ -21,6 +22,8 @@ error: Typing[4110] Invalid return type [1]
 -> Here's why: this hint [3]
 -> flows into this expression [4]
 -> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this expression [1]
 -> which itself flows into this expression [1]
 -> which itself flows into this hint [2]
 
@@ -28,7 +31,7 @@ intersection_subtyping.php:14:10
         10 | }
         11 | 
 [2,3,4] 12 | function inter_l((A & I) $ai): C {
-[5]     13 |   $c = $ai;
+[5,6]   13 |   $c = $ai;
 [1]     14 |   return $c;
         15 | }
 

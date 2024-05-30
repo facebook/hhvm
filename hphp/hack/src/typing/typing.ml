@@ -3559,13 +3559,18 @@ end = struct
       make_result env p (Aast.Dollardollar id) ty.Typing_local_types.ty
     | Lvar ((_, x) as id) ->
       if not ctxt.Context.accept_using_var then check_escaping_var env id;
-      let ty =
+      let Typing_local_types.{ ty; _ } =
         if ctxt.Context.check_defined then
           Env.get_local_check_defined env id
         else
           Env.get_local env x
       in
-      make_result env p (Aast.Lvar id) ty.Typing_local_types.ty
+      let ty =
+        Prov.(
+          update ty ~env ~f:(fun from ->
+              flow ~from ~into:(Typing_reason.Rwitness p)))
+      in
+      make_result env p (Aast.Lvar id) ty
     | Tuple el ->
       let (env, expected) =
         Env_help.expand_expected_opt

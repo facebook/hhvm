@@ -47,6 +47,7 @@ import org.apache.thrift.conformance.RpcTestCase;
 import org.apache.thrift.conformance.SinkBasicClientInstruction;
 import org.apache.thrift.conformance.SinkBasicClientTestResult;
 import org.apache.thrift.conformance.SinkChunkTimeoutClientInstruction;
+import org.apache.thrift.conformance.SinkInitialResponseClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientTestResult;
 import org.apache.thrift.conformance.StreamChunkTimeoutClientInstruction;
@@ -306,6 +307,11 @@ public class RpcClientConformanceHandler {
 
   public Mono<ClientTestResult> testSinkChunkTimeout(
       SinkChunkTimeoutClientInstruction instruction) {
+    throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testSinkInitialResponse(
+      SinkInitialResponseClientInstruction instruction) {
     throw new RuntimeException("Not supported");
   }
 

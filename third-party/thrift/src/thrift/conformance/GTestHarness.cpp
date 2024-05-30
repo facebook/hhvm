@@ -344,6 +344,25 @@ SinkChunkTimeoutClientTestResult runSinkChunkTimeout(
   return result;
 }
 
+SinkInitialResponseClientTestResult runSinkInitialResponse(
+    RPCConformanceServiceAsyncClient& client,
+    const SinkInitialResponseClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkInitialResponseClientTestResult> {
+        SinkInitialResponseClientTestResult result;
+        auto sinkAndResponse =
+            co_await client.co_sinkInitialResponse(*instruction.request());
+        result.initialResponse() = sinkAndResponse.response;
+        auto finalResponse = co_await sinkAndResponse.sink.sink(
+            [&]() -> folly::coro::AsyncGenerator<Request&&> {
+              for (auto payload : *instruction.sinkPayloads()) {
+                co_yield std::move(payload);
+              }
+            }());
+        result.finalResponse() = std::move(finalResponse);
+        co_return result;
+      }());
+}
 // =================== Interactions ===================
 InteractionConstructorClientTestResult runInteractionConstructor(
     RPCConformanceServiceAsyncClient& client,
@@ -463,6 +482,10 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::sinkChunkTimeout:
       result.sinkChunkTimeout_ref() = runSinkChunkTimeout(
           client, *clientInstruction.sinkChunkTimeout_ref());
+      break;
+    case ClientInstruction::Type::sinkInitialResponse:
+      result.sinkInitialResponse_ref() = runSinkInitialResponse(
+          client, *clientInstruction.sinkInitialResponse_ref());
       break;
     case ClientInstruction::Type::interactionConstructor:
       result.interactionConstructor_ref() = runInteractionConstructor(

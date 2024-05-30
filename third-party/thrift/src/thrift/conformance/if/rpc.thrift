@@ -62,6 +62,7 @@ union ServerTestResult {
   108: StreamInitialTimeoutServerTestResult streamInitialTimeout;
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
+  202: SinkInitialResponseServerTestResult sinkInitialResponse;
   300: InteractionConstructorServerTestResult interactionConstructor;
   301: InteractionFactoryFunctionServerTestResult interactionFactoryFunction;
   302: InteractionPersistsStateServerTestResult interactionPersistsState;
@@ -85,6 +86,7 @@ union ClientTestResult {
   108: StreamInitialTimeoutClientTestResult streamInitialTimeout;
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
+  202: SinkInitialResponseClientTestResult sinkInitialResponse;
   300: InteractionConstructorClientTestResult interactionConstructor;
   301: InteractionFactoryFunctionClientTestResult interactionFactoryFunction;
   302: InteractionPersistsStateClientTestResult interactionPersistsState;
@@ -154,6 +156,11 @@ struct SinkChunkTimeoutServerTestResult {
   1: Request request;
   2: list<Request> sinkPayloads;
   3: bool chunkTimeoutException;
+}
+
+struct SinkInitialResponseServerTestResult {
+  1: Request request;
+  2: list<Request> sinkPayloads;
 }
 
 struct InteractionConstructorServerTestResult {
@@ -240,6 +247,11 @@ struct SinkChunkTimeoutClientTestResult {
   1: bool chunkTimeoutException;
 }
 
+struct SinkInitialResponseClientTestResult {
+  1: Response initialResponse;
+  2: Response finalResponse;
+}
+
 struct InteractionConstructorClientTestResult {}
 
 struct InteractionFactoryFunctionClientTestResult {}
@@ -267,6 +279,7 @@ union ClientInstruction {
   108: StreamInitialTimeoutClientInstruction streamInitialTimeout;
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
+  202: SinkInitialResponseClientInstruction sinkInitialResponse;
   300: InteractionConstructorClientInstruction interactionConstructor;
   301: InteractionFactoryFunctionClientInstruction interactionFactoryFunction;
   302: InteractionPersistsStateClientInstruction interactionPersistsState;
@@ -290,6 +303,7 @@ union ServerInstruction {
   108: StreamInitialTimeoutServerInstruction streamInitialTimeout;
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
+  202: SinkInitialResponseServerInstruction sinkInitialResponse;
   300: InteractionConstructorServerInstruction interactionConstructor;
   301: InteractionFactoryFunctionServerInstruction interactionFactoryFunction;
   302: InteractionPersistsStateServerInstruction interactionPersistsState;
@@ -364,6 +378,11 @@ struct SinkChunkTimeoutClientInstruction {
   1: Request request;
   2: list<Request> sinkPayloads;
   3: i64 chunkTimeoutMs;
+}
+
+struct SinkInitialResponseClientInstruction {
+  1: Request request;
+  2: list<Request> sinkPayloads;
 }
 
 struct InteractionConstructorClientInstruction {}
@@ -454,6 +473,12 @@ struct SinkChunkTimeoutServerInstruction {
   2: i64 chunkTimeoutMs;
 }
 
+struct SinkInitialResponseServerInstruction {
+  1: Response initialResponse;
+  2: Response finalResponse;
+  3: i64 bufferSize;
+}
+
 struct InteractionConstructorServerInstruction {}
 
 struct InteractionFactoryFunctionServerInstruction {}
@@ -504,6 +529,7 @@ service RPCConformanceService {
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);
   sink<Request, Response> sinkChunkTimeout(1: Request req);
+  Response, sink<Request, Response> sinkInitialResponse(1: Request req);
 
   // =================== Interactions ===================
   performs BasicInteraction;

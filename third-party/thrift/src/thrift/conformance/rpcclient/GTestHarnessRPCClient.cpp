@@ -211,6 +211,31 @@ class ConformanceVerificationServer
             *testCase_.serverInstruction()->sinkBasic_ref()->bufferSize())};
   }
 
+  apache::thrift::ResponseAndSinkConsumer<Response, Request, Response>
+  sinkInitialResponse(std::unique_ptr<Request> req) override {
+    serverResult_.sinkInitialResponse_ref().emplace().request() = *req;
+
+    return {
+        *testCase_.serverInstruction()
+             ->sinkInitialResponse_ref()
+             ->initialResponse(),
+        apache::thrift::SinkConsumer<Request, Response>{
+            [&](folly::coro::AsyncGenerator<Request&&> gen)
+                -> folly::coro::Task<Response> {
+              while (auto item = co_await gen.next()) {
+                serverResult_.sinkInitialResponse_ref()
+                    ->sinkPayloads()
+                    ->push_back(std::move(*item));
+              }
+              co_return *testCase_.serverInstruction()
+                  ->sinkInitialResponse_ref()
+                  ->finalResponse();
+            },
+            static_cast<uint64_t>(*testCase_.serverInstruction()
+                                       ->sinkInitialResponse_ref()
+                                       ->bufferSize())}};
+  }
+
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:

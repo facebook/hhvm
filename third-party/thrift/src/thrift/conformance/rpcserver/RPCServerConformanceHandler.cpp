@@ -164,6 +164,29 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
                                                       ->chunkTimeoutMs()});
 }
 
+apache::thrift::ResponseAndSinkConsumer<Response, Request, Response>
+RPCServerConformanceHandler::sinkInitialResponse(std::unique_ptr<Request> req) {
+  result_.sinkInitialResponse_ref().emplace().request() = *req;
+  return {
+      *testCase_->serverInstruction()
+           ->sinkInitialResponse_ref()
+           ->initialResponse(),
+      apache::thrift::SinkConsumer<Request, Response>{
+          [&](folly::coro::AsyncGenerator<Request&&> gen)
+              -> folly::coro::Task<Response> {
+            while (auto item = co_await gen.next()) {
+              result_.sinkInitialResponse_ref()->sinkPayloads()->push_back(
+                  std::move(*item));
+            }
+            co_return *testCase_->serverInstruction()
+                ->sinkInitialResponse_ref()
+                ->finalResponse();
+          },
+          static_cast<uint64_t>(*testCase_->serverInstruction()
+                                     ->sinkInitialResponse_ref()
+                                     ->bufferSize())}};
+}
+
 // =================== Interactions ===================
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {

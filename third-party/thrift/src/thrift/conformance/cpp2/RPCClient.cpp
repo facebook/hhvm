@@ -318,6 +318,25 @@ SinkBasicClientTestResult sinkBasicTest(
       }());
 }
 
+SinkInitialResponseClientTestResult sinkInitialResponseTest(
+    SinkInitialResponseClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkInitialResponseClientTestResult> {
+        SinkInitialResponseClientTestResult result;
+        auto sinkAndResponse =
+            co_await client->co_sinkInitialResponse(*instruction.request());
+        result.initialResponse() = sinkAndResponse.response;
+        result.finalResponse() = co_await sinkAndResponse.sink.sink(
+            [&]() -> folly::coro::AsyncGenerator<Request&&> {
+              for (auto& payload : *instruction.sinkPayloads()) {
+                co_yield std::move(payload);
+              }
+            }());
+        co_return result;
+      }());
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult interactionConstructorTest(
     InteractionConstructorClientInstruction&) {
@@ -440,6 +459,10 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =
           sinkBasicTest(*clientInstruction.sinkBasic_ref());
+      break;
+    case ClientInstruction::Type::sinkInitialResponse:
+      result.sinkInitialResponse_ref() =
+          sinkInitialResponseTest(*clientInstruction.sinkInitialResponse_ref());
       break;
     case ClientInstruction::Type::interactionConstructor:
       result.interactionConstructor_ref() = interactionConstructorTest(

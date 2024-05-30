@@ -224,6 +224,13 @@ public class RpcServerReactiveHandler implements RPCConformanceService.Reactive 
   }
 
   @Override
+  public Flux<StreamResponse<Response, Response>> sinkInitialResponse(
+      Request request, Publisher<Request> publisher) {
+    // The return type makes no sense here. Definitely a bug
+    return null;
+  }
+
+  @Override
   public BasicInteraction createBasicInteraction() {
     return null;
   }

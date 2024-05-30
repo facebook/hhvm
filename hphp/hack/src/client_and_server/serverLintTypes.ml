@@ -38,7 +38,9 @@ let output_text oc el format =
   else
     let f =
       match format with
-      | Errors.Context -> Lint.to_contextual_string
+      | Errors.Extended
+      | Errors.Context ->
+        Lint.to_contextual_string
       | Errors.Raw
       | Errors.Plain ->
         Lint.to_string

@@ -1,118 +1,371 @@
-error: Typing[4110] Invalid argument [1]
--> Expected B [2]
--> But got mixed arising from an implicit as mixed constraint on this type [3]
--> Here's why: the implicit upper bound (mixed) on the generic parameter [3]
--> flows into this hint [3]
--> which itself flows into this expression [4]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [5]
--> which itself flows from this declaration [6]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+error: Typing[4110] Invalid argument
 
-generic_subtyping.php:13:17
-       8 | class E extends D  {}
-       9 | 
-[2,6] 10 | function rcvr_concrete(B $x): void {}
-      11 | 
-[3,4] 12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
-[1,5] 13 |   rcvr_concrete($x);
-      14 | }
-      15 | 
+Expected `B`
 
-error: Typing[4110] Invalid argument [1]
--> Expected B [2]
--> But got A [3]
--> Here's why: this hint [3]
--> flows into this hint [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [6]
--> which itself flows from this declaration [7]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+13 |   rcvr_concrete($x);
+14 | }
 
-generic_subtyping.php:17:17
-         8 | class E extends D  {}
-         9 | 
-[2,7]   10 | function rcvr_concrete(B $x): void {}
-        11 | 
-        12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
-        13 |   rcvr_concrete($x);
-        14 | }
-        15 | 
-[3,4,5] 16 | function call_conrete_with_upper_bound<T as A>(T $x): void {
-[1,6]   17 |   rcvr_concrete($x);
-        18 | }
-        19 | 
+But got `mixed` arising from an implicit `as mixed` constraint on this type
 
-error: Typing[4323] Invalid argument [1]
--> T is a constrained type parameter [2]
--> This type constraint is violated [3]
--> Expected B [3]
--> But got A [4]
--> Here's why: this hint [4]
--> flows into this expression [5]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [6]
--> which itself flows from this declaration [7]
--> which itself flows into the constraint on the generic parameter, via the (contravariant) 1st function parameter [3]
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
+ 13 |   rcvr_concrete($x);
+ 14 | }
 
-generic_subtyping.php:23:20
-        18 | }
-        19 | 
-[2,3,7] 20 | function rcvr_upper_bound<T as B>(T $x): void {}
-        21 | 
-[4,5]   22 | function call_upper_bound_with_conrete(A $x): void {
-[1,6]   23 |   rcvr_upper_bound($x);
-        24 | }
-        25 | 
+Here's why: the implicit upper bound (`mixed`) on the generic parameter
 
-error: Typing[4323] Invalid argument [1]
--> T is a constrained type parameter [2]
--> This type constraint is violated [3]
--> Expected B [3]
--> But got A [4]
--> Here's why: this hint [4]
--> flows into this hint [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into the constraint on the generic parameter, via the (contravariant) 1st function parameter [3]
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
+ 13 |   rcvr_concrete($x);
+ 14 | }
 
-generic_subtyping.php:27:20
-        18 | }
-        19 | 
-[2,3,8] 20 | function rcvr_upper_bound<T as B>(T $x): void {}
-        21 | 
-        22 | function call_upper_bound_with_conrete(A $x): void {
-        23 |   rcvr_upper_bound($x);
-        24 | }
-        25 | 
-[4,5,6] 26 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
-[1,7]   27 |   rcvr_upper_bound($x);
-        28 | }
-        29 | 
+flows *into* this hint
 
-error: Typing[4323] Invalid argument [1]
--> T is a constrained type parameter [2]
--> This type constraint is violated [3]
--> Expected D [3]
--> But got A [4]
--> Here's why: this hint [4]
--> flows into this hint [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into the constraint on the generic parameter, via the (contravariant) 1st function parameter [3]
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
+ 13 |   rcvr_concrete($x);
+ 14 | }
 
-generic_subtyping.php:33:20
-        28 | }
-        29 | 
-[2,3,8] 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
-        31 | 
-[4,5,6] 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
-[1,7]   33 |   rcvr_both_bounds($x);
-        34 | }
+which itself flows *into* this expression
+
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(T »$x«): void {
+ 13 |   rcvr_concrete($x);
+ 14 | }
+
+which itself flows *into* this expression
+
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+ 13 |   rcvr_concrete(»$x«);
+ 14 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+ 13 |   »rcvr_concrete«($x);
+ 14 | }
+
+which itself flows *from* this declaration
+
+10 | function »rcvr_concrete«(B $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+13 |   rcvr_concrete($x);
+14 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+13 |   rcvr_concrete($x);
+14 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `B`
+
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+
+But got `A`
+
+ 16 | function call_conrete_with_upper_bound<T as »A«>(T $x): void {
+ 17 |   rcvr_concrete($x);
+ 18 | }
+
+Here's why: this hint
+
+ 16 | function call_conrete_with_upper_bound<T as »A«>(T $x): void {
+ 17 |   rcvr_concrete($x);
+ 18 | }
+
+flows *into* this hint
+
+ 16 | function call_conrete_with_upper_bound<T as A>(»T« $x): void {
+ 17 |   rcvr_concrete($x);
+ 18 | }
+
+which itself flows *into* this expression
+
+ 16 | function call_conrete_with_upper_bound<T as A>(T »$x«): void {
+ 17 |   rcvr_concrete($x);
+ 18 | }
+
+which itself flows *into* this expression
+
+ 16 | function call_conrete_with_upper_bound<T as A>(T $x): void {
+ 17 |   rcvr_concrete(»$x«);
+ 18 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 16 | function call_conrete_with_upper_bound<T as A>(T $x): void {
+ 17 |   »rcvr_concrete«($x);
+ 18 | }
+
+which itself flows *from* this declaration
+
+10 | function »rcvr_concrete«(B $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 20 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+This type constraint is violated
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+Expected `B`
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+But got `A`
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(»A« $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+Here's why: this hint
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(»A« $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+flows *into* this expression
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A »$x«): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+which itself flows *into* this expression
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound(»$x«);
+ 24 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   »rcvr_upper_bound«($x);
+ 24 | }
+
+which itself flows *from* this declaration
+
+ 20 | function »rcvr_upper_bound«<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 20 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+This type constraint is violated
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+Expected `B`
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+But got `A`
+
+ 26 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
+ 27 |   rcvr_upper_bound($x);
+ 28 | }
+
+Here's why: this hint
+
+ 26 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
+ 27 |   rcvr_upper_bound($x);
+ 28 | }
+
+flows *into* this hint
+
+ 26 | function call_upper_bound_with_upper_bound<T as A>(»T« $x): void {
+ 27 |   rcvr_upper_bound($x);
+ 28 | }
+
+which itself flows *into* this expression
+
+ 26 | function call_upper_bound_with_upper_bound<T as A>(T »$x«): void {
+ 27 |   rcvr_upper_bound($x);
+ 28 | }
+
+which itself flows *into* this expression
+
+ 26 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+ 27 |   rcvr_upper_bound(»$x«);
+ 28 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 26 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+ 27 |   »rcvr_upper_bound«($x);
+ 28 | }
+
+which itself flows *from* this declaration
+
+ 20 | function »rcvr_upper_bound«<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 30 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+This type constraint is violated
+
+ 30 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+Expected `D`
+
+ 30 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+But got `A`
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+Here's why: this hint
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+flows *into* this hint
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+which itself flows *into* this expression
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T »$x«): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+which itself flows *into* this expression
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds(»$x«);
+ 34 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   »rcvr_both_bounds«($x);
+ 34 | }
+
+which itself flows *from* this declaration
+
+ 30 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+
+ 30 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
 
 5 errors found.

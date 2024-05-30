@@ -135,6 +135,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
     | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
+    | Errors.Extended -> Extended_error_formatter.to_string
   in
   let absolute_errors = User_error.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
@@ -379,8 +380,9 @@ let parse_options () =
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
             | "plain" -> error_format := Errors.Plain
+            | "extended" -> error_format := Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+        "<raw|context|highlighted|plain|flow> Error formatting style; (default: highlighted)"
       );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");

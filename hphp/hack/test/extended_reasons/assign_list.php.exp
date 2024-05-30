@@ -1,21 +1,57 @@
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this hint [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this type variable [7]
--> which itself flows into this hint [2]
+error: Typing[4110] Invalid argument
 
-assign_list.php:10:7
-         4 | class Sub extends Super {}
-         5 | 
-[2]      6 | function foo(Sub $_): void {}
-         7 | 
-[3,4,5]  8 | function bar_1((string,Super,bool) $xyz): void {
-[6,7]    9 |   list($_, $y, $_) = $xyz;
-[1]     10 |   foo($y);
-        11 | }
+Expected `Sub`
+
+ 6 | function foo(»Sub« $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+
+But got `Super`
+
+ 8 | function bar_1((string,»Super«,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+Here's why: this hint
+
+ 8 | function bar_1((string,»Super«,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+flows *into* this hint
+
+ 8 | function bar_1(»(string,Super,bool)« $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+which itself flows *into* this expression
+
+ 8 | function bar_1((string,Super,bool) »$xyz«): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+which itself flows *into* this expression
+
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = »$xyz«;
+10 |   foo($y);
+11 | }
+
+which itself flows *into* this type variable
+
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, »$y«, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+which itself flows *into* this hint
+
+ 6 | function foo(»Sub« $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
 
 1 error found.

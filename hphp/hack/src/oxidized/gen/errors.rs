@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7baa4aa4c83edf051c6b35aa9077be0b>>
+// @generated SignedSource<<98cb541120104e7c867811a0cf1a9895>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -54,6 +54,8 @@ pub enum Format {
     Highlighted,
     /// Verbose positions and no color
     Plain,
+    /// Verbose context showing expressions, statements, hints, and declarations involved in error
+    Extended,
 }
 impl TrivialDrop for Format {}
 arena_deserializer::impl_deserialize_in_arena!(Format);

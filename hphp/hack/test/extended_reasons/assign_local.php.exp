@@ -1,119 +1,354 @@
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this expression [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+error: Typing[4110] Invalid argument
 
-assign_local.php:16:7
-      10 | }
-      11 | 
-[2,8] 12 | function foo(Sub $_): void {}
-      13 | 
-[3,4] 14 | function bar_1(Super $f): void {
-[5,6] 15 |   $g = $f;
-[1,7] 16 |   foo($g);
-      17 | }
-      18 | 
+Expected `Sub`
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this expression [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [8]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [9]
--> which itself flows from this declaration [10]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
 
-assign_local.php:22:7
-       10 | }
-       11 | 
-[2,10] 12 | function foo(Sub $_): void {}
-       13 | 
-       14 | function bar_1(Super $f): void {
-          :
-       17 | }
-       18 | 
-[3,4]  19 | function bar_2(Super $f): void {
-[5,6]  20 |   $g = $f;
-[7,8]  21 |   $h = $g;
-[1,9]  22 |   foo($h);
-       23 | }
-       24 | 
+But got `Super`
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this expression [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [8]
--> which itself flows into this expression [9]
--> which itself flows into this expression [10]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [11]
--> which itself flows from this declaration [12]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 14 | function bar_1(»Super« $f): void {
+ 15 |   $g = $f;
+ 16 |   foo($g);
+ 17 | }
 
-assign_local.php:29:7
-       10 | }
-       11 | 
-[2,12] 12 | function foo(Sub $_): void {}
-       13 | 
-       14 | function bar_1(Super $f): void {
-          :
-       23 | }
-       24 | 
-[3,4]  25 | function bar_3(Super $f): void {
-[5,6]  26 |   $g = $f;
-[7,8]  27 |   $h = $g;
-[9,10] 28 |   $i = $h;
-[1,11] 29 |   foo($i);
-       30 | }
-       31 | 
+Here's why: this hint
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this expression [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
--> which itself flows from this declaration [9]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 14 | function bar_1(»Super« $f): void {
+ 15 |   $g = $f;
+ 16 |   foo($g);
+ 17 | }
 
-assign_local.php:36:7
-       5 | class SuperBox {
-       6 |   public function __construct(private Super $item) {}
-[3]    7 |   public function get(): Super {
-       8 |     return $this->item;
-       9 |   }
-      10 | }
-      11 | 
-[2,9] 12 | function foo(Sub $_): void {}
-      13 | 
-      14 | function bar_1(Super $f): void {
-         :
-      32 | function bar_4(SuperBox $f): void {
-      33 |   $g = $f;
-[4,5] 34 |   $h = $g->get();
-[6,7] 35 |   $i = $h;
-[1,8] 36 |   foo($i);
-      37 | }
+flows *into* this expression
+
+ 14 | function bar_1(Super »$f«): void {
+ 15 |   $g = $f;
+ 16 |   foo($g);
+ 17 | }
+
+which itself flows *into* this expression
+
+ 14 | function bar_1(Super $f): void {
+ 15 |   $g = »$f«;
+ 16 |   foo($g);
+ 17 | }
+
+which itself flows *into* this expression
+
+ 14 | function bar_1(Super $f): void {
+ 15 |   »$g« = $f;
+ 16 |   foo($g);
+ 17 | }
+
+which itself flows *into* this expression
+
+ 14 | function bar_1(Super $f): void {
+ 15 |   $g = $f;
+ 16 |   foo(»$g«);
+ 17 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 14 | function bar_1(Super $f): void {
+ 15 |   $g = $f;
+ 16 |   »foo«($g);
+ 17 | }
+
+which itself flows *from* this declaration
+
+ 12 | function »foo«(Sub $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+But got `Super`
+
+ 19 | function bar_2(»Super« $f): void {
+ 20 |   $g = $f;
+ 21 |   $h = $g;
+ 22 |   foo($h);
+ 23 | }
+
+Here's why: this hint
+
+ 19 | function bar_2(»Super« $f): void {
+ 20 |   $g = $f;
+ 21 |   $h = $g;
+ 22 |   foo($h);
+ 23 | }
+
+flows *into* this expression
+
+ 19 | function bar_2(Super »$f«): void {
+ 20 |   $g = $f;
+ 21 |   $h = $g;
+ 22 |   foo($h);
+ 23 | }
+
+which itself flows *into* this expression
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   $g = »$f«;
+ 21 |   $h = $g;
+ 22 |   foo($h);
+ 23 | }
+
+which itself flows *into* this expression
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   »$g« = $f;
+ 21 |   $h = $g;
+ 22 |   foo($h);
+ 23 | }
+
+which itself flows *into* this expression
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   $g = $f;
+ 21 |   $h = »$g«;
+ 22 |   foo($h);
+ 23 | }
+
+which itself flows *into* this expression
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   $g = $f;
+ 21 |   »$h« = $g;
+ 22 |   foo($h);
+ 23 | }
+
+which itself flows *into* this expression
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   $g = $f;
+ 21 |   $h = $g;
+ 22 |   foo(»$h«);
+ 23 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 19 | function bar_2(Super $f): void {
+ 20 |   $g = $f;
+ 21 |   $h = $g;
+ 22 |   »foo«($h);
+ 23 | }
+
+which itself flows *from* this declaration
+
+ 12 | function »foo«(Sub $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+But got `Super`
+
+ 25 | function bar_3(»Super« $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+
+Here's why: this hint
+
+ 25 | function bar_3(»Super« $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+
+flows *into* this expression
+
+ 25 | function bar_3(Super »$f«): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = »$f«;
+ 27 |   $h = $g;
+ 28 |   $i = $h;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   »$g« = $f;
+ 27 |   $h = $g;
+ 28 |   $i = $h;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = »$g«;
+ 28 |   $i = $h;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   »$h« = $g;
+ 28 |   $i = $h;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+ 28 |   $i = »$h«;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+ 28 |   »$i« = $h;
+ 29 |   foo($i);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+ 28 |   $i = $h;
+ 29 |   foo(»$i«);
+ 30 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 25 | function bar_3(Super $f): void {
+ 26 |   $g = $f;
+ 27 |   $h = $g;
+ 28 |   $i = $h;
+ 29 |   »foo«($i);
+ 30 | }
+
+which itself flows *from* this declaration
+
+ 12 | function »foo«(Sub $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+But got `Super`
+
+ 6 |   public function __construct(private Super $item) {}
+ 7 |   public function get(): »Super« {
+ 8 |     return $this->item;
+ 9 |   }
+
+Here's why: this hint
+
+ 6 |   public function __construct(private Super $item) {}
+ 7 |   public function get(): »Super« {
+ 8 |     return $this->item;
+ 9 |   }
+
+flows *into* this expression
+
+ 33 |   $g = $f;
+ 34 |   $h = »$g->get()«;
+ 35 |   $i = $h;
+ 36 |   foo($i);
+ 37 | }
+
+which itself flows *into* this expression
+
+ 33 |   $g = $f;
+ 34 |   »$h« = $g->get();
+ 35 |   $i = $h;
+ 36 |   foo($i);
+ 37 | }
+
+which itself flows *into* this expression
+
+ 33 |   $g = $f;
+ 34 |   $h = $g->get();
+ 35 |   $i = »$h«;
+ 36 |   foo($i);
+ 37 | }
+
+which itself flows *into* this expression
+
+ 33 |   $g = $f;
+ 34 |   $h = $g->get();
+ 35 |   »$i« = $h;
+ 36 |   foo($i);
+ 37 | }
+
+which itself flows *into* this expression
+
+ 33 |   $g = $f;
+ 34 |   $h = $g->get();
+ 35 |   $i = $h;
+ 36 |   foo(»$i«);
+ 37 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 33 |   $g = $f;
+ 34 |   $h = $g->get();
+ 35 |   $i = $h;
+ 36 |   »foo«($i);
+ 37 | }
+
+which itself flows *from* this declaration
+
+ 12 | function »foo«(Sub $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar_1(Super $f): void {
 
 4 errors found.

@@ -17,6 +17,8 @@ type format =
   | Raw  (** Compact format with color but no references *)
   | Highlighted  (** Numbered and colored references *)
   | Plain  (** Verbose positions and no color *)
+  | Extended
+      (** Verbose context showing expressions, statements, hints, and declarations involved in error *)
 
 (** Type representing the errors for a single file. *)
 type per_file_errors

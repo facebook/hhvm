@@ -298,6 +298,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
             | "plain" -> error_format := Errors.Plain
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
+            | "extended" -> error_format := Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );

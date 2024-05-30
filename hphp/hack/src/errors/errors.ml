@@ -16,6 +16,8 @@ type format =
   | Raw  (** Compact format with color but no references *)
   | Highlighted  (** Numbered and colored references *)
   | Plain  (** Verbose positions and no color *)
+  | Extended
+      (** Verbose context showing expressions, statements, hints, and declarations involved in error *)
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
@@ -494,7 +496,8 @@ let format_summary format ~displayed_count ~dropped_count ~max_errors :
     string option =
   match format with
   | Context
-  | Highlighted ->
+  | Highlighted
+  | Extended ->
     let found_count = displayed_count + Option.value dropped_count ~default:0 in
     let found_message =
       Printf.sprintf

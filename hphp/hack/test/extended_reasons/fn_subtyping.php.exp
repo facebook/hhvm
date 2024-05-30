@@ -1,105 +1,361 @@
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this expression [4]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [5]
--> which itself flows from this declaration [6]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+error: Typing[4110] Invalid argument
 
-fn_subtyping.php:8:9
-      4 | class Sub extends Super {}
-      5 | 
-[2,6] 6 | function foo_0(Sub $_): void {}
-[3,4] 7 | function bar_0(Super $f): void {
-[1,5] 8 |   foo_0($f);
-      9 | }
-     10 | 
+Expected `Sub`
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this hint, via the (contravariant) 1st function parameter [4]
--> which itself flows from this declaration, via the (contravariant) 1st function parameter [5]
--> which itself flows into this expression [6]
--> which itself flows from this expression, via the (contravariant) 1st function parameter [1]
--> which itself flows from this expression [7]
--> which itself flows from this hint [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 6 | function foo_0(»Sub« $_): void {}
+ 7 | function bar_0(Super $f): void {
+ 8 |   foo_0($f);
+ 9 | }
 
-fn_subtyping.php:13:9
-         9 | }
-        10 | 
-[3,4,5] 11 | function foo_1((function(Super): void) $_): void {}
-[2,7,8] 12 | function bar_1((function(Sub): void) $f): void {
-[1,6]   13 |   foo_1($f);
-        14 | }
-        15 | 
+But got `Super`
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this hint, via the (contravariant) 1st function parameter [4]
--> which itself flows from this hint, via the (contravariant) 1st function parameter [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [9]
--> which itself flows from this hint, via the (contravariant) 1st function parameter [10]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 6 | function foo_0(Sub $_): void {}
+ 7 | function bar_0(»Super« $f): void {
+ 8 |   foo_0($f);
+ 9 | }
 
-fn_subtyping.php:18:9
-           14 | }
-           15 | 
-[2,8,9,10] 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
-[3,4,5,6]  17 | function bar_2((function((function(Super): void)): void) $f): void {
-[1,7]      18 |   foo_2($f);
-           19 | }
-           20 | 
+Here's why: this hint
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this hint, via the (contravariant) 2nd function parameter [4]
--> which itself flows from this declaration, via the (contravariant) 1st function parameter [5]
--> which itself flows into this expression [6]
--> which itself flows from this expression, via the (contravariant) 1st function parameter [1]
--> which itself flows from this expression [7]
--> which itself flows from this hint [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 6 | function foo_0(Sub $_): void {}
+ 7 | function bar_0(»Super« $f): void {
+ 8 |   foo_0($f);
+ 9 | }
 
-fn_subtyping.php:23:18
-        19 | }
-        20 | 
-[3,4,5] 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
-[2,7,8] 22 | function bar_variadic_1((function(Sub...):void) $x): void {
-[1,6]   23 |   foo_variadic_1($x);
-        24 | }
-        25 | 
+flows *into* this expression
 
-error: Typing[4110] Invalid argument [1]
--> Expected Sub [2]
--> But got Super [3]
--> Here's why: this hint [3]
--> flows into this hint, via the (contravariant) 2nd function parameter [4]
--> which itself flows from this declaration, via the (contravariant) 1st function parameter [5]
--> which itself flows into this expression [6]
--> which itself flows from this expression, via the (contravariant) 1st function parameter [1]
--> which itself flows from this expression [7]
--> which itself flows from this hint [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+ 6 | function foo_0(Sub $_): void {}
+ 7 | function bar_0(Super »$f«): void {
+ 8 |   foo_0($f);
+ 9 | }
 
-fn_subtyping.php:29:18
-        25 | 
-        26 | 
-[3,4,5] 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
-[2,7,8] 28 | function bar_variadic_2((function(Sub...):void) $x): void {
-[1,6]   29 |   foo_variadic_2($x);
-        30 | }
+which itself flows *into* this expression
+
+ 6 | function foo_0(Sub $_): void {}
+ 7 | function bar_0(Super $f): void {
+ 8 |   foo_0(»$f«);
+ 9 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 6 | function foo_0(Sub $_): void {}
+ 7 | function bar_0(Super $f): void {
+ 8 |   »foo_0«($f);
+ 9 | }
+
+which itself flows *from* this declaration
+
+ 6 | function »foo_0«(Sub $_): void {}
+ 7 | function bar_0(Super $f): void {
+ 8 |   foo_0($f);
+ 9 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 6 | function foo_0(»Sub« $_): void {}
+ 7 | function bar_0(Super $f): void {
+ 8 |   foo_0($f);
+ 9 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1((function(»Sub«): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+But got `Super`
+
+ 11 | function foo_1((function(»Super«): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+Here's why: this hint
+
+ 11 | function foo_1((function(»Super«): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 11 | function foo_1(»(function(Super): void)« $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+which itself flows *from* this declaration, via the (contravariant) 1st function parameter
+
+ 11 | function »foo_1«((function(Super): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+which itself flows *into* this expression
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   »foo_1«($f);
+ 14 | }
+
+which itself flows *from* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) $f): void {
+ 13 |   foo_1(»$f«);
+ 14 | }
+
+which itself flows *from* this expression
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1((function(Sub): void) »$f«): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+which itself flows *from* this hint
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1(»(function(Sub): void)« $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 11 | function foo_1((function(Super): void) $_): void {}
+ 12 | function bar_1((function(»Sub«): void) $f): void {
+ 13 |   foo_1($f);
+ 14 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 16 | function foo_2((function((function(»Sub«): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+But got `Super`
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(»Super«): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+Here's why: this hint
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(»Super«): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function(»(function(Super): void)«): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *from* this hint, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2(»(function((function(Super): void)): void)« $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *into* this expression
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) »$f«): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *into* this expression
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2(»$f«);
+ 19 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   »foo_2«($f);
+ 19 | }
+
+which itself flows *from* this declaration
+
+ 16 | function »foo_2«((function((function(Sub): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2(»(function((function(Sub): void)): void)« $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *from* this hint, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 16 | function foo_2((function((function(»Sub«): void)): void) $_): void {}
+ 17 | function bar_2((function((function(Super): void)): void) $f): void {
+ 18 |   foo_2($f);
+ 19 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(»Sub«...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+But got `Super`
+
+ 21 | function foo_variadic_1((function(Sub, »Super«):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+Here's why: this hint
+
+ 21 | function foo_variadic_1((function(Sub, »Super«):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+flows *into* this hint, via the (contravariant) 2nd function parameter
+
+ 21 | function foo_variadic_1(»(function(Sub, Super):void)« $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+which itself flows *from* this declaration, via the (contravariant) 1st function parameter
+
+ 21 | function »foo_variadic_1«((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+which itself flows *into* this expression
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   »foo_variadic_1«($x);
+ 24 | }
+
+which itself flows *from* this expression, via the (contravariant) 1st function parameter
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) $x): void {
+ 23 |   foo_variadic_1(»$x«);
+ 24 | }
+
+which itself flows *from* this expression
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(Sub...):void) »$x«): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+which itself flows *from* this hint
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1(»(function(Sub...):void)« $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 21 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
+ 22 | function bar_variadic_1((function(»Sub«...):void) $x): void {
+ 23 |   foo_variadic_1($x);
+ 24 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(»Sub«...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+But got `Super`
+
+ 27 | function foo_variadic_2((function(Sub, »Super«...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+Here's why: this hint
+
+ 27 | function foo_variadic_2((function(Sub, »Super«...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+flows *into* this hint, via the (contravariant) 2nd function parameter
+
+ 27 | function foo_variadic_2(»(function(Sub, Super...):void)« $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+which itself flows *from* this declaration, via the (contravariant) 1st function parameter
+
+ 27 | function »foo_variadic_2«((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+which itself flows *into* this expression
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   »foo_variadic_2«($x);
+ 30 | }
+
+which itself flows *from* this expression, via the (contravariant) 1st function parameter
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 29 |   foo_variadic_2(»$x«);
+ 30 | }
+
+which itself flows *from* this expression
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(Sub...):void) »$x«): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+which itself flows *from* this hint
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2(»(function(Sub...):void)« $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 28 | function bar_variadic_2((function(»Sub«...):void) $x): void {
+ 29 |   foo_variadic_2($x);
+ 30 | }
 
 5 errors found.

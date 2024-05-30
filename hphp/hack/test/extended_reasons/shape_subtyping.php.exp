@@ -1,271 +1,741 @@
-error: Typing[4057] Invalid argument [1]
--> The field b is missing [2]
--> The field b is defined [3]
--> Here's why: this hint [4]
--> flows into this hint, via the required shape field 'b' [5]
--> which itself flows into this hint [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
--> which itself flows from this declaration [9]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
--> which itself flows into this hint [10]
--> which itself flows into nothing, via the non-existent shape field 'b' [11]
+error: Typing[4057] Invalid argument
 
-shape_subtyping.php:60:35
-        25 | 
-        26 | 
-[2]     27 | type required_a_at_int = shape('a' => int);
-        28 | type required_a_at_bool = shape('a' => bool);
-        29 | type optional_a_at_int = shape(?'a' => int);
-        30 | type optional_a_at_bool = shape(?'a' => bool);
-[3,4,5] 31 | type missing_a = shape('b' => int);
-        32 | 
-[9]     33 | function expects_required_a_at_int_alias(
-[10]    34 | required_a_at_int $s,
-        35 | ): void {
-        36 | }
-           :
-        56 | 
-        57 | function passes_missing_a_alias(
-[6,7]   58 |   missing_a $s,
-        59 | ): void {
-[1,8]   60 |   expects_required_a_at_int_alias($s);
-        61 | }
+The field `b` is missing
 
-.:0:0
-[11]     0 | No source found
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
 
-error: Typing[4057] Invalid argument [1]
--> The field a is missing [2]
--> The field a is defined [3]
--> Here's why: nothing [4]
--> flows into this hint, via the non-existent shape field 'a' [2]
--> which itself flows into this hint [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [9]
--> which itself flows into this hint [10]
--> which itself flows into this hint, via the required shape field 'a' [11]
+The field `b` is defined
 
-shape_subtyping.php:60:35
-         25 | 
-         26 | 
-[3,9,11] 27 | type required_a_at_int = shape('a' => int);
-         28 | type required_a_at_bool = shape('a' => bool);
-         29 | type optional_a_at_int = shape(?'a' => int);
-         30 | type optional_a_at_bool = shape(?'a' => bool);
-[2]      31 | type missing_a = shape('b' => int);
-         32 | 
-[8]      33 | function expects_required_a_at_int_alias(
-[10]     34 | required_a_at_int $s,
-         35 | ): void {
-         36 | }
-            :
-         56 | 
-         57 | function passes_missing_a_alias(
-[5,6]    58 |   missing_a $s,
-         59 | ): void {
-[1,7]    60 |   expects_required_a_at_int_alias($s);
-         61 | }
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape(»'b'« => int);
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
 
-.:0:0
-[4]       0 | No source found
+Here's why: this hint
 
-error: Typing[4110] Invalid argument [1]
--> Expected int [2]
--> But got bool [3]
--> Here's why: this hint [3]
--> flows into this hint, via the required shape field 'a' [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [6]
--> which itself flows from this declaration [7]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [8]
--> which itself flows into this hint, via the required shape field 'a' [2]
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => »int«);
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
 
-shape_subtyping.php:11:29
-         1 | <?hh
-         2 | 
-[7]      3 | function expects_required_a_at_int(
-[2,8]    4 | shape('a' => int) $s,
-         5 | ): void {
-         6 | }
-         7 | 
-         8 | function passes_required_a_at_bool(
-[3,4,5]  9 |   shape('a' => bool) $s,
-        10 | ): void {
-[1,6]   11 |   expects_required_a_at_int($s);
-        12 | }
-        13 | 
+flows *into* this hint, via the required shape field `'b'`
 
-error: Typing[4110] Invalid argument [1]
--> Expected int [2]
--> But got bool [3]
--> Here's why: this hint [3]
--> flows into this hint, via the required shape field 'a' [4]
--> which itself flows into this hint [5]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [9]
--> which itself flows into this hint [10]
--> which itself flows into this hint, via the required shape field 'a' [2]
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = »shape('b' => int)«;
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
 
-shape_subtyping.php:41:35
-      25 | 
-      26 | 
-[2,9] 27 | type required_a_at_int = shape('a' => int);
-[3,4] 28 | type required_a_at_bool = shape('a' => bool);
-      29 | type optional_a_at_int = shape(?'a' => int);
-      30 | type optional_a_at_bool = shape(?'a' => bool);
-      31 | type missing_a = shape('b' => int);
-      32 | 
-[8]   33 | function expects_required_a_at_int_alias(
-[10]  34 | required_a_at_int $s,
-      35 | ): void {
-      36 | }
-      37 | 
-      38 | function passes_required_a_at_bool_alias(
-[5,6] 39 |   required_a_at_bool $s,
-      40 | ): void {
-[1,7] 41 |   expects_required_a_at_int_alias($s);
-      42 | }
-      43 | 
+which itself flows *into* this hint
 
-error: Typing[4163] Invalid argument [1]
--> The field a is optional [2]
--> The field a is defined as required [3]
--> a is defined here [4]
--> Here's why: this hint [5]
--> flows into this hint, via the optional shape field 'a' [2]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [3]
--> which itself flows into this hint, via the required shape field 'a' [4]
+ 57 | function passes_missing_a_alias(
+ 58 |   »missing_a« $s,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias($s);
+ 61 | }
 
-shape_subtyping.php:17:29
-         1 | <?hh
-         2 | 
-[8]      3 | function expects_required_a_at_int(
-[3,4]    4 | shape('a' => int) $s,
-         5 | ): void {
-         6 | }
-           :
-        13 | 
-        14 | function passes_optional_a_at_int(
-[2,5,6] 15 |   shape(?'a' => int) $s,
-        16 | ): void {
-[1,7]   17 |   expects_required_a_at_int($s);
-        18 | }
-        19 | 
+which itself flows *into* this expression
 
-error: Typing[4163] Invalid argument [1]
--> The field a is optional [2]
--> The field a is defined as required [3]
--> a is defined here [4]
--> Here's why: this hint [5]
--> flows into this hint, via the optional shape field 'a' [2]
--> which itself flows into this expression [6]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [7]
--> which itself flows from this declaration [8]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [3]
--> which itself flows into this hint, via the required shape field 'a' [4]
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a »$s«,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias($s);
+ 61 | }
 
-shape_subtyping.php:23:29
-         1 | <?hh
-         2 | 
-[8]      3 | function expects_required_a_at_int(
-[3,4]    4 | shape('a' => int) $s,
-         5 | ): void {
-         6 | }
-           :
-        19 | 
-        20 | function passes_optional_a_at_bool(
-[2,5,6] 21 |   shape(?'a' => bool) $s,
-        22 | ): void {
-[1,7]   23 |   expects_required_a_at_int($s);
-        24 | }
-        25 | 
+which itself flows *into* this expression
 
-error: Typing[4163] Invalid argument [1]
--> The field a is optional [2]
--> The field a is defined as required [3]
--> a is defined here [4]
--> Here's why: this hint [5]
--> flows into this hint, via the optional shape field 'a' [2]
--> which itself flows into this hint [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
--> which itself flows from this declaration [9]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [3]
--> which itself flows into this hint [10]
--> which itself flows into this hint, via the required shape field 'a' [4]
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a $s,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias(»$s«);
+ 61 | }
 
-shape_subtyping.php:47:35
-      25 | 
-      26 | 
-[3,4] 27 | type required_a_at_int = shape('a' => int);
-      28 | type required_a_at_bool = shape('a' => bool);
-[2,5] 29 | type optional_a_at_int = shape(?'a' => int);
-      30 | type optional_a_at_bool = shape(?'a' => bool);
-      31 | type missing_a = shape('b' => int);
-      32 | 
-[9]   33 | function expects_required_a_at_int_alias(
-[10]  34 | required_a_at_int $s,
-      35 | ): void {
-      36 | }
-         :
-      43 | 
-      44 | function passes_optional_a_at_int_alias(
-[6,7] 45 |   optional_a_at_int $s,
-      46 | ): void {
-[1,8] 47 |   expects_required_a_at_int_alias($s);
-      48 | }
-      49 | 
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
-error: Typing[4163] Invalid argument [1]
--> The field a is optional [2]
--> The field a is defined as required [3]
--> a is defined here [4]
--> Here's why: this hint [5]
--> flows into this hint, via the optional shape field 'a' [2]
--> which itself flows into this hint [6]
--> which itself flows into this expression [7]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
--> which itself flows from this declaration [9]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [3]
--> which itself flows into this hint [10]
--> which itself flows into this hint, via the required shape field 'a' [4]
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a $s,
+ 59 | ): void {
+ 60 |   »expects_required_a_at_int_alias«($s);
+ 61 | }
 
-shape_subtyping.php:53:35
-      25 | 
-      26 | 
-[3,4] 27 | type required_a_at_int = shape('a' => int);
-      28 | type required_a_at_bool = shape('a' => bool);
-      29 | type optional_a_at_int = shape(?'a' => int);
-[2,5] 30 | type optional_a_at_bool = shape(?'a' => bool);
-      31 | type missing_a = shape('b' => int);
-      32 | 
-[9]   33 | function expects_required_a_at_int_alias(
-[10]  34 | required_a_at_int $s,
-      35 | ): void {
-      36 | }
-         :
-      49 | 
-      50 | function passes_optional_a_at_bool_alias(
-[6,7] 51 |   optional_a_at_bool $s,
-      52 | ): void {
-[1,8] 53 |   expects_required_a_at_int_alias($s);
-      54 | }
-      55 | 
+which itself flows *from* this declaration
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+ 32 | 
+ 33 | function »expects_required_a_at_int_alias«(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+
+which itself flows *into* this hint
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | »required_a_at_int« $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* nothing, via the non-existent shape field `'b'`
+
+
+error: Typing[4057] Invalid argument
+
+The field `a` is missing
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = »shape('b' => int)«;
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+The field `a` is defined
+
+ 27 | type required_a_at_int = shape(»'a'« => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+
+Here's why: nothing
+
+
+flows *into* this hint, via the non-existent shape field `'a'`
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = »shape('b' => int)«;
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint
+
+ 57 | function passes_missing_a_alias(
+ 58 |   »missing_a« $s,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias($s);
+ 61 | }
+
+which itself flows *into* this expression
+
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a »$s«,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias($s);
+ 61 | }
+
+which itself flows *into* this expression
+
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a $s,
+ 59 | ): void {
+ 60 |   expects_required_a_at_int_alias(»$s«);
+ 61 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 57 | function passes_missing_a_alias(
+ 58 |   missing_a $s,
+ 59 | ): void {
+ 60 |   »expects_required_a_at_int_alias«($s);
+ 61 | }
+
+which itself flows *from* this declaration
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+ 32 | 
+ 33 | function »expects_required_a_at_int_alias«(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+
+which itself flows *into* this hint
+
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+ 32 | 
+ 33 | function expects_required_a_at_int_alias(
+ 34 | »required_a_at_int« $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+
+error: Typing[4110] Invalid argument
+
+Expected `int`
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+But got `bool`
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   shape('a' => »bool«) $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+Here's why: this hint
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   shape('a' => »bool«) $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+flows *into* this hint, via the required shape field `'a'`
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   »shape('a' => bool)« $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+which itself flows *into* this expression
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   shape('a' => bool) »$s«,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+which itself flows *into* this expression
+
+  8 | function passes_required_a_at_bool(
+  9 |   shape('a' => bool) $s,
+ 10 | ): void {
+ 11 |   expects_required_a_at_int(»$s«);
+ 12 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+  8 | function passes_required_a_at_bool(
+  9 |   shape('a' => bool) $s,
+ 10 | ): void {
+ 11 |   »expects_required_a_at_int«($s);
+ 12 | }
+
+which itself flows *from* this declaration
+
+ 3 | function »expects_required_a_at_int«(
+ 4 | shape('a' => int) $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | function expects_required_a_at_int(
+ 4 | »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+error: Typing[4110] Invalid argument
+
+Expected `int`
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+But got `bool`
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => »bool«);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+Here's why: this hint
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => »bool«);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+flows *into* this hint, via the required shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = »shape('a' => bool)«;
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+which itself flows *into* this hint
+
+ 38 | function passes_required_a_at_bool_alias(
+ 39 |   »required_a_at_bool« $s,
+ 40 | ): void {
+ 41 |   expects_required_a_at_int_alias($s);
+ 42 | }
+
+which itself flows *into* this expression
+
+ 38 | function passes_required_a_at_bool_alias(
+ 39 |   required_a_at_bool »$s«,
+ 40 | ): void {
+ 41 |   expects_required_a_at_int_alias($s);
+ 42 | }
+
+which itself flows *into* this expression
+
+ 38 | function passes_required_a_at_bool_alias(
+ 39 |   required_a_at_bool $s,
+ 40 | ): void {
+ 41 |   expects_required_a_at_int_alias(»$s«);
+ 42 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 38 | function passes_required_a_at_bool_alias(
+ 39 |   required_a_at_bool $s,
+ 40 | ): void {
+ 41 |   »expects_required_a_at_int_alias«($s);
+ 42 | }
+
+which itself flows *from* this declaration
+
+ 33 | function »expects_required_a_at_int_alias«(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+which itself flows *into* this hint
+
+ 33 | function expects_required_a_at_int_alias(
+ 34 | »required_a_at_int« $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   »shape(?'a' => int)« $s,
+ 16 | ): void {
+ 17 |   expects_required_a_at_int($s);
+ 18 | }
+
+The field `a` is defined as **required**
+
+ 3 | function expects_required_a_at_int(
+ 4 | »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+`a` is defined here
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+Here's why: this hint
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   shape(?'a' => »int«) $s,
+ 16 | ): void {
+ 17 |   expects_required_a_at_int($s);
+ 18 | }
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   »shape(?'a' => int)« $s,
+ 16 | ): void {
+ 17 |   expects_required_a_at_int($s);
+ 18 | }
+
+which itself flows *into* this expression
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   shape(?'a' => int) »$s«,
+ 16 | ): void {
+ 17 |   expects_required_a_at_int($s);
+ 18 | }
+
+which itself flows *into* this expression
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   shape(?'a' => int) $s,
+ 16 | ): void {
+ 17 |   expects_required_a_at_int(»$s«);
+ 18 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 14 | function passes_optional_a_at_int(
+ 15 |   shape(?'a' => int) $s,
+ 16 | ): void {
+ 17 |   »expects_required_a_at_int«($s);
+ 18 | }
+
+which itself flows *from* this declaration
+
+ 3 | function »expects_required_a_at_int«(
+ 4 | shape('a' => int) $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | function expects_required_a_at_int(
+ 4 | »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   »shape(?'a' => bool)« $s,
+ 22 | ): void {
+ 23 |   expects_required_a_at_int($s);
+ 24 | }
+
+The field `a` is defined as **required**
+
+ 3 | function expects_required_a_at_int(
+ 4 | »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+`a` is defined here
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+Here's why: this hint
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   shape(?'a' => »bool«) $s,
+ 22 | ): void {
+ 23 |   expects_required_a_at_int($s);
+ 24 | }
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   »shape(?'a' => bool)« $s,
+ 22 | ): void {
+ 23 |   expects_required_a_at_int($s);
+ 24 | }
+
+which itself flows *into* this expression
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   shape(?'a' => bool) »$s«,
+ 22 | ): void {
+ 23 |   expects_required_a_at_int($s);
+ 24 | }
+
+which itself flows *into* this expression
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   shape(?'a' => bool) $s,
+ 22 | ): void {
+ 23 |   expects_required_a_at_int(»$s«);
+ 24 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 20 | function passes_optional_a_at_bool(
+ 21 |   shape(?'a' => bool) $s,
+ 22 | ): void {
+ 23 |   »expects_required_a_at_int«($s);
+ 24 | }
+
+which itself flows *from* this declaration
+
+ 3 | function »expects_required_a_at_int«(
+ 4 | shape('a' => int) $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | function expects_required_a_at_int(
+ 4 | »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | function expects_required_a_at_int(
+ 4 | shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = »shape(?'a' => int)«;
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+The field `a` is defined as **required**
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+`a` is defined here
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+Here's why: this hint
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => »int«);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = »shape(?'a' => int)«;
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+which itself flows *into* this hint
+
+ 44 | function passes_optional_a_at_int_alias(
+ 45 |   »optional_a_at_int« $s,
+ 46 | ): void {
+ 47 |   expects_required_a_at_int_alias($s);
+ 48 | }
+
+which itself flows *into* this expression
+
+ 44 | function passes_optional_a_at_int_alias(
+ 45 |   optional_a_at_int »$s«,
+ 46 | ): void {
+ 47 |   expects_required_a_at_int_alias($s);
+ 48 | }
+
+which itself flows *into* this expression
+
+ 44 | function passes_optional_a_at_int_alias(
+ 45 |   optional_a_at_int $s,
+ 46 | ): void {
+ 47 |   expects_required_a_at_int_alias(»$s«);
+ 48 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 44 | function passes_optional_a_at_int_alias(
+ 45 |   optional_a_at_int $s,
+ 46 | ): void {
+ 47 |   »expects_required_a_at_int_alias«($s);
+ 48 | }
+
+which itself flows *from* this declaration
+
+ 33 | function »expects_required_a_at_int_alias«(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+which itself flows *into* this hint
+
+ 33 | function expects_required_a_at_int_alias(
+ 34 | »required_a_at_int« $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = »shape(?'a' => bool)«;
+ 31 | type missing_a = shape('b' => int);
+
+The field `a` is defined as **required**
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+`a` is defined here
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+Here's why: this hint
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => »bool«);
+ 31 | type missing_a = shape('b' => int);
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => int);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = »shape(?'a' => bool)«;
+ 31 | type missing_a = shape('b' => int);
+
+which itself flows *into* this hint
+
+ 50 | function passes_optional_a_at_bool_alias(
+ 51 |   »optional_a_at_bool« $s,
+ 52 | ): void {
+ 53 |   expects_required_a_at_int_alias($s);
+ 54 | }
+
+which itself flows *into* this expression
+
+ 50 | function passes_optional_a_at_bool_alias(
+ 51 |   optional_a_at_bool »$s«,
+ 52 | ): void {
+ 53 |   expects_required_a_at_int_alias($s);
+ 54 | }
+
+which itself flows *into* this expression
+
+ 50 | function passes_optional_a_at_bool_alias(
+ 51 |   optional_a_at_bool $s,
+ 52 | ): void {
+ 53 |   expects_required_a_at_int_alias(»$s«);
+ 54 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 50 | function passes_optional_a_at_bool_alias(
+ 51 |   optional_a_at_bool $s,
+ 52 | ): void {
+ 53 |   »expects_required_a_at_int_alias«($s);
+ 54 | }
+
+which itself flows *from* this declaration
+
+ 33 | function »expects_required_a_at_int_alias«(
+ 34 | required_a_at_int $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 27 | type required_a_at_int = »shape('a' => int)«;
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
+
+which itself flows *into* this hint
+
+ 33 | function expects_required_a_at_int_alias(
+ 34 | »required_a_at_int« $s,
+ 35 | ): void {
+ 36 | }
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 27 | type required_a_at_int = shape('a' => »int«);
+ 28 | type required_a_at_bool = shape('a' => bool);
+ 29 | type optional_a_at_int = shape(?'a' => int);
+ 30 | type optional_a_at_bool = shape(?'a' => bool);
+ 31 | type missing_a = shape('b' => int);
 
 8 errors found.

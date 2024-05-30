@@ -1,29 +1,57 @@
-error: Typing[4110] Invalid argument [1]
--> Expected bool [2]
--> But got int [3]
--> Here's why: this hint [3]
--> flows into this hint [4]
--> which itself flows into this expression [5]
--> which itself flows into this expression [1]
--> which itself flows into this expression, via the (contravariant) 1st function parameter [6]
--> which itself flows from this declaration [7]
--> which itself flows into this hint, via the (contravariant) 1st function parameter [8]
--> which itself flows into this hint [2]
+error: Typing[4110] Invalid argument
 
-newtype1.php--file2.php:8:22
-      1 | <?hh
-      2 | 
-[2,7] 3 | function expect_bool(bool $x): bool {
-      4 |   return $x;
-      5 | }
-      6 | 
-[4,5] 7 | function pass_my_int(myint $y) : bool {
-[1,6] 8 |   return expect_bool($y);
-      9 | }
+Expected `bool`
 
-newtype1.php--file1.php:3:24
-      1 | <?hh
-      2 | 
-[3,8] 3 | newtype myint as int = int;
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+But got `int`
+
+ 3 | newtype myint as int = »int«;
+
+Here's why: this hint
+
+ 3 | newtype myint as int = »int«;
+
+flows *into* this hint
+
+ 7 | function pass_my_int(»myint« $y) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+which itself flows *into* this expression
+
+ 7 | function pass_my_int(myint »$y«) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+which itself flows *into* this expression
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return expect_bool(»$y«);
+ 9 | }
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return »expect_bool«($y);
+ 9 | }
+
+which itself flows *from* this declaration
+
+ 3 | function »expect_bool«(bool $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | newtype myint as »int« = int;
+
+which itself flows *into* this hint
+
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
 
 1 error found.

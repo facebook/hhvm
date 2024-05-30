@@ -96,6 +96,7 @@
    contextual_error_formatter
    error_category
    errors
+   extended_error_formatter
    highlighted_error_formatter
    phase_error
    raw_error_formatter

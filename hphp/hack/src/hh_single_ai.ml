@@ -72,6 +72,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
     | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
+    | Errors.Extended -> Extended_error_formatter.to_string
   in
   let absolute_errors =
     if use_canonical_filenames () then

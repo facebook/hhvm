@@ -23,10 +23,6 @@ python_capi_transitive: mstch_python_capi src/transitive.thrift
 python_includes: mstch_python src/includes.thrift
 python_capi_includes: mstch_python_capi src/includes.thrift
 py3_auto_migrate_service: mstch_py3:auto_migrate src/service.thrift
-py3_no_auto_migrate_service: mstch_py3:auto_migrate,no_auto_migrate src/service.thrift
 py3_auto_migrate: mstch_py3:auto_migrate src/module.thrift
-py3_no_auto_migrate: mstch_py3:auto_migrate,no_auto_migrate src/module.thrift
 py3_auto_migrate_transitive: mstch_py3:auto_migrate src/transitive.thrift
-py3_no_auto_migrate_transitive: mstch_py3:auto_migrate,no_auto_migrate src/transitive.thrift
 py3_auto_migrate_includes: mstch_py3:auto_migrate src/includes.thrift
-py3_no_auto_migrate_includes: mstch_py3:auto_migrate,no_auto_migrate src/includes.thrift

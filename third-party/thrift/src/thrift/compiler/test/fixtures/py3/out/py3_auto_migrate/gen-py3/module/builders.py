@@ -74,7 +74,7 @@ class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
         self.structTwo: _typing.Any = None
         self.an_integer: _typing.Optional[int] = None
         self.name: _typing.Optional[str] = None
-        self.an_enum: _typing.Optional[_module_types.AnEnum] = None
+        self.an_enum: _typing.Optional[AnEnum] = None
         self.some_bytes: _typing.Optional[bytes] = None
         self.sender: _typing.Optional[str] = None
         self.cdef_: _typing.Optional[str] = None

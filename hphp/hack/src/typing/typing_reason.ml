@@ -1351,7 +1351,7 @@ let explain_asymm_prj prj =
 
 (* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
    and ensure we handle all cases statically *)
-let explain_witness = function
+let rec explain_witness = function
   | Rhint pos -> (pos, "this hint")
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
   | Rmissing_field -> (Pos_or_decl.none, "nothing")
@@ -1367,7 +1367,22 @@ let explain_witness = function
       Format.sprintf
         "the implicit upper bound (`%s`) on the generic parameter"
         nm )
-  | r -> (to_raw_pos r, "this thing")
+  | Runpack_param (pos, _, _) ->
+    (Pos_or_decl.of_raw_pos pos, "this unpacked parameter")
+  | Rbitwise pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
+  | Rarith pos -> (Pos_or_decl.of_raw_pos pos, "this arithmetic expression")
+  | Rlambda_param (pos, _) ->
+    (Pos_or_decl.of_raw_pos pos, "this lambda parameter")
+  | Rinout_param pos -> (pos, "this inout parameter")
+  | Ridx_vector pos -> (Pos_or_decl.of_raw_pos pos, "this index expression")
+  | Ridx (pos, _) -> (Pos_or_decl.of_raw_pos pos, "this index expression")
+  | Rsplice pos -> (Pos_or_decl.of_raw_pos pos, "this splice expression")
+  | Rno_return pos -> (Pos_or_decl.of_raw_pos pos, "this declaration")
+  | Rshape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
+  | Rtypeconst (_, (pos, _), _, _) -> (pos, "this type constant")
+  | Rtype_access (r, _) -> explain_witness r
+  | r ->
+    (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
 
 let explain_flow = function
   | Fwd -> "flows *into*"

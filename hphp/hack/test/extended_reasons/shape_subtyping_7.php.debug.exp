@@ -1,0 +1,199 @@
+error: Typing[4057] Invalid argument
+
+The field `b` is missing
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
+
+The field `b` is defined
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape(»'b'« => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+
+File "shape_subtyping_7.php", line 4, character 24 - line 4, character 26:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":31,"char_end":33}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["b",{"Required":[]},{"Absent":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {"Rmissing_field":[]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4057] Invalid argument
+
+The field `a` is missing
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = »shape('b' => int)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
+
+The field `a` is defined
+
+ 3 | type required_a_at_int = shape(»'a'« => int);
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+
+File "shape_subtyping_7.php", line 3, character 32 - line 3, character 34:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {"Rmissing_field":[]},
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Absent":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":33}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":39,"char_end":41}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+2 errors found.

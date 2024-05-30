@@ -1,0 +1,111 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 25 - line 11, character 27:
+
+But got `Super`
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<»Super«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
+
+Here's why: this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<»Super«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
+
+flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+
+ 5 | class MyC<+T1, T2> extends »MyA<T1, Super, T2>« {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_covariant.php", line 5, character 28 - line 5, character 45:
+
+which itself flows *into* this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(»MyC<Super, Super>« $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 32 - line 13, character 48:
+
+which itself flows *into* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> »$x«): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 50 - line 13, character 51:
+
+which itself flows *into* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 14, character 14 - line 14, character 15:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   »takes_my_a«($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 14, character 3 - line 14, character 12:
+
+which itself flows *from* this declaration
+
+ 11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 10 - line 11, character 19:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 21 - line 11, character 42:
+
+which itself flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+
+ 11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 25 - line 11, character 27:
+
+1 error found.

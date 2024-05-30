@@ -1,0 +1,238 @@
+error: Typing[4057] Invalid argument
+
+The field `b` is missing
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type missing_a = shape('b' => int);
+
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
+
+The field `b` is defined
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape(»'b'« => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 4, character 24 - line 4, character 26:
+
+Here's why: this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape('b' => »int«);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 4, character 31 - line 4, character 33:
+
+flows *into* this hint, via the required shape field `'b'`
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = »shape('b' => int)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
+
+which itself flows *into* this hint
+
+ 11 | function passes_missing_a_alias(
+ 12 |   »missing_a« $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
+
+which itself flows *into* this expression
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a »$s«,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
+
+which itself flows *into* this expression
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   »expects_required_a_at_int_alias«($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
+
+which itself flows *from* this declaration
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function »expects_required_a_at_int_alias«(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type missing_a = shape('b' => int);
+
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
+
+which itself flows *into* this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   »required_a_at_int« $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
+
+which itself flows *into* nothing, via the non-existent shape field `'b'`
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4057] Invalid argument
+
+The field `a` is missing
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = »shape('b' => int)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
+
+The field `a` is defined
+
+ 3 | type required_a_at_int = shape(»'a'« => int);
+ 4 | type missing_a = shape('b' => int);
+
+File "shape_subtyping_7.php", line 3, character 32 - line 3, character 34:
+
+Here's why: nothing
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+flows *into* this hint, via the non-existent shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = »shape('b' => int)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
+
+which itself flows *into* this hint
+
+ 11 | function passes_missing_a_alias(
+ 12 |   »missing_a« $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
+
+which itself flows *into* this expression
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a »$s«,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
+
+which itself flows *into* this expression
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   »expects_required_a_at_int_alias«($s);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
+
+which itself flows *from* this declaration
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function »expects_required_a_at_int_alias«(
+ 7 |   required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type missing_a = shape('b' => int);
+
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
+
+which itself flows *into* this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type missing_a = shape('b' => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |   »required_a_at_int« $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => »int«);
+ 4 | type missing_a = shape('b' => int);
+
+File "shape_subtyping_7.php", line 3, character 39 - line 3, character 41:
+
+2 errors found.

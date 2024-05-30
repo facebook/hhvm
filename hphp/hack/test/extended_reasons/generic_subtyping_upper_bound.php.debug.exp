@@ -1,0 +1,158 @@
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 7 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_upper_bound.php", line 7, character 27 - line 7, character 27:
+
+This type constraint is violated
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+Expected `B`
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+But got `A`
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_upper_bound.php",
+              "line":9,
+              "char_start":49,
+              "char_end":49
+            }
+          ]
+        },
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"generic_subtyping_upper_bound.php",
+                          "line":9,
+                          "char_start":52,
+                          "char_end":52
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness":[
+                        {
+                          "filename":"generic_subtyping_upper_bound.php",
+                          "line":9,
+                          "char_start":54,
+                          "char_end":55
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[
+                    {
+                      "filename":"generic_subtyping_upper_bound.php",
+                      "line":10,
+                      "char_start":20,
+                      "char_end":21
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[
+                        {
+                          "filename":"generic_subtyping_upper_bound.php",
+                          "line":10,
+                          "char_start":3,
+                          "char_end":18
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness_from_decl":[
+                        {
+                          "filename":"generic_subtyping_upper_bound.php",
+                          "line":7,
+                          "char_start":10,
+                          "char_end":25
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rcstr_on_generics":[
+        {
+          "filename":"generic_subtyping_upper_bound.php",
+          "line":7,
+          "char_start":32,
+          "char_end":32
+        },
+        {
+          "Tuple2":[
+            {
+              "filename":"generic_subtyping_upper_bound.php",
+              "line":7,
+              "char_start":27,
+              "char_end":27
+            },
+            "T"
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

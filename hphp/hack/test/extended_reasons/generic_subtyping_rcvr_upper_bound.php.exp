@@ -1,0 +1,103 @@
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 7 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 27 - line 7, character 27:
+
+This type constraint is violated
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+Expected `B`
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+But got `A`
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(»A« $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 9, character 40 - line 9, character 40:
+
+Here's why: this hint
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(»A« $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 9, character 40 - line 9, character 40:
+
+flows *into* this expression
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A »$x«): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 9, character 42 - line 9, character 43:
+
+which itself flows *into* this expression
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound(»$x«);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 10, character 20 - line 10, character 21:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 7 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   »rcvr_upper_bound«($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 10, character 3 - line 10, character 18:
+
+which itself flows *from* this declaration
+
+ 7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 10 - line 7, character 25:
+
+which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+1 error found.

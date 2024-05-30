@@ -1,0 +1,100 @@
+error: Typing[4110] Invalid return type
+
+Expected `A`
+
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
+
+But got `B`
+
+ 5 | function foo(bool  $p, A $x, »B« $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+Here's why: this hint
+
+ 5 | function foo(bool  $p, A $x, »B« $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+flows *into* this expression
+
+ 5 | function foo(bool  $p, A $x, B »$y«): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 32 - line 5, character 33:
+
+which itself flows *into* this expression
+
+ 8 |   } else{
+ 9 |     $z = »$y«;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 10 - line 9, character 11:
+
+which itself flows *into* this expression
+
+ 8 |   } else{
+ 9 |     »$z« = $y;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 5 - line 9, character 6:
+
+which itself flows *into* this expression, via the union type
+
+ 5 | function foo(bool  $p, A $x, B $y): A {
+ 6 |   »if($p){
+ 7 |     $z = $x;
+ 8 |   } else{
+ 9 |     $z = $y;
+10 |   }«
+11 | 
+12 |   return $z;
+
+File "union_join_point.php", line 6, character 3 - line 10, character 3:
+
+which itself flows *into* this expression
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   return »$z«;
+ 13 | }
+
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
+which itself flows *into* this expression
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   »return $z;«
+ 13 | }
+
+File "union_join_point.php", line 12, character 3 - line 12, character 12:
+
+which itself flows *into* this hint
+
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
+
+1 error found.

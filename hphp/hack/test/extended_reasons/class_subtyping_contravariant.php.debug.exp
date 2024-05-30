@@ -1,0 +1,160 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
+
+But got `Super`
+
+ 11 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_contravariant.php",
+              "line":11,
+              "char_start":30,
+              "char_end":34
+            }
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_class":["\\MyA",1,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {
+                      "filename":"class_subtyping_contravariant.php",
+                      "line":11,
+                      "char_start":21,
+                      "char_end":42
+                    }
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rprj_symm":[
+                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness_from_decl":[
+                                    {
+                                      "filename":"class_subtyping_contravariant.php",
+                                      "line":11,
+                                      "char_start":10,
+                                      "char_end":19
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rwitness":[
+                                    {
+                                      "filename":"class_subtyping_contravariant.php",
+                                      "line":14,
+                                      "char_start":3,
+                                      "char_end":12
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[
+                                {
+                                  "filename":"class_subtyping_contravariant.php",
+                                  "line":14,
+                                  "char_start":14,
+                                  "char_end":15
+                                }
+                              ]
+                            },
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness":[
+                                    {
+                                      "filename":"class_subtyping_contravariant.php",
+                                      "line":13,
+                                      "char_start":52,
+                                      "char_end":53
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rhint":[
+                                    {
+                                      "filename":"class_subtyping_contravariant.php",
+                                      "line":13,
+                                      "char_start":36,
+                                      "char_end":50
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"class_subtyping_contravariant.php",
+                          "line":5,
+                          "char_start":28,
+                          "char_end":43
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {
+          "filename":"class_subtyping_contravariant.php",
+          "line":13,
+          "char_start":40,
+          "char_end":42
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

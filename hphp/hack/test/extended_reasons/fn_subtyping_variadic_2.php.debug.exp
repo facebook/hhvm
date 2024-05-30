@@ -1,0 +1,144 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 7 | function bar_variadic_2((function(»Sub«...):void) $x): void {
+ 8 |   foo_variadic_2($x);
+ 9 | }
+
+File "fn_subtyping_variadic_2.php", line 7, character 35 - line 7, character 37:
+
+But got `Super`
+
+ 6 | function foo_variadic_2((function(Sub, »Super«...):void) $_): void {}
+ 7 | function bar_variadic_2((function(Sub...):void) $x): void {
+ 8 |   foo_variadic_2($x);
+ 9 | }
+
+File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_2.php",
+              "line":6,
+              "char_start":40,
+              "char_end":44
+            }
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[1,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {
+                      "filename":"fn_subtyping_variadic_2.php",
+                      "line":6,
+                      "char_start":25,
+                      "char_end":54
+                    }
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness_from_decl":[
+                                {
+                                  "filename":"fn_subtyping_variadic_2.php",
+                                  "line":6,
+                                  "char_start":10,
+                                  "char_end":23
+                                }
+                              ]
+                            },
+                            {
+                              "Rwitness":[
+                                {
+                                  "filename":"fn_subtyping_variadic_2.php",
+                                  "line":8,
+                                  "char_start":3,
+                                  "char_end":16
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rflow":[
+                        {
+                          "Rwitness":[
+                            {
+                              "filename":"fn_subtyping_variadic_2.php",
+                              "line":8,
+                              "char_start":18,
+                              "char_end":19
+                            }
+                          ]
+                        },
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[
+                                {
+                                  "filename":"fn_subtyping_variadic_2.php",
+                                  "line":7,
+                                  "char_start":49,
+                                  "char_end":50
+                                }
+                              ]
+                            },
+                            {
+                              "Rhint":[
+                                {
+                                  "filename":"fn_subtyping_variadic_2.php",
+                                  "line":7,
+                                  "char_start":25,
+                                  "char_end":47
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {
+          "filename":"fn_subtyping_variadic_2.php",
+          "line":7,
+          "char_start":35,
+          "char_end":37
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

@@ -1,0 +1,113 @@
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 9 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 27 - line 9, character 27:
+
+This type constraint is violated
+
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
+
+Expected `D`
+
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
+
+But got `A`
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, character 49:
+
+Here's why: this hint
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, character 49:
+
+flows *into* this hint
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, character 52:
+
+which itself flows *into* this expression
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T »$x«): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, character 55:
+
+which itself flows *into* this expression
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   »rcvr_both_bounds«($x);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
+
+which itself flows *from* this declaration
+
+ 9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 10 - line 9, character 25:
+
+which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
+
+1 error found.

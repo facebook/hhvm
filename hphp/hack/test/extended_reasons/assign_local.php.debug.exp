@@ -2,20 +2,20 @@ error: Typing[4110] Invalid argument
 
 Expected `Sub`
 
- 12 | function foo(»Sub« $_): void {}
- 13 | 
- 14 | function bar_1(Super $f): void {
+ 7 | function foo(»Sub« $_): void {}
+ 8 | 
+ 9 | function bar(Super $f): void {
 
-File "assign_local.php", line 12, character 14 - line 12, character 16:
+File "assign_local.php", line 7, character 14 - line 7, character 16:
 
 But got `Super`
 
- 14 | function bar_1(»Super« $f): void {
- 15 |   $g = $f;
- 16 |   foo($g);
- 17 | }
+ 9 | function bar(»Super« $f): void {
+10 |   $g = $f;
+11 |   foo($g);
+12 | }
 
-File "assign_local.php", line 14, character 16 - line 14, character 20:
+File "assign_local.php", line 9, character 14 - line 9, character 18:
 
 Flow:
 {
@@ -31,25 +31,25 @@ Flow:
                     {
                       "Rflow":[
                         {
-                          "Rhint":[{"filename":"assign_local.php","line":14,"char_start":16,"char_end":20}]
+                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
                         },
                         {
-                          "Rwitness":[{"filename":"assign_local.php","line":14,"char_start":22,"char_end":23}]
+                          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
                         }
                       ]
                     },
                     {
-                      "Rwitness":[{"filename":"assign_local.php","line":15,"char_start":8,"char_end":9}]
+                      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
                     }
                   ]
                 },
                 {
-                  "Rwitness":[{"filename":"assign_local.php","line":15,"char_start":3,"char_end":4}]
+                  "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
                 }
               ]
             },
             {
-              "Rwitness":[{"filename":"assign_local.php","line":16,"char_start":7,"char_end":8}]
+              "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
             }
           ]
         },
@@ -59,10 +59,10 @@ Flow:
             {
               "Rflow":[
                 {
-                  "Rwitness":[{"filename":"assign_local.php","line":16,"char_start":3,"char_end":5}]
+                  "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":5}]
                 },
                 {
-                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":12,"char_start":10,"char_end":12}]
+                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
                 }
               ]
             }
@@ -71,7 +71,7 @@ Flow:
       ]
     },
     {
-      "Rhint":[{"filename":"assign_local.php","line":12,"char_start":14,"char_end":16}]
+      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
     }
   ]
 }
@@ -79,296 +79,4 @@ Flow:
 
 File "", line 0, character 0 - line 0, character -1:
 
-error: Typing[4110] Invalid argument
-
-Expected `Sub`
-
- 12 | function foo(»Sub« $_): void {}
- 13 | 
- 14 | function bar_1(Super $f): void {
-
-File "assign_local.php", line 12, character 14 - line 12, character 16:
-
-But got `Super`
-
- 19 | function bar_2(»Super« $f): void {
- 20 |   $g = $f;
- 21 |   $h = $g;
- 22 |   foo($h);
- 23 | }
-
-File "assign_local.php", line 19, character 16 - line 19, character 20:
-
-Flow:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rflow":[
-                                {
-                                  "Rhint":[{"filename":"assign_local.php","line":19,"char_start":16,"char_end":20}]
-                                },
-                                {
-                                  "Rwitness":[{"filename":"assign_local.php","line":19,"char_start":22,"char_end":23}]
-                                }
-                              ]
-                            },
-                            {
-                              "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":8,"char_end":9}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"assign_local.php","line":20,"char_start":3,"char_end":4}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"assign_local.php","line":21,"char_start":8,"char_end":9}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":21,"char_start":3,"char_end":4}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"assign_local.php","line":22,"char_start":7,"char_end":8}]
-            }
-          ]
-        },
-        {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":22,"char_start":3,"char_end":5}]
-                },
-                {
-                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":12,"char_start":10,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"assign_local.php","line":12,"char_start":14,"char_end":16}]
-    }
-  ]
-}
-
-
-File "", line 0, character 0 - line 0, character -1:
-
-error: Typing[4110] Invalid argument
-
-Expected `Sub`
-
- 12 | function foo(»Sub« $_): void {}
- 13 | 
- 14 | function bar_1(Super $f): void {
-
-File "assign_local.php", line 12, character 14 - line 12, character 16:
-
-But got `Super`
-
- 25 | function bar_3(»Super« $f): void {
- 26 |   $g = $f;
- 27 |   $h = $g;
-
-File "assign_local.php", line 25, character 16 - line 25, character 20:
-
-Flow:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rflow":[
-                                {
-                                  "Rflow":[
-                                    {
-                                      "Rflow":[
-                                        {
-                                          "Rhint":[{"filename":"assign_local.php","line":25,"char_start":16,"char_end":20}]
-                                        },
-                                        {
-                                          "Rwitness":[{"filename":"assign_local.php","line":25,"char_start":22,"char_end":23}]
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "Rwitness":[{"filename":"assign_local.php","line":26,"char_start":8,"char_end":9}]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "Rwitness":[{"filename":"assign_local.php","line":26,"char_start":3,"char_end":4}]
-                                }
-                              ]
-                            },
-                            {
-                              "Rwitness":[{"filename":"assign_local.php","line":27,"char_start":8,"char_end":9}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"assign_local.php","line":27,"char_start":3,"char_end":4}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"assign_local.php","line":28,"char_start":8,"char_end":9}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":28,"char_start":3,"char_end":4}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"assign_local.php","line":29,"char_start":7,"char_end":8}]
-            }
-          ]
-        },
-        {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":29,"char_start":3,"char_end":5}]
-                },
-                {
-                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":12,"char_start":10,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"assign_local.php","line":12,"char_start":14,"char_end":16}]
-    }
-  ]
-}
-
-
-File "", line 0, character 0 - line 0, character -1:
-
-error: Typing[4110] Invalid argument
-
-Expected `Sub`
-
- 12 | function foo(»Sub« $_): void {}
- 13 | 
- 14 | function bar_1(Super $f): void {
-
-File "assign_local.php", line 12, character 14 - line 12, character 16:
-
-But got `Super`
-
- 6 |   public function __construct(private Super $item) {}
- 7 |   public function get(): »Super« {
- 8 |     return $this->item;
- 9 |   }
-
-File "assign_local.php", line 7, character 26 - line 7, character 30:
-
-Flow:
-{
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rhint":[{"filename":"assign_local.php","line":7,"char_start":26,"char_end":30}]
-                            },
-                            {
-                              "Rwitness":[{"filename":"assign_local.php","line":34,"char_start":8,"char_end":16}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"assign_local.php","line":34,"char_start":3,"char_end":4}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"assign_local.php","line":35,"char_start":8,"char_end":9}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":35,"char_start":3,"char_end":4}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"assign_local.php","line":36,"char_start":7,"char_end":8}]
-            }
-          ]
-        },
-        {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":36,"char_start":3,"char_end":5}]
-                },
-                {
-                  "Rwitness_from_decl":[{"filename":"assign_local.php","line":12,"char_start":10,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "Rhint":[{"filename":"assign_local.php","line":12,"char_start":14,"char_end":16}]
-    }
-  ]
-}
-
-
-File "", line 0, character 0 - line 0, character -1:
-
-4 errors found.
+1 error found.

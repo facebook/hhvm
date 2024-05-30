@@ -1,0 +1,108 @@
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 8 | function passes_optional_a_at_int(
+ 9 |   »shape(?'a' => int)« $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
+
+The field `a` is defined as **required**
+
+ 3 | function expects_required_a_at_int(
+ 4 |   »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
+
+`a` is defined here
+
+ 3 | function expects_required_a_at_int(
+ 4 |   shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
+
+Here's why: this hint
+
+ 8 | function passes_optional_a_at_int(
+ 9 |   shape(?'a' => »int«) $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_2.php", line 9, character 17 - line 9, character 19:
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 8 | function passes_optional_a_at_int(
+ 9 |   »shape(?'a' => int)« $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
+
+which itself flows *into* this expression
+
+ 8 | function passes_optional_a_at_int(
+ 9 |   shape(?'a' => int) »$s«,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_2.php", line 9, character 22 - line 9, character 23:
+
+which itself flows *into* this expression
+
+  8 | function passes_optional_a_at_int(
+  9 |   shape(?'a' => int) $s,
+ 10 | ): void {
+ 11 |   expects_required_a_at_int(»$s«);
+ 12 | }
+
+File "shape_subtyping_2.php", line 11, character 29 - line 11, character 30:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+  8 | function passes_optional_a_at_int(
+  9 |   shape(?'a' => int) $s,
+ 10 | ): void {
+ 11 |   »expects_required_a_at_int«($s);
+ 12 | }
+
+File "shape_subtyping_2.php", line 11, character 3 - line 11, character 27:
+
+which itself flows *from* this declaration
+
+ 3 | function »expects_required_a_at_int«(
+ 4 |   shape('a' => int) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 3, character 10 - line 3, character 34:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | function expects_required_a_at_int(
+ 4 |   »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | function expects_required_a_at_int(
+ 4 |   shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
+
+1 error found.

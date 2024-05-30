@@ -1,0 +1,125 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 6 | function foo_2((function((function(»Sub«): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 36 - line 6, character 38:
+
+But got `Super`
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(»Super«): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":36,"char_end":40}
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                  ]
+                },
+                {
+                  "Rflow":[
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                                          ]
+                                        },
+                                        {
+                                          "Rwitness":[
+                                            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":58,"char_end":59}
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Rwitness":[
+                                        {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":9,"char_end":10}
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rprj_symm":[
+                                    {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rwitness":[{"filename":"fn_subtyping_contra_2.php","line":8,"char_start":3,"char_end":7}]
+                                        },
+                                        {
+                                          "Rwitness_from_decl":[
+                                            {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":10,"char_end":14}
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "Rhint":[
+                                {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rhint":[
+                        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":36,"char_end":38}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

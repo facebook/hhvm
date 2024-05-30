@@ -1,0 +1,98 @@
+error: Typing[4163] Invalid argument
+
+The field `a` is **optional**
+
+ 8 | function passes_optional_a_at_int(
+ 9 |   »shape(?'a' => int)« $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
+
+The field `a` is defined as **required**
+
+ 3 | function expects_required_a_at_int(
+ 4 |   »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
+
+`a` is defined here
+
+ 3 | function expects_required_a_at_int(
+ 4 |   shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping_2.php","line":9,"char_start":17,"char_end":19}]
+        },
+        {
+          "Rprj_symm":[
+            {" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"shape_subtyping_2.php","line":9,"char_start":3,"char_end":20}]
+                            },
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_2.php","line":9,"char_start":22,"char_end":23}]
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_2.php","line":11,"char_start":29,"char_end":30}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rprj_symm":[
+                        {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_2.php","line":11,"char_start":3,"char_end":27}]
+                            },
+                            {
+                              "Rwitness_from_decl":[{"filename":"shape_subtyping_2.php","line":3,"char_start":10,"char_end":34}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[{"filename":"shape_subtyping_2.php","line":4,"char_start":3,"char_end":19}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping_2.php","line":4,"char_start":16,"char_end":18}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

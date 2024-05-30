@@ -11,16 +11,16 @@ error: Typing[4110] Invalid argument [1]
 -> which itself flows from this declaration [8]
 -> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
 
-assign_local.php:10:7
-       4 | class Sub extends Super {}
-       5 | 
-[2,8]  6 | function foo(Sub $_): void {}
-       7 | 
-[3,4]  8 | function bar_1(Super $f): void {
-[5,6]  9 |   $g = $f;
-[1,7] 10 |   foo($g);
-      11 | }
-      12 | 
+assign_local.php:16:7
+      10 | }
+      11 | 
+[2,8] 12 | function foo(Sub $_): void {}
+      13 | 
+[3,4] 14 | function bar_1(Super $f): void {
+[5,6] 15 |   $g = $f;
+[1,7] 16 |   foo($g);
+      17 | }
+      18 | 
 
 error: Typing[4110] Invalid argument [1]
 -> Expected Sub [2]
@@ -37,21 +37,21 @@ error: Typing[4110] Invalid argument [1]
 -> which itself flows from this declaration [10]
 -> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
 
-assign_local.php:16:7
-        4 | class Sub extends Super {}
-        5 | 
-[2,10]  6 | function foo(Sub $_): void {}
-        7 | 
-        8 | function bar_1(Super $f): void {
+assign_local.php:22:7
+       10 | }
+       11 | 
+[2,10] 12 | function foo(Sub $_): void {}
+       13 | 
+       14 | function bar_1(Super $f): void {
           :
-       11 | }
-       12 | 
-[3,4]  13 | function bar_2(Super $f): void {
-[5,6]  14 |   $g = $f;
-[7,8]  15 |   $h = $g;
-[1,9]  16 |   foo($h);
        17 | }
        18 | 
+[3,4]  19 | function bar_2(Super $f): void {
+[5,6]  20 |   $g = $f;
+[7,8]  21 |   $h = $g;
+[1,9]  22 |   foo($h);
+       23 | }
+       24 | 
 
 error: Typing[4110] Invalid argument [1]
 -> Expected Sub [2]
@@ -70,20 +70,54 @@ error: Typing[4110] Invalid argument [1]
 -> which itself flows from this declaration [12]
 -> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
 
-assign_local.php:23:7
-        4 | class Sub extends Super {}
-        5 | 
-[2,12]  6 | function foo(Sub $_): void {}
-        7 | 
-        8 | function bar_1(Super $f): void {
+assign_local.php:29:7
+       10 | }
+       11 | 
+[2,12] 12 | function foo(Sub $_): void {}
+       13 | 
+       14 | function bar_1(Super $f): void {
           :
-       17 | }
-       18 | 
-[3,4]  19 | function bar_3(Super $f): void {
-[5,6]  20 |   $g = $f;
-[7,8]  21 |   $h = $g;
-[9,10] 22 |   $i = $h;
-[1,11] 23 |   foo($i);
-       24 | }
+       23 | }
+       24 | 
+[3,4]  25 | function bar_3(Super $f): void {
+[5,6]  26 |   $g = $f;
+[7,8]  27 |   $h = $g;
+[9,10] 28 |   $i = $h;
+[1,11] 29 |   foo($i);
+       30 | }
+       31 | 
 
-3 errors found.
+error: Typing[4110] Invalid argument [1]
+-> Expected Sub [2]
+-> But got Super [3]
+-> Here's why: this hint [3]
+-> flows into this expression [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this expression [7]
+-> which itself flows into this expression [1]
+-> which itself flows into this expression [1]
+-> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
+-> which itself flows from this declaration [9]
+-> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
+
+assign_local.php:36:7
+       5 | class SuperBox {
+       6 |   public function __construct(private Super $item) {}
+[3]    7 |   public function get(): Super {
+       8 |     return $this->item;
+       9 |   }
+      10 | }
+      11 | 
+[2,9] 12 | function foo(Sub $_): void {}
+      13 | 
+      14 | function bar_1(Super $f): void {
+         :
+      32 | function bar_4(SuperBox $f): void {
+      33 |   $g = $f;
+[4,5] 34 |   $h = $g->get();
+[6,7] 35 |   $i = $h;
+[1,8] 36 |   foo($i);
+      37 | }
+
+4 errors found.

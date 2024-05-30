@@ -2,17 +2,29 @@ error: Typing[4110] Invalid argument [1]
 -> Expected Sub [2]
 -> But got Super [3]
 -> Here's why: this hint [3]
--> flows into this type variable [4]
--> which itself flows into this hint [2]
+-> flows into this hint [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this type variable [7]
+-> which itself flows into this hint [4]
+-> which itself flows into this expression [5]
+-> which itself flows into this expression [6]
+-> which itself flows into this type variable [7]
+-> which itself flows into this expression [7]
+-> which itself flows into this expression [1]
+-> which itself flows into this expression [1]
+-> which itself flows into this expression, via the (contravariant) 1st function parameter [8]
+-> which itself flows from this declaration [9]
+-> which itself flows into this hint, via the (contravariant) 1st function parameter [2]
 
 assign_list.php:10:7
-     4 | class Sub extends Super {}
-     5 | 
-[2]  6 | function foo(Sub $_): void {}
-     7 | 
-[3]  8 | function bar_1((string,Super,bool) $xyz): void {
-[4]  9 |   list($_, $y, $_) = $xyz;
-[1] 10 |   foo($y);
-    11 | }
+         4 | class Sub extends Super {}
+         5 | 
+[2,9]    6 | function foo(Sub $_): void {}
+         7 | 
+[3,4,5]  8 | function bar_1((string,Super,bool) $xyz): void {
+[6,7]    9 |   list($_, $y, $_) = $xyz;
+[1,8]   10 |   foo($y);
+        11 | }
 
 1 error found.

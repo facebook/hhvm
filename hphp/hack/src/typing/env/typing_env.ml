@@ -90,8 +90,25 @@ let log_env_change name ?(level = 1) old_env new_env =
   env
 
 let expand_var env r v =
-  let (inference_env, ty) = Inf.expand_var env.inference_env r v in
-  ({ env with inference_env }, ty)
+  let (inference_env, ty_solution) = Inf.expand_var env.inference_env r v in
+  (* When we have a _concrete_ solution, record the flow of that solution as a
+     prefix to the original type variables's reason; when we linearize the
+     path, we should then see the path of the relevant uppper / lower bounds
+     as the prefix for any flow through typing.
+
+     TODO(mjt) do we want to record the flow when the tyvar expands to another
+     tyvar?
+  *)
+  let ty_solution =
+    if
+      (not (is_tyvar ty_solution))
+      && TypecheckerOptions.tco_extended_reasons env.genv.tcopt
+    then
+      map_reason ty_solution ~f:(fun from -> Typing_reason.Rflow (from, r))
+    else
+      ty_solution
+  in
+  ({ env with inference_env }, ty_solution)
 
 let fresh_type_reason ?variance env p r =
   log_env_change_ "fresh_type_reason" env
@@ -249,12 +266,19 @@ let get_type env r var =
   ({ env with inference_env }, res)
 
 let expand_type env ty =
-  let (inference_env, res) = Inf.expand_type env.inference_env ty in
-  ({ env with inference_env }, res)
+  match deref ty with
+  | (reason, Tvar tvid) -> expand_var env reason tvid
+  | _ ->
+    (* If this expansion was applied to a concrete type, don't modify the
+       reason *)
+    (env, ty)
 
 let expand_internal_type env ty =
-  let (inference_env, res) = Inf.expand_internal_type env.inference_env ty in
-  ({ env with inference_env }, res)
+  match ty with
+  | LoclType ty ->
+    let (env, ty) = expand_type env ty in
+    (env, LoclType ty)
+  | _ -> (env, ty)
 
 let get_tyvar_pos env var = Inf.get_tyvar_pos env.inference_env var
 

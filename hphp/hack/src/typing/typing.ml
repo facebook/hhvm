@@ -4086,6 +4086,12 @@ end = struct
       (* We typecheck Obj_get by checking whether it is a subtype of
          Thas_member(m, #1) where #1 is a fresh type variable. *)
       let (env, mem_ty) = Env.fresh_type env p in
+      let mem_ty =
+        Prov.(
+          update mem_ty ~env ~f:(fun into ->
+              let from = get_reason ty1 in
+              flow ~from ~into))
+      in
       let (_, p1, _) = e1 in
       let r = Reason.Rwitness p1 in
       let has_member_ty =
@@ -4143,6 +4149,13 @@ end = struct
 
       let (env, result_ty) =
         Env.FakeMembers.check_instance_invalid env e1 (snd m) result_ty
+      in
+      (* Under extended reasons we record the flow into the entire Obj_get
+         expression *)
+      let result_ty =
+        Prov.(
+          update result_ty ~env ~f:(fun from ->
+              flow ~from ~into:(Typing_reason.Rwitness p)))
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, inner_te) =
@@ -10715,6 +10728,12 @@ end = struct
                 Env.fresh_type_error env p
               else
                 Env.fresh_type env p)
+        in
+        let tyl =
+          List.map tyl ~f:(fun ty ->
+              Prov.(
+                update ty ~env ~f:(fun into ->
+                    flow ~into ~from:(get_reason ty2))))
         in
         let (_, p1, _) = e1 in
         let destructure_ty =

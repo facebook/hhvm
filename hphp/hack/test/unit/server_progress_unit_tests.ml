@@ -542,6 +542,7 @@ let env =
       watchman_debug_logging = false;
       allow_non_opt_build = true;
       desc = "testing";
+      preexisting_warnings = false;
     }
 
 let test_check_success () : bool Lwt.t =

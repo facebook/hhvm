@@ -25,6 +25,8 @@ type options = {
   dump_fanout: bool;
   from: string;
   gen_saved_ignore_type_errors: bool;
+  preexisting_warnings: bool;
+      (** Whether to show preexisting warnings in typechecked files. *)
   ignore_hh_version: bool;
   enable_global_access_check: bool;
   saved_state_ignore_hhconfig: bool;
@@ -146,6 +148,7 @@ let parse_options () : options =
   let from_hhclient = ref false in
   let from_vim = ref false in
   let gen_saved_ignore_type_errors = ref false in
+  let preexisting_warnings = ref false in
   let ignore_hh = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let json_mode = ref false in
@@ -203,6 +206,10 @@ let parse_options () : options =
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         Messages.gen_saved_ignore_type_errors );
+      ( "--preexisting-warnings",
+        Arg.Set preexisting_warnings,
+        " show all preexisting warnings in typechecked files (default: false)"
+      );
       ("--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version);
       ("--json", Arg.Set json_mode, Messages.json);
       ( "--log-inference-constraints",
@@ -294,6 +301,7 @@ let parse_options () : options =
     enable_global_access_check = !enable_global_access_check;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
+    preexisting_warnings = !preexisting_warnings;
     ignore_hh_version = !ignore_hh;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     json_mode = !json_mode;
@@ -326,6 +334,7 @@ let default_options ~root =
     enable_global_access_check = false;
     from = "";
     gen_saved_ignore_type_errors = false;
+    preexisting_warnings = false;
     ignore_hh_version = false;
     saved_state_ignore_hhconfig = false;
     json_mode = false;
@@ -415,6 +424,8 @@ let allow_non_opt_build options = options.allow_non_opt_build
 
 let write_symbol_info options = options.write_symbol_info
 
+let preexisting_warnings options = options.preexisting_warnings
+
 (*****************************************************************************)
 (* Setters *)
 (*****************************************************************************)
@@ -455,6 +466,7 @@ let to_string
       enable_global_access_check;
       from;
       gen_saved_ignore_type_errors;
+      preexisting_warnings;
       ignore_hh_version;
       saved_state_ignore_hhconfig;
       json_mode;
@@ -568,6 +580,9 @@ let to_string
     ", ";
     "gen_saved_ignore_type_errors: ";
     string_of_bool gen_saved_ignore_type_errors;
+    ", ";
+    "preexisting_warnings: ";
+    string_of_bool preexisting_warnings;
     ", ";
     "ignore_hh_version: ";
     string_of_bool ignore_hh_version;

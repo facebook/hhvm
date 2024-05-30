@@ -420,6 +420,7 @@ impl HhConfig {
             hack_warnings: hhconfig.get_all_or_some_ints_or("hack_warnings", default.hack_warnings)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
+            preexisting_warnings: default.preexisting_warnings,
         };
         let mut c = Self {
             local_config,

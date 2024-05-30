@@ -337,6 +337,7 @@ type _ t =
       file_names: file_input list;
       max_errors: int option;
       return_expanded_tast: bool;
+      preexisting_warnings: bool;
     }
       -> ((Errors.finalized_error list * int)
          * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)

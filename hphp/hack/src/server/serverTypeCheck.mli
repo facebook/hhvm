@@ -34,3 +34,6 @@ val print_defs_per_file_pos :
   (('a * string) list * ('b * string) list) SMap.t -> unit
 
 val print_fast : (SSet.t * SSet.t) SMap.t -> unit
+
+val filter_out_mergebase_warnings :
+  ServerEnv.env -> preexisting_warnings:bool -> Errors.t -> Errors.t

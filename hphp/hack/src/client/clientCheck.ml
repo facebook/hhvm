@@ -100,7 +100,7 @@ let parse_position_string ~(split_on : string) arg =
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
 
-let connect ?(use_priority_pipe = false) args =
+let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
   let {
     root;
     from;
@@ -121,6 +121,7 @@ let connect ?(use_priority_pipe = false) args =
     allow_non_opt_build;
     custom_hhi_path;
     custom_telemetry_data;
+    preexisting_warnings;
     error_format = _;
     gen_saved_ignore_type_errors = _;
     paths = _;
@@ -162,6 +163,7 @@ let connect ?(use_priority_pipe = false) args =
         custom_hhi_path;
         custom_telemetry_data;
         allow_non_opt_build;
+        preexisting_warnings;
       })
 
 (* This is a function, because server closes the connection after each command,
@@ -715,7 +717,7 @@ let main_internal
              ~value:status.ServerCommandTypes.Server_status.last_recheck_stats
       in
       Lwt.return (exit_status, telemetry)
-  | MODE_STATUS_SINGLE { filenames; show_tast } ->
+  | MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings } ->
     let file_input filename =
       match filename with
       | "-" ->
@@ -731,6 +733,7 @@ let main_internal
              file_names = file_inputs;
              max_errors = args.max_errors;
              return_expanded_tast = show_tast;
+             preexisting_warnings;
            })
     in
     (match tasts with

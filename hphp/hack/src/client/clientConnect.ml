@@ -42,6 +42,7 @@ type env = {
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
+  preexisting_warnings: bool;
 }
 
 type conn = {
@@ -396,6 +397,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           custom_hhi_path;
           custom_telemetry_data;
           allow_non_opt_build;
+          preexisting_warnings;
         } =
           env
         in
@@ -420,6 +422,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               custom_hhi_path;
               custom_telemetry_data;
               allow_non_opt_build;
+              preexisting_warnings;
             });
         connect env start_time
       ) else (

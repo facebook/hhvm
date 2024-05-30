@@ -87,6 +87,11 @@ module Common_argspecs = struct
       Arg.String (fun s -> value_ref := Some s),
       " use the provided naming table instead of fetching it from a saved state"
     )
+
+  let preexisting_warnings preexisting_warnings =
+    ( "--preexisting-warnings",
+      Arg.Set preexisting_warnings,
+      " show all preexisting warnings in typechecked files (default: false)" )
 end
 
 let parse_command () =
@@ -117,7 +122,7 @@ let parse_without_command options usage command =
  * if you are making significant changes you need to update the manpage as
  * well. Experimental or otherwise volatile options need not be documented
  * there, but keep what's there up to date please. *)
-let parse_check_args cmd ~from_default =
+let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   (* arg parse output refs *)
   let autostart = ref true in
   let config = ref [] in
@@ -153,6 +158,7 @@ let parse_check_args cmd ~from_default =
   let version = ref false in
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
+  let preexisting_warnings = ref false in
   let desc = ref (ClientCommand.command_name cmd) in
   (* custom behaviors *)
   let current_option = ref None in
@@ -168,13 +174,15 @@ let parse_check_args cmd ~from_default =
     end
   in
   let add_single x = single_files := x :: !single_files in
-  let set_mode_from_single_files (show_tast : bool) =
+  let set_mode_from_single_files (show_tast : bool) preexisting_warnings =
     match !single_files with
     | [] -> ()
     | single_files ->
       (match !mode with
       | _ ->
-        set_mode (MODE_STATUS_SINGLE { filenames = single_files; show_tast }))
+        set_mode
+          (MODE_STATUS_SINGLE
+             { filenames = single_files; show_tast; preexisting_warnings }))
   in
   (* parse args *)
   let usage =
@@ -478,7 +486,7 @@ let parse_check_args cmd ~from_default =
         ^ " to the given class" );
       ( "--json",
         Arg.Set output_json,
-        " output json for machine consumption. (default: false)" );
+        " output json for machine consumption (default: false)" );
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );
@@ -500,6 +508,7 @@ let parse_check_args cmd ~from_default =
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display" );
+      Common_argspecs.preexisting_warnings preexisting_warnings;
       ("--logname", Arg.Set logname, " (mode) show log filename and exit");
       ( "--monitor-logname",
         Arg.Set monitor_logname,
@@ -715,7 +724,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     exit 0
   );
 
-  set_mode_from_single_files !show_tast;
+  set_mode_from_single_files !show_tast !preexisting_warnings;
   let mode = Option.value !mode ~default:MODE_STATUS in
   (* fixups *)
   let (root, paths) =
@@ -782,6 +791,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     paths;
     log_inference_constraints = !log_inference_constraints;
     max_errors = !max_errors;
+    preexisting_warnings = !preexisting_warnings;
     mode;
     no_load =
       (!no_load
@@ -823,6 +833,7 @@ let parse_start_env command ~from_default =
   let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let allow_non_opt_build = ref false in
+  let preexisting_warnings = ref false in
   let wait_deprecation_msg () =
     Printf.eprintf
       "WARNING: --wait is deprecated, does nothing, and will be going away soon!\n%!"
@@ -852,6 +863,7 @@ let parse_start_env command ~from_default =
         Arg.Unit wait_deprecation_msg,
         " this flag is deprecated and does nothing!" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
+      Common_argspecs.preexisting_warnings preexisting_warnings;
       (* Please keep these sorted in the alphabetical order *)
     ]
   in
@@ -875,6 +887,7 @@ let parse_start_env command ~from_default =
     silent = false;
     watchman_debug_logging = !watchman_debug_logging;
     allow_non_opt_build = !allow_non_opt_build;
+    preexisting_warnings = !preexisting_warnings;
   }
 
 let parse_saved_state_project_metadata_args ~from_default : command =

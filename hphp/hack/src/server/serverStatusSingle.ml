@@ -10,8 +10,7 @@ open Hh_prelude
 open ServerCommandTypes
 
 let go file_inputs ctx :
-    Errors.finalized_error list
-    * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
+    Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let collect (errors_acc, tasts) file_input =
     match file_input with
     | FileName file_name ->
@@ -49,8 +48,5 @@ let go file_inputs ctx :
       ~f:collect
       ~init:(Errors.empty, Relative_path.Map.empty)
       file_inputs
-  in
-  let errors =
-    Errors.get_sorted_error_list errors |> List.map ~f:User_error.to_absolute
   in
   (errors, tasts)

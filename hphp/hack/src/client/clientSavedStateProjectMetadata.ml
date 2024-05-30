@@ -26,6 +26,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     paths = _;
     log_inference_constraints = _;
     max_errors = _;
+    preexisting_warnings = _;
     mode = _;
     no_load = _;
     save_64bit = _;

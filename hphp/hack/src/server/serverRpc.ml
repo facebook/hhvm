@@ -17,7 +17,7 @@ let remove_dead_warning name =
   ^ "s.\n"
   ^ "Please run 'hh_client restart --no-load' to restart it."
 
-let take_max_errors error_list max_errors =
+let take_max_errors max_errors error_list =
   match max_errors with
   | Some max_errors ->
     let (error_list, dropped_errors) = List.split_n error_list max_errors in
@@ -53,7 +53,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | STATUS { max_errors; _ } ->
     log_check_response env;
     let error_list = Errors.sort_and_finalize env.errorl in
-    let (error_list, dropped_count) = take_max_errors error_list max_errors in
+    let (error_list, dropped_count) = take_max_errors max_errors error_list in
     let liveness =
       if is_stale then
         Stale_status
@@ -71,10 +71,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     ( env,
       { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
     )
-  | STATUS_SINGLE { file_names; max_errors; return_expanded_tast } ->
+  | STATUS_SINGLE
+      { file_names; max_errors; preexisting_warnings; return_expanded_tast } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, tasts) = ServerStatusSingle.go file_names ctx in
-    let errors = take_max_errors errors max_errors in
+    let errors =
+      errors
+      |> ServerTypeCheck.filter_out_mergebase_warnings env ~preexisting_warnings
+      |> Errors.get_sorted_error_list
+      |> List.map ~f:User_error.to_absolute
+      |> take_max_errors max_errors
+    in
     (* Unforced lazy values are closures which make serialization over RPC fail. *)
     let tasts =
       if return_expanded_tast then

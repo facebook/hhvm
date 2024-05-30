@@ -83,6 +83,8 @@ val allow_non_opt_build : options -> bool
 
 val write_symbol_info : options -> string option
 
+val preexisting_warnings : options -> bool
+
 (****************************************************************************)
 (* Setters *)
 (****************************************************************************)

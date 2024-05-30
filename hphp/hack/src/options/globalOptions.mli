@@ -252,6 +252,8 @@ type t = {
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2: bool;
       (** Option to bypass package boundary violation errors to enable v0 of intern-prod separation *)
+  preexisting_warnings: bool;
+      (** Whether to show preexisting warnings from typechecked files *)
 }
 [@@deriving eq, show]
 
@@ -355,6 +357,7 @@ val set :
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2:bool ->
+  ?preexisting_warnings:bool ->
   t ->
   t
 

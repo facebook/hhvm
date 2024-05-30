@@ -64,6 +64,7 @@ type env = {
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
+  preexisting_warnings: bool;
 }
 
 (* Sometimes systemd-run is available but we can't use it. For example, the
@@ -116,6 +117,7 @@ let start_server (env : env) =
     custom_hhi_path;
     custom_telemetry_data;
     allow_non_opt_build;
+    preexisting_warnings;
   } =
     env
   in
@@ -192,6 +194,10 @@ let start_server (env : env) =
           custom_telemetry_data;
         (if allow_non_opt_build then
           [| "--allow-non-opt-build" |]
+        else
+          [||]);
+        (if preexisting_warnings then
+          [| "--preexisting-warnings" |]
         else
           [||]);
       ]

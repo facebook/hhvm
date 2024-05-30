@@ -16,6 +16,7 @@ type rename_mode =
 type status_single = {
   filenames: string list;
   show_tast: bool;
+  preexisting_warnings: bool;
 }
 
 type client_mode =
@@ -86,6 +87,8 @@ type client_check_env = {
   paths: string list;
   log_inference_constraints: bool;
   max_errors: int option;
+  preexisting_warnings: bool;
+      (** Whether to show preexisint warnings in typechecked files *)
   mode: client_mode;
   no_load: bool;
   save_64bit: string option;

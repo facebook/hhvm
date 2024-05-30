@@ -30,6 +30,7 @@ type env = {
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
+  preexisting_warnings: bool;
 }
 
 (* [connect] returns this record, which contains everything needed for subsequent rpc calls *)

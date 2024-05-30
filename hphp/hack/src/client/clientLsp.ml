@@ -1360,6 +1360,7 @@ let start_server () : unit =
         custom_hhi_path = None;
         custom_telemetry_data = [];
         allow_non_opt_build = false;
+        preexisting_warnings = false;
       }
   in
   let _exit_status = ClientStart.main env_start in

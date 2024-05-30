@@ -19,6 +19,7 @@ from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
+cimport thrift.python.exceptions
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
@@ -383,7 +384,7 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
             pyfuture.set_exception(FooStreamEx._fbthrift_create(thrift.py3.exceptions.try_make_shared_exception[cFooStreamEx](result.exception())))
         elif result.hasException():
             pyfuture.set_exception(
-                thrift.py3.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)
+                thrift.python.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)
             )
         else:
             opt_val = result.value()

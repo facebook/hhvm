@@ -21,7 +21,8 @@ from libcpp.utility cimport move as cmove
 from cython.operator cimport dereference as deref, typeid
 from cpython.ref cimport PyObject
 from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
-from thrift.py3.exceptions cimport try_make_shared_exception, create_py_exception
+from thrift.py3.exceptions cimport try_make_shared_exception
+from thrift.python.exceptions cimport create_py_exception
 from folly cimport cFollyTry, cFollyUnit, c_unit
 from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info

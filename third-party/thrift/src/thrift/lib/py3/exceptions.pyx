@@ -12,23 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cython.operator cimport dereference as deref
-from cpython.exc cimport PyErr_Occurred
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
-from libcpp.vector cimport vector
 from thrift.python.common import RpcOptions
-from thrift.python.exceptions cimport (
-    create_ApplicationError,
-    create_Error,
-    create_LibraryError,
-    create_ProtocolError,
-    create_TransportError,
-    cTApplicationException,
-    cTException,
-    cTLibraryException,
-    cTProtocolException,
-    cTTransportException,
-)
 from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
@@ -119,56 +104,3 @@ cdef class GeneratedError(BaseError):
     @staticmethod
     def __get_thrift_name__():
         raise NotImplementedError()
-
-
-
-
-
-# Our Registry
-cdef vector[Handler] handlers
-
-
-cdef void addHandler(Handler handler):
-    handlers.push_back(handler)
-
-
-cdef object runHandlers(const cFollyExceptionWrapper& ex, RpcOptions options):
-    for handler in handlers:
-        pyex = handler(ex, <PyObject *> options)
-        if pyex:
-            return pyex
-
-
-cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options):
-    # This will raise an exception if a handler raised one
-    pyex = runHandlers(ex, options)
-    if pyex:
-        return pyex
-
-    pyex = create_ApplicationError(ex.get_exception[cTApplicationException]())
-    if pyex:
-        return pyex
-
-    pyex = create_TransportError(ex.get_exception[cTTransportException]())
-    if pyex:
-        return pyex
-
-    pyex = create_ProtocolError(ex.get_exception[cTProtocolException]())
-    if pyex:
-        return pyex
-
-    pyex = create_LibraryError(ex.get_exception[cTLibraryException]())
-    if pyex:
-        return pyex
-
-    pyex = create_Error(ex.get_exception[cTException]())
-    if pyex:
-        return pyex
-
-    try:
-        # No clue what this is just throw it and let the default cython logic takeover
-        ex.throw_exception()
-    except Exception as pyex:
-        # We don't try to shorten the traceback because this is Unknown
-        # it will be helpful to know the most information possible.
-        return pyex

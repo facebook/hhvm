@@ -36,12 +36,6 @@ cdef extern from "thrift/lib/py3/exceptions.h" namespace "::thrift::py3::excepti
         const cFollyExceptionWrapper& excepton)
 
 
-ctypedef object(*Handler)(const cFollyExceptionWrapper& ex, PyObject* user_data)
-cdef void addHandler(Handler handler)
-cdef object runHandlers(const cFollyExceptionWrapper& ex, RpcOptions options)
-cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)
-
-
 cdef class GeneratedError(BaseError):
     cdef object __weakref__
     cdef object _fbthrift_hash

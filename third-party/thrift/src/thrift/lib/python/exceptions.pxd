@@ -103,13 +103,9 @@ cdef class Error(Exception):
     """base class for all Thrift exceptions"""
     pass
 
-# cdef Inheritence sucks in cython
-cdef object create_Error(const cTException* ex)
 
 cdef class LibraryError(Error):
     pass
-
-cdef object create_LibraryError(const cTLibraryException* ex)
 
 cdef class ApplicationError(Error):
     pass
@@ -120,12 +116,8 @@ cdef ApplicationError create_ApplicationError(const cTApplicationException* ex)
 cdef class TransportError(LibraryError):
     pass
 
-cdef TransportError create_TransportError(const cTTransportException* ex)
-
 cdef class ProtocolError(LibraryError):
     pass
-
-cdef ProtocolError create_ProtocolError(const cTProtocolException* ex)
 
 
 cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)

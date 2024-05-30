@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Properties.h>
+#include <fizz/crypto/Crypto.h>
 #include <openssl/evp.h>
 
 namespace fizz {
@@ -32,6 +34,21 @@ struct P521 {
   static const int curveNid{NID_secp521r1};
   static const int coordinateLength = 66;
   static const int keyShareLength = coordinateLength * 2 + 1;
+};
+
+template <>
+struct Properties<fizz::P256> {
+  static const int curveNid{NID_X9_62_prime256v1};
+};
+
+template <>
+struct Properties<fizz::P384> {
+  static const int curveNid{NID_X9_62_prime256v1};
+};
+
+template <>
+struct Properties<fizz::P521> {
+  static const int curveNid{NID_X9_62_prime256v1};
 };
 
 } // namespace openssl

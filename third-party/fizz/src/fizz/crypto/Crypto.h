@@ -13,6 +13,7 @@
 
 namespace fizz {
 
+// AEAD Ciphers
 struct AESGCM128 {
   static const size_t kKeyLength{16};
   static const size_t kIVLength{12};
@@ -37,6 +38,7 @@ struct ChaCha20Poly1305 {
   static const size_t kTagLength{16};
 };
 
+// Hashing Algorithms
 struct Sha256 {
   static constexpr size_t HashLen = 32;
 
@@ -56,6 +58,25 @@ struct Sha512 {
 
   static constexpr folly::StringPiece BlankHash{
       "\xcf\x83\xe1\x35\x7e\xef\xb8\xbd\xf1\x54\x28\x50\xd6\x6d\x80\x07\xd6\x20\xe4\x05\x0b\x57\x15\xdc\x83\xf4\xa9\x21\xd3\x6c\xe9\xce\x47\xd0\xd1\x3c\x5d\x85\xf2\xb0\xff\x83\x18\xd2\x87\x7e\xec\x2f\x63\xb9\x31\xbd\x47\x41\x7a\x81\xa5\x38\x32\x7a\xf9\x27\xda\x3e"};
+};
+
+// Elliptic Curves
+struct P256 {
+  /**
+   * See RFC8446 Section 4.2.8.2
+   */
+  static constexpr int coordinateLength = 32;
+  static constexpr int keyShareLength = coordinateLength * 2 + 1;
+};
+
+struct P384 {
+  static constexpr int coordinateLength = 48;
+  static constexpr int keyShareLength = coordinateLength * 2 + 1;
+};
+
+struct P521 {
+  static constexpr int coordinateLength = 66;
+  static constexpr int keyShareLength = coordinateLength * 2 + 1;
 };
 
 } // namespace fizz

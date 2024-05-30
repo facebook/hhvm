@@ -14,15 +14,32 @@
 namespace fizz {
 namespace openssl {
 
+namespace detail {
+class OpenSSLECKeyDecoder {
+ public:
+  static folly::ssl::EvpPkeyUniquePtr decode(
+      folly::ByteRange range,
+      const int curveNid);
+};
+
+class OpenSSLECKeyEncoder {
+ public:
+  static std::unique_ptr<folly::IOBuf> encode(
+      const folly::ssl::EvpPkeyUniquePtr& key);
+};
+} // namespace detail
+
 /**
  * Eliptic curve key exchange implementation using OpenSSL.
  *
  * The template struct requires the following parameters:
  *   - curveNid: OpenSSL NID for the named curve
  */
-template <class T>
 class OpenSSLECKeyExchange : public KeyExchange {
  public:
+  OpenSSLECKeyExchange(int nid, int keyShareLength)
+      : nid_(nid), keyShareLength_(keyShareLength) {}
+
   ~OpenSSLECKeyExchange() override = default;
 
   void generateKeyPair() override;
@@ -45,8 +62,8 @@ class OpenSSLECKeyExchange : public KeyExchange {
 
  private:
   folly::ssl::EvpPkeyUniquePtr key_;
+  int nid_;
+  int keyShareLength_;
 };
 } // namespace openssl
 } // namespace fizz
-
-#include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange-inl.h>

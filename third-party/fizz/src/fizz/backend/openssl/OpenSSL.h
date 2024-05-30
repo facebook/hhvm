@@ -30,3 +30,22 @@ Include this file to use openssl features.
 #include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <folly/io/IOBuf.h>
+
+namespace fizz::openssl {
+
+template <typename T>
+std::unique_ptr<fizz::KeyExchange> makeKeyExchange() {
+  return std::make_unique<OpenSSLECKeyExchange>(
+      Properties<T>::curveNid, T::keyShareLength);
+}
+
+// For use in tests. This is not part of the "backend" compile time
+// interface. Other callers should be working with the type-erased
+// `KeyExchange` object.
+template <typename T>
+std::unique_ptr<fizz::openssl::OpenSSLECKeyExchange>
+makeOpenSSLECKeyExchange() {
+  return std::make_unique<OpenSSLECKeyExchange>(
+      Properties<T>::curveNid, T::keyShareLength);
+}
+} // namespace fizz::openssl

@@ -9,6 +9,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
@@ -94,7 +95,7 @@ ClientHello getChloOuterHRRWithExt(
 }
 
 TEST(DecrypterTest, TestDecodeSuccess) {
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -118,7 +119,7 @@ TEST(DecrypterTest, TestDecodeSuccess) {
 }
 
 TEST(DecrypterTest, TestDecodeHRRSuccess) {
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -141,7 +142,7 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -172,7 +173,7 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
 
 TEST(DecrypterTest, TestDecodeFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -185,7 +186,7 @@ TEST(DecrypterTest, TestDecodeFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;
@@ -204,7 +205,7 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   auto echConfig = getECHConfig();
-  auto kex = std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
   ECHConfigManager decrypter;

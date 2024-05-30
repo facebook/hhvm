@@ -8,7 +8,8 @@
 
 #include <folly/portability/GTest.h>
 
-#include <fizz/backend/openssl/crypto/exchange/ECCurveKeyExchange.h>
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <folly/String.h>
@@ -39,15 +40,13 @@ struct KeyParams {
 template <class T>
 class Key : public ::testing::Test {
  public:
-  using KeyExch = OpenSSLECKeyExchange<T>;
-  using KeyEncoder = detail::OpenSSLECKeyEncoder;
-  using KeyDecoder = detail::OpenSSLECKeyDecoder<T>;
+  static constexpr auto makeKex = fizz::openssl::makeOpenSSLECKeyExchange<T>;
 
   KeyParams getKeyParams();
 };
 
 template <>
-KeyParams Key<P256>::getKeyParams() {
+KeyParams Key<fizz::P256>::getKeyParams() {
   return KeyParams{
       kP256Key,
       kP256K1Key,
@@ -63,7 +62,7 @@ KeyParams Key<P256>::getKeyParams() {
 }
 
 template <>
-KeyParams Key<P384>::getKeyParams() {
+KeyParams Key<fizz::P384>::getKeyParams() {
   return KeyParams{
       kP384Key,
       kP256Key,
@@ -85,7 +84,7 @@ KeyParams Key<P384>::getKeyParams() {
 }
 
 template <>
-KeyParams Key<P521>::getKeyParams() {
+KeyParams Key<fizz::P521>::getKeyParams() {
   return KeyParams{
       kP521Key,
       kP384Key,
@@ -109,48 +108,50 @@ KeyParams Key<P521>::getKeyParams() {
       "8de930387e8ecc2c68ec41bcf2",
       "8de930387e8ecc2c68ec41bcf2"};
 }
-using KeyTypes = ::testing::Types<P256, P384, P521>;
+using KeyTypes = ::testing::Types<fizz::P256, fizz::P384, fizz::P521>;
 TYPED_TEST_SUITE(Key, KeyTypes);
 
 TYPED_TEST(Key, GenerateKey) {
-  typename TestFixture::KeyExch kex;
-  kex.generateKeyPair();
+  auto kex = TestFixture::makeKex();
+  kex->generateKeyPair();
 }
 
 TYPED_TEST(Key, SharedSecret) {
-  typename TestFixture::KeyExch kex;
-  kex.generateKeyPair();
-  auto shared = kex.generateSharedSecret(kex.getPrivateKey());
+  auto kex = TestFixture::makeKex();
+  kex->generateKeyPair();
+  auto shared = kex->generateSharedSecret(kex->getPrivateKey());
   EXPECT_TRUE(shared);
 }
 
 TYPED_TEST(Key, ReadFromKey) {
-  typename TestFixture::KeyExch kex;
+  auto kex = TestFixture::makeKex();
   auto pkey = getPrivateKey(this->getKeyParams().privateKey);
-  kex.setPrivateKey(std::move(pkey));
+  kex->setPrivateKey(std::move(pkey));
 
   auto pkey2 = getPrivateKey(this->getKeyParams().privateKey);
-  typename TestFixture::KeyExch kex2;
-  kex2.setPrivateKey(std::move(pkey2));
-  auto shared = kex.generateSharedSecret(kex2.getPrivateKey());
+  auto kex2 = TestFixture::makeKex();
+  kex2->setPrivateKey(std::move(pkey2));
+  auto shared = kex->generateSharedSecret(kex2->getPrivateKey());
   EXPECT_TRUE(shared);
 }
 
 TYPED_TEST(Key, ReadWrongGroup) {
   auto pkey = getPrivateKey(this->getKeyParams().invalidPrivateKey);
-  typename TestFixture::KeyExch kex;
-  EXPECT_THROW(kex.setPrivateKey(std::move(pkey)), std::runtime_error);
+  auto kex = TestFixture::makeKex();
+  EXPECT_THROW(kex->setPrivateKey(std::move(pkey)), std::runtime_error);
 }
 
 TYPED_TEST(Key, Decode) {
   std::string out = unhexlify(this->getKeyParams().encodedShare);
-  auto pub = detail::OpenSSLECKeyDecoder<TypeParam>::decode(range(out));
+  auto pub = detail::OpenSSLECKeyDecoder::decode(
+      range(out), openssl::Properties<TypeParam>::curveNid);
   EXPECT_TRUE(pub);
 }
 
 TYPED_TEST(Key, Encode) {
   std::string out = unhexlify(this->getKeyParams().encodedShare);
-  auto pub = detail::OpenSSLECKeyDecoder<TypeParam>::decode(range(out));
+  auto pub = detail::OpenSSLECKeyDecoder::decode(
+      range(out), openssl::Properties<TypeParam>::curveNid);
   EXPECT_TRUE(pub);
   auto encoded = detail::OpenSSLECKeyEncoder::encode(pub);
 
@@ -161,14 +162,16 @@ TYPED_TEST(Key, Encode) {
 TYPED_TEST(Key, DecodeInvalid) {
   std::string out = unhexlify(this->getKeyParams().invalidEncodedShare);
   EXPECT_THROW(
-      detail::OpenSSLECKeyDecoder<TypeParam>::decode(range(out)),
+      detail::OpenSSLECKeyDecoder::decode(
+          range(out), openssl::Properties<TypeParam>::curveNid),
       std::runtime_error);
 }
 
 TYPED_TEST(Key, DecodeInvalidSmallLength) {
   std::string out = unhexlify(this->getKeyParams().tooSmallEncodedShare);
   EXPECT_THROW(
-      detail::OpenSSLECKeyDecoder<TypeParam>::decode(range(out)),
+      detail::OpenSSLECKeyDecoder::decode(
+          range(out), openssl::Properties<TypeParam>::curveNid),
       std::runtime_error);
 }
 
@@ -251,21 +254,21 @@ TEST_P(ECDHTest, TestKeyAgreement) {
     std::unique_ptr<folly::IOBuf> shared;
     switch (GetParam().key) {
       case KeyType::P256: {
-        P256KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
-        shared = kex.generateSharedSecret(pkeyPeerKey);
+        auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
+        kex->setPrivateKey(std::move(privateKey));
+        shared = kex->generateSharedSecret(pkeyPeerKey);
         break;
       }
       case KeyType::P384: {
-        P384KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
-        shared = kex.generateSharedSecret(pkeyPeerKey);
+        auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
+        kex->setPrivateKey(std::move(privateKey));
+        shared = kex->generateSharedSecret(pkeyPeerKey);
         break;
       }
       case KeyType::P521: {
-        P521KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
-        shared = kex.generateSharedSecret(pkeyPeerKey);
+        auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
+        kex->setPrivateKey(std::move(privateKey));
+        shared = kex->generateSharedSecret(pkeyPeerKey);
         break;
       }
       default:
@@ -288,24 +291,24 @@ TEST_P(ECDHTest, TestKexClone) {
     std::unique_ptr<KeyExchange> chosenKex;
     switch (GetParam().key) {
       case KeyType::P256: {
-        P256KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
+        auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
+        kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex.clone();
+        chosenKex = kex->clone();
         break;
       }
       case KeyType::P384: {
-        P384KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
+        auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
+        kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex.clone();
+        chosenKex = kex->clone();
         break;
       }
       case KeyType::P521: {
-        P521KeyExchange kex;
-        kex.setPrivateKey(std::move(privateKey));
+        auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
+        kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex.clone();
+        chosenKex = kex->clone();
         break;
       }
       default:

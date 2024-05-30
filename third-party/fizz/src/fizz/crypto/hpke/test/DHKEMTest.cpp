@@ -72,8 +72,7 @@ DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
 }
 
 TEST(DHKEMTest, TestP256EncapDecapEqual) {
-  auto actualKex =
-      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   auto privateKey = getPrivateKey(kP256Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
@@ -89,8 +88,7 @@ TEST(DHKEMTest, TestP256EncapDecapEqual) {
 }
 
 TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
-  auto actualKex =
-      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+  auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   auto privateKey = getPrivateKey(kP256Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
@@ -115,8 +113,7 @@ TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
 }
 
 TEST(DHKEMTest, TestP384EncapDecapEqual) {
-  auto actualKex =
-      std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
+  auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P384>();
   auto privateKey = getPrivateKey(kP384Key);
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp384r1);

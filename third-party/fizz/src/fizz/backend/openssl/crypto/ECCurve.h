@@ -38,17 +38,17 @@ struct P521 {
 
 template <>
 struct Properties<fizz::P256> {
-  static const int curveNid{NID_X9_62_prime256v1};
+  static constexpr int curveNid{NID_X9_62_prime256v1};
 };
 
 template <>
 struct Properties<fizz::P384> {
-  static const int curveNid{NID_X9_62_prime256v1};
+  static constexpr int curveNid{NID_secp384r1};
 };
 
 template <>
 struct Properties<fizz::P521> {
-  static const int curveNid{NID_X9_62_prime256v1};
+  static constexpr int curveNid{NID_secp521r1};
 };
 
 } // namespace openssl

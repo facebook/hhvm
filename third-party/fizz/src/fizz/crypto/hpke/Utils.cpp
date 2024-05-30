@@ -149,11 +149,11 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
 std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId) {
   switch (kemId) {
     case KEMId::secp256r1:
-      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+      return openssl::makeKeyExchange<fizz::P256>();
     case KEMId::secp384r1:
-      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
+      return openssl::makeKeyExchange<fizz::P384>();
     case KEMId::secp521r1:
-      return std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P521>>();
+      return openssl::makeKeyExchange<fizz::P521>();
     case KEMId::x25519:
       return std::make_unique<X25519KeyExchange>();
     default:

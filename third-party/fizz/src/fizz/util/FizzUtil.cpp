@@ -135,20 +135,20 @@ std::unique_ptr<KeyExchange> FizzUtil::createKeyExchangeFromBuf(
     folly::ByteRange privKey) {
   switch (kemId) {
     case hpke::KEMId::secp256r1: {
-      auto kex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+      std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
+          openssl::makeOpenSSLECKeyExchange<fizz::P256>();
       kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
       return kex;
     }
     case hpke::KEMId::secp384r1: {
-      auto kex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
+      std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
+          openssl::makeOpenSSLECKeyExchange<fizz::P384>();
       kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
       return kex;
     }
     case hpke::KEMId::secp521r1: {
-      auto kex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P521>>();
+      std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
+          openssl::makeOpenSSLECKeyExchange<fizz::P521>();
       kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
       return kex;
     }

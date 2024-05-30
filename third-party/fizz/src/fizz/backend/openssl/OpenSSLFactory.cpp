@@ -7,7 +7,10 @@
  */
 
 #include <fizz/backend/openssl/OpenSSLFactory.h>
+
+#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+
 #include <fizz/fizz-config.h>
 
 #if FIZZ_HAVE_OQS
@@ -28,11 +31,11 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
   (void)mode;
   switch (group) {
     case NamedGroup::secp256r1:
-      return std::make_unique<OpenSSLECKeyExchange<P256>>();
+      return fizz::openssl::makeKeyExchange<fizz::P256>();
     case NamedGroup::secp384r1:
-      return std::make_unique<OpenSSLECKeyExchange<P384>>();
+      return fizz::openssl::makeKeyExchange<fizz::P384>();
     case NamedGroup::secp521r1:
-      return std::make_unique<OpenSSLECKeyExchange<P521>>();
+      return fizz::openssl::makeKeyExchange<fizz::P521>();
     case NamedGroup::x25519:
       return std::make_unique<X25519KeyExchange>();
 #if FIZZ_HAVE_OQS
@@ -43,7 +46,7 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
     case NamedGroup::secp256r1_kyber512:
       return std::make_unique<HybridKeyExchange>(
-          std::make_unique<OpenSSLECKeyExchange<P256>>(),
+          fizz::openssl::makeKeyExchange<fizz::P256>(),
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
     case NamedGroup::kyber512:
       return OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512);
@@ -54,11 +57,11 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
     case NamedGroup::secp256r1_kyber768_draft00:
       return std::make_unique<HybridKeyExchange>(
-          std::make_unique<OpenSSLECKeyExchange<P256>>(),
+          fizz::openssl::makeKeyExchange<fizz::P256>(),
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
     case NamedGroup::secp384r1_kyber768:
       return std::make_unique<HybridKeyExchange>(
-          std::make_unique<OpenSSLECKeyExchange<P384>>(),
+          fizz::openssl::makeKeyExchange<fizz::P384>(),
           OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
 #endif
     default:

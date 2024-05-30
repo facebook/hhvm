@@ -10,6 +10,9 @@
 
 #include <fizz/crypto/test/TestUtil.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/backend/openssl/crypto/ECCurve.h>
+#include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/hpke/Hpke.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/protocol/ech/Encryption.h>
@@ -35,9 +38,15 @@ static std::vector<hpke::AeadId> supportedAeads{
     hpke::AeadId::TLS_AES_256_GCM_SHA384,
     hpke::AeadId::TLS_AES_128_GCM_SHA256};
 
-class MockOpenSSLECKeyExchange256
-    : public openssl::OpenSSLECKeyExchange<openssl::P256> {
+class MockOpenSSLECKeyExchange256 : public openssl::OpenSSLECKeyExchange {
  public:
+  MockOpenSSLECKeyExchange256()
+      : openssl::OpenSSLECKeyExchange(
+            openssl::Properties<fizz::P256>::curveNid,
+            fizz::P256::keyShareLength) {}
+
+  ~MockOpenSSLECKeyExchange256() = default;
+
   MOCK_METHOD(void, generateKeyPair, ());
 };
 

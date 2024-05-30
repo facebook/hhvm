@@ -1887,21 +1887,28 @@ class HpkeMockX25519KeyExchange : public X25519KeyExchange {
   MOCK_METHOD(void, generateKeyPair, ());
 };
 
-template <class T>
-class HpkeMockOpenSSLECKeyExchange : public openssl::OpenSSLECKeyExchange<T> {
+class HpkeMockOpenSSLECKeyExchange : public openssl::OpenSSLECKeyExchange {
  public:
+  using OpenSSLECKeyExchange::OpenSSLECKeyExchange;
+
   MOCK_METHOD0(generateKeyPair, void());
+
+  template <typename T>
+  static std::unique_ptr<HpkeMockOpenSSLECKeyExchange> makeMockKeyExchange() {
+    return std::make_unique<HpkeMockOpenSSLECKeyExchange>(
+        openssl::Properties<T>::curveNid, T::keyShareLength);
+  }
 };
 
 template <class T>
 void setOpenSSLPrivKey(
-    openssl::OpenSSLECKeyExchange<T>* kex,
+    openssl::OpenSSLECKeyExchange* kex,
     std::string& privKey,
     std::string& pubKey) {
   auto pubKeyBuf = toIOBuf(pubKey);
   std::string privKeyBin = folly::unhexlify(privKey);
   auto key = fizz::openssl::detail::decodeECPublicKey(
-      pubKeyBuf->coalesce(), T::curveNid);
+      pubKeyBuf->coalesce(), openssl::Properties<T>::curveNid);
   folly::ssl::EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(key.get()));
   folly::ssl::BIGNUMUniquePtr privateBn(
       BN_bin2bn((uint8_t*)privKeyBin.c_str(), privKeyBin.size(), nullptr));
@@ -1928,21 +1935,18 @@ std::unique_ptr<KeyExchange> generateAuthKex(
       return dKex;
     }
     case NamedGroup::secp256r1: {
-      auto dKex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
-      setOpenSSLPrivKey(dKex.get(), privateKey, publicKey);
+      auto dKex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
+      setOpenSSLPrivKey<fizz::P256>(dKex.get(), privateKey, publicKey);
       return dKex;
     }
     case NamedGroup::secp384r1: {
-      auto dKex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
-      setOpenSSLPrivKey(dKex.get(), privateKey, publicKey);
+      auto dKex = openssl::makeOpenSSLECKeyExchange<fizz::P384>();
+      setOpenSSLPrivKey<fizz::P384>(dKex.get(), privateKey, publicKey);
       return dKex;
     }
     case NamedGroup::secp521r1: {
-      auto dKex =
-          std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P521>>();
-      setOpenSSLPrivKey(dKex.get(), privateKey, publicKey);
+      auto dKex = openssl::makeOpenSSLECKeyExchange<fizz::P521>();
+      setOpenSSLPrivKey<fizz::P521>(dKex.get(), privateKey, publicKey);
       return dKex;
     }
     default:
@@ -1973,24 +1977,21 @@ SetupParam getSetupParam(
       break;
     }
     case NamedGroup::secp256r1: {
-      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange<openssl::P256>*>(
-          kex.get());
+      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
       CHECK(dKex);
-      setOpenSSLPrivKey(dKex, privateKey, publicKey);
+      setOpenSSLPrivKey<fizz::P256>(dKex, privateKey, publicKey);
       break;
     }
     case NamedGroup::secp384r1: {
-      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange<openssl::P384>*>(
-          kex.get());
+      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
       CHECK(dKex);
-      setOpenSSLPrivKey(dKex, privateKey, publicKey);
+      setOpenSSLPrivKey<fizz::P384>(dKex, privateKey, publicKey);
       break;
     }
     case NamedGroup::secp521r1: {
-      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange<openssl::P521>*>(
-          kex.get());
+      auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
       CHECK(dKex);
-      setOpenSSLPrivKey(dKex, privateKey, publicKey);
+      setOpenSSLPrivKey<fizz::P521>(dKex, privateKey, publicKey);
       break;
     }
     default:
@@ -2036,21 +2037,21 @@ TEST(HpkeTest, TestSetup) {
       }
       case NamedGroup::secp256r1: {
         auto kex =
-            std::make_unique<HpkeMockOpenSSLECKeyExchange<openssl::P256>>();
+            HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P256>();
         EXPECT_CALL(*kex, generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }
       case NamedGroup::secp384r1: {
         auto kex =
-            std::make_unique<HpkeMockOpenSSLECKeyExchange<openssl::P384>>();
+            HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P384>();
         EXPECT_CALL(*kex, generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }
       case NamedGroup::secp521r1: {
         auto kex =
-            std::make_unique<HpkeMockOpenSSLECKeyExchange<openssl::P521>>();
+            HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P521>();
         EXPECT_CALL(*kex, generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
@@ -2093,18 +2094,15 @@ TEST(HpkeTest, TestSetup) {
         break;
       }
       case NamedGroup::secp256r1: {
-        decapKex =
-            std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P256>>();
+        decapKex = openssl::makeKeyExchange<fizz::P256>();
         break;
       }
       case NamedGroup::secp384r1: {
-        decapKex =
-            std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P384>>();
+        decapKex = openssl::makeKeyExchange<fizz::P384>();
         break;
       }
       case NamedGroup::secp521r1: {
-        decapKex =
-            std::make_unique<openssl::OpenSSLECKeyExchange<openssl::P521>>();
+        decapKex = openssl::makeKeyExchange<fizz::P521>();
         break;
       }
       default:

@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"crypto/tls"
 	"errors"
 	"net"
 	"time"
@@ -28,6 +29,8 @@ type Socket interface {
 	// Opens the socket for communication
 	Open() error
 }
+
+var _ net.Conn = (*socket)(nil)
 
 type socket struct {
 	conn    net.Conn
@@ -135,6 +138,36 @@ func (s *socket) Open() error {
 // Addr returns the address the Socket is listening on.
 func (s *socket) Addr() net.Addr {
 	return s.addr
+}
+
+// LocalAddr returns the local network address, if known.
+func (s *socket) LocalAddr() net.Addr {
+	return s.conn.LocalAddr()
+}
+
+// RemoteAddr returns the remote network address, if known.
+func (s *socket) RemoteAddr() net.Addr {
+	return s.conn.RemoteAddr()
+}
+
+func (s *socket) SetDeadline(t time.Time) error {
+	return s.conn.SetDeadline(t)
+}
+
+func (s *socket) SetReadDeadline(t time.Time) error {
+	return s.conn.SetReadDeadline(t)
+}
+
+func (s *socket) SetWriteDeadline(t time.Time) error {
+	return s.conn.SetWriteDeadline(t)
+}
+
+func (s *socket) ConnectionState() (tls.ConnectionState, bool) {
+	tlsConn, ok := s.conn.(tlsConnectionStater)
+	if !ok {
+		return tls.ConnectionState{}, false
+	}
+	return tlsConn.ConnectionState(), true
 }
 
 // Conn retrieves the underlying net.Conn

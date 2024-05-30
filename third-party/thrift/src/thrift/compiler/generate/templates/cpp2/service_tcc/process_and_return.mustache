@@ -52,28 +52,44 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
-{{#function:args}}{{#field:type}}
-{{^type:resolves_to_complex_return?}}
-{{^type:enum?}}
-  {{type:cpp_type}} uarg_{{field:cpp_name}}{0};
-{{/type:enum?}}
-{{#type:enum?}}
-  {{type:cpp_type}} uarg_{{field:cpp_name}}{static_cast<{{type:cpp_type}}>(0)};
-{{/type:enum?}}
-  args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
-{{/type:resolves_to_complex_return?}}
-{{#type:resolves_to_complex_return?}}
-  {{#function:stack_arguments?}}
-  {{type:cpp_type}} uarg_{{field:cpp_name}};
-  args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
-  {{/function:stack_arguments?}}
-  {{^function:stack_arguments?}}
-  auto uarg_{{field:cpp_name}} = std::make_unique<{{type:cpp_type}}>();
-  args.get<{{field:index}}>().value = uarg_{{field:cpp_name}}.get();
-  {{/function:stack_arguments?}}
-{{/type:resolves_to_complex_return?}}
-{{/field:type}}{{/function:args}}
+  struct ArgsState {
+  {{#function:args}}{{#field:type}}
+  {{^type:resolves_to_complex_return?}}
+  {{^type:enum?}}
+    {{type:cpp_type}} uarg_{{field:cpp_name}}{0};
+  {{/type:enum?}}
+  {{#type:enum?}}
+    {{type:cpp_type}} uarg_{{field:cpp_name}}{static_cast<{{type:cpp_type}}>(0)};
+  {{/type:enum?}}
+  {{/type:resolves_to_complex_return?}}
+  {{#type:resolves_to_complex_return?}}
+    {{#function:stack_arguments?}}
+    {{type:cpp_type}} uarg_{{field:cpp_name}};
+    {{/function:stack_arguments?}}
+    {{^function:stack_arguments?}}
+    std::unique_ptr<{{type:cpp_type}}> uarg_{{field:cpp_name}} = std::make_unique<{{type:cpp_type}}>();
+    {{/function:stack_arguments?}}
+  {{/type:resolves_to_complex_return?}}
+  {{/field:type}}{{/function:args}}
+    {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs pargs() {
+      {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
+      {{#function:args}}{{#field:type}}
+      {{^type:resolves_to_complex_return?}}
+      args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
+      {{/type:resolves_to_complex_return?}}
+      {{#type:resolves_to_complex_return?}}
+      {{#function:stack_arguments?}}
+      args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
+      {{/function:stack_arguments?}}
+      {{^function:stack_arguments?}}
+      args.get<{{field:index}}>().value = uarg_{{field:cpp_name}}.get();
+      {{/function:stack_arguments?}}
+      {{/type:resolves_to_complex_return?}}
+      {{/field:type}}{{/function:args}}
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -83,7 +99,8 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   auto& iface = static_cast<apache::thrift::ServiceHandler<{{service:parent_service_cpp_name}}>::{{service:name}}If&>(*tile);
 {{/service:interaction?}}
   try {
-    deserializeRequest<ProtocolIn_>(args, "{{ > common/function_name}}", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "{{ > common/function_name}}", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
 {{#function:oneway?}}
@@ -116,7 +133,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<{{ > types/return_type_server}}>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<{{ > types/return_type_server}}>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_{{function:prefixed_name}}<ProtocolIn_,ProtocolOut_>
@@ -129,7 +146,26 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     {{#function:in_or_creates_interaction?}}, std::move(tile){{/function:in_or_creates_interaction?}});
 {{/function:oneway?}}
-  {{^service:interaction?}}iface_->{{/service:interaction?}}{{#service:interaction?}}iface.{{/service:interaction?}}{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:cpp_name}}(std::move(callback){{ > service_tcc/get_args_ref}});
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = {{^service:interaction?}}iface_{{/service:interaction?}}{{#service:interaction?}}&iface{{/service:interaction?}}, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:cpp_name}}(std::move(cb){{ > service_tcc/get_args_ref}});
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 {{^function:oneway?}}

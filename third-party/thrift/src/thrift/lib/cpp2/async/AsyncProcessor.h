@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <exception>
 #include <mutex>
 #include <string>
 #include <string_view>
@@ -1168,6 +1169,20 @@ class ServerInterface : public virtual AsyncProcessorFactory,
 template <class T>
 class HandlerCallback;
 
+class HandlerCallbackBase;
+
+namespace detail {
+// These functions allow calling the function within generated code since
+// doException is protected
+
+bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&);
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> processServiceInterceptorsOnRequest(
+    HandlerCallbackBase&);
+#endif // FOLLY_HAS_COROUTINES
+} // namespace detail
+
 /**
  * HandlerCallback class for async callbacks.
  *
@@ -1348,6 +1363,16 @@ class HandlerCallbackBase {
 
   bool fulfillTilePromise(std::unique_ptr<Tile> ptr);
   void breakTilePromise();
+
+  bool shouldProcessServiceInterceptorsOnRequest() const;
+  friend bool detail::shouldProcessServiceInterceptorsOnRequest(
+      HandlerCallbackBase&);
+
+#if FOLLY_HAS_COROUTINES
+  folly::coro::Task<void> processServiceInterceptorsOnRequest();
+  friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
+      HandlerCallbackBase&);
+#endif // FOLLY_HAS_COROUTINES
 
 #if !FOLLY_HAS_COROUTINES
   [[noreturn]]

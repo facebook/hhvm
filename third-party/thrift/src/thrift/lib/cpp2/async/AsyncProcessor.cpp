@@ -949,5 +949,76 @@ void HandlerCallback<void>::doDone() {
   sendReply(std::move(queue));
 }
 
+bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest() const {
+  // The chain of objects can be null in unit tests when these objects are
+  // mocked.
+  if (reqCtx_ != nullptr) {
+    if (auto connCtx = reqCtx_->getConnectionContext()) {
+      if (auto workerCtx = connCtx->getWorkerContext()) {
+        if (auto server = workerCtx->getServerContext()) {
+          return server->getServiceInterceptors().size() > 0;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void>
+HandlerCallbackBase::processServiceInterceptorsOnRequest() {
+  DCHECK(shouldProcessServiceInterceptorsOnRequest());
+  const apache::thrift::server::ServerConfigs* server =
+      reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
+  DCHECK(server);
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+      serviceInterceptors = server->getServiceInterceptors();
+  std::vector<std::exception_ptr> exceptions;
+
+  for (auto& interceptor : serviceInterceptors) {
+    auto connectionInfo =
+        ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
+    auto requestInfo = ServiceInterceptorBase::RequestInfo{reqCtx_};
+    try {
+      co_await interceptor->internal_onRequest(
+          std::move(connectionInfo), std::move(requestInfo));
+    } catch (...) {
+      exceptions.emplace_back(std::current_exception());
+    }
+  }
+  if (!exceptions.empty()) {
+    std::string message = fmt::format(
+        "ServiceInterceptor::onRequest threw exceptions:\n[0] {}\n",
+        folly::exceptionStr(exceptions[0]));
+    for (std::size_t i = 1; i < exceptions.size(); ++i) {
+      message +=
+          fmt::format("[{}] {}\n", i, folly::exceptionStr(exceptions[i]));
+    }
+    co_yield folly::coro::co_error(TApplicationException(message));
+  }
+}
+#endif // FOLLY_HAS_COROUTINES
+
+namespace detail {
+
+bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase& callback) {
+  return callback.shouldProcessServiceInterceptorsOnRequest();
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> processServiceInterceptorsOnRequest(
+    HandlerCallbackBase& callback) {
+  try {
+    co_await callback.processServiceInterceptorsOnRequest();
+  } catch (...) {
+    // We must call doException() instead of exception() to avoid further
+    // ServiceInterceptor invocations.
+    callback.doException(std::current_exception());
+    throw;
+  }
+}
+#endif // FOLLY_HAS_COROUTINES
+} // namespace detail
+
 } // namespace thrift
 } // namespace apache

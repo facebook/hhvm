@@ -28,16 +28,23 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::test::fixtures::basic::FB303Service_simple_rpc_pargs args;
-  ::std::int32_t uarg_int_parameter{0};
-  args.get<0>().value = &uarg_int_parameter;
+  struct ArgsState {
+    ::std::int32_t uarg_int_parameter{0};
+    ::test::fixtures::basic::FB303Service_simple_rpc_pargs pargs() {
+      ::test::fixtures::basic::FB303Service_simple_rpc_pargs args;
+      args.get<0>().value = &uarg_int_parameter;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "FB303Service.simple_rpc",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "simple_rpc", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "simple_rpc", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -51,7 +58,7 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
@@ -63,7 +70,26 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_simple_rpc(std::move(callback), args.get<0>().ref());
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_simple_rpc(std::move(cb), args.uarg_int_parameter);
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -30,16 +30,23 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::DbMixedStackArguments_getDataByKey0_pargs args;
-  auto uarg_key = std::make_unique<::std::string>();
-  args.get<0>().value = uarg_key.get();
+  struct ArgsState {
+    std::unique_ptr<::std::string> uarg_key = std::make_unique<::std::string>();
+    ::cpp2::DbMixedStackArguments_getDataByKey0_pargs pargs() {
+      ::cpp2::DbMixedStackArguments_getDataByKey0_pargs args;
+      args.get<0>().value = uarg_key.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "DbMixedStackArguments.getDataByKey0",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "getDataByKey0", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "getDataByKey0", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -53,7 +60,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_getDataByKey0<ProtocolIn_,ProtocolOut_>
@@ -65,7 +72,26 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_getDataByKey0(std::move(callback), std::move(uarg_key));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_getDataByKey0(std::move(cb), std::move(args.uarg_key));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -104,16 +130,23 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::DbMixedStackArguments_getDataByKey1_pargs args;
-  ::std::string uarg_key;
-  args.get<0>().value = &uarg_key;
+  struct ArgsState {
+    ::std::string uarg_key;
+    ::cpp2::DbMixedStackArguments_getDataByKey1_pargs pargs() {
+      ::cpp2::DbMixedStackArguments_getDataByKey1_pargs args;
+      args.get<0>().value = &uarg_key;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "DbMixedStackArguments.getDataByKey1",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "getDataByKey1", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "getDataByKey1", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -127,7 +160,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::string>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::std::string>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_getDataByKey1<ProtocolIn_,ProtocolOut_>
@@ -139,7 +172,26 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_getDataByKey1(std::move(callback), args.get<0>().ref());
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_getDataByKey1(std::move(cb), args.uarg_key);
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

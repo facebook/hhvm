@@ -30,14 +30,21 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::facebook::thrift::test::AdapterService_count_pargs args;
+  struct ArgsState {
+    ::facebook::thrift::test::AdapterService_count_pargs pargs() {
+      ::facebook::thrift::test::AdapterService_count_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "AdapterService.count",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "count", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "count", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -51,7 +58,7 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_count<ProtocolIn_,ProtocolOut_>
@@ -63,7 +70,26 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_count(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_count(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -102,16 +128,23 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::facebook::thrift::test::AdapterService_adaptedTypes_pargs args;
-  auto uarg_arg = std::make_unique<::facebook::thrift::test::HeapAllocated>();
-  args.get<0>().value = uarg_arg.get();
+  struct ArgsState {
+    std::unique_ptr<::facebook::thrift::test::HeapAllocated> uarg_arg = std::make_unique<::facebook::thrift::test::HeapAllocated>();
+    ::facebook::thrift::test::AdapterService_adaptedTypes_pargs pargs() {
+      ::facebook::thrift::test::AdapterService_adaptedTypes_pargs args;
+      args.get<0>().value = uarg_arg.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "AdapterService.adaptedTypes",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "adaptedTypes", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "adaptedTypes", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -125,7 +158,7 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_adaptedTypes<ProtocolIn_,ProtocolOut_>
@@ -137,7 +170,26 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_adaptedTypes(std::move(callback), std::move(uarg_arg));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_adaptedTypes(std::move(cb), std::move(args.uarg_arg));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

@@ -37,14 +37,21 @@ void MyServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_foo_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_foo_pargs pargs() {
+      ::cpp2::MyService_foo_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "MyService.foo",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -58,7 +65,7 @@ void MyServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_foo<ProtocolIn_,ProtocolOut_>
@@ -70,7 +77,26 @@ void MyServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_foo(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_foo(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -108,16 +134,23 @@ void MyServiceAsyncProcessor::executeRequest_interact(apache::thrift::ServerRequ
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_interact_pargs args;
-  ::std::int32_t uarg_arg{0};
-  args.get<0>().value = &uarg_arg;
+  struct ArgsState {
+    ::std::int32_t uarg_arg{0};
+    ::cpp2::MyService_interact_pargs pargs() {
+      ::cpp2::MyService_interact_pargs args;
+      args.get<0>().value = &uarg_arg;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "MyService.interact",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "interact", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -131,7 +164,7 @@ void MyServiceAsyncProcessor::executeRequest_interact(apache::thrift::ServerRequ
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_interact<ProtocolIn_,ProtocolOut_>
@@ -143,7 +176,26 @@ void MyServiceAsyncProcessor::executeRequest_interact(apache::thrift::ServerRequ
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface_->async_tm_interact(std::move(callback), args.get<0>().ref());
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_interact(std::move(cb), args.uarg_arg);
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -181,14 +233,21 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(apache::thrift::Server
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_interactFast_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_interactFast_pargs pargs() {
+      ::cpp2::MyService_interactFast_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "MyService.interactFast",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "interactFast", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "interactFast", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -202,7 +261,7 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(apache::thrift::Server
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_interactFast<ProtocolIn_,ProtocolOut_>
@@ -214,7 +273,26 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(apache::thrift::Server
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface_->async_tm_interactFast(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_interactFast(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -254,14 +332,21 @@ void MyServiceAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_serialize_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_serialize_pargs pargs() {
+      ::cpp2::MyService_serialize_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "MyService.serialize",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "serialize", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "serialize", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -275,7 +360,7 @@ void MyServiceAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_serialize<ProtocolIn_,ProtocolOut_>
@@ -287,7 +372,26 @@ void MyServiceAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface_->async_tm_serialize(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_serialize(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -347,7 +451,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteraction_frobnicate_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteraction_frobnicate_pargs pargs() {
+      ::cpp2::MyService_MyInteraction_frobnicate_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -355,7 +465,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteraction.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteraction.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -369,7 +480,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
@@ -381,7 +492,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_tm_frobnicate(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_frobnicate(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -438,7 +568,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteraction_ping_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteraction_ping_pargs pargs() {
+      ::cpp2::MyService_MyInteraction_ping_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -446,7 +582,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteraction.ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteraction.ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     LOG(ERROR) << "exception in function MyInteraction.ping: " << folly::exceptionStr(std::current_exception());
@@ -465,7 +602,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_tm_ping(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_ping(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -484,7 +640,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteraction_truthify_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteraction_truthify_pargs pargs() {
+      ::cpp2::MyService_MyInteraction_truthify_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -492,7 +654,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteraction.truthify", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteraction.truthify", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -506,7 +669,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
@@ -518,7 +681,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_tm_truthify(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_truthify(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -561,7 +743,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteraction_encode_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteraction_encode_pargs pargs() {
+      ::cpp2::MyService_MyInteraction_encode_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -569,7 +757,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteraction.encode", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteraction.encode", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -583,7 +772,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
@@ -595,7 +784,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_tm_encode(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_encode(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -661,7 +869,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteractionFast_frobnicate_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteractionFast_frobnicate_pargs pargs() {
+      ::cpp2::MyService_MyInteractionFast_frobnicate_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -669,7 +883,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionFastIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteractionFast.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteractionFast.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -683,7 +898,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteractionFast_frobnicate<ProtocolIn_,ProtocolOut_>
@@ -695,7 +910,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_eb_frobnicate(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_eb_frobnicate(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -733,7 +967,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteractionFast_ping_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteractionFast_ping_pargs pargs() {
+      ::cpp2::MyService_MyInteractionFast_ping_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -741,7 +981,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionFastIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteractionFast.ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteractionFast.ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     LOG(ERROR) << "exception in function MyInteractionFast.ping: " << folly::exceptionStr(std::current_exception());
@@ -760,7 +1001,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_eb_ping(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_eb_ping(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -777,7 +1037,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteractionFast_truthify_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteractionFast_truthify_pargs pargs() {
+      ::cpp2::MyService_MyInteractionFast_truthify_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -785,7 +1051,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionFastIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteractionFast.truthify", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteractionFast.truthify", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -799,7 +1066,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteractionFast_truthify<ProtocolIn_,ProtocolOut_>
@@ -811,7 +1078,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_eb_truthify(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_eb_truthify(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -852,7 +1138,13 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_MyInteractionFast_encode_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_MyInteractionFast_encode_pargs pargs() {
+      ::cpp2::MyService_MyInteractionFast_encode_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -860,7 +1152,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionFastIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "MyInteractionFast.encode", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "MyInteractionFast.encode", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -874,7 +1167,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_MyInteractionFast_encode<ProtocolIn_,ProtocolOut_>
@@ -886,7 +1179,26 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_eb_encode(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_eb_encode(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -942,7 +1254,13 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::MyService_SerialInteraction_frobnicate_pargs args;
+  struct ArgsState {
+    ::cpp2::MyService_SerialInteraction_frobnicate_pargs pargs() {
+      ::cpp2::MyService_SerialInteraction_frobnicate_pargs args;
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
@@ -950,7 +1268,8 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
     serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::SerialInteractionIf&>(*tile);
   try {
-    deserializeRequest<ProtocolIn_>(args, "SerialInteraction.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "SerialInteraction.frobnicate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -964,7 +1283,7 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_SerialInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
@@ -976,7 +1295,26 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     , std::move(tile));
-  iface.async_tm_frobnicate(std::move(callback));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = &iface, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_frobnicate(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

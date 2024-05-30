@@ -36,16 +36,23 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::NestedContainers_mapList_pargs args;
-  auto uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>>();
-  args.get<0>().value = uarg_foo.get();
+  struct ArgsState {
+    std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>>();
+    ::cpp2::NestedContainers_mapList_pargs pargs() {
+      ::cpp2::NestedContainers_mapList_pargs args;
+      args.get<0>().value = uarg_foo.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "NestedContainers.mapList",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "mapList", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "mapList", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -59,7 +66,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_mapList<ProtocolIn_,ProtocolOut_>
@@ -71,7 +78,26 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_mapList(std::move(callback), std::move(uarg_foo));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_mapList(std::move(cb), std::move(args.uarg_foo));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -108,16 +134,23 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::NestedContainers_mapSet_pargs args;
-  auto uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::set<::std::int32_t>>>();
-  args.get<0>().value = uarg_foo.get();
+  struct ArgsState {
+    std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::set<::std::int32_t>>>();
+    ::cpp2::NestedContainers_mapSet_pargs pargs() {
+      ::cpp2::NestedContainers_mapSet_pargs args;
+      args.get<0>().value = uarg_foo.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "NestedContainers.mapSet",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "mapSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "mapSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -131,7 +164,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_mapSet<ProtocolIn_,ProtocolOut_>
@@ -143,7 +176,26 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_mapSet(std::move(callback), std::move(uarg_foo));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_mapSet(std::move(cb), std::move(args.uarg_foo));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -180,16 +232,23 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::NestedContainers_listMap_pargs args;
-  auto uarg_foo = std::make_unique<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>();
-  args.get<0>().value = uarg_foo.get();
+  struct ArgsState {
+    std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> uarg_foo = std::make_unique<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>();
+    ::cpp2::NestedContainers_listMap_pargs pargs() {
+      ::cpp2::NestedContainers_listMap_pargs args;
+      args.get<0>().value = uarg_foo.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "NestedContainers.listMap",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "listMap", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "listMap", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -203,7 +262,7 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_listMap<ProtocolIn_,ProtocolOut_>
@@ -215,7 +274,26 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_listMap(std::move(callback), std::move(uarg_foo));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_listMap(std::move(cb), std::move(args.uarg_foo));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -252,16 +330,23 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::NestedContainers_listSet_pargs args;
-  auto uarg_foo = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
-  args.get<0>().value = uarg_foo.get();
+  struct ArgsState {
+    std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> uarg_foo = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
+    ::cpp2::NestedContainers_listSet_pargs pargs() {
+      ::cpp2::NestedContainers_listSet_pargs args;
+      args.get<0>().value = uarg_foo.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "NestedContainers.listSet",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "listSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "listSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -275,7 +360,7 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_listSet<ProtocolIn_,ProtocolOut_>
@@ -287,7 +372,26 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_listSet(std::move(callback), std::move(uarg_foo));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_listSet(std::move(cb), std::move(args.uarg_foo));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -324,16 +428,23 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::cpp2::NestedContainers_turtles_pargs args;
-  auto uarg_foo = std::make_unique<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>>();
-  args.get<0>().value = uarg_foo.get();
+  struct ArgsState {
+    std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> uarg_foo = std::make_unique<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>>();
+    ::cpp2::NestedContainers_turtles_pargs pargs() {
+      ::cpp2::NestedContainers_turtles_pargs args;
+      args.get<0>().value = uarg_foo.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "NestedContainers.turtles",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "turtles", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "turtles", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -347,7 +458,7 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_turtles<ProtocolIn_,ProtocolOut_>
@@ -359,7 +470,26 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_turtles(std::move(callback), std::move(uarg_foo));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_turtles(std::move(cb), std::move(args.uarg_foo));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

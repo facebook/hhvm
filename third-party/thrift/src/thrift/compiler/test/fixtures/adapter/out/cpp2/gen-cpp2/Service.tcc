@@ -28,20 +28,27 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  ::facebook::thrift::test::Service_func_pargs args;
-  auto uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
-  args.get<0>().value = uarg_arg1.get();
-  auto uarg_arg2 = std::make_unique<::std::string>();
-  args.get<1>().value = uarg_arg2.get();
-  auto uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
-  args.get<2>().value = uarg_arg3.get();
+  struct ArgsState {
+    std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
+    std::unique_ptr<::std::string> uarg_arg2 = std::make_unique<::std::string>();
+    std::unique_ptr<::facebook::thrift::test::Foo> uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
+    ::facebook::thrift::test::Service_func_pargs pargs() {
+      ::facebook::thrift::test::Service_func_pargs args;
+      args.get<0>().value = uarg_arg1.get();
+      args.get<1>().value = uarg_arg2.get();
+      args.get<2>().value = uarg_arg3.get();
+      return args;
+    }
+  } args;
+
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
     "Service.func",
     serverRequest.requestContext());
   try {
-    deserializeRequest<ProtocolIn_>(args, "func", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(pargs, "func", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -55,7 +62,7 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>>(
+  auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_func<ProtocolIn_,ProtocolOut_>
@@ -67,7 +74,26 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
-  iface_->async_tm_func(std::move(callback), std::move(uarg_arg1), std::move(uarg_arg2), std::move(uarg_arg3));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+      (void)args;
+      ifacePtr->async_tm_func(std::move(cb), std::move(args.uarg_arg1), std::move(args.uarg_arg2), std::move(args.uarg_arg3));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
+      executeHandler(std::move(callback));
+    }(std::move(callback), makeExecuteHandler())
+              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+              .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback));
+  }
+#else
+  makeExecuteHandler()(std::move(callback));
+#endif // FOLLY_HAS_COROUTINES
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

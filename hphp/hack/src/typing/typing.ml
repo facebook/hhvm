@@ -6927,6 +6927,11 @@ end = struct
               MakeType.locl_like r2 ft.ft_ret
             | _ -> ft.ft_ret
           in
+          let ret =
+            Prov.(
+              update ret ~env ~f:(fun from ->
+                  flow ~from ~into:(Typing_reason.Rwitness expr_pos)))
+          in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
         | (_, Tnewtype (name, [ty], _))
           when String.equal name SN.Classes.cSupportDyn ->

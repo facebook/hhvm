@@ -299,6 +299,9 @@ struct BasicIntrusiveSharedPtrControlBlock {
         old >= 1, "call to releaseRef() when ref count is already 0");
     return old - 1;
   }
+  RefCount useCount() const noexcept {
+    return refCount_.load(std::memory_order_relaxed);
+  }
 
  private:
   std::atomic<RefCount> refCount_{0};

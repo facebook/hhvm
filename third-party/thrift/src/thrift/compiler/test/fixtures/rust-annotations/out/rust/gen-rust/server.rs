@@ -18,10 +18,10 @@ pub mod errors {
     pub use ::::services::service1::*;
 
     #[doc(inline)]
-    pub use ::::services::s2;
+    pub use ::::services::s2_proxy;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::s2::*;
+    pub use ::::services::s2_proxy::*;
 
     #[doc(inline)]
     pub use ::::services::all_methods;
@@ -407,8 +407,8 @@ where
 pub trait S2: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn s(
         &self,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s2::RExn> {
-        ::std::result::Result::Err(crate::services::s2::RExn::ApplicationException(
+    ) -> ::std::result::Result<crate::types::T6, crate::services::s2_proxy::RExn> {
+        ::std::result::Result::Err(crate::services::s2_proxy::RExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
                 "S2",
                 "r",
@@ -424,7 +424,7 @@ where
 {
     async fn s(
         &self,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s2::RExn> {
+    ) -> ::std::result::Result<crate::types::T6, crate::services::s2_proxy::RExn> {
         (**self).s(
         ).await
     }
@@ -437,7 +437,7 @@ where
 {
     async fn s(
         &self,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s2::RExn> {
+    ) -> ::std::result::Result<crate::types::T6, crate::services::s2_proxy::RExn> {
         (**self).s(
         ).await
     }
@@ -553,11 +553,11 @@ where
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("S2.r", exn);
                 ::tracing::error!(method = "S2.r", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::s2::RExn::ApplicationException(aexn))
+                ::std::result::Result::Err(crate::services::s2_proxy::RExn::ApplicationException(aexn))
             }
         };
 
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::s2::RExn>(
+        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::s2_proxy::RExn>(
             "r",
             METHOD_NAME.as_cstr(),
             _seqid,

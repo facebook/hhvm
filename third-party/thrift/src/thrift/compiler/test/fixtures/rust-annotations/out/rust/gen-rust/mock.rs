@@ -138,7 +138,7 @@ impl<'mock> ::::Service1 for Service1<'mock> {
 }
 
 pub struct S2<'mock> {
-    pub s: r#impl::s2::s<'mock>,
+    pub s: r#impl::s2_proxy::s<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
@@ -146,7 +146,7 @@ impl crate::DynClient for dyn ::::S2 {
     type Mock<'mock> = S2<'mock>;
     fn mock<'mock>() -> Self::Mock<'mock> {
         S2 {
-            s: r#impl::s2::s::unimplemented(),
+            s: r#impl::s2_proxy::s::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
     }
@@ -155,7 +155,7 @@ impl crate::DynClient for dyn ::::S2 {
 impl<'mock> ::::S2 for S2<'mock> {
     fn s(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         let mut closure = self.s.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
@@ -312,13 +312,13 @@ pub mod r#impl {
             }
         }
     }
-    pub mod s2 {
+    pub mod s2_proxy {
 
         pub struct s<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
                 dyn ::std::ops::FnMut() -> ::std::result::Result<
                     crate::types::T6,
-                    ::::errors::s2::RError,
+                    ::::errors::s2_proxy::RError,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
         }
@@ -344,14 +344,14 @@ pub mod r#impl {
                 *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
             }
 
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<crate::types::T6, ::::errors::s2::RError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<crate::types::T6, ::::errors::s2_proxy::RError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move || mock());
             }
 
             pub fn throw<E>(&self, exception: E)
             where
-                E: ::std::convert::Into<::::errors::s2::RError>,
+                E: ::std::convert::Into<::::errors::s2_proxy::RError>,
                 E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
             {
                 let mut closure = self.closure.lock().unwrap();

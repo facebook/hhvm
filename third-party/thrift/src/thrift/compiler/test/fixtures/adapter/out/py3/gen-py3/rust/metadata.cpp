@@ -23,6 +23,7 @@ namespace rust {
   ::apache::thrift::detail::md::StructMetadata<Ord>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NewType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Type>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Mod>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Derive>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ServiceExn>::gen(metadata);

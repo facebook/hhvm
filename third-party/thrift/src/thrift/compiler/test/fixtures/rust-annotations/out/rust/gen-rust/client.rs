@@ -339,7 +339,7 @@ where
     fn _r_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
@@ -368,12 +368,12 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::s2::RReader, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::s2_proxy::RReader, S>(de).await?;
 
             let res = match res {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err(crate::errors::s2::RError::ApplicationException(aexn))
+                    ::std::result::Result::Err(crate::errors::s2_proxy::RError::ApplicationException(aexn))
                 }
             };
             res
@@ -386,7 +386,7 @@ where
 pub trait S2: ::std::marker::Send {
     fn s(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
 }
 
 pub trait S2Ext<T>: S2
@@ -396,7 +396,7 @@ where
     fn s_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
 
     fn transport(&self) -> &T;
 }
@@ -426,7 +426,7 @@ where
 {
     fn s(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         let rpc_options = T::RpcOptions::default();
         self._r_impl(
             rpc_options,
@@ -446,7 +446,7 @@ where
     fn s_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         self._r_impl(
             rpc_options,
         )
@@ -465,7 +465,7 @@ where
 {
     fn s(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         self.as_ref().s(
         )
     }
@@ -482,7 +482,7 @@ where
     fn s_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
         <Self as ::std::convert::AsRef<dyn S2Ext<T>>>::as_ref(self).s_with_rpc_opts(
             rpc_options,
         )

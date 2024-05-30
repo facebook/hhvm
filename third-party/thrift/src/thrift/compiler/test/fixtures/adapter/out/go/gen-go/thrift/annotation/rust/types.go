@@ -785,6 +785,134 @@ func (x *Type) String() string {
     return sb.String()
 }
 
+type Mod struct {
+    Name string `thrift:"name,1" json:"name" db:"name"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*Mod)(nil)
+
+func NewMod() *Mod {
+    return (&Mod{}).
+        SetNameNonCompat("")
+}
+
+func (x *Mod) GetName() string {
+    return x.Name
+}
+
+func (x *Mod) SetNameNonCompat(value string) *Mod {
+    x.Name = value
+    return x
+}
+
+func (x *Mod) SetName(value string) *Mod {
+    x.Name = value
+    return x
+}
+
+func (x *Mod) writeField1(p thrift.Format) error {  // Name
+    if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Name
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Mod) readField1(p thrift.Format) error {  // Name
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.Name = result
+    return nil
+}
+
+func (x *Mod) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.Name)
+}
+
+
+
+func (x *Mod) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("Mod"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Mod) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Mod) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Mod({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -1219,6 +1347,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/rust/Ord", func() any { return NewOrd() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/NewType", func() any { return NewNewType_() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Type", func() any { return NewType() })
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Mod", func() any { return NewMod() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Derive", func() any { return NewDerive() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/ServiceExn", func() any { return NewServiceExn() })

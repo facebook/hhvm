@@ -253,6 +253,31 @@
         "is_union" : false,
         "lineno" : 110
       },
+      "Mod" : {
+        "name" : "Mod",
+        "structured_annotations": {
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 273,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 271
+      },
       "Adapter" : {
         "name" : "Adapter",
         "structured_annotations": {
@@ -285,14 +310,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 312,
+            "lineno" : 321,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 267
+        "lineno" : 276
       },
       "Derive" : {
         "name" : "Derive",
@@ -318,7 +343,7 @@
           "derives" : {
             "name" : "derives",
             "key" : 1,
-            "lineno" : 338,
+            "lineno" : 347,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -328,7 +353,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 315
+        "lineno" : 324
       },
       "ServiceExn" : {
         "name" : "ServiceExn",
@@ -354,14 +379,14 @@
           "anyhow_to_application_exn" : {
             "name" : "anyhow_to_application_exn",
             "key" : 1,
-            "lineno" : 392,
+            "lineno" : 401,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 341
+        "lineno" : 350
       }
       },
   "source_path" : "thrift/annotation/rust",

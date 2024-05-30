@@ -98,7 +98,7 @@ pub mod service1 {
 }
 
 /// Service definitions for `S2`.
-pub mod s2 {
+pub mod s2_proxy {
     #[derive(Clone, Debug)]
     pub enum RExn {
 

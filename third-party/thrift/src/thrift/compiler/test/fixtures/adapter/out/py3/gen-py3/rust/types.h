@@ -89,6 +89,16 @@ inline void reset_field<::facebook::thrift::annotation::rust::Type>(
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::rust::Mod>(
+    ::facebook::thrift::annotation::rust::Mod& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.name_ref().copy_from(default_inst<::facebook::thrift::annotation::rust::Mod>().name_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::annotation::rust::Adapter>(
     ::facebook::thrift::annotation::rust::Adapter& obj, uint16_t index) {
   switch (index) {
@@ -201,6 +211,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::rust::Type>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::rust::Mod>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

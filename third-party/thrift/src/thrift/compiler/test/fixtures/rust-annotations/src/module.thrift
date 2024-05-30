@@ -97,6 +97,7 @@ struct T9 {
 
 // --
 
+@rust.Mod{name = "s2_proxy"}
 service S2 {
   @rust.Name{name = "s"}
   T6 r();

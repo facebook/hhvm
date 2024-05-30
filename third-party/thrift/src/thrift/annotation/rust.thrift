@@ -264,6 +264,15 @@ struct Type {
   1: string name;
 }
 
+// # `rust.Mod`
+//
+// Use this annotation to explicitly set a non-default name for the module that
+// contains the services exceptions and error types.
+@scope.Service
+struct Mod {
+  1: string name;
+}
+
 @scope.Field
 @scope.Typedef
 @scope.Struct

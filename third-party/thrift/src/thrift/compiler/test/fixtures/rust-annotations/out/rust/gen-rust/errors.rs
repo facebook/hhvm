@@ -69,7 +69,7 @@ pub mod service1 {
 pub use self::service1::*;
 
 /// Error definitions for `S2`.
-pub mod s2 {
+pub mod s2_proxy {
 
     pub type RError = ::fbthrift::NonthrowingFunctionError;
 
@@ -131,7 +131,7 @@ pub mod s2 {
 
 #[doc(inline)]
 #[allow(ambiguous_glob_reexports)]
-pub use self::s2::*;
+pub use self::s2_proxy::*;
 
 /// Error definitions for `AllMethods`.
 pub mod all_methods {

@@ -85,6 +85,18 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("rust.Mod").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("name").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("rust.Adapter").
     SetIsUnion(false).
     SetFields(

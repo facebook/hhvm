@@ -50,10 +50,12 @@ CO_TEST(ServiceInterceptorTest, BasicOnRequest) {
 
     folly::coro::Task<void> internal_onResponse(
         ConnectionInfo, ResponseInfo) override {
+      onResponseCount++;
       co_return;
     }
 
     int onRequestCount = 0;
+    int onResponseCount = 0;
   };
   class TestModule : public apache::thrift::ServerModule {
    public:
@@ -81,4 +83,5 @@ CO_TEST(ServiceInterceptorTest, BasicOnRequest) {
       runner.newClient<apache::thrift::Client<test::HandlerGeneric>>();
   co_await client->co_get_string();
   EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }

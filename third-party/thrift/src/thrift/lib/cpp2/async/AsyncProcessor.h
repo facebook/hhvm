@@ -1235,6 +1235,15 @@ class HandlerCallbackBase {
   using Ptr =
       util::IntrusiveSharedPtr<HandlerCallbackBase, IntrusiveSharedPtrAccess>;
 
+ private:
+  Ptr sharedFromThis() {
+    // Constructing from raw pointer is safe in this case because
+    // `this` is guaranteed to be alive while the current
+    // function is executing.
+    return Ptr(typename Ptr::UnsafelyFromRawPointer(), this);
+  }
+
+ public:
   HandlerCallbackBase() : eb_(nullptr), reqCtx_(nullptr), protoSeqId_(0) {}
 
   HandlerCallbackBase(
@@ -1345,6 +1354,20 @@ class HandlerCallbackBase {
 
   virtual ResponsePayload transform(ResponsePayload&& response);
 
+#if FOLLY_HAS_COROUTINES
+  template <class T>
+  void startOnExecutor(
+      folly::coro::Task<T>&& task, folly::Executor::KeepAlive<> executor) {
+    if (executor.get() == eb_ && eb_->isInEventBaseThread()) {
+      // Avoid rescheduling in the common case where result() is called inline
+      // on the EB thread where request execution began
+      std::move(task).scheduleOn(std::move(executor)).startInlineUnsafe();
+    } else {
+      std::move(task).scheduleOn(std::move(executor)).start();
+    }
+  }
+#endif // FOLLY_HAS_COROUTINES
+
   // Can be called from IO or TM thread
   virtual void doException(std::exception_ptr ex) {
     doExceptionWrapped(folly::exception_wrapper(ex));
@@ -1368,8 +1391,12 @@ class HandlerCallbackBase {
   friend bool detail::shouldProcessServiceInterceptorsOnRequest(
       HandlerCallbackBase&);
 
+  bool shouldProcessServiceInterceptorsOnResponse() const;
+
 #if FOLLY_HAS_COROUTINES
   folly::coro::Task<void> processServiceInterceptorsOnRequest();
+  folly::coro::Task<void> processServiceInterceptorsOnResponse();
+
   friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
       HandlerCallbackBase&);
 #endif // FOLLY_HAS_COROUTINES
@@ -1418,6 +1445,14 @@ class HandlerCallback : public HandlerCallbackBase {
   using Ptr = HandlerCallbackPtr<T>;
   using ResultType = std::decay_t<typename Helper::InputType>;
 
+ private:
+  Ptr sharedFromThis() {
+    // Constructing from raw pointer is safe in this case because
+    // `this` is guaranteed to be alive while the current
+    // function is executing.
+    return Ptr(typename Ptr::UnsafelyFromRawPointer(), this);
+  }
+
  public:
   HandlerCallback() : cp_(nullptr) {}
 
@@ -1446,7 +1481,34 @@ class HandlerCallback : public HandlerCallbackBase {
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
-  void result(InnerType r) { doResult(std::forward<InputType>(r)); }
+  void result(InnerType r) {
+#if FOLLY_HAS_COROUTINES
+    if (!shouldProcessServiceInterceptorsOnResponse()) {
+      // Some service code (especially unit tests) assume that doResult() is
+      // called synchronously within a result() call. This check exists simply
+      // for backwards compatibility with those services. As an added bonus, we
+      // get to avoid allocating a coroutine frame + Future core in the case
+      // where they will be unused.
+      doResult(std::forward<InputType>(r));
+    } else {
+      auto task = [](Ptr callback, auto result) -> folly::coro::Task<void> {
+        folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+            callback->processServiceInterceptorsOnResponse());
+        if (onResponseResult.hasException()) {
+          callback->doException(
+              onResponseResult.exception().to_exception_ptr());
+        } else {
+          callback->doResult(std::move(result));
+        }
+      }(sharedFromThis(), std::decay_t<InputType>(std::move(r)));
+      startOnExecutor(
+          std::move(task),
+          executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+    }
+#else
+    doResult(std::forward<InputType>(r));
+#endif // FOLLY_HAS_COROUTINES
+  }
   [[deprecated("Pass the inner value directly to result()")]] void result(
       std::unique_ptr<ResultType> r);
 
@@ -1466,6 +1528,15 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   using Ptr = HandlerCallbackPtr<void>;
   using ResultType = void;
 
+ private:
+  Ptr sharedFromThis() {
+    // Constructing from raw pointer is safe in this case because
+    // `this` is guaranteed to be alive while the current
+    // function is executing.
+    return Ptr(typename Ptr::UnsafelyFromRawPointer(), this);
+  }
+
+ public:
   HandlerCallback() : cp_(nullptr) {}
 
   HandlerCallback(
@@ -1493,7 +1564,34 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
-  void done() { doDone(); }
+  void done() {
+#if FOLLY_HAS_COROUTINES
+    if (!shouldProcessServiceInterceptorsOnResponse()) {
+      // Some service code (especially unit tests) assume that doResult() is
+      // called synchronously within a result() call. This check exists simply
+      // for backwards compatibility with those services. As an added bonus, we
+      // get to avoid allocating a coroutine frame + Future core in the case
+      // where they will be unused.
+      doDone();
+    } else {
+      auto task = [](Ptr callback) -> folly::coro::Task<void> {
+        folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+            callback->processServiceInterceptorsOnResponse());
+        if (onResponseResult.hasException()) {
+          callback->doException(
+              onResponseResult.exception().to_exception_ptr());
+        } else {
+          callback->doDone();
+        }
+      }(sharedFromThis());
+      startOnExecutor(
+          std::move(task),
+          executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+    }
+#else
+    doDone();
+#endif // FOLLY_HAS_COROUTINES
+  }
 
   void complete(folly::Try<folly::Unit>&& r);
 
@@ -1851,7 +1949,7 @@ HandlerCallback<T>::HandlerCallback(
 
 template <typename T>
 void HandlerCallback<T>::result(std::unique_ptr<ResultType> r) {
-  r ? doResult(std::move(*r))
+  r ? result(std::move(*r))
     : exception(TApplicationException(
           TApplicationException::MISSING_RESULT,
           "nullptr yielded from handler"));

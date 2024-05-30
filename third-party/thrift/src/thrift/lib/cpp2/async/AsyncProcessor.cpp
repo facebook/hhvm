@@ -653,9 +653,11 @@ HandlerCallbackBase::~HandlerCallbackBase() {
   // req must be deleted in the eb
   if (req_) {
     if (req_->isActive() && ewp_) {
-      exception(TApplicationException(
+      // We must call doException() here instead of exception() because the
+      // latter may invoke ServiceInterceptor::onResponse.
+      doException(std::make_exception_ptr(TApplicationException(
           TApplicationException::INTERNAL_ERROR,
-          "apache::thrift::HandlerCallback not completed"));
+          "apache::thrift::HandlerCallback not completed")));
       return;
     }
     if (getEventBase()) {
@@ -964,6 +966,20 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest() const {
   return false;
 }
 
+bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse() const {
+  if (!shouldProcessServiceInterceptorsOnRequest()) {
+    return false;
+  }
+  if (intrusivePtrControlBlock_.useCount() == 0) {
+    // unsafeRelease() was called on IntrusiveSharedPtr(this) that was passed to
+    // the user-defined handler implementation. This means that we cannot
+    // guarantee that the request outlives ServiceInterceptorBase::onResponse().
+    // So the only safe option is to avoid calling it.
+    return false;
+  }
+  return true;
+}
+
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnRequest() {
@@ -989,6 +1005,40 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest() {
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onRequest threw exceptions:\n[0] {}\n",
+        folly::exceptionStr(exceptions[0]));
+    for (std::size_t i = 1; i < exceptions.size(); ++i) {
+      message +=
+          fmt::format("[{}] {}\n", i, folly::exceptionStr(exceptions[i]));
+    }
+    co_yield folly::coro::co_error(TApplicationException(message));
+  }
+}
+
+folly::coro::Task<void>
+HandlerCallbackBase::processServiceInterceptorsOnResponse() {
+  DCHECK(shouldProcessServiceInterceptorsOnResponse());
+  const apache::thrift::server::ServerConfigs* server =
+      reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
+  DCHECK(server);
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+      serviceInterceptors = server->getServiceInterceptors();
+  std::vector<std::exception_ptr> exceptions;
+
+  for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
+    auto connectionInfo =
+        ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
+    auto responseInfo = ServiceInterceptorBase::ResponseInfo{reqCtx_};
+    try {
+      co_await serviceInterceptors[i]->internal_onResponse(
+          std::move(connectionInfo), std::move(responseInfo));
+    } catch (...) {
+      exceptions.emplace_back(std::current_exception());
+    }
+  }
+
+  if (!exceptions.empty()) {
+    std::string message = fmt::format(
+        "ServiceInterceptor::onResponse threw exceptions:\n[0] {}\n",
         folly::exceptionStr(exceptions[0]));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message +=

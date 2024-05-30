@@ -457,7 +457,7 @@ String DebuggerClient::FormatVariable(
       VariableSerializer::Type::DebuggerDump;
     VariableSerializer vs(t, 0, 2);
     value = vs.serialize(v, true);
-  } catch (const StringBufferLimitException& e) {
+  } catch (const StringBufferLimitException&) {
     value = "Serialization limit reached";
   } catch (...) {
     assertx(false);

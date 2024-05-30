@@ -6588,7 +6588,7 @@ end = struct
               let update_reason from =
                 Prov.(
                   flow
-                    ~from:(flow ~from ~into:(Typing_reason.Rwitness pos))
+                    ~from
                     ~into:
                       (prj_fn_arg
                          ~idx_sub:arg_idx
@@ -6629,7 +6629,7 @@ end = struct
               let update_reason from =
                 Prov.(
                   flow
-                    ~from:(flow ~from ~into:(Typing_reason.Rwitness pos))
+                    ~from
                     ~into:
                       (prj_fn_arg
                          ~idx_sub:arg_idx

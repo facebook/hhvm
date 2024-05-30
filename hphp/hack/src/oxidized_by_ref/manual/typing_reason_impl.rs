@@ -33,7 +33,8 @@ impl<'a> Reason<'a> {
         match self {
             T_::Rflow(r) => r.0.rev_pos(),
             T_::RprjSymm(r) => r.1.rev_pos(),
-            T_::RprjAsymm(r) => r.1.rev_pos(),
+            T_::RprjAsymmLeft(r) => r.1.rev_pos(),
+            T_::RprjAsymmRight(r) => r.1.rev_pos(),
             T_::Rrev(r) => r.pos(),
             _ => self.pos(),
         }
@@ -145,7 +146,8 @@ impl<'a> Reason<'a> {
             RdynamicCoercion(r) => r.pos(),
             Rflow(r) => r.0.pos(),
             RprjSymm(r) => r.1.pos(),
-            RprjAsymm(r) => r.1.pos(),
+            RprjAsymmLeft(r) => r.1.pos(),
+            RprjAsymmRight(r) => r.1.pos(),
             Rrev(r) => r.rev_pos(),
         }
     }
@@ -291,7 +293,8 @@ impl<'a> std::fmt::Debug for T_<'a> {
             Rflow(p) => f.debug_tuple("Rflow").field(p).finish(),
             Rrev(p) => f.debug_tuple("Rrev").field(p).finish(),
             RprjSymm(p) => f.debug_tuple("RprjSymm").field(p).finish(),
-            RprjAsymm(p) => f.debug_tuple("RprjAsymm").field(p).finish(),
+            RprjAsymmLeft(p) => f.debug_tuple("RprjAsymmLeft").field(p).finish(),
+            RprjAsymmRight(p) => f.debug_tuple("RprjAsymmRight").field(p).finish(),
         }
     }
 }

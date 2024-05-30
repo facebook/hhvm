@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e40b99d07b30fcc13fe68593eb7e4aa>>
+// @generated SignedSource<<05a12cf5db7d9a2befeafc5daf7bbe76>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -427,8 +427,10 @@ pub enum T_ {
     Rrev(Box<T_>),
     #[rust_to_ocaml(name = "Rprj_symm")]
     RprjSymm(PrjSymm, Box<T_>),
-    #[rust_to_ocaml(name = "Rprj_asymm")]
-    RprjAsymm(PrjAsymm, Box<T_>),
+    #[rust_to_ocaml(name = "Rprj_asymm_left")]
+    RprjAsymmLeft(PrjAsymm, Box<T_>),
+    #[rust_to_ocaml(name = "Rprj_asymm_right")]
+    RprjAsymmRight(PrjAsymm, Box<T_>),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[rust_to_ocaml(name = "Rpessimised_this")]
@@ -482,8 +484,10 @@ pub enum PathElem {
     PrjSymmLhs(PrjSymm),
     #[rust_to_ocaml(name = "Prj_symm_rhs")]
     PrjSymmRhs(PrjSymm),
-    #[rust_to_ocaml(name = "Prj_asymm")]
-    PrjAsymm(PrjAsymm),
+    #[rust_to_ocaml(name = "Prj_asymm_left")]
+    PrjAsymmLeft(PrjAsymm),
+    #[rust_to_ocaml(name = "Prj_asymm_right")]
+    PrjAsymmRight(PrjAsymm),
     Witness(T_),
 }
 

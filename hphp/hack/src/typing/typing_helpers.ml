@@ -183,7 +183,15 @@ module Prov = struct
 
   let prj_fn_ret r = Typing_reason.(Rprj_symm (Prj_symm_fn_ret, r))
 
-  let prj_union r = Typing_reason.(Rprj_asymm (Prj_asymm_union, r))
+  let prj_union_left r = Typing_reason.(Rprj_asymm_left (Prj_asymm_union, r))
+
+  let prj_union_right r = Typing_reason.(Rprj_asymm_right (Prj_asymm_union, r))
+
+  let prj_intersection_left r =
+    Typing_reason.(Rprj_asymm_left (Prj_asymm_inter, r))
+
+  let prj_intersection_right r =
+    Typing_reason.(Rprj_asymm_right (Prj_asymm_inter, r))
 
   let prj_class r ~nm ~idx ~var =
     Typing_reason.(Rprj_symm (Prj_symm_class (nm, idx, var), r))

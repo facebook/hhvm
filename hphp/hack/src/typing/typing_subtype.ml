@@ -997,7 +997,7 @@ end = struct
         ~this_ty
         ~mk_prop
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -1132,7 +1132,6 @@ end = struct
       lty_sub
       (r_super, lty_supers)
       env =
-    let r_sub = get_reason lty_sub in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
     let default_subtype_help env =
@@ -1355,16 +1354,16 @@ end = struct
         match tys with
         | [] -> invalid_env env
         | ty :: tys ->
-          let lty_sub =
+          let ty_super =
             Prov.(
-              update lty_sub ~env ~f:(fun from ->
-                  flow ~from ~into:(prj_union r_sub)))
+              update ty ~env ~f:(fun into ->
+                  flow ~from:(prj_union_right r_super) ~into))
           in
           simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super = ty }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env
           ||| try_disjuncts tys
       in
@@ -2954,7 +2953,7 @@ end = struct
         ~this_ty
         ~mk_prop
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -2963,12 +2962,17 @@ end = struct
           | Ttuple _ | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _
           | Taccess _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
           | Tclass _ | Tneg _ ) ),
-        (_, Tintersection tyl) ) ->
+        (r_super, Tintersection tyl) ) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
        * t <: t1 /\  ... /\ t <: tn
        *)
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
+          let ty_super =
+            Prov.(
+              update ty_super ~env ~f:(fun into ->
+                  flow ~from:(prj_intersection_right r_super) ~into))
+          in
           res
           &&& simplify
                 ~subtype_env
@@ -2987,7 +2991,7 @@ end = struct
         ~this_ty
         ~mk_prop
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -3135,7 +3139,8 @@ end = struct
           ~this_ty
           ~mk_prop
           ~update_reason:
-            Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+            Prov.(
+              update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -4551,7 +4556,7 @@ end = struct
           ~update_reason:
             Prov.(
               update ~f:(fun from ->
-                  flow ~from ~into:(prj_union @@ get_reason ty_sub)))
+                  flow ~from ~into:(prj_union_left @@ get_reason ty_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5145,7 +5150,8 @@ end = struct
           ~this_ty
           ~mk_prop:simplify
           ~update_reason:
-            Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+            Prov.(
+              update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5420,7 +5426,7 @@ end = struct
           ~update_reason:
             Prov.(
               update ~f:(fun from ->
-                  flow ~from ~into:(prj_union @@ get_reason lty_sub)))
+                  flow ~from ~into:(prj_union_left @@ get_reason lty_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5702,7 +5708,7 @@ end = struct
         ~this_ty
         ~mk_prop:simplify
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5915,7 +5921,7 @@ end = struct
         ~this_ty
         ~mk_prop:simplify
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6064,7 +6070,7 @@ end = struct
           ~update_reason:
             Prov.(
               update ~f:(fun from ->
-                  flow ~from ~into:(prj_union @@ get_reason ty_sub)))
+                  flow ~from ~into:(prj_union_left @@ get_reason ty_sub)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -6543,7 +6549,7 @@ end = struct
         ~this_ty
         ~mk_prop:mk_prop_union
         ~update_reason:
-          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union r_sub)))
+          Prov.(update ~f:(fun from -> flow ~from ~into:(prj_union_left r_sub)))
         (sub_supportdyn, ty_subs)
         rhs
         env

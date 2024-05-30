@@ -80,7 +80,13 @@ module Prov : sig
 
   val prj_fn_ret : Typing_reason.t -> Typing_reason.t
 
-  val prj_union : Typing_reason.t -> Typing_reason.t
+  val prj_union_left : Typing_reason.t -> Typing_reason.t
+
+  val prj_union_right : Typing_reason.t -> Typing_reason.t
+
+  val prj_intersection_left : Typing_reason.t -> Typing_reason.t
+
+  val prj_intersection_right : Typing_reason.t -> Typing_reason.t
 
   val prj_class :
     Typing_reason.t ->

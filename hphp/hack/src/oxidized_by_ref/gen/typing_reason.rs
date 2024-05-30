@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e348bd0d306699ed836821590bc8c0e5>>
+// @generated SignedSource<<ad855218ea884fd59b76bb589b61b4ff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -499,9 +499,13 @@ pub enum T_<'a> {
     #[rust_to_ocaml(inline_tuple)]
     RprjSymm(&'a (PrjSymm<'a>, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rprj_asymm")]
+    #[rust_to_ocaml(name = "Rprj_asymm_left")]
     #[rust_to_ocaml(inline_tuple)]
-    RprjAsymm(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
+    RprjAsymmLeft(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rprj_asymm_right")]
+    #[rust_to_ocaml(inline_tuple)]
+    RprjAsymmRight(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

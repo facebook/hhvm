@@ -11,7 +11,8 @@ impl Reason {
         match self {
             T_::Rflow(r, _) => r.rev_pos(),
             T_::RprjSymm(_, r) => r.rev_pos(),
-            T_::RprjAsymm(_, r) => r.rev_pos(),
+            T_::RprjAsymmLeft(_, r) => r.rev_pos(),
+            T_::RprjAsymmRight(_, r) => r.rev_pos(),
             T_::Rrev(r) => r.pos(),
             _ => self.pos(),
         }
@@ -123,7 +124,8 @@ impl Reason {
             RdynamicCoercion(r) => r.pos(),
             Rflow(r, _) => r.pos(),
             RprjSymm(_, r) => r.pos(),
-            RprjAsymm(_, r) => r.pos(),
+            RprjAsymmLeft(_, r) => r.pos(),
+            RprjAsymmRight(_, r) => r.pos(),
             Rrev(r) => r.rev_pos(),
         }
     }

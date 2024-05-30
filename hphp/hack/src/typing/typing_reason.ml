@@ -318,7 +318,8 @@ type _ t_ =
   | Rflow : locl_phase t_ * locl_phase t_ -> locl_phase t_
   | Rrev : locl_phase t_ -> locl_phase t_
   | Rprj_symm : prj_symm * locl_phase t_ -> locl_phase t_
-  | Rprj_asymm : prj_asymm * locl_phase t_ -> locl_phase t_
+  | Rprj_asymm_left : prj_asymm * locl_phase t_ -> locl_phase t_
+  | Rprj_asymm_right : prj_asymm * locl_phase t_ -> locl_phase t_
   | Rmissing_field : locl_phase t_
   | Rpessimised_this : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
 [@@deriving hash]
@@ -327,14 +328,16 @@ let rec normalize : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, t2) -> Rflow (normalize t1, normalize t2)
   | Rrev t -> reverse t
   | Rprj_symm (prj, t) -> Rprj_symm (prj, normalize t)
-  | Rprj_asymm (prj, t) -> Rprj_asymm (prj, normalize t)
+  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, normalize t)
+  | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, normalize t)
   | t -> t
 
 and reverse : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, t2) -> Rflow (reverse t2, reverse t1)
   | Rrev t -> normalize t
   | Rprj_symm (prj, t) -> Rprj_symm (prj, reverse t)
-  | Rprj_asymm (prj, t) -> Rprj_asymm (prj, reverse t)
+  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, reverse t)
+  | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, reverse t)
   | t -> t
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -449,7 +452,8 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rflow (from, _into) -> to_raw_pos from
   | Rrev r -> to_raw_pos @@ normalize r
   | Rprj_symm (_prj, r) -> to_raw_pos r
-  | Rprj_asymm (_prj, r) -> to_raw_pos r
+  | Rprj_asymm_left (_prj, r) -> to_raw_pos r
+  | Rprj_asymm_right (_prj, r) -> to_raw_pos r
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
@@ -553,7 +557,8 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rflow _ -> "Rflow"
   | Rrev _ -> "Rrev"
   | Rprj_symm _ -> "Rprj_symm"
-  | Rprj_asymm _ -> "Rprj_asymm"
+  | Rprj_asymm_left _ -> "Rprj_asymm_left"
+  | Rprj_asymm_right _ -> "Rprj_asymm_right"
   | Rmissing_field -> "Rmissing_field"
   | Rpessimised_this _ -> "Rpessimised_this"
 
@@ -783,7 +788,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Rflow (from, _into) -> pp_t_ fmt from
     | Rrev t -> pp_t_ fmt @@ normalize t
     | Rprj_symm (_, t) -> pp_t_ fmt t
-    | Rprj_asymm (_, t) -> pp_t_ fmt t);
+    | Rprj_asymm_left (_, t) -> pp_t_ fmt t
+    | Rprj_asymm_right (_, t) -> pp_t_ fmt t);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1172,10 +1178,14 @@ let rec to_json : type a. a t_ -> Hh_json.json =
   | Rprj_symm (prj, r) ->
     Hh_json.(
       JSON_Object [("Rprj_symm", JSON_Array [prj_symm_to_json prj; to_json r])])
-  | Rprj_asymm (prj, r) ->
+  | Rprj_asymm_left (prj, r) ->
     Hh_json.(
       JSON_Object
-        [("Rprj_asymm", JSON_Array [prj_asymm_to_json prj; to_json r])])
+        [("Rprj_asymm_left", JSON_Array [prj_asymm_to_json prj; to_json r])])
+  | Rprj_asymm_right (prj, r) ->
+    Hh_json.(
+      JSON_Object
+        [("Rprj_asymm_right", JSON_Array [prj_asymm_to_json prj; to_json r])])
   | Rmissing_field -> Hh_json.(JSON_Object [("Rmissing_field", JSON_Array [])])
   | Rpessimised_this pos_or_decl ->
     Hh_json.(
@@ -1199,7 +1209,8 @@ type path_elem =
   | Flow of direction
   | Prj_symm_lhs of prj_symm
   | Prj_symm_rhs of prj_symm
-  | Prj_asymm of prj_asymm
+  | Prj_asymm_left of prj_asymm
+  | Prj_asymm_right of prj_asymm
   | Witness of locl_phase t_
 
 let path_elem_to_json = function
@@ -1209,8 +1220,12 @@ let path_elem_to_json = function
     Hh_json.(JSON_Object [("Prj_symm_lhs", JSON_Array [prj_symm_to_json prj])])
   | Prj_symm_rhs prj ->
     Hh_json.(JSON_Object [("Prj_symm_rhs", JSON_Array [prj_symm_to_json prj])])
-  | Prj_asymm prj ->
-    Hh_json.(JSON_Object [("Prj_asymm", JSON_Array [prj_asymm_to_json prj])])
+  | Prj_asymm_left prj ->
+    Hh_json.(
+      JSON_Object [("Prj_asymm_left", JSON_Array [prj_asymm_to_json prj])])
+  | Prj_asymm_right prj ->
+    Hh_json.(
+      JSON_Object [("Prj_asymm_right", JSON_Array [prj_asymm_to_json prj])])
   | Witness r -> Hh_json.(JSON_Object [("Witness", JSON_Array [to_json r])])
 
 let path_to_json path = Hh_json.JSON_Array (List.map ~f:path_elem_to_json path)
@@ -1246,9 +1261,12 @@ let to_path t =
     | Rprj_symm (prj, t) ->
       let dir = project prj dir in
       aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
-    | Rprj_asymm (prj, t) ->
+    | Rprj_asymm_left (prj, t) ->
       (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (Prj_asymm prj :: t))
+      aux t ~dir ~k:(fun t -> k (Prj_asymm_left prj :: t))
+    | Rprj_asymm_right (prj, t) ->
+      (* All asymmetric projections are covariant and preserve data flow direction *)
+      aux t ~dir ~k:(fun t -> k (t @ [Prj_asymm_right prj]))
     | Rrev _ -> failwith "expected a normalized reason"
     | _ -> k @@ [Witness t]
   in
@@ -1411,7 +1429,30 @@ let explain_path ps =
         lhs_expl :: rhs_expl :: expls
       else
         rhs_expl :: expls
-    | Witness lhs :: Flow dir :: Prj_asymm prj :: Witness rhs :: rest ->
+    | Witness lhs :: Flow dir :: Prj_asymm_left prj :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_asymm_prj prj in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Prj_asymm_right prj :: Flow dir :: Witness rhs :: rest ->
       let expls = aux (Witness rhs :: rest) ~first:false in
       let lhs_expl = prefix_first ~first @@ explain_witness lhs in
       let flow_expl = explain_flow dir in
@@ -1987,7 +2028,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rflow (from, _into) -> to_string prefix from
   | Rrev r -> to_string prefix @@ reverse r
   | Rprj_symm (_prj, r) -> to_string prefix r
-  | Rprj_asymm (_prj, r) -> to_string prefix r
+  | Rprj_asymm_left (_prj, r) -> to_string prefix r
+  | Rprj_asymm_right (_prj, r) -> to_string prefix r
 
 type ureason =
   | URnone
@@ -2222,7 +2264,8 @@ module Visitor = struct
         | Rflow (from, into) -> Rflow (this#on_reason from, this#on_reason into)
         | Rrev t -> Rrev (this#on_reason t)
         | Rprj_symm (prj, t) -> Rprj_symm (prj, this#on_reason t)
-        | Rprj_asymm (prj, t) -> Rprj_asymm (prj, this#on_reason t)
+        | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, this#on_reason t)
+        | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, this#on_reason t)
         | Rpessimised_this x -> Rpessimised_this x
 
       method on_lazy l = l

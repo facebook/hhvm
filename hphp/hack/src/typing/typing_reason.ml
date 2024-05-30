@@ -450,10 +450,20 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
   | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
   | Rflow (from, _into) -> to_raw_pos from
-  | Rrev r -> to_raw_pos @@ normalize r
+  | Rrev r -> to_raw_pos_rev r
   | Rprj_symm (_prj, r) -> to_raw_pos r
   | Rprj_asymm_left (_prj, r) -> to_raw_pos r
   | Rprj_asymm_right (_prj, r) -> to_raw_pos r
+
+and to_raw_pos_rev = function
+  | Rprj_symm (_, r)
+  | Rflow (_, r)
+  | Rprj_asymm_left (_, r)
+  | Rprj_asymm_right (_, r) ->
+    to_raw_pos_rev r
+  | Rrev r
+  | r ->
+    to_raw_pos r
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"

@@ -6,12 +6,16 @@ Expected `Sub`
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 14 - line 12, character 16:
+
 But got `Super`
 
  14 | function bar_1(»Super« $f): void {
  15 |   $g = $f;
  16 |   foo($g);
  17 | }
+
+File "assign_local.php", line 14, character 16 - line 14, character 20:
 
 Here's why: this hint
 
@@ -20,12 +24,16 @@ Here's why: this hint
  16 |   foo($g);
  17 | }
 
+File "assign_local.php", line 14, character 16 - line 14, character 20:
+
 flows *into* this expression
 
  14 | function bar_1(Super »$f«): void {
  15 |   $g = $f;
  16 |   foo($g);
  17 | }
+
+File "assign_local.php", line 14, character 22 - line 14, character 23:
 
 which itself flows *into* this expression
 
@@ -34,12 +42,16 @@ which itself flows *into* this expression
  16 |   foo($g);
  17 | }
 
+File "assign_local.php", line 15, character 8 - line 15, character 9:
+
 which itself flows *into* this expression
 
  14 | function bar_1(Super $f): void {
  15 |   »$g« = $f;
  16 |   foo($g);
  17 | }
+
+File "assign_local.php", line 15, character 3 - line 15, character 4:
 
 which itself flows *into* this expression
 
@@ -48,6 +60,8 @@ which itself flows *into* this expression
  16 |   foo(»$g«);
  17 | }
 
+File "assign_local.php", line 16, character 7 - line 16, character 8:
+
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
  14 | function bar_1(Super $f): void {
@@ -55,17 +69,23 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  16 |   »foo«($g);
  17 | }
 
+File "assign_local.php", line 16, character 3 - line 16, character 5:
+
 which itself flows *from* this declaration
 
  12 | function »foo«(Sub $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 10 - line 12, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
+
+File "assign_local.php", line 12, character 14 - line 12, character 16:
 
 error: Typing[4110] Invalid argument
 
@@ -75,6 +95,8 @@ Expected `Sub`
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 14 - line 12, character 16:
+
 But got `Super`
 
  19 | function bar_2(»Super« $f): void {
@@ -83,6 +105,8 @@ But got `Super`
  22 |   foo($h);
  23 | }
 
+File "assign_local.php", line 19, character 16 - line 19, character 20:
+
 Here's why: this hint
 
  19 | function bar_2(»Super« $f): void {
@@ -90,6 +114,8 @@ Here's why: this hint
  21 |   $h = $g;
  22 |   foo($h);
  23 | }
+
+File "assign_local.php", line 19, character 16 - line 19, character 20:
 
 flows *into* this expression
 
@@ -99,6 +125,8 @@ flows *into* this expression
  22 |   foo($h);
  23 | }
 
+File "assign_local.php", line 19, character 22 - line 19, character 23:
+
 which itself flows *into* this expression
 
  19 | function bar_2(Super $f): void {
@@ -106,6 +134,8 @@ which itself flows *into* this expression
  21 |   $h = $g;
  22 |   foo($h);
  23 | }
+
+File "assign_local.php", line 20, character 8 - line 20, character 9:
 
 which itself flows *into* this expression
 
@@ -115,6 +145,8 @@ which itself flows *into* this expression
  22 |   foo($h);
  23 | }
 
+File "assign_local.php", line 20, character 3 - line 20, character 4:
+
 which itself flows *into* this expression
 
  19 | function bar_2(Super $f): void {
@@ -122,6 +154,8 @@ which itself flows *into* this expression
  21 |   $h = »$g«;
  22 |   foo($h);
  23 | }
+
+File "assign_local.php", line 21, character 8 - line 21, character 9:
 
 which itself flows *into* this expression
 
@@ -131,6 +165,8 @@ which itself flows *into* this expression
  22 |   foo($h);
  23 | }
 
+File "assign_local.php", line 21, character 3 - line 21, character 4:
+
 which itself flows *into* this expression
 
  19 | function bar_2(Super $f): void {
@@ -138,6 +174,8 @@ which itself flows *into* this expression
  21 |   $h = $g;
  22 |   foo(»$h«);
  23 | }
+
+File "assign_local.php", line 22, character 7 - line 22, character 8:
 
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
@@ -147,17 +185,23 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  22 |   »foo«($h);
  23 | }
 
+File "assign_local.php", line 22, character 3 - line 22, character 5:
+
 which itself flows *from* this declaration
 
  12 | function »foo«(Sub $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 10 - line 12, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
+
+File "assign_local.php", line 12, character 14 - line 12, character 16:
 
 error: Typing[4110] Invalid argument
 
@@ -167,11 +211,15 @@ Expected `Sub`
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 14 - line 12, character 16:
+
 But got `Super`
 
  25 | function bar_3(»Super« $f): void {
  26 |   $g = $f;
  27 |   $h = $g;
+
+File "assign_local.php", line 25, character 16 - line 25, character 20:
 
 Here's why: this hint
 
@@ -179,11 +227,15 @@ Here's why: this hint
  26 |   $g = $f;
  27 |   $h = $g;
 
+File "assign_local.php", line 25, character 16 - line 25, character 20:
+
 flows *into* this expression
 
  25 | function bar_3(Super »$f«): void {
  26 |   $g = $f;
  27 |   $h = $g;
+
+File "assign_local.php", line 25, character 22 - line 25, character 23:
 
 which itself flows *into* this expression
 
@@ -194,6 +246,8 @@ which itself flows *into* this expression
  29 |   foo($i);
  30 | }
 
+File "assign_local.php", line 26, character 8 - line 26, character 9:
+
 which itself flows *into* this expression
 
  25 | function bar_3(Super $f): void {
@@ -202,6 +256,8 @@ which itself flows *into* this expression
  28 |   $i = $h;
  29 |   foo($i);
  30 | }
+
+File "assign_local.php", line 26, character 3 - line 26, character 4:
 
 which itself flows *into* this expression
 
@@ -212,6 +268,8 @@ which itself flows *into* this expression
  29 |   foo($i);
  30 | }
 
+File "assign_local.php", line 27, character 8 - line 27, character 9:
+
 which itself flows *into* this expression
 
  25 | function bar_3(Super $f): void {
@@ -220,6 +278,8 @@ which itself flows *into* this expression
  28 |   $i = $h;
  29 |   foo($i);
  30 | }
+
+File "assign_local.php", line 27, character 3 - line 27, character 4:
 
 which itself flows *into* this expression
 
@@ -230,6 +290,8 @@ which itself flows *into* this expression
  29 |   foo($i);
  30 | }
 
+File "assign_local.php", line 28, character 8 - line 28, character 9:
+
 which itself flows *into* this expression
 
  25 | function bar_3(Super $f): void {
@@ -238,6 +300,8 @@ which itself flows *into* this expression
  28 |   »$i« = $h;
  29 |   foo($i);
  30 | }
+
+File "assign_local.php", line 28, character 3 - line 28, character 4:
 
 which itself flows *into* this expression
 
@@ -248,6 +312,8 @@ which itself flows *into* this expression
  29 |   foo(»$i«);
  30 | }
 
+File "assign_local.php", line 29, character 7 - line 29, character 8:
+
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
  25 | function bar_3(Super $f): void {
@@ -257,17 +323,23 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  29 |   »foo«($i);
  30 | }
 
+File "assign_local.php", line 29, character 3 - line 29, character 5:
+
 which itself flows *from* this declaration
 
  12 | function »foo«(Sub $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 10 - line 12, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
+
+File "assign_local.php", line 12, character 14 - line 12, character 16:
 
 error: Typing[4110] Invalid argument
 
@@ -277,6 +349,8 @@ Expected `Sub`
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 14 - line 12, character 16:
+
 But got `Super`
 
  6 |   public function __construct(private Super $item) {}
@@ -284,12 +358,16 @@ But got `Super`
  8 |     return $this->item;
  9 |   }
 
+File "assign_local.php", line 7, character 26 - line 7, character 30:
+
 Here's why: this hint
 
  6 |   public function __construct(private Super $item) {}
  7 |   public function get(): »Super« {
  8 |     return $this->item;
  9 |   }
+
+File "assign_local.php", line 7, character 26 - line 7, character 30:
 
 flows *into* this expression
 
@@ -299,6 +377,8 @@ flows *into* this expression
  36 |   foo($i);
  37 | }
 
+File "assign_local.php", line 34, character 8 - line 34, character 16:
+
 which itself flows *into* this expression
 
  33 |   $g = $f;
@@ -306,6 +386,8 @@ which itself flows *into* this expression
  35 |   $i = $h;
  36 |   foo($i);
  37 | }
+
+File "assign_local.php", line 34, character 3 - line 34, character 4:
 
 which itself flows *into* this expression
 
@@ -315,6 +397,8 @@ which itself flows *into* this expression
  36 |   foo($i);
  37 | }
 
+File "assign_local.php", line 35, character 8 - line 35, character 9:
+
 which itself flows *into* this expression
 
  33 |   $g = $f;
@@ -322,6 +406,8 @@ which itself flows *into* this expression
  35 |   »$i« = $h;
  36 |   foo($i);
  37 | }
+
+File "assign_local.php", line 35, character 3 - line 35, character 4:
 
 which itself flows *into* this expression
 
@@ -331,6 +417,8 @@ which itself flows *into* this expression
  36 |   foo(»$i«);
  37 | }
 
+File "assign_local.php", line 36, character 7 - line 36, character 8:
+
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
  33 |   $g = $f;
@@ -339,16 +427,22 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  36 |   »foo«($i);
  37 | }
 
+File "assign_local.php", line 36, character 3 - line 36, character 5:
+
 which itself flows *from* this declaration
 
  12 | function »foo«(Sub $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
 
+File "assign_local.php", line 12, character 10 - line 12, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 
  14 | function bar_1(Super $f): void {
+
+File "assign_local.php", line 12, character 14 - line 12, character 16:
 
 4 errors found.

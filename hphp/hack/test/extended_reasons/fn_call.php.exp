@@ -8,6 +8,8 @@ Expected `string`
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 14 - line 3, character 19:
+
 But got `int`
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -15,6 +17,8 @@ But got `int`
  5 | function bar(string $x, »int« $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 25 - line 5, character 27:
 
 Here's why: this hint
 
@@ -24,6 +28,8 @@ Here's why: this hint
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 25 - line 5, character 27:
+
 flows *into* this expression
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -31,6 +37,8 @@ flows *into* this expression
  5 | function bar(string $x, int »$y« ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 29 - line 5, character 30:
 
 which itself flows *into* this expression
 
@@ -40,6 +48,8 @@ which itself flows *into* this expression
  6 |   foo(»$y«, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 6, character 7 - line 6, character 8:
+
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -47,6 +57,8 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  5 | function bar(string $x, int $y ): void{
  6 |   »foo«($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 6, character 3 - line 6, character 5:
 
 which itself flows *from* this declaration
 
@@ -56,6 +68,8 @@ which itself flows *from* this declaration
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 10 - line 3, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  3 | function foo(»string« $_, int $_, arraykey... $_): void {}
@@ -63,6 +77,8 @@ which itself flows *into* this hint, via the (contravariant) 1st function parame
  5 | function bar(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
 
 error: Typing[4110] Invalid argument
 
@@ -74,6 +90,8 @@ Expected `int`
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 25 - line 3, character 27:
+
 But got `string`
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -81,6 +99,8 @@ But got `string`
  5 | function bar(»string« $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 14 - line 5, character 19:
 
 Here's why: this hint
 
@@ -90,6 +110,8 @@ Here's why: this hint
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 14 - line 5, character 19:
+
 flows *into* this expression
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -97,6 +119,8 @@ flows *into* this expression
  5 | function bar(string »$x«, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 21 - line 5, character 22:
 
 which itself flows *into* this expression
 
@@ -106,6 +130,8 @@ which itself flows *into* this expression
  6 |   foo($y, »$x«, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 6, character 11 - line 6, character 12:
+
 which itself flows *into* this expression, via the (contravariant) 2nd function parameter
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -113,6 +139,8 @@ which itself flows *into* this expression, via the (contravariant) 2nd function 
  5 | function bar(string $x, int $y ): void{
  6 |   »foo«($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 6, character 3 - line 6, character 5:
 
 which itself flows *from* this declaration
 
@@ -122,6 +150,8 @@ which itself flows *from* this declaration
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 10 - line 3, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 2nd function parameter
 
  3 | function foo(string $_, »int« $_, arraykey... $_): void {}
@@ -129,6 +159,8 @@ which itself flows *into* this hint, via the (contravariant) 2nd function parame
  5 | function bar(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 3, character 25 - line 3, character 27:
 
 error: Typing[4110] Invalid argument
 
@@ -140,6 +172,8 @@ Expected `arraykey` (variadic argument)
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 45 - line 3, character 46:
+
 But got `bool`
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -147,6 +181,8 @@ But got `bool`
  5 | function bar(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', »true«);
  7 | }
+
+File "fn_call.php", line 6, character 23 - line 6, character 26:
 
 Here's why: this expression
 
@@ -156,6 +192,8 @@ Here's why: this expression
  6 |   foo($y, $x, 1, 'a', »true«);
  7 | }
 
+File "fn_call.php", line 6, character 23 - line 6, character 26:
+
 flows *into* this expression, via the (contravariant) 5th function parameter
 
  3 | function foo(string $_, int $_, arraykey... $_): void {}
@@ -163,6 +201,8 @@ flows *into* this expression, via the (contravariant) 5th function parameter
  5 | function bar(string $x, int $y ): void{
  6 |   »foo«($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 6, character 3 - line 6, character 5:
 
 which itself flows *from* this declaration
 
@@ -172,6 +212,8 @@ which itself flows *from* this declaration
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 3, character 10 - line 3, character 12:
+
 which itself flows *into* this variadic parameter declaration, via the (contravariant) 3rd function parameter
 
  3 | function foo(string $_, int $_, arraykey... »$_«): void {}
@@ -179,6 +221,8 @@ which itself flows *into* this variadic parameter declaration, via the (contrava
  5 | function bar(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 3, character 45 - line 3, character 46:
 
 error: Typing[4110] Invalid argument
 
@@ -188,12 +232,16 @@ Expected `string`
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 14 - line 5, character 19:
+
 But got `int`
 
  13 | function baz(»int« $x): void {
  14 |   $y = qux();
  15 |   bar($x, $y);
  16 | }
+
+File "fn_call.php", line 13, character 14 - line 13, character 16:
 
 Here's why: this hint
 
@@ -202,12 +250,16 @@ Here's why: this hint
  15 |   bar($x, $y);
  16 | }
 
+File "fn_call.php", line 13, character 14 - line 13, character 16:
+
 flows *into* this expression
 
  13 | function baz(int »$x«): void {
  14 |   $y = qux();
  15 |   bar($x, $y);
  16 | }
+
+File "fn_call.php", line 13, character 18 - line 13, character 19:
 
 which itself flows *into* this expression
 
@@ -216,6 +268,8 @@ which itself flows *into* this expression
  15 |   bar(»$x«, $y);
  16 | }
 
+File "fn_call.php", line 15, character 7 - line 15, character 8:
+
 which itself flows *into* this expression, via the (contravariant) 1st function parameter
 
  13 | function baz(int $x): void {
@@ -223,17 +277,23 @@ which itself flows *into* this expression, via the (contravariant) 1st function 
  15 |   »bar«($x, $y);
  16 | }
 
+File "fn_call.php", line 15, character 3 - line 15, character 5:
+
 which itself flows *from* this declaration
 
  5 | function »bar«(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 10 - line 5, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 1st function parameter
 
  5 | function bar(»string« $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 14 - line 5, character 19:
 
 error: Typing[4110] Invalid argument
 
@@ -243,17 +303,23 @@ Expected `int`
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 25 - line 5, character 27:
+
 But got `string`
 
  9 | function qux(): »string« {
 10 |   return 'a';
 11 | }
 
+File "fn_call.php", line 9, character 17 - line 9, character 22:
+
 Here's why: this hint
 
  9 | function qux(): »string« {
 10 |   return 'a';
 11 | }
+
+File "fn_call.php", line 9, character 17 - line 9, character 22:
 
 flows *into* this expression
 
@@ -262,12 +328,16 @@ flows *into* this expression
  15 |   bar($x, $y);
  16 | }
 
+File "fn_call.php", line 14, character 8 - line 14, character 12:
+
 which itself flows *into* this expression
 
  13 | function baz(int $x): void {
  14 |   »$y« = qux();
  15 |   bar($x, $y);
  16 | }
+
+File "fn_call.php", line 14, character 3 - line 14, character 4:
 
 which itself flows *into* this expression
 
@@ -276,6 +346,8 @@ which itself flows *into* this expression
  15 |   bar($x, »$y«);
  16 | }
 
+File "fn_call.php", line 15, character 11 - line 15, character 12:
+
 which itself flows *into* this expression, via the (contravariant) 2nd function parameter
 
  13 | function baz(int $x): void {
@@ -283,16 +355,22 @@ which itself flows *into* this expression, via the (contravariant) 2nd function 
  15 |   »bar«($x, $y);
  16 | }
 
+File "fn_call.php", line 15, character 3 - line 15, character 5:
+
 which itself flows *from* this declaration
 
  5 | function »bar«(string $x, int $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
 
+File "fn_call.php", line 5, character 10 - line 5, character 12:
+
 which itself flows *into* this hint, via the (contravariant) 2nd function parameter
 
  5 | function bar(string $x, »int« $y ): void{
  6 |   foo($y, $x, 1, 'a', true);
  7 | }
+
+File "fn_call.php", line 5, character 25 - line 5, character 27:
 
 5 errors found.

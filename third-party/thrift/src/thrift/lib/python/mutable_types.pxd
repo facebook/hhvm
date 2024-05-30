@@ -29,6 +29,26 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
         Optional
         Terse
 
+cdef extern from "<thrift/lib/cpp2/type/BaseType.h>" namespace "::apache::thrift::type":
+    cdef enum class ThriftIdlType "::apache::thrift::type::BaseType":
+        Void
+        Bool
+        Byte
+        I16
+        I32
+        I64
+        Float
+        Double
+        String
+        Binary
+        Enum
+        Struct
+        Union
+        Exception
+        List
+        Set
+        Map
+
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(const char* name, int16_t numFields, bint isUnion)

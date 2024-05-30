@@ -126,6 +126,7 @@ cdef class FieldInfo:
     cdef object default_value
     cdef object adapter_info
     cdef bint is_primitive
+    cdef int idl_type
 
 cdef class StructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj

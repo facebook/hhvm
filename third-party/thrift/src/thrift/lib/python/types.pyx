@@ -273,7 +273,7 @@ StructOrError = cython.fused_type(Struct, GeneratedError)
 # )
 
 cdef class FieldInfo:
-    def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive):
+    def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive, idl_type = -1):
         """
         Args:
             id (int): The field ID specified in the IDL.
@@ -305,6 +305,12 @@ cdef class FieldInfo:
                 Note that this definition of "primitive" DOES NOT match that of Thrift IDL
                 primitive types, as the latter include string and binary (see:
                 https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#primitive-types).
+
+            idl_type (int):
+                Thrift IDL type of the field. The enum values are defined in
+                `apache::thrift::type::BaseType` located at `thrift/lib/cpp2/type/BaseType.h`
+                Default value is -1, which is not a valid value for `BaseType` enum.
+                This field is currently only used by mutable types.
         """
         self.id = id
         self.qualifier = qualifier
@@ -314,6 +320,7 @@ cdef class FieldInfo:
         self.default_value = default_value
         self.adapter_info = adapter_info
         self.is_primitive = is_primitive
+        self.idl_type = idl_type
 
     @property
     def id(self):
@@ -350,6 +357,10 @@ cdef class FieldInfo:
     @property
     def is_primitive(self):
         return self.is_primitive
+
+    @property
+    def idl_type(self):
+        return self.idl_type
 
 cdef class StructInfo:
     """

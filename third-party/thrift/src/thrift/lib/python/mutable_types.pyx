@@ -87,11 +87,8 @@ class _MutableStructField:
         (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
 
 
-cdef is_cacheable_non_primitive(object type_info):
-    if PyCallable_Check(type_info):
-        type_info = type_info()
-
-    return isinstance(type_info, (StringTypeInfo, AdaptedTypeInfo))
+cdef is_cacheable_non_primitive(ThriftIdlType idl_type):
+    return idl_type == ThriftIdlType.String
 
 
 class _MutableStructCachedField:
@@ -108,12 +105,8 @@ class _MutableStructCachedField:
         obj._fbthrift_field_cache[self._field_index] = None
 
 
-cdef is_mutable_container(object type_info):
-    if PyCallable_Check(type_info):
-        type_info = type_info()
-
-    return isinstance(type_info, (MutableListTypeInfo, MutableSetTypeInfo))
-
+cdef is_container(ThriftIdlType idl_type):
+    return idl_type in (ThriftIdlType.List, ThriftIdlType.Set, ThriftIdlType.Map)
 
 class _MutableStructContainerField:
     __slots__ = ('_field_index')
@@ -437,8 +430,9 @@ class MutableStructMeta(type):
         fields = dct.pop('_fbthrift_SPEC')
         dct["_fbthrift_mutable_struct_info"] = MutableStructInfo(cls_name, fields)
 
-        # List[Tuple[int (index in fields), str (field name)]
+        # List[Tuple[int (index in fields), str (field name), int (IDL Type)]
         primitive_types = []
+        # List[Tuple[int (index in fields), str (field name), int (IDL Type), Optional[AdapterInfo]]
         non_primitive_types = []
 
         slots = ['_fbthrift_field_cache']
@@ -448,14 +442,15 @@ class MutableStructMeta(type):
             # if field has an adapter or is not primitive type, consider
             # as "non-primitive"
             if field_info.adapter_info is not None or not field_info.is_primitive:
-                non_primitive_types.append((field_index, field_info.py_name, field_info.type_info))
+                non_primitive_types.append(
+                    (field_index, field_info.py_name, field_info.idl_type, field_info.adapter_info))
             else:
-                primitive_types.append((field_index, field_info.py_name))
+                primitive_types.append((field_index, field_info.py_name, field_info.idl_type))
 
         dct["__slots__"] = slots
         klass = super().__new__(cls, cls_name, (MutableStruct,), dct)
 
-        for field_index, field_name in primitive_types:
+        for field_index, field_name, *_ in primitive_types:
             type.__setattr__(
                 klass,
                 field_name,
@@ -467,11 +462,11 @@ class MutableStructMeta(type):
         # For now, handle non-primitive-types similarly to primitive types and
         # use the `_MutableStructField` descriptor for all types, except for
         # `list`. For `list`, use `_MutableStructContainerField` descriptor.
-        for field_index, field_name, type_info in non_primitive_types:
+        for field_index, field_name, idl_type, adapter_info in non_primitive_types:
             field_descriptor = _MutableStructField(field_index)
-            if is_mutable_container(type_info):
+            if is_container(idl_type):
                 field_descriptor = _MutableStructContainerField(field_index)
-            elif is_cacheable_non_primitive(type_info):
+            elif adapter_info is not None or is_cacheable_non_primitive(idl_type):
                 field_descriptor = _MutableStructCachedField(field_index)
 
             type.__setattr__(

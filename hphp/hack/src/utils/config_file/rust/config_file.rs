@@ -174,6 +174,13 @@ impl ConfigFile {
         })
     }
 
+    pub fn get_either_int_or_str(&self, key: &str) -> Option<Result<isize, String>> {
+        self.map.get(key).map(|s| match parse_int(s) {
+            Ok(i) => Ok(i),
+            _ => Err(s.to_owned()),
+        })
+    }
+
     pub fn get_str_list(&self, key: &str) -> Option<impl Iterator<Item = &str>> {
         lazy_static::lazy_static! {
             static ref RE: regex::Regex = regex::Regex::new(",[ \n\r\x0c\t]*").unwrap();

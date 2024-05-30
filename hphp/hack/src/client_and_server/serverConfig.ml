@@ -257,6 +257,14 @@ let prepare_iset config config_name =
 let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes"
 
+let reasons_config_opt config =
+  Option.bind (string_opt "extended_reasons" config) ~f:(fun data_str ->
+      if String.equal data_str "debug" then
+        Some GlobalOptions.Debug
+      else
+        Option.map ~f:(fun n -> GlobalOptions.Extended n)
+        @@ int_of_string_opt data_str)
+
 let load_config config options =
   let ( >?? ) x y = Option.value x ~default:y in
   let po_opt = options.GlobalOptions.po in
@@ -447,7 +455,7 @@ let load_config config options =
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
     ?tco_package_v2:(bool_opt "package_v2" config)
-    ?tco_extended_reasons:(bool_opt "extended_reasons" config)
+    ?tco_extended_reasons:(reasons_config_opt config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

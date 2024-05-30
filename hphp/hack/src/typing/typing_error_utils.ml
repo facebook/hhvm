@@ -5861,15 +5861,18 @@ end = struct
        in
        let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
        let reasons = left @ right in
-       (* If the extended reasons flag is set, we output the debug data  *)
-       if
-         TypecheckerOptions.tco_extended_reasons
-           Typing_env_types.(env.genv.tcopt)
-       then
-         let flow = Typing_reason.(explain @@ Rflow (r_sub, r_super)) in
-         reasons @ flow
-       else
-         reasons)
+       let flow =
+         Option.value_map
+           ~default:[]
+           ~f:(function
+             | GlobalOptions.Extended complexity ->
+               Typing_reason.(explain (Rflow (r_sub, r_super)) ~complexity)
+             | GlobalOptions.Debug ->
+               Typing_reason.(debug (Rflow (r_sub, r_super))))
+           (TypecheckerOptions.tco_extended_reasons
+              Typing_env_types.(env.genv.tcopt))
+       in
+       reasons @ flow)
 
   let subtyping_error is_coeffect stripped_existential ~ty_sub ~ty_sup env =
     ( Error_code.UnifyError,
@@ -5976,15 +5979,16 @@ end = struct
         ((pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing")
         :: ( decl_pos,
              "The field " ^ Markdown_lite.md_codify name ^ " is defined" )
-        ::
-        (* If the extended reasons flag is set, we output the debug data  *)
-        (if
-         TypecheckerOptions.tco_extended_reasons
-           Typing_env_types.(env.genv.tcopt)
-        then
-          Typing_reason.(explain @@ Rflow (reason_sub, reason_super))
-        else
-          []))
+        :: Option.value_map
+             ~default:[]
+             ~f:(function
+               | GlobalOptions.Extended complexity ->
+                 Typing_reason.(
+                   explain (Rflow (reason_sub, reason_super)) ~complexity)
+               | GlobalOptions.Debug ->
+                 Typing_reason.(debug (Rflow (reason_sub, reason_super))))
+             (TypecheckerOptions.tco_extended_reasons
+                Typing_env_types.(env.genv.tcopt)))
     in
     (Error_code.MissingField, reasons, User_error_flags.empty)
 
@@ -6120,15 +6124,18 @@ end = struct
              ^ Markdown_lite.md_codify name
              ^ " is defined as **required**" )
         :: (def_pos, Markdown_lite.md_codify name ^ " is defined here")
-        ::
-        (if
-         TypecheckerOptions.tco_extended_reasons
-           Typing_env_types.(env.genv.tcopt)
-        then
-          Typing_reason.(explain @@ Rflow (reason_sub, reason_super))
-        else
-          []))
+        :: Option.value_map
+             ~default:[]
+             ~f:(function
+               | GlobalOptions.Extended complexity ->
+                 Typing_reason.(
+                   explain (Rflow (reason_sub, reason_super)) ~complexity)
+               | GlobalOptions.Debug ->
+                 Typing_reason.(debug (Rflow (reason_sub, reason_super))))
+             (TypecheckerOptions.tco_extended_reasons
+                Typing_env_types.(env.genv.tcopt)))
     in
+
     (Error_code.RequiredFieldIsOptional, reasons, User_error_flags.empty)
 
   let return_disposable_mismatch pos_sub is_marked_return_disposable pos_super =

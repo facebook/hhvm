@@ -305,7 +305,6 @@ let parse_options () =
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let get_some_file_deps_full_hierarchy = ref false in
-  let extended_reasons = ref false in
   let options =
     [
       ( "--config",
@@ -743,9 +742,6 @@ let parse_options () =
       ( "--map-reduce",
         Arg.Unit (set_mode Map_reduce_mode),
         " Run the map reducers and print the result" );
-      ( "--extended-reasons",
-        Arg.Set extended_reasons,
-        " Use extended reasons during inference" );
     ]
   in
 
@@ -928,7 +924,6 @@ let parse_options () =
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       ~tco_rust_elab:!rust_elab
-      ~tco_extended_reasons:!extended_reasons
       GlobalOptions.default
   in
 

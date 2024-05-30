@@ -2134,7 +2134,7 @@ end = struct
                        --extended-reasons flag rather than using our helper functions
                        directly *)
           let ty_super =
-            if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+            if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
               map_reason
                 super
                 ~f:
@@ -2153,7 +2153,7 @@ end = struct
         | Ast_defs.Invariant ->
           let covariant_prop env =
             let f from =
-              if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+              if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
                 from
               else
                 Typing_reason.Rinvariant_generic (from, nm)
@@ -2170,7 +2170,7 @@ end = struct
             simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
           and contravariant_prop env =
             let f from =
-              if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+              if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
                 Prov.(
                   flow
                     ~from
@@ -2719,7 +2719,7 @@ end = struct
         in
         let r_field_sub =
           let from = Typing_reason.Rmissing_field in
-          if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
             Prov.(
               flow
                 ~from
@@ -6457,7 +6457,7 @@ end = struct
         in
         try_bounds bounds env
       in
-      if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
         (* Under exteded reasons, the failure on the type parameter is contained
            in the failure for its bound
            TODO(mjt): record disjunction here *)

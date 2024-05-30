@@ -359,7 +359,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         let (env, x_ty) = Env.expand_type env x_ty in
         let r_inst =
           let rp = get_reason x_ty in
-          if not @@ TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+          if not @@ TypecheckerOptions.using_extended_reasons env.genv.tcopt
+          then
             Reason.Rinstantiate (rp, x, r)
           else
             rp

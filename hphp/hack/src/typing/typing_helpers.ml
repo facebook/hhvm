@@ -169,13 +169,13 @@ let hint_fun_decl ~params ~ret env =
 
 module Prov = struct
   let update ty ~f ~env =
-    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+    if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
       map_reason ty ~f
     else
       ty
 
   let update_cty cty ~f ~env =
-    if TypecheckerOptions.tco_extended_reasons env.genv.tcopt then
+    if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
       let (r, cstr) = deref_constraint_type cty in
       mk_constraint_type (f r, cstr)
     else

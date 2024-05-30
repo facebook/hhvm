@@ -1,0 +1,218 @@
+error: Typing[4110] Invalid return type
+
+Expected `I`
+
+ 8 | function inter_r(C $c) : (A & »I«) {
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping.php", line 8, character 31 - line 8, character 31:
+
+But got `C`
+
+ 8 | function inter_r(»C« $c) : (A & I) {
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping.php", line 8, character 18 - line 8, character 18:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {
+                      "filename":"intersection_subtyping.php",
+                      "line":8,
+                      "char_start":18,
+                      "char_end":18
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[
+                    {
+                      "filename":"intersection_subtyping.php",
+                      "line":8,
+                      "char_start":20,
+                      "char_end":21
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Rwitness":[
+                {
+                  "filename":"intersection_subtyping.php",
+                  "line":9,
+                  "char_start":10,
+                  "char_end":11
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rwitness":[
+            {"filename":"intersection_subtyping.php","line":9,"char_start":3,"char_end":12}
+          ]
+        }
+      ]
+    },
+    {
+      "Rflow":[
+        {
+          "Rprj_asymm_right":[
+            "Prj_asymm_inter",
+            {
+              "Rhint":[
+                {
+                  "filename":"intersection_subtyping.php",
+                  "line":8,
+                  "char_start":26,
+                  "char_end":32
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"intersection_subtyping.php",
+              "line":8,
+              "char_start":31,
+              "char_end":31
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4110] Invalid return type
+
+Expected `C`
+
+ 12 | function inter_l((A & I) $ai): »C« {
+ 13 |   $c = $ai;
+ 14 |   return $c;
+ 15 | }
+
+File "intersection_subtyping.php", line 12, character 32 - line 12, character 32:
+
+But got `(A & I)`
+
+ 12 | function inter_l(»(A & I)« $ai): C {
+ 13 |   $c = $ai;
+ 14 |   return $c;
+ 15 | }
+
+File "intersection_subtyping.php", line 12, character 18 - line 12, character 24:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"intersection_subtyping.php",
+                              "line":12,
+                              "char_start":18,
+                              "char_end":24
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[
+                            {
+                              "filename":"intersection_subtyping.php",
+                              "line":12,
+                              "char_start":26,
+                              "char_end":28
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness":[
+                        {
+                          "filename":"intersection_subtyping.php",
+                          "line":13,
+                          "char_start":8,
+                          "char_end":10
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[
+                    {"filename":"intersection_subtyping.php","line":13,"char_start":3,"char_end":4}
+                  ]
+                }
+              ]
+            },
+            {
+              "Rwitness":[
+                {
+                  "filename":"intersection_subtyping.php",
+                  "line":14,
+                  "char_start":10,
+                  "char_end":11
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rwitness":[
+            {
+              "filename":"intersection_subtyping.php",
+              "line":14,
+              "char_start":3,
+              "char_end":12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {
+          "filename":"intersection_subtyping.php",
+          "line":12,
+          "char_start":32,
+          "char_end":32
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+2 errors found.

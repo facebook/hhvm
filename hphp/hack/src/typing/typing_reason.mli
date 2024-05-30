@@ -217,7 +217,7 @@ val to_json : 'a t_ -> Hh_json.json
 
 val debug : t -> (Pos_or_decl.t * string) list
 
-val explain : t -> (Pos_or_decl.t * string) list
+val explain : t -> complexity:int -> (Pos_or_decl.t * string) list
 
 type decl_t = decl_phase t_
 

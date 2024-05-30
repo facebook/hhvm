@@ -46,6 +46,11 @@ val with_log_saved_state_age_and_distance : bool -> saved_state -> saved_state
 
 val with_zstd_decompress_by_file : bool -> saved_state -> saved_state
 
+type extended_reasons_config =
+  | Extended of int
+  | Debug
+[@@deriving eq, show]
+
 (** Naming conventions for fieds:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
@@ -244,7 +249,7 @@ type t = {
   tco_lsp_invalidation: bool;
       (** Controls how [Provicer_utils.respect_but_quarantine_unsaved_changes] invalidates folded decls *)
   tco_autocomplete_sort_text: bool;
-  tco_extended_reasons: bool;
+  tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
   hack_warnings: int all_or_some;  (** turn on hack warnings *)
   tco_strict_switch: bool;
@@ -352,7 +357,7 @@ val set :
   ?tco_sticky_quarantine:bool ->
   ?tco_lsp_invalidation:bool ->
   ?tco_autocomplete_sort_text:bool ->
-  ?tco_extended_reasons:bool ->
+  ?tco_extended_reasons:extended_reasons_config ->
   ?hack_warnings:int all_or_some ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->

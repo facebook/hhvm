@@ -1,0 +1,454 @@
+error: Typing[4110] Invalid argument
+
+Expected `B`
+
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+13 |   rcvr_concrete($x);
+14 | }
+
+File "generic_subtyping.php", line 10, character 24 - line 10, character 24:
+
+But got `mixed` arising from an implicit `as mixed` constraint on this type
+
+ 10 | function rcvr_concrete(B $x): void {}
+ 11 | 
+ 12 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
+ 13 |   rcvr_concrete($x);
+ 14 | }
+
+File "generic_subtyping.php", line 12, character 53 - line 12, character 53:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rimplicit_upper_bound":[
+            {"filename":"generic_subtyping.php","line":12,"char_start":53,"char_end":53},
+            "mixed"
+          ]
+        },
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"generic_subtyping.php","line":12,"char_start":53,"char_end":53}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":12,"char_start":55,"char_end":56}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":13,"char_start":17,"char_end":18}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":13,"char_start":3,"char_end":15}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"generic_subtyping.php","line":10,"char_start":10,"char_end":22}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"generic_subtyping.php","line":10,"char_start":24,"char_end":24}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4110] Invalid argument
+
+Expected `B`
+
+10 | function rcvr_concrete(»B« $x): void {}
+11 | 
+12 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
+
+File "generic_subtyping.php", line 10, character 24 - line 10, character 24:
+
+But got `A`
+
+ 16 | function call_conrete_with_upper_bound<T as »A«>(T $x): void {
+ 17 |   rcvr_concrete($x);
+ 18 | }
+
+File "generic_subtyping.php", line 16, character 45 - line 16, character 45:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"generic_subtyping.php","line":16,"char_start":45,"char_end":45}]
+        },
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"generic_subtyping.php","line":16,"char_start":48,"char_end":48}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":16,"char_start":50,"char_end":51}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":17,"char_start":17,"char_end":18}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":17,"char_start":3,"char_end":15}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"generic_subtyping.php","line":10,"char_start":10,"char_end":22}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"generic_subtyping.php","line":10,"char_start":24,"char_end":24}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 20 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+File "generic_subtyping.php", line 20, character 27 - line 20, character 27:
+
+This type constraint is violated
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+File "generic_subtyping.php", line 20, character 32 - line 20, character 32:
+
+Expected `B`
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+File "generic_subtyping.php", line 20, character 32 - line 20, character 32:
+
+But got `A`
+
+ 20 | function rcvr_upper_bound<T as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(»A« $x): void {
+ 23 |   rcvr_upper_bound($x);
+ 24 | }
+
+File "generic_subtyping.php", line 22, character 40 - line 22, character 40:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"generic_subtyping.php","line":22,"char_start":40,"char_end":40}]
+                },
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":22,"char_start":42,"char_end":43}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"generic_subtyping.php","line":23,"char_start":20,"char_end":21}]
+            }
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":23,"char_start":3,"char_end":18}]
+                },
+                {
+                  "Rwitness_from_decl":[{"filename":"generic_subtyping.php","line":20,"char_start":10,"char_end":25}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rcstr_on_generics":[
+        {"filename":"generic_subtyping.php","line":20,"char_start":32,"char_end":32},
+        {
+          "Tuple2":[
+            {"filename":"generic_subtyping.php","line":20,"char_start":27,"char_end":27},
+            "T"
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 20 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+File "generic_subtyping.php", line 20, character 27 - line 20, character 27:
+
+This type constraint is violated
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+File "generic_subtyping.php", line 20, character 32 - line 20, character 32:
+
+Expected `B`
+
+ 20 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 21 | 
+ 22 | function call_upper_bound_with_conrete(A $x): void {
+
+File "generic_subtyping.php", line 20, character 32 - line 20, character 32:
+
+But got `A`
+
+ 26 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
+ 27 |   rcvr_upper_bound($x);
+ 28 | }
+
+File "generic_subtyping.php", line 26, character 49 - line 26, character 49:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"generic_subtyping.php","line":26,"char_start":49,"char_end":49}]
+        },
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"generic_subtyping.php","line":26,"char_start":52,"char_end":52}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":26,"char_start":54,"char_end":55}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":27,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":27,"char_start":3,"char_end":18}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"generic_subtyping.php","line":20,"char_start":10,"char_end":25}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rcstr_on_generics":[
+        {"filename":"generic_subtyping.php","line":20,"char_start":32,"char_end":32},
+        {
+          "Tuple2":[
+            {"filename":"generic_subtyping.php","line":20,"char_start":27,"char_end":27},
+            "T"
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+error: Typing[4323] Invalid argument
+
+`T` is a constrained type parameter
+
+ 30 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+File "generic_subtyping.php", line 30, character 27 - line 30, character 27:
+
+This type constraint is violated
+
+ 30 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+File "generic_subtyping.php", line 30, character 32 - line 30, character 32:
+
+Expected `D`
+
+ 30 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+File "generic_subtyping.php", line 30, character 32 - line 30, character 32:
+
+But got `A`
+
+ 30 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 31 | 
+ 32 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 33 |   rcvr_both_bounds($x);
+ 34 | }
+
+File "generic_subtyping.php", line 32, character 49 - line 32, character 49:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"generic_subtyping.php","line":32,"char_start":49,"char_end":49}]
+        },
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"generic_subtyping.php","line":32,"char_start":52,"char_end":52}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":32,"char_start":54,"char_end":55}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"generic_subtyping.php","line":33,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"generic_subtyping.php","line":33,"char_start":3,"char_end":18}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"generic_subtyping.php","line":30,"char_start":10,"char_end":25}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rcstr_on_generics":[
+        {"filename":"generic_subtyping.php","line":30,"char_start":32,"char_end":32},
+        {
+          "Tuple2":[
+            {"filename":"generic_subtyping.php","line":30,"char_start":27,"char_end":27},
+            "T"
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+5 errors found.

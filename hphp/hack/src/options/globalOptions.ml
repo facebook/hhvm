@@ -71,6 +71,11 @@ let with_log_saved_state_age_and_distance log_saved_state_age_and_distance ss =
 let with_zstd_decompress_by_file zstd_decompress_by_file ss =
   { ss with loading = { ss.loading with zstd_decompress_by_file } }
 
+type extended_reasons_config =
+  | Extended of int
+  | Debug
+[@@deriving eq, show]
+
 (** Naming conventions for fields in this struct:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
@@ -171,7 +176,7 @@ type t = {
   tco_sticky_quarantine: bool;
   tco_lsp_invalidation: bool;
   tco_autocomplete_sort_text: bool;
-  tco_extended_reasons: bool;
+  tco_extended_reasons: extended_reasons_config option;
   hack_warnings: int all_or_some;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
@@ -276,7 +281,7 @@ let default =
     tco_sticky_quarantine = false;
     tco_lsp_invalidation = false;
     tco_autocomplete_sort_text = false;
-    tco_extended_reasons = false;
+    tco_extended_reasons = None;
     hack_warnings = ASome [];
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
@@ -637,7 +642,7 @@ let set
     tco_autocomplete_sort_text =
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     tco_extended_reasons =
-      setting tco_extended_reasons options.tco_extended_reasons;
+      setting_opt tco_extended_reasons options.tco_extended_reasons;
     hack_warnings = setting hack_warnings options.hack_warnings;
     tco_strict_switch = setting tco_strict_switch options.tco_strict_switch;
     tco_allowed_files_for_ignore_readonly =

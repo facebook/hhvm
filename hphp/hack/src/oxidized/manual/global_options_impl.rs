@@ -134,7 +134,7 @@ impl Default for GlobalOptions {
             tco_sticky_quarantine: false,
             tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,
-            tco_extended_reasons: false,
+            tco_extended_reasons: None,
             hack_warnings: AllOrSome::ASome(vec![]),
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],

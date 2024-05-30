@@ -1,0 +1,79 @@
+error: Typing[4110] Invalid argument
+
+Expected `bool`
+
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+
+But got `int`
+
+ 3 | newtype myint as int = »int«;
+
+File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
+                        },
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                }
+              ]
+            },
+            {
+              "Rprj_symm":[
+                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
+                    },
+                    {
+                      "Rwitness_from_decl":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

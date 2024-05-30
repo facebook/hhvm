@@ -1206,10 +1206,6 @@ type direction =
   | Fwd
   | Bwd
 
-let direction_to_json = function
-  | Fwd -> Hh_json.(JSON_Object [("Fwd", JSON_Array [])])
-  | Bwd -> Hh_json.(JSON_Object [("Bwd", JSON_Array [])])
-
 let reverse_direction = function
   | Fwd -> Bwd
   | Bwd -> Fwd
@@ -1222,23 +1218,6 @@ type path_elem =
   | Prj_asymm_left of prj_asymm
   | Prj_asymm_right of prj_asymm
   | Witness of locl_phase t_
-
-let path_elem_to_json = function
-  | Flow dir ->
-    Hh_json.(JSON_Object [("Flow", JSON_Array [direction_to_json dir])])
-  | Prj_symm_lhs prj ->
-    Hh_json.(JSON_Object [("Prj_symm_lhs", JSON_Array [prj_symm_to_json prj])])
-  | Prj_symm_rhs prj ->
-    Hh_json.(JSON_Object [("Prj_symm_rhs", JSON_Array [prj_symm_to_json prj])])
-  | Prj_asymm_left prj ->
-    Hh_json.(
-      JSON_Object [("Prj_asymm_left", JSON_Array [prj_asymm_to_json prj])])
-  | Prj_asymm_right prj ->
-    Hh_json.(
-      JSON_Object [("Prj_asymm_right", JSON_Array [prj_asymm_to_json prj])])
-  | Witness r -> Hh_json.(JSON_Object [("Witness", JSON_Array [to_json r])])
-
-let path_to_json path = Hh_json.JSON_Array (List.map ~f:path_elem_to_json path)
 
 let project prj dir =
   match prj with
@@ -1507,14 +1486,15 @@ let explain_path ps =
   aux ps ~first:true
 
 let debug t =
-  let pos = to_raw_pos t in
-  let norm_t = normalize t in
-  let path = to_path norm_t in
-  let path_json = Hh_json.json_to_string ~pretty:true @@ path_to_json path in
-  let path_expl = explain_path path in
-  (pos, "Path:\n" ^ path_json) :: path_expl
+  [
+    ( Pos_or_decl.none,
+      Format.sprintf "Flow:\n%s"
+      @@ Hh_json.json_to_string ~pretty:true
+      @@ to_json
+      @@ normalize t );
+  ]
 
-let explain t = explain_path @@ to_path @@ normalize t
+let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
 
 type t = locl_phase t_
 

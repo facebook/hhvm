@@ -20,7 +20,8 @@
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
-#include <thrift/lib/cpp2/test/gen-cpp2/HandlerGeneric.h>
+#include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_clients.h>
+#include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_handlers.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -29,9 +30,11 @@ using apache::thrift::test::TrackingTProcessorEventHandler;
 
 namespace {
 
-struct TestHandler : apache::thrift::ServiceHandler<test::HandlerGeneric> {
-  folly::coro::Task<std::unique_ptr<std::string>> co_get_string() override {
-    co_return std::make_unique<std::string>("reply");
+struct TestHandler
+    : apache::thrift::ServiceHandler<test::ServiceInterceptorTest> {
+  folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+      std::unique_ptr<std::string> str) override {
+    co_return std::move(str);
   }
 };
 
@@ -80,8 +83,8 @@ CO_TEST(ServiceInterceptorTest, BasicOnRequest) {
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::HandlerGeneric>>();
-  co_await client->co_get_string();
+      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+  co_await client->co_echo("");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }

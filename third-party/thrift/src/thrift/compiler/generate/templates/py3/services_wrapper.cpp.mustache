@@ -28,7 +28,7 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{> common/auto_generated_c}}
 
 #include <{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h>
-#include <{{program:includePrefix}}gen-py3/{{program:name}}/{{> common/auto_migrate_prefix}}services_api.h>
+#include <{{program:includePrefix}}gen-py3/{{program:name}}/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
 {{#program:cppNamespaces}}namespace {{value}} {
@@ -39,7 +39,7 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__{{> common/auto_migrate_prefix}}services();
+    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__services();
   }
 
 {{/service:extends?}}
@@ -47,7 +47,7 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
   : {{#service:extends}}::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}Wrapper(obj, exc){{/service:extends}}
   {
-    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__{{> common/auto_migrate_prefix}}services();
+    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__services();
   }
 {{/service:extends?}}
 

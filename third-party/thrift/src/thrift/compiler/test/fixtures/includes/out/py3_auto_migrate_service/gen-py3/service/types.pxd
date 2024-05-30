@@ -30,9 +30,9 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport includes.py3_types as _includes_types
-cimport module.py3_types as _module_types
-cimport transitive.py3_types as _transitive_types
+cimport includes.types as _includes_types
+cimport module.types as _module_types
+cimport transitive.types as _transitive_types
 
 
 

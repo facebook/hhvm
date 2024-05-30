@@ -14,5 +14,83 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
+}}{{!
+
+This template should always mirror clients.pyx but for mypy typing
+
 }}
-{{> py3_clients.pyi }}
+{{> common/auto_generated_py}}
+
+import folly.iobuf as _fbthrift_iobuf
+import thrift.py3.types
+import thrift.py3.client
+import thrift.py3.common
+import typing as _typing
+from types import TracebackType
+
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{#hasServices?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}clients
+{{/hasServices?}}
+{{/program:includeNamespaces}}
+{{#program:services}}
+
+
+_{{service:name}}T = _typing.TypeVar('_{{service:name}}T', bound='{{service:name}}')
+
+
+class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
+    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+
+{{#service:supportedFunctions}}
+    async def {{function:name}}(
+        self{{#function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> {{#function:return_type}}{{!
+        }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!
+        }}{{^function:stream?}}{{> types/pep484_type}}{{/function:stream?}}{{!
+        }}{{/function:return_type}}: ...
+
+{{/service:supportedFunctions}}
+{{#service:interactions}}
+    def create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
+    def async_create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
+{{/service:interactions}}
+{{^service:interactions}}
+{{^service:supportedFunctions}}
+    pass
+{{/service:supportedFunctions}}
+{{/service:interactions}}
+{{#service:interactions}}
+
+_{{service:parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{service:parent_service_name}}_{{service:name}}', bound='{{service:parent_service_name}}_{{service:name}}')
+
+
+class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
+    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+
+{{#service:supportedFunctions}}
+    async def {{function:name}}(
+        self{{#function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> {{#function:return_type}}{{!
+        }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!
+        }}{{^function:stream?}}{{> types/pep484_type}}{{/function:stream?}}{{!
+        }}{{/function:return_type}}: ...
+
+{{/service:supportedFunctions}}
+{{^service:supportedFunctions}}
+    pass
+{{/service:supportedFunctions}}
+{{/service:interactions}}
+{{/program:services}}

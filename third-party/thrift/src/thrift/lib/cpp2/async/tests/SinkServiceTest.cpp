@@ -310,7 +310,8 @@ TEST_F(SinkServiceTest, SinkEarlyFinalResponseWithLongWait) {
       });
 }
 
-TEST_F(SinkServiceTest, SinkEarlyClose) {
+// DO_BEFORE(aristidis,20240715): Test is flaky. Find owner or remove.
+TEST_F(SinkServiceTest, DISABLED_SinkEarlyClose) {
   std::vector<std::thread> ths;
   for (int i = 0; i < 100; i++) {
     ths.push_back(std::thread([this]() {

@@ -23,7 +23,7 @@ namespace detail {
 
 // Returns active field id for a Thrift union object.
 int getActiveId(const void* object, const StructInfo& info) {
-  auto getActiveIdFunc = info.unionExt->getActiveId;
+  auto* getActiveIdFunc = info.unionExt->getActiveId;
   if (getActiveIdFunc != nullptr) {
     return getActiveIdFunc(object);
   }
@@ -33,7 +33,7 @@ int getActiveId(const void* object, const StructInfo& info) {
 
 // Sets the active field id for a Thrift union object.
 void setActiveId(void* object, const StructInfo& info, int value) {
-  auto setActiveIdFunc = info.unionExt->setActiveId;
+  auto* setActiveIdFunc = info.unionExt->setActiveId;
   if (setActiveIdFunc != nullptr) {
     setActiveIdFunc(object, value);
   } else {

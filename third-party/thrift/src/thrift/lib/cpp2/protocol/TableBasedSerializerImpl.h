@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderWireTypeInfo.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 constexpr TypeInfo kStopType = {
     protocol::TType::T_STOP, nullptr, nullptr, nullptr};
@@ -71,7 +69,7 @@ const FieldInfo* findFieldInfo(
     Protocol_* iprot,
     ProtocolReaderStructReadState<Protocol_>& readState,
     const StructInfo& structInfo) {
-  auto* end = structInfo.fieldInfos + structInfo.numFields;
+  const FieldInfo* const end = structInfo.fieldInfos + structInfo.numFields;
   if (iprot->kUsesFieldNames()) {
     const FieldInfo* found =
         std::find_if(structInfo.fieldInfos, end, [&](const FieldInfo& val) {
@@ -556,39 +554,48 @@ size_t writeField(
 }
 
 template <class Protocol_>
-void read(Protocol_* iprot, const StructInfo& structInfo, void* object) {
-  DCHECK(object);
+void readUnion(
+    Protocol_* iprot, const StructInfo& structInfo, void* unionObject) {
+  DCHECK(structInfo.unionExt != nullptr);
+  const UnionExt& unionExt = *structInfo.unionExt;
   ProtocolReaderStructReadState<Protocol_> readState;
   readState.readStructBegin(iprot);
+  readState.fieldId = 0;
+  readState.readFieldBegin(iprot);
+  if (readState.atStop()) {
+    unionExt.clear(unionObject);
+    readState.readStructEnd(iprot);
+    return;
+  }
+  if (const FieldInfo* fieldInfo =
+          findFieldInfo(iprot, readState, structInfo)) {
+    if (getActiveId(unionObject, structInfo) != 0) {
+      unionExt.clear(unionObject);
+    }
+    void* value = getMember(*fieldInfo, unionObject);
+    if (unionExt.initMember[0] != nullptr) {
+      unionExt.initMember[fieldInfo - structInfo.fieldInfos](value);
+    }
+    read(iprot, *fieldInfo->typeInfo, readState, value);
+    setActiveId(unionObject, structInfo, fieldInfo->id);
+  } else {
+    skip(iprot, readState);
+  }
+  readState.readFieldEnd(iprot);
+  readState.readFieldBegin(iprot);
+  if (UNLIKELY(!readState.atStop())) {
+    TProtocolException::throwUnionMissingStop();
+  }
+  readState.readStructEnd(iprot);
+  return;
+}
+
+template <class Protocol_>
+void read(Protocol_* iprot, const StructInfo& structInfo, void* object) {
+  DCHECK(object);
 
   if (UNLIKELY(structInfo.unionExt != nullptr)) {
-    readState.fieldId = 0;
-    readState.readFieldBegin(iprot);
-    if (readState.atStop()) {
-      structInfo.unionExt->clear(object);
-      readState.readStructEnd(iprot);
-      return;
-    }
-    if (const auto* fieldInfo = findFieldInfo(iprot, readState, structInfo)) {
-      if (getActiveId(object, structInfo) != 0) {
-        structInfo.unionExt->clear(object);
-      }
-      void* value = getMember(*fieldInfo, object);
-      if (structInfo.unionExt->initMember[0] != nullptr) {
-        structInfo.unionExt->initMember[fieldInfo - structInfo.fieldInfos](
-            value);
-      }
-      read(iprot, *fieldInfo->typeInfo, readState, value);
-      setActiveId(object, structInfo, fieldInfo->id);
-    } else {
-      skip(iprot, readState);
-    }
-    readState.readFieldEnd(iprot);
-    readState.readFieldBegin(iprot);
-    if (UNLIKELY(!readState.atStop())) {
-      TProtocolException::throwUnionMissingStop();
-    }
-    readState.readStructEnd(iprot);
+    readUnion(iprot, structInfo, object);
     return;
   }
 
@@ -600,6 +607,9 @@ void read(Protocol_* iprot, const StructInfo& structInfo, void* object) {
 
   // Define out of loop to call advanceToNextField after the loop ends.
   FieldID prevFieldId = 0;
+
+  ProtocolReaderStructReadState<Protocol_> readState;
+  readState.readStructBegin(iprot);
 
   // The index of the expected field in the struct layout.
   std::int16_t index = 0;
@@ -648,52 +658,68 @@ void read(Protocol_* iprot, const StructInfo& structInfo, void* object) {
 }
 
 template <class Protocol_>
+size_t writeUnion(
+    Protocol_& iprot, const StructInfo& structInfo, const void* unionObject) {
+  size_t written = iprot.writeStructBegin(structInfo.name);
+
+  const int activeFieldId = getActiveId(unionObject, structInfo);
+  const FieldInfo* const end = structInfo.fieldInfos + structInfo.numFields;
+  const FieldInfo* foundFieldInfo = std::lower_bound(
+      structInfo.fieldInfos,
+      end,
+      activeFieldId,
+      [](const FieldInfo& fieldInfo, FieldID fieldId) {
+        return fieldInfo.id < fieldId;
+      });
+
+  if (foundFieldInfo != end && foundFieldInfo->id == activeFieldId) {
+    const OptionalThriftValue value = getValue(
+        *foundFieldInfo->typeInfo, getMember(*foundFieldInfo, unionObject));
+    if (value.hasValue()) {
+      written += writeField(&iprot, *foundFieldInfo, value.value());
+    } else if (foundFieldInfo->typeInfo->type == protocol::TType::T_STRUCT) {
+      // DO_BEFORE(aristidis,20240730): Follow-up to figure out if this branch
+      // is required. Document or remove.
+      written += iprot.writeFieldBegin(
+          foundFieldInfo->name,
+          foundFieldInfo->typeInfo->type,
+          foundFieldInfo->id);
+      written += iprot.writeStructBegin(foundFieldInfo->name);
+      written += iprot.writeStructEnd();
+      written += iprot.writeFieldStop();
+      written += iprot.writeFieldEnd();
+    }
+  }
+  written += iprot.writeFieldStop();
+  written += iprot.writeStructEnd();
+  return written;
+}
+
+template <class Protocol_>
 size_t write(
     Protocol_* iprot, const StructInfo& structInfo, const void* object) {
   DCHECK(object);
-  size_t written = iprot->writeStructBegin(structInfo.name);
   if (UNLIKELY(structInfo.unionExt != nullptr)) {
-    const FieldInfo* end = structInfo.fieldInfos + structInfo.numFields;
-    int activeId = getActiveId(object, structInfo);
-    const FieldInfo* found = std::lower_bound(
-        structInfo.fieldInfos,
-        end,
-        activeId,
-        [](const FieldInfo& lhs, FieldID rhs) { return lhs.id < rhs; });
-    if (found < end && found->id == activeId) {
-      const OptionalThriftValue value =
-          getValue(*found->typeInfo, getMember(*found, object));
-      if (value.hasValue()) {
-        written += writeField(iprot, *found, value.value());
-      } else if (found->typeInfo->type == protocol::TType::T_STRUCT) {
-        written += iprot->writeFieldBegin(
-            found->name, found->typeInfo->type, found->id);
-        written += iprot->writeStructBegin(found->name);
-        written += iprot->writeStructEnd();
-        written += iprot->writeFieldStop();
-        written += iprot->writeFieldEnd();
-      }
-    }
-  } else {
-    for (std::int16_t index = 0; index < structInfo.numFields; index++) {
-      const auto& fieldInfo = structInfo.fieldInfos[index];
-      if (hasFieldValue(object, fieldInfo, structInfo)) {
-        if (OptionalThriftValue value =
-                getValue(*fieldInfo.typeInfo, getMember(fieldInfo, object))) {
-          if (fieldInfo.qualifier == FieldQualifier::Terse &&
-              !isTerseFieldSet(value.value(), fieldInfo)) {
-            continue;
-          }
-          written += writeField(iprot, fieldInfo, value.value());
+    return writeUnion(*iprot, structInfo, object);
+  }
+
+  size_t written = iprot->writeStructBegin(structInfo.name);
+  for (std::int16_t index = 0; index < structInfo.numFields; index++) {
+    const auto& fieldInfo = structInfo.fieldInfos[index];
+    if (hasFieldValue(object, fieldInfo, structInfo)) {
+      if (OptionalThriftValue value =
+              getValue(*fieldInfo.typeInfo, getMember(fieldInfo, object))) {
+        if (fieldInfo.qualifier == FieldQualifier::Terse &&
+            !isTerseFieldSet(value.value(), fieldInfo)) {
+          continue;
         }
+        written += writeField(iprot, fieldInfo, value.value());
       }
     }
   }
-
   written += iprot->writeFieldStop();
   written += iprot->writeStructEnd();
   return written;
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+
+} // namespace apache::thrift::detail

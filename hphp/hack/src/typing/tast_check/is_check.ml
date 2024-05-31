@@ -82,53 +82,49 @@ let handler ~as_lint =
     inherit Tast_visitor.handler_base
 
     method! at_expr (env : Env.env) expr =
-      if
-        as_lint
-        || Typing_warning_utils.code_is_enabled
-             (Env.get_tcopt env)
-             Error_codes.Warning.IsAsAlways
-      then
-        let as_lint =
-          if as_lint then
-            Some (Some (Env.get_check_status env))
-          else
-            None
-        in
-        match expr with
-        | (_, p, Is ((lhs_ty, _, _), hint)) ->
-          let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
-          trivial_check
-            ~as_lint
-            p
-            env
-            lhs_ty
-            hint_ty
-            ~always_kind:Typing_warning.IsAsAlways.Is_is_always_true
-            ~never_kind:Typing_warning.IsAsAlways.Is_is_always_false
-        | ( _,
-            p,
-            As
-              {
-                expr = (lhs_ty, lhs_pos, lhs_expr);
-                hint;
-                is_nullable = false;
-                enforce_deep = _;
-              } ) ->
-          let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
-          trivial_check
-            ~as_lint
-            p
-            env
-            lhs_ty
-            hint_ty
-            ~always_kind:
-              (Typing_warning.IsAsAlways.As_always_succeeds
-                 {
-                   Typing_warning.can_be_captured =
-                     Aast_utils.can_be_captured lhs_expr;
-                   original_pos = p;
-                   replacement_pos = lhs_pos;
-                 })
-            ~never_kind:Typing_warning.IsAsAlways.As_always_fails
-        | _ -> ()
+      let as_lint =
+        if as_lint then
+          Some (Some (Env.get_check_status env))
+        else
+          None
+      in
+      match expr with
+      | (_, p, Is ((lhs_ty, _, _), hint)) ->
+        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
+        trivial_check
+          ~as_lint
+          p
+          env
+          lhs_ty
+          hint_ty
+          ~always_kind:Typing_warning.IsAsAlways.Is_is_always_true
+          ~never_kind:Typing_warning.IsAsAlways.Is_is_always_false
+      | ( _,
+          p,
+          As
+            {
+              expr = (lhs_ty, lhs_pos, lhs_expr);
+              hint;
+              is_nullable = false;
+              enforce_deep = _;
+            } ) ->
+        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
+        trivial_check
+          ~as_lint
+          p
+          env
+          lhs_ty
+          hint_ty
+          ~always_kind:
+            (Typing_warning.IsAsAlways.As_always_succeeds
+               {
+                 Typing_warning.can_be_captured =
+                   Aast_utils.can_be_captured lhs_expr;
+                 original_pos = p;
+                 replacement_pos = lhs_pos;
+               })
+          ~never_kind:Typing_warning.IsAsAlways.As_always_fails
+      | _ -> ()
   end
+
+let error_code = Error_codes.Warning.IsAsAlways

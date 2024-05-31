@@ -65,6 +65,7 @@ fn error_kind(error_code: ErrorCode) -> &'static str {
         4 => "Typing",
         5 => "Lint",
         8 => "Init",
+        12 => "Warn",
         _ => "Other",
     }
 }

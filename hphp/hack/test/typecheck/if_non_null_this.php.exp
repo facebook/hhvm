@@ -1,1 +1,5 @@
-No errors
+WARN: File "if_non_null_this.php", line 15, characters 11-12:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])

@@ -1,1 +1,5 @@
-No errors
+WARN: File "null_check_partial2.php", line 17, characters 8-14:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])

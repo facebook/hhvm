@@ -158,17 +158,6 @@ let missing_override_attribute
 
   Lints.add ~autofix Codes.missing_override_attribute Lint_error name_pos @@ msg
 
-let sketchy_null_check pos name kind =
-  let name = Option.value name ~default:"$x" in
-  Lints.add Codes.sketchy_null_check Lint_warning pos
-  @@ "This is a sketchy null check.\nIt detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\nIf you want to test for them, please consider doing so explicitly.\nIf you only meant to test for `null`, "
-  ^
-  match kind with
-  | `Coalesce ->
-    Printf.sprintf "use `%s ?? $default` instead of `%s ?: $default`" name name
-  | `Eq -> Printf.sprintf "use `%s is null` instead" name
-  | `Neq -> Printf.sprintf "use `%s is nonnull` instead" name
-
 let invalid_truthiness_test pos ty =
   Lints.add Codes.invalid_truthiness_test Lint_warning pos
   @@ Printf.sprintf

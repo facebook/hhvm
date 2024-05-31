@@ -30,6 +30,18 @@ module IsAsAlways = struct
   }
 end
 
+module SketchyNullCheck = struct
+  type kind =
+    | Coalesce
+    | Eq
+    | Neq
+
+  type t = {
+    name: string option;
+    kind: kind;
+  }
+end
+
 type _ t_ =
   | Sketchy_equality : {
       result: bool;
@@ -40,5 +52,6 @@ type _ t_ =
     }
       -> warn t_
   | Is_as_always : IsAsAlways.t -> migrated t_
+  | Sketchy_null_check : SketchyNullCheck.t -> migrated t_
 
 type 'a t = Pos.t * 'a t_

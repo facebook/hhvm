@@ -43,8 +43,20 @@ let visitor ctx =
     else
       Some handler
   in
+
+  let warning_handlers =
+    let warning_checks =
+      [(module Is_check : Handler.Warning.S); (module Sketchy_null_check)]
+    in
+    List.filter_map warning_checks ~f:(fun (module M) ->
+        if Typing_warning_utils.code_is_enabled tcopt M.error_code then
+          Some (M.handler ~as_lint:false)
+        else
+          None)
+  in
   let handlers =
     irregular_handlers
+    @ warning_handlers
     @ List.filter_map
         ~f:Fn.id
         [
@@ -85,7 +97,6 @@ let visitor ctx =
           Some Readonly_check.handler;
           Some Meth_caller_check.handler;
           Some Expression_tree_check.handler;
-          Some (Is_check.handler ~as_lint:false);
           hierarchy_check Class_const_origin_check.handler;
           (if TypecheckerOptions.global_access_check_enabled tcopt then
             Some Global_access_check.handler

@@ -781,6 +781,7 @@ module Warning = struct
   type t =
     | SketchyEquality [@value 12001]
     | IsAsAlways [@value 12002]
+    | SketchyNullCheck [@value 12003]
   [@@deriving enum, show { with_path = false }]
 end
 

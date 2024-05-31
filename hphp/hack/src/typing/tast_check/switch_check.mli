@@ -5,4 +5,5 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val handler : Tast_visitor.handler
+
+include Handler.S

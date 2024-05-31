@@ -31,7 +31,7 @@ let rec is_abstract_or_unknown env ty =
   | Tintersection tyl -> List.for_all tyl ~f:(is_abstract_or_unknown env)
   | _ -> false
 
-let sketchy_null_check env (ty, p, e) kind =
+let sketchy_null_check env ~as_lint (ty, p, e) kind =
   if
     Env.is_sub_type_for_union env (Typing_make_type.null Reason.none) ty
     || is_abstract_or_unknown env ty
@@ -40,27 +40,43 @@ let sketchy_null_check env (ty, p, e) kind =
     Tast_utils.(
       let (env, nonnull_ty) = Env.non_null env (get_pos ty) ty in
       match truthiness env nonnull_ty with
-      | Possibly_falsy -> Lints_errors.sketchy_null_check p name kind
+      | Possibly_falsy ->
+        Typing_warning_utils.add_for_migration
+          (Env.get_tcopt env)
+          ~as_lint:
+            (if as_lint then
+              Some None
+            else
+              None)
+          ( p,
+            Typing_warning.(Sketchy_null_check { SketchyNullCheck.name; kind })
+          )
       | Always_truthy
       | Always_falsy
       | Unknown ->
         ())
 
-let handler =
+let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
     method! at_expr env (_, _, x) =
       match x with
-      | Eif (e, None, _) -> sketchy_null_check env e `Coalesce
+      | Eif (e, None, _) ->
+        sketchy_null_check
+          env
+          ~as_lint
+          e
+          Typing_warning.SketchyNullCheck.Coalesce
       | Unop (Unot, e)
       | Binop { bop = Eqeq; lhs = (_, _, Null); rhs = e }
       | Binop { bop = Eqeq; lhs = e; rhs = (_, _, Null) } ->
-        sketchy_null_check env e `Eq
-      | Eif (e, Some _, _) -> sketchy_null_check env e `Neq
+        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Eq
+      | Eif (e, Some _, _) ->
+        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Neq
       | Binop { bop = Ampamp | Barbar; lhs = e1; rhs = e2 } ->
-        sketchy_null_check env e1 `Neq;
-        sketchy_null_check env e2 `Neq
+        sketchy_null_check env ~as_lint e1 Typing_warning.SketchyNullCheck.Neq;
+        sketchy_null_check env ~as_lint e2 Typing_warning.SketchyNullCheck.Neq
       | _ -> ()
 
     method! at_stmt env x =
@@ -69,6 +85,8 @@ let handler =
       | Do (_, e)
       | While (e, _)
       | For (_, Some e, _, _) ->
-        sketchy_null_check env e `Neq
+        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Neq
       | _ -> ()
   end
+
+let error_code = Error_codes.Warning.SketchyNullCheck

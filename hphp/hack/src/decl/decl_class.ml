@@ -84,13 +84,14 @@ let rec apply_substs substs class_context (pos, ty) =
 
 let element_to_class_elt
     (pty : (Pos_or_decl.t * decl_ty) lazy_t)
-    {
-      elt_flags = ce_flags;
-      elt_origin = ce_origin;
-      elt_visibility = ce_visibility;
-      elt_deprecated = ce_deprecated;
-      elt_sort_text = ce_sort_text;
-    } =
+    ({
+       elt_flags = ce_flags;
+       elt_origin = ce_origin;
+       elt_visibility = ce_visibility;
+       elt_deprecated = ce_deprecated;
+       elt_sort_text = ce_sort_text;
+     } :
+      Decl_defs.element) : Typing_defs.class_elt =
   let (ce_pos, ce_type) =
     (lazy (fst @@ Lazy.force pty), lazy (snd @@ Lazy.force pty))
   in
@@ -286,10 +287,15 @@ let lookup_static_property_type_lazy
     (find_static_property ~child_class_name:dc.Decl_defs.dc_name ctx)
 
 let lookup_method_type_lazy
-    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+    (ctx : Provider_context.t option)
+    (dc : Decl_defs.decl_class_type)
+    (name : string)
+    (element : Decl_defs.element) : Typing_defs.class_elt =
   map_element
     dc.dc_substs
     (find_method ctx ~child_class_name:dc.Decl_defs.dc_name)
+    name
+    element
 
 let lookup_static_method_type_lazy
     (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =

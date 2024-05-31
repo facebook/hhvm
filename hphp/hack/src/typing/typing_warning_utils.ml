@@ -97,20 +97,49 @@ module IsAsAlways = struct
     }
 end
 
+module SketchyNullCheck = struct
+  let message { Typing_warning.SketchyNullCheck.name; kind } =
+    let name = Option.value name ~default:"$x" in
+    "This is a sketchy null check.\nIt detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\nIf you want to test for them, please consider doing so explicitly.\nIf you only meant to test for `null`, "
+    ^
+    match kind with
+    | Typing_warning.SketchyNullCheck.Coalesce ->
+      Printf.sprintf
+        "use `%s ?? $default` instead of `%s ?: $default`"
+        name
+        name
+    | Typing_warning.SketchyNullCheck.Eq ->
+      Printf.sprintf "use `%s is null` instead" name
+    | Typing_warning.SketchyNullCheck.Neq ->
+      Printf.sprintf "use `%s is nonnull` instead" name
+
+  let warn pos x =
+    {
+      code = Codes.SketchyNullCheck;
+      claim = lazy (pos, message x);
+      reasons = lazy [];
+      quickfixes = (* TODO @catg migrate quickfixes too. *) [];
+    }
+end
+
 module Lint = struct
   let code (warning : Typing_warning.migrated Typing_warning.t_) : int =
     match warning with
     | Typing_warning.Is_as_always { Typing_warning.IsAsAlways.kind; _ } ->
       IsAsAlways.lint_code kind
+    | Typing_warning.Sketchy_null_check _ ->
+      Lints_codes.Codes.sketchy_null_check
 
   let message (warning : Typing_warning.migrated Typing_warning.t_) : string =
     match warning with
     | Typing_warning.Is_as_always x -> IsAsAlways.message x
+    | Typing_warning.Sketchy_null_check x -> SketchyNullCheck.message x
 
   let quickfix (warning : Typing_warning.migrated Typing_warning.t_) =
     (match warning with
     | Typing_warning.Is_as_always { Typing_warning.IsAsAlways.kind; _ } ->
-      IsAsAlways.quickfix kind)
+      IsAsAlways.quickfix kind
+    | Typing_warning.Sketchy_null_check _ -> None)
     |> Option.map ~f:Lints_errors.quickfix
 end
 
@@ -120,6 +149,7 @@ let to_error (type a) ((pos, warning) : a Typing_warning.t) : t =
       { result; left; right; left_trail; right_trail } ->
     sketchy_equality pos result left right left_trail right_trail
   | Typing_warning.Is_as_always x -> IsAsAlways.warn pos x
+  | Typing_warning.Sketchy_null_check x -> SketchyNullCheck.warn pos x
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with

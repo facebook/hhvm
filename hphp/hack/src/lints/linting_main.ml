@@ -24,7 +24,7 @@ let typed_linters =
     Is_check.handler ~as_lint:true;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
-    Linter_sketchy_null_check.handler;
+    Sketchy_null_check.handler ~as_lint:true;
     Linter_truthiness_test.handler;
     Linter_redundant_generics.handler;
     Linter_class_overrides_trait.handler;

@@ -1,1 +1,5 @@
-No errors
+WARN: File "condition_if_static.php", line 16, characters 9-16:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])

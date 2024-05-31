@@ -10,7 +10,7 @@
 #include <chrono>
 #include <cstdint>
 #include <glog/logging.h>
-#include <proxygen/lib/http/HTTPHeaders.h>
+#include <proxygen/lib/http/HTTPMessage.h>
 #include <utility>
 
 namespace proxygen {
@@ -62,10 +62,10 @@ class HTTPSessionObserverInterface {
 
   struct RequestStartedEvent {
     const TimePoint timestamp;
-    const HTTPHeaders& requestHeaders;
+    const HTTPMessage& request;
     HTTPTransactionObserverAccessor* txnObserverAccessor;
 
-    // Do not support copy or move given that requestHeaders is a ref.
+    // Do not support copy or move given that request is a ref.
     RequestStartedEvent(RequestStartedEvent&&) = delete;
     RequestStartedEvent& operator=(const RequestStartedEvent&) = delete;
     RequestStartedEvent& operator=(RequestStartedEvent&& rhs) = delete;
@@ -74,15 +74,15 @@ class HTTPSessionObserverInterface {
     struct BuilderFields {
       folly::Optional<std::reference_wrapper<const TimePoint>>
           maybeTimestampRef;
-      folly::Optional<std::reference_wrapper<const HTTPHeaders>>
-          maybeHTTPHeadersRef;
+      folly::Optional<std::reference_wrapper<const HTTPMessage>>
+          maybeRequestRef;
       HTTPTransactionObserverAccessor* maybeTxnObserverAccessorPtr;
       explicit BuilderFields() = default;
     };
 
     struct Builder : public BuilderFields {
       Builder&& setTimestamp(const TimePoint& timestamp);
-      Builder&& setHeaders(const proxygen::HTTPHeaders& headers);
+      Builder&& setRequest(const proxygen::HTTPMessage& request);
       Builder&& setTxnObserverAccessor(
           proxygen::HTTPTransactionObserverAccessor* txnObserverAccessor);
       RequestStartedEvent build() &&;

@@ -1634,9 +1634,9 @@ TEST_P(HQDownstreamSessionTest, Observer_RequestStarted) {
       .WillOnce(Invoke(
           [&](HTTPSessionObserverAccessor*,
               const HTTPSessionObserverInterface::RequestStartedEvent& event) {
-            EXPECT_EQ(
-                event.requestHeaders.getSingleOrEmpty("x-meta-test-header"),
-                "abc123");
+            EXPECT_EQ(event.request.getHeaders().getSingleOrEmpty(
+                          "x-meta-test-header"),
+                      "abc123");
             actualTxnObserverAccessor = event.txnObserverAccessor;
           }));
   auto handler = addSimpleStrictHandler();

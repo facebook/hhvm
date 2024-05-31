@@ -875,7 +875,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
               .setTimestamp(HTTPSessionObserverInterface::Clock::now())
-              .setHeaders(msgPtr->getHeaders())
+              .setRequest(*msg)
               .setTxnObserverAccessor(txn->getObserverAccessor())
               .build();
       sessionObserverContainer_.invokeInterfaceMethod<
@@ -1651,7 +1651,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
-            .setHeaders(headers.getHeaders())
+            .setRequest(headers)
             .setTxnObserverAccessor(txn->getObserverAccessor())
             .build();
     sessionObserverContainer_.invokeInterfaceMethod<

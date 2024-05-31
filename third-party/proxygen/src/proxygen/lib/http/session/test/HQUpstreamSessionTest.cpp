@@ -1279,9 +1279,9 @@ TEST_P(HQUpstreamSessionTest, Observer_RequestStarted) {
       .WillOnce(
           Invoke([&](HTTPSessionObserverAccessor*,
                      const MockSessionObserver::RequestStartedEvent& event) {
-            EXPECT_EQ(
-                event.requestHeaders.getSingleOrEmpty("x-meta-test-header"),
-                "abc123");
+            EXPECT_EQ(event.request.getHeaders().getSingleOrEmpty(
+                          "x-meta-test-header"),
+                      "abc123");
             actualTxnObserverAccessor = event.txnObserverAccessor;
           }));
 

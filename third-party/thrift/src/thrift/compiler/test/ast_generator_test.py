@@ -51,11 +51,13 @@ class AstGeneratorTest(unittest.TestCase):
         os.chdir(self.tmp)
         self.maxDiff = None
 
-    def run_thrift(self, file, backcompat=True):
+    def run_thrift(self, file, backcompat=True, use_hash=False):
         with resources.as_file(
             resources.files(__package__).joinpath("implicit_includes")
         ) as inc:
             extra_args = "" if backcompat else ",no_backcompat"
+            if use_hash:
+                extra_args += ",use_hash"
             argsx = [
                 thrift2ast,
                 "--gen",
@@ -429,3 +431,30 @@ class AstGeneratorTest(unittest.TestCase):
             spans,
             {1: "foo.thrift"},
         )
+
+    def test_hash_mode(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """
+                struct Foo {
+                    1: i64 int;
+                }
+                struct Bar {
+                    1: Foo foo;
+                }
+                """
+            ),
+        )
+
+        ast = self.run_thrift("foo.thrift", use_hash=True)
+        for v in ast.definitionsMap.values():
+            if v.structDef.attrs.name == "Bar":
+                self.assertEqual(
+                    ast.definitionsMap[
+                        v.structDef.fields[
+                            0
+                        ].type.name.structType.typeHashPrefixSha2_256
+                    ].structDef.attrs.name,
+                    "Foo",
+                )

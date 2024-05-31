@@ -87,6 +87,8 @@ class t_ast_generator : public t_generator {
         source_ranges_ = true;
       } else if (pair.first == "no_backcompat") {
         schema_opts_.include.reset(schematizer::included_data::DoubleWrites);
+      } else if (pair.first == "use_hash") {
+        schema_opts_.use_hash = true;
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -129,6 +131,8 @@ void t_ast_generator::generate_program() {
       program_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
       definition_index;
+  std::unordered_map<const t_named*, apache::thrift::type::DefinitionKey>
+      definition_key_index;
 
   auto intern_value = [&](std::unique_ptr<t_const_value> val,
                           t_program* = nullptr) {
@@ -144,11 +148,18 @@ void t_ast_generator::generate_program() {
                      ->at(idToPosition(program_index.at(program)))
                      .definitions()
                      .value();
+    auto& defKeys = ast.programs()
+                        ->at(idToPosition(program_index.at(program)))
+                        .definitionKeys()
+                        .value();
     for (auto& def : program->definitions()) {
       if (def.generated() && !include_generated_) {
         continue;
       }
-      defs.push_back(definition_index.at(&def));
+      if (!schema_opts_.use_hash) {
+        defs.push_back(definition_index.at(&def));
+      }
+      defKeys.push_back(definition_key_index.at(&def));
     }
   };
 
@@ -210,9 +221,7 @@ void t_ast_generator::generate_program() {
   schematizer schema_source(&program_bundle_, schema_opts_);
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
-    if (program_index.count(&program)) {
-      return;
-    }
+    assert(!program_index.count(&program));
 
     auto& programs = *ast.programs();
     auto pos = programs.size();
@@ -227,9 +236,11 @@ void t_ast_generator::generate_program() {
     auto is_root_program = std::exchange(is_root_program_, false);
     for (auto* include : program.get_included_programs()) {
       // This could invalidate references into `programs`.
-      visitor(*include);
+      if (!program_index.count(include)) {
+        visitor(*include);
+        populate_defs(include);
+      }
       programs.at(pos).includes().value().push_back(program_index.at(include));
-      populate_defs(include);
     }
     is_root_program_ = is_root_program;
 
@@ -272,6 +283,14 @@ void t_ast_generator::generate_program() {
     hydrate_const(def, *schema_source.gen_schema(node));             \
     set_source_range(node, *def.attrs());                            \
     set_child_source_ranges(node, def);                              \
+    auto key = schematizer::identify_definition(node);               \
+    if (ast.definitionsMap()->count(key)) {                          \
+      throw std::runtime_error(fmt::format(                          \
+          "Duplicate definition key: {}",                            \
+          node.uri().empty() ? node.name() : node.uri()));           \
+    }                                                                \
+    ast.definitionsMap()[key] = definitions.back();                  \
+    definition_key_index[&node] = std::move(key);                    \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);
@@ -423,6 +442,9 @@ void t_ast_generator::generate_program() {
 
   visitor(*program_);
   populate_defs(program_);
+  if (schema_opts_.use_hash) {
+    ast.definitions()->clear();
+  }
   if (source_ranges_) {
     for (auto inc : program_->includes()) {
       cpp2::IncludeRef ident;
@@ -453,6 +475,7 @@ THRIFT_REGISTER_GENERATOR(
     "    include_generated: Enables schematization of generated (patch) types.\n"
     "    source_ranges:     Enables population of the identifier source range map.\n"
     "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
+    "    use_hash:          Uses typeHashPrefixSha2_256 in typeUri and instead of extern ids.\n"
     "");
 
 } // namespace compiler

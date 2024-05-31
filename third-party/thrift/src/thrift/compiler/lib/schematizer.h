@@ -59,9 +59,11 @@ class schematizer {
   struct options {
     included_data_set include;
     InternFunc intern_value;
+    bool use_hash = false; // Uses typeHashPrefixSha2_256 in typeUri and
+                           // definitionKey instead of definitionId.
   };
 
-  explicit schematizer(const t_program_bundle* bundle, options opts = {})
+  explicit schematizer(const t_program_bundle* bundle, options opts)
       : bundle_(bundle), opts_(std::move(opts)) {}
 
   // Creates a constant of type schema.Struct describing the argument.
@@ -76,6 +78,10 @@ class schematizer {
   // Creates a constant of type schema.Schema describing the argument and all
   // types recursively referenced by it. Calls gen_schema internally.
   std::unique_ptr<t_const_value> gen_full_schema(const t_service& node);
+
+  // Gets a universally unique identifier for a definition that is consistent
+  // across runs on different including programs.
+  static std::string identify_definition(const t_named& node);
 
  private:
   const t_program_bundle* bundle_;

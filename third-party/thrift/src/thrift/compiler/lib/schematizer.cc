@@ -17,6 +17,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <openssl/sha.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
@@ -61,7 +62,9 @@ t_type_ref schematizer::stdType(std::string_view uri) {
 
 std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
   auto ret = t_const_value::make_map();
-  if (!type.uri().empty()) {
+  if (opts_.use_hash) {
+    ret->add_map(val("typeHashPrefixSha2_256"), val(identify_definition(type)));
+  } else if (!type.uri().empty()) {
     ret->add_map(val("uri"), val(type.uri()));
   } else {
     ret->add_map(val("scopedName"), val(type.get_scoped_name()));
@@ -747,6 +750,15 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
       break;
   }
   return ret;
+}
+
+std::string schematizer::identify_definition(const t_named& node) {
+  // @lint-ignore CLANGTIDY facebook-hte-CArray
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  auto val = node.program()->path() + node.name();
+  SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
+  constexpr size_t kBytes = 16;
+  return std::string(reinterpret_cast<const char*>(hash), kBytes);
 }
 
 } // namespace compiler

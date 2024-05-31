@@ -629,6 +629,12 @@ union Definition {
 @python.Py3Hidden
 typedef list<Definition> DefinitionList
 
+typedef standard.ByteString DefinitionKey
+
+/** A map of definitions (Structs, Enums, Services, etc), accessible by `DefinitionKey`. */
+@python.Py3Hidden
+typedef map<DefinitionKey, Definition> DefinitionMap
+
 /**
  * A Thrift program.
  *
@@ -665,6 +671,11 @@ struct Program {
   // TODO(afuller): Fix type resolution order bugs in the parser to make this
   // comment true in all cases.
   4: DefinitionIds definitions;
+
+  /**
+ * As above, but for accessing `definitionsMap`
+ */
+  8: list<DefinitionKey> definitionKeys;
 
   /**
    * The raw path used to identify this program's file to the compiler.
@@ -711,6 +722,9 @@ struct Schema {
 
   /** The definitions, accessible by `DefinitionId`. */
   4: DefinitionList definitions;
+
+  /** The definitions, accessible by `DefinitionKey`. */
+  8: DefinitionMap definitionsMap;
 
   /**
    * DEPRECATED! Get the information from the Program struct.

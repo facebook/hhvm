@@ -24,7 +24,7 @@ import (
 )
 
 func TestHeaderTransport(t *testing.T) {
-	trans := newHeaderTransport(NewMemoryBuffer())
+	trans := newHeaderTransport(newMockSocket())
 	TransportTest(t, trans, trans)
 }
 
@@ -32,7 +32,7 @@ func TestHeaderTransport(t *testing.T) {
 // Reflect the result after going through the header pipeline, and make sure that:
 // The original proto could still read what it sent
 // Header found the correct protocol from the incoming frame
-func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, proto Format, headertrans *headerTransport) {
+func testHeaderToProto(t *testing.T, clientType ClientType, tmb *mockSocket, proto Format, headertrans *headerTransport) {
 	tFname, tTypeID, tID, tData := "func", CALL, int32(1), "ASDF"
 	err := proto.WriteMessageBegin(tFname, tTypeID, tID)
 	if err != nil {
@@ -100,7 +100,7 @@ func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, p
 }
 
 func TestHeaderFramedBinary(t *testing.T) {
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	testHeaderToProto(
 		t, FramedDeprecated, tmb,
 		NewBinaryProtocol(NewFramedTransport(tmb), true, true),
@@ -109,7 +109,7 @@ func TestHeaderFramedBinary(t *testing.T) {
 }
 
 func TestHeaderFramedCompact(t *testing.T) {
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	testHeaderToProto(
 		t, FramedCompact, tmb,
 		NewCompactProtocol(NewFramedTransport(tmb)),
@@ -119,7 +119,7 @@ func TestHeaderFramedCompact(t *testing.T) {
 
 func TestHeaderProtoID(t *testing.T) {
 	n := 1
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	// write transport
 	trans1 := newHeaderTransport(tmb)
 	// read transport
@@ -155,7 +155,7 @@ func TestHeaderProtoID(t *testing.T) {
 
 func TestHeaderHeaders(t *testing.T) {
 	n := 1
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	// write transport
 	trans1 := newHeaderTransport(tmb)
 	// read transport
@@ -218,7 +218,7 @@ func TestHeaderHeaders(t *testing.T) {
 
 func TestHeaderRWSmall(t *testing.T) {
 	n := 1
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDF")
 
@@ -281,7 +281,7 @@ func TestHeaderRWSmall(t *testing.T) {
 
 func TestHeaderZlib(t *testing.T) {
 	n := 1
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
@@ -352,7 +352,7 @@ func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {
 }
 
 func TestHeaderTransportRWMultiple(t *testing.T) {
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb)
 
 	// Test Junk Data
@@ -366,7 +366,7 @@ func BenchmarkHeaderFlush(b *testing.B) {
 	data := []byte("ASDF")
 
 	for n := 0; n < b.N; n++ {
-		tmb := NewMemoryBuffer()
+		tmb := newMockSocket()
 		trans1 := newHeaderTransport(tmb)
 
 		trans1.SetIdentity("localhost")

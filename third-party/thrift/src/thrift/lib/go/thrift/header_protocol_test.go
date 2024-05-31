@@ -19,9 +19,9 @@ package thrift
 import "testing"
 
 func TestHeaderProtocolHeaders(t *testing.T) {
-	tmb := NewMemoryBuffer()
-	proto1 := NewHeaderProtocol(tmb)
-	proto2 := NewHeaderProtocol(tmb)
+	mockSocket := newMockSocket()
+	proto1 := NewHeaderProtocol(mockSocket)
+	proto2 := NewHeaderProtocol(mockSocket)
 
 	proto1.(RequestHeaders).SetRequestHeader("preferred_cheese", "cheddar")
 	if v, _ := proto1.(RequestHeaders).GetRequestHeader("preferred_cheese"); v != "cheddar" {

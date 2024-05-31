@@ -24,7 +24,7 @@ import (
 
 func TestHeaderZstd(t *testing.T) {
 	n := 1
-	tmb := NewMemoryBuffer()
+	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30

@@ -23,7 +23,7 @@ import (
 )
 
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
-	protocol := NewHeaderProtocol(NewMemoryBuffer())
+	protocol := NewHeaderProtocol(newMockSocket())
 	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)

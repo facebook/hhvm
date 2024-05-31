@@ -16,20 +16,20 @@
 
 package thrift
 
-import "net"
+import (
+	"net"
+	"time"
+)
 
 type mockSocket struct {
-	net.Conn
-	server net.Conn
+	Transport
 }
 
 var _ Socket = (*mockSocket)(nil)
 
 func newMockSocket() *mockSocket {
-	client, server := net.Pipe()
 	return &mockSocket{
-		Conn:   client,
-		server: server,
+		Transport: NewMemoryBuffer(),
 	}
 }
 
@@ -37,10 +37,38 @@ func (s *mockSocket) Open() error {
 	return nil
 }
 
-func (s *mockSocket) Flush() error {
+func (s *mockSocket) Bytes() []byte {
+	return s.Transport.(*MemoryBuffer).Bytes()
+}
+
+type mockAddr struct {
+	addr string
+}
+
+func (m *mockAddr) Network() string {
+	return "tcp"
+}
+
+func (m *mockAddr) String() string {
+	return m.addr
+}
+
+func (s *mockSocket) LocalAddr() net.Addr {
+	return &mockAddr{"<local mock socket>"}
+}
+
+func (s *mockSocket) RemoteAddr() net.Addr {
+	return &mockAddr{"<remote mock socket>"}
+}
+
+func (s *mockSocket) SetDeadline(t time.Time) error {
 	return nil
 }
 
-func (s *mockSocket) RemainingBytes() uint64 {
-	return UnknownRemaining
+func (s *mockSocket) SetReadDeadline(t time.Time) error {
+	return nil
+}
+
+func (s *mockSocket) SetWriteDeadline(t time.Time) error {
+	return nil
 }

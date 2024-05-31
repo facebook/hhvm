@@ -33,7 +33,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol := NewHeaderProtocol(NewMemoryBuffer())
+	protocol := NewHeaderProtocol(newMockSocket())
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestHeaderProtocolSetNilHeaders(t *testing.T) {
-	transport := NewHeaderProtocol(NewMemoryBuffer())
+	transport := NewHeaderProtocol(newMockSocket())
 	if err := setRequestHeaders(nil, transport); err != nil {
 		t.Fatal(err)
 	}

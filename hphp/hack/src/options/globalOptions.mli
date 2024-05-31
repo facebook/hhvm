@@ -49,6 +49,7 @@ val with_zstd_decompress_by_file : bool -> saved_state -> saved_state
 type extended_reasons_config =
   | Extended of int
   | Debug
+  | Yolo
 [@@deriving eq, show]
 
 (** Naming conventions for fieds:

@@ -1,0 +1,248 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 25 - line 11, character 27:
+
+But got `Super`
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<»Super«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
+
+Here's why: this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<»Super«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
+
+flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+
+ 5 | class MyC<+T1, T2> extends »MyA<T1, Super, T2>« {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_covariant.php", line 5, character 28 - line 5, character 45:
+
+which itself flows *into* this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(»MyC<Super, Super>« $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 32 - line 13, character 48:
+
+which itself flows *into* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> »$x«): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 13, character 50 - line 13, character 51:
+
+which itself flows *into* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 14, character 14 - line 14, character 15:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   »takes_my_a«($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 14, character 3 - line 14, character 12:
+
+which itself flows *from* this function or method 
+
+ 11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 10 - line 11, character 19:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 21 - line 11, character 42:
+
+which itself flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+
+ 11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 11, character 25 - line 11, character 27:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":13,
+              "char_start":36,
+              "char_end":40
+            }
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_class":["\\MyA",0,{"Covariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"class_subtyping_covariant.php",
+                          "line":5,
+                          "char_start":28,
+                          "char_end":45
+                        }
+                      ]
+                    },
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[
+                                    {
+                                      "filename":"class_subtyping_covariant.php",
+                                      "line":13,
+                                      "char_start":32,
+                                      "char_end":48
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rwitness":[
+                                    {
+                                      "filename":"class_subtyping_covariant.php",
+                                      "line":13,
+                                      "char_start":50,
+                                      "char_end":51
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "Rwitness":[
+                                {
+                                  "filename":"class_subtyping_covariant.php",
+                                  "line":14,
+                                  "char_start":14,
+                                  "char_end":15
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "Rprj_symm":[
+                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rwitness":[
+                                    {
+                                      "filename":"class_subtyping_covariant.php",
+                                      "line":14,
+                                      "char_start":3,
+                                      "char_end":12
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Rsupport_dynamic_type":[
+                                    {
+                                      "filename":"class_subtyping_covariant.php",
+                                      "line":11,
+                                      "char_start":10,
+                                      "char_end":19
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rhint":[
+                    {
+                      "filename":"class_subtyping_covariant.php",
+                      "line":11,
+                      "char_start":21,
+                      "char_end":42
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {
+          "filename":"class_subtyping_covariant.php",
+          "line":11,
+          "char_start":25,
+          "char_end":27
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

@@ -5867,7 +5867,8 @@ end = struct
            ~f:(function
              | GlobalOptions.Extended complexity ->
                Typing_reason.(explain (Rflow (r_sub, r_super)) ~complexity)
-             | GlobalOptions.Debug ->
+             | GlobalOptions.Debug
+             | GlobalOptions.Yolo ->
                Typing_reason.(debug (Rflow (r_sub, r_super))))
            (TypecheckerOptions.tco_extended_reasons
               Typing_env_types.(env.genv.tcopt))
@@ -5985,7 +5986,8 @@ end = struct
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain (Rflow (reason_sub, reason_super)) ~complexity)
-               | GlobalOptions.Debug ->
+               | GlobalOptions.Debug
+               | GlobalOptions.Yolo ->
                  Typing_reason.(debug (Rflow (reason_sub, reason_super))))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
@@ -6130,7 +6132,8 @@ end = struct
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain (Rflow (reason_sub, reason_super)) ~complexity)
-               | GlobalOptions.Debug ->
+               | GlobalOptions.Debug
+               | GlobalOptions.Yolo ->
                  Typing_reason.(debug (Rflow (reason_sub, reason_super))))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))

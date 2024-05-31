@@ -1,0 +1,123 @@
+error: Typing[4110] Invalid argument
+
+Expected `string`
+
+ 3 | function foo(»string« $_): void {}
+ 4 | 
+ 5 | function bar(int $y ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
+
+But got `int`
+
+ 3 | function foo(string $_): void {}
+ 4 | 
+ 5 | function bar(»int« $y ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 5, character 14 - line 5, character 16:
+
+Here's why: this hint
+
+ 3 | function foo(string $_): void {}
+ 4 | 
+ 5 | function bar(»int« $y ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 5, character 14 - line 5, character 16:
+
+flows *into* this expression
+
+ 3 | function foo(string $_): void {}
+ 4 | 
+ 5 | function bar(int »$y« ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 5, character 18 - line 5, character 19:
+
+which itself flows *into* this expression
+
+ 3 | function foo(string $_): void {}
+ 4 | 
+ 5 | function bar(int $y ): void{
+ 6 |   foo(»$y«);
+ 7 | }
+
+File "fn_call.php", line 6, character 7 - line 6, character 8:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 3 | function foo(string $_): void {}
+ 4 | 
+ 5 | function bar(int $y ): void{
+ 6 |   »foo«($y);
+ 7 | }
+
+File "fn_call.php", line 6, character 3 - line 6, character 5:
+
+which itself flows *from* this function or method 
+
+ 3 | function »foo«(string $_): void {}
+ 4 | 
+ 5 | function bar(int $y ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 3, character 10 - line 3, character 12:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | function foo(»string« $_): void {}
+ 4 | 
+ 5 | function bar(int $y ): void{
+ 6 |   foo($y);
+ 7 | }
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+                {
+                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+                }
+              ]
+            },
+            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":5}]},
+                {
+                  "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

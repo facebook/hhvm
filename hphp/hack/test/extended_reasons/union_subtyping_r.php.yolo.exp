@@ -1,0 +1,115 @@
+error: Typing[4110] Invalid return type
+
+Expected `B`
+
+ 6 | function union_r(C $c): (A|»B«) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+
+But got `C`
+
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+Here's why: this hint
+
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+flows *into* this expression
+
+ 6 | function union_r(C »$c«): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+
+which itself flows *into* this expression
+
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
+which itself flows *into* this expression
+
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   »return $c;«
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+
+which itself flows *into* this hint
+
+ 6 | function union_r(C $c): »(A|B)« {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+
+which itself flows *into* this hint, via the union type
+
+ 6 | function union_r(C $c): (A|»B«) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    {
+      "Rflow":[
+        {
+          "Rprj_asymm_right":[
+            "Prj_asymm_union",
+            {
+              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
+        },
+        {
+          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

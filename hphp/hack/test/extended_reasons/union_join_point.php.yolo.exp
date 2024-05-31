@@ -1,0 +1,162 @@
+error: Typing[4110] Invalid return type
+
+Expected `A`
+
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
+
+But got `B`
+
+ 5 | function foo(bool  $p, A $x, »B« $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+Here's why: this hint
+
+ 5 | function foo(bool  $p, A $x, »B« $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+flows *into* this expression
+
+ 5 | function foo(bool  $p, A $x, B »$y«): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 32 - line 5, character 33:
+
+which itself flows *into* this expression
+
+ 8 |   } else{
+ 9 |     $z = »$y«;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 10 - line 9, character 11:
+
+which itself flows *into* this expression
+
+ 8 |   } else{
+ 9 |     »$z« = $y;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 5 - line 9, character 6:
+
+which itself flows *into* this expression, via the union type
+
+ 5 | function foo(bool  $p, A $x, B $y): A {
+ 6 |   »if($p){
+ 7 |     $z = $x;
+ 8 |   } else{
+ 9 |     $z = $y;
+10 |   }«
+11 | 
+12 |   return $z;
+
+File "union_join_point.php", line 6, character 3 - line 10, character 3:
+
+which itself flows *into* this expression
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   return »$z«;
+ 13 | }
+
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
+which itself flows *into* this expression
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   »return $z;«
+ 13 | }
+
+File "union_join_point.php", line 12, character 3 - line 12, character 12:
+
+which itself flows *into* this hint
+
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
+            }
+          ]
+        },
+        {
+          "Rprj_asymm_left":[
+            "Prj_asymm_union",
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
+                    },
+                    {
+                      "Rwitness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

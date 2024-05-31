@@ -1,0 +1,183 @@
+error: Typing[4110] Invalid return type
+
+Expected `C`
+
+ 7 | function inter_l((A & I) $ai): »C« {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+
+But got `(A & I)`
+
+ 7 | function inter_l(»(A & I)« $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
+
+Here's why: this hint
+
+ 7 | function inter_l(»(A & I)« $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
+
+flows *into* this expression
+
+ 7 | function inter_l((A & I) »$ai«): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = »$ai«;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   »$c« = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   »return $c;«
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
+
+which itself flows *into* this hint
+
+ 7 | function inter_l((A & I) $ai): »C« {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"intersection_subtyping_l.php",
+                              "line":7,
+                              "char_start":18,
+                              "char_end":24
+                            }
+                          ]
+                        },
+                        {
+                          "Rwitness":[
+                            {
+                              "filename":"intersection_subtyping_l.php",
+                              "line":7,
+                              "char_start":26,
+                              "char_end":28
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness":[
+                        {
+                          "filename":"intersection_subtyping_l.php",
+                          "line":8,
+                          "char_start":8,
+                          "char_end":10
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[
+                    {
+                      "filename":"intersection_subtyping_l.php",
+                      "line":8,
+                      "char_start":3,
+                      "char_end":4
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Rwitness":[
+                {
+                  "filename":"intersection_subtyping_l.php",
+                  "line":9,
+                  "char_start":10,
+                  "char_end":11
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Rwitness":[
+            {
+              "filename":"intersection_subtyping_l.php",
+              "line":9,
+              "char_start":3,
+              "char_end":12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[
+        {
+          "filename":"intersection_subtyping_l.php",
+          "line":7,
+          "char_start":32,
+          "char_end":32
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

@@ -1,0 +1,152 @@
+error: Typing[4110] Invalid argument
+
+Expected `Sub`
+
+ 7 | function foo(»Sub« $_): void {}
+ 8 | 
+ 9 | function bar(Super $f): void {
+
+File "assign_local.php", line 7, character 14 - line 7, character 16:
+
+But got `Super`
+
+ 9 | function bar(»Super« $f): void {
+10 |   $g = $f;
+11 |   foo($g);
+12 | }
+
+File "assign_local.php", line 9, character 14 - line 9, character 18:
+
+Here's why: this hint
+
+ 9 | function bar(»Super« $f): void {
+10 |   $g = $f;
+11 |   foo($g);
+12 | }
+
+File "assign_local.php", line 9, character 14 - line 9, character 18:
+
+flows *into* this expression
+
+ 9 | function bar(Super »$f«): void {
+10 |   $g = $f;
+11 |   foo($g);
+12 | }
+
+File "assign_local.php", line 9, character 20 - line 9, character 21:
+
+which itself flows *into* this expression
+
+ 9 | function bar(Super $f): void {
+10 |   $g = »$f«;
+11 |   foo($g);
+12 | }
+
+File "assign_local.php", line 10, character 8 - line 10, character 9:
+
+which itself flows *into* this expression
+
+ 9 | function bar(Super $f): void {
+10 |   »$g« = $f;
+11 |   foo($g);
+12 | }
+
+File "assign_local.php", line 10, character 3 - line 10, character 4:
+
+which itself flows *into* this expression
+
+  9 | function bar(Super $f): void {
+ 10 |   $g = $f;
+ 11 |   foo(»$g«);
+ 12 | }
+
+File "assign_local.php", line 11, character 7 - line 11, character 8:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+  9 | function bar(Super $f): void {
+ 10 |   $g = $f;
+ 11 |   »foo«($g);
+ 12 | }
+
+File "assign_local.php", line 11, character 3 - line 11, character 5:
+
+which itself flows *from* this function or method 
+
+ 7 | function »foo«(Sub $_): void {}
+ 8 | 
+ 9 | function bar(Super $f): void {
+
+File "assign_local.php", line 7, character 10 - line 7, character 12:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 7 | function foo(»Sub« $_): void {}
+ 8 | 
+ 9 | function bar(Super $f): void {
+
+File "assign_local.php", line 7, character 14 - line 7, character 16:
+
+Flow:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                        },
+                        {
+                          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    },
+                    {
+                      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+                    }
+                  ]
+                },
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+                }
+              ]
+            },
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+            }
+          ]
+        },
+        {
+          "Rprj_symm":[
+            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":5}]
+                },
+                {
+                  "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+1 error found.

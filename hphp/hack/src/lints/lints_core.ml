@@ -27,10 +27,10 @@ let string_of_severity = function
   | Lint_disabled -> "disabled"
 
 type 'pos t = {
-  code: int;
+  code: int; (* Determines ordering (1st priority) *)
   severity: severity;
-  pos: 'pos; [@opaque]
-  message: string;
+  pos: 'pos; [@opaque] (* Determines ordering (2nd priority) *)
+  message: string; (* Determines ordering (3rd priority) *)
   bypass_changed_lines: bool;
       (** Normally, lint warnings and lint advice only get shown by arcanist if the
        * lines they are raised on overlap with lines changed in a diff. This
@@ -39,6 +39,16 @@ type 'pos t = {
   check_status: Tast.check_status option;
 }
 [@@deriving show]
+
+(* Code, position, and message imply the rest of the fields *)
+let compare_lint a b =
+  match Int.compare a.code b.code with
+  | 0 -> begin
+    match Pos.compare a.pos b.pos with
+    | 0 -> String.compare a.message b.message
+    | n -> n
+  end
+  | n -> n
 
 let (lint_list : Pos.t t list option ref) = ref None
 
@@ -221,4 +231,5 @@ let do_ f =
   in
   let out = filter_out_unsound_lints out in
   lint_list := list_copy;
-  (List.rev out, result)
+  let uniq = List.dedup_and_sort out ~compare:compare_lint in
+  (uniq, result)

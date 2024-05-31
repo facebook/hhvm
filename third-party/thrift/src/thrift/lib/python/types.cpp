@@ -24,9 +24,7 @@
 #include <folly/python/import.h>
 #include <thrift/lib/cpp2/protocol/TableBasedSerializer.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
 constexpr const size_t kHeadOffset = sizeof(PyVarObject);
 constexpr const size_t kFieldOffset = sizeof(PyObject*);
@@ -291,9 +289,9 @@ UniquePyObjectPtr getDefaultValueForField(
   return std::move(value);
 }
 
-const char* getIssetFlags(const void* object) {
+const char* getIssetFlags(const void* objectPtr) {
   PyObject* isset =
-      *toPyObjectPtr(static_cast<const char*>(object) + kHeadOffset);
+      *toPyObjectPtr(static_cast<const char*>(objectPtr) + kHeadOffset);
   const char* issetFlags = PyBytes_AsString(isset);
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
@@ -412,6 +410,189 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
   }
 }
 
+void* setImmutableStruct(void* object, const detail::TypeInfo& typeInfo) {
+  return setPyObject(
+      object,
+      UniquePyObjectPtr{createStructTupleWithDefaultValues(
+          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
+          getStandardImmutableDefaultValueForType)});
+}
+
+void* setUnion(void* object, const detail::TypeInfo& /* typeInfo */) {
+  return setPyObject(object, UniquePyObjectPtr{createUnionTuple()});
+}
+
+bool getIsset(const void* object, ptrdiff_t offset) {
+  const char* flags = getIssetFlags(object);
+  return flags[offset];
+}
+
+void setIsset(void* object, ptrdiff_t offset, bool value) {
+  return setStructIsset(object, offset, value);
+}
+
+/**
+ * Clears a thrift-python union.
+ *
+ * @param object A `PyObject*` that corresponds to the "data tuple" for a
+ *        thrift-python Union class. Must not be nullptr.
+ */
+void clearUnion(void* object) {
+  PyObject* unionTuple = toPyObject(object);
+
+  // Clear field id of "present field" (if any).
+  PyObject* previousActiveFieldId = PyTuple_GET_ITEM(unionTuple, 0);
+  UniquePyObjectPtr zero{PyLong_FromLong(0)};
+  if (zero == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  PyTuple_SET_ITEM(unionTuple, 0, zero.release());
+  Py_XDECREF(previousActiveFieldId);
+
+  // Clear value (if any).
+  PyObject* previousValue = PyTuple_GET_ITEM(unionTuple, 1);
+  PyTuple_SET_ITEM(unionTuple, 1, Py_None);
+  Py_INCREF(Py_None);
+  Py_XDECREF(previousValue);
+}
+
+/**
+ * Returns the id of the field that is currently set for the given union tuple,
+ * or 0 if the union is empty.
+ *
+ * @param objectPtr A `PyObject**` that points to a "data tuple" for a
+ *        thrift-python Union class. Must not be nullptr.
+ */
+int getUnionActiveFieldId(const void* objectPtr) {
+  PyObject* const* unionTuple = toPyObjectPtr(objectPtr);
+  long id = PyLong_AsLong(PyTuple_GET_ITEM(unionTuple, 0));
+  if (id == -1) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return id;
+}
+
+/**
+ * Updates the given union tuple to indicate that the given fieldId is currently
+ * set for that union.
+ *
+ * @param object A `PyObject*` that corresponds to a "data tuple" for a
+ *        thrift-python Union class. Must not be nullptr.
+ * @param fieldId of the field that is marked as "present" for the given union.
+ *        Should be > 0.
+ */
+void setUnionActiveFieldId(void* object, int fieldId) {
+  UniquePyObjectPtr fieldIdPyObj{PyLong_FromLong(fieldId)};
+  if (fieldIdPyObj == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+
+  PyObject* unionTuple = toPyObject(object);
+  PyObject* previousFieldId = PyTuple_GET_ITEM(unionTuple, 0);
+  PyTuple_SET_ITEM(unionTuple, 0, fieldIdPyObj.release());
+  Py_DECREF(previousFieldId);
+}
+
+const detail::UnionExtN<1> kUnionExt = {
+    /* .clear */ clearUnion,
+    /* .unionTypeOffset */ 0,
+    /* .getActiveId */ getUnionActiveFieldId,
+    /* .setActiveId */ setUnionActiveFieldId,
+    /* .initMember */ {nullptr},
+};
+
+/**
+ * Creates a new (table-based) serializer StructInfo for the thrift-python
+ * structured type (struct, union or exception) with the given properties.
+ *
+ * @param namePtr Name of the Thrift type. The returned object holds a pointer
+ *        to this string, but does not take ownership.
+ * @param fieldValues Map of default values for the fields of the returned type.
+ *        The return StructInfo maintains a pointer to this map (as its
+ *        `customExt`), but does not take ownership.
+ */
+detail::StructInfo* newStructInfo(
+    const char* namePtr,
+    int16_t numFields,
+    bool isUnion,
+    FieldValueMap& fieldValues) {
+  auto structInfo = static_cast<detail::StructInfo*>(folly::operator_new(
+      sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
+      std::align_val_t{alignof(detail::StructInfo)}));
+  structInfo->numFields = numFields;
+  structInfo->name = namePtr;
+  structInfo->unionExt =
+      isUnion ? reinterpret_cast<const detail::UnionExt*>(&kUnionExt) : nullptr;
+  structInfo->getIsset = getIsset;
+  structInfo->setIsset = setIsset;
+  structInfo->customExt = &fieldValues;
+  return structInfo;
+}
+
+/**
+ * Returns a view into the string contained in the given Python bytes referred
+ * to by `objectPtr`.
+ *
+ * Note that, if this method returns, the returned optional always holds a
+ * `ThriftValue` with a `stringViewValue`.
+ *
+ * @param objectPtr double pointer to a Python bytes object (i.e., a
+ *        [`PyBytesObject**`](https://docs.python.org/3/c-api/bytes.html#c.PyBytesObject))
+ *
+ * @throws if `objectPtr` does not contain a valid string.
+ */
+detail::OptionalThriftValue getString(
+    const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  // Note: `PyObject` is a parent class of `PyBytesObject`, so the following
+  // assignment is correct.
+  PyObject* pyBytesObject = *toPyObjectPtr(objectPtr);
+
+  Py_ssize_t len = 0;
+  char* buf = nullptr;
+  if (PyBytes_AsStringAndSize(pyBytesObject, &buf, &len) == -1) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return folly::make_optional<detail::ThriftValue>(
+      folly::StringPiece{buf, static_cast<std::size_t>(len)});
+}
+
+/**
+ * Copies the given string `value` into a new `PyBytesObject` instance, and
+ * updates the given `object` to hold a pointer to that instance.
+ *
+ * @param object a `PyBytesObject**` (see `getString()` above).
+ * @param value String whose copy will be in a new Python bytes object.
+ *
+ * @throws if `value` cannot be copied to a new `PyBytesObject`.
+ */
+void setString(void* object, const std::string& value) {
+  UniquePyObjectPtr bytesObj{
+      PyBytes_FromStringAndSize(value.data(), value.size())};
+  if (bytesObj == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  setPyObject(object, std::move(bytesObj));
+}
+
+detail::OptionalThriftValue getIOBuf(
+    const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  ensureImportOrThrow();
+  PyObject* pyObj = *toPyObjectPtr(objectPtr);
+  folly::IOBuf* buf = pyObj != nullptr ? get_cIOBuf(pyObj) : nullptr;
+  return buf ? folly::make_optional<detail::ThriftValue>(buf)
+             : detail::OptionalThriftValue{};
+}
+
+void setIOBuf(void* object, const folly::IOBuf& value) {
+  ensureImportOrThrow();
+  const auto buf = create_IOBuf(value.clone());
+  UniquePyObjectPtr iobufObj{buf};
+  if (!buf) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  setPyObject(object, std::move(iobufObj));
+}
+
 } // namespace
 
 PyObject* createUnionTuple() {
@@ -478,35 +659,14 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
   return tuple.release();
 }
 
-void setStructIsset(void* object, int16_t index, bool value) {
+void setStructIsset(void* objectPtr, int16_t index, bool value) {
   PyObject** issetPyBytesPtr =
-      toPyObjectPtr(static_cast<char*>(object) + kHeadOffset);
+      toPyObjectPtr(static_cast<char*>(objectPtr) + kHeadOffset);
   char* flags = PyBytes_AsString(*issetPyBytesPtr);
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   flags[index] = value;
-}
-
-void* setImmutableStruct(void* object, const detail::TypeInfo& typeInfo) {
-  return setPyObject(
-      object,
-      UniquePyObjectPtr{createStructTupleWithDefaultValues(
-          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
-          getStandardImmutableDefaultValueForType)});
-}
-
-void* setUnion(void* object, const detail::TypeInfo& /* typeInfo */) {
-  return setPyObject(object, UniquePyObjectPtr{createUnionTuple()});
-}
-
-bool getIsset(const void* object, ptrdiff_t offset) {
-  const char* flags = getIssetFlags(object);
-  return flags[offset];
-}
-
-void setIsset(void* object, ptrdiff_t offset, bool value) {
-  return setStructIsset(object, offset, value);
 }
 
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
@@ -558,116 +718,9 @@ void resetFieldToStandardDefault(
   setStructIsset(tuple, index, false);
 }
 
-void clearUnion(void* object) {
-  PyObject* pyObj = toPyObject(object);
-  PyObject* oldType = PyTuple_GET_ITEM(pyObj, 0);
-  UniquePyObjectPtr zero{PyLong_FromLong(0)};
-  if (!zero) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  PyTuple_SET_ITEM(pyObj, 0, zero.release());
-  Py_XDECREF(oldType);
-  PyObject* oldValue = PyTuple_GET_ITEM(pyObj, 1);
-  PyTuple_SET_ITEM(pyObj, 1, Py_None);
-  Py_INCREF(Py_None);
-  Py_XDECREF(oldValue);
-}
-
-int getActiveId(const void* object) {
-  PyObject* const* pyObj = toPyObjectPtr(object);
-  auto id = PyLong_AsLong(PyTuple_GET_ITEM(pyObj, 0));
-  if (id == -1) {
-    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
-  }
-  return id;
-}
-
-void setActiveId(void* object, int value) {
-  PyObject* pyObj = toPyObject(object);
-  PyObject* oldValue = PyTuple_GET_ITEM(pyObj, 0);
-  UniquePyObjectPtr valueObj{PyLong_FromLong(value)};
-  if (!valueObj) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  PyTuple_SET_ITEM(pyObj, 0, valueObj.release());
-  Py_DECREF(oldValue);
-}
-
-const detail::UnionExtN<1> unionExt = {
-    /* .clear */ clearUnion,
-    /* .unionTypeOffset */ 0,
-    /* .getActiveId */ getActiveId,
-    /* .setActiveId */ setActiveId,
-    /* .initMember */ {nullptr},
-};
-
-/**
- * Returns a view into the string contained in the given Python bytes referred
- * to by `object`.
- *
- * Note that, if this method returns, the returned optional always holds a
- * `ThriftValue` with a `stringViewValue`.
- *
- * @param object double pointer to a Python bytes object (i.e., a
- *        [`PyBytesObject**`](https://docs.python.org/3/c-api/bytes.html#c.PyBytesObject))
- *
- * @throws if `object` does not contain a valid string.
- */
-detail::OptionalThriftValue getString(
-    const void* object, const detail::TypeInfo& /* typeInfo */) {
-  // Note: `PyObject` is a parent class of `PyBytesObject`, so the following
-  // assignment is correct.
-  PyObject* pyBytesObject = *toPyObjectPtr(object);
-
-  Py_ssize_t len = 0;
-  char* buf = nullptr;
-  if (PyBytes_AsStringAndSize(pyBytesObject, &buf, &len) == -1) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  return folly::make_optional<detail::ThriftValue>(
-      folly::StringPiece{buf, static_cast<std::size_t>(len)});
-}
-
-/**
- * Copies the given string `value` into a new `PyBytesObject` instance, and
- * updates the given `object` to hold a pointer to that instance.
- *
- * @param object a `PyBytesObject**` (see `getString()` above).
- * @param value String whose copy will be in a new Python bytes object.
- *
- * @throws if `value` cannot be copied to a new `PyBytesObject`.
- */
-void setString(void* object, const std::string& value) {
-  UniquePyObjectPtr bytesObj{
-      PyBytes_FromStringAndSize(value.data(), value.size())};
-  if (bytesObj == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  setPyObject(object, std::move(bytesObj));
-}
-
-detail::OptionalThriftValue getIOBuf(
-    const void* object, const detail::TypeInfo& /* typeInfo */) {
-  ensureImportOrThrow();
-  PyObject* pyObj = *toPyObjectPtr(object);
-  folly::IOBuf* buf = pyObj != nullptr ? get_cIOBuf(pyObj) : nullptr;
-  return buf ? folly::make_optional<detail::ThriftValue>(buf)
-             : detail::OptionalThriftValue{};
-}
-
-void setIOBuf(void* object, const folly::IOBuf& value) {
-  ensureImportOrThrow();
-  const auto buf = create_IOBuf(value.clone());
-  UniquePyObjectPtr iobufObj{buf};
-  if (!buf) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  setPyObject(object, std::move(iobufObj));
-}
-
 detail::OptionalThriftValue getStruct(
-    const void* object, const detail::TypeInfo& /* typeInfo */) {
-  PyObject* pyObj = *toPyObjectPtr(object);
+    const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  PyObject* pyObj = *toPyObjectPtr(objectPtr);
   return folly::make_optional<detail::ThriftValue>(pyObj);
 }
 
@@ -717,11 +770,11 @@ size_t ListTypeInfo::write(
 
 void ListTypeInfo::consumeElem(
     const void* context,
-    void* object,
+    void* objectPtr,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
   PyObject* elem = nullptr;
   reader(context, &elem);
-  PyObject** pyObjPtr = toPyObjectPtr(object);
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   auto currentSize = PyTuple_GET_SIZE(*pyObjPtr);
   if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
     THRIFT_PY3_CHECK_ERROR();
@@ -764,12 +817,12 @@ size_t MutableListTypeInfo::write(
 
 void MutableListTypeInfo::consumeElem(
     const void* context,
-    void* object,
+    void* objectPtr,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
   PyObject* elem = nullptr;
   reader(context, &elem);
   DCHECK(elem != nullptr);
-  PyObject** pyObjPtr = toPyObjectPtr(object);
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   if (PyList_Append(*pyObjPtr, elem) == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -836,10 +889,10 @@ size_t MapTypeInfo::write(
 
 void MapTypeInfo::consumeElem(
     const void* context,
-    void* object,
+    void* objectPtr,
     void (*keyReader)(const void* context, void* key),
     void (*valueReader)(const void* context, void* val)) {
-  PyObject** pyObjPtr = toPyObjectPtr(object);
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   CHECK_NOTNULL(*pyObjPtr);
   PyObject* mkey = nullptr;
   keyReader(context, &mkey);
@@ -860,30 +913,23 @@ void MapTypeInfo::consumeElem(
 
 DynamicStructInfo::DynamicStructInfo(
     const char* name, int16_t numFields, bool isUnion)
-    : name_{name} {
-  structInfo_ = static_cast<detail::StructInfo*>(folly::operator_new(
-      sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
-      std::align_val_t{alignof(detail::StructInfo)}));
+    : name_{name},
+      tableBasedSerializerStructInfo_{
+          newStructInfo(name_.c_str(), numFields, isUnion, fieldValues_)} {
   // reserve vector as we are assigning const char* from the string in
   // vector
   fieldNames_.reserve(numFields);
-  structInfo_->numFields = numFields;
-  structInfo_->name = name_.c_str();
-  structInfo_->unionExt =
-      isUnion ? reinterpret_cast<const detail::UnionExt*>(&unionExt) : nullptr;
-  structInfo_->getIsset = getIsset;
-  structInfo_->setIsset = setIsset;
-  structInfo_->customExt = &fieldValues_;
 }
 
 DynamicStructInfo::~DynamicStructInfo() {
-  for (auto kv : fieldValues_) {
-    Py_DECREF(kv.second);
+  for (auto [unused_field_id, field_value_py_object] : fieldValues_) {
+    Py_DECREF(field_value_py_object);
   }
   folly::operator_delete(
-      structInfo_,
+      tableBasedSerializerStructInfo_,
       sizeof(detail::StructInfo) +
-          sizeof(detail::FieldInfo) * structInfo_->numFields,
+          sizeof(detail::FieldInfo) *
+              tableBasedSerializerStructInfo_->numFields,
       std::align_val_t{alignof(detail::StructInfo)});
 }
 
@@ -892,12 +938,12 @@ void DynamicStructInfo::addFieldInfo(
     detail::FieldQualifier qualifier,
     const char* name,
     const detail::TypeInfo* typeInfo) {
-  fieldNames_.push_back(name);
+  const std::string& fieldName = fieldNames_.emplace_back(name);
   int16_t idx = fieldNames_.size() - 1;
-  structInfo_->fieldInfos[idx] = detail::FieldInfo{
+  tableBasedSerializerStructInfo_->fieldInfos[idx] = detail::FieldInfo{
       /* .id */ id,
       /* .qualifier */ qualifier,
-      /* .name */ fieldNames_[idx].c_str(),
+      /* .name */ fieldName.c_str(),
       /* .memberOffset */
       static_cast<ptrdiff_t>(
           kHeadOffset + kFieldOffset * (isUnion() ? 1 : idx + 1)),
@@ -959,7 +1005,9 @@ const detail::TypeInfo iobufTypeInfo{
     /* .typeExt */ &ioBufFieldType,
 };
 
-namespace capi {
+} // namespace apache::thrift::python
+
+namespace apache::thrift::python::capi {
 PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion) {
   if (!ensure_module_imported()) {
     return nullptr;
@@ -1019,8 +1067,4 @@ PyObject* unionTupleFromValue(int64_t type_key, PyObject* value) {
   return union_tuple;
 }
 
-} // namespace capi
-
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

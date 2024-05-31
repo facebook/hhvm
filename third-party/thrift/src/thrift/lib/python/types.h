@@ -30,16 +30,14 @@
 
 #include <thrift/lib/cpp2/protocol/TableBasedSerializer.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
-inline PyObject* const* toPyObjectPtr(const void* object) {
-  return static_cast<PyObject* const*>(object);
+inline PyObject* const* toPyObjectPtr(const void* objectPtr) {
+  return static_cast<PyObject* const*>(objectPtr);
 }
 
-inline PyObject** toPyObjectPtr(void* object) {
-  return static_cast<PyObject**>(object);
+inline PyObject** toPyObjectPtr(void* objectPtr) {
+  return static_cast<PyObject**>(objectPtr);
 }
 
 inline const PyObject* toPyObject(const void* object) {
@@ -212,16 +210,16 @@ struct PyObjectDeleter {
 using UniquePyObjectPtr = std::unique_ptr<PyObject, PyObjectDeleter>;
 
 /**
- * Sets the Python object pointed to by `object` to the given `value` (releasing
- * the previous one, if any).
+ * Sets the Python object pointed to by `objectPtr` to the given `value`
+ * (releasing the previous one, if any).
  *
- * @params object double pointer to a `PyObject` (i.e., `PyObject**`).
+ * @params objectPtr double pointer to a `PyObject` (i.e., `PyObject**`).
  *
  * @return the newly set Python object pointer, i.e. the pointer previously held
- *         by the `value` parameter (and now pointed to by `object`).
+ *         by the `value` parameter (and now pointed to by `objectPtr`).
  */
-inline PyObject* setPyObject(void* object, UniquePyObjectPtr value) {
-  PyObject** pyObjPtr = toPyObjectPtr(object);
+inline PyObject* setPyObject(void* objectPtr, UniquePyObjectPtr value) {
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   PyObject* oldObject = *pyObjPtr;
   *pyObjPtr = value.release();
   Py_XDECREF(oldObject);
@@ -336,14 +334,14 @@ inline detail::ThriftValue primitivePythonToCpp<float>(PyObject* object) {
 template <typename PrimitiveType, protocol::TType Type>
 struct PrimitiveTypeInfo {
   static detail::OptionalThriftValue get(
-      const void* object, const detail::TypeInfo& /* typeInfo */) {
-    PyObject* pyObj = *toPyObjectPtr(object);
+      const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+    PyObject* pyObj = *toPyObjectPtr(objectPtr);
     return folly::make_optional<detail::ThriftValue>(
         primitivePythonToCpp<PrimitiveType>(pyObj));
   }
 
-  static void set(void* object, PrimitiveType value) {
-    setPyObject(object, primitiveCppToPython(value));
+  static void set(void* objectPtr, PrimitiveType value) {
+    setPyObject(objectPtr, primitiveCppToPython(value));
   }
 
   static const detail::TypeInfo typeInfo;
@@ -615,9 +613,9 @@ inline void _fbthrift_Py_SET_REFCNT(PyObject* ob, Py_ssize_t refcnt) {
 template <typename T>
 void SetTypeInfoTemplate<T>::consumeElem(
     const void* context,
-    void* object,
+    void* objectPtr,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
-  PyObject** pyObjPtr = toPyObjectPtr(object);
+  PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   DCHECK(*pyObjPtr);
   PyObject* elem = nullptr;
   reader(context, &elem);
@@ -720,6 +718,10 @@ class MapTypeInfo {
 
 using FieldValueMap = std::unordered_map<int16_t, PyObject*>;
 
+/**
+ * Holds the information required to (de)serialize a thrift-python structured
+ * type (i.e., struct, union or exception).
+ */
 class DynamicStructInfo {
  public:
   DynamicStructInfo(const char* name, int16_t numFields, bool isUnion = false);
@@ -731,13 +733,16 @@ class DynamicStructInfo {
   ~DynamicStructInfo();
 
   /**
-   * Returns the underlying `StructInfo`, populated with all field infos and
-   * values added via the `addField*()` methods.
+   * Returns the underlying (table-based) serializer `StructInfo`, populated
+   * with all field infos and values added via the `addField*()` methods.
    */
-  const detail::StructInfo& getStructInfo() const { return *structInfo_; }
+  const detail::StructInfo& getStructInfo() const {
+    return *tableBasedSerializerStructInfo_;
+  }
 
   /**
-   * Adds information for a new field to the underlying `StructInfo`.
+   * Adds information for a new field to the underlying (table-based) serializer
+   * `StructInfo`.
    *
    * The order of `FieldInfo` in the underlying `StructInfo` corresponds to the
    * order in which this method is called. Calling this method more than the
@@ -750,6 +755,7 @@ class DynamicStructInfo {
       const char* name,
       const detail::TypeInfo* typeInfo);
 
+  // DO_BEFORE(aristidis,20240729): Rename to set(Default?)FieldValue.
   /**
    * Sets the value for the field with the given `index`.
    *
@@ -762,33 +768,15 @@ class DynamicStructInfo {
    */
   void addFieldValue(int16_t index, PyObject* fieldValue);
 
-  bool isUnion() const { return structInfo_->unionExt != nullptr; }
+  bool isUnion() const {
+    return tableBasedSerializerStructInfo_->unionExt != nullptr;
+  }
 
  private:
   /**
-   * Pointer to a region of memory that holds a `StructInfo` followed by
-   * `numFields` instances of `FieldInfo` (accessible through
-   * `structInfo->fieldInfos`).
-   *
-   * ------------------------------------------------
-   * | StructInfo    |  FieldInfo | ... | FieldInfo |
-   * ------------------------------------------------
-   * ^                      (numFields times)
-   *
-   * The `customExt` field of this StructInfo points to `fieldValues_`.
+   * Name of this Thrift type (struct/union/exception).
    */
-  detail::StructInfo* structInfo_;
-
   std::string name_;
-
-  /**
-   * Names of the fields added via `addFieldInfo()`, in the order they were
-   * added.
-   *
-   * The same order is used for the corresponding `FieldInfo` entries in
-   * `structInfo_`.
-   */
-  std::vector<std::string> fieldNames_;
 
   /**
    * Default values (if any) for each field (indexed by field position in
@@ -799,12 +787,37 @@ class DynamicStructInfo {
    * classes).
    */
   FieldValueMap fieldValues_;
+
+  /**
+   * Pointer to a region of memory that holds a (table-based) serializer
+   * `StructInfo` followed by `numFields` instances of `FieldInfo` (accessible
+   * through `structInfo->fieldInfos`).
+   *
+   * ------------------------------------------------
+   * | StructInfo    |  FieldInfo | ... | FieldInfo |
+   * ------------------------------------------------
+   * ^                      (numFields times)
+   *
+   * The `customExt` field of this StructInfo points to `fieldValues_`.
+   */
+  detail::StructInfo* tableBasedSerializerStructInfo_;
+
+  /**
+   * Names of the fields added via `addFieldInfo()`, in the order they were
+   * added.
+   *
+   * The same order is used for the corresponding `FieldInfo` entries in
+   * `tableBasedSerializerStructInfo_`.
+   */
+  std::vector<std::string> fieldNames_;
 };
 
 detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
-namespace capi {
+} // namespace apache::thrift::python
+
+namespace apache::thrift::python::capi {
 /**
  * Retrieves internal _fbthrift_data from `StructOrUnion`. On import failure,
  * returns nullptr. Caller is responsible for clearing Err indicator on failure.
@@ -832,8 +845,4 @@ int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
  */
 PyObject* unionTupleFromValue(int64_t type_key, PyObject* value);
 
-} // namespace capi
-
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

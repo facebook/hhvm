@@ -790,7 +790,6 @@ let test_no_load () : bool Lwt.t =
             ~root
             ~tmp
             [|
-              "--ignore-hh-version";
               "--config";
               "max_workers=1";
               "--config";

@@ -582,12 +582,45 @@ void insertEnsureReadFieldsToMask(Mask& mask, const Value& ensureFields) {
 // iff current mask is not allMask and the field was never included in the write
 // mask before.
 void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
+  if (mask == allMask()) {
+    return;
+  }
   const auto& obj = ensureFields.as_object();
   for (const auto& [id, value] : obj) {
-    if (mask == allMask()) {
-      continue;
-    }
     mask.includes_ref().ensure().emplace(id, allMask());
+  }
+}
+
+// Ensure requires reading existing value to know whether keys exist in the
+// map. Insert allMask() if the key was never included in read mask
+// before.
+void insertEnsureReadKeysToMask(
+    Mask& mask, const Value& ensureFields, bool view) {
+  const auto& map = ensureFields.as_map();
+  auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
+  auto getIncludesStringMapRef = [&](Mask& mask) {
+    return mask.includes_string_map_ref();
+  };
+  if (view) {
+    auto readValueIndex = buildValueIndex(mask);
+    for (const auto& [key, value] : map) {
+      auto id = static_cast<int64_t>(
+          getMapIdValueAddressFromIndex(readValueIndex, key));
+      insertMaskIntersect(mask, id, allMask(), getIncludesMapRef);
+    }
+    return;
+  }
+  for (const auto& [key, value] : map) {
+    if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
+      insertMaskIntersect(
+          mask,
+          static_cast<int64_t>(getMapIdFromValue(key)),
+          allMask(),
+          getIncludesMapRef);
+    } else {
+      insertMaskIntersect(
+          mask, getStringFromValue(key), allMask(), getIncludesStringMapRef);
+    }
   }
 }
 
@@ -600,8 +633,9 @@ const K& getKeyOrElem(const std::pair<const K, V>& value) {
   return value.first;
 }
 
-// `view` specifies whether to use address of Value to populate map mask
-// (deprecated).
+// Put allMask() iff current mask is not allMask and the key was never included
+// in the write mask before. `view` specifies whether to use address of Value to
+// populate map mask (deprecated).
 template <typename Container>
 void insertWriteKeysToMapMask(Mask& mask, const Container& c, bool view) {
   if (mask == allMask()) {
@@ -609,10 +643,12 @@ void insertWriteKeysToMapMask(Mask& mask, const Container& c, bool view) {
   }
 
   if (view) {
+    auto writeValueIndex = buildValueIndex(mask);
     for (const auto& elem : c) {
       const auto& v = getKeyOrElem(elem);
-      mask.includes_map_ref().ensure().emplace(
-          reinterpret_cast<int64_t>(&v), allMask());
+      auto id = static_cast<int64_t>(
+          getMapIdValueAddressFromIndex(writeValueIndex, v));
+      mask.includes_map_ref().ensure().emplace(id, allMask());
     }
     return;
   }
@@ -756,7 +792,8 @@ ExtractedMasksFromPatch extractMaskFromPatch(
       insertEnsureReadFieldsToMask(masks.read, *ensureStruct);
       insertEnsureWriteFieldsToMask(masks.write, *ensureStruct);
     } else {
-      insertFieldsToMask(masks, *ensureStruct, false, view);
+      insertEnsureReadKeysToMask(masks.read, *ensureStruct, view);
+      insertWriteKeysToMapMask(masks.write, ensureStruct->as_map(), view);
     }
   }
 

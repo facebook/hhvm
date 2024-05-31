@@ -37,10 +37,9 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type SimpleServer struct {
-	processorContext             ProcessorContext
-	serverTransport              ServerTransport
-	newProtocol                  func(Transport) Protocol
-	configurableRequestProcessor func(ctx context.Context, client Transport) error
+	processorContext ProcessorContext
+	serverTransport  ServerTransport
+	newProtocol      func(Transport) Protocol
 	*ServerOptions
 }
 
@@ -149,10 +148,6 @@ func (p *SimpleServer) Stop() error {
 }
 
 func (p *SimpleServer) processRequests(ctx context.Context, client Transport) error {
-	if p.configurableRequestProcessor != nil {
-		return p.configurableRequestProcessor(ctx, client)
-	}
-
 	processor := p.processorContext
 
 	protocol := p.newProtocol(client)

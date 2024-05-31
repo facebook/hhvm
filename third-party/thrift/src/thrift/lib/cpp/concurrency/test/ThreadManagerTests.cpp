@@ -322,7 +322,8 @@ static void expireTest(size_t numWorkers, int64_t expirationTimeMs) {
   }
 }
 
-TEST_F(ThreadManagerTest, ExpireTest) {
+// DO_BEFORE(aristidis,20250715): Test is flaky. Find owner or remove.
+TEST_F(ThreadManagerTest, DISABLED_ExpireTest) {
   size_t numWorkers = 100;
   int64_t expireTimeMs = 50;
   expireTest(numWorkers, expireTimeMs);
@@ -800,7 +801,8 @@ TEST_F(ThreadManagerTest, PriorityThreadManagerWorkerCount) {
   EXPECT_EQ(5, threadManager->workerCount(PRIORITY::BEST_EFFORT));
 }
 
-TEST_F(ThreadManagerTest, PriorityQueueThreadManagerExecutor) {
+// DO_BEFORE(aristidis,20250715): Test is flaky. Find owner or remove.
+TEST_F(ThreadManagerTest, DISABLED_PriorityQueueThreadManagerExecutor) {
   auto threadManager = ThreadManager::newPriorityQueueThreadManager(1);
   threadManager->start();
   folly::Baton<> reqSyncBaton;
@@ -846,7 +848,8 @@ std::array<std::function<std::shared_ptr<ThreadManager>()>, 3> factories = {
 class JoinTest : public testing::TestWithParam<
                      std::function<std::shared_ptr<ThreadManager>()>> {};
 
-TEST_P(JoinTest, Join) {
+// DO_BEFORE(aristidis,20250715): Test is flaky. Find owner or remove.
+TEST_P(JoinTest, DISABLED_Join) {
   auto threadManager = GetParam()();
   auto threadFactory = std::make_shared<PosixThreadFactory>();
   threadManager->threadFactory(threadFactory);

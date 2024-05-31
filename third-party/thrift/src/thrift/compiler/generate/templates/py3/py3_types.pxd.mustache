@@ -16,10 +16,9 @@
 
 }}{{!
 
-Wraps structs and exceptions defined in the thrift interface file and implemented
-in the cpp2 generated code. This file just exposes the C++ classes and attributes
-to Cython. The Pythonic wrappers of the individual structs and fields are
-implemented in the Struct.pyx file.
+This portion of types.pxd contains mainly thrift-py3-only declarations that are
+incompatible with thrift-python and a few extern cpp bindings not used by
+thrift-py3 cython users.
 
 }}
 {{> common/auto_generated_py}}

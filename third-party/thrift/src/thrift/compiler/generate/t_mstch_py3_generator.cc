@@ -1414,7 +1414,7 @@ void t_mstch_py3_generator::generate_types() {
   for (const auto& file : converterFiles) {
     generate_file(file, IsTypesFile, generateRootPath_);
   }
-  // - if auto_migrate is present, generate py3_types, types.pxd, and types.py
+  // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
   if (has_option("auto_migrate")) {
     for (const auto& file : autoMigrateFiles) {

@@ -46,5 +46,5 @@ from thrift.py3.types cimport (
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 {{#program:includeNamespaces}}
-cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}{{> common/auto_migrate_prefix}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{/program:includeNamespaces}}

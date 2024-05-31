@@ -1,15 +1,3 @@
-File "invalid_disjoint_check_methods_like.php", line 4, characters 19-29:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_like.php", line 4, characters 39-39:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_like.php", line 5, characters 71-72:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_like.php", line 5, characters 82-85:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_like.php", line 11, characters 72-73:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_like.php", line 11, characters 82-85:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "invalid_disjoint_check_methods_like.php", line 26, characters 14-52:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH\FIXME\UNSAFE_CAST` call. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5807])
 File "invalid_disjoint_check_methods_like.php", line 32, characters 8-38:

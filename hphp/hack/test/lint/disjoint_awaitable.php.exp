@@ -1,10 +1,2 @@
-File "disjoint_awaitable.php", line 4, characters 19-29:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "disjoint_awaitable.php", line 4, characters 39-39:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "disjoint_awaitable.php", line 5, characters 71-72:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "disjoint_awaitable.php", line 5, characters 78-81:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "disjoint_awaitable.php", line 19, characters 5-26:
 Non-dynamic calls to 'toEqual' will always return the same value, because type Awaitable<int> is disjoint from type int. (Lint[5638])

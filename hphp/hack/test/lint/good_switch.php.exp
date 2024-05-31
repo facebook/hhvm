@@ -1,8 +1,1 @@
-File "good_switch.php", line 19, characters 35-49:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "good_switch.php", line 19, characters 61-64:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "good_switch.php", line 32, characters 37-51:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "good_switch.php", line 32, characters 63-66:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
+No lint errors

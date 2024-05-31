@@ -2,7 +2,3 @@ File "redundant_generics_trait.php", line 5, characters 23-23:
 The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
 File "redundant_generics_trait.php", line 5, characters 23-23:
 The generic parameter `T` is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
-File "redundant_generics_trait.php", line 5, characters 26-26:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "redundant_generics_trait.php", line 5, characters 34-37:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])

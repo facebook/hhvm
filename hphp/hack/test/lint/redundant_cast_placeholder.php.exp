@@ -1,11 +1,3 @@
-File "redundant_cast_placeholder.php", line 4, characters 23-24:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "redundant_cast_placeholder.php", line 4, characters 43-44:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "redundant_cast_placeholder.php", line 7, characters 23-24:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "redundant_cast_placeholder.php", line 7, characters 43-44:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
 File "redundant_cast_placeholder.php", line 18, characters 3-17:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
 File "redundant_cast_placeholder.php", line 18, characters 3-17:

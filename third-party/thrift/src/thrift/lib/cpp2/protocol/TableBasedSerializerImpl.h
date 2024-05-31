@@ -685,8 +685,8 @@ size_t writeUnion(
           foundFieldInfo->typeInfo->type,
           foundFieldInfo->id);
       written += iprot.writeStructBegin(foundFieldInfo->name);
-      written += iprot.writeStructEnd();
       written += iprot.writeFieldStop();
+      written += iprot.writeStructEnd();
       written += iprot.writeFieldEnd();
     }
   }

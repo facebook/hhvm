@@ -163,12 +163,23 @@ func (s *socket) SetWriteDeadline(t time.Time) error {
 	return s.conn.SetWriteDeadline(t)
 }
 
-func (s *socket) ConnectionState() (tls.ConnectionState, bool) {
+// tlsConnectionStater is an abstract interface for types that can return
+// the state of TLS connections. This is used to support not only tls.Conn
+// but also custom wrappers such as permissive TLS/non-TLS sockets.
+//
+// Caveat: this interface has to support at least tls.Conn, which has
+// the current signature for ConnectionState. Because of that, wrappers
+// for permissive TLS/non-TLS may return an empty tls.ConnectionState.
+type tlsConnectionStater interface {
+	ConnectionState() tls.ConnectionState
+}
+
+func (s *socket) ConnectionState() tls.ConnectionState {
 	tlsConn, ok := s.conn.(tlsConnectionStater)
 	if !ok {
-		return tls.ConnectionState{}, false
+		return tls.ConnectionState{}
 	}
-	return tlsConn.ConnectionState(), true
+	return tlsConn.ConnectionState()
 }
 
 // Conn retrieves the underlying net.Conn

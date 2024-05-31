@@ -33,9 +33,7 @@ const (
 type ConnInfo struct {
 	LocalAddr  net.Addr
 	RemoteAddr net.Addr
-
-	netConn  net.Conn             // set by thrift tcp servers
-	tlsState *tls.ConnectionState // set by thrift http servers
+	tlsState   tlsConnectionStater // set by thrift tcp servers
 }
 
 // String implements the fmt.Stringer interface.
@@ -43,27 +41,9 @@ func (c ConnInfo) String() string {
 	return c.RemoteAddr.String() + " -> " + c.LocalAddr.String()
 }
 
-// tlsConnectionStater is an abstract interface for types that can return
-// the state of TLS connections. This is used to support not only tls.Conn
-// but also custom wrappers such as permissive TLS/non-TLS sockets.
-//
-// Caveat: this interface has to support at least tls.Conn, which has
-// the current signature for ConnectionState. Because of that, wrappers
-// for permissive TLS/non-TLS may return an empty tls.ConnectionState.
-type tlsConnectionStater interface {
-	ConnectionState() tls.ConnectionState
-}
-
 // TLS returns the TLS connection state.
 func (c ConnInfo) TLS() *tls.ConnectionState {
-	if c.tlsState != nil {
-		return c.tlsState
-	}
-	tlsConn, ok := c.netConn.(tlsConnectionStater)
-	if !ok {
-		return nil
-	}
-	cs := tlsConn.ConnectionState()
+	cs := c.tlsState.ConnectionState()
 	// See the caveat in tlsConnectionStater.
 	if cs.Version == 0 {
 		return nil
@@ -78,9 +58,9 @@ func WithConnInfo(ctx context.Context, client Transport) context.Context {
 		return ctx
 	}
 	ctx = context.WithValue(ctx, connInfoKey, ConnInfo{
-		LocalAddr:  s.Conn().LocalAddr(),
-		RemoteAddr: s.Conn().RemoteAddr(),
-		netConn:    s.Conn(),
+		LocalAddr:  s.LocalAddr(),
+		RemoteAddr: s.RemoteAddr(),
+		tlsState:   s,
 	})
 	return ctx
 }

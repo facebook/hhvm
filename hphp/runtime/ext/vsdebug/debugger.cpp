@@ -177,7 +177,7 @@ void Debugger::checkForFileChanges(DebuggerRequestInfo* ri) {
       for (auto s : changedFiles) {
         msg += s + '\n';
       }
-      msg += "Reload the debugger to reload the modified files.\n";
+      msg += "Restart to reload the modified files.\n";
       msg += "Run hphp_debugger_set_option('warnOnFileChange', false) "
              "to disable this message.\n";
 

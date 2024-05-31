@@ -51,29 +51,18 @@ type rocketProtocol struct {
 	buf *MemoryBuffer
 }
 
-// rocketSocket is a minimal interface for thrift.Socket
-type rocketSocket interface {
-	Conn() net.Conn
-}
-
-var _ rocketSocket = (*socket)(nil)
-
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
-func NewRocketProtocol(trans Transport) Protocol {
+func NewRocketProtocol(socket Socket) Protocol {
 	p := &rocketProtocol{
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
 	}
-	switch t := trans.(type) {
-	case rocketSocket:
-		p.conn = t.Conn()
-	default:
-		panic(NewTransportException(
-			NOT_IMPLEMENTED,
-			fmt.Sprintf("Rocket Transport only supports Socket and does not support: %T", trans)))
+	if cc, ok := socket.(interface{ Conn() net.Conn }); ok {
+		p.conn = cc.Conn()
+	} else {
+		p.conn = socket
 	}
-
 	if err := p.resetProtocol(); err != nil {
 		panic(err)
 	}

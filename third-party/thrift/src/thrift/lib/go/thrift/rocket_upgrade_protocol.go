@@ -26,15 +26,15 @@ type upgradeToRocketProtocol struct {
 	headerProtocol Protocol
 }
 
-// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a transport.
-func NewUpgradeToRocketProtocol(trans Transport) Protocol {
+// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a socket.
+func NewUpgradeToRocketProtocol(socket Socket) Protocol {
 	return &upgradeToRocketProtocol{
-		rocketProtocol: NewRocketProtocol(trans),
-		headerProtocol: NewHeaderProtocol(trans),
+		rocketProtocol: NewRocketProtocol(socket),
+		headerProtocol: NewHeaderProtocol(socket),
 	}
 }
 
-// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol given both protocols.
+// NewUpgradeToRocketProtocols creates a protocol that upgrades from Header to Rocket protocol given both protocols.
 func NewUpgradeToRocketProtocols(rocketProtocol, headerProtocol Protocol) Protocol {
 	return &upgradeToRocketProtocol{
 		rocketProtocol: rocketProtocol,

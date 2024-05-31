@@ -37,6 +37,8 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
 
+#include <thrift/compiler/test/test_utils.h>
+
 namespace apache::thrift::compiler {
 
 using ::testing::UnorderedElementsAre;

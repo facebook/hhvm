@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/test/compiler.h>
+#include <thrift/compiler/test/test_utils.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -33,11 +34,6 @@
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
-// Add newlines when printing diagnostics to improve readability.
-void PrintTo(const diagnostic& d, std::ostream* os) {
-  fmt::print(*os, "\n{}\n", d);
-}
-
 // Avoid order dependence when comparing diagnostics on one line.
 bool operator<(const diagnostic& diag1, const diagnostic& diag2) {
   // @lint-ignore-every CLANGTIDY facebook-hte-MissingBraces

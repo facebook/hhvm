@@ -31,14 +31,8 @@ const (
 
 // ConnInfo contains connection information from clients of the SimpleServer.
 type ConnInfo struct {
-	LocalAddr  net.Addr
 	RemoteAddr net.Addr
 	tlsState   tlsConnectionStater // set by thrift tcp servers
-}
-
-// String implements the fmt.Stringer interface.
-func (c ConnInfo) String() string {
-	return c.RemoteAddr.String() + " -> " + c.LocalAddr.String()
 }
 
 // TLS returns the TLS connection state.
@@ -58,7 +52,6 @@ func WithConnInfo(ctx context.Context, client Transport) context.Context {
 		return ctx
 	}
 	ctx = context.WithValue(ctx, connInfoKey, ConnInfo{
-		LocalAddr:  s.LocalAddr(),
 		RemoteAddr: s.RemoteAddr(),
 		tlsState:   s,
 	})

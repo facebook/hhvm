@@ -49,14 +49,16 @@ render_context::push::~push() {
   m_context.m_state.pop();
 }
 
-std::string render_context::push::render(const template_type& templt) {
-  return m_context.render(templt);
+void render_context::push::render(const template_type& templt) {
+  m_context.render(templt);
 }
 
 render_context::render_context(
     const node& node, const std::map<std::string, template_type>& partials)
     : m_partials(partials), m_nodes(1, node), m_node_ptrs(1, &node) {
   m_state.push(std::unique_ptr<render_state>(new outside_section));
+  // Preallocate a few kB for rendered output, which is commonly large.
+  out.reserve(4096);
 }
 
 const node& render_context::find_node(
@@ -79,25 +81,23 @@ const node& render_context::get_node(const std::string& token) {
   return find_node(token, m_node_ptrs);
 }
 
-std::string render_context::render(
+void render_context::render(
     const template_type& templt, const std::string& prefix) {
-  std::string output;
   bool prev_eol = true;
   for (auto& token : templt) {
     if (prev_eol && prefix.length() != 0) {
-      output += m_state.top()->render(*this, {prefix});
+      m_state.top()->render(*this, {prefix});
     }
-    output += m_state.top()->render(*this, token);
+    m_state.top()->render(*this, token);
     prev_eol = token.eol();
   }
-  return output;
 }
 
-std::string render_context::render_partial(
+void render_context::render_partial(
     const std::string& partial_name, const std::string& prefix) {
-  return m_partials.count(partial_name)
-      ? render(m_partials.at(partial_name), prefix)
-      : "";
+  if (m_partials.count(partial_name)) {
+    render(m_partials.at(partial_name), prefix);
+  }
 }
 
 } // namespace mstch

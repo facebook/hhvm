@@ -42,7 +42,7 @@ class in_section : public render_state {
  public:
   enum class type { inverted, normal };
   in_section(type type, const token& start_token);
-  std::string render(render_context& context, const token& token) override;
+  void render(render_context& context, const token& token) override;
 
  private:
   const type m_type;

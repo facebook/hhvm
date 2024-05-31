@@ -38,20 +38,19 @@ namespace mstch {
 in_section::in_section(type type, const token& start_token)
     : m_type(type), m_start_token(start_token), m_skipped_openings(0) {}
 
-std::string in_section::render(render_context& ctx, const token& token) {
+void in_section::render(render_context& ctx, const token& token) {
   if (token.token_type() == token::type::section_close) {
     if (token.name() == m_start_token.name() && m_skipped_openings == 0) {
       auto& node = ctx.get_node(m_start_token.name());
-      std::string out;
 
       if (m_type == type::normal && !node.visit(is_node_empty())) {
-        out = node.visit(render_section(ctx, m_section));
+        node.visit(render_section(ctx, m_section));
       } else if (m_type == type::inverted && node.visit(is_node_empty())) {
-        out = render_context::push(ctx).render(m_section);
+        render_context::push(ctx).render(m_section);
       }
 
       ctx.set_state<outside_section>();
-      return out;
+      return;
     } else {
       m_skipped_openings--;
     }
@@ -62,7 +61,6 @@ std::string in_section::render(render_context& ctx, const token& token) {
   }
 
   m_section << token;
-  return "";
 }
 
 } // namespace mstch

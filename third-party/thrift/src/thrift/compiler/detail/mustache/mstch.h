@@ -140,7 +140,7 @@ class is_fun {
 };
 
 template <class N>
-using node_renderer = std::function<std::string(const N& n)>;
+using node_renderer = std::function<void(const N& n)>;
 
 template <class N>
 class lambda_t {
@@ -159,13 +159,13 @@ class lambda_t {
           return renderer(f(text));
         }) {}
 
-  std::string operator()(
+  void operator()(
       node_renderer<N> renderer, const std::string& text = "") const {
-    return fun(renderer, text);
+    fun(renderer, text);
   }
 
  private:
-  std::function<std::string(node_renderer<N> renderer, const std::string&)> fun;
+  std::function<void(node_renderer<N> renderer, const std::string&)> fun;
 };
 
 template <typename Node>

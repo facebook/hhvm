@@ -41,7 +41,7 @@ class render_context;
 class render_state {
  public:
   virtual ~render_state() = default;
-  virtual std::string render(render_context& context, const token& token) = 0;
+  virtual void render(render_context& context, const token& token) = 0;
 };
 
 } // namespace mstch

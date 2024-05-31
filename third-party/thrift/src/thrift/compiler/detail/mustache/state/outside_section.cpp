@@ -35,7 +35,7 @@ namespace apache {
 namespace thrift {
 namespace mstch {
 
-std::string outside_section::render(render_context& ctx, const token& token) {
+void outside_section::render(render_context& ctx, const token& token) {
   switch (token.token_type()) {
     case token::type::section_open:
       ctx.set_state<in_section>(in_section::type::normal, token);
@@ -44,15 +44,17 @@ std::string outside_section::render(render_context& ctx, const token& token) {
       ctx.set_state<in_section>(in_section::type::inverted, token);
       break;
     case token::type::variable:
-      return ctx.get_node(token.name()).visit(render_node(ctx));
+      ctx.get_node(token.name()).visit(render_node(ctx));
+      break;
     case token::type::text:
-      return token.raw();
+      ctx.out += token.raw();
+      break;
     case token::type::partial:
-      return ctx.render_partial(token.name(), token.partial_prefix());
+      ctx.render_partial(token.name(), token.partial_prefix());
+      break;
     default:
       break;
   }
-  return "";
 }
 
 } // namespace mstch

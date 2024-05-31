@@ -48,7 +48,7 @@ class render_context {
    public:
     /* implicit */ push(render_context& context, const node& node = {});
     ~push();
-    std::string render(const template_type& templt);
+    void render(const template_type& templt);
 
    private:
     render_context& m_context;
@@ -57,9 +57,8 @@ class render_context {
   render_context(
       const node& node, const std::map<std::string, template_type>& partials);
   const node& get_node(const std::string& token);
-  std::string render(
-      const template_type& templt, const std::string& prefix = "");
-  std::string render_partial(
+  void render(const template_type& templt, const std::string& prefix = "");
+  void render_partial(
       const std::string& partial_name, const std::string& prefix);
   template <class T, class... Args>
   void set_state(Args&&... args) {
@@ -75,6 +74,9 @@ class render_context {
   std::deque<node> m_nodes;
   std::list<const node*> m_node_ptrs;
   std::stack<std::unique_ptr<render_state>> m_state;
+
+ public:
+  std::string out;
 };
 
 } // namespace mstch

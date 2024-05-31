@@ -47,28 +47,39 @@ class render_section {
       : m_ctx(ctx), m_section(section), m_flag(p_flag) {}
 
   template <class T>
-  std::string operator()(const T& t) const {
-    return render_context::push(m_ctx, t).render(m_section);
+  void operator()(const T& t) const {
+    render_context::push(m_ctx, t).render(m_section);
   }
 
-  std::string operator()(const lambda& fun) const {
+  void operator()(const lambda& fun) const {
+    // Concatenate the unrendered contents of this section.
     std::string section_str;
     for (auto& token : m_section)
       section_str += token.raw();
-    template_type interpreted{
-        fun([this](const node& n) { return n.visit(render_node(m_ctx)); },
-            section_str)};
-    return render_context::push(m_ctx).render(interpreted);
+
+    // Reset m_ctx to an empty output.
+    std::string prior_output;
+    std::swap(prior_output, m_ctx.out);
+
+    // Pass unrendered section content to lambda, and render lambda's lazy value
+    // into m_ctx.
+    fun([this](const node& n) { n.visit(render_node(m_ctx)); }, section_str);
+
+    // Parse a template out of the lamdba's output.
+    template_type interpreted{m_ctx.out};
+
+    // Restore the original value of m_ctx, and continue rendering with the
+    // obtained template.
+    m_ctx.out = std::move(prior_output);
+    render_context::push(m_ctx).render(interpreted);
   }
 
-  std::string operator()(const array& array) const {
-    std::string out;
+  void operator()(const array& array) const {
     if (m_flag == flag::keep_array)
-      return render_context::push(m_ctx, array).render(m_section);
+      render_context::push(m_ctx, array).render(m_section);
     else
       for (auto& item : array)
-        out += item.visit(render_section(m_ctx, m_section, flag::keep_array));
-    return out;
+        item.visit(render_section(m_ctx, m_section, flag::keep_array));
   }
 
  private:

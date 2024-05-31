@@ -42,7 +42,9 @@ std::string render(
     partial_templates.insert({partial.first, {partial.second}});
   }
 
-  return render_context(root, partial_templates).render(tmplt);
+  render_context ctx{root, partial_templates};
+  ctx.render(tmplt);
+  return std::move(ctx.out);
 }
 
 } // namespace mstch

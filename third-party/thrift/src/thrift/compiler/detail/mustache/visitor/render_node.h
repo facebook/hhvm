@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include <sstream>
 
+#include <fmt/core.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/detail/mustache/render_context.h>
 #include <thrift/compiler/detail/mustache/utils.h>
@@ -43,31 +44,38 @@ class render_node {
   render_node(render_context& ctx) : m_ctx(ctx) {}
 
   template <class T>
-  std::string operator()(const T&) const {
-    return "";
+  void operator()(const T&) const {}
+
+  void operator()(const int& value) const {
+    fmt::format_to(std::back_inserter(m_ctx.out), "{}", value);
   }
 
-  std::string operator()(const int& value) const {
-    return std::to_string(value);
+  void operator()(const double& value) const {
+    fmt::format_to(std::back_inserter(m_ctx.out), "{}", value);
   }
 
-  std::string operator()(const double& value) const {
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
+  void operator()(const bool& value) const {
+    m_ctx.out += value ? "true" : "false";
   }
 
-  std::string operator()(const bool& value) const {
-    return value ? "true" : "false";
+  void operator()(const lambda& value) const {
+    // Reset m_ctx to an empty output.
+    std::string prior_output;
+    std::swap(prior_output, m_ctx.out);
+
+    // Render the lamdba's lazy value into m_ctx.
+    value([this](const node& n) { n.visit(render_node(m_ctx)); });
+
+    // Parse a template out of the lambda's output.
+    template_type interpreted{m_ctx.out};
+
+    // Restore the original value of m_ctx, and continue rendering with the
+    // obtained template.
+    m_ctx.out = std::move(prior_output);
+    render_context::push(m_ctx).render(interpreted);
   }
 
-  std::string operator()(const lambda& value) const {
-    template_type interpreted{
-        value([this](const node& n) { return n.visit(render_node(m_ctx)); })};
-    return render_context::push(m_ctx).render(interpreted);
-  }
-
-  std::string operator()(const std::string& value) const { return value; }
+  void operator()(const std::string& value) const { m_ctx.out += value; }
 
  private:
   render_context& m_ctx;

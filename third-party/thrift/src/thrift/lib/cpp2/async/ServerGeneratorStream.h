@@ -29,13 +29,13 @@
 namespace HPHP::thrift {
 struct TServerStream;
 }
-namespace testutil::testservice {
-class TestProducerCallback;
-}
 
 namespace apache {
 namespace thrift {
 namespace detail {
+namespace test {
+class TestProducerCallback;
+}
 
 class ServerStreamConsumer {
  public:
@@ -139,7 +139,7 @@ class ServerGeneratorStream : public TwoWayBridge<
 #endif
 
   friend struct HPHP::thrift::TServerStream;
-  friend class testutil::testservice::TestProducerCallback;
+  friend class test::TestProducerCallback;
 };
 
 } // namespace detail

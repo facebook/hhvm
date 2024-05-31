@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/async/ServerStreamMultiPublisher.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestStreamService.h>
 
-namespace testutil {
-namespace testservice {
+namespace apache::thrift::detail::test {
 
 class TestStreamGeneratorService
     : public apache::thrift::ServiceHandler<TestStreamService> {
@@ -160,5 +159,4 @@ class TestStreamProducerCallbackService
       int32_t from, int32_t to) override;
 };
 
-} // namespace testservice
-} // namespace testutil
+} // namespace apache::thrift::detail::test

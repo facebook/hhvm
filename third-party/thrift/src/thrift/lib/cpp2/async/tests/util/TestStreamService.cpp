@@ -19,8 +19,7 @@
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/portability/GTest.h>
 
-namespace testutil {
-namespace testservice {
+namespace apache::thrift::detail::test {
 
 apache::thrift::ServerStream<int32_t> TestStreamGeneratorService::range(
     int32_t from, int32_t to) {
@@ -437,5 +436,4 @@ TestStreamProducerCallbackService::rangeThrowUDE(int32_t from, int32_t to) {
   });
 }
 
-} // namespace testservice
-} // namespace testutil
+} // namespace apache::thrift::detail::test

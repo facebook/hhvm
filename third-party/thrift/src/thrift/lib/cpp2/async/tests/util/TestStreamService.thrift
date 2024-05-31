@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace cpp2 testutil.testservice
+namespace cpp2 apache.thrift.detail.test
 exception UserDefinedException {}
 
 service TestStreamService {

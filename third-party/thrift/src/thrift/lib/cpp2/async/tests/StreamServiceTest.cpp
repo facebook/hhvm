@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/async/tests/util/Util.h>
 
 using namespace apache::thrift;
+using namespace apache::thrift::detail::test;
 
 template <typename Service>
 class StreamServiceTest

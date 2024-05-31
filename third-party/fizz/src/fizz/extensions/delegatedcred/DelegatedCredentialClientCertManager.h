@@ -31,12 +31,17 @@ class DelegatedCredentialClientCertManager : public fizz::client::CertManager {
 
   /*
    * It is the callers responsibility to call this with an actual delegated
-   * cred. The override flag here has the same meaning as above, if there is
-   * already a dc for the signature scheme we will replace the existing entry.
+   * cred. If there is already a dc for the signature scheme we will not
+   * override the existing entry.
    */
-  void addDelegatedCredential(
-      std::shared_ptr<SelfCert> cert,
-      bool overrideExistingEntry = true);
+  void addDelegatedCredential(std::shared_ptr<SelfCert> cert);
+
+  /*
+   * It is the callers responsibility to call this with an actual delegated
+   * cred. If there is already a dc for the signature scheme we will override
+   * the existing entry.
+   */
+  void addDelegatedCredentialAndOverride(std::shared_ptr<SelfCert> cert);
 
  protected:
   client::CertManager dcMgr_;

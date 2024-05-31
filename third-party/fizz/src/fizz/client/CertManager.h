@@ -28,15 +28,20 @@ class CertManager : public CertManagerBase {
       const std::vector<Extension>& peerExtensions) const override;
 
   /*
-   * This will add the cert to the internal map, note we expect only a single
-   * cert for a particular signature scheme, by default we will override any
-   * existing entry. The caller may choose to not do so.
+   * This will add the cert to the internal map, and will not override existing
+   * entry.
    */
-  virtual void addCert(
-      std::shared_ptr<SelfCert> cert,
-      bool overrideExistingEntry = true);
+  void addCert(std::shared_ptr<SelfCert> cert);
+
+  /*
+   * This will add the cert to the internal map, and override any existing
+   * entry.
+   */
+  void addCertAndOverride(std::shared_ptr<SelfCert> cert);
 
  protected:
+  void addCert(std::shared_ptr<SelfCert> cert, bool overrideExistingEntry);
+
   SigSchemeMap certs_;
 };
 } // namespace client

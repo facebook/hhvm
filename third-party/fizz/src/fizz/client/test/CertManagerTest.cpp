@@ -33,7 +33,7 @@ class CertManagerTest : public Test {
 
 TEST_F(CertManagerTest, TestBasicMatch) {
   auto cert = getCert(kRsa);
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }
@@ -45,7 +45,7 @@ TEST_F(CertManagerTest, TestNoCertsInMgr) {
 TEST_F(CertManagerTest, TestSigSchemesPref) {
   auto cert = getCert(
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512});
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
 
   auto res = manager_.getCert(
       folly::none,
@@ -67,8 +67,8 @@ TEST_F(CertManagerTest, TestSigSchemesPref) {
 TEST_F(CertManagerTest, TestServerSigScheme) {
   auto cert1 = getCert({SignatureScheme::rsa_pss_sha256});
   auto cert2 = getCert({SignatureScheme::rsa_pss_sha512});
-  manager_.addCert(cert1);
-  manager_.addCert(cert2);
+  manager_.addCertAndOverride(cert1);
+  manager_.addCertAndOverride(cert2);
 
   auto res = manager_.getCert(
       folly::none,
@@ -81,7 +81,7 @@ TEST_F(CertManagerTest, TestServerSigScheme) {
 
 TEST_F(CertManagerTest, TestNoSigSchemeMatch) {
   auto cert = getCert({SignatureScheme::rsa_pss_sha256});
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
   auto res = manager_.getCert(
       folly::none,
       {SignatureScheme::rsa_pss_sha256},

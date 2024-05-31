@@ -49,7 +49,7 @@ TEST_F(DelegatedClientCertManagerTest, TestNoCert) {
 TEST_F(DelegatedClientCertManagerTest, TestBasicMatch) {
   // Only non dc cert must be returned
   auto cert = getCert(kRsa);
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
 }
@@ -57,9 +57,9 @@ TEST_F(DelegatedClientCertManagerTest, TestBasicMatch) {
 TEST_F(DelegatedClientCertManagerTest, TestBasicMatchNoExt) {
   auto cert1 = getCert(kRsa);
   auto cert2 = getCert(kRsa);
-  manager_.addCert(cert1);
+  manager_.addCertAndOverride(cert1);
   // Let's just pretend here the impl of the self cert doesnt really matter
-  manager_.addDelegatedCredential(cert2);
+  manager_.addDelegatedCredentialAndOverride(cert2);
   {
     auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
     EXPECT_EQ(res->cert, cert1);
@@ -72,9 +72,9 @@ TEST_F(DelegatedClientCertManagerTest, TestBasicMatchNoExt) {
 
 TEST_F(DelegatedClientCertManagerTest, TestSigSchemes) {
   auto cert = getCert({SignatureScheme::rsa_pss_sha256});
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
   auto dcCert = getCert({SignatureScheme::rsa_pss_sha512});
-  manager_.addDelegatedCredential(dcCert);
+  manager_.addDelegatedCredentialAndOverride(dcCert);
 
   {
     auto res = manager_.getCert(
@@ -128,7 +128,7 @@ TEST_F(DelegatedClientCertManagerTest, TestSigSchemes) {
 
 TEST_F(DelegatedClientCertManagerTest, TestNoSigSchemeMatch) {
   auto cert = getCert({SignatureScheme::rsa_pss_sha256});
-  manager_.addCert(cert);
+  manager_.addCertAndOverride(cert);
   auto res = manager_.getCert(
       folly::none,
       {SignatureScheme::rsa_pss_sha256},

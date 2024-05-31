@@ -34,10 +34,16 @@ DelegatedCredentialClientCertManager::getCert(
 }
 
 void DelegatedCredentialClientCertManager::addDelegatedCredential(
-    std::shared_ptr<SelfCert> cert,
-    bool overrideExistingEntry) {
+    std::shared_ptr<SelfCert> cert) {
   VLOG(8) << "Adding delegated credential";
-  dcMgr_.addCert(std::move(cert), overrideExistingEntry);
+  dcMgr_.addCert(std::move(cert));
 }
+
+void DelegatedCredentialClientCertManager::addDelegatedCredentialAndOverride(
+    std::shared_ptr<SelfCert> cert) {
+  VLOG(8) << "Adding delegated credential";
+  dcMgr_.addCertAndOverride(std::move(cert));
+}
+
 } // namespace extensions
 } // namespace fizz

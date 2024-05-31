@@ -123,7 +123,7 @@ class FizzClientContext {
     if (cert != nullptr) {
       auto certMgr = std::make_shared<CertManager>();
       clientCert_ = cert;
-      certMgr->addCert(std::move(cert));
+      certMgr->addCertAndOverride(std::move(cert));
       certManager_ = std::move(certMgr);
     } else {
       certManager_ = nullptr;

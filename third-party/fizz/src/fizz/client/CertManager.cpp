@@ -31,6 +31,14 @@ CertManager::CertMatch CertManager::getCert(
   return none;
 }
 
+void CertManager::addCert(std::shared_ptr<SelfCert> cert) {
+  addCert(cert, false);
+}
+
+void CertManager::addCertAndOverride(std::shared_ptr<SelfCert> cert) {
+  addCert(cert, true);
+}
+
 void CertManager::addCert(
     std::shared_ptr<SelfCert> cert,
     bool overrideExistingEntry) {

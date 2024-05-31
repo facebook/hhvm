@@ -61,8 +61,7 @@ TYPED_TEST(StreamServiceTest, Throw) {
           auto t = co_await gen.next();
           EXPECT_EQ(i, *t);
         }
-        EXPECT_THROW(
-            co_await gen.next(), apache::thrift::TApplicationException);
+        EXPECT_THROW(co_await gen.next(), TApplicationException);
       });
 }
 
@@ -149,8 +148,7 @@ TYPED_TEST(StreamServiceTest, DuplicateStreamIdThrows) {
       });
 }
 
-class InitialThrowHandler
-    : public apache::thrift::ServiceHandler<TestStreamService> {
+class InitialThrowHandler : public ServiceHandler<TestStreamService> {
  public:
   ServerStream<int32_t> range(int32_t, int32_t) override {
     throw std::runtime_error("oops");

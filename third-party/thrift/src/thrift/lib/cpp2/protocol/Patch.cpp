@@ -657,14 +657,19 @@ void insertFieldsToMask(
   if (const auto* obj = patchFields.if_object()) {
     auto getIncludesObjRef = [&](Mask& mask) { return mask.includes_ref(); };
     for (const auto& [id, value] : *obj) {
-      // Object patch can get here only patch* operations, which require
-      // reading existing value to know if/how given operations can/should be
-      // applied. Generate allMask() read mask for them if the recursively
-      // extracted masks from patch does not include the field.
+      // Object patch can get here only StructPatch::Patch(Prior|After
+      // operations, which require reading existing value to know if/how given
+      // operations can/should be applied. Generate allMask() read mask for them
+      // if the recursively extracted masks from patch does not include the
+      // field.
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
       insertMaskIntersect(masks.read, id, allMask(), getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
+    // Map patch can get here only MapPatch::Patch(Prior|After) operations,
+    // which require reading existing value to know if/how given operations
+    // can/should be applied. Generate allMask() read map mask if the
+    // recursively extracted masks from patch do not include the key.
     if (view) {
       auto readValueIndex = buildValueIndex(masks.read);
       auto writeValueIndex = buildValueIndex(masks.write);
@@ -675,6 +680,7 @@ void insertFieldsToMask(
             getMapIdValueAddressFromIndex(writeValueIndex, key));
         insertNextMask(
             masks, value, readId, writeId, recursive, view, getIncludesMapRef);
+        insertMaskIntersect(masks.read, readId, allMask(), getIncludesMapRef);
       }
       return;
     }
@@ -683,10 +689,12 @@ void insertFieldsToMask(
         auto id = static_cast<int64_t>(getMapIdFromValue(key));
         insertNextMask(
             masks, value, id, id, recursive, view, getIncludesMapRef);
+        insertMaskIntersect(masks.read, id, allMask(), getIncludesMapRef);
       } else {
         auto id = getStringFromValue(key);
         insertNextMask(
             masks, value, id, id, recursive, view, getIncludesStringMapRef);
+        insertMaskIntersect(masks.read, id, allMask(), getIncludesStringMapRef);
       }
     }
   }

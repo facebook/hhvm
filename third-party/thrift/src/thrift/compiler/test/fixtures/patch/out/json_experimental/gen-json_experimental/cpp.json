@@ -52,36 +52,36 @@
           "I8" : {
             "name" : "I8",
             "docstring" : "::std::int8_t\n",
-            "lineno" : 295,
+            "lineno" : 277,
             "value" : 0
           },
           "U8" : {
             "name" : "U8",
             "docstring" : "::std::uint8_t\n",
-            "lineno" : 297,
+            "lineno" : 279,
             "value" : 1
           },
           "I16" : {
             "name" : "I16",
             "docstring" : "::std::int16_t\n",
-            "lineno" : 299,
+            "lineno" : 281,
             "value" : 2
           },
           "U16" : {
             "name" : "U16",
             "docstring" : "::std::uint16_t\n",
-            "lineno" : 301,
+            "lineno" : 283,
             "value" : 3
           },
           "U32" : {
             "name" : "U32",
             "docstring" : "::std::uint32_t\n",
-            "lineno" : 303,
+            "lineno" : 285,
             "value" : 4
           }
         },
         "docstring" : "Enum in C++ by default uses signed 32 bit integer. There is no need to specify\nunderlying type for signed 32 bit integer.\n64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.\n",
-        "lineno" : 293
+        "lineno" : 275
       }
       },
   "structs" :
@@ -383,31 +383,6 @@
         "is_union" : false,
         "lineno" : 223
       },
-      "StrongType" : {
-        "name" : "StrongType",
-        "structured_annotations": {
-          "thrift.Experimental" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Experimental",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      },
-          "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
-        },
-        "docstring" : "Indicates a typedef should be 'strong', and require an explicit cast to\nthe underlying type.\n\nCurrently only works for integer typedefs, for example:\n\n    @cpp.StrongType\n    typedef i32 MyId;\n\nWill cause an enum class to be used instead of a typedef in the genearte code, for example:\n\n    enum class MyId : ::std::int32_t {};\n\n",
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 240
-      },
       "FieldInterceptor" : {
         "name" : "FieldInterceptor",
         "structured_annotations": {
@@ -434,7 +409,7 @@
             "name" : "name",
             "docstring" : "The name of a field interceptor.\n\nThe field interceptor provides the following API:\n\n    struct ThriftFieldInterceptor {\n      template <typename T, typename Struct, int16_t FieldId>\n      static void interceptThriftFieldAccess(T&& field,\n                                             apache::thrift::FieldContext<Struct, FieldId>&& ctx);\n    };\n\nThe field interceptor intercepts with the field value and the field context.\nIt enforces an easily searchable function name `interceptThriftFieldAccess`.\n",
             "key" : 1,
-            "lineno" : 275,
+            "lineno" : 257,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -442,14 +417,14 @@
             "name" : "noinline",
             "docstring" : "Setting to true makes compiler not inline and erase function signature for\nthe intercepting field accessor.\n",
             "key" : 2,
-            "lineno" : 281,
+            "lineno" : 263,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 258
+        "lineno" : 240
       },
       "UseOpEncode" : {
         "name" : "UseOpEncode",
@@ -473,7 +448,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 284
+        "lineno" : 266
       },
       "EnumType" : {
         "name" : "EnumType",
@@ -492,7 +467,7 @@
           "type" : {
             "name" : "type",
             "key" : 1,
-            "lineno" : 325,
+            "lineno" : 307,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -502,7 +477,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 323
+        "lineno" : 305
       },
       "Frozen2Exclude" : {
         "name" : "Frozen2Exclude",
@@ -519,7 +494,7 @@
         "docstring" : "Indicates that frozen types should not be generated for a given struct.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 331
+        "lineno" : 313
       },
       "Frozen2RequiresCompleteContainerParams" : {
         "name" : "Frozen2RequiresCompleteContainerParams",
@@ -536,7 +511,7 @@
         "docstring" : "Indicates that the container params must be complete at the time this type is instantiated.\nOnly required in rare cases where the build fails with a frozen-related assert failure.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 338
+        "lineno" : 320
       },
       "ProcessInEbThreadUnsafe" : {
         "name" : "ProcessInEbThreadUnsafe",
@@ -561,7 +536,7 @@
         "docstring" : "Causes C++ handler code to run inline on the EventBase thread.\nDisables overload protection, use with caution.\nCannot be applied to individual functions in interactions.\n\nCauses the request to be executed on the event base thread directly instead of rescheduling onto a thread manager thread, provided the async_eb_ handler method is implemented.\nYou should only execute the request on the event base thread if it is very fast and you have measured that rescheduling is a substantial chunk of your service's CPU usage.\nIf a request executing on the event base thread blocks or takes a long time, all other requests sharing the same event base are affected and latency will increase significantly.\nWe strongly discourage the use of this annotation unless strictly necessary. You will have to implement the harder-to-use async_eb_ handler method.\nThis also disables queue timeouts, an important form of overload protection.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 352
+        "lineno" : 334
       },
       "RuntimeAnnotation" : {
         "name" : "RuntimeAnnotation",
@@ -578,7 +553,7 @@
         "docstring" : "Applies to structured annotation that need to be accessed in Runtime.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 359
+        "lineno" : 341
       },
       "UseCursorSerialization" : {
         "name" : "UseCursorSerialization",
@@ -626,7 +601,7 @@
         "docstring" : "Causes uses of the given structured type to be replaced with `CursorSerializationWrapper` to allow use of cursor-based serialization.\nMust add `cpp_include \"thrift/lib/cpp2/protocol/CursorBasedSerializer.h\"` to files that use this annotation.\nSee documentation for this class in CursorBasedSerializer.h\nCan only be applied to top-level structs (used as return type or sole argument to an RPC or serialized directly), not to types used as struct fields or container elements.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 368
+        "lineno" : 350
       }
       },
   "source_path" : "thrift/annotation/cpp",

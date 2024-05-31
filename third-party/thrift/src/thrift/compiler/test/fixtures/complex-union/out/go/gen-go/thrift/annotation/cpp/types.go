@@ -1446,79 +1446,6 @@ func (x *ScopedEnumAsUnionType) String() string {
     return sb.String()
 }
 
-type StrongType struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*StrongType)(nil)
-
-func NewStrongType() *StrongType {
-    return (&StrongType{})
-}
-
-
-
-func (x *StrongType) Write(p thrift.Format) error {
-    if err := p.WriteStructBegin("StrongType"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *StrongType) Read(p thrift.Format) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *StrongType) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StrongType({")
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 type FieldInterceptor struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
     Noinline bool `thrift:"noinline,2" json:"noinline" db:"noinline"`
@@ -2283,7 +2210,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/MinimizePadding", func() any { return NewMinimizePadding() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/TriviallyRelocatable", func() any { return NewTriviallyRelocatable() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType", func() any { return NewScopedEnumAsUnionType() })
-    registry.RegisterType("facebook.com/thrift/annotation/cpp/StrongType", func() any { return NewStrongType() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/FieldInterceptor", func() any { return NewFieldInterceptor() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/UseOpEncode", func() any { return NewUseOpEncode() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumType", func() any { return NewEnumType() })

@@ -145,13 +145,6 @@ inline void reset_field<::facebook::thrift::annotation::cpp::ScopedEnumAsUnionTy
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::cpp::StrongType>(
-    ::facebook::thrift::annotation::cpp::StrongType& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::annotation::cpp::FieldInterceptor>(
     ::facebook::thrift::annotation::cpp::FieldInterceptor& obj, uint16_t index) {
   switch (index) {
@@ -309,16 +302,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::cpp::StrongType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

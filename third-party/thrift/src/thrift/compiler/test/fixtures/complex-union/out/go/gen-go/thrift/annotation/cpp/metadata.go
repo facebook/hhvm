@@ -153,9 +153,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("cpp.ScopedEnumAsUnionType").
     SetIsUnion(false),
     metadata.NewThriftStruct().
-    SetName("cpp.StrongType").
-    SetIsUnion(false),
-    metadata.NewThriftStruct().
     SetName("cpp.FieldInterceptor").
     SetIsUnion(false).
     SetFields(

@@ -29,15 +29,8 @@ DelegatedCredentialClientCertManager::getCert(
       return dcRes;
     }
   }
-  return mainMgr_.getCert(
+  return CertManager::getCert(
       sni, supportedSigSchemes, peerSigSchemes, peerExtensions);
-}
-
-void DelegatedCredentialClientCertManager::addCert(
-    std::shared_ptr<SelfCert> cert,
-    bool overrideExistingEntry) {
-  VLOG(8) << "Adding undelegated cert";
-  mainMgr_.addCert(std::move(cert), overrideExistingEntry);
 }
 
 void DelegatedCredentialClientCertManager::addDelegatedCredential(

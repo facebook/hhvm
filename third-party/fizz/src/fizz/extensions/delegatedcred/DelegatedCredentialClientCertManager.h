@@ -29,10 +29,6 @@ class DelegatedCredentialClientCertManager : public fizz::client::CertManager {
       const std::vector<SignatureScheme>& peerSigSchemes,
       const std::vector<Extension>& peerExtensions) const override;
 
-  void addCert(
-      std::shared_ptr<SelfCert> cert,
-      bool overrideExistingEntry = true) override;
-
   /*
    * It is the callers responsibility to call this with an actual delegated
    * cred. The override flag here has the same meaning as above, if there is
@@ -43,7 +39,6 @@ class DelegatedCredentialClientCertManager : public fizz::client::CertManager {
       bool overrideExistingEntry = true);
 
  protected:
-  client::CertManager mainMgr_;
   client::CertManager dcMgr_;
 };
 } // namespace extensions

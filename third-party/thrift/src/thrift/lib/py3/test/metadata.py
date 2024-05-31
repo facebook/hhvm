@@ -22,6 +22,7 @@ from apache.thrift.metadata.types import ThriftPrimitiveType
 from testing.clients import TestingService, TestingServiceChild
 from testing.services import TestingServiceInterface
 from testing.types import hard, HardError, mixed, Perm
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.metadata import gen_metadata, ThriftKind
 
 
@@ -70,8 +71,6 @@ class MetadataTests(unittest.TestCase):
             fieldInstance.type.as_primitive(),
             ThriftPrimitiveType.THRIFT_STRING_TYPE,
         )
-        self.assertEqual(typedef.type.kind, ThriftKind.TYPEDEF)
-        self.assertEqual(typedef.type.as_typedef().underlyingType.kind, ThriftKind.LIST)
 
         self.assertEqual(meta.structs["testing.EmptyUnion"].is_union, True)
 
@@ -80,6 +79,19 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.name, "some_field")
         self.assertEqual(field.pyname, "some_field_")
 
+    @brokenInAutoMigrate()
+    def test_metadata_structs_typedef(self) -> None:
+        hardStructClass = gen_metadata(hard)
+        _, typedef, *rest = hardStructClass.fields
+        self.assertEqual(typedef.type.kind, ThriftKind.TYPEDEF)
+        self.assertEqual(typedef.type.as_typedef().underlyingType.kind, ThriftKind.LIST)
+
+    @brokenInAutoMigrate()
+    def test_metadata_struct_recursive_typedefs(self) -> None:
+        hard_struct = gen_metadata(hard)
+        _, val_list, *rest = hard_struct.fields
+        self.assertEqual(val_list.type.kind, ThriftKind.TYPEDEF)
+
     def test_metadata_struct_recursive(self) -> None:
         hard_struct = gen_metadata(hard)
 
@@ -87,7 +99,6 @@ class MetadataTests(unittest.TestCase):
         # grabbing fields 2 and 4 to check
         _, val_list, _, an_int, _, *rest = hard_struct.fields
         self.assertEqual(an_int.name, "an_int")
-        self.assertEqual(val_list.type.kind, ThriftKind.TYPEDEF)
 
         # Test a few fields on the struct
         integers = an_int.type.as_union()
@@ -215,7 +226,7 @@ class MetadataTests(unittest.TestCase):
             ThriftPrimitiveType.THRIFT_I32_TYPE,
         )
 
-    def test_metadata_structured_annotations(self) -> None:
+    def test_metadata_services_structured_annotations(self) -> None:
         annotations = gen_metadata(TestingService).structuredAnnotations
         self.assertEqual(len(annotations), 2)
 

@@ -19,7 +19,19 @@ from thrift.py3.types cimport CompiledEnum, Struct
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.server cimport ServiceInterface
 from thrift.py3.client cimport Client
+from thrift.python.client import (
+    Client as PyClient,
+    AsyncClient as PyAsyncClient,
+    SyncClient as PySyncClient,
+)
 from thrift.python.common cimport MetadataBox
+from thrift.python.exceptions import GeneratedError as PyGeneratedError
+from thrift.python.metadata import gen_metadata as python_gen_metadata
+from thrift.python.types import (
+    Enum as PyEnum,
+    ServiceInterface as PyServiceInterface,
+    StructOrUnion as PyStructOrUnion,
+)
 from apache.thrift.metadata.types cimport (
     cThriftMetadata,
     cThriftStruct,
@@ -443,6 +455,9 @@ def gen_metadata(obj_or_cls):
         return obj_or_cls.getThriftModuleMetadata()
 
     cls = obj_or_cls if isinstance(obj_or_cls, type) else type(obj_or_cls)
+
+    if issubclass(cls, (PyStructOrUnion, PyEnum, PyGeneratedError, PyClient, PyAsyncClient, PySyncClient, PyServiceInterface)):
+        return python_gen_metadata(cls)
 
     if not issubclass(cls, (Struct, GeneratedError, ServiceInterface, Client, CompiledEnum)):
         raise TypeError(f'{cls!r} is not a thrift-py3 type.')

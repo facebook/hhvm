@@ -25,3 +25,8 @@ cdef class MutableSet:
 cdef class MutableSetIterator:
     cdef TypeInfoBase _val_typeinfo
     cdef object _iter
+
+cdef class MutableMap:
+    cdef TypeInfoBase _key_typeinfo
+    cdef TypeInfoBase _val_typeinfo
+    cdef dict _map_data

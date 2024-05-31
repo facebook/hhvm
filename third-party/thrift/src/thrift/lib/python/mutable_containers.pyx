@@ -15,6 +15,8 @@
 
 from collections.abc import (
     Iterable,
+    Mapping,
+    MutableMapping,
     MutableSequence,
     MutableSet as pyMutableSet,
     Set
@@ -306,12 +308,94 @@ pyMutableSet.register(MutableSet)
 
 
 cdef class MutableSetIterator:
-    def __cinit__(MutableSetIterator self, TypeInfoBase value_typeinfo, set set_data):
+    def __cinit__(MutableSetIterator self, TypeInfoBase value_typeinfo, data: typing.Union[set, dict]):
         self._val_typeinfo = value_typeinfo
-        self._iter = iter(set_data)
+        self._iter = iter(data)
 
     def __next__(MutableSetIterator self):
         return self._val_typeinfo.to_python_value(next(self._iter))
 
     def __iter__(self):
         return self
+
+
+cdef class MutableMap:
+    """
+    A mutable container used to represent a Thrift mutable map. It implements
+    the [`MutableMap` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
+    """
+
+    # DO_BEFORE(alperyoney,20240617): Implement missing methods from abstract
+    def __cinit__(MutableSet self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
+        """
+        map_data: It should contain valid elements. Any invalid elements within
+            `map_data` may lead to undefined behavior.
+        """
+        self._key_typeinfo = key_typeinfo
+        self._val_typeinfo = value_typeinfo
+        self._map_data = map_data
+
+    def __len__(self):
+        return len(self._map_data)
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+
+        if isinstance(other, MutableMap):
+            if self._is_same_type_of_map(other):
+                return self._map_data == (<MutableMap>other)._map_data
+            raise TypeError("Cannot check MutableMap instances for equality: types do not match.")
+
+        if not isinstance(other, Mapping):
+            return NotImplemented
+
+        if len(self._map_data) != len(other):
+            return False
+
+        for other_key, other_value in other.items():
+            other_internal_key = self._key_typeinfo.to_internal_data(other_key)
+            self_internal_value = self._map_data.get(other_internal_key, None)
+            if self_internal_value is None:
+                return False
+            other_internal_value = self._val_typeinfo.to_internal_data(other_value)
+            if self_internal_value != other_internal_value:
+                return False
+
+        return True
+
+    def __getitem__(self, key):
+        internal_key = self._key_typeinfo.to_internal_data(key)
+        return self._val_typeinfo.to_python_value(self._map_data[internal_key])
+
+    def __iter__(MutableMap self):
+        return MutableSetIterator(self._key_typeinfo, self._map_data)
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key):
+        internal_key = self._key_typeinfo.to_internal_data(key)
+        return internal_key in self._map_data
+
+    def __setitem__(self, key, value):
+        internal_key = self._key_typeinfo.to_internal_data(key)
+        internal_value = self._val_typeinfo.to_internal_data(value)
+        self._map_data[internal_key] = internal_value
+
+    def _is_same_type_of_map(MutableMap self, other):
+        """
+        Returns `True` if `other` is a `MutableMap` with the same
+        `_key_typeinfo` and `_val_typeinfo` as `self`, `False` otherwise.
+        """
+        if not isinstance(other, MutableMap):
+            return False
+
+        return (self._key_typeinfo.same_as((<MutableMap>other)._key_typeinfo)
+            and self._val_typeinfo.same_as((<MutableMap>other)._val_typeinfo))
+
+
+MutableMapping.register(MutableMap)

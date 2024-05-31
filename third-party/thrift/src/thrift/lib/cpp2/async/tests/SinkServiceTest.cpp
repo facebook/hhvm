@@ -23,7 +23,7 @@
 namespace apache {
 namespace thrift {
 
-using namespace testutil::testservice;
+using namespace apache::thrift::detail::test;
 
 struct SinkServiceTest
     : public AsyncTestSetup<TestSinkService, Client<TestSinkService>> {};
@@ -70,27 +70,26 @@ TEST_F(SinkServiceTest, SinkThrow) {
 }
 
 TEST_F(SinkServiceTest, SinkThrowStruct) {
-  connectToServer([](Client<TestSinkService>& client) -> folly::coro::Task<void> {
-    auto sink = co_await client.co_sinkThrow();
-    bool exceptionThrown = false;
-    try {
-      co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-        co_yield 0;
-        co_yield 1;
-        SinkException e;
-        e.reason_ref() = "test";
-        throw e;
-      }());
-    } catch (const SinkThrew& ex) {
-      exceptionThrown = true;
-      EXPECT_EQ(TApplicationException::UNKNOWN, ex.getType());
-      EXPECT_EQ(
-          "testutil::testservice::SinkException: ::testutil::testservice::SinkException",
-          ex.getMessage());
-    }
-    EXPECT_TRUE(exceptionThrown);
-    co_await client.co_purge();
-  });
+  connectToServer(
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
+        auto sink = co_await client.co_sinkThrow();
+        bool exceptionThrown = false;
+        try {
+          co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+            co_yield 0;
+            co_yield 1;
+            SinkException e;
+            e.reason_ref() = "test";
+            throw e;
+          }());
+        } catch (const SinkThrew& ex) {
+          exceptionThrown = true;
+          EXPECT_EQ(TApplicationException::UNKNOWN, ex.getType());
+          EXPECT_THAT(ex.getMessage(), HasSubstr("SinkException"));
+        }
+        EXPECT_TRUE(exceptionThrown);
+        co_await client.co_purge();
+      });
 }
 
 TEST_F(SinkServiceTest, SinkFinalThrow) {

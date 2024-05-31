@@ -19,8 +19,7 @@
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestSinkService.h>
 
-namespace testutil {
-namespace testservice {
+namespace apache::thrift::detail::test {
 
 class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
  public:
@@ -66,5 +65,4 @@ class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
   std::atomic<int> activeSinks_{0};
 };
 
-} // namespace testservice
-} // namespace testutil
+} // namespace apache::thrift::detail::test

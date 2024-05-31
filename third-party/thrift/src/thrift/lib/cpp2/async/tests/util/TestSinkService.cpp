@@ -20,8 +20,7 @@
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/portability/GTest.h>
 
-namespace testutil {
-namespace testservice {
+namespace apache::thrift::detail::test {
 
 apache::thrift::SinkConsumer<int32_t, bool> TestSinkService::range(
     int32_t from, int32_t to) {
@@ -251,5 +250,4 @@ TestSinkService::rangeSlowFinalResponse(int32_t from, int32_t to) {
       10 /* buffer size */
   };
 }
-} // namespace testservice
-} // namespace testutil
+} // namespace apache::thrift::detail::test

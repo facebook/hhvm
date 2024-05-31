@@ -51,14 +51,15 @@ class AstGeneratorTest(unittest.TestCase):
         os.chdir(self.tmp)
         self.maxDiff = None
 
-    def run_thrift(self, file):
+    def run_thrift(self, file, backcompat=True):
         with resources.as_file(
             resources.files(__package__).joinpath("implicit_includes")
         ) as inc:
+            extra_args = "" if backcompat else ",no_backcompat"
             argsx = [
                 thrift2ast,
                 "--gen",
-                "ast:protocol=compact,source_ranges",
+                "ast:protocol=compact,source_ranges" + extra_args,
                 "-o",
                 self.tmp,
                 "-I",
@@ -327,6 +328,11 @@ class AstGeneratorTest(unittest.TestCase):
             annot.objectValue.members[1].objectValue.members[3].stringValue,
             b"foo.Annot",
         )
+
+        # Disable backcompat
+        ast = self.run_thrift("foo.thrift", backcompat=False)
+        struct = ast.definitions[1].structDef
+        self.assertFalse(struct.fields[0].attrs.structuredAnnotations)
 
     def test_source_range_map(self):
         write_file(

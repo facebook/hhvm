@@ -35,10 +35,34 @@ class schematizer {
   using InternFunc = std::function<t_program::value_id(
       std::unique_ptr<t_const_value> val, t_program* program)>;
 
-  explicit schematizer(
-      const t_program_bundle* bundle,
-      InternFunc intern_value = &default_intern_value)
-      : bundle_(bundle), intern_value_(std::move(intern_value)) {}
+  enum class included_data : uint16_t {
+    DoubleWrites = 1, // Legacy copies of data for backcompat
+    Annotations = 2,
+    Docs = 4,
+  };
+
+  struct included_data_set {
+    bool test(included_data item) const {
+      return data & static_cast<storage>(item);
+    }
+    void set(included_data item) { data |= static_cast<storage>(item); }
+    void reset(included_data item) { data &= ~static_cast<storage>(item); }
+
+    // Needed to work around https://github.com/llvm/llvm-project/issues/36032
+    included_data_set() : data(static_cast<storage>(-1)) {}
+
+   private:
+    using storage = std::underlying_type_t<included_data>;
+    storage data;
+  };
+
+  struct options {
+    included_data_set include;
+    InternFunc intern_value;
+  };
+
+  explicit schematizer(const t_program_bundle* bundle, options opts = {})
+      : bundle_(bundle), opts_(std::move(opts)) {}
 
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
@@ -55,10 +79,7 @@ class schematizer {
 
  private:
   const t_program_bundle* bundle_;
-  InternFunc intern_value_;
-
-  static t_program::value_id default_intern_value(
-      std::unique_ptr<t_const_value> val, t_program* program);
+  options opts_;
 
   t_type_ref stdType(std::string_view uri);
   std::unique_ptr<t_const_value> typeUri(const t_type& type);

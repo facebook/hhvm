@@ -85,6 +85,8 @@ class t_ast_generator : public t_generator {
         include_generated_ = true;
       } else if (pair.first == "source_ranges") {
         source_ranges_ = true;
+      } else if (pair.first == "no_backcompat") {
+        schema_opts_.include.reset(schematizer::included_data::DoubleWrites);
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -111,6 +113,7 @@ class t_ast_generator : public t_generator {
 
   std::ofstream f_out_;
   ast_protocol protocol_;
+  schematizer::options schema_opts_;
   bool include_generated_{false};
   bool source_ranges_{false};
   bool is_root_program_{true};
@@ -203,7 +206,8 @@ void t_ast_generator::generate_program() {
         "thrift/lib/thrift/schema.thrift must be present in one of the include paths.");
   }
 
-  schematizer schema_source(&program_bundle_, intern_value);
+  schema_opts_.intern_value = intern_value;
+  schematizer schema_source(&program_bundle_, schema_opts_);
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
     if (program_index.count(&program)) {
@@ -231,23 +235,25 @@ void t_ast_generator::generate_program() {
 
     // Double write to deprecated externed path. (T161963504)
     // The new path is populated in the Program struct by the schematizer.
-    cpp2::SourceInfo info;
-    info.fileName() =
-        source_mgr_.found_include_file(program.path()).value_or(program.path());
+    if (schema_opts_.include.test(schematizer::included_data::DoubleWrites)) {
+      cpp2::SourceInfo info;
+      info.fileName() = source_mgr_.found_include_file(program.path())
+                            .value_or(program.path());
 
-    for (const auto& [lang, incs] : program.language_includes()) {
-      for (const auto& inc : incs) {
-        info.languageIncludes()[lang].push_back(static_cast<type::ValueId>(
-            intern_value(std::make_unique<t_const_value>(inc))));
+      for (const auto& [lang, incs] : program.language_includes()) {
+        for (const auto& inc : incs) {
+          info.languageIncludes()[lang].push_back(static_cast<type::ValueId>(
+              intern_value(std::make_unique<t_const_value>(inc))));
+        }
       }
-    }
 
-    for (const auto& [lang, langNamespace] : program.namespaces()) {
-      info.namespaces()[lang] = static_cast<type::ValueId>(
-          intern_value(std::make_unique<t_const_value>(langNamespace)));
-    }
+      for (const auto& [lang, langNamespace] : program.namespaces()) {
+        info.namespaces()[lang] = static_cast<type::ValueId>(
+            intern_value(std::make_unique<t_const_value>(langNamespace)));
+      }
 
-    ast.sources()[program_id] = std::move(info);
+      ast.sources()[program_id] = std::move(info);
+    }
 
     // Note: have to populate `definitions` after the visitor completes since it
     // visits the children after this lambda returns.
@@ -446,6 +452,7 @@ THRIFT_REGISTER_GENERATOR(
     "    protocol:          Which of [json|debug|compact] protocols to use for serialization.\n"
     "    include_generated: Enables schematization of generated (patch) types.\n"
     "    source_ranges:     Enables population of the identifier source range map.\n"
+    "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
     "");
 
 } // namespace compiler

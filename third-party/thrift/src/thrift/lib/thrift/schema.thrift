@@ -699,6 +699,10 @@ struct Program {
 @python.Py3Hidden
 typedef list<Program> ProgramList
 
+/** A hash of the value, but stored internally as ValueId */
+@python.Py3Hidden
+typedef id.ValueId ValueKey
+
 /**
  * A Thrift schema represented as a collection of Thrift programs and associated
  * schema values.
@@ -719,6 +723,9 @@ struct Schema {
 
   /** The values, accessible by `ValueId`. */
   2: list<protocol.Value> values;
+
+  /** The values, accessible by `ValueKey`. */
+  3: map<ValueKey, protocol.Value> valuesMap;
 
   /** The definitions, accessible by `DefinitionId`. */
   4: DefinitionList definitions;

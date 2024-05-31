@@ -136,10 +136,24 @@ void t_ast_generator::generate_program() {
 
   auto intern_value = [&](std::unique_ptr<t_const_value> val,
                           t_program* = nullptr) {
-    // TODO: deduplication
+    auto value = const_to_value(*val);
+    if (schema_opts_.use_hash) {
+      auto hash = op::hash<type::struct_t<protocol::Value>>(value);
+      auto key = static_cast<type::ValueKey>(hash);
+      if (ast.valuesMap()->count(key)) {
+        if (ast.valuesMap()->at(key) != value) {
+          throw std::runtime_error(fmt::format(
+              "Hash collision on value: {}", debugStringViaEncode(value)));
+        }
+      } else {
+        ast.valuesMap()->insert({key, std::move(value)});
+      }
+      return static_cast<t_program::value_id>(hash);
+    }
+
     auto& values = ast.values().value();
     auto ret = positionToId<t_program::value_id>(values.size());
-    values.push_back(const_to_value(*val));
+    values.push_back(std::move(value));
     return ret;
   };
 

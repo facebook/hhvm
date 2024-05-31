@@ -438,7 +438,7 @@ class AstGeneratorTest(unittest.TestCase):
             textwrap.dedent(
                 """
                 struct Foo {
-                    1: i64 int;
+                    1: i64 int = 42;
                 }
                 struct Bar {
                     1: Foo foo;
@@ -457,4 +457,8 @@ class AstGeneratorTest(unittest.TestCase):
                         ].type.name.structType.typeHashPrefixSha2_256
                     ].structDef.attrs.name,
                     "Foo",
+                )
+            else:
+                self.assertEqual(
+                    ast.valuesMap[v.structDef.fields[0].customDefault].i64Value, 42
                 )

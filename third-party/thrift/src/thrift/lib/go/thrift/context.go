@@ -37,6 +37,9 @@ type ConnInfo struct {
 
 // TLS returns the TLS connection state.
 func (c ConnInfo) TLS() *tls.ConnectionState {
+	if c.tlsState == nil {
+		return nil
+	}
 	cs := c.tlsState.ConnectionState()
 	// See the caveat in tlsConnectionStater.
 	if cs.Version == 0 {
@@ -46,14 +49,14 @@ func (c ConnInfo) TLS() *tls.ConnectionState {
 }
 
 // WithConnInfo adds connection info (from a thrift.Transport) to context, if applicable
-func WithConnInfo(ctx context.Context, client Transport) context.Context {
-	s, ok := client.(*socket)
-	if !ok {
-		return ctx
+func WithConnInfo(ctx context.Context, conn net.Conn) context.Context {
+	var tlsState tlsConnectionStater
+	if t, ok := conn.(tlsConnectionStater); ok {
+		tlsState = t
 	}
 	ctx = context.WithValue(ctx, connInfoKey, ConnInfo{
-		RemoteAddr: s.RemoteAddr(),
-		tlsState:   s,
+		RemoteAddr: conn.RemoteAddr(),
+		tlsState:   tlsState,
 	})
 	return ctx
 }

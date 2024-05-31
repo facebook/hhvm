@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"runtime/debug"
 )
 
@@ -108,7 +109,11 @@ func (p *SimpleServer) addConnInfo(ctx context.Context, client Transport) contex
 	if p.processorContext == nil {
 		return ctx
 	}
-	return WithConnInfo(ctx, client)
+	conn, ok := client.(net.Conn)
+	if !ok {
+		return ctx
+	}
+	return WithConnInfo(ctx, conn)
 }
 
 // Serve starts listening on the transport and accepting new connections

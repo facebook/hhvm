@@ -349,7 +349,7 @@ let redundant_unsafe_cast ~can_be_captured hole_pos expr_pos =
     hole_pos
     expr_pos
     code
-    Lint_error
+    Lint_advice
 
 let redundant_cast ~can_be_captured ~check_status cast cast_pos expr_pos =
   let code = Codes.redundant_cast in
@@ -374,12 +374,12 @@ let loose_unsafe_cast_lower_bound p ty_str_opt =
         Some (ty_str, p) )
     | None -> (msg, None)
   in
-  Lints.add ~autofix Codes.loose_unsafe_cast_lower_bound Lint_error p msg
+  Lints.add ~autofix Codes.loose_unsafe_cast_lower_bound Lint_advice p msg
 
 let loose_unsafe_cast_upper_bound p =
   Lints.add
     Codes.loose_unsafe_cast_upper_bound
-    Lint_error
+    Lint_advice
     p
     "HH\\FIXME\\UNSAFE_CAST output type annotation is too loose, please use a more specific type."
 

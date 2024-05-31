@@ -17,6 +17,59 @@ But got `Super`
 
 File "assign_list.php", line 8, character 24 - line 8, character 28:
 
+Here's why: this hint
+
+ 8 | function bar_1((string,»Super«,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+File "assign_list.php", line 8, character 24 - line 8, character 28:
+
+flows *into* this hint
+
+ 8 | function bar_1(»(string,Super,bool)« $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+File "assign_list.php", line 8, character 16 - line 8, character 34:
+
+which itself flows *into* this expression
+
+ 8 | function bar_1((string,Super,bool) »$xyz«): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+File "assign_list.php", line 8, character 36 - line 8, character 39:
+
+which itself flows *into* this expression
+
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = »$xyz«;
+10 |   foo($y);
+11 | }
+
+File "assign_list.php", line 9, character 22 - line 9, character 25:
+
+which itself flows *into* this type variable
+
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, »$y«, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+File "assign_list.php", line 9, character 12 - line 9, character 13:
+
+which itself flows *into* this hint
+
+ 6 | function foo(»Sub« $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+
+File "assign_list.php", line 6, character 14 - line 6, character 16:
+
 Flow:
 {
   "Rflow":[

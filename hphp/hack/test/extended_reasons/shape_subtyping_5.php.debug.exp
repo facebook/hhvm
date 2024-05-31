@@ -6,6 +6,9 @@ The field `a` is **optional**
  4 | type optional_a_at_int = »shape(?'a' => int)«;
  5 | 
  6 | function expects_required_a_at_int_alias(
+ 7 | required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
 
 File "shape_subtyping_5.php", line 4, character 26 - line 4, character 43:
 
@@ -13,8 +16,6 @@ The field `a` is defined as **required**
 
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type optional_a_at_int = shape(?'a' => int);
- 5 | 
- 6 | function expects_required_a_at_int_alias(
 
 File "shape_subtyping_5.php", line 3, character 26 - line 3, character 42:
 
@@ -22,8 +23,108 @@ File "shape_subtyping_5.php", line 3, character 26 - line 3, character 42:
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type optional_a_at_int = shape(?'a' => int);
+
+File "shape_subtyping_5.php", line 3, character 39 - line 3, character 41:
+
+Here's why: this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type optional_a_at_int = shape(?'a' => »int«);
  5 | 
  6 | function expects_required_a_at_int_alias(
+ 7 | required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_5.php", line 4, character 40 - line 4, character 42:
+
+flows *into* this hint, via the optional shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type optional_a_at_int = »shape(?'a' => int)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 | required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_5.php", line 4, character 26 - line 4, character 43:
+
+which itself flows *into* this hint
+
+ 11 | function passes_optional_a_at_int_alias(
+ 12 |   »optional_a_at_int« $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_5.php", line 12, character 3 - line 12, character 19:
+
+which itself flows *into* this expression
+
+ 11 | function passes_optional_a_at_int_alias(
+ 12 |   optional_a_at_int »$s«,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_5.php", line 12, character 21 - line 12, character 22:
+
+which itself flows *into* this expression
+
+ 11 | function passes_optional_a_at_int_alias(
+ 12 |   optional_a_at_int $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_5.php", line 14, character 35 - line 14, character 36:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function passes_optional_a_at_int_alias(
+ 12 |   optional_a_at_int $s,
+ 13 | ): void {
+ 14 |   »expects_required_a_at_int_alias«($s);
+ 15 | }
+
+File "shape_subtyping_5.php", line 14, character 3 - line 14, character 33:
+
+which itself flows *from* this function or method 
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type optional_a_at_int = shape(?'a' => int);
+ 5 | 
+ 6 | function »expects_required_a_at_int_alias«(
+ 7 | required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_5.php", line 6, character 10 - line 6, character 40:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type optional_a_at_int = shape(?'a' => int);
+
+File "shape_subtyping_5.php", line 3, character 26 - line 3, character 42:
+
+which itself flows *into* this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type optional_a_at_int = shape(?'a' => int);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 | »required_a_at_int« $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_5.php", line 7, character 1 - line 7, character 17:
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => »int«);
+ 4 | type optional_a_at_int = shape(?'a' => int);
 
 File "shape_subtyping_5.php", line 3, character 39 - line 3, character 41:
 

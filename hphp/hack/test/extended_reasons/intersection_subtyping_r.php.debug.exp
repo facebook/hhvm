@@ -16,6 +16,54 @@ But got `C`
 
 File "intersection_subtyping_r.php", line 7, character 18 - line 7, character 18:
 
+Here's why: this hint
+
+ 7 | function inter_r(»C« $c) : (A & I) {
+ 8 |   return $c;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 7, character 18 - line 7, character 18:
+
+flows *into* this expression
+
+ 7 | function inter_r(C »$c«) : (A & I) {
+ 8 |   return $c;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 7, character 20 - line 7, character 21:
+
+which itself flows *into* this expression
+
+ 7 | function inter_r(C $c) : (A & I) {
+ 8 |   return »$c«;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 8, character 10 - line 8, character 11:
+
+which itself flows *into* this expression
+
+ 7 | function inter_r(C $c) : (A & I) {
+ 8 |   »return $c;«
+ 9 | }
+
+File "intersection_subtyping_r.php", line 8, character 3 - line 8, character 12:
+
+which itself flows *into* this hint
+
+ 7 | function inter_r(C $c) : »(A & I)« {
+ 8 |   return $c;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 7, character 26 - line 7, character 32:
+
+which itself flows *into* this hint, via the intersection type
+
+ 7 | function inter_r(C $c) : (A & »I«) {
+ 8 |   return $c;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 7, character 31 - line 7, character 31:
+
 Flow:
 {
   "Rflow":[

@@ -18,6 +18,69 @@ But got `(A & I)`
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
+Here's why: this hint
+
+ 7 | function inter_l(»(A & I)« $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
+
+flows *into* this expression
+
+ 7 | function inter_l((A & I) »$ai«): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = »$ai«;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   »$c« = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+
+which itself flows *into* this expression
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   »return $c;«
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
+
+which itself flows *into* this hint
+
+ 7 | function inter_l((A & I) $ai): »C« {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+
 Flow:
 {
   "Rflow":[

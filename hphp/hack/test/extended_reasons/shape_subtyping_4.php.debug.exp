@@ -4,8 +4,6 @@ Expected `int`
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type required_a_at_bool = shape('a' => bool);
- 5 | 
- 6 | function expects_required_a_at_int_alias(
 
 File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
 
@@ -15,8 +13,113 @@ But got `bool`
  4 | type required_a_at_bool = shape('a' => »bool«);
  5 | 
  6 | function expects_required_a_at_int_alias(
+ 7 |  required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
 
 File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
+
+Here's why: this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type required_a_at_bool = shape('a' => »bool«);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |  required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
+
+flows *into* this hint, via the required shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type required_a_at_bool = »shape('a' => bool)«;
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |  required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_4.php", line 4, character 27 - line 4, character 44:
+
+which itself flows *into* this hint
+
+ 11 | function passes_required_a_at_bool_alias(
+ 12 |   »required_a_at_bool« $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_4.php", line 12, character 3 - line 12, character 20:
+
+which itself flows *into* this expression
+
+ 11 | function passes_required_a_at_bool_alias(
+ 12 |   required_a_at_bool »$s«,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias($s);
+ 15 | }
+
+File "shape_subtyping_4.php", line 12, character 22 - line 12, character 23:
+
+which itself flows *into* this expression
+
+ 11 | function passes_required_a_at_bool_alias(
+ 12 |   required_a_at_bool $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function passes_required_a_at_bool_alias(
+ 12 |   required_a_at_bool $s,
+ 13 | ): void {
+ 14 |   »expects_required_a_at_int_alias«($s);
+ 15 | }
+
+File "shape_subtyping_4.php", line 14, character 3 - line 14, character 33:
+
+which itself flows *from* this function or method 
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type required_a_at_bool = shape('a' => bool);
+ 5 | 
+ 6 | function »expects_required_a_at_int_alias«(
+ 7 |  required_a_at_int $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_4.php", line 6, character 10 - line 6, character 40:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | type required_a_at_int = »shape('a' => int)«;
+ 4 | type required_a_at_bool = shape('a' => bool);
+
+File "shape_subtyping_4.php", line 3, character 26 - line 3, character 42:
+
+which itself flows *into* this hint
+
+ 3 | type required_a_at_int = shape('a' => int);
+ 4 | type required_a_at_bool = shape('a' => bool);
+ 5 | 
+ 6 | function expects_required_a_at_int_alias(
+ 7 |  »required_a_at_int« $s,
+ 8 | ): void {
+ 9 | }
+
+File "shape_subtyping_4.php", line 7, character 2 - line 7, character 18:
+
+which itself flows *into* this hint, via the required shape field `'a'`
+
+ 3 | type required_a_at_int = shape('a' => »int«);
+ 4 | type required_a_at_bool = shape('a' => bool);
+
+File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
 
 Flow:
 {

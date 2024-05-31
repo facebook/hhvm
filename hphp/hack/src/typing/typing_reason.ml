@@ -1487,16 +1487,17 @@ let explain_path ps =
   in
   aux ps ~first:true
 
-let debug t =
-  [
-    ( Pos_or_decl.none,
-      Format.sprintf "Flow:\n%s"
-      @@ Hh_json.json_to_string ~pretty:true
-      @@ to_json
-      @@ normalize t );
-  ]
-
 let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
+
+let debug t =
+  explain t ~complexity:0
+  @ [
+      ( Pos_or_decl.none,
+        Format.sprintf "Flow:\n%s"
+        @@ Hh_json.json_to_string ~pretty:true
+        @@ to_json
+        @@ normalize t );
+    ]
 
 type t = locl_phase t_
 

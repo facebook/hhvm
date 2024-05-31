@@ -16,6 +16,54 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+Here's why: this hint
+
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+flows *into* this expression
+
+ 6 | function union_r(C »$c«): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+
+which itself flows *into* this expression
+
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
+which itself flows *into* this expression
+
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   »return $c;«
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+
+which itself flows *into* this hint
+
+ 6 | function union_r(C $c): »(A|B)« {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+
+which itself flows *into* this hint, via the union type
+
+ 6 | function union_r(C $c): (A|»B«) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+
 Flow:
 {
   "Rflow":[

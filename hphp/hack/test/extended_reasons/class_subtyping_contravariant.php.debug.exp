@@ -20,6 +20,94 @@ But got `Super`
 
 File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
+Here's why: this hint
+
+ 11 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
+
+flows *into* this hint, via the (contravariant) 2nd type parameter of the class `\MyA`
+
+ 11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
+
+which itself flows *from* this function or method , via the (contravariant) 1st function parameter
+
+ 11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 10 - line 11, character 19:
+
+which itself flows *into* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   »takes_my_a«($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 14, character 3 - line 14, character 12:
+
+which itself flows *from* this expression, via the (contravariant) 1st function parameter
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
+
+which itself flows *from* this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> »$x«): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 52 - line 13, character 53:
+
+which itself flows *from* this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(»MyB<Sub, Super>« $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 36 - line 13, character 50:
+
+which itself flows *from* this hint
+
+ 5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_contravariant.php", line 5, character 28 - line 5, character 43:
+
+which itself flows *into* this hint, via the (contravariant) 2nd type parameter of the class `\MyA`
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
+
 Flow:
 {
   "Rflow":[

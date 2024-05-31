@@ -14,6 +14,66 @@ But got `int`
 
 File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
+Here's why: this hint
+
+ 3 | newtype myint as int = »int«;
+
+File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
+
+flows *into* this hint
+
+ 7 | function pass_my_int(»myint« $y) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
+
+which itself flows *into* this expression
+
+ 7 | function pass_my_int(myint »$y«) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
+
+which itself flows *into* this expression
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return expect_bool(»$y«);
+ 9 | }
+
+File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return »expect_bool«($y);
+ 9 | }
+
+File "newtype1.php--file2.php", line 8, character 10 - line 8, character 20:
+
+which itself flows *from* this function or method 
+
+ 3 | function »expect_bool«(bool $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 10 - line 3, character 20:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 3 | newtype myint as »int« = int;
+
+File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
+
+which itself flows *into* this hint
+
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+
 Flow:
 {
   "Rflow":[

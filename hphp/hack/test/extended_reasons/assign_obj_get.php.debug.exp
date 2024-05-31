@@ -17,6 +17,67 @@ But got `Super`
 
 File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
+Here's why: this hint
+
+ 6 |   public function __construct(private Super $item) {}
+ 7 |   public function get(): »Super« {
+ 8 |     return $this->item;
+ 9 |   }
+
+File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
+
+flows *into* this expression
+
+ 14 | function bar(SuperBox $f): void {
+ 15 |   $g = »$f->get()«;
+ 16 |   foo($g);
+ 17 | }
+
+File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
+
+which itself flows *into* this expression
+
+ 14 | function bar(SuperBox $f): void {
+ 15 |   »$g« = $f->get();
+ 16 |   foo($g);
+ 17 | }
+
+File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
+
+which itself flows *into* this expression
+
+ 14 | function bar(SuperBox $f): void {
+ 15 |   $g = $f->get();
+ 16 |   foo(»$g«);
+ 17 | }
+
+File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
+
+which itself flows *into* this expression, via the (contravariant) 1st function parameter
+
+ 14 | function bar(SuperBox $f): void {
+ 15 |   $g = $f->get();
+ 16 |   »foo«($g);
+ 17 | }
+
+File "assign_obj_get.php", line 16, character 3 - line 16, character 5:
+
+which itself flows *from* this function or method 
+
+ 12 | function »foo«(Sub $_): void {}
+ 13 | 
+ 14 | function bar(SuperBox $f): void {
+
+File "assign_obj_get.php", line 12, character 10 - line 12, character 12:
+
+which itself flows *into* this hint, via the (contravariant) 1st function parameter
+
+ 12 | function foo(»Sub« $_): void {}
+ 13 | 
+ 14 | function bar(SuperBox $f): void {
+
+File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
+
 Flow:
 {
   "Rflow":[

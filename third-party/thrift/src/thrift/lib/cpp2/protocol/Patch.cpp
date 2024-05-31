@@ -533,15 +533,10 @@ void insertMaskUnion(
   }
 }
 
-// Inserts the next mask with intersect operator to getIncludesRef(mask)[id].
+// Insert allMask to getIncludesRef(mask)[id] if id does not exist.
 template <typename Id, typename F>
-void insertMaskIntersect(
-    Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
-  Mask& current = getIncludesRef(mask)
-                      .ensure()
-                      .emplace(std::move(id), allMask())
-                      .first->second;
-  current = current & next;
+void tryInsertAllMask(Mask& mask, Id id, const F& getIncludesRef) {
+  getIncludesRef(mask).ensure().emplace(std::move(id), allMask());
 }
 
 template <typename Id, typename F>
@@ -574,7 +569,7 @@ void insertEnsureReadFieldsToMask(Mask& mask, const Value& ensureFields) {
   const auto& obj = ensureFields.as_object();
   auto getIncludesObjRef = [&](Mask& m) { return m.includes_ref(); };
   for (const auto& [id, value] : obj) {
-    insertMaskIntersect(mask, id, allMask(), getIncludesObjRef);
+    tryInsertAllMask(mask, id, getIncludesObjRef);
   }
 }
 
@@ -606,20 +601,18 @@ void insertEnsureReadKeysToMask(
     for (const auto& [key, value] : map) {
       auto id = static_cast<int64_t>(
           getMapIdValueAddressFromIndex(readValueIndex, key));
-      insertMaskIntersect(mask, id, allMask(), getIncludesMapRef);
+      tryInsertAllMask(mask, id, getIncludesMapRef);
     }
     return;
   }
   for (const auto& [key, value] : map) {
     if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
-      insertMaskIntersect(
+      tryInsertAllMask(
           mask,
           static_cast<int64_t>(getMapIdFromValue(key)),
-          allMask(),
           getIncludesMapRef);
     } else {
-      insertMaskIntersect(
-          mask, getStringFromValue(key), allMask(), getIncludesStringMapRef);
+      tryInsertAllMask(mask, getStringFromValue(key), getIncludesStringMapRef);
     }
   }
 }
@@ -699,7 +692,7 @@ void insertFieldsToMask(
       // if the recursively extracted masks from patch does not include the
       // field.
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
-      insertMaskIntersect(masks.read, id, allMask(), getIncludesObjRef);
+      tryInsertAllMask(masks.read, id, getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
     // Map patch can get here only MapPatch::Patch(Prior|After) operations,
@@ -716,7 +709,7 @@ void insertFieldsToMask(
             getMapIdValueAddressFromIndex(writeValueIndex, key));
         insertNextMask(
             masks, value, readId, writeId, recursive, view, getIncludesMapRef);
-        insertMaskIntersect(masks.read, readId, allMask(), getIncludesMapRef);
+        tryInsertAllMask(masks.read, readId, getIncludesMapRef);
       }
       return;
     }
@@ -725,12 +718,12 @@ void insertFieldsToMask(
         auto id = static_cast<int64_t>(getMapIdFromValue(key));
         insertNextMask(
             masks, value, id, id, recursive, view, getIncludesMapRef);
-        insertMaskIntersect(masks.read, id, allMask(), getIncludesMapRef);
+        tryInsertAllMask(masks.read, id, getIncludesMapRef);
       } else {
         auto id = getStringFromValue(key);
         insertNextMask(
             masks, value, id, id, recursive, view, getIncludesStringMapRef);
-        insertMaskIntersect(masks.read, id, allMask(), getIncludesStringMapRef);
+        tryInsertAllMask(masks.read, id, getIncludesStringMapRef);
       }
     }
   }

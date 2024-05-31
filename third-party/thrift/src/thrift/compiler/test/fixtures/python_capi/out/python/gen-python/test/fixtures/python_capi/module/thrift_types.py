@@ -1253,6 +1253,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.module.thrift_metadata
 
+
 class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue1 = 0
     MyValue2 = 1
@@ -1278,6 +1279,8 @@ class MyEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     FOO = 1
     BAR = 2
@@ -1304,6 +1307,7 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     MyEnum,
     AnnoyingEnum,
@@ -1311,30 +1315,55 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStruct()
+
+
 def _fbthrift_metadata__struct_MyDataItem():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItem()
+
+
 def _fbthrift_metadata__struct_TransitiveDoubler():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_TransitiveDoubler()
+
+
 def _fbthrift_metadata__struct_DoubledPair():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_DoubledPair()
+
+
 def _fbthrift_metadata__struct_StringPair():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_StringPair()
+
+
 def _fbthrift_metadata__struct_VapidStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_VapidStruct()
+
+
 def _fbthrift_metadata__struct_PrimitiveStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
+
+
 def _fbthrift_metadata__struct_AdaptedFields():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_AdaptedFields()
+
+
 def _fbthrift_metadata__struct_ListStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_ListStruct()
+
+
 def _fbthrift_metadata__struct_SetStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_SetStruct()
+
+
 def _fbthrift_metadata__struct_MapStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MapStruct()
+
+
 def _fbthrift_metadata__struct_ComposeStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
+
+
 def _fbthrift_metadata__struct_Onion():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_Onion()
+
 
 _fbthrift_all_structs = [
     MyStruct,

@@ -235,12 +235,19 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_Mixin1():
     return module.thrift_metadata.gen_metadata_struct_Mixin1()
+
+
 def _fbthrift_metadata__struct_Mixin2():
     return module.thrift_metadata.gen_metadata_struct_Mixin2()
+
+
 def _fbthrift_metadata__struct_Mixin3Base():
     return module.thrift_metadata.gen_metadata_struct_Mixin3Base()
+
+
 def _fbthrift_metadata__struct_Foo():
     return module.thrift_metadata.gen_metadata_struct_Foo()
+
 
 _fbthrift_all_structs = [
     Mixin1,

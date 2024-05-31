@@ -628,6 +628,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
+
 class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET = 0
     ONE = 1
@@ -656,6 +657,8 @@ class AnEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     name_ = 0
     value_ = 1
@@ -682,6 +685,8 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class Flags(_fbthrift_python_types.Flag):
     flag_A = 1
     flag_B = 2
@@ -710,6 +715,7 @@ class Flags(_fbthrift_python_types.Flag):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     AnEnum,
     AnEnumRenamed,
@@ -718,22 +724,39 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__exception_SimpleException():
     return module.thrift_metadata.gen_metadata_exception_SimpleException()
+
+
 def _fbthrift_metadata__struct_OptionalRefStruct():
     return module.thrift_metadata.gen_metadata_struct_OptionalRefStruct()
+
+
 def _fbthrift_metadata__struct_SimpleStruct():
     return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
+
+
 def _fbthrift_metadata__struct_HiddenTypeFieldsStruct():
     return module.thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
+
+
 def _fbthrift_metadata__struct_AdaptedUnion():
     return module.thrift_metadata.gen_metadata_struct_AdaptedUnion()
+
+
 def _fbthrift_metadata__exception_HiddenException():
     return module.thrift_metadata.gen_metadata_exception_HiddenException()
+
+
 def _fbthrift_metadata__struct_ComplexStruct():
     return module.thrift_metadata.gen_metadata_struct_ComplexStruct()
+
+
 def _fbthrift_metadata__struct_BinaryUnion():
     return module.thrift_metadata.gen_metadata_struct_BinaryUnion()
+
+
 def _fbthrift_metadata__struct_BinaryUnionStruct():
     return module.thrift_metadata.gen_metadata_struct_BinaryUnionStruct()
+
 
 _fbthrift_all_structs = [
     SimpleException,

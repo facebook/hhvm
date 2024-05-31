@@ -167,6 +167,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.enums.module.thrift_metadata
 
+
 class Metasyntactic(_fbthrift_python_types.Enum, int):
     FOO = 1
     BAR = 2
@@ -194,6 +195,8 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyEnum1(_fbthrift_python_types.Enum, int):
     ME1_0 = 0
     ME1_1 = 1
@@ -223,6 +226,8 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyEnum2(_fbthrift_python_types.Enum, int):
     ME2_0 = 0
     ME2_1 = 1
@@ -249,6 +254,8 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyEnum3(_fbthrift_python_types.Enum, int):
     ME3_0 = 0
     ME3_1 = 1
@@ -278,6 +285,8 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyEnum4(_fbthrift_python_types.Enum, int):
     ME4_A = 2147483645
     ME4_B = 2147483646
@@ -305,6 +314,8 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
@@ -331,6 +342,8 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
@@ -358,6 +371,7 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     Metasyntactic,
     MyEnum1,
@@ -370,8 +384,11 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_SomeStruct():
     return test.fixtures.enums.module.thrift_metadata.gen_metadata_struct_SomeStruct()
+
+
 def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.enums.module.thrift_metadata.gen_metadata_struct_MyStruct()
+
 
 _fbthrift_all_structs = [
     SomeStruct,

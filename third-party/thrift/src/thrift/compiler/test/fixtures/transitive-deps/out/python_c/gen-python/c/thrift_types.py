@@ -103,8 +103,11 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_C():
     return c.thrift_metadata.gen_metadata_struct_C()
+
+
 def _fbthrift_metadata__exception_E():
     return c.thrift_metadata.gen_metadata_exception_E()
+
 
 _fbthrift_all_structs = [
     C,

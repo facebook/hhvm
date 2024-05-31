@@ -247,12 +247,19 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_Fields():
     return module.thrift_metadata.gen_metadata_struct_Fields()
+
+
 def _fbthrift_metadata__struct_FieldsInjectedToEmptyStruct():
     return module.thrift_metadata.gen_metadata_struct_FieldsInjectedToEmptyStruct()
+
+
 def _fbthrift_metadata__struct_FieldsInjectedToStruct():
     return module.thrift_metadata.gen_metadata_struct_FieldsInjectedToStruct()
+
+
 def _fbthrift_metadata__struct_FieldsInjectedWithIncludedStruct():
     return module.thrift_metadata.gen_metadata_struct_FieldsInjectedWithIncludedStruct()
+
 
 _fbthrift_all_structs = [
     Fields,

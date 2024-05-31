@@ -88,6 +88,7 @@ _fbthrift_all_enums = [
 def _fbthrift_metadata__struct_Fields():
     return foo.thrift_metadata.gen_metadata_struct_Fields()
 
+
 _fbthrift_all_structs = [
     Fields,
 ]

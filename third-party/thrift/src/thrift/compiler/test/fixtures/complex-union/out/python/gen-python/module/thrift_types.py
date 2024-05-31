@@ -499,20 +499,35 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_ComplexUnion():
     return module.thrift_metadata.gen_metadata_struct_ComplexUnion()
+
+
 def _fbthrift_metadata__struct_ListUnion():
     return module.thrift_metadata.gen_metadata_struct_ListUnion()
+
+
 def _fbthrift_metadata__struct_DataUnion():
     return module.thrift_metadata.gen_metadata_struct_DataUnion()
+
+
 def _fbthrift_metadata__struct_Val():
     return module.thrift_metadata.gen_metadata_struct_Val()
+
+
 def _fbthrift_metadata__struct_ValUnion():
     return module.thrift_metadata.gen_metadata_struct_ValUnion()
+
+
 def _fbthrift_metadata__struct_VirtualComplexUnion():
     return module.thrift_metadata.gen_metadata_struct_VirtualComplexUnion()
+
+
 def _fbthrift_metadata__struct_NonCopyableStruct():
     return module.thrift_metadata.gen_metadata_struct_NonCopyableStruct()
+
+
 def _fbthrift_metadata__struct_NonCopyableUnion():
     return module.thrift_metadata.gen_metadata_struct_NonCopyableUnion()
+
 
 _fbthrift_all_structs = [
     ComplexUnion,

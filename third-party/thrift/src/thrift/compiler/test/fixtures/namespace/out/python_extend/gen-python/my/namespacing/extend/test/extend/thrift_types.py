@@ -21,7 +21,6 @@ import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
 ]
 

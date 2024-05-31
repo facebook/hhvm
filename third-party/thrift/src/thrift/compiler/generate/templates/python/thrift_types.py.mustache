@@ -126,13 +126,14 @@ class {{> structs/unadapted_name}}(metaclass={{!
 
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata
-
 {{> enums/thrift_enums }}
-
 {{#program:structs}}
+
+
 def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():
     return {{program:module_path}}.thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
 {{/program:structs}}
+
 
 _fbthrift_all_structs = [
     {{#program:structs}}

@@ -415,18 +415,31 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__exception_Fiery():
     return module.thrift_metadata.gen_metadata_exception_Fiery()
+
+
 def _fbthrift_metadata__exception_Serious():
     return module.thrift_metadata.gen_metadata_exception_Serious()
+
+
 def _fbthrift_metadata__exception_ComplexFieldNames():
     return module.thrift_metadata.gen_metadata_exception_ComplexFieldNames()
+
+
 def _fbthrift_metadata__exception_CustomFieldNames():
     return module.thrift_metadata.gen_metadata_exception_CustomFieldNames()
+
+
 def _fbthrift_metadata__exception_ExceptionWithPrimitiveField():
     return module.thrift_metadata.gen_metadata_exception_ExceptionWithPrimitiveField()
+
+
 def _fbthrift_metadata__exception_ExceptionWithStructuredAnnotation():
     return module.thrift_metadata.gen_metadata_exception_ExceptionWithStructuredAnnotation()
+
+
 def _fbthrift_metadata__exception_Banal():
     return module.thrift_metadata.gen_metadata_exception_Banal()
+
 
 _fbthrift_all_structs = [
     Fiery,

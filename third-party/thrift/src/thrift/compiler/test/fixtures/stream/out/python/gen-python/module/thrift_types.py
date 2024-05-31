@@ -129,10 +129,15 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__exception_FooStreamEx():
     return module.thrift_metadata.gen_metadata_exception_FooStreamEx()
+
+
 def _fbthrift_metadata__exception_FooEx():
     return module.thrift_metadata.gen_metadata_exception_FooEx()
+
+
 def _fbthrift_metadata__exception_FooEx2():
     return module.thrift_metadata.gen_metadata_exception_FooEx2()
+
 
 _fbthrift_all_structs = [
     FooStreamEx,

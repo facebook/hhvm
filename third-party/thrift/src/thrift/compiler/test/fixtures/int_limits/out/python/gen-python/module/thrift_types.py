@@ -138,6 +138,7 @@ _fbthrift_all_enums = [
 def _fbthrift_metadata__struct_Limits():
     return module.thrift_metadata.gen_metadata_struct_Limits()
 
+
 _fbthrift_all_structs = [
     Limits,
 ]

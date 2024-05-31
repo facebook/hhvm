@@ -417,16 +417,27 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_SerializedStruct():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_SerializedStruct()
+
+
 def _fbthrift_metadata__struct_SerializedUnion():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_SerializedUnion()
+
+
 def _fbthrift_metadata__exception_SerializedError():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_exception_SerializedError()
+
+
 def _fbthrift_metadata__struct_MarshalStruct():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_MarshalStruct()
+
+
 def _fbthrift_metadata__struct_MarshalUnion():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_struct_MarshalUnion()
+
+
 def _fbthrift_metadata__exception_MarshalError():
     return test.fixtures.python_capi.serialized_dep.thrift_metadata.gen_metadata_exception_MarshalError()
+
 
 _fbthrift_all_structs = [
     SerializedStruct,

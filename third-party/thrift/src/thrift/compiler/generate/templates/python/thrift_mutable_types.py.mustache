@@ -29,12 +29,10 @@ import {{program:base_library_package}}.types as _fbthrift_python_types
 {{#program:adapter_modules}}
 import {{module_path}}
 {{/program:adapter_modules}}
-
-{{> enums/thrift_enums }}
-
 {{!
 Iterate over structs and unions (but not exceptions).
 }}{{#program:structs}}{{^struct:exception?}}
+
 
 class {{> structs/unadapted_name}}(metaclass={{!
         }}{{#struct:union?}}_fbthrift_python_mutable_types.MutableUnionMeta{{/struct:union?}}{{!
@@ -73,13 +71,16 @@ class {{> structs/unadapted_name}}(metaclass={{!
         import importlib
         immutable_types = importlib.import_module("{{program:module_path}}.thrift_types")
         return immutable_types.{{> structs/unadapted_name}}(**dataclasses.asdict(self))
-
 {{#struct:has_adapter?}}
+
+
 raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
 {{/struct:has_adapter?}}{{!
 }}{{/struct:exception?}}{{/program:structs}}
+{{> enums/thrift_enums }}
 
 {{> common/typedef }}
+
 
 _fbthrift_all_structs = [
     {{#program:structs}}

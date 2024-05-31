@@ -14,8 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{#program:enums}}
+}}{{#program:enums}}
+
+
 class {{enum:name}}(_fbthrift_python_types.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
         }}{{^enum:flags?}}Enum, int{{/enum:flags?}}):
@@ -49,9 +50,9 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     {{/enum:legacy_api?}}
 {{/program:enums}}
 
+
 _fbthrift_all_enums = [
     {{#program:enums}}
     {{enum:name}},
     {{/program:enums}}
 ]
-

@@ -1645,6 +1645,7 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
+
 class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue1 = 0
     MyValue2 = 1
@@ -1674,40 +1675,70 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     MyEnum,
 ]
 
 def _fbthrift_metadata__struct_MyStructFloatFieldThrowExp():
     return module.thrift_metadata.gen_metadata_struct_MyStructFloatFieldThrowExp()
+
+
 def _fbthrift_metadata__struct_MyStructMapFloatThrowExp():
     return module.thrift_metadata.gen_metadata_struct_MyStructMapFloatThrowExp()
+
+
 def _fbthrift_metadata__struct_MyStruct():
     return module.thrift_metadata.gen_metadata_struct_MyStruct()
+
+
 def _fbthrift_metadata__struct_SimpleStruct():
     return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
+
+
 def _fbthrift_metadata__struct_defaultStruct():
     return module.thrift_metadata.gen_metadata_struct_defaultStruct()
+
+
 def _fbthrift_metadata__struct_MyStructTypeDef():
     return module.thrift_metadata.gen_metadata_struct_MyStructTypeDef()
+
+
 def _fbthrift_metadata__struct_MyDataItem():
     return module.thrift_metadata.gen_metadata_struct_MyDataItem()
+
+
 def _fbthrift_metadata__struct_MyUnion():
     return module.thrift_metadata.gen_metadata_struct_MyUnion()
+
+
 def _fbthrift_metadata__struct_MyUnionFloatFieldThrowExp():
     return module.thrift_metadata.gen_metadata_struct_MyUnionFloatFieldThrowExp()
+
+
 def _fbthrift_metadata__struct_ComplexNestedStruct():
     return module.thrift_metadata.gen_metadata_struct_ComplexNestedStruct()
+
+
 def _fbthrift_metadata__struct_TypeRemapped():
     return module.thrift_metadata.gen_metadata_struct_TypeRemapped()
+
+
 def _fbthrift_metadata__exception_emptyXcep():
     return module.thrift_metadata.gen_metadata_exception_emptyXcep()
+
+
 def _fbthrift_metadata__exception_reqXcep():
     return module.thrift_metadata.gen_metadata_exception_reqXcep()
+
+
 def _fbthrift_metadata__exception_optXcep():
     return module.thrift_metadata.gen_metadata_exception_optXcep()
+
+
 def _fbthrift_metadata__exception_complexException():
     return module.thrift_metadata.gen_metadata_exception_complexException()
+
 
 _fbthrift_all_structs = [
     MyStructFloatFieldThrowExp,

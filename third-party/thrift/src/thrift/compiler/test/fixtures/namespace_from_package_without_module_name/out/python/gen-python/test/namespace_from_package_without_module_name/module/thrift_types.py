@@ -68,6 +68,7 @@ _fbthrift_all_enums = [
 def _fbthrift_metadata__struct_Foo():
     return test.namespace_from_package_without_module_name.module.thrift_metadata.gen_metadata_struct_Foo()
 
+
 _fbthrift_all_structs = [
     Foo,
 ]

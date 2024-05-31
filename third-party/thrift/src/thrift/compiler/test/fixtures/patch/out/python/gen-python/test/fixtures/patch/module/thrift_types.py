@@ -4787,6 +4787,7 @@ class RefFieldsSafePatch(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.patch.module.thrift_metadata
 
+
 class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue0 = 0
     @staticmethod
@@ -4812,126 +4813,242 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     MyEnum,
 ]
 
 def _fbthrift_metadata__struct_MyData():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyData()
+
+
 def _fbthrift_metadata__struct_MyDataWithCustomDefault():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefault()
+
+
 def _fbthrift_metadata__struct_InnerUnion():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_InnerUnion()
+
+
 def _fbthrift_metadata__struct_MyUnion():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnion()
+
+
 def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStruct()
+
+
 def _fbthrift_metadata__struct_LateDefStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStruct()
+
+
 def _fbthrift_metadata__struct_Recursive():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_Recursive()
+
+
 def _fbthrift_metadata__struct_Bar():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_Bar()
+
+
 def _fbthrift_metadata__struct_Loop():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_Loop()
+
+
 def _fbthrift_metadata__struct_RefFields():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFields()
+
+
 def _fbthrift_metadata__struct_MyDataPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_MyDataFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataFieldPatch()
+
+
 def _fbthrift_metadata__struct_MyDataEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataEnsureStruct()
+
+
 def _fbthrift_metadata__struct_MyDataSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataSafePatch()
+
+
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultFieldPatch()
+
+
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultEnsureStruct()
+
+
 def _fbthrift_metadata__struct_MyDataWithCustomDefaultSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyDataWithCustomDefaultSafePatch()
+
+
 def _fbthrift_metadata__struct_InnerUnionPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_InnerUnionPatch()
+
+
 def _fbthrift_metadata__struct_InnerUnionFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_InnerUnionFieldPatch()
+
+
 def _fbthrift_metadata__struct_InnerUnionSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_InnerUnionSafePatch()
+
+
 def _fbthrift_metadata__struct_MyUnionPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnionPatch()
+
+
 def _fbthrift_metadata__struct_MyUnionFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnionFieldPatch()
+
+
 def _fbthrift_metadata__struct_MyUnionSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyUnionSafePatch()
+
+
 def _fbthrift_metadata__struct_MyStructPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_MyStructField10Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField10Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField23Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField23Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField26Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField26Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField27Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField27Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField28Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField28Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField29Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField29Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField30Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField30Patch()
+
+
 def _fbthrift_metadata__struct_MyStructField30Patch1():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField30Patch1()
+
+
 def _fbthrift_metadata__struct_MyStructFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructFieldPatch()
+
+
 def _fbthrift_metadata__struct_MyStructEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructEnsureStruct()
+
+
 def _fbthrift_metadata__struct_MyStructSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructSafePatch()
+
+
 def _fbthrift_metadata__struct_LateDefStructPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_LateDefStructFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructFieldPatch()
+
+
 def _fbthrift_metadata__struct_LateDefStructEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructEnsureStruct()
+
+
 def _fbthrift_metadata__struct_LateDefStructSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LateDefStructSafePatch()
+
+
 def _fbthrift_metadata__struct_RecursivePatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursivePatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_RecursiveField1Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveField1Patch()
+
+
 def _fbthrift_metadata__struct_RecursiveFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveFieldPatch()
+
+
 def _fbthrift_metadata__struct_RecursiveEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveEnsureStruct()
+
+
 def _fbthrift_metadata__struct_RecursiveSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RecursiveSafePatch()
+
+
 def _fbthrift_metadata__struct_BarPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_BarFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarFieldPatch()
+
+
 def _fbthrift_metadata__struct_BarEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarEnsureStruct()
+
+
 def _fbthrift_metadata__struct_BarSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_BarSafePatch()
+
+
 def _fbthrift_metadata__struct_LoopPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LoopPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_LoopSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_LoopSafePatch()
+
+
 def _fbthrift_metadata__struct_RefFieldsPatchStructInternalDoNotUse():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsPatchStructInternalDoNotUse()
+
+
 def _fbthrift_metadata__struct_RefFieldsField1Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField1Patch()
+
+
 def _fbthrift_metadata__struct_RefFieldsField4Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField4Patch()
+
+
 def _fbthrift_metadata__struct_RefFieldsField7Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField7Patch()
+
+
 def _fbthrift_metadata__struct_RefFieldsFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsFieldPatch()
+
+
 def _fbthrift_metadata__struct_RefFieldsEnsureStruct():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsEnsureStruct()
+
+
 def _fbthrift_metadata__struct_RefFieldsSafePatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsSafePatch()
+
 
 _fbthrift_all_structs = [
     MyData,

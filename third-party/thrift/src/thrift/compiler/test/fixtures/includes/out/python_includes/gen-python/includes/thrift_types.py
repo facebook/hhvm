@@ -80,6 +80,7 @@ _fbthrift_all_enums = [
 def _fbthrift_metadata__struct_Included():
     return includes.thrift_metadata.gen_metadata_struct_Included()
 
+
 _fbthrift_all_structs = [
     Included,
 ]

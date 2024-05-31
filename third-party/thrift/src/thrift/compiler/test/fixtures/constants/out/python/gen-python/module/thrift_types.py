@@ -553,6 +553,7 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
+
 class EmptyEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -576,6 +577,8 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class City(_fbthrift_python_types.Enum, int):
     NYC = 0
     MPK = 1
@@ -603,6 +606,8 @@ class City(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+
 class Company(_fbthrift_python_types.Enum, int):
     FACEBOOK = 0
     WHATSAPP = 1
@@ -631,6 +636,7 @@ class Company(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
+
 _fbthrift_all_enums = [
     EmptyEnum,
     City,
@@ -639,20 +645,35 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_Internship():
     return module.thrift_metadata.gen_metadata_struct_Internship()
+
+
 def _fbthrift_metadata__struct_Range():
     return module.thrift_metadata.gen_metadata_struct_Range()
+
+
 def _fbthrift_metadata__struct_struct1():
     return module.thrift_metadata.gen_metadata_struct_struct1()
+
+
 def _fbthrift_metadata__struct_struct2():
     return module.thrift_metadata.gen_metadata_struct_struct2()
+
+
 def _fbthrift_metadata__struct_struct3():
     return module.thrift_metadata.gen_metadata_struct_struct3()
+
+
 def _fbthrift_metadata__struct_struct4():
     return module.thrift_metadata.gen_metadata_struct_struct4()
+
+
 def _fbthrift_metadata__struct_union1():
     return module.thrift_metadata.gen_metadata_struct_union1()
+
+
 def _fbthrift_metadata__struct_union2():
     return module.thrift_metadata.gen_metadata_struct_union2()
+
 
 _fbthrift_all_structs = [
     Internship,

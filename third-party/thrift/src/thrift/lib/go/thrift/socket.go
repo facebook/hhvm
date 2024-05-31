@@ -25,6 +25,7 @@ import (
 
 // Socket is a Transport that can be opened and reopened.
 type Socket interface {
+	net.Conn
 	Transport
 	// Opens the socket for communication
 	Open() error

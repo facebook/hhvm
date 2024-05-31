@@ -519,10 +519,11 @@ void ApplyPatch::operator()(Object&& patch, Object& value) const {
   impl(std::move(patch), value);
 }
 
-// Inserts the next mask to getIncludesRef(mask)[id].
+// Inserts the next mask with union operator to getIncludesRef(mask)[id].
 // Skips if mask is allMask (already includes all fields), or next is noneMask.
 template <typename Id, typename F>
-void insertMask(Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
+void insertMaskUnion(
+    Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
   if (mask != allMask() && next != noneMask()) {
     Mask& current = getIncludesRef(mask)
                         .ensure()
@@ -530,6 +531,17 @@ void insertMask(Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
                         .first->second;
     current = current | next;
   }
+}
+
+// Inserts the next mask with intersect operator to getIncludesRef(mask)[id].
+template <typename Id, typename F>
+void insertMaskIntersect(
+    Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
+  Mask& current = getIncludesRef(mask)
+                      .ensure()
+                      .emplace(std::move(id), allMask())
+                      .first->second;
+  current = current & next;
 }
 
 template <typename Id, typename F>
@@ -545,12 +557,13 @@ void insertNextMask(
     auto nextMasks = view
         ? protocol::extractMaskViewFromPatch(nextPatch.as_object())
         : protocol::extractMaskFromPatch(nextPatch.as_object());
-    insertMask(masks.read, std::move(readId), nextMasks.read, getIncludesRef);
-    insertMask(
+    insertMaskUnion(
+        masks.read, std::move(readId), nextMasks.read, getIncludesRef);
+    insertMaskUnion(
         masks.write, std::move(writeId), nextMasks.write, getIncludesRef);
   } else {
-    insertMask(masks.read, std::move(readId), allMask(), getIncludesRef);
-    insertMask(masks.write, std::move(writeId), allMask(), getIncludesRef);
+    insertMaskUnion(masks.read, std::move(readId), allMask(), getIncludesRef);
+    insertMaskUnion(masks.write, std::move(writeId), allMask(), getIncludesRef);
   }
 }
 
@@ -560,7 +573,7 @@ void insertEnsureReadFieldsToMask(Mask& mask, const Value& ensureFields) {
   const auto& obj = ensureFields.as_object();
   auto getIncludesObjRef = [&](Mask& m) { return m.includes_ref(); };
   for (const auto& [id, value] : obj) {
-    insertMask(mask, id, allMask(), getIncludesObjRef);
+    insertMaskUnion(mask, id, allMask(), getIncludesObjRef);
   }
 }
 
@@ -648,10 +661,10 @@ void insertFieldsToMask(
     for (const auto& [id, value] : *obj) {
       // Object patch can get here only patch* operations, which require
       // reading existing value to know if/how given operations can/should be
-      // applied. Hence always generate allMask() read mask for them.
-      // TODO(dokwon): Not all field patch operations requires reading.
-      insertMask(masks.read, id, allMask(), getIncludesObjRef);
+      // applied. Generate allMask() read mask for them if the recursively
+      // extracted masks from patch does not include the field.
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
+      insertMaskIntersect(masks.read, id, allMask(), getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
     if (view) {

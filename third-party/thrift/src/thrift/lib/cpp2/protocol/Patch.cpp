@@ -568,18 +568,19 @@ void insertNextMask(
 }
 
 // Ensure requires reading existing value to know whether the field is set or
-// not. We always generate allMask() read mask for it.
+// not. Insert allMask() if the field was never included in read mask
+// before.
 void insertEnsureReadFieldsToMask(Mask& mask, const Value& ensureFields) {
   const auto& obj = ensureFields.as_object();
   auto getIncludesObjRef = [&](Mask& m) { return m.includes_ref(); };
   for (const auto& [id, value] : obj) {
-    insertMaskUnion(mask, id, allMask(), getIncludesObjRef);
+    insertMaskIntersect(mask, id, allMask(), getIncludesObjRef);
   }
 }
 
-// Ensure only requires writing fields that exists in the patch. Recurse
-// EnsureStruct and put allMask() iff current mask is not allMask and the field
-// was never included in the write mask before.
+// Ensure only requires writing fields that exists in the patch. Put allMask()
+// iff current mask is not allMask and the field was never included in the write
+// mask before.
 void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
   const auto& obj = ensureFields.as_object();
   for (const auto& [id, value] : obj) {
@@ -587,9 +588,6 @@ void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
       continue;
     }
     mask.includes_ref().ensure().emplace(id, allMask());
-    if (const auto* nestedObj = value.if_object()) {
-      insertEnsureWriteFieldsToMask((*mask.includes_ref())[id], value);
-    }
   }
 }
 

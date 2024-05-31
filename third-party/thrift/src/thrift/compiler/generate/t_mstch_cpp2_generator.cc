@@ -2772,6 +2772,17 @@ void validate_lazy_fields(diagnostic_context& ctx, const t_field& field) {
   }
 }
 
+void disallow_deprecated_generate_patch(
+    diagnostic_context& ctx, const t_structured& node) {
+  if (ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
+    ctx.report(
+        node,
+        "no-generate-patch",
+        diagnostic_level::error,
+        "@patch.GeneratePatch is disallowed in C++");
+  }
+}
+
 void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(std::bind(
@@ -2782,6 +2793,8 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
   validator.add_program_visitor(
       validate_splits(get_split_count(options()), client_name_to_split_count_));
   validator.add_field_visitor(validate_lazy_fields);
+  validator.add_structured_definition_visitor(
+      disallow_deprecated_generate_patch);
 }
 
 THRIFT_REGISTER_GENERATOR(mstch_cpp2, "cpp2", "");

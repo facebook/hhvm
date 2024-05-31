@@ -2017,3 +2017,16 @@ TEST(CompilerTest, cursor_serialization_adapter) {
     }
   )");
 }
+
+TEST(CompilerTest, no_generate_patch_in_cpp) {
+  check_compile(R"(
+    include "thrift/lib/thrift/patch.thrift"
+
+    @patch.GeneratePatch
+    package "meta.com/thrift/test"
+
+    struct MyStruct { # expected-error: @patch.GeneratePatch is disallowed in C++ [no-generate-patch]
+        1: i32 field;
+    }
+  )");
+}

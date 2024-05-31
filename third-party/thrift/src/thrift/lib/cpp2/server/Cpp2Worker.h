@@ -257,6 +257,7 @@ class Cpp2Worker : public IOWorkerContext,
   }
 
   static void dispatchRequest(
+      const AsyncProcessorFactory& processorFactory,
       AsyncProcessor* processor,
       ResponseChannelRequest::UniquePtr request,
       SerializedCompressedRequest&& serializedCompressedRequest,
@@ -264,7 +265,7 @@ class Cpp2Worker : public IOWorkerContext,
       protocol::PROTOCOL_TYPES protocolId,
       Cpp2RequestContext* cpp2ReqCtx,
       concurrency::ThreadManager* tm,
-      server::ServerConfigs* serverConfigs);
+      ThriftServer* server);
 
  protected:
   Cpp2Worker(

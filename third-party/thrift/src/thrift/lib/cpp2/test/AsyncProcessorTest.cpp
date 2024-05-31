@@ -561,7 +561,6 @@ THRIFT_PLUGGABLE_FUNC_SET(
             *processorFactory,
             std::make_shared<concurrency::ThreadManagerExecutorAdapter>(
                 folly::getGlobalCPUExecutor()),
-            server_,
             nullptr /* requestsRegistry */
         };
       }

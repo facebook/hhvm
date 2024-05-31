@@ -217,6 +217,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
     };
 
     eventBase_ = connContext_.getTransport()->getEventBase();
+    serverConfigs_ = worker_->getServer();
+
     for (const auto& h : setupFrameHandlers_) {
       auto processorInfo = h->tryHandle(meta);
       if (processorInfo) {
@@ -230,7 +232,6 @@ void ThriftRocketServerHandler::handleSetupFrame(
             (!!(threadManager_ = std::move(processorInfo->threadManager_)) ||
              processorInfo->useResourcePool_ ||
              !worker_->getServer()->resourcePoolSet().empty());
-        valid &= !!(serverConfigs_ = &processorInfo->serverConfigs_);
         requestsRegistry_ = processorInfo->requestsRegistry_ != nullptr
             ? processorInfo->requestsRegistry_
             : worker_->getRequestsRegistry();
@@ -257,7 +258,6 @@ void ThriftRocketServerHandler::handleSetupFrame(
     if (worker_->getServer()->resourcePoolSet().empty()) {
       threadManager_ = worker_->getServer()->getThreadManager_deprecated();
     }
-    serverConfigs_ = worker_->getServer();
     requestsRegistry_ = worker_->getRequestsRegistry();
 
     if (auto* observer = serverConfigs_->getObserver()) {
@@ -667,6 +667,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
           : metadata.compression_ref().value_or(CompressionAlgorithm::NONE));
 
   Cpp2Worker::dispatchRequest(
+      *processorFactory_,
       processor_.get(),
       std::move(request),
       std::move(serializedCompressedRequest),
@@ -674,7 +675,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
       protocolId,
       cpp2ReqCtx,
       threadManager_.get(),
-      serverConfigs_);
+      worker_->getServer());
 }
 
 void ThriftRocketServerHandler::handleRequestWithBadMetadata(

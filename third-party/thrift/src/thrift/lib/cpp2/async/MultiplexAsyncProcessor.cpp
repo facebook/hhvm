@@ -459,6 +459,28 @@ MultiplexAsyncProcessorFactory::getBaseContextForRequest(
       wildcardMethodMetadata);
 }
 
+SelectPoolResult MultiplexAsyncProcessorFactory::selectResourcePool(
+    const ServerRequest& request) const {
+  const auto* methodMetadata = request.methodMetadata();
+  if (!methodMetadata) {
+    return std::monostate{};
+  }
+
+  std::size_t index;
+  if (methodMetadata->isWildcard()) {
+    auto wildcardIndex = compositionMetadata_.wildcardIndex();
+    DCHECK(wildcardIndex.has_value())
+        << "Received WildcardMethodMetadata but expected no WildcardMethodMetadataMap was composed";
+    index = *wildcardIndex;
+  } else {
+    index = AsyncProcessorHelper::expectMetadataOfType<MetadataImpl>(
+                *methodMetadata)
+                .sourceIndex;
+  }
+
+  return processorFactories_[index]->selectResourcePool(request);
+}
+
 std::vector<ServiceHandlerBase*>
 MultiplexAsyncProcessorFactory::getServiceHandlers() {
   std::vector<ServiceHandlerBase*> result;

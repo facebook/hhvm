@@ -469,6 +469,7 @@ Cpp2Worker::PerServiceMetadata::getBaseContextForRequest(
 }
 
 void Cpp2Worker::dispatchRequest(
+    const AsyncProcessorFactory& processorFactory,
     AsyncProcessor* processor,
     ResponseChannelRequest::UniquePtr request,
     SerializedCompressedRequest&& serializedCompressedRequest,
@@ -476,7 +477,7 @@ void Cpp2Worker::dispatchRequest(
     protocol::PROTOCOL_TYPES protocolId,
     Cpp2RequestContext* cpp2ReqCtx,
     concurrency::ThreadManager* tm,
-    server::ServerConfigs* serverConfigs) {
+    ThriftServer* server) {
   auto eb = cpp2ReqCtx->getConnectionContext()
                 ->getWorkerContext()
                 ->getWorkerEventBase();
@@ -484,8 +485,7 @@ void Cpp2Worker::dispatchRequest(
     if (auto* found = std::get_if<PerServiceMetadata::MetadataFound>(
             &methodMetadataResult);
         LIKELY(found != nullptr)) {
-      if (serverConfigs->resourcePoolEnabled() &&
-          !serverConfigs->resourcePoolSet().empty()) {
+      if (server->resourcePoolEnabled() && !server->resourcePoolSet().empty()) {
         if (!found->metadata.isWildcard() && !found->metadata.rpcKind) {
           std::string_view methodName = cpp2ReqCtx->getMethodName();
           AsyncProcessorHelper::sendUnknownMethodError(
@@ -498,7 +498,7 @@ void Cpp2Worker::dispatchRequest(
           priority = found->metadata.priority.value_or(concurrency::NORMAL);
         }
         cpp2ReqCtx->setRequestExecutionScope(
-            serverConfigs->getRequestExecutionScope(cpp2ReqCtx, priority));
+            server->getRequestExecutionScope(cpp2ReqCtx, priority));
 
         ServerRequest serverRequest(
             std::move(request),
@@ -516,18 +516,19 @@ void Cpp2Worker::dispatchRequest(
           return;
         }
 
-        SelectPoolResult poolResult =
-            serverConfigs->resourcePoolSet().selectResourcePool(serverRequest);
+        // Check AsyncProcessorFactory for its opinion on which ResourcePool to
+        // use for the request
+        auto poolResult = processorFactory.selectResourcePool(serverRequest);
 
         ResourcePool* resourcePool;
 
         if (auto resourcePoolHandle =
                 std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
                     &poolResult)) {
-          DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
-              *resourcePoolHandle));
-          resourcePool = &serverConfigs->resourcePoolSet().resourcePool(
-              *resourcePoolHandle);
+          DCHECK(
+              server->resourcePoolSet().hasResourcePool(*resourcePoolHandle));
+          resourcePool =
+              &server->resourcePoolSet().resourcePool(*resourcePoolHandle);
         } else if (
             auto* reject = std::get_if<ServerRequestRejection>(&poolResult)) {
           handleServerRequestRejection(serverRequest, *reject);
@@ -556,16 +557,17 @@ void Cpp2Worker::dispatchRequest(
           auto resourcePoolHandle_2 =
               std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
                   &poolResult);
-          DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
-              *resourcePoolHandle_2));
-          resourcePool = &serverConfigs->resourcePoolSet().resourcePool(
-              *resourcePoolHandle_2);
+          DCHECK(
+              server->resourcePoolSet().hasResourcePool(*resourcePoolHandle_2));
+          resourcePool =
+              &server->resourcePoolSet().resourcePool(*resourcePoolHandle_2);
           // Allow the priority to override the default resource pool
           if (priority != concurrency::NORMAL &&
               resourcePoolHandle_2->get().index() ==
                   ResourcePoolHandle::kDefaultAsyncIndex) {
-            resourcePool = &serverConfigs->resourcePoolSet()
-                                .resourcePoolByPriority_deprecated(priority);
+            resourcePool =
+                &server->resourcePoolSet().resourcePoolByPriority_deprecated(
+                    priority);
           }
         }
 
@@ -614,10 +616,9 @@ void Cpp2Worker::dispatchRequest(
         if (found->metadata.executorType ==
                 AsyncProcessor::MethodMetadata::ExecutorType::ANY &&
             tm) {
-          cpp2ReqCtx->setRequestExecutionScope(
-              serverConfigs->getRequestExecutionScope(
-                  cpp2ReqCtx,
-                  found->metadata.priority.value_or(concurrency::NORMAL)));
+          cpp2ReqCtx->setRequestExecutionScope(server->getRequestExecutionScope(
+              cpp2ReqCtx,
+              found->metadata.priority.value_or(concurrency::NORMAL)));
         }
         detail::ap::processViaExecuteRequest(
             processor,

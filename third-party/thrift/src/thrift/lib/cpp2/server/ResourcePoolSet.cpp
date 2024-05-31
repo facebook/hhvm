@@ -81,11 +81,6 @@ void ResourcePoolSet::setPoolSelectionFunc(PoolSelectionFunction func) {
   poolSelectionFunction_ = std::move(func);
 }
 
-SelectPoolResult ResourcePoolSet::selectResourcePool(
-    const ServerRequest& serverRequest) {
-  return poolSelectionFunction_(serverRequest);
-}
-
 void ResourcePoolSet::lock() {
   std::lock_guard<std::mutex> lock(mutex_);
   locked_ = true;

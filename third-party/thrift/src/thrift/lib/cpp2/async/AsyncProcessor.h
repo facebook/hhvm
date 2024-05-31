@@ -115,6 +115,26 @@ class ServiceInfoHolder {
   virtual const ServiceRequestInfoMap& requestInfoMap() const = 0;
 };
 
+// Returned by resource pool components when a request is rejected.
+class ServerRequestRejection {
+ public:
+  explicit ServerRequestRejection(TApplicationException&& exception)
+      : impl_(std::move(exception)) {}
+
+  const TApplicationException& applicationException() const& { return impl_; }
+
+  TApplicationException applicationException() && { return std::move(impl_); }
+
+ private:
+  TApplicationException impl_;
+};
+
+// Returned to choose a resource pool
+using SelectPoolResult = std::variant<
+    std::monostate, // No opinion (use a reasonable default)
+    std::reference_wrapper<const ResourcePoolHandle>, // Use this ResourcePool
+    ServerRequestRejection>; // Reject the request with this reason
+
 /**
  * Descriptor of a Thrift service - its methods and how they should be handled.
  */
@@ -302,30 +322,26 @@ class AsyncProcessorFactory {
     return nullptr;
   }
 
+  /**
+   * Selects the ResourcePool to be used for requests handled by the processor
+   * returned by getProcessor.
+   *
+   * The default implementation of this method has no effect (i.e., default
+   * ResourcePool selection process will be used).
+   *
+   * NOTE: Users of this API must ensure that ResourcePool(s) corresponding to
+   * the ResourcePoolHandle(s) returned by this method exist in the
+   * ResourcePoolSet of the ThriftServer in which the AsyncProcessorFactory is
+   * installed. Failure to do so will result in undefined behavior.
+   */
+  virtual SelectPoolResult selectResourcePool(const ServerRequest&) const {
+    return std::monostate{};
+  }
+
   virtual ~AsyncProcessorFactory() = default;
 };
 
-// Returned by resource pool components when a request is rejected.
-class ServerRequestRejection {
- public:
-  ServerRequestRejection(TApplicationException&& exception)
-      : impl_(std::move(exception)) {}
-
-  const TApplicationException& applicationException() const& { return impl_; }
-
-  TApplicationException applicationException() && { return std::move(impl_); }
-
- private:
-  TApplicationException impl_;
-};
-
 class AsyncProcessor;
-
-// Returned to choose a resource pool
-using SelectPoolResult = std::variant<
-    std::monostate, // No opinion (use a reasonable default)
-    std::reference_wrapper<const ResourcePoolHandle>, // Use this ResourcePool
-    ServerRequestRejection>; // Reject the request with this reason
 
 /**
  * A class that is created once per-connection and handles incoming requests.

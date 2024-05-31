@@ -581,13 +581,6 @@ void ThriftServer::setup() {
   auto nWorkers = getNumIOWorkerThreads();
   DCHECK_GT(nWorkers, 0u);
 
-  addRoutingHandler(
-      std::make_unique<apache::thrift::RocketRoutingHandler>(*this));
-  if (!FLAGS_disable_legacy_header_routing_handler) {
-    addRoutingHandler(
-        std::make_unique<apache::thrift::LegacyHeaderRoutingHandler>(*this));
-  }
-
   // Initialize event base for this thread
   auto serveEventBase = eventBaseManager_->getEventBase();
   serveEventBase_ = serveEventBase;
@@ -644,6 +637,20 @@ void ThriftServer::setup() {
     runtimeResourcePoolsChecks();
 
     setupThreadManager();
+
+    // Routing handlers may install custom Resource Pools to handle their
+    // requests, so they must be added after Resource Pool enablement status is
+    // solidified in setupThreadManager().
+    addRoutingHandler(
+        std::make_unique<apache::thrift::RocketRoutingHandler>(*this));
+    if (!FLAGS_disable_legacy_header_routing_handler) {
+      addRoutingHandler(
+          std::make_unique<apache::thrift::LegacyHeaderRoutingHandler>(*this));
+    }
+
+    // Ensure no further changes can be made to the set of ResourcePools
+    // currently installed
+    lockResourcePoolSet();
 
     ServerBootstrap::socketConfig.acceptBacklog = getListenBacklog();
     ServerBootstrap::socketConfig.maxNumPendingConnectionsPerWorker =
@@ -1016,35 +1023,6 @@ void ThriftServer::setupThreadManager() {
         }
       }
     });
-  }
-
-  // After this point there should be no further changes to resource pools. We
-  // lock whether or not we are actually using them so that the checks on
-  // resourcePoolSet().empty() can be efficient.
-  resourcePoolSet().lock();
-
-  if (!resourcePoolSet().empty()) {
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "Resource pools (" << resourcePoolSet().size()
-        << "): " << resourcePoolSet().describe();
-
-    auto descriptions = resourcePoolSet().poolsDescriptions();
-    if (auto observer = getObserverShared()) {
-      observer->resourcePoolsInitialized(descriptions);
-    }
-
-    size_t count{0};
-    for (auto description : descriptions) {
-      XLOG_IF(INFO, infoLoggingEnabled_)
-          << fmt::format("Resource pool [{}]: {}", count++, description);
-    }
-  }
-  if (FLAGS_thrift_server_enforces_qps_limit) {
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "QPS limit will be enforced by Thrift Server";
-  } else {
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "QPS limit will be enforced by Resource Pool";
   }
 }
 
@@ -1449,6 +1427,37 @@ void ThriftServer::ensureResourcePools() {
             pool.thriftPriority);
       }
     }
+  }
+}
+
+void ThriftServer::lockResourcePoolSet() {
+  // After this point there should be no further changes to resource pools. We
+  // lock whether or not we are actually using them so that the checks on
+  // resourcePoolSet().empty() can be efficient.
+  resourcePoolSet().lock();
+
+  if (!resourcePoolSet().empty()) {
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "Resource pools (" << resourcePoolSet().size()
+        << "): " << resourcePoolSet().describe();
+
+    auto descriptions = resourcePoolSet().poolsDescriptions();
+    if (auto observer = getObserverShared()) {
+      observer->resourcePoolsInitialized(descriptions);
+    }
+
+    size_t count{0};
+    for (auto description : descriptions) {
+      XLOG_IF(INFO, infoLoggingEnabled_)
+          << fmt::format("Resource pool [{}]: {}", count++, description);
+    }
+  }
+  if (FLAGS_thrift_server_enforces_qps_limit) {
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "QPS limit will be enforced by Thrift Server";
+  } else {
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "QPS limit will be enforced by Resource Pool";
   }
 }
 

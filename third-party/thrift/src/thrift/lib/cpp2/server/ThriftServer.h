@@ -2631,6 +2631,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    */
   void ensureResourcePools();
 
+ private:
+  /**
+   * Ensures no further changes can be made to the ResourcePoolSet.
+   */
+  void lockResourcePoolSet();
+
+ public:
   /**
    * Returns debug information regarding ResourcePool setup on this server.
    **/

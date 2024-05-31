@@ -102,6 +102,7 @@ void ThriftProcessor::onThriftRequest(
   auto reqContext = request->getRequestContext();
 
   Cpp2Worker::dispatchRequest(
+      processorFactory,
       processor.get(),
       std::move(request),
       SerializedCompressedRequest(std::move(payload)),

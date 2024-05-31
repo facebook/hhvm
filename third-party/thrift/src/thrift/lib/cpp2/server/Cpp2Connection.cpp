@@ -674,6 +674,7 @@ void Cpp2Connection::requestReceived(
   }
 
   Cpp2Worker::dispatchRequest(
+      processorFactory_,
       processor_.get(),
       std::move(req),
       SerializedCompressedRequest(std::move(serializedRequest)),

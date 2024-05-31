@@ -78,6 +78,10 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
 
   std::shared_ptr<folly::RequestContext> getBaseContextForRequest(
       const MethodMetadata&) override;
+
+  SelectPoolResult selectResourcePool(
+      const ServerRequest& request) const override;
+
   std::vector<ServiceHandlerBase*> getServiceHandlers() override;
 
   /**

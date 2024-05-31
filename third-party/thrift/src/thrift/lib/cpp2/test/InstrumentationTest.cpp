@@ -235,11 +235,9 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
               executor,
               std::move(concurrencyController));
         }
-        return rocket::ProcessorInfo(
-            debug_, nullptr, origServer_, reqRegistry_.get());
+        return rocket::ProcessorInfo(debug_, nullptr, reqRegistry_.get());
       } else {
-        return rocket::ProcessorInfo(
-            debug_, tm_, origServer_, reqRegistry_.get());
+        return rocket::ProcessorInfo(debug_, tm_, reqRegistry_.get());
       }
     }
     return std::nullopt;

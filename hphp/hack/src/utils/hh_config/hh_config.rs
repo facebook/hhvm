@@ -427,6 +427,9 @@ impl HhConfig {
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
             preexisting_warnings: default.preexisting_warnings,
+            re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
+            hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
+                    "hh_distc_should_disable_trace_store", default.hh_distc_should_disable_trace_store)?,
         };
         let mut c = Self {
             local_config,

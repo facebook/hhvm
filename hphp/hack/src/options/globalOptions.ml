@@ -183,6 +183,8 @@ type t = {
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2: bool;
   preexisting_warnings: bool;
+  re_no_cache: bool;
+  hh_distc_should_disable_trace_store: bool;
 }
 [@@deriving eq, show]
 
@@ -288,6 +290,8 @@ let default =
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_v2 = false;
     preexisting_warnings = false;
+    re_no_cache = false;
+    hh_distc_should_disable_trace_store = false;
   }
 
 let set
@@ -391,6 +395,8 @@ let set
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_v2
     ?preexisting_warnings
+    ?re_no_cache
+    ?hh_distc_should_disable_trace_store
     options =
   let setting setting option =
     match setting with
@@ -653,6 +659,11 @@ let set
     tco_package_v2 = setting tco_package_v2 options.tco_package_v2;
     preexisting_warnings =
       setting preexisting_warnings options.preexisting_warnings;
+    re_no_cache = setting re_no_cache options.re_no_cache;
+    hh_distc_should_disable_trace_store =
+      setting
+        hh_distc_should_disable_trace_store
+        options.hh_distc_should_disable_trace_store;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

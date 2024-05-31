@@ -260,6 +260,12 @@ type t = {
       (** Option to bypass package boundary violation errors to enable v0 of intern-prod separation *)
   preexisting_warnings: bool;
       (** Whether to show preexisting warnings from typechecked files *)
+  re_no_cache: bool;
+      (** Disable RE cache when calling hh_distc. Useful for performance testing.
+        Corresponds to the `--no-cache` options of hh_distc. *)
+  hh_distc_should_disable_trace_store: bool;
+      (** Disable trace store when calling hh_distc. Useful for performance testing.
+        Corresponds to the `--trace-store-mode local` options of hh_distc.*)
 }
 [@@deriving eq, show]
 
@@ -364,6 +370,8 @@ val set :
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2:bool ->
   ?preexisting_warnings:bool ->
+  ?re_no_cache:bool ->
+  ?hh_distc_should_disable_trace_store:bool ->
   t ->
   t
 

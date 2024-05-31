@@ -458,6 +458,9 @@ let load_config config options =
       (string_list_opt "allowed_files_for_ignore_readonly" config)
     ?tco_package_v2:(bool_opt "package_v2" config)
     ?tco_extended_reasons:(reasons_config_opt config)
+    ?re_no_cache:(bool_opt "re_no_cache" config)
+    ?hh_distc_should_disable_trace_store:
+      (bool_opt "hh_distc_should_disable_trace_store" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

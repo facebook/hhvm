@@ -140,6 +140,8 @@ impl Default for GlobalOptions {
             tco_allowed_files_for_ignore_readonly: vec![],
             tco_package_v2: false,
             preexisting_warnings: false,
+            re_no_cache: false,
+            hh_distc_should_disable_trace_store: false,
         }
     }
 }

@@ -149,7 +149,11 @@ add_library(
   detail/mustache/token.cpp
   detail/mustache/utils.cpp
 )
-target_link_libraries(mustache Boost::boost)
+target_link_libraries(
+  mustache
+  Boost::boost
+  fmt::fmt
+)
 
 add_subdirectory(generate)
 

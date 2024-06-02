@@ -410,25 +410,25 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
   }
 }
 
-void* setImmutableStruct(void* object, const detail::TypeInfo& typeInfo) {
+void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
   return setPyObject(
-      object,
+      objectPtr,
       UniquePyObjectPtr{createStructTupleWithDefaultValues(
           *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
           getStandardImmutableDefaultValueForType)});
 }
 
-void* setUnion(void* object, const detail::TypeInfo& /* typeInfo */) {
-  return setPyObject(object, UniquePyObjectPtr{createUnionTuple()});
+void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  return setPyObject(objectPtr, UniquePyObjectPtr{createUnionTuple()});
 }
 
-bool getIsset(const void* object, ptrdiff_t offset) {
-  const char* flags = getIssetFlags(object);
+bool getIsset(const void* objectPtr, ptrdiff_t offset) {
+  const char* flags = getIssetFlags(objectPtr);
   return flags[offset];
 }
 
-void setIsset(void* object, ptrdiff_t offset, bool value) {
-  return setStructIsset(object, offset, value);
+void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {
+  return setStructIsset(objectPtr, offset, value);
 }
 
 /**
@@ -560,18 +560,18 @@ detail::OptionalThriftValue getString(
  * Copies the given string `value` into a new `PyBytesObject` instance, and
  * updates the given `object` to hold a pointer to that instance.
  *
- * @param object a `PyBytesObject**` (see `getString()` above).
+ * @param objectPtr a `PyBytesObject**` (see `getString()` above).
  * @param value String whose copy will be in a new Python bytes object.
  *
  * @throws if `value` cannot be copied to a new `PyBytesObject`.
  */
-void setString(void* object, const std::string& value) {
+void setString(void* objectPtr, const std::string& value) {
   UniquePyObjectPtr bytesObj{
       PyBytes_FromStringAndSize(value.data(), value.size())};
   if (bytesObj == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  setPyObject(object, std::move(bytesObj));
+  setPyObject(objectPtr, std::move(bytesObj));
 }
 
 detail::OptionalThriftValue getIOBuf(
@@ -583,14 +583,14 @@ detail::OptionalThriftValue getIOBuf(
              : detail::OptionalThriftValue{};
 }
 
-void setIOBuf(void* object, const folly::IOBuf& value) {
+void setIOBuf(void* objectPtr, const folly::IOBuf& value) {
   ensureImportOrThrow();
   const auto buf = create_IOBuf(value.clone());
   UniquePyObjectPtr iobufObj{buf};
   if (!buf) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  setPyObject(object, std::move(iobufObj));
+  setPyObject(objectPtr, std::move(iobufObj));
 }
 
 } // namespace
@@ -738,7 +738,7 @@ detail::TypeInfo createImmutableStructTypeInfo(
 
 void ListTypeInfo::read(
     const void* context,
-    void* object,
+    void* objectPtr,
     std::uint32_t listSize,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
   // use a tuple to represent a list field for immutability
@@ -751,7 +751,7 @@ void ListTypeInfo::read(
     reader(context, &elem);
     PyTuple_SET_ITEM(list.get(), i, elem);
   }
-  setPyObject(object, std::move(list));
+  setPyObject(objectPtr, std::move(list));
 }
 
 size_t ListTypeInfo::write(
@@ -785,7 +785,7 @@ void ListTypeInfo::consumeElem(
 
 void MutableListTypeInfo::read(
     const void* context,
-    void* object,
+    void* objectPtr,
     std::uint32_t listSize,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
   // use a PyList to represent a list field
@@ -798,7 +798,7 @@ void MutableListTypeInfo::read(
     reader(context, &elem);
     PyList_SET_ITEM(list.get(), i, elem);
   }
-  setPyObject(object, std::move(list));
+  setPyObject(objectPtr, std::move(list));
 }
 
 size_t MutableListTypeInfo::write(
@@ -830,7 +830,7 @@ void MutableListTypeInfo::consumeElem(
 
 void MapTypeInfo::read(
     const void* context,
-    void* object,
+    void* objectPtr,
     std::uint32_t mapSize,
     void (*keyReader)(const void* context, void* key),
     void (*valueReader)(const void* context, void* val)) {
@@ -855,7 +855,7 @@ void MapTypeInfo::read(
     PyTuple_SET_ITEM(elem.get(), 1, mvalue.release());
     PyTuple_SET_ITEM(map.get(), i, elem.release());
   }
-  setPyObject(object, std::move(map));
+  setPyObject(objectPtr, std::move(map));
 }
 
 size_t MapTypeInfo::write(

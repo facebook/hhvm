@@ -430,7 +430,7 @@ module Simple = struct
              env
              typedef.td_internal
              (Option.map typedef.td_module ~f:snd)
-             None (* TODO(milliechen): Add package_override to typedef_type *));
+             typedef.td_package_override);
         check_against_tparams
           ~in_signature
           typedef.td_pos
@@ -452,7 +452,7 @@ module Simple = struct
              env
              typedef.td_internal
              (Option.map typedef.td_module ~f:snd)
-             None (* TODO(milliechen): Add package_override to typedef_type *));
+             typedef.td_package_override);
         check_against_tparams
           ~in_signature
           typedef.td_pos

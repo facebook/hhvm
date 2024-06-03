@@ -15,7 +15,7 @@
                  sft_ty = (Rhint ([3:46-51]), (Tprim Tfloat)) } };
              s_unknown_value = (Rhint ([3:53-56]), Tmixed) }));
        td_is_ctx = false; td_attributes = []; td_internal = false;
-       td_docs_url = None }));
+       td_docs_url = None; td_package_override = None }));
   ("\\takes_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -175,5 +175,5 @@
                   sft_ty = (Rhint ([20:19-25]), (Tprim Tstring)) } };
               s_unknown_value = (Rhint ([Pos.none]), (Tunion [])) }));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None }))
+        td_docs_url = None; td_package_override = None }))
   ]

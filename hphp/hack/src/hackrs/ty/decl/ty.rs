@@ -680,6 +680,7 @@ pub struct TypedefType<R: Reason> {
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub internal: bool,
     pub docs_url: Option<String>,
+    pub package_override: Option<String>,
 }
 
 walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, ty]);

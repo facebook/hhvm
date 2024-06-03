@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06d63d637ab18fd340e2531a8253d1e9>>
+// @generated SignedSource<<93956370e7ed69afbc5c9337c8a9ea54>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -498,6 +498,7 @@ pub struct TypedefType {
     pub attributes: Vec<UserAttribute>,
     pub internal: bool,
     pub docs_url: Option<String>,
+    pub package_override: Option<String>,
 }
 
 #[derive(

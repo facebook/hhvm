@@ -2561,6 +2561,7 @@ module PrintTypedef = struct
         td_is_ctx;
         td_internal = _;
         td_docs_url = _;
+        td_package_override = _;
       } ->
       let (fuel, tparaml_s) = PrintClass.tparam_list ~fuel td_tparams in
       let constr_s fuel cnstr str =

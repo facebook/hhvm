@@ -104,7 +104,8 @@
         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
         td_super_constraint = None;
         td_type = (Rhint ([13:16-22]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None }));
+        td_attributes = []; td_internal = false; td_docs_url = None;
+        td_package_override = None }));
   ("\\function_with_non_primitive_args",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

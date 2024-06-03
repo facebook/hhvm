@@ -812,6 +812,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
             attributes,
             internal,
             docs_url,
+            package_override,
         } = self;
         arena.alloc(obr::shallow_decl_defs::TypedefDecl {
             module: module.as_ref().map(|m| {
@@ -828,6 +829,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
             attributes: attributes.to_oxidized(arena),
             internal: *internal,
             docs_url: docs_url.as_deref().to_oxidized(arena),
+            package_override: package_override.as_deref().to_oxidized(arena),
         })
     }
 }

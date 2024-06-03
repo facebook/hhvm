@@ -497,6 +497,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::TypedefDecl<'_>> for shallow::Type
             attributes: slice(x.attributes),
             internal: x.internal,
             docs_url: x.docs_url.map(Into::into),
+            package_override: x.package_override.map(Into::into),
         }
     }
 }

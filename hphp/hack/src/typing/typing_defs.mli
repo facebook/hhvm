@@ -153,6 +153,7 @@ type typedef_type = {
   td_attributes: user_attribute list;
   td_internal: bool;
   td_docs_url: string option;
+  td_package_override: string option;
 }
 [@@deriving eq, show]
 

@@ -13,6 +13,10 @@ open Aast
 open Typing_defs
 module Env = Tast_env
 
+let warning_kind = Typing_warning.Sketchy_null_check
+
+let error_code = Typing_warning_utils.code warning_kind
+
 let get_lvar_name = function
   | Lvar (_, id) -> Some (Local_id.get_name id)
   | _ -> None
@@ -48,9 +52,7 @@ let sketchy_null_check env ~as_lint (ty, p, e) kind =
               Some None
             else
               None)
-          ( p,
-            Typing_warning.(Sketchy_null_check { SketchyNullCheck.name; kind })
-          )
+          (p, warning_kind, { Typing_warning.SketchyNullCheck.name; kind })
       | Always_truthy
       | Always_falsy
       | Unknown ->
@@ -88,5 +90,3 @@ let handler ~as_lint =
         sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Neq
       | _ -> ()
   end
-
-let error_code = Error_codes.Warning.SketchyNullCheck

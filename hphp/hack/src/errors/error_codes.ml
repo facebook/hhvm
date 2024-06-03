@@ -782,6 +782,7 @@ module Warning = struct
     | SketchyEquality [@value 12001]
     | IsAsAlways [@value 12002]
     | SketchyNullCheck [@value 12003]
+    | NonDisjointCheck [@value 12004]
   [@@deriving enum, show { with_path = false }]
 end
 

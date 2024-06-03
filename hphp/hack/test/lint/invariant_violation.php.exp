@@ -9,17 +9,17 @@ File "invariant_violation.php", line 9, characters 14-20:
 Sketchy condition: testing the truthiness of a string may not behave as expected.
 The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Lint[5623])
 File "invariant_violation.php", line 13, characters 7-13:
-Putting a string literal in the condition of an if statement guarantees it will always or never trigger. (Lint[5581])
+Putting a string literal in the condition of an `if` statement guarantees it will always or never trigger. (Lint[5581])
 File "invariant_violation.php", line 13, characters 7-13:
 Sketchy condition: testing the truthiness of a string may not behave as expected.
 The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Lint[5623])
 File "invariant_violation.php", line 19, characters 7-14:
-Putting a string literal in the condition of an if statement guarantees it will always or never trigger. (Lint[5581])
+Putting a string literal in the condition of an `if` statement guarantees it will always or never trigger. (Lint[5581])
 File "invariant_violation.php", line 19, characters 8-14:
 Sketchy condition: testing the truthiness of a string may not behave as expected.
 The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Lint[5623])
 File "invariant_violation.php", line 25, characters 7-15:
-Putting a string literal in the condition of an if statement guarantees it will always or never trigger. (Lint[5581])
+Putting a string literal in the condition of an `if` statement guarantees it will always or never trigger. (Lint[5581])
 File "invariant_violation.php", line 25, characters 9-15:
 Sketchy condition: testing the truthiness of a string may not behave as expected.
 The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Lint[5623])

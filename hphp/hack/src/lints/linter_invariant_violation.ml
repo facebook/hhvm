@@ -63,7 +63,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
               if is_invariant_violation_call then
                 "invariant('error message') will never or always crash. Did you mean invariant_violation()?"
               else
-                "Putting a string literal in the condition of an if statement guarantees it will always or never trigger."
+                "Putting a string literal in the condition of an `if` statement guarantees it will always or never trigger."
             in
             Some err_msg
           | CKUnaryNot true when is_invariant_violation_call ->

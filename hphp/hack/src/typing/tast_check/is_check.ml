@@ -13,6 +13,10 @@ module Env = Tast_env
 module TUtils = Typing_utils
 module T = Typing_defs
 
+let warning_kind = Typing_warning.Is_as_always
+
+let error_code = Typing_warning_utils.code warning_kind
+
 let nothing_ty = Typing_make_type.nothing Typing_reason.Rnone
 
 (* To handle typechecking against placeholder, e.g., `... as C<_>`, we convert
@@ -69,12 +73,12 @@ let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =
         (Env.get_tcopt env)
         ~as_lint
         ( pos,
-          Typing_warning.Is_as_always
-            {
-              Typing_warning.IsAsAlways.kind;
-              lhs_ty = print_ty lhs_ty;
-              rhs_ty = print_ty rhs_ty;
-            } )
+          warning_kind,
+          {
+            Typing_warning.IsAsAlways.kind;
+            lhs_ty = print_ty lhs_ty;
+            rhs_ty = print_ty rhs_ty;
+          } )
     | None -> ()
 
 let handler ~as_lint =
@@ -126,5 +130,3 @@ let handler ~as_lint =
           ~never_kind:Typing_warning.IsAsAlways.As_always_fails
       | _ -> ()
   end
-
-let error_code = Error_codes.Warning.IsAsAlways

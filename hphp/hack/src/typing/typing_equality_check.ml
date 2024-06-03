@@ -37,8 +37,14 @@ let trivial_comparison_error
     Typing_warning_utils.add
       env
       ( pos,
-        Typing_warning.Sketchy_equality
-          { result; left; right; left_trail; right_trail } )
+        Typing_warning.Sketchy_equality,
+        {
+          Typing_warning.SketchyEquality.result;
+          left;
+          right;
+          left_trail;
+          right_trail;
+        } )
   else
     Typing_error_utils.add_typing_error
       ~env

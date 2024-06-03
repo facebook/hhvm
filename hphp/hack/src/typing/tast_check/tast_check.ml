@@ -46,7 +46,11 @@ let visitor ctx =
 
   let warning_handlers =
     let warning_checks =
-      [(module Is_check : Handler.Warning.S); (module Sketchy_null_check)]
+      [
+        (module Is_check : Handler.Warning.S);
+        (module Sketchy_null_check);
+        (module Disjoint_types);
+      ]
     in
     List.filter_map warning_checks ~f:(fun (module M) ->
         if Typing_warning_utils.code_is_enabled tcopt M.error_code then

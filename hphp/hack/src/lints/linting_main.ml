@@ -20,7 +20,7 @@ let untyped_linters =
 let typed_linters =
   [
     Linter_equality_check.handler;
-    Linter_disjoint_types.handler;
+    Disjoint_types.handler ~as_lint:true;
     Is_check.handler ~as_lint:true;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;

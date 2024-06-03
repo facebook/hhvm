@@ -112,22 +112,6 @@ let trait_requires_class_that_overrides_method
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
        (Utils.strip_ns class_name |> Markdown_lite.md_codify))
 
-let invalid_disjointness_check p name ty1 ty2 =
-  Lints.add Codes.invalid_disjointness_check Lint_warning p
-  @@ Printf.sprintf
-       "This call to '%s' will always return the same value, because type %s is disjoint from type %s."
-       name
-       ty1
-       ty2
-
-let invalid_disjointness_check_dynamic p name ty1 ty2 =
-  Lints.add Codes.invalid_disjointness_check Lint_warning p
-  @@ Printf.sprintf
-       "Non-dynamic calls to '%s' will always return the same value, because type %s is disjoint from type %s."
-       name
-       ty1
-       ty2
-
 let invalid_switch_case_value_type
     (case_value_p : Ast_defs.pos) case_value_ty scrutinee_ty =
   Lints.add Codes.invalid_switch_case_value_type Lint_warning case_value_p

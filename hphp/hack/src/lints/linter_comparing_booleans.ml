@@ -5,6 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+(** Check for expression like `$mybool == true` and suggests simplification. *)
+
 let as_lvar_and_literal ((_, _, lhs) : Tast.expr) ((_, _, rhs) : Tast.expr) :
     (string * bool) option =
   match (lhs, rhs) with

@@ -17,6 +17,8 @@ module Env = Tast_env
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 
+(** Warns when comparing two expression whose types are disjoint *)
+
 let enum_base_type env cid =
   match Decl_provider.get_class (Typing_env.get_ctx env) cid with
   | Decl_entry.DoesNotExist

@@ -42,16 +42,29 @@ module SketchyNullCheck = struct
   }
 end
 
-type _ t_ =
-  | Sketchy_equality : {
-      result: bool;
-      left: Pos_or_decl.t Message.t list Lazy.t;
-      right: Pos_or_decl.t Message.t list Lazy.t;
-      left_trail: Pos_or_decl.t list;
-      right_trail: Pos_or_decl.t list;
-    }
-      -> warn t_
-  | Is_as_always : IsAsAlways.t -> migrated t_
-  | Sketchy_null_check : SketchyNullCheck.t -> migrated t_
+module NonDisjointCheck = struct
+  type t = {
+    name: string;
+    ty1: string;
+    ty2: string;
+    dynamic: bool;
+  }
+end
 
-type 'a t = Pos.t * 'a t_
+module SketchyEquality = struct
+  type t = {
+    result: bool;
+    left: Pos_or_decl.t Message.t list Lazy.t;
+    right: Pos_or_decl.t Message.t list Lazy.t;
+    left_trail: Pos_or_decl.t list;
+    right_trail: Pos_or_decl.t list;
+  }
+end
+
+type (_, _) kind =
+  | Sketchy_equality : (SketchyEquality.t, warn) kind
+  | Is_as_always : (IsAsAlways.t, migrated) kind
+  | Sketchy_null_check : (SketchyNullCheck.t, migrated) kind
+  | Non_disjoint_check : (NonDisjointCheck.t, migrated) kind
+
+type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

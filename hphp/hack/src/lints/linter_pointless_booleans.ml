@@ -5,6 +5,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+(** Checks for always true/false boolean expressions like
+  `expr || true` and `expr && false`,
+  or pointless booleans like `expr || false` and `expr && true`. *)
+
 let which_boolean_literal ((_ty, _pos, expr_) : Tast.expr) =
   match expr_ with
   | Aast.True -> Some Aast.True

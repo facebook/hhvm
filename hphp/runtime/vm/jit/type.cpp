@@ -1095,6 +1095,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     auto ty = TBottom;
     for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
       ty |= baseForTC(innerTc);
+      if (innerTc.isNullable()) ty |= TInitNull;
     }
     return ty;
   }

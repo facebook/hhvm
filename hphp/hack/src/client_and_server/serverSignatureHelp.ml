@@ -121,6 +121,7 @@ let get_occurrence_info
                   both class_elt and fun_decl uniformally. *)
                {
                  fe_module = None;
+                 fe_package_override = None;
                  fe_internal = false;
                  Typing_defs.fe_pos = Lazy.force class_elt.Typing_defs.ce_pos;
                  fe_type = Lazy.force class_elt.Typing_defs.ce_type;

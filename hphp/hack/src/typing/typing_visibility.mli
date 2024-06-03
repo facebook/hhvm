@@ -36,6 +36,7 @@ val check_top_level_access :
   env ->
   bool ->
   string option ->
+  string option ->
   Typing_error.t option
 
 val check_meth_caller_access :

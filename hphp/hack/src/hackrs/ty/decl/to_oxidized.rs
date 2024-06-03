@@ -766,6 +766,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
         let Self {
             deprecated,
             module,
+            package_override,
             internal,
             ty,
             pos,
@@ -790,6 +791,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
                 let (pos, id) = m.to_oxidized(arena);
                 obr::ast_defs::Id(pos, id)
             }),
+            package_override: package_override.as_deref().to_oxidized(arena),
         })
     }
 }

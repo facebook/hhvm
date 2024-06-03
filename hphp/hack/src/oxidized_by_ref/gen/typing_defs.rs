@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8bd951b75b6c5a93d3b14b8956e30d51>>
+// @generated SignedSource<<c02c387434b87372ec93095e1aa032c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -189,6 +189,8 @@ pub struct FunElt<'a> {
     pub deprecated: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<ast_defs::Id<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub package_override: Option<&'a str>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

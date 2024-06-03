@@ -599,6 +599,7 @@ walkable!(ConstDecl<R> => [ty]);
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
+    pub package_override: Option<String>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub ty: Ty<R>,

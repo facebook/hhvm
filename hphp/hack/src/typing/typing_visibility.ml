@@ -155,12 +155,13 @@ let check_internal_access ~in_signature env target pos decl_pos =
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_public_access env use_pos def_pos target =
+let check_public_access
+    env use_pos def_pos target_module _target_package_override =
   match
     Typing_modules.can_access_public
       ~env
       ~current:(Env.get_current_module env)
-      ~target
+      ~target:target_module
       def_pos
   with
   | `Yes -> None
@@ -181,7 +182,7 @@ let check_public_access env use_pos def_pos target =
               module_pos = current_module_pos;
               package_pos = current_package_pos;
               current_module_opt = Env.get_current_module env;
-              target_module_opt = target;
+              target_module_opt = target_module;
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
@@ -222,7 +223,7 @@ let check_public_access env use_pos def_pos target =
               module_pos = current_module_pos;
               package_pos = current_package_pos;
               current_module_opt = Env.get_current_module env;
-              target_module_opt = target;
+              target_module_opt = target_module;
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
@@ -327,11 +328,17 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
     | Vinternal m -> is_internal_visible env m
 
 let is_visible_for_top_level
-    ~in_signature env is_internal target_module pos decl_pos =
+    ~in_signature
+    env
+    is_internal
+    target_module
+    target_package_override
+    pos
+    decl_pos =
   if is_internal then
     check_internal_access ~in_signature env target_module pos decl_pos
   else
-    check_public_access env pos decl_pos target_module
+    check_public_access env pos decl_pos target_module target_package_override
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
@@ -356,12 +363,19 @@ let check_obj_access ~is_method ~is_receiver_interface ~use_pos ~def_pos env vis
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_top_level_access
-    ~in_signature ~use_pos ~def_pos env is_internal target_module =
+    ~in_signature
+    ~use_pos
+    ~def_pos
+    env
+    is_internal
+    target_module
+    target_package_override =
   is_visible_for_top_level
     ~in_signature
     env
     is_internal
     target_module
+    target_package_override
     use_pos
     def_pos
 

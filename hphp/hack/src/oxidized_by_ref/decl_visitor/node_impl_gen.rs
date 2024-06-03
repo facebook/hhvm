@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<02f16bebf8aebf73e10fc773019edb88>>
+// @generated SignedSource<<3c6a0ef08839dc425d12af0fc5e350b4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -816,13 +816,14 @@ impl<'a> Node<'a> for FunElt<'a> {
             FunElt {
                 deprecated: ref __binding_0,
                 module: ref __binding_1,
-                internal: ref __binding_2,
-                type_: ref __binding_3,
-                pos: ref __binding_4,
-                php_std_lib: ref __binding_5,
-                support_dynamic_type: ref __binding_6,
-                no_auto_dynamic: ref __binding_7,
-                no_auto_likes: ref __binding_8,
+                package_override: ref __binding_2,
+                internal: ref __binding_3,
+                type_: ref __binding_4,
+                pos: ref __binding_5,
+                php_std_lib: ref __binding_6,
+                support_dynamic_type: ref __binding_7,
+                no_auto_dynamic: ref __binding_8,
+                no_auto_likes: ref __binding_9,
             } => {
                 {
                     __binding_0.accept(v)
@@ -848,7 +849,10 @@ impl<'a> Node<'a> for FunElt<'a> {
                 {
                     __binding_7.accept(v)
                 }
-                { __binding_8.accept(v) }
+                {
+                    __binding_8.accept(v)
+                }
+                { __binding_9.accept(v) }
             }
         }
     }

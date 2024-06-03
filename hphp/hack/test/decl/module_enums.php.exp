@@ -53,7 +53,7 @@ File root|module_enums.php--X.php
   ("\\f1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
-        fe_internal = true;
+        fe_package_override = None; fe_internal = true;
         fe_type =
         (Rwitness_from_decl ([12:19-21]),
          (Tfun
@@ -84,7 +84,7 @@ File root|module_enums.php--X.php
   ("\\f2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:10-12]),
          (Tfun
@@ -115,7 +115,7 @@ File root|module_enums.php--X.php
   ("\\f5",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
-        fe_internal = true;
+        fe_package_override = None; fe_internal = true;
         fe_type =
         (Rwitness_from_decl ([18:19-21]),
          (Tfun
@@ -136,7 +136,7 @@ File root|module_enums.php--X.php
   ("\\f6",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([23:10-12]),
          (Tfun
@@ -160,7 +160,7 @@ File root|module_enums.php--Y.php
 [("\\f3",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "Y"));
-       fe_internal = false;
+       fe_package_override = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([6:10-12]),
         (Tfun
@@ -191,7 +191,7 @@ File root|module_enums.php--Y.php
   ("\\f7",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "Y"));
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([10:10-12]),
          (Tfun
@@ -215,7 +215,7 @@ File root|module_enums.php--no-module.php
 [("\\f4",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_internal = false;
+       fe_package_override = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-12]),
         (Tfun
@@ -246,7 +246,7 @@ File root|module_enums.php--no-module.php
   ("\\f8",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-12]),
          (Tfun

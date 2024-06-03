@@ -47,6 +47,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
         Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
     {
       Typing_defs.fe_module = None;
+      fe_package_override = None;
       fe_pos;
       fe_internal = false;
       fe_deprecated = sm_deprecated;
@@ -86,6 +87,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
     in
     {
       Typing_defs.fe_module = None;
+      fe_package_override = None;
       fe_pos = pos;
       fe_internal = false;
       fe_deprecated = None;

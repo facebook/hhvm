@@ -23,7 +23,8 @@ File root|module_attr.php--here.php
 [("\\foo",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
-       fe_module = (Some ([2:8-12], "here")); fe_internal = false;
+       fe_module = (Some ([2:8-12], "here")); fe_package_override = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-13]),
         (Tfun

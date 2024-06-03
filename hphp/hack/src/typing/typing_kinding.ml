@@ -416,7 +416,8 @@ module Simple = struct
              ~def_pos:(Cls.pos class_info)
              env
              (Cls.internal class_info)
-             (Cls.get_module class_info));
+             (Cls.get_module class_info)
+             None (* TODO(milliechen): Add package_override to Cls.t *));
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->
@@ -428,7 +429,8 @@ module Simple = struct
              ~def_pos:typedef.td_pos
              env
              typedef.td_internal
-             (Option.map typedef.td_module ~f:snd));
+             (Option.map typedef.td_module ~f:snd)
+             None (* TODO(milliechen): Add package_override to typedef_type *));
         check_against_tparams
           ~in_signature
           typedef.td_pos
@@ -449,7 +451,8 @@ module Simple = struct
              ~def_pos:typedef.td_pos
              env
              typedef.td_internal
-             (Option.map typedef.td_module ~f:snd));
+             (Option.map typedef.td_module ~f:snd)
+             None (* TODO(milliechen): Add package_override to typedef_type *));
         check_against_tparams
           ~in_signature
           typedef.td_pos

@@ -109,7 +109,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo is deprecated: use bar() instead");
-        fe_module = None; fe_internal = false;
+        fe_module = None; fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([18:10-13]),
          (Tfun
@@ -130,7 +130,7 @@
   ("\\bar",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([21:10-13]),
          (Tfun
@@ -151,7 +151,7 @@
   ("\\baz",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([24:10-13]),
          (Tfun
@@ -173,7 +173,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo2 is deprecated: use bar2() instead");
-        fe_module = None; fe_internal = false;
+        fe_module = None; fe_package_override = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([27:10-14]),
          (Tfun

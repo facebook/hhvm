@@ -134,6 +134,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
     module: Option<Id<'a>>,
+    package_override: Option<&'a str>,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
@@ -173,6 +174,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 under_no_auto_likes: false,
                 inside_no_auto_dynamic_class: false,
                 module: None,
+                package_override: None,
             }),
             token_factory: SimpleTokenFactoryImpl::new(),
             // EndOfFile is used here as a None value (signifying "beginning of
@@ -3824,6 +3826,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         || parsed_attributes.dynamically_callable,
                     no_auto_dynamic: self.under_no_auto_dynamic,
                     no_auto_likes: parsed_attributes.no_auto_likes,
+                    package_override: self.package_override,
                 });
                 let this = Rc::make_mut(&mut self.state);
                 this.add_fun(name, fun_elt);
@@ -6211,16 +6214,25 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         attributes: Self::Output,
         _right_double_angle: Self::Output,
     ) -> Self::Output {
-        if self.opts.keep_user_attributes {
-            let this = Rc::make_mut(&mut self.state);
-            this.file_attributes = List::empty();
-            for attr in attributes.iter() {
-                match attr {
-                    Node::Attribute(attr) => this
-                        .file_attributes
-                        .push_front(this.user_attribute_to_decl(attr), this.arena),
-                    _ => {}
+        let keep_user_attributes = self.opts.keep_user_attributes;
+        let this = Rc::make_mut(&mut self.state);
+        this.file_attributes = List::empty();
+        for attr in attributes.iter() {
+            match attr {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == naming_special_names::user_attributes::PACKAGE_OVERRIDE {
+                        if let [AttributeParam::String(_, s)] = &attr.params {
+                            this.package_override = Some(
+                                std::str::from_utf8(s).expect("Unable to parse package override"),
+                            );
+                        }
+                    }
+                    if keep_user_attributes {
+                        this.file_attributes
+                            .push_front(this.user_attribute_to_decl(attr), this.arena)
+                    }
                 }
+                _ => {}
             }
         }
         Node::Ignored(SK::FileAttributeSpecification)

@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <list>
 #include <string>
 #include <vector>
 
 #include <folly/container/F14Map.h>
+#include <folly/small_vector.h>
 #include <proxygen/lib/http/codec/compress/HPACKHeader.h>
 
 namespace proxygen {
@@ -24,8 +24,10 @@ namespace proxygen {
 
 class HeaderTable {
  public:
-  // TODO: std::vector might be faster than std::list in the use case?
-  using names_map = folly::F14FastMap<HPACKHeaderName, std::list<uint32_t>>;
+  // 7 is chosen as an empirically good value that's not too big.
+  // small_vector spills to the heap beyond that.
+  using names_map =
+      folly::F14ValueMap<HPACKHeaderName, folly::small_vector<uint32_t, 7>>;
 
   explicit HeaderTable(uint32_t capacityVal) {
     init(capacityVal);

@@ -122,7 +122,7 @@ uint32_t HeaderTable::removeLast() {
     DCHECK(names_it != names_.end());
     auto& ilist = names_it->second;
     DCHECK_EQ(ilist.front(), t);
-    ilist.pop_front();
+    ilist.erase(ilist.begin());
 
     // remove the name if there are no indices associated with it
     if (ilist.empty()) {

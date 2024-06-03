@@ -83,11 +83,11 @@ TEST_F(HPACKContextTests, StaticTableHeaderNamesAreCommon) {
                                               "max-forwards",
                                               "if-range",
                                               "refresh"};
-  for (std::pair<HPACKHeaderName, std::list<uint32_t>> entry : table.names()) {
-    EXPECT_TRUE(entry.first.isCommonHeader() ||
-                uncommonStaticEntries.find(entry.first.get()) !=
+  for (const auto& [header, _] : table.names()) {
+    EXPECT_TRUE(header.isCommonHeader() ||
+                uncommonStaticEntries.find(header.get()) !=
                     uncommonStaticEntries.end())
-        << entry.first.get();
+        << header.get();
   }
 }
 

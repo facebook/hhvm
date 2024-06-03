@@ -390,6 +390,22 @@ void validate_field_names_uniqueness(
   }
 }
 
+// @thrift.ExceptionMessage annotation is only valid in exceptions.
+// This validator checks if the node that contains any field
+// with that annotation is an exception definiton.
+void validate_exception_message_annotation_is_only_in_exceptions(
+    diagnostic_context& ctx, const t_structured& node) {
+  for (const auto& f : node.fields()) {
+    if (f.find_structured_annotation_or_null(kExceptionMessageUri)) {
+      ctx.check(
+          node.is_exception(),
+          f,
+          "@thrift.ExceptionMessage annotation is only allowed in exception definitions. '{}' is not an exception.",
+          node.name());
+    }
+  }
+}
+
 // Checks the attributes of fields in a union.
 void validate_union_field_attributes(
     diagnostic_context& ctx, const t_union& node) {
@@ -1301,6 +1317,9 @@ ast_validator standard_validator() {
       &validate_compatibility_with_lazy_field);
   validator.add_structured_definition_visitor(
       &validate_reserved_ids_structured);
+  validator.add_structured_definition_visitor(
+      &validate_exception_message_annotation_is_only_in_exceptions);
+
   validator.add_union_visitor(&validate_union_field_attributes);
   validator.add_exception_visitor(&validate_exception_message_annotation);
   validator.add_field_visitor(&validate_field_id);

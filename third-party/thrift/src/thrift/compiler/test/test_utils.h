@@ -22,7 +22,7 @@
 #include <thrift/compiler/diagnostic.h>
 
 /*
- * Some helper functions for testing like reaching gtest how to print values
+ * Some helper functions for testing like teaching gtest how to print values
  * https://google.github.io/googletest/advanced.html#teaching-googletest-how-to-print-your-values
  */
 

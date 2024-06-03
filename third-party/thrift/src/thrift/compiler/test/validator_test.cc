@@ -20,6 +20,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <fmt/ostream.h>
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -70,6 +71,15 @@ class StandardValidatorTest : public ::testing::Test {
                 .start) {}
 
  protected:
+  t_struct scopeField{nullptr, "Field"};
+  t_struct annotationExceptionMessage{nullptr, "thrift.ExceptionMessage"};
+
+  void SetUp() override {
+    scopeField.set_uri(kScopeFieldUri);
+    annotationExceptionMessage.add_structured_annotation(inst(&scopeField, 1));
+    annotationExceptionMessage.set_uri(kExceptionMessageUri);
+  }
+
   std::vector<diagnostic> validate(
       diagnostic_params params = diagnostic_params::keep_all()) {
     diagnostic_results results;
@@ -85,6 +95,23 @@ class StandardValidatorTest : public ::testing::Test {
         std::make_unique<t_const>(&program_, ttype, "", std::move(value));
     result->set_src_range({loc + (lineno - 1), loc + (lineno - 1)});
     return result;
+  }
+
+  void add_exception_message_field(
+      t_struct& node,
+      const t_primitive_type& message_field_data_type,
+      std::string message_field_name,
+      int field_number_and_line_number) {
+    auto field = std::make_unique<t_field>(
+        message_field_data_type,
+        message_field_name,
+        field_number_and_line_number);
+    field->set_src_range(
+        {loc + (field_number_and_line_number - 1),
+         loc + (field_number_and_line_number - 1)});
+    field->add_structured_annotation(
+        inst(&annotationExceptionMessage, field_number_and_line_number));
+    node.append(std::move(field));
   }
 
   diagnostic error(int lineno, const std::string& msg) {
@@ -531,6 +558,87 @@ TEST_F(StandardValidatorTest, CustomDefaultValue) {
           error(
               1,
               "value error: const `const_float_precision_loss` cannot be represented precisely as `float` or `double`.")));
+}
+
+TEST_F(StandardValidatorTest, ValidExceptionMessageNoErrors) {
+  auto texception = std::make_unique<t_exception>(&program_, "MyException");
+  add_exception_message_field(
+      *texception, t_primitive_type::t_string(), "valid_message", 1);
+  program_.add_exception(std::move(texception));
+
+  EXPECT_THAT(validate(), ::testing::IsEmpty());
+}
+
+TEST_F(
+    StandardValidatorTest,
+    StructedAnnotationExceptionMessageOnANonStringField) {
+  auto texception = std::make_unique<t_exception>(&program_, "MyException");
+  add_exception_message_field(
+      *texception, t_primitive_type::t_i16(), "valid_message", 1);
+  program_.add_exception(std::move(texception));
+
+  EXPECT_THAT(
+      validate(),
+      UnorderedElementsAre(error(
+          "member specified as exception 'message' should be of type STRING, 'valid_message' in 'MyException' is not")));
+}
+
+TEST_F(StandardValidatorTest, DuplicateStructuredAnnotationExceptionMessage) {
+  auto texception = std::make_unique<t_exception>(&program_, "MyException");
+  add_exception_message_field(
+      *texception, t_primitive_type::t_string(), "valid_message", 1);
+  add_exception_message_field(
+      *texception, t_primitive_type::t_string(), "invalid_message", 2);
+  program_.add_exception(std::move(texception));
+
+  EXPECT_THAT(
+      validate(),
+      UnorderedElementsAre(error(2, "Duplicate message annotation.")));
+}
+
+TEST_F(StandardValidatorTest, DuplicateDeprecatedAnnotationExceptionMessage) {
+  auto tstring = t_primitive_type::t_string();
+
+  auto texception = std::make_unique<t_exception>(&program_, "MyException");
+  add_exception_message_field(
+      *texception, t_primitive_type::t_string(), "valid_message", 1);
+  texception->set_annotation("message", "valid_message");
+
+  program_.add_exception(std::move(texception));
+
+  EXPECT_THAT(
+      validate(),
+      UnorderedElementsAre(
+          error("Duplicate message annotation."),
+          warning(
+              "The annotation message is deprecated. Please use @thrift.ExceptionMessage instead.")));
+}
+
+TEST_F(
+    StandardValidatorTest, ExceptionMessageAnnotationMustOnlyBeInExceptions) {
+  auto tstring = t_primitive_type::t_string();
+
+  auto tstruct = std::make_unique<t_struct>(&program_, "MyStruct");
+  add_exception_message_field(
+      *tstruct, t_primitive_type::t_string(), "invalid_message", 1);
+
+  program_.add_struct(std::move(tstruct));
+
+  auto tunion = std::make_unique<t_union>(&program_, "MyUnion");
+  add_exception_message_field(
+      *tunion, t_primitive_type::t_string(), "invalid_message", 5);
+
+  program_.add_struct(std::move(tunion));
+
+  EXPECT_THAT(
+      validate(),
+      UnorderedElementsAre(
+          error(
+              1,
+              "@thrift.ExceptionMessage annotation is only allowed in exception definitions. 'MyStruct' is not an exception."),
+          error(
+              5,
+              "@thrift.ExceptionMessage annotation is only allowed in exception definitions. 'MyUnion' is not an exception.")));
 }
 
 class ScopeValidatorTest : public ::testing::Test {

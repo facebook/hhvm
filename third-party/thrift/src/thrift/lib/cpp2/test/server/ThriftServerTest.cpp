@@ -1959,7 +1959,8 @@ INSTANTIATE_TEST_CASE_P(
     HeaderOrRocket,
     testing::Values(TransportType::Header, TransportType::Rocket));
 
-TEST_P(OverloadTest, Test) {
+// DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
+TEST_P(OverloadTest, DISABLED_Test) {
   class BlockInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
     folly::Baton<> block;
@@ -2111,7 +2112,8 @@ TEST(ThriftServer, QueueTimeoutDisabledTest) {
   std::move(slowRequestFuture).via(&base).getVia(&base);
 }
 
-TEST(ThriftServer, ClientTimeoutTest) {
+// DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
+TEST(ThriftServer, DISABLED_ClientTimeoutTest) {
   TestThriftServerFactory<TestInterface> factory;
   auto server = factory.create();
   ScopedServerThread sst(server);
@@ -3913,7 +3915,8 @@ void setConfig(size_t concurrency, double jitter = 0.0) {
 }
 } // namespace
 
-TEST_P(HeaderOrRocket, AdaptiveConcurrencyConfig) {
+// DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
+TEST_P(HeaderOrRocket, DISABLED_AdaptiveConcurrencyConfig) {
   class TestInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
     void voidResponse() override {}

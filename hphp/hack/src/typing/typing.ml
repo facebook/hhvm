@@ -5980,7 +5980,13 @@ end = struct
       let def_pos = get_pos m in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
-        (TVis.check_obj_access ~is_method:true ~use_pos:p ~def_pos env vis);
+        (TVis.check_obj_access
+           ~is_method:true
+           ~is_receiver_interface:false
+           ~use_pos:p
+           ~def_pos
+           env
+           vis);
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);

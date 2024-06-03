@@ -22,6 +22,7 @@ val check_class_access :
 
 val check_obj_access :
   is_method:bool ->
+  is_receiver_interface:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   env ->

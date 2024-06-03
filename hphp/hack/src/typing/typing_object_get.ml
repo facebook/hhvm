@@ -700,6 +700,7 @@ and obj_get_concrete_class_with_member_info
             None);
       TVis.check_obj_access
         ~is_method:args.is_method
+        ~is_receiver_interface:(Ast_defs.is_c_interface (Cls.kind class_info))
         ~use_pos:id_pos
         ~def_pos:mem_pos
         env

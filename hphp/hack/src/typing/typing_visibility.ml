@@ -247,7 +247,7 @@ let check_public_access env use_pos def_pos target =
               target_package_opt = target_package_name;
             }))
 
-let is_visible_for_obj ~is_method env vis =
+let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
     if is_method then
       "method"
@@ -261,9 +261,13 @@ let is_visible_for_obj ~is_method env vis =
     | None -> Some ("You cannot access this " ^ member_ty)
     | Some self_id -> is_private_visible ~is_static:false env x self_id)
   | Vprotected x ->
-    (match Env.get_self_id env with
-    | None -> Some ("You cannot access this " ^ member_ty)
-    | Some self_id -> is_protected_visible env x self_id)
+    if is_receiver_interface then
+      Some "You cannot invoke a protected method on an interface"
+    else (
+      match Env.get_self_id env with
+      | None -> Some ("You cannot access this " ^ member_ty)
+      | Some self_id -> is_protected_visible env x self_id
+    )
   | Vinternal m -> is_internal_visible env m
 
 (* The only permitted way to access an LSB property is via
@@ -333,7 +337,7 @@ let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
     match cid with
     | Some cid -> is_visible_for_class ~is_method env (vis, lsb) cid class_
-    | None -> is_visible_for_obj ~is_method env vis
+    | None -> is_visible_for_obj ~is_method ~is_receiver_interface:false env vis
   in
   Option.is_none msg_opt
 
@@ -345,9 +349,11 @@ let visibility_error p msg (p_vis, vis) =
     @@ Primary.Visibility
          { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
-let check_obj_access ~is_method ~use_pos ~def_pos env vis =
-  Option.map (is_visible_for_obj ~is_method env vis) ~f:(fun msg ->
-      visibility_error use_pos msg (def_pos, vis))
+let check_obj_access ~is_method ~is_receiver_interface ~use_pos ~def_pos env vis
+    =
+  Option.map
+    (is_visible_for_obj ~is_method ~is_receiver_interface env vis)
+    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_top_level_access
     ~in_signature ~use_pos ~def_pos env is_internal target_module =

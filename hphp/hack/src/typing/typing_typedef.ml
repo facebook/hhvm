@@ -118,6 +118,11 @@ let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env = Env.set_current_module env typedef.t_module in
   let env = Env.set_internal env typedef.t_internal in
+  let env =
+    Env.set_current_package_override_from_file_attributes
+      env
+      typedef.t_file_attributes
+  in
   let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env

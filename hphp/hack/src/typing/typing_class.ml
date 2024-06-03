@@ -1967,6 +1967,11 @@ let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
   let env = Env.set_current_module env c.c_module in
   let env = Env.set_internal env c.c_internal in
+  let env =
+    Env.set_current_package_override_from_file_attributes
+      env
+      c.c_file_attributes
+  in
   env
 
 let class_def ctx (c : _ class_) =

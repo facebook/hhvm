@@ -65,6 +65,7 @@ and genv = {
   fun_is_ctor: bool;
   file: Relative_path.t;
   current_module: Ast_defs.id option;
+  current_package_override: string option;
   this_internal: bool;
   this_support_dynamic_type: bool;
   no_auto_likes: bool;
@@ -112,6 +113,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_is_ctor = false;
         file;
         current_module = None;
+        current_package_override = None;
         this_internal = false;
         this_support_dynamic_type = false;
         no_auto_likes = false;

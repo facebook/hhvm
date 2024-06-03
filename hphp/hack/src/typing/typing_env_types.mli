@@ -90,6 +90,9 @@ and genv = {
       (** The file containing the top-level definition that we are checking *)
   current_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
+  current_package_override: string option;
+      (** The overridden package membership of a top-level definition that we're checking,
+          specified in the file attribute __PackageOverride *)
   this_internal: bool;
       (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;

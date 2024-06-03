@@ -85,6 +85,11 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   let env = Env.set_current_module env fd.fd_module in
   let env = Env.set_internal env fd.fd_internal in
   let env =
+    Env.set_current_package_override_from_file_attributes
+      env
+      fd.fd_file_attributes
+  in
+  let env =
     if
       Naming_attributes.mem
         SN.UserAttributes.uaSupportDynamicType

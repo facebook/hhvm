@@ -154,12 +154,13 @@ let check_internal_access ~in_signature env target pos decl_pos =
   Option.map ~f:Typing_error.modules module_err_opt
 
 let check_public_access
-    env use_pos def_pos target_module _target_package_override =
+    env use_pos def_pos target_module target_package_override =
   match
     Typing_packages.can_access_public
       ~env
       ~current_module:(Env.get_current_module env)
       ~target_module
+      ~target_package_override
       def_pos
   with
   | `Yes -> None

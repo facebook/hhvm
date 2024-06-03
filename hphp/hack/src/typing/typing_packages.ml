@@ -53,10 +53,11 @@ type package_error_info = {
 (* Use the module names of current and target symbols to calculate their respective
  * packages, then determine if the current package is allowed to access the target
  * package.
- * If `package_v2` is set, use the file paths instead of modules to perform the
- * package membership calculation.
+ * If `package_v2` is set, use the file paths instead of modules to calculate the
+ * package membership, optionally overridden by the __PackageOverride attribute.
  *)
-let satisfies_pkg_rules env current_md target_md target_pos :
+let satisfies_pkg_rules
+    env current_md target_md target_pos target_package_override :
     (package_error_info * Package.package_relationship) option =
   let current_md_name = declared_module_name_with_default current_md in
   let target_md_name = declared_module_name_with_default target_md in
@@ -67,10 +68,21 @@ let satisfies_pkg_rules env current_md target_md target_pos :
   *)
   let (current_pkg, target_pkg) =
     if Env.package_v2 env then
-      let current_file = Env.get_file env in
-      let target_file = Pos_or_decl.filename target_pos in
-      ( Env.get_package_for_file env current_file,
-        Env.get_package_for_file env target_file )
+      let current_pkg =
+        match Env.get_current_package_override env with
+        | Some pkg -> Env.get_package_by_name env pkg
+        | None ->
+          let current_file = Env.get_file env in
+          Env.get_package_for_file env current_file
+      in
+      let target_pkg =
+        match target_package_override with
+        | None ->
+          let target_file = Pos_or_decl.filename target_pos in
+          Env.get_package_for_file env target_file
+        | Some pkg -> Env.get_package_by_name env pkg
+      in
+      (current_pkg, target_pkg)
     else
       ( Env.get_package_for_module env current_md_name,
         Env.get_package_for_module env target_md_name )
@@ -107,8 +119,16 @@ let can_access_public
     ~(env : Typing_env_types.env)
     ~(current_module : string option)
     ~(target_module : string option)
+    ~(target_package_override : string option)
     (target_pos : Pos_or_decl.t) =
-  match satisfies_pkg_rules env current_module target_module target_pos with
+  match
+    satisfies_pkg_rules
+      env
+      current_module
+      target_module
+      target_pos
+      target_package_override
+  with
   | Some (err_info, Package.Soft_includes) -> `PackageSoftIncludes err_info
   | Some (err_info, Package.Unrelated) -> `PackageNotSatisfied err_info
   | Some (_, Package.(Equal | Includes)) ->

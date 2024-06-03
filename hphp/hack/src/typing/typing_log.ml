@@ -514,6 +514,7 @@ let genv_as_value env genv =
     fun_is_ctor;
     file = _;
     current_module;
+    current_package_override;
     this_internal;
     this_support_dynamic_type;
     no_auto_likes;
@@ -537,6 +538,10 @@ let genv_as_value env genv =
     @ (match current_module with
       | Some current_module ->
         [("current_module", string_as_value @@ Ast_defs.show_id current_module)]
+      | None -> [])
+    @ (match current_package_override with
+      | Some current_package_override ->
+        [("current_package_override", string_as_value current_package_override)]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

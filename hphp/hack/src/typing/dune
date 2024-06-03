@@ -208,6 +208,11 @@
   (modules typing_modules)
   (libraries typing_env typing_env_types decl_provider))
 
+(library
+  (name typing_packages)
+  (wrapped false)
+  (modules typing_packages)
+  (libraries typing_env typing_env_types))
 
 (library
  (name typing)
@@ -292,7 +297,7 @@
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)
- (libraries typing_algebra typing_common typing_modules typing_skeleton)
+ (libraries typing_algebra typing_common typing_modules typing_packages typing_skeleton)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -360,7 +365,7 @@
  (name typing_visibility)
  (wrapped false)
  (modules typing_visibility)
- (libraries typing_modules typing_utils)
+ (libraries typing_modules typing_packages typing_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -220,7 +220,6 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
           ~env
           ~current:(Some child_m)
           ~target:(Some parent_m)
-          parent_pos
       with
       | `Yes -> None
       | `Disjoint (current, target) ->

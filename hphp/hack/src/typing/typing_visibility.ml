@@ -112,7 +112,6 @@ let is_internal_visible env target =
       ~env
       ~current:(Env.get_current_module env)
       ~target:(Some target)
-      Pos_or_decl.none (* only called from autocompleteService *)
   with
   | `Yes -> None
   | `Disjoint (current, target) ->
@@ -132,7 +131,6 @@ let check_internal_access ~in_signature env target pos decl_pos =
         ~env
         ~current:(Env.get_current_module env)
         ~target
-        decl_pos
     with
     | `Yes when in_signature && not (Env.get_internal env) ->
       Some (Module_hint { pos; decl_pos })
@@ -158,15 +156,15 @@ let check_internal_access ~in_signature env target pos decl_pos =
 let check_public_access
     env use_pos def_pos target_module _target_package_override =
   match
-    Typing_modules.can_access_public
+    Typing_packages.can_access_public
       ~env
-      ~current:(Env.get_current_module env)
-      ~target:target_module
+      ~current_module:(Env.get_current_module env)
+      ~target_module
       def_pos
   with
   | `Yes -> None
   | `PackageNotSatisfied
-      Typing_modules.
+      Typing_packages.
         {
           current_module_pos_or_filename = `ModulePos current_module_pos;
           current_package_pos;
@@ -187,7 +185,7 @@ let check_public_access
               target_package_opt = target_package_name;
             }))
   | `PackageNotSatisfied
-      Typing_modules.
+      Typing_packages.
         {
           current_module_pos_or_filename = `FileName current_filename;
           current_package_pos;
@@ -207,7 +205,7 @@ let check_public_access
               target_package_opt = target_package_name;
             }))
   | `PackageSoftIncludes
-      Typing_modules.
+      Typing_packages.
         {
           current_module_pos_or_filename = `ModulePos current_module_pos;
           current_package_pos;
@@ -228,7 +226,7 @@ let check_public_access
               target_package_opt = target_package_name;
             }))
   | `PackageSoftIncludes
-      Typing_modules.
+      Typing_packages.
         {
           current_module_pos_or_filename = `FileName current_filename;
           current_package_pos;
@@ -431,7 +429,7 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
         Env.get_package_for_file env current_file
     in
     let target_pkg = Env.get_package_by_name env target in
-    (match Typing_modules.get_package_violation env current_pkg target_pkg with
+    (match Typing_packages.get_package_violation env current_pkg target_pkg with
     | Some _ ->
       Some
         (Typing_error.modules

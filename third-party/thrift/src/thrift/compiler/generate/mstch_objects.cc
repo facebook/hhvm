@@ -460,6 +460,8 @@ mstch::node mstch_field::idl_type() {
       case t_type::type::t_program:
         return std::nullopt;
     }
+    // unneccessary, but prevents a GCC warning
+    return std::nullopt;
   });
 
   if (idl_type == std::nullopt) {

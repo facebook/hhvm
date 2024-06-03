@@ -8,3 +8,5 @@
 val program : Provider_context.t -> Tast.program -> unit
 
 val def : Provider_context.t -> Tast.def -> unit
+
+val warning_checks : (module Handler.Warning.S) list

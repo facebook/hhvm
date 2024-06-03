@@ -32,6 +32,13 @@ let select_logger_handlers ctx =
   in
   List.fold ~init:[] ~f:add_handler logger_handlers
 
+let warning_checks =
+  [
+    (module Is_check : Handler.Warning.S);
+    (module Sketchy_null_check);
+    (module Disjoint_types);
+  ]
+
 let visitor ctx =
   (* Handlers that are not TAST checks to produce errors, but are used for
      telemetry that processes TASTs. *)
@@ -45,13 +52,6 @@ let visitor ctx =
   in
 
   let warning_handlers =
-    let warning_checks =
-      [
-        (module Is_check : Handler.Warning.S);
-        (module Sketchy_null_check);
-        (module Disjoint_types);
-      ]
-    in
     List.filter_map warning_checks ~f:(fun (module M) ->
         if Typing_warning_utils.code_is_enabled tcopt M.error_code then
           Some (M.handler ~as_lint:false)

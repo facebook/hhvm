@@ -298,6 +298,26 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     }
   }
 
+  if (!m_preciseTypeMask) {
+    // Canonicalization: An empty union mask can either be nullable, which case
+    // the type is precisely null, or non-nullable in which case the type is
+    // nothing.
+    assertx(m_classes.m_list.empty());
+    if (contains(m_flags, TypeConstraintFlags::Nullable)) {
+      return TypeConstraint{
+        AnnotType::Null,
+        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        ClassConstraint { m_typeName }
+      };
+    } else {
+      return TypeConstraint{
+        AnnotType::Nothing,
+        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        ClassConstraint { m_typeName }
+      };
+    }
+  }
+
   if (m_classes.m_list.size() > RuntimeOption::EvalMaxCaseTypeVariants) {
     auto msg = folly::sformat(
       "Case type '{}' exceeds allowed variants of {} ({} requested)",
@@ -1109,9 +1129,8 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       Optional<AnnotAction> fallback;
       for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
         auto type = tc.type();
-        auto klass = type == AnnotType::SubObject
-          ? tc.clsNamedType()->getCachedClass() : nullptr;
-        auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
+        auto const name = tc.isSubObject() ? tc.clsName() : tc.typeName();
+        auto result = annotCompat(val.type(), type, name);
         switch (result) {
           case AnnotAction::Pass: return true;
           case AnnotAction::Fail: continue;

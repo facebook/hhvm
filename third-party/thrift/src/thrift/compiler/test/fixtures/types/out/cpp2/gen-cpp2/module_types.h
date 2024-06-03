@@ -6261,7 +6261,7 @@ class AllocatorAware final  {
     return __fbthrift_alloc;
   }
  private:
-  FOLLY_ATTR_NO_UNIQUE_ADDRESS allocator_type __fbthrift_alloc;
+  [[FOLLY_ATTR_NO_UNIQUE_ADDRESS]] allocator_type __fbthrift_alloc;
 
  public:
 
@@ -6743,7 +6743,7 @@ class AllocatorAware2 final  {
     return __fbthrift_alloc;
   }
  private:
-  FOLLY_ATTR_NO_UNIQUE_ADDRESS allocator_type __fbthrift_alloc;
+  [[FOLLY_ATTR_NO_UNIQUE_ADDRESS]] allocator_type __fbthrift_alloc;
 
  public:
 

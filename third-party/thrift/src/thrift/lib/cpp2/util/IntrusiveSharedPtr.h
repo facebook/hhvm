@@ -279,7 +279,7 @@ class IntrusiveSharedPtr {
   friend class IntrusiveSharedPtr;
 
   pointer ptr_{nullptr};
-  FOLLY_ATTR_NO_UNIQUE_ADDRESS std::default_delete<T> deleter_;
+  [[FOLLY_ATTR_NO_UNIQUE_ADDRESS]] std::default_delete<T> deleter_;
 };
 
 struct BasicIntrusiveSharedPtrControlBlock {

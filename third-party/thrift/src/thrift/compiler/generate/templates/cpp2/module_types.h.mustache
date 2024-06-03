@@ -167,7 +167,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   }
 {{^struct:cpp_allocator_via}}
  private:
-  FOLLY_ATTR_NO_UNIQUE_ADDRESS allocator_type __fbthrift_alloc;
+  [[FOLLY_ATTR_NO_UNIQUE_ADDRESS]] allocator_type __fbthrift_alloc;
 {{/struct:cpp_allocator_via}}
 {{/struct:cpp_allocator}}
 

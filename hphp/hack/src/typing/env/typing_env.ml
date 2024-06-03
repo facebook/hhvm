@@ -91,6 +91,22 @@ let log_env_change name ?(level = 1) old_env new_env =
 
 let expand_var env r v =
   let (inference_env, ty_solution) = Inf.expand_var env.inference_env r v in
+  (* When we have a concrete solution r, record the flow of that solution as a
+     prefix to the original type variables's reason; when we linearize the
+     path, we should then see the path of the relevant uppper / lower bounds
+     as the prefix for any flow through typing.
+     We don't record the flow when we are pointing at another tyvar on the
+     heap since we would end up with a chain of flows representing unification
+  *)
+  let ty_solution =
+    if
+      (not (is_tyvar ty_solution))
+      && TypecheckerOptions.yolo_extended_reasons env.genv.tcopt
+    then
+      map_reason ty_solution ~f:(fun from -> Typing_reason.Rflow (from, r))
+    else
+      ty_solution
+  in
   ({ env with inference_env }, ty_solution)
 
 let fresh_type_reason ?variance env p r =

@@ -2030,3 +2030,19 @@ TEST(CompilerTest, no_generate_patch_in_cpp) {
     }
   )");
 }
+
+TEST(CompilerTest, exception_invalid_use) {
+  check_compile(R"(
+    exception E {}
+    struct S {
+      1: E field; # TODO (T191018859)
+    }
+
+    service Svc {
+      E return(); # expected-error: Exceptions cannot be used as function return types
+      void param(1: E e); # expected-error: Exceptions cannot be used as function arguments
+    }
+
+    const E e = E{}; # expected-error: Exceptions cannot be used as const types
+  )");
+}

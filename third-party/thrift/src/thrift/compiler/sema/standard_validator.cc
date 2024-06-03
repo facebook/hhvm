@@ -1298,6 +1298,25 @@ void validate_cursor_serialization_adapter_in_container(
   }
 }
 
+// TODO (T191018859): forbid as field type too
+void forbid_exception_as_method_type(
+    diagnostic_context& ctx, const t_function& node) {
+  ctx.check(
+      !node.return_type()->get_true_type()->is_exception(),
+      "Exceptions cannot be used as function return types");
+  for (const auto& field : node.params().fields()) {
+    ctx.check(
+        !field.type()->get_true_type()->is_exception(),
+        "Exceptions cannot be used as function arguments");
+  }
+}
+void forbid_exception_as_const_type(
+    diagnostic_context& ctx, const t_const& node) {
+  ctx.check(
+      !node.type()->get_true_type()->is_exception(),
+      "Exceptions cannot be used as const types");
+}
+
 } // namespace
 
 ast_validator standard_validator() {
@@ -1369,6 +1388,8 @@ ast_validator standard_validator() {
       &validate_cursor_serialization_adapter_on_function);
   validator.add_container_visitor(
       &validate_cursor_serialization_adapter_in_container);
+  validator.add_function_visitor(&forbid_exception_as_method_type);
+  validator.add_const_visitor(&forbid_exception_as_const_type);
 
   add_explicit_include_validators(validator);
 

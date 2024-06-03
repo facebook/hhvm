@@ -192,6 +192,7 @@ set(FIZZ_SOURCES
   crypto/hpke/Hpke.cpp
   crypto/hpke/Utils.cpp
   backend/openssl/crypto/OpenSSLKeyUtils.cpp
+  backend/openssl/crypto/exchange/OpenSSLKeyExchange.cpp
   record/Types.cpp
   record/RecordLayer.cpp
   record/EncryptedRecordLayer.cpp

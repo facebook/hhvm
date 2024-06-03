@@ -16,7 +16,9 @@ class DefaultHTTPCodecFactory : public HTTPCodecFactory {
  public:
   explicit DefaultHTTPCodecFactory(
       bool forceHTTP1xCodecTo1_1,
-      const HeaderIndexingStrategy* strat = nullptr);
+      const HeaderIndexingStrategy* strat = nullptr,
+      std::list<std::string> allowedH1UpgradeProtocols =
+          std::list<std::string>());
   ~DefaultHTTPCodecFactory() override = default;
 
   /**
@@ -33,6 +35,7 @@ class DefaultHTTPCodecFactory : public HTTPCodecFactory {
  protected:
   bool forceHTTP1xCodecTo1_1_{false};
   const HeaderIndexingStrategy* headerIndexingStrategy_;
+  std::list<std::string> allowedH1UpgradeProtocols_;
 };
 
 } // namespace proxygen

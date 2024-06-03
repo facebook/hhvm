@@ -133,7 +133,7 @@ TEST_P(HTTPSessionAcceptorTestNPN, Npn) {
   EXPECT_EQ(acceptor_->sessionCreationErrors_, 0);
 }
 
-std::array<char const*, 4> protos1{"h2-14", "h2", "http/1.1", ""};
+std::array<char const*, 3> protos1{"h2", "http/1.1", ""};
 INSTANTIATE_TEST_SUITE_P(NPNPositive,
                          HTTPSessionAcceptorTestNPN,
                          ::testing::ValuesIn(protos1));

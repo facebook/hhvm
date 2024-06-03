@@ -13,6 +13,12 @@
 
 namespace proxygen {
 
+/**
+ * This factory is for an HTTP server to create codecs for new connections.
+ *
+ * Though this factory cannot modify the passed in accConfig, the owner can
+ * change parameters at runtime which affects new codecs.
+ */
 class HTTPDefaultSessionCodecFactory : public HTTPCodecFactory {
  public:
   explicit HTTPDefaultSessionCodecFactory(
@@ -29,7 +35,6 @@ class HTTPDefaultSessionCodecFactory : public HTTPCodecFactory {
 
  protected:
   const AcceptorConfiguration& accConfig_;
-  folly::Optional<bool> alwaysUseHTTP2_{};
 };
 
 } // namespace proxygen

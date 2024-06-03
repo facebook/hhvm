@@ -33,8 +33,7 @@ TEST(DefaultHTTPCodecFactoryTest, GetCodec) {
   EXPECT_NE(http1xCodec, nullptr);
 
   codec = factory.getCodec("not/supported", TransportDirection::UPSTREAM, true);
-  http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
-  EXPECT_NE(http1xCodec, nullptr);
+  EXPECT_EQ(codec, nullptr);
 }
 
 class DefaultHTTPCodecFactoryValidationTest

@@ -156,7 +156,7 @@ cdef class MutableSet:
         return internal_item in self._set_data
 
     def __iter__(MutableSet self):
-        return MutableSetIterator(self._val_typeinfo, self._set_data)
+        return ValueIterator(self._val_typeinfo, self._set_data)
 
     def __len__(MutableSet self):
         return len(self._set_data)
@@ -307,12 +307,12 @@ cdef class MutableSet:
 pyMutableSet.register(MutableSet)
 
 
-cdef class MutableSetIterator:
-    def __cinit__(MutableSetIterator self, TypeInfoBase value_typeinfo, data: typing.Union[set, dict]):
+cdef class ValueIterator:
+    def __cinit__(self, TypeInfoBase value_typeinfo, data: Iterable):
         self._val_typeinfo = value_typeinfo
         self._iter = iter(data)
 
-    def __next__(MutableSetIterator self):
+    def __next__(self):
         return self._val_typeinfo.to_python_value(next(self._iter))
 
     def __iter__(self):
@@ -369,7 +369,7 @@ cdef class MutableMap:
         return self._val_typeinfo.to_python_value(self._map_data[internal_key])
 
     def __iter__(MutableMap self):
-        return MutableSetIterator(self._key_typeinfo, self._map_data)
+        return ValueIterator(self._key_typeinfo, self._map_data)
 
     def get(self, key, default=None):
         try:
@@ -380,6 +380,18 @@ cdef class MutableMap:
     def __contains__(self, key):
         internal_key = self._key_typeinfo.to_internal_data(key)
         return internal_key in self._map_data
+
+    def clear(self):
+        self._map_data.clear()
+
+    def keys(self):
+        return MapKeysView(self._key_typeinfo, self._map_data.keys())
+
+    def items(self):
+        return MapItemsView(self._key_typeinfo, self._val_typeinfo, self._map_data.items())
+
+    def values(self):
+        return MapValuesView(self._val_typeinfo, self._map_data.values())
 
     def __setitem__(self, key, value):
         internal_key = self._key_typeinfo.to_internal_data(key)
@@ -399,3 +411,71 @@ cdef class MutableMap:
 
 
 MutableMapping.register(MutableMap)
+
+
+cdef class MapKeysView:
+    def __cinit__(self, TypeInfoBase key_typeinfo, dict_keys):
+        self._key_typeinfo = key_typeinfo
+        self._dict_keys = dict_keys
+
+    def __len__(self):
+        return len(self._dict_keys)
+
+    def __contains__(self, key):
+        if key is None:
+            return False
+
+        internal_key = self._key_typeinfo.to_internal_data(key)
+        return internal_key in self._dict_keys
+
+    def __iter__(self):
+        return ValueIterator(self._key_typeinfo, self._dict_keys)
+
+
+cdef class MapItemsView:
+    def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
+        self._key_typeinfo = key_typeinfo
+        self._val_typeinfo = value_typeinfo
+        self._dict_items = dict_items
+
+    def __len__(self):
+        return len(self._dict_items)
+
+    def __contains__(self, item):
+        if item is None:
+            return False
+
+        internal_item = (self._key_typeinfo.to_internal_data(item[0]),
+                         self._val_typeinfo.to_internal_data(item[1]))
+        return internal_item in self._dict_items
+
+    def __iter__(self):
+        return MapItemIterator(self._key_typeinfo, self._val_typeinfo, self._dict_items)
+
+
+cdef class MapItemIterator:
+    def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
+        self._key_typeinfo = key_typeinfo
+        self._val_typeinfo = value_typeinfo
+        self._iter = iter(dict_items)
+
+    def __next__(self):
+        it = next(self._iter)
+        return (self._key_typeinfo.to_python_value(it[0]),
+                self._val_typeinfo.to_python_value(it[1]))
+
+    def __iter__(self):
+        return self
+
+
+cdef class MapValuesView:
+    def __cinit__(self, TypeInfoBase value_typeinfo, dict_values):
+        self._val_typeinfo = value_typeinfo
+        self._dict_values = dict_values
+
+    def __len__(self):
+        return len(self._dict_values)
+
+    def __iter__(self):
+        return ValueIterator(self._val_typeinfo, self._dict_values)
+

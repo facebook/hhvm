@@ -22,7 +22,7 @@ cdef class MutableSet:
     cdef TypeInfoBase _val_typeinfo
     cdef set _set_data
 
-cdef class MutableSetIterator:
+cdef class ValueIterator:
     cdef TypeInfoBase _val_typeinfo
     cdef object _iter
 
@@ -30,3 +30,21 @@ cdef class MutableMap:
     cdef TypeInfoBase _key_typeinfo
     cdef TypeInfoBase _val_typeinfo
     cdef dict _map_data
+
+cdef class MapKeysView:
+    cdef TypeInfoBase _key_typeinfo
+    cdef object _dict_keys
+
+cdef class MapItemsView:
+    cdef TypeInfoBase _key_typeinfo
+    cdef TypeInfoBase _val_typeinfo
+    cdef object _dict_items
+
+cdef class MapItemIterator:
+    cdef TypeInfoBase _key_typeinfo
+    cdef TypeInfoBase _val_typeinfo
+    cdef object _iter
+
+cdef class MapValuesView:
+    cdef TypeInfoBase _val_typeinfo
+    cdef object _dict_values

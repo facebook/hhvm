@@ -19,6 +19,30 @@ A custom (human-readable) exception message may be specified in a field, by
 annotating it with
 [`@thrift.ExceptionMessage`](/idl/annotations.md#thrift-annotations).
 
+**Example**
+```thrift
+exception MyException {
+  @thrift.ExceptionMessage
+  string message;
+}
+```
+
+The exception message is made available to the exception-handling code via standard,
+language-dependent APIs of the generated code, such as:
+- [`std::exception::what()`](https://en.cppreference.com/w/cpp/error/exception/what)
+      in C++.
+- [`Throwable.getMessage()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html#getMessage--)
+        in Java.
+- etc.
+
+If an exception definition does not specify this anotation for any field, the exception message returned by the aforementioned APIs is unspecified.
+
+**Restrictions**
+
+The `@thrift.ExceptionMessage` annotation can be specified on at most one field of an
+[exception definition](/idl/index.md#exceptions), whose type must be `string`. The thrift compiler will generate an error if this annotion is specied on a field in any other structured definition, like a [struct definition](/idl/index.md#structs) or an [union definition](/idl/index.md#unions)
+
+
 ## Error Classification
 ### Kind
 Thrift Error can be classified into three categories: **Transient**, **Stateful**, and **Permanent**.

@@ -23,7 +23,7 @@ import (
 )
 
 type BufferedTransport struct {
-	bufio.ReadWriter
+	buf    bufio.ReadWriter
 	socket Socket
 }
 
@@ -31,7 +31,7 @@ var _ Socket = (*BufferedTransport)(nil)
 
 func NewBufferedTransport(socket Socket, bufferSize int) *BufferedTransport {
 	return &BufferedTransport{
-		ReadWriter: bufio.ReadWriter{
+		buf: bufio.ReadWriter{
 			Reader: bufio.NewReaderSize(socket, bufferSize),
 			Writer: bufio.NewWriterSize(socket, bufferSize),
 		},
@@ -44,28 +44,31 @@ func (p *BufferedTransport) Open() error {
 }
 
 func (p *BufferedTransport) Close() (err error) {
+	if err = p.buf.Flush(); err != nil {
+		return err
+	}
 	return p.socket.Close()
 }
 
 func (p *BufferedTransport) Read(b []byte) (int, error) {
-	n, err := p.ReadWriter.Read(b)
+	n, err := p.buf.Read(b)
 	if err != nil {
-		p.ReadWriter.Reader.Reset(p.socket)
+		p.buf.Reader.Reset(p.socket)
 	}
 	return n, err
 }
 
 func (p *BufferedTransport) Write(b []byte) (int, error) {
-	n, err := p.ReadWriter.Write(b)
+	n, err := p.buf.Write(b)
 	if err != nil {
-		p.ReadWriter.Writer.Reset(p.socket)
+		p.buf.Writer.Reset(p.socket)
 	}
 	return n, err
 }
 
 func (p *BufferedTransport) Flush() error {
-	if err := p.ReadWriter.Flush(); err != nil {
-		p.ReadWriter.Writer.Reset(p.socket)
+	if err := p.buf.Flush(); err != nil {
+		p.buf.Writer.Reset(p.socket)
 		return err
 	}
 	return p.socket.Flush()

@@ -16,7 +16,9 @@
 
 package thrift
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestHeaderProtocolHeaders(t *testing.T) {
 	mockSocket := newMockSocket()
@@ -59,5 +61,47 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 
 	if proto2.(*headerProtocol).peerIdentity() != "batman" {
 		t.Fatalf("failed to peer identity")
+	}
+}
+
+func TestHeaderProtocolUnBuffered(t *testing.T) {
+	socket := newMockSocket()
+	proto1 := NewHeaderProtocol(socket)
+	proto2 := NewHeaderProtocol(socket)
+
+	want := "test123"
+	proto1.WriteMessageBegin(want, CALL, 1)
+	proto1.WriteMessageEnd()
+	proto1.Flush()
+
+	got, _, _, err := proto2.ReadMessageBegin()
+	if err != nil {
+		t.Fatalf("failed to read message from proto1 in proto2")
+	}
+	if got != want {
+		t.Fatalf("failed to read message, got: %s", got)
+	}
+}
+
+func TestHeaderProtocolBuffered(t *testing.T) {
+	socket := newMockSocket()
+	proto1 := NewHeaderProtocol(NewBufferedTransport(socket, 8192))
+	proto2 := NewHeaderProtocol(socket)
+
+	want := "test123"
+	proto1.WriteMessageBegin(want, CALL, 1)
+	proto1.WriteMessageEnd()
+
+	if _, _, _, err := proto2.ReadMessageBegin(); err == nil {
+		t.Fatalf("buffered transport was not flushed yet, so should get error")
+	}
+	proto1.Flush()
+
+	got, _, _, err := proto2.ReadMessageBegin()
+	if err != nil {
+		t.Fatalf("failed to read message from proto1 in proto2")
+	}
+	if got != want {
+		t.Fatalf("failed to read message, got: %s", got)
 	}
 }

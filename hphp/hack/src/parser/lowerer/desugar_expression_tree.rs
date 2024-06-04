@@ -90,22 +90,21 @@ pub fn desugar(
     e: Expr,
     env: &Env<'_>,
 ) -> DesugarResult {
-    let mut errors = vec![];
-
     let et_literal_pos = e.1.clone();
 
-    let mut temps = Temporaries {
+    let mut state = RewriteState {
         splices: vec![],
         global_function_pointers: vec![],
         static_method_pointers: vec![],
+        errors: vec![],
     };
-    let rewritten_expr = rewrite_expr(&mut temps, e, visitor_name, &mut errors);
+    let rewritten_expr = state.rewrite_expr(e, visitor_name);
 
-    let dollardollar_pos = rewrite_dollardollars(&mut temps.splices);
+    let dollardollar_pos = rewrite_dollardollars(&mut state.splices);
 
-    let splice_count = temps.splices.len();
-    let function_count = temps.global_function_pointers.len();
-    let static_method_count = temps.static_method_pointers.len();
+    let splice_count = state.splices.len();
+    let function_count = state.global_function_pointers.len();
+    let static_method_count = state.static_method_pointers.len();
 
     // Wrap this in an Efun with appropriate variables for typing.
     // This enables us to report unbound variables correctly.
@@ -172,9 +171,9 @@ pub fn desugar(
 
     let metadata = maketree_metadata(
         visitor_pos,
-        &temps.splices,
-        &temps.global_function_pointers,
-        &temps.static_method_pointers,
+        &state.splices,
+        &state.global_function_pointers,
+        &state.static_method_pointers,
         env.is_typechecker(),
         virtualized_expr,
     );
@@ -214,13 +213,13 @@ pub fn desugar(
 
     // Create assignment of the extracted expressions to temporary variables
     // `$0splice0 = spliced_expr0;`
-    let splice_assignments: Vec<Stmt> = create_temp_statements(temps.splices, temp_splice_lvar);
+    let splice_assignments: Vec<Stmt> = create_temp_statements(state.splices, temp_splice_lvar);
     // `$0fp0 = foo<>;`
     let function_pointer_assignments: Vec<Stmt> =
-        create_temp_statements(temps.global_function_pointers, temp_function_pointer_lvar);
+        create_temp_statements(state.global_function_pointers, temp_function_pointer_lvar);
     // `$0sm0 = Foo::bar<>;`
     let static_method_assignments: Vec<Stmt> =
-        create_temp_statements(temps.static_method_pointers, temp_static_method_lvar);
+        create_temp_statements(state.static_method_pointers, temp_static_method_lvar);
 
     let mut function_pointers = vec![];
     function_pointers.extend(function_pointer_assignments);
@@ -261,7 +260,10 @@ pub fn desugar(
             runtime_expr,
         }),
     );
-    DesugarResult { expr, errors }
+    DesugarResult {
+        expr,
+        errors: state.errors,
+    }
 }
 
 /// Convert `foo` to `return foo;`.
@@ -646,231 +648,792 @@ fn boolify(receiver: Expr) -> Expr {
     meth_call(receiver, "__bool", vec![], &pos)
 }
 
-struct Temporaries {
+struct RewriteState {
     splices: Vec<Expr>,
     global_function_pointers: Vec<Expr>,
     static_method_pointers: Vec<Expr>,
+    errors: Vec<(Pos, String)>,
 }
 
-/// Performs both the virtualization and the desugaring in tandem
-/// Also extracts the expressions that need to be assigned to temporaries
-/// Replaces the extracted splices, function pointers, and static method pointers
-/// with temporary variables
-fn rewrite_expr(
-    temps: &mut Temporaries,
-    e: Expr,
-    visitor_name: &str,
-    errors: &mut Vec<(Pos, String)>,
-) -> RewriteResult {
-    use aast::Expr_::*;
+impl RewriteState {
+    /// Performs both the virtualization and the desugaring in tandem
+    /// Also extracts the expressions that need to be assigned to temporaries
+    /// Replaces the extracted splices, function pointers, and static method pointers
+    /// with temporary variables
+    fn rewrite_expr(&mut self, e: Expr, visitor_name: &str) -> RewriteResult {
+        use aast::Expr_::*;
 
-    // If we can't rewrite the expression (e.g. due to unsupported syntax), return the
-    // original syntax unmodified. This is particularly useful during code completion,
-    // where an unfinished code fragment might accidentally use unsupported syntax.
-    let unchanged_result = RewriteResult {
-        virtual_expr: e.clone(),
-        desugar_expr: e.clone(),
-    };
+        // If we can't rewrite the expression (e.g. due to unsupported syntax), return the
+        // original syntax unmodified. This is particularly useful during code completion,
+        // where an unfinished code fragment might accidentally use unsupported syntax.
+        let unchanged_result = RewriteResult {
+            virtual_expr: e.clone(),
+            desugar_expr: e.clone(),
+        };
 
-    let Expr(_, pos, expr_) = e;
-    let pos_expr = exprpos(&pos);
-    match expr_ {
-        // Source: MyDsl`1`
-        // Virtualized: MyDsl::intType()
-        // Desugared: $0v->visitInt(new ExprPos(...), 1)
-        Int(_) => {
-            let virtual_expr = static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos);
-            let desugar_expr = v_meth_call(
-                et::VISIT_INT,
-                vec![pos_expr, Expr((), pos.clone(), expr_)],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`1.0`
-        // Virtualized: MyDsl::floatType()
-        // Desugared: $0v->visitFloat(new ExprPos(...), 1.0)
-        Float(_) => {
-            let virtual_expr = static_meth_call(visitor_name, et::FLOAT_TYPE, vec![], &pos);
-            let desugar_expr = v_meth_call(
-                et::VISIT_FLOAT,
-                vec![pos_expr, Expr((), pos.clone(), expr_)],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`'foo'`
-        // Virtualized: MyDsl::stringType()
-        // Desugared: $0v->visitString(new ExprPos(...), 'foo')
-        String(_) => {
-            let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
-            let desugar_expr = v_meth_call(
-                et::VISIT_STRING,
-                vec![pos_expr, Expr((), pos.clone(), expr_)],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`true`
-        // Virtualized: MyDsl::boolType()
-        // Desugared: $0v->visitBool(new ExprPos(...), true)
-        True | False => {
-            let virtual_expr = static_meth_call(visitor_name, et::BOOL_TYPE, vec![], &pos);
-            let desugar_expr = v_meth_call(
-                et::VISIT_BOOL,
-                vec![pos_expr, Expr((), pos.clone(), expr_)],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`null`
-        // Virtualized: MyDsl::nullType()
-        // Desugared: $0v->visitNull(new ExprPos(...))
-        Null => {
-            let virtual_expr = static_meth_call(visitor_name, et::NULL_TYPE, vec![], &pos);
-            let desugar_expr = v_meth_call(et::VISIT_NULL, vec![pos_expr], &pos);
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`$x`
-        // Virtualized: $x
-        // Desugared: $0v->visitLocal(new ExprPos(...), '$x')
-        Lvar(lid) => {
-            let desugar_expr = v_meth_call(
-                et::VISIT_LOCAL,
-                vec![pos_expr, string_literal(lid.0.clone(), &((lid.1).1))],
-                &pos,
-            );
-            let virtual_expr = Expr((), pos, Lvar(lid));
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        Binop(binop) => {
-            let aast::Binop { bop, lhs, rhs } = *binop;
-            let rewritten_lhs = rewrite_expr(temps, lhs, visitor_name, errors);
-            let rewritten_rhs = rewrite_expr(temps, rhs, visitor_name, errors);
-
-            if bop == Bop::Eq(None) {
-                // Source: MyDsl`$x = ...`
-                // Virtualized: $x = ...
-                // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
+        let Expr(_, pos, expr_) = e;
+        let pos_expr = exprpos(&pos);
+        match expr_ {
+            // Source: MyDsl`1`
+            // Virtualized: MyDsl::intType()
+            // Desugared: $0v->visitInt(new ExprPos(...), 1)
+            Int(_) => {
+                let virtual_expr = static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos);
                 let desugar_expr = v_meth_call(
-                    et::VISIT_ASSIGN,
+                    et::VISIT_INT,
+                    vec![pos_expr, Expr((), pos.clone(), expr_)],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`1.0`
+            // Virtualized: MyDsl::floatType()
+            // Desugared: $0v->visitFloat(new ExprPos(...), 1.0)
+            Float(_) => {
+                let virtual_expr = static_meth_call(visitor_name, et::FLOAT_TYPE, vec![], &pos);
+                let desugar_expr = v_meth_call(
+                    et::VISIT_FLOAT,
+                    vec![pos_expr, Expr((), pos.clone(), expr_)],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`'foo'`
+            // Virtualized: MyDsl::stringType()
+            // Desugared: $0v->visitString(new ExprPos(...), 'foo')
+            String(_) => {
+                let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
+                let desugar_expr = v_meth_call(
+                    et::VISIT_STRING,
+                    vec![pos_expr, Expr((), pos.clone(), expr_)],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`true`
+            // Virtualized: MyDsl::boolType()
+            // Desugared: $0v->visitBool(new ExprPos(...), true)
+            True | False => {
+                let virtual_expr = static_meth_call(visitor_name, et::BOOL_TYPE, vec![], &pos);
+                let desugar_expr = v_meth_call(
+                    et::VISIT_BOOL,
+                    vec![pos_expr, Expr((), pos.clone(), expr_)],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`null`
+            // Virtualized: MyDsl::nullType()
+            // Desugared: $0v->visitNull(new ExprPos(...))
+            Null => {
+                let virtual_expr = static_meth_call(visitor_name, et::NULL_TYPE, vec![], &pos);
+                let desugar_expr = v_meth_call(et::VISIT_NULL, vec![pos_expr], &pos);
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`$x`
+            // Virtualized: $x
+            // Desugared: $0v->visitLocal(new ExprPos(...), '$x')
+            Lvar(lid) => {
+                let desugar_expr = v_meth_call(
+                    et::VISIT_LOCAL,
+                    vec![pos_expr, string_literal(lid.0.clone(), &((lid.1).1))],
+                    &pos,
+                );
+                let virtual_expr = Expr((), pos, Lvar(lid));
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            Binop(binop) => {
+                let aast::Binop { bop, lhs, rhs } = *binop;
+                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
+                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
+
+                if bop == Bop::Eq(None) {
+                    // Source: MyDsl`$x = ...`
+                    // Virtualized: $x = ...
+                    // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_ASSIGN,
+                        vec![
+                            pos_expr,
+                            rewritten_lhs.desugar_expr,
+                            rewritten_rhs.desugar_expr,
+                        ],
+                        &pos,
+                    );
+                    let virtual_expr = Expr(
+                        (),
+                        pos.clone(),
+                        Binop(Box::new(aast::Binop {
+                            bop,
+                            lhs: rewritten_lhs.virtual_expr,
+                            rhs: rewritten_rhs.virtual_expr,
+                        })),
+                    );
+                    RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    }
+                } else {
+                    // Source: MyDsl`... + ...`
+                    // Virtualized: ...->__plus(...)
+                    // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
+                    let binop_str = match bop {
+                        Bop::Plus => "__plus",
+                        Bop::Minus => "__minus",
+                        Bop::Star => "__star",
+                        Bop::Slash => "__slash",
+                        Bop::Percent => "__percent",
+                        // Convert boolean &&, ||
+                        Bop::Ampamp => "__ampamp",
+                        Bop::Barbar => "__barbar",
+                        // Convert comparison operators, <, <=, >, >=, ===, !==
+                        Bop::Lt => "__lessThan",
+                        Bop::Lte => "__lessThanEqual",
+                        Bop::Gt => "__greaterThan",
+                        Bop::Gte => "__greaterThanEqual",
+                        Bop::Eqeqeq => "__tripleEquals",
+                        Bop::Diff2 => "__notTripleEquals",
+                        // Convert string concatenation
+                        Bop::Dot => "__dot",
+                        // Convert bitwise operators, &, |, ^, <<, >>
+                        Bop::Amp => "__amp",
+                        Bop::Bar => "__bar",
+                        Bop::Xor => "__caret",
+                        Bop::Ltlt => "__lessThanLessThan",
+                        Bop::Gtgt => "__greaterThanGreaterThan",
+                        // Explicit list of unsupported operators and error messages
+                        Bop::Starstar => {
+                            self.errors.push((
+                                pos.clone(),
+                                "Expression trees do not support the exponent operator `**`."
+                                    .into(),
+                            ));
+                            "__unsupported"
+                        }
+                        Bop::Eqeq | Bop::Diff => {
+                            self.errors.push((
+                            pos.clone(),
+                            "Expression trees only support strict equality operators `===` and `!==`".into(),
+                        ));
+                            "__unsupported"
+                        }
+                        Bop::Cmp => {
+                            self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support the spaceship operator `<=>`. Try comparison operators like `<` and `>=`".into(),
+                        ));
+                            "__unsupported"
+                        }
+                        Bop::QuestionQuestion => {
+                            self.errors.push((
+                                pos.clone(),
+                                "Expression trees do not support the null coalesce operator `??`."
+                                    .into(),
+                            ));
+                            "__unsupported"
+                        }
+                        Bop::Eq(_) => {
+                            self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),
+                        ));
+                            "__unsupported"
+                        }
+                    };
+                    let virtual_expr = meth_call(
+                        rewritten_lhs.virtual_expr,
+                        binop_str,
+                        vec![rewritten_rhs.virtual_expr],
+                        &pos,
+                    );
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_BINOP,
+                        vec![
+                            pos_expr,
+                            rewritten_lhs.desugar_expr,
+                            string_literal(pos.clone(), binop_str),
+                            rewritten_rhs.desugar_expr,
+                        ],
+                        &pos,
+                    );
+                    RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    }
+                }
+            }
+            // Source: MyDsl`!...`
+            // Virtualized: ...->__exclamationMark(...)
+            // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
+            Unop(unop) => {
+                let (op, operand) = *unop;
+                let rewritten_operand = self.rewrite_expr(operand, visitor_name);
+
+                let op_str = match op {
+                    // Allow boolean not operator !$x
+                    Uop::Unot => "__exclamationMark",
+                    // Allow negation -$x (required for supporting negative literals -123)
+                    Uop::Uminus => "__negate",
+                    // Allow bitwise complement
+                    Uop::Utild => "__tilde",
+                    // Currently not allowed operators
+                    Uop::Uplus => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support the unary plus operator.".into(),
+                        ));
+                        "__unsupported"
+                    }
+                    // Postfix ++
+                    Uop::Upincr => "__postfixPlusPlus",
+                    // Prefix ++
+                    Uop::Uincr => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees only support postfix increment operator `$x++`."
+                                .into(),
+                        ));
+                        "__unsupported"
+                    }
+                    // Postfix --
+                    Uop::Updecr => "__postfixMinusMinus",
+                    // Prefix --
+                    Uop::Udecr => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees only support postfix decrement operator `$x--`."
+                                .into(),
+                        ));
+                        "__unsupported"
+                    }
+                    Uop::Usilence => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support the error suppression operator `@`."
+                                .into(),
+                        ));
+                        "__unsupported"
+                    }
+                };
+                let virtual_expr = meth_call(rewritten_operand.virtual_expr, op_str, vec![], &pos);
+                let desugar_expr = v_meth_call(
+                    et::VISIT_UNOP,
                     vec![
                         pos_expr,
-                        rewritten_lhs.desugar_expr,
-                        rewritten_rhs.desugar_expr,
+                        rewritten_operand.desugar_expr,
+                        string_literal(pos.clone(), op_str),
+                    ],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`... ? ... : ...`
+            // Virtualized: ...->__bool() ? ... : ...
+            // Desugared: $0v->visitTernary(new ExprPos(...), ..., ..., ...)
+            Eif(eif) => {
+                let (e1, e2o, e3) = *eif;
+
+                let rewritten_e1 = self.rewrite_expr(e1, visitor_name);
+                let rewritten_e2 = if let Some(e2) = e2o {
+                    self.rewrite_expr(e2, visitor_name)
+                } else {
+                    self.errors.push((
+                        pos.clone(),
+                        "Unsupported expression tree syntax: Elvis operator".into(),
+                    ));
+                    unchanged_result
+                };
+                let rewritten_e3 = self.rewrite_expr(e3, visitor_name);
+
+                let desugar_expr = v_meth_call(
+                    et::VISIT_TERNARY,
+                    vec![
+                        pos_expr,
+                        rewritten_e1.desugar_expr,
+                        rewritten_e2.desugar_expr,
+                        rewritten_e3.desugar_expr,
                     ],
                     &pos,
                 );
                 let virtual_expr = Expr(
                     (),
-                    pos.clone(),
-                    Binop(Box::new(aast::Binop {
-                        bop,
-                        lhs: rewritten_lhs.virtual_expr,
-                        rhs: rewritten_rhs.virtual_expr,
+                    pos,
+                    Eif(Box::new((
+                        boolify(rewritten_e1.virtual_expr),
+                        Some(rewritten_e2.virtual_expr),
+                        rewritten_e3.virtual_expr,
+                    ))),
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`...()`
+            // Virtualized: (...->__unwrap())()
+            // Desugared: $0v->visitCall(new ExprPos(...), ..., vec[])
+            Call(call) => {
+                let ast::CallExpr {
+                    func: recv,
+                    targs,
+                    args,
+                    unpacked_arg: variadic,
+                } = *call;
+
+                if variadic.is_some() {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression trees do not support variadic calls.".into(),
+                    ));
+                }
+                if !targs.is_empty() {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression trees do not support function calls with generics.".into(),
+                    ));
+                }
+                match &recv.2 {
+                    // Don't transform calls to `hh_show`.
+                    Id(sid) if is_typechecker_fun_name(&sid.1) => {
+                        let call_e = Expr::new(
+                            (),
+                            pos,
+                            Call(Box::new(ast::CallExpr {
+                                func: recv,
+                                targs,
+                                args,
+                                unpacked_arg: variadic,
+                            })),
+                        );
+                        return RewriteResult {
+                            desugar_expr: call_e.clone(),
+                            virtual_expr: call_e,
+                        };
+                    }
+                    _ => {}
+                }
+
+                let mut args_without_inout = vec![];
+                for arg in args {
+                    match arg {
+                        (ParamKind::Pnormal, e) => args_without_inout.push(e),
+                        (ParamKind::Pinout(_), Expr(_, p, _)) => self.errors.push((
+                            p,
+                            "Expression trees do not support `inout` function calls.".into(),
+                        )),
+                    }
+                }
+
+                let (virtual_args, desugar_args) =
+                    self.rewrite_exprs(args_without_inout, visitor_name);
+
+                match recv.2 {
+                    // Source: MyDsl`foo()`
+                    // Virtualized: (MyDsl::symbolType($0fpXX)->__unwrap())()
+                    // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
+                    Id(sid) => {
+                        let len = self.global_function_pointers.len();
+                        self.global_function_pointers.push(global_func_ptr(&sid));
+                        let temp_variable = temp_function_pointer_lvar(&recv.1, len);
+
+                        let desugar_expr = v_meth_call(
+                            et::VISIT_CALL,
+                            vec![
+                                pos_expr.clone(),
+                                v_meth_call(
+                                    et::VISIT_GLOBAL_FUNCTION,
+                                    vec![pos_expr, temp_variable.clone()],
+                                    &pos,
+                                ),
+                                vec_literal(desugar_args),
+                            ],
+                            &pos,
+                        );
+                        let virtual_expr = Expr(
+                            (),
+                            pos.clone(),
+                            Call(Box::new(ast::CallExpr {
+                                func: _virtualize_call(
+                                    static_meth_call(
+                                        visitor_name,
+                                        et::SYMBOL_TYPE,
+                                        vec![temp_variable],
+                                        &pos,
+                                    ),
+                                    &pos,
+                                ),
+                                targs: vec![],
+                                args: build_args(virtual_args),
+                                unpacked_arg: None,
+                            })),
+                        );
+                        RewriteResult {
+                            virtual_expr,
+                            desugar_expr,
+                        }
+                    }
+                    // Source: MyDsl`Foo::bar()`
+                    // Virtualized: (MyDsl::symbolType($0smXX)->__unwrap())()
+                    // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
+                    ClassConst(cc) => {
+                        let (cid, s) = *cc;
+                        if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
+                            if sid.1 == classes::PARENT
+                                || sid.1 == classes::SELF
+                                || sid.1 == classes::STATIC
+                            {
+                                self.errors.push((
+                                pos,
+                                "Static method calls in expression trees require explicit class names.".into(),
+                            ));
+                                return unchanged_result;
+                            }
+                        } else {
+                            self.errors.push((
+                            pos,
+                            "Expression trees only support function calls and static method calls on named classes.".into(),
+                        ));
+                            return unchanged_result;
+                        };
+
+                        let len = self.static_method_pointers.len();
+                        self.static_method_pointers
+                            .push(static_meth_ptr(&recv.1, &cid, &s));
+                        let temp_variable = temp_static_method_lvar(&recv.1, len);
+
+                        let desugar_expr = v_meth_call(
+                            et::VISIT_CALL,
+                            vec![
+                                pos_expr.clone(),
+                                v_meth_call(
+                                    et::VISIT_STATIC_METHOD,
+                                    vec![pos_expr, temp_variable.clone()],
+                                    &pos,
+                                ),
+                                vec_literal(desugar_args),
+                            ],
+                            &pos,
+                        );
+                        let virtual_expr = Expr(
+                            (),
+                            pos.clone(),
+                            Call(Box::new(ast::CallExpr {
+                                func: _virtualize_call(
+                                    static_meth_call(
+                                        visitor_name,
+                                        et::SYMBOL_TYPE,
+                                        vec![temp_variable],
+                                        &pos,
+                                    ),
+                                    &pos,
+                                ),
+                                targs: vec![],
+                                args: build_args(virtual_args),
+                                unpacked_arg: None,
+                            })),
+                        );
+                        RewriteResult {
+                            virtual_expr,
+                            desugar_expr,
+                        }
+                    }
+                    // Source: MyDsl`$x->bar()`
+                    // Virtualized: $x->bar()
+                    // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
+                    ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
+                        self.errors.push((
+                            pos,
+                            "Expression trees do not support calling instance methods".into(),
+                        ));
+                        unchanged_result
+                    }
+                    _ => {
+                        let rewritten_recv =
+                            self.rewrite_expr(Expr((), recv.1, recv.2), visitor_name);
+
+                        let desugar_expr = v_meth_call(
+                            et::VISIT_CALL,
+                            vec![
+                                pos_expr,
+                                rewritten_recv.desugar_expr,
+                                vec_literal(desugar_args),
+                            ],
+                            &pos,
+                        );
+                        let virtual_expr = Expr(
+                            (),
+                            pos.clone(),
+                            Call(Box::new(ast::CallExpr {
+                                func: _virtualize_call(rewritten_recv.virtual_expr, &pos),
+                                targs: vec![],
+                                args: build_args(virtual_args),
+                                unpacked_arg: None,
+                            })),
+                        );
+                        RewriteResult {
+                            virtual_expr,
+                            desugar_expr,
+                        }
+                    }
+                }
+            }
+            // Source: MyDsl`($x) ==> { ... }`
+            // Virtualized: ($x) ==> { ...; return MyDsl::voidType(); }
+            //   if no `return expr;` statements.
+            // Desugared: $0v->visitLambda(new ExprPos(...), vec['$x'], vec[...]).
+            Lfun(lf) => {
+                let mut fun_ = lf.0;
+
+                match &fun_ {
+                    aast::Fun_ {
+                        // Allow a plain function that isn't async.
+                        fun_kind: ast::FunKind::FSync,
+                        body: _,
+                        span: _,
+                        doc_comment: _,
+                        ret: _,
+                        annotation: (),
+                        params: _,
+                        user_attributes: _,
+                        // The function should not use any of these newer features.
+                        readonly_this: None,
+                        readonly_ret: None,
+                        ctxs: None,
+                        unsafe_ctxs: None,
+                        external: false,
+                    } => {}
+                    _ => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees only support simple lambdas, without features like `async`, generators or capabilities."
+                                .into(),
+                        ));
+                    }
+                }
+
+                let mut param_names = Vec::with_capacity(fun_.params.len());
+                for param in &fun_.params {
+                    if param.expr.is_some() {
+                        self.errors.push((
+                            param.pos.clone(),
+                            "Expression trees do not support parameters with default values."
+                                .into(),
+                        ));
+                    }
+                    param_names.push(string_literal(param.pos.clone(), &param.name));
+                }
+
+                let body = std::mem::take(&mut fun_.body.fb_ast.0);
+
+                let should_append_return = only_void_return(&body);
+
+                let (mut virtual_body_stmts, desugar_body) = self.rewrite_stmts(body, visitor_name);
+                if should_append_return {
+                    virtual_body_stmts.push(Stmt(
+                        pos.clone(),
+                        aast::Stmt_::Return(Box::new(Some(static_meth_call(
+                            visitor_name,
+                            et::VOID_TYPE,
+                            vec![],
+                            &pos,
+                        )))),
+                    ));
+                }
+
+                let desugar_expr = v_meth_call(
+                    et::VISIT_LAMBDA,
+                    vec![
+                        pos_expr,
+                        vec_literal(param_names),
+                        vec_literal(desugar_body),
+                    ],
+                    &pos,
+                );
+                fun_.body.fb_ast = ast::Block(virtual_body_stmts);
+
+                let virtual_expr = _virtualize_lambda(
+                    visitor_name,
+                    Expr((), pos.clone(), Lfun(Box::new((fun_, vec![])))),
+                    &pos,
+                );
+
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`${ ... }`
+            // Virtualized to `${ ... }`
+            // Desugared to `$0v->splice(new ExprPos(...), '$var_name', ...)`
+            ETSplice(box aast::EtSplice {
+                spliced_expr,
+                extract_client_type,
+            }) => {
+                let len = self.splices.len();
+                let expr_pos = spliced_expr.1.clone();
+                self.splices.push(Expr(
+                    (),
+                    expr_pos.clone(),
+                    ETSplice(Box::new(aast::EtSplice {
+                        spliced_expr,
+                        extract_client_type: false,
+                    })),
+                ));
+                let temp_variable = temp_splice_lvar(&expr_pos, len);
+                let temp_variable_string = string_literal(expr_pos, &temp_splice_lvar_string(len));
+                let desugar_expr = v_meth_call(
+                    et::SPLICE,
+                    vec![pos_expr, temp_variable_string, temp_variable.clone()],
+                    &pos,
+                );
+                let virtual_expr = Expr(
+                    (),
+                    pos,
+                    ETSplice(Box::new(aast::EtSplice {
+                        spliced_expr: temp_variable,
+                        extract_client_type,
                     })),
                 );
                 RewriteResult {
                     virtual_expr,
                     desugar_expr,
                 }
-            } else {
-                // Source: MyDsl`... + ...`
-                // Virtualized: ...->__plus(...)
-                // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
-                let binop_str = match bop {
-                    Bop::Plus => "__plus",
-                    Bop::Minus => "__minus",
-                    Bop::Star => "__star",
-                    Bop::Slash => "__slash",
-                    Bop::Percent => "__percent",
-                    // Convert boolean &&, ||
-                    Bop::Ampamp => "__ampamp",
-                    Bop::Barbar => "__barbar",
-                    // Convert comparison operators, <, <=, >, >=, ===, !==
-                    Bop::Lt => "__lessThan",
-                    Bop::Lte => "__lessThanEqual",
-                    Bop::Gt => "__greaterThan",
-                    Bop::Gte => "__greaterThanEqual",
-                    Bop::Eqeqeq => "__tripleEquals",
-                    Bop::Diff2 => "__notTripleEquals",
-                    // Convert string concatenation
-                    Bop::Dot => "__dot",
-                    // Convert bitwise operators, &, |, ^, <<, >>
-                    Bop::Amp => "__amp",
-                    Bop::Bar => "__bar",
-                    Bop::Xor => "__caret",
-                    Bop::Ltlt => "__lessThanLessThan",
-                    Bop::Gtgt => "__greaterThanGreaterThan",
-                    // Explicit list of unsupported operators and error messages
-                    Bop::Starstar => {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees do not support the exponent operator `**`.".into(),
-                        ));
-                        "__unsupported"
-                    }
-                    Bop::Eqeq | Bop::Diff => {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees only support strict equality operators `===` and `!==`".into(),
-                        ));
-                        "__unsupported"
-                    }
-                    Bop::Cmp => {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees do not support the spaceship operator `<=>`. Try comparison operators like `<` and `>=`".into(),
-                        ));
-                        "__unsupported"
-                    }
-                    Bop::QuestionQuestion => {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees do not support the null coalesce operator `??`."
-                                .into(),
-                        ));
-                        "__unsupported"
-                    }
-                    Bop::Eq(_) => {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),
-                        ));
-                        "__unsupported"
-                    }
+            }
+            // Source: MyDsl`(...)->foo`
+            // Virtualized to: `(...)->foo`
+            // Desugared to `$0v->visitPropertyAccess(new ExprPos(...), ...), 'foo')`
+            ObjGet(og) => {
+                let (e1, e2, null_flavor, is_prop_call) = *og;
+
+                if null_flavor == OgNullFlavor::OGNullsafe {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression Trees do not support nullsafe property access".into(),
+                    ));
+                }
+                let rewritten_e1 = self.rewrite_expr(e1, visitor_name);
+
+                let id = if let Id(id) = &e2.2 {
+                    string_literal(id.0.clone(), &id.1)
+                } else {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression trees only support named property access.".into(),
+                    ));
+                    e2.clone()
                 };
-                let virtual_expr = meth_call(
-                    rewritten_lhs.virtual_expr,
-                    binop_str,
-                    vec![rewritten_rhs.virtual_expr],
+                let desugar_expr = v_meth_call(
+                    et::VISIT_PROPERTY_ACCESS,
+                    vec![pos_expr, rewritten_e1.desugar_expr, id],
                     &pos,
                 );
+
+                let virtual_expr = Expr(
+                    (),
+                    pos,
+                    ObjGet(Box::new((
+                        rewritten_e1.virtual_expr,
+                        e2,
+                        null_flavor,
+                        is_prop_call,
+                    ))),
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            // Source: MyDsl`<foo my-attr="stuff">text <foo-child/> </foo>`
+            // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
+            // Desugared:
+            //   $0v->visitXhp(
+            //     new ExprPos(...),
+            //     nameof :foo,
+            //     dict["my-attr" => $0v->visitString(...)],
+            //     vec[
+            //       $0v->visitString(..., "text ")],
+            //       $0v->visitXhp(..., nameof :foo-child, ...),
+            //     ],
+            //   )
+            Xml(xml) => {
+                let (hint, attrs, children) = *xml;
+
+                let mut virtual_attrs = vec![];
+                let mut desugar_attrs = vec![];
+                for attr in attrs {
+                    match attr {
+                        aast::XhpAttribute::XhpSimple(xs) => {
+                            let (attr_name_pos, attr_name) = xs.name.clone();
+                            let dict_key = Expr::new(
+                                (),
+                                attr_name_pos,
+                                Expr_::String(BString::from(attr_name)),
+                            );
+
+                            let rewritten_attr_expr = self.rewrite_expr(xs.expr, visitor_name);
+                            desugar_attrs.push((dict_key, rewritten_attr_expr.desugar_expr));
+                            virtual_attrs.push(aast::XhpAttribute::XhpSimple(aast::XhpSimple {
+                                expr: rewritten_attr_expr.virtual_expr,
+                                ..xs
+                            }))
+                        }
+                        aast::XhpAttribute::XhpSpread(e) => {
+                            self.errors.push((
+                                e.1,
+                                "Expression trees do not support attribute spread syntax.".into(),
+                            ));
+                        }
+                    }
+                }
+
+                let (virtual_children, desugar_children) =
+                    self.rewrite_exprs(children, visitor_name);
+
+                // Construct nameof :foo.
+                let hint_pos = hint.0.clone();
+                let hint_class = Expr_::Nameof(Box::new(ClassId(
+                    (),
+                    hint_pos.clone(),
+                    ClassId_::CIexpr(Expr::new(
+                        (),
+                        hint_pos.clone(),
+                        Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
+                    )),
+                )));
+
+                let virtual_expr = Expr(
+                    (),
+                    pos.clone(),
+                    Xml(Box::new((hint, virtual_attrs, virtual_children))),
+                );
                 let desugar_expr = v_meth_call(
-                    et::VISIT_BINOP,
+                    et::VISIT_XHP,
                     vec![
                         pos_expr,
-                        rewritten_lhs.desugar_expr,
-                        string_literal(pos.clone(), binop_str),
-                        rewritten_rhs.desugar_expr,
+                        Expr((), pos.clone(), hint_class),
+                        dict_literal(&pos, desugar_attrs),
+                        vec_literal(desugar_children),
                     ],
                     &pos,
                 );
@@ -879,887 +1442,313 @@ fn rewrite_expr(
                     desugar_expr,
                 }
             }
-        }
-        // Source: MyDsl`!...`
-        // Virtualized: ...->__exclamationMark(...)
-        // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
-        Unop(unop) => {
-            let (op, operand) = *unop;
-            let rewritten_operand = rewrite_expr(temps, operand, visitor_name, errors);
-
-            let op_str = match op {
-                // Allow boolean not operator !$x
-                Uop::Unot => "__exclamationMark",
-                // Allow negation -$x (required for supporting negative literals -123)
-                Uop::Uminus => "__negate",
-                // Allow bitwise complement
-                Uop::Utild => "__tilde",
-                // Currently not allowed operators
-                Uop::Uplus => {
-                    errors.push((
+            // Source: MyDsl`ClientMap {...}`
+            // Virtualized: ClientMap::__make(...)
+            // Desugared: $0v->visitKeyedCollection('ClientMap', ...)
+            Collection(box (ast::Id(name_pos, name), targ, fields)) => {
+                let mut rewritten_fields_virtual = vec![];
+                let mut rewritten_fields_desugar = vec![];
+                for kv in fields {
+                    match kv {
+                        Afield::AFvalue(v) => {
+                            self.rewrite_expr(v, visitor_name);
+                            self.errors.push((
+                                pos.clone(),
+                                "Collections in expression trees must have `key => value` entries"
+                                    .into(),
+                            ))
+                        }
+                        Afield::AFkvalue(k, v) => {
+                            let pos = match Pos::merge(&k.1, &v.1) {
+                                Ok(pos) => pos,
+                                _ => k.1.clone(),
+                            };
+                            let k_rewr = self.rewrite_expr(k, visitor_name);
+                            let v_rewr = self.rewrite_expr(v, visitor_name);
+                            rewritten_fields_virtual.push(Expr::new(
+                                (),
+                                pos.clone(),
+                                Expr_::Tuple(vec![k_rewr.virtual_expr, v_rewr.virtual_expr]),
+                            ));
+                            rewritten_fields_desugar.push(Expr::new(
+                                (),
+                                pos,
+                                Expr_::Tuple(vec![k_rewr.desugar_expr, v_rewr.desugar_expr]),
+                            ))
+                        }
+                    }
+                }
+                let mut args = vec![pos_expr, string_literal(name_pos.clone(), &name)];
+                args.append(&mut rewritten_fields_desugar);
+                let desugar_expr = v_meth_call(et::VISIT_KEYED_COLLECTION, args, &pos);
+                let virtual_expr = static_meth_call_with_meth_pos(
+                    &name,
+                    et::MAKE_KEYED_COLLECTION_TYPE,
+                    &name_pos,
+                    rewritten_fields_virtual,
+                    &pos,
+                );
+                match targ {
+                    None => {}
+                    Some(_) => self.errors.push((
                         pos.clone(),
-                        "Expression trees do not support the unary plus operator.".into(),
-                    ));
-                    "__unsupported"
-                }
-                // Postfix ++
-                Uop::Upincr => "__postfixPlusPlus",
-                // Prefix ++
-                Uop::Uincr => {
-                    errors.push((
-                        pos.clone(),
-                        "Expression trees only support postfix increment operator `$x++`.".into(),
-                    ));
-                    "__unsupported"
-                }
-                // Postfix --
-                Uop::Updecr => "__postfixMinusMinus",
-                // Prefix --
-                Uop::Udecr => {
-                    errors.push((
-                        pos.clone(),
-                        "Expression trees only support postfix decrement operator `$x--`.".into(),
-                    ));
-                    "__unsupported"
-                }
-                Uop::Usilence => {
-                    errors.push((
-                        pos.clone(),
-                        "Expression trees do not support the error suppression operator `@`."
-                            .into(),
-                    ));
-                    "__unsupported"
-                }
-            };
-            let virtual_expr = meth_call(rewritten_operand.virtual_expr, op_str, vec![], &pos);
-            let desugar_expr = v_meth_call(
-                et::VISIT_UNOP,
-                vec![
-                    pos_expr,
-                    rewritten_operand.desugar_expr,
-                    string_literal(pos.clone(), op_str),
-                ],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`... ? ... : ...`
-        // Virtualized: ...->__bool() ? ... : ...
-        // Desugared: $0v->visitTernary(new ExprPos(...), ..., ..., ...)
-        Eif(eif) => {
-            let (e1, e2o, e3) = *eif;
-
-            let rewritten_e1 = rewrite_expr(temps, e1, visitor_name, errors);
-            let rewritten_e2 = if let Some(e2) = e2o {
-                rewrite_expr(temps, e2, visitor_name, errors)
-            } else {
-                errors.push((
-                    pos.clone(),
-                    "Unsupported expression tree syntax: Elvis operator".into(),
-                ));
-                unchanged_result
-            };
-            let rewritten_e3 = rewrite_expr(temps, e3, visitor_name, errors);
-
-            let desugar_expr = v_meth_call(
-                et::VISIT_TERNARY,
-                vec![
-                    pos_expr,
-                    rewritten_e1.desugar_expr,
-                    rewritten_e2.desugar_expr,
-                    rewritten_e3.desugar_expr,
-                ],
-                &pos,
-            );
-            let virtual_expr = Expr(
-                (),
-                pos,
-                Eif(Box::new((
-                    boolify(rewritten_e1.virtual_expr),
-                    Some(rewritten_e2.virtual_expr),
-                    rewritten_e3.virtual_expr,
-                ))),
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`...()`
-        // Virtualized: (...->__unwrap())()
-        // Desugared: $0v->visitCall(new ExprPos(...), ..., vec[])
-        Call(call) => {
-            let ast::CallExpr {
-                func: recv,
-                targs,
-                args,
-                unpacked_arg: variadic,
-            } = *call;
-
-            if variadic.is_some() {
-                errors.push((
-                    pos.clone(),
-                    "Expression trees do not support variadic calls.".into(),
-                ));
-            }
-            if !targs.is_empty() {
-                errors.push((
-                    pos.clone(),
-                    "Expression trees do not support function calls with generics.".into(),
-                ));
-            }
-            match &recv.2 {
-                // Don't transform calls to `hh_show`.
-                Id(sid) if is_typechecker_fun_name(&sid.1) => {
-                    let call_e = Expr::new(
-                        (),
-                        pos,
-                        Call(Box::new(ast::CallExpr {
-                            func: recv,
-                            targs,
-                            args,
-                            unpacked_arg: variadic,
-                        })),
-                    );
-                    return RewriteResult {
-                        desugar_expr: call_e.clone(),
-                        virtual_expr: call_e,
-                    };
-                }
-                _ => {}
-            }
-
-            let mut args_without_inout = vec![];
-            for arg in args {
-                match arg {
-                    (ParamKind::Pnormal, e) => args_without_inout.push(e),
-                    (ParamKind::Pinout(_), Expr(_, p, _)) => errors.push((
-                        p,
-                        "Expression trees do not support `inout` function calls.".into(),
+                        "Collections in expression trees must not have explicit type hints".into(),
                     )),
                 }
-            }
-
-            let (virtual_args, desugar_args) =
-                rewrite_exprs(temps, args_without_inout, visitor_name, errors);
-
-            match recv.2 {
-                // Source: MyDsl`foo()`
-                // Virtualized: (MyDsl::symbolType($0fpXX)->__unwrap())()
-                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
-                Id(sid) => {
-                    let len = temps.global_function_pointers.len();
-                    temps.global_function_pointers.push(global_func_ptr(&sid));
-                    let temp_variable = temp_function_pointer_lvar(&recv.1, len);
-
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_CALL,
-                        vec![
-                            pos_expr.clone(),
-                            v_meth_call(
-                                et::VISIT_GLOBAL_FUNCTION,
-                                vec![pos_expr, temp_variable.clone()],
-                                &pos,
-                            ),
-                            vec_literal(desugar_args),
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Call(Box::new(ast::CallExpr {
-                            func: _virtualize_call(
-                                static_meth_call(
-                                    visitor_name,
-                                    et::SYMBOL_TYPE,
-                                    vec![temp_variable],
-                                    &pos,
-                                ),
-                                &pos,
-                            ),
-                            targs: vec![],
-                            args: build_args(virtual_args),
-                            unpacked_arg: None,
-                        })),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
-                    }
-                }
-                // Source: MyDsl`Foo::bar()`
-                // Virtualized: (MyDsl::symbolType($0smXX)->__unwrap())()
-                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
-                ClassConst(cc) => {
-                    let (cid, s) = *cc;
-                    if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
-                        if sid.1 == classes::PARENT
-                            || sid.1 == classes::SELF
-                            || sid.1 == classes::STATIC
-                        {
-                            errors.push((
-                                pos,
-                                "Static method calls in expression trees require explicit class names.".into(),
-                            ));
-                            return unchanged_result;
-                        }
-                    } else {
-                        errors.push((
-                            pos,
-                            "Expression trees only support function calls and static method calls on named classes.".into(),
-                        ));
-                        return unchanged_result;
-                    };
-
-                    let len = temps.static_method_pointers.len();
-                    temps
-                        .static_method_pointers
-                        .push(static_meth_ptr(&recv.1, &cid, &s));
-                    let temp_variable = temp_static_method_lvar(&recv.1, len);
-
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_CALL,
-                        vec![
-                            pos_expr.clone(),
-                            v_meth_call(
-                                et::VISIT_STATIC_METHOD,
-                                vec![pos_expr, temp_variable.clone()],
-                                &pos,
-                            ),
-                            vec_literal(desugar_args),
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Call(Box::new(ast::CallExpr {
-                            func: _virtualize_call(
-                                static_meth_call(
-                                    visitor_name,
-                                    et::SYMBOL_TYPE,
-                                    vec![temp_variable],
-                                    &pos,
-                                ),
-                                &pos,
-                            ),
-                            targs: vec![],
-                            args: build_args(virtual_args),
-                            unpacked_arg: None,
-                        })),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
-                    }
-                }
-                // Source: MyDsl`$x->bar()`
-                // Virtualized: $x->bar()
-                // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
-                ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
-                    errors.push((
-                        pos,
-                        "Expression trees do not support calling instance methods".into(),
-                    ));
-                    unchanged_result
-                }
-                _ => {
-                    let rewritten_recv =
-                        rewrite_expr(temps, Expr((), recv.1, recv.2), visitor_name, errors);
-
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_CALL,
-                        vec![
-                            pos_expr,
-                            rewritten_recv.desugar_expr,
-                            vec_literal(desugar_args),
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Call(Box::new(ast::CallExpr {
-                            func: _virtualize_call(rewritten_recv.virtual_expr, &pos),
-                            targs: vec![],
-                            args: build_args(virtual_args),
-                            unpacked_arg: None,
-                        })),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
-                    }
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
                 }
             }
-        }
-        // Source: MyDsl`($x) ==> { ... }`
-        // Virtualized: ($x) ==> { ...; return MyDsl::voidType(); }
-        //   if no `return expr;` statements.
-        // Desugared: $0v->visitLambda(new ExprPos(...), vec['$x'], vec[...]).
-        Lfun(lf) => {
-            let mut fun_ = lf.0;
-
-            match &fun_ {
-                aast::Fun_ {
-                    // Allow a plain function that isn't async.
-                    fun_kind: ast::FunKind::FSync,
-                    body: _,
-                    span: _,
-                    doc_comment: _,
-                    ret: _,
-                    annotation: (),
-                    params: _,
-                    user_attributes: _,
-                    // The function should not use any of these newer features.
-                    readonly_this: None,
-                    readonly_ret: None,
-                    ctxs: None,
-                    unsafe_ctxs: None,
-                    external: false,
-                } => {}
-                _ => {
-                    errors.push((
-                            pos.clone(),
-                            "Expression trees only support simple lambdas, without features like `async`, generators or capabilities."
-                                .into(),
-                        ));
-                }
-            }
-
-            let mut param_names = Vec::with_capacity(fun_.params.len());
-            for param in &fun_.params {
-                if param.expr.is_some() {
-                    errors.push((
-                        param.pos.clone(),
-                        "Expression trees do not support parameters with default values.".into(),
-                    ));
-                }
-                param_names.push(string_literal(param.pos.clone(), &param.name));
-            }
-
-            let body = std::mem::take(&mut fun_.body.fb_ast.0);
-
-            let should_append_return = only_void_return(&body);
-
-            let (mut virtual_body_stmts, desugar_body) =
-                rewrite_stmts(temps, body, visitor_name, errors);
-            if should_append_return {
-                virtual_body_stmts.push(Stmt(
-                    pos.clone(),
-                    aast::Stmt_::Return(Box::new(Some(static_meth_call(
-                        visitor_name,
-                        et::VOID_TYPE,
-                        vec![],
-                        &pos,
-                    )))),
-                ));
-            }
-
-            let desugar_expr = v_meth_call(
-                et::VISIT_LAMBDA,
-                vec![
-                    pos_expr,
-                    vec_literal(param_names),
-                    vec_literal(desugar_body),
-                ],
-                &pos,
-            );
-            fun_.body.fb_ast = ast::Block(virtual_body_stmts);
-
-            let virtual_expr = _virtualize_lambda(
-                visitor_name,
-                Expr((), pos.clone(), Lfun(Box::new((fun_, vec![])))),
-                &pos,
-            );
-
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`${ ... }`
-        // Virtualized to `${ ... }`
-        // Desugared to `$0v->splice(new ExprPos(...), '$var_name', ...)`
-        ETSplice(box aast::EtSplice {
-            spliced_expr,
-            extract_client_type,
-        }) => {
-            let len = temps.splices.len();
-            let expr_pos = spliced_expr.1.clone();
-            temps.splices.push(Expr(
-                (),
-                expr_pos.clone(),
-                ETSplice(Box::new(aast::EtSplice {
-                    spliced_expr,
-                    extract_client_type: false,
-                })),
-            ));
-            let temp_variable = temp_splice_lvar(&expr_pos, len);
-            let temp_variable_string = string_literal(expr_pos, &temp_splice_lvar_string(len));
-            let desugar_expr = v_meth_call(
-                et::SPLICE,
-                vec![pos_expr, temp_variable_string, temp_variable.clone()],
-                &pos,
-            );
-            let virtual_expr = Expr(
-                (),
-                pos,
-                ETSplice(Box::new(aast::EtSplice {
-                    spliced_expr: temp_variable,
-                    extract_client_type,
-                })),
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`(...)->foo`
-        // Virtualized to: `(...)->foo`
-        // Desugared to `$0v->visitPropertyAccess(new ExprPos(...), ...), 'foo')`
-        ObjGet(og) => {
-            let (e1, e2, null_flavor, is_prop_call) = *og;
-
-            if null_flavor == OgNullFlavor::OGNullsafe {
-                errors.push((
-                    pos.clone(),
-                    "Expression Trees do not support nullsafe property access".into(),
-                ));
-            }
-            let rewritten_e1 = rewrite_expr(temps, e1, visitor_name, errors);
-
-            let id = if let Id(id) = &e2.2 {
-                string_literal(id.0.clone(), &id.1)
-            } else {
-                errors.push((
-                    pos.clone(),
-                    "Expression trees only support named property access.".into(),
-                ));
-                e2.clone()
-            };
-            let desugar_expr = v_meth_call(
-                et::VISIT_PROPERTY_ACCESS,
-                vec![pos_expr, rewritten_e1.desugar_expr, id],
-                &pos,
-            );
-
-            let virtual_expr = Expr(
-                (),
-                pos,
-                ObjGet(Box::new((
-                    rewritten_e1.virtual_expr,
-                    e2,
-                    null_flavor,
-                    is_prop_call,
-                ))),
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`<foo my-attr="stuff">text <foo-child/> </foo>`
-        // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
-        // Desugared:
-        //   $0v->visitXhp(
-        //     new ExprPos(...),
-        //     nameof :foo,
-        //     dict["my-attr" => $0v->visitString(...)],
-        //     vec[
-        //       $0v->visitString(..., "text ")],
-        //       $0v->visitXhp(..., nameof :foo-child, ...),
-        //     ],
-        //   )
-        Xml(xml) => {
-            let (hint, attrs, children) = *xml;
-
-            let mut virtual_attrs = vec![];
-            let mut desugar_attrs = vec![];
-            for attr in attrs {
-                match attr {
-                    aast::XhpAttribute::XhpSimple(xs) => {
-                        let (attr_name_pos, attr_name) = xs.name.clone();
-                        let dict_key =
-                            Expr::new((), attr_name_pos, Expr_::String(BString::from(attr_name)));
-
-                        let rewritten_attr_expr =
-                            rewrite_expr(temps, xs.expr, visitor_name, errors);
-                        desugar_attrs.push((dict_key, rewritten_attr_expr.desugar_expr));
-                        virtual_attrs.push(aast::XhpAttribute::XhpSimple(aast::XhpSimple {
-                            expr: rewritten_attr_expr.virtual_expr,
-                            ..xs
-                        }))
-                    }
-                    aast::XhpAttribute::XhpSpread(e) => {
-                        errors.push((
-                            e.1,
-                            "Expression trees do not support attribute spread syntax.".into(),
-                        ));
-                    }
-                }
-            }
-
-            let (virtual_children, desugar_children) =
-                rewrite_exprs(temps, children, visitor_name, errors);
-
-            // Construct nameof :foo.
-            let hint_pos = hint.0.clone();
-            let hint_class = Expr_::Nameof(Box::new(ClassId(
-                (),
-                hint_pos.clone(),
-                ClassId_::CIexpr(Expr::new(
-                    (),
-                    hint_pos.clone(),
-                    Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
-                )),
-            )));
-
-            let virtual_expr = Expr(
-                (),
-                pos.clone(),
-                Xml(Box::new((hint, virtual_attrs, virtual_children))),
-            );
-            let desugar_expr = v_meth_call(
-                et::VISIT_XHP,
-                vec![
-                    pos_expr,
-                    Expr((), pos.clone(), hint_class),
-                    dict_literal(&pos, desugar_attrs),
-                    vec_literal(desugar_children),
-                ],
-                &pos,
-            );
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        // Source: MyDsl`ClientMap {...}`
-        // Virtualized: ClientMap::__make(...)
-        // Desugared: $0v->visitKeyedCollection('ClientMap', ...)
-        Collection(box (ast::Id(name_pos, name), targ, fields)) => {
-            let mut rewritten_fields_virtual = vec![];
-            let mut rewritten_fields_desugar = vec![];
-            for kv in fields {
-                match kv {
-                    Afield::AFvalue(v) => {
-                        rewrite_expr(temps, v, visitor_name, errors);
-                        errors.push((
-                            pos.clone(),
-                            "Collections in expression trees must have `key => value` entries"
-                                .into(),
-                        ))
-                    }
-                    Afield::AFkvalue(k, v) => {
-                        let pos = match Pos::merge(&k.1, &v.1) {
-                            Ok(pos) => pos,
-                            _ => k.1.clone(),
-                        };
-                        let k_rewr = rewrite_expr(temps, k, visitor_name, errors);
-                        let v_rewr = rewrite_expr(temps, v, visitor_name, errors);
-                        rewritten_fields_virtual.push(Expr::new(
-                            (),
-                            pos.clone(),
-                            Expr_::Tuple(vec![k_rewr.virtual_expr, v_rewr.virtual_expr]),
-                        ));
-                        rewritten_fields_desugar.push(Expr::new(
-                            (),
-                            pos,
-                            Expr_::Tuple(vec![k_rewr.desugar_expr, v_rewr.desugar_expr]),
-                        ))
-                    }
-                }
-            }
-            let mut args = vec![pos_expr, string_literal(name_pos.clone(), &name)];
-            args.append(&mut rewritten_fields_desugar);
-            let desugar_expr = v_meth_call(et::VISIT_KEYED_COLLECTION, args, &pos);
-            let virtual_expr = static_meth_call_with_meth_pos(
-                &name,
-                et::MAKE_KEYED_COLLECTION_TYPE,
-                &name_pos,
-                rewritten_fields_virtual,
-                &pos,
-            );
-            match targ {
-                None => {}
-                Some(_) => errors.push((
-                    pos.clone(),
-                    "Collections in expression trees must not have explicit type hints".into(),
-                )),
-            }
-            RewriteResult {
-                virtual_expr,
-                desugar_expr,
-            }
-        }
-        ClassConst(_) => {
-            errors.push((
+            ClassConst(_) => {
+                self.errors.push((
                 pos,
                 "Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}.".into(),
             ));
-            unchanged_result
-        }
-        Efun(_) => {
-            errors.push((
+                unchanged_result
+            }
+            Efun(_) => {
+                self.errors.push((
                 pos,
                 "Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead.".into(),
             ));
-            unchanged_result
-        }
-        ExpressionTree(_) => {
-            errors.push((
-                pos,
-                "Expression trees may not be used directly inside of other expression trees."
-                    .into(),
-            ));
-            unchanged_result
-        }
-        _ => {
-            errors.push((pos, "Unsupported expression tree syntax.".into()));
-            unchanged_result
-        }
-    }
-}
-
-fn rewrite_exprs(
-    temps: &mut Temporaries,
-    exprs: Vec<Expr>,
-    visitor_name: &str,
-    errors: &mut Vec<(Pos, String)>,
-) -> (Vec<Expr>, Vec<Expr>) {
-    let mut virtual_results = Vec::with_capacity(exprs.len());
-    let mut desugar_results = Vec::with_capacity(exprs.len());
-    for expr in exprs {
-        let rewritten_expr = rewrite_expr(temps, expr, visitor_name, errors);
-        virtual_results.push(rewritten_expr.virtual_expr);
-        desugar_results.push(rewritten_expr.desugar_expr);
-    }
-    (virtual_results, desugar_results)
-}
-
-fn rewrite_stmts(
-    temps: &mut Temporaries,
-    stmts: Vec<Stmt>,
-    visitor_name: &str,
-    errors: &mut Vec<(Pos, String)>,
-) -> (Vec<Stmt>, Vec<Expr>) {
-    let mut virtual_results = Vec::with_capacity(stmts.len());
-    let mut desugar_results = Vec::with_capacity(stmts.len());
-    for stmt in stmts {
-        let (virtual_stmt, desugared_expr) = rewrite_stmt(temps, stmt, visitor_name, errors);
-        virtual_results.push(virtual_stmt);
-        if let Some(desugared_expr) = desugared_expr {
-            desugar_results.push(desugared_expr);
-        }
-    }
-    (virtual_results, desugar_results)
-}
-
-fn rewrite_stmt(
-    temps: &mut Temporaries,
-    s: Stmt,
-    visitor_name: &str,
-    errors: &mut Vec<(Pos, String)>,
-) -> (Stmt, Option<Expr>) {
-    use aast::Stmt_::*;
-
-    let unchanged_result = (s.clone(), None);
-
-    let Stmt(pos, stmt_) = s;
-    let pos_expr = exprpos(&pos);
-
-    match stmt_ {
-        Expr(e) => {
-            let result = rewrite_expr(temps, *e, visitor_name, errors);
-            (
-                Stmt(pos, Expr(Box::new(result.virtual_expr))),
-                Some(result.desugar_expr),
-            )
-        }
-        Return(e) => match *e {
-            // Source: MyDsl`return ...;`
-            // Virtualized: return ...;
-            // Desugared: $0v->visitReturn(new ExprPos(...), $0v->...)
-            Some(e) => {
-                let result = rewrite_expr(temps, e, visitor_name, errors);
-                let desugar_expr =
-                    v_meth_call(et::VISIT_RETURN, vec![pos_expr, result.desugar_expr], &pos);
-                let virtual_stmt = Stmt(pos, Return(Box::new(Some(result.virtual_expr))));
-                (virtual_stmt, Some(desugar_expr))
+                unchanged_result
             }
-            // Source: MyDsl`return;`
-            // Virtualized: return MyDsl::voidType();
-            // Desugared: $0v->visitReturn(new ExprPos(...), null)
-            None => {
+            ExpressionTree(_) => {
+                self.errors.push((
+                    pos,
+                    "Expression trees may not be used directly inside of other expression trees."
+                        .into(),
+                ));
+                unchanged_result
+            }
+            _ => {
+                self.errors
+                    .push((pos, "Unsupported expression tree syntax.".into()));
+                unchanged_result
+            }
+        }
+    }
+
+    fn rewrite_exprs(&mut self, exprs: Vec<Expr>, visitor_name: &str) -> (Vec<Expr>, Vec<Expr>) {
+        let mut virtual_results = Vec::with_capacity(exprs.len());
+        let mut desugar_results = Vec::with_capacity(exprs.len());
+        for expr in exprs {
+            let rewritten_expr = self.rewrite_expr(expr, visitor_name);
+            virtual_results.push(rewritten_expr.virtual_expr);
+            desugar_results.push(rewritten_expr.desugar_expr);
+        }
+        (virtual_results, desugar_results)
+    }
+
+    fn rewrite_stmts(&mut self, stmts: Vec<Stmt>, visitor_name: &str) -> (Vec<Stmt>, Vec<Expr>) {
+        let mut virtual_results = Vec::with_capacity(stmts.len());
+        let mut desugar_results = Vec::with_capacity(stmts.len());
+        for stmt in stmts {
+            let (virtual_stmt, desugared_expr) = self.rewrite_stmt(stmt, visitor_name);
+            virtual_results.push(virtual_stmt);
+            if let Some(desugared_expr) = desugared_expr {
+                desugar_results.push(desugared_expr);
+            }
+        }
+        (virtual_results, desugar_results)
+    }
+
+    fn rewrite_stmt(&mut self, s: Stmt, visitor_name: &str) -> (Stmt, Option<Expr>) {
+        use aast::Stmt_::*;
+
+        let unchanged_result = (s.clone(), None);
+
+        let Stmt(pos, stmt_) = s;
+        let pos_expr = exprpos(&pos);
+
+        match stmt_ {
+            Expr(e) => {
+                let result = self.rewrite_expr(*e, visitor_name);
+                (
+                    Stmt(pos, Expr(Box::new(result.virtual_expr))),
+                    Some(result.desugar_expr),
+                )
+            }
+            Return(e) => match *e {
+                // Source: MyDsl`return ...;`
+                // Virtualized: return ...;
+                // Desugared: $0v->visitReturn(new ExprPos(...), $0v->...)
+                Some(e) => {
+                    let result = self.rewrite_expr(e, visitor_name);
+                    let desugar_expr =
+                        v_meth_call(et::VISIT_RETURN, vec![pos_expr, result.desugar_expr], &pos);
+                    let virtual_stmt = Stmt(pos, Return(Box::new(Some(result.virtual_expr))));
+                    (virtual_stmt, Some(desugar_expr))
+                }
+                // Source: MyDsl`return;`
+                // Virtualized: return MyDsl::voidType();
+                // Desugared: $0v->visitReturn(new ExprPos(...), null)
+                None => {
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_RETURN,
+                        vec![pos_expr, null_literal(pos.clone())],
+                        &pos,
+                    );
+
+                    let virtual_void_expr =
+                        static_meth_call(visitor_name, et::VOID_TYPE, vec![], &pos);
+                    let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_void_expr))));
+                    (virtual_stmt, Some(desugar_expr))
+                }
+            },
+            // Source: MyDsl`if (...) {...} else {...}`
+            // Virtualized: if (...->__bool())) {...} else {...}
+            // Desugared: $0v->visitIf(new ExprPos(...), $0v->..., vec[...], vec[...])
+            If(if_stmt) => {
+                let (cond_expr, then_block, else_block) = *if_stmt;
+
+                let rewritten_cond = self.rewrite_expr(cond_expr, visitor_name);
+                let (virtual_then_stmts, desugar_then) =
+                    self.rewrite_stmts(then_block.0, visitor_name);
+                let (virtual_else_stmts, desugar_else) =
+                    self.rewrite_stmts(else_block.0, visitor_name);
+
                 let desugar_expr = v_meth_call(
-                    et::VISIT_RETURN,
-                    vec![pos_expr, null_literal(pos.clone())],
+                    et::VISIT_IF,
+                    vec![
+                        pos_expr,
+                        rewritten_cond.desugar_expr,
+                        vec_literal(desugar_then),
+                        vec_literal(desugar_else),
+                    ],
                     &pos,
                 );
-
-                let virtual_void_expr = static_meth_call(visitor_name, et::VOID_TYPE, vec![], &pos);
-                let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_void_expr))));
+                let virtual_stmt = Stmt(
+                    pos,
+                    If(Box::new((
+                        boolify(rewritten_cond.virtual_expr),
+                        ast::Block(virtual_then_stmts),
+                        ast::Block(virtual_else_stmts),
+                    ))),
+                );
                 (virtual_stmt, Some(desugar_expr))
             }
-        },
-        // Source: MyDsl`if (...) {...} else {...}`
-        // Virtualized: if (...->__bool())) {...} else {...}
-        // Desugared: $0v->visitIf(new ExprPos(...), $0v->..., vec[...], vec[...])
-        If(if_stmt) => {
-            let (cond_expr, then_block, else_block) = *if_stmt;
+            // Source: MyDsl`while (...) {...}`
+            // Virtualized: while (...->__bool()) {...}
+            // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
+            While(w) => {
+                let (cond, body) = *w;
 
-            let rewritten_cond = rewrite_expr(temps, cond_expr, visitor_name, errors);
-            let (virtual_then_stmts, desugar_then) =
-                rewrite_stmts(temps, then_block.0, visitor_name, errors);
-            let (virtual_else_stmts, desugar_else) =
-                rewrite_stmts(temps, else_block.0, visitor_name, errors);
+                let rewritten_cond = self.rewrite_expr(cond, visitor_name);
+                let (virtual_body_stmts, desugar_body) = self.rewrite_stmts(body.0, visitor_name);
 
-            let desugar_expr = v_meth_call(
-                et::VISIT_IF,
-                vec![
-                    pos_expr,
-                    rewritten_cond.desugar_expr,
-                    vec_literal(desugar_then),
-                    vec_literal(desugar_else),
-                ],
-                &pos,
-            );
-            let virtual_stmt = Stmt(
-                pos,
-                If(Box::new((
-                    boolify(rewritten_cond.virtual_expr),
-                    ast::Block(virtual_then_stmts),
-                    ast::Block(virtual_else_stmts),
-                ))),
-            );
-            (virtual_stmt, Some(desugar_expr))
-        }
-        // Source: MyDsl`while (...) {...}`
-        // Virtualized: while (...->__bool()) {...}
-        // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
-        While(w) => {
-            let (cond, body) = *w;
-
-            let rewritten_cond = rewrite_expr(temps, cond, visitor_name, errors);
-            let (virtual_body_stmts, desugar_body) =
-                rewrite_stmts(temps, body.0, visitor_name, errors);
-
-            let desugar_expr = v_meth_call(
-                et::VISIT_WHILE,
-                vec![
-                    pos_expr,
-                    rewritten_cond.desugar_expr,
-                    vec_literal(desugar_body),
-                ],
-                &pos,
-            );
-            let virtual_stmt = Stmt(
-                pos,
-                While(Box::new((
-                    boolify(rewritten_cond.virtual_expr),
-                    ast::Block(virtual_body_stmts),
-                ))),
-            );
-            (virtual_stmt, Some(desugar_expr))
-        }
-        // Source: MyDsl`for (...; ...; ...) {...}`
-        // Virtualized: for (...; ...->__bool(); ...) {...}
-        // Desugared: $0v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])
-        For(w) => {
-            let (init, cond, incr, body) = *w;
-
-            let (virtual_init_exprs, desugar_init_exprs) =
-                rewrite_exprs(temps, init, visitor_name, errors);
-
-            let (virtual_cond_option, desugar_cond_expr) = match cond {
-                Some(cond) => {
-                    let rewritten_cond = rewrite_expr(temps, cond, visitor_name, errors);
-                    (
-                        Some(boolify(rewritten_cond.virtual_expr)),
+                let desugar_expr = v_meth_call(
+                    et::VISIT_WHILE,
+                    vec![
+                        pos_expr,
                         rewritten_cond.desugar_expr,
-                    )
-                }
-                None => (None, null_literal(pos.clone())),
-            };
+                        vec_literal(desugar_body),
+                    ],
+                    &pos,
+                );
+                let virtual_stmt = Stmt(
+                    pos,
+                    While(Box::new((
+                        boolify(rewritten_cond.virtual_expr),
+                        ast::Block(virtual_body_stmts),
+                    ))),
+                );
+                (virtual_stmt, Some(desugar_expr))
+            }
+            // Source: MyDsl`for (...; ...; ...) {...}`
+            // Virtualized: for (...; ...->__bool(); ...) {...}
+            // Desugared: $0v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])
+            For(w) => {
+                let (init, cond, incr, body) = *w;
 
-            let (virtual_incr_exprs, desugar_incr_exprs) =
-                rewrite_exprs(temps, incr, visitor_name, errors);
+                let (virtual_init_exprs, desugar_init_exprs) =
+                    self.rewrite_exprs(init, visitor_name);
 
-            let (virtual_body_stmts, desugar_body) =
-                rewrite_stmts(temps, body.0, visitor_name, errors);
+                let (virtual_cond_option, desugar_cond_expr) = match cond {
+                    Some(cond) => {
+                        let rewritten_cond = self.rewrite_expr(cond, visitor_name);
+                        (
+                            Some(boolify(rewritten_cond.virtual_expr)),
+                            rewritten_cond.desugar_expr,
+                        )
+                    }
+                    None => (None, null_literal(pos.clone())),
+                };
 
-            let desugar_expr = v_meth_call(
-                et::VISIT_FOR,
-                vec![
-                    pos_expr,
-                    vec_literal(desugar_init_exprs),
-                    desugar_cond_expr,
-                    vec_literal(desugar_incr_exprs),
-                    vec_literal(desugar_body),
-                ],
-                &pos,
-            );
-            let virtual_stmt = Stmt(
-                pos,
-                For(Box::new((
-                    virtual_init_exprs,
-                    virtual_cond_option,
-                    virtual_incr_exprs,
-                    ast::Block(virtual_body_stmts),
-                ))),
-            );
-            (virtual_stmt, Some(desugar_expr))
-        }
-        // Source: MyDsl`break;`
-        // Virtualized: break;
-        // Desugared: $0v->visitBreak(new ExprPos(...))
-        Break => {
-            let desugar_expr = v_meth_call(et::VISIT_BREAK, vec![pos_expr], &pos);
-            let virtual_stmt = Stmt(pos, Break);
-            (virtual_stmt, Some(desugar_expr))
-        }
-        // Source: MyDsl`continue;`
-        // Virtualized: continue;
-        // Desugared: $0v->visitContinue(new ExprPos(...))
-        Continue => {
-            let desugar_expr = v_meth_call(et::VISIT_CONTINUE, vec![pos_expr], &pos);
-            let virtual_stmt = Stmt(pos, Continue);
-            (virtual_stmt, Some(desugar_expr))
-        }
-        Noop => (Stmt(pos, Noop), None),
-        // Unsupported operators
-        Do(_) => {
-            errors.push((
+                let (virtual_incr_exprs, desugar_incr_exprs) =
+                    self.rewrite_exprs(incr, visitor_name);
+
+                let (virtual_body_stmts, desugar_body) = self.rewrite_stmts(body.0, visitor_name);
+
+                let desugar_expr = v_meth_call(
+                    et::VISIT_FOR,
+                    vec![
+                        pos_expr,
+                        vec_literal(desugar_init_exprs),
+                        desugar_cond_expr,
+                        vec_literal(desugar_incr_exprs),
+                        vec_literal(desugar_body),
+                    ],
+                    &pos,
+                );
+                let virtual_stmt = Stmt(
+                    pos,
+                    For(Box::new((
+                        virtual_init_exprs,
+                        virtual_cond_option,
+                        virtual_incr_exprs,
+                        ast::Block(virtual_body_stmts),
+                    ))),
+                );
+                (virtual_stmt, Some(desugar_expr))
+            }
+            // Source: MyDsl`break;`
+            // Virtualized: break;
+            // Desugared: $0v->visitBreak(new ExprPos(...))
+            Break => {
+                let desugar_expr = v_meth_call(et::VISIT_BREAK, vec![pos_expr], &pos);
+                let virtual_stmt = Stmt(pos, Break);
+                (virtual_stmt, Some(desugar_expr))
+            }
+            // Source: MyDsl`continue;`
+            // Virtualized: continue;
+            // Desugared: $0v->visitContinue(new ExprPos(...))
+            Continue => {
+                let desugar_expr = v_meth_call(et::VISIT_CONTINUE, vec![pos_expr], &pos);
+                let virtual_stmt = Stmt(pos, Continue);
+                (virtual_stmt, Some(desugar_expr))
+            }
+            Noop => (Stmt(pos, Noop), None),
+            // Unsupported operators
+            Do(_) => {
+                self.errors.push((
                 pos,
                 "Expression trees do not support `do while` loops. Consider using a `while` loop instead.".into(),
             ));
-            unchanged_result
-        }
-        Switch(_) => {
-            errors.push((
+                unchanged_result
+            }
+            Switch(_) => {
+                self.errors.push((
                 pos,
                 "Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead.".into(),
             ));
-            unchanged_result
-        }
-        Foreach(_) => {
-            errors.push((
+                unchanged_result
+            }
+            Foreach(_) => {
+                self.errors.push((
                 pos,
                 "Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead.".into(),
             ));
-            unchanged_result
-        }
-        _ => {
-            errors.push((
-                pos,
-                "Expression trees do not support this statement syntax.".into(),
-            ));
-            unchanged_result
+                unchanged_result
+            }
+            _ => {
+                self.errors.push((
+                    pos,
+                    "Expression trees do not support this statement syntax.".into(),
+                ));
+                unchanged_result
+            }
         }
     }
 }

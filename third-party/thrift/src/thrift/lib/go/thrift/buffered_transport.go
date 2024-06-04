@@ -18,31 +18,39 @@ package thrift
 
 import (
 	"bufio"
+	"net"
+	"time"
 )
 
 type BufferedTransport struct {
 	bufio.ReadWriter
-	tp Transport
+	socket Socket
 }
 
-func NewBufferedTransport(trans Transport, bufferSize int) *BufferedTransport {
+var _ Socket = (*BufferedTransport)(nil)
+
+func NewBufferedTransport(socket Socket, bufferSize int) *BufferedTransport {
 	return &BufferedTransport{
 		ReadWriter: bufio.ReadWriter{
-			Reader: bufio.NewReaderSize(trans, bufferSize),
-			Writer: bufio.NewWriterSize(trans, bufferSize),
+			Reader: bufio.NewReaderSize(socket, bufferSize),
+			Writer: bufio.NewWriterSize(socket, bufferSize),
 		},
-		tp: trans,
+		socket: socket,
 	}
 }
 
+func (p *BufferedTransport) Open() error {
+	return p.socket.Open()
+}
+
 func (p *BufferedTransport) Close() (err error) {
-	return p.tp.Close()
+	return p.socket.Close()
 }
 
 func (p *BufferedTransport) Read(b []byte) (int, error) {
 	n, err := p.ReadWriter.Read(b)
 	if err != nil {
-		p.ReadWriter.Reader.Reset(p.tp)
+		p.ReadWriter.Reader.Reset(p.socket)
 	}
 	return n, err
 }
@@ -50,19 +58,41 @@ func (p *BufferedTransport) Read(b []byte) (int, error) {
 func (p *BufferedTransport) Write(b []byte) (int, error) {
 	n, err := p.ReadWriter.Write(b)
 	if err != nil {
-		p.ReadWriter.Writer.Reset(p.tp)
+		p.ReadWriter.Writer.Reset(p.socket)
 	}
 	return n, err
 }
 
 func (p *BufferedTransport) Flush() error {
 	if err := p.ReadWriter.Flush(); err != nil {
-		p.ReadWriter.Writer.Reset(p.tp)
+		p.ReadWriter.Writer.Reset(p.socket)
 		return err
 	}
-	return p.tp.Flush()
+	return p.socket.Flush()
 }
 
 func (p *BufferedTransport) RemainingBytes() (num_bytes uint64) {
-	return p.tp.RemainingBytes()
+	return p.socket.RemainingBytes()
+}
+
+// LocalAddr returns the local network address, if known.
+func (s *BufferedTransport) LocalAddr() net.Addr {
+	return s.socket.LocalAddr()
+}
+
+// RemoteAddr returns the remote network address, if known.
+func (s *BufferedTransport) RemoteAddr() net.Addr {
+	return s.socket.RemoteAddr()
+}
+
+func (s *BufferedTransport) SetDeadline(t time.Time) error {
+	return s.socket.SetDeadline(t)
+}
+
+func (s *BufferedTransport) SetReadDeadline(t time.Time) error {
+	return s.socket.SetReadDeadline(t)
+}
+
+func (s *BufferedTransport) SetWriteDeadline(t time.Time) error {
+	return s.socket.SetWriteDeadline(t)
 }

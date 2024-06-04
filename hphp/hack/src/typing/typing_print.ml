@@ -898,15 +898,8 @@ module Full = struct
   let rec locl_ty ~fuel : _ -> _ -> _ -> locl_ty -> Fuel.t * Doc.t =
    fun to_doc st penv ty ->
     Fuel.provide fuel (fun ~fuel ->
-        let (r, x) = deref ty in
-        let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
-        let d =
-          if Reason.Predicates.is_solve_fail r then
-            Concat [text "{suggest:"; d; text "}"]
-          else
-            d
-        in
-        (fuel, d))
+        let (_r, x) = deref ty in
+        locl_ty_ ~fuel to_doc st penv x)
 
   and locl_ty_ ~fuel : _ -> _ -> penv -> locl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
@@ -1252,15 +1245,8 @@ module Full = struct
       (fuel, ttype_switch_doc)
 
   and constraint_type ~fuel to_doc st penv ty =
-    let (r, x) = deref_constraint_type ty in
-    let (fuel, constraint_ty_doc) = constraint_type_ ~fuel to_doc st penv x in
-    let constraint_ty_doc =
-      if Reason.Predicates.is_solve_fail r then
-        Concat [text "{suggest:"; constraint_ty_doc; text "}"]
-      else
-        constraint_ty_doc
-    in
-    (fuel, constraint_ty_doc)
+    let (_r, x) = deref_constraint_type ty in
+    constraint_type_ ~fuel to_doc st penv x
 
   let internal_type ~fuel to_doc st penv ty =
     match ty with

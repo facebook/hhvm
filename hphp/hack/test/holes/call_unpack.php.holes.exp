@@ -341,7 +341,7 @@ Errors:
                        targs = []; args = [];
                        unpacked_arg =
                        (Some ((shape('a' => float, 'b' => int, 'c' => int)), [36:15-17],
-                              (Hole (((shape('a' => float, 'b' => int, 'c' => int)), [36:15-17], (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)), ({suggest:nothing}), Typing))))
+                              (Hole (((shape('a' => float, 'b' => int, 'c' => int)), [36:15-17], (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)), (nothing), Typing))))
                        }))));
              ([38:3-19],
               (Expr

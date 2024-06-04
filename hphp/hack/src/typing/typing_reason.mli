@@ -387,8 +387,6 @@ module Predicates : sig
 
   val is_opaque_type_from_module : t -> bool
 
-  val is_solve_fail : t -> bool
-
   val is_instantiate : t -> bool
 
   val is_hint : t -> bool

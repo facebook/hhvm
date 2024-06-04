@@ -2640,11 +2640,6 @@ module Predicates = struct
     | Ropaque_type_from_module _ -> true
     | _ -> false
 
-  let is_solve_fail r =
-    match r with
-    | Rsolve_fail _ -> true
-    | _ -> false
-
   let is_none r =
     match r with
     | Rnone -> true

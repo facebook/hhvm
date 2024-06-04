@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include <list>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 
 namespace proxygen {

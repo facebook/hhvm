@@ -163,7 +163,6 @@ let parse_options () =
     | (x, Some ai_options) -> (x, ai_options)
   in
 
-  let root = Path.make "/" (* if none specified, we use this dummy *) in
   let popt =
     ParserOptions.
       {
@@ -200,7 +199,6 @@ let parse_options () =
       no_builtins = !no_builtins;
       tcopt;
     },
-    root,
     None,
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
@@ -246,6 +244,26 @@ let handle_mode ai_options ctx files_info parse_errors error_format =
   else
     (* No type check *)
     Ai.do_ files_info ai_options ctx
+
+(* Multifile.file_to_files will place all filenames that are split behind a `Dummy`
+ * suffix, and calls `Relative_path.to_absolute` on them.
+ * This behavior causes the temp dirs we create to be exposed in test files. To prevent
+ * exposing the tempdirs, we manually return basenames from any Dummy's that were created
+ * (this is fine, because the only thing that could cause this is the Hack `//// a.php` syntax
+   exception for things we put directly into the Root directory regardless. *)
+let file_to_files filename =
+  let strip_basenames_from_dummy relative_path =
+    let open Relative_path in
+    match prefix relative_path with
+    | Dummy ->
+      let basename = suffix relative_path |> Filename.basename in
+      create Dummy basename
+    | _ -> relative_path
+  in
+  let files_contents = Multifile.file_to_files filename in
+  Relative_path.Map.elements files_contents
+  |> List.map ~f:(fun (path, value) -> (strip_basenames_from_dummy path, value))
+  |> Relative_path.Map.of_list
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -312,13 +330,15 @@ let decl_and_run_mode
       |> List.map ~f:(fun s -> Option.value_exn s)
       |> List.map ~f:Relative_path.create_detect_prefix
     else
-      files |> List.map ~f:(Relative_path.create Relative_path.Dummy)
+      files
+      |> List.map ~f:(fun file ->
+             Relative_path.create Relative_path.Root (Filename.basename file))
   in
   let files_contents =
     List.fold
       files
       ~f:(fun acc filename ->
-        let files_contents = Multifile.file_to_files filename in
+        let files_contents = file_to_files filename in
         Relative_path.Map.union acc files_contents)
       ~init:Relative_path.Map.empty
   in
@@ -360,9 +380,15 @@ let decl_and_run_mode
     (Errors.get_sorted_error_list errors)
     error_format
 
+let write_file_to_root ~(root : Path.t) ~file =
+  let contents = Sys_utils.cat_no_fail file in
+  let file = Path.make file in
+  Sys_utils.write_file
+    ~file:(Path.to_string (Path.concat root (Path.basename file)))
+    contents
+
 let main_hack
     ({ tcopt; _ } as opts)
-    (root : Path.t)
     (naming_table : string option)
     (sharedmem_config : SharedMem.config) : unit =
   Folly.ensure_folly_init ();
@@ -374,13 +400,47 @@ let main_hack
     SharedMem.init ~num_workers:0 sharedmem_config
   in
   Decl_store.set Ai_decl_heap.decl_store;
-  Tempfile.with_tempdir (fun hhi_root ->
-      Hhi.set_hhi_root_for_unit_test hhi_root;
-      Relative_path.set_path_prefix Relative_path.Root root;
-      Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
-      Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root naming_table;
-      TypingLogger.flush_buffers ())
+  Tempfile.with_tempdir (fun root ->
+      Tempfile.with_tempdir (fun hhi_root ->
+          Hhi.set_hhi_root_for_unit_test hhi_root;
+          Relative_path.set_path_prefix Relative_path.Root root;
+          Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+          Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
+
+          let files = opts.files in
+          let hh_config_options =
+            [
+              "enable_sound_dynamic_type=true";
+              "everything_sdt=true";
+              "disable_xhp_element_mangling=false";
+              "disable_xhp_children_declarations=false";
+              "enable_xhp_class_modifier=false";
+              "disable_hh_ignore_error=0";
+            ]
+            |> String.concat ~sep:"\n"
+          in
+          Sys_utils.write_file
+            ~file:(Path.concat root ".hhconfig" |> Path.to_string)
+            hh_config_options;
+          Sys_utils.(
+            try_touch
+              (Touch_existing_or_create_new
+                 { mkdir_if_new = false; perm_if_new = 0o666 })
+              (Path.concat root ".hhconfig" |> Path.to_string));
+          List.iter files ~f:(fun file -> write_file_to_root ~root ~file);
+
+          let opts =
+            let ai_options =
+              { opts.ai_options with Ai_options.unittest_hack_root = Some root }
+            in
+            let files =
+              List.map files ~f:(fun file ->
+                  Path.concat root (Filename.basename file) |> Path.to_string)
+            in
+            { opts with ai_options; files }
+          in
+          decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root naming_table;
+          TypingLogger.flush_buffers ()))
 
 (* command line driver *)
 let () =
@@ -392,5 +452,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, root, naming_table, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options root naming_table sharedmem_config
+  let (options, naming_table, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options naming_table sharedmem_config

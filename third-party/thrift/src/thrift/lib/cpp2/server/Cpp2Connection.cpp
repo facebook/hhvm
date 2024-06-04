@@ -167,9 +167,33 @@ Cpp2Connection::Cpp2Connection(
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&context_);
   }
+
+#if FOLLY_HAS_COROUTINES
+  const auto& serviceInterceptors =
+      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+          *worker_->getServer());
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &context_,
+        context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    serviceInterceptors[i]->internal_onConnection(connectionInfo);
+  }
+#endif // FOLLY_HAS_COROUTINES
 }
 
 Cpp2Connection::~Cpp2Connection() {
+#if FOLLY_HAS_COROUTINES
+  const auto& serviceInterceptors =
+      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+          *worker_->getServer());
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &context_,
+        context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
+  }
+#endif // FOLLY_HAS_COROUTINES
+
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->connectionDestroyed(&context_);
   }

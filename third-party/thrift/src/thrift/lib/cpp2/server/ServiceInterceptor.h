@@ -21,7 +21,7 @@
 
 namespace apache::thrift {
 
-template <class RequestState>
+template <class RequestState, class ConnectionState = folly::Unit>
 class ServiceInterceptor : public ServiceInterceptorBase {
  public:
   virtual folly::coro::Task<std::optional<RequestState>> onRequest(
@@ -32,8 +32,26 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     co_return;
   }
 
+  virtual std::optional<ConnectionState> onConnection(ConnectionInfo) noexcept {
+    return std::nullopt;
+  }
+  virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
+
  private:
-  void internal_onConnection(ConnectionInfo) final {}
+  void internal_onConnection(ConnectionInfo connectionInfo) noexcept final {
+    auto* storage = connectionInfo.storage;
+    if (auto value = onConnection(std::move(connectionInfo))) {
+      storage->emplace<ConnectionState>(std::move(*value));
+    }
+  }
+  void internal_onConnectionClosed(
+      ConnectionInfo connectionInfo) noexcept final {
+    ConnectionState* connectionState = connectionInfo.storage->has_value()
+        ? std::addressof(
+              connectionInfo.storage->value_unchecked<ConnectionState>())
+        : nullptr;
+    onConnectionClosed(connectionState, std::move(connectionInfo));
+  }
 
   folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo requestInfo) final {

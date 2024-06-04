@@ -94,9 +94,20 @@ class TestModule : public apache::thrift::ServerModule {
 };
 
 struct ServiceInterceptorCountWithRequestState
-    : public ServiceInterceptor<int> {
+    : public ServiceInterceptor<int, int> {
  public:
+  using ConnectionState = int;
   using RequestState = int;
+
+  std::optional<ConnectionState> onConnection(
+      ConnectionInfo) noexcept override {
+    onConnectionCount++;
+    return 1;
+  }
+  void onConnectionClosed(
+      ConnectionState* connectionState, ConnectionInfo) noexcept override {
+    onConnectionClosedCount += *connectionState;
+  }
 
   folly::coro::Task<std::optional<RequestState>> onRequest(
       RequestInfo) override {
@@ -110,6 +121,8 @@ struct ServiceInterceptorCountWithRequestState
     co_return;
   }
 
+  int onConnectionCount = 0;
+  int onConnectionClosedCount = 0;
   int onRequestCount = 0;
   int onResponseCount = 0;
 };
@@ -201,24 +214,36 @@ CO_TEST(ServiceInterceptorTest, BasicVoidReturn) {
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  ScopedServerInterfaceThread runner(
+  auto runner = std::make_unique<ScopedServerInterfaceThread>(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
-  auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
-  co_await client->co_noop();
-  for (auto& interceptor : {interceptor1, interceptor2}) {
-    EXPECT_EQ(interceptor->onRequestCount, 1);
-    EXPECT_EQ(interceptor->onResponseCount, 1);
+  {
+    auto client = runner->newStickyClient<
+        apache::thrift::Client<test::ServiceInterceptorTest>>();
+    co_await client->co_noop();
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 1);
+      EXPECT_EQ(interceptor->onResponseCount, 1);
+      EXPECT_EQ(interceptor->onConnectionCount, 1);
+      EXPECT_EQ(interceptor->onConnectionClosedCount, 0);
+    }
+
+    co_await client->co_noop();
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 2);
+      EXPECT_EQ(interceptor->onResponseCount, 2);
+      EXPECT_EQ(interceptor->onConnectionCount, 1);
+      EXPECT_EQ(interceptor->onConnectionClosedCount, 0);
+    }
   }
 
-  co_await client->co_noop();
+  runner.reset();
   for (auto& interceptor : {interceptor1, interceptor2}) {
-    EXPECT_EQ(interceptor->onRequestCount, 2);
-    EXPECT_EQ(interceptor->onResponseCount, 2);
+    EXPECT_EQ(interceptor->onConnectionCount, 1);
+    EXPECT_EQ(interceptor->onConnectionClosedCount, 1);
   }
 }
 

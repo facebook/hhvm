@@ -116,9 +116,32 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&connContext_);
   }
+#if FOLLY_HAS_COROUTINES
+  const auto& serviceInterceptors =
+      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+          *worker_->getServer());
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &connContext_,
+        connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    serviceInterceptors[i]->internal_onConnection(connectionInfo);
+  }
+#endif // FOLLY_HAS_COROUTINES
 }
 
 ThriftRocketServerHandler::~ThriftRocketServerHandler() {
+#if FOLLY_HAS_COROUTINES
+  const auto& serviceInterceptors =
+      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+          *worker_->getServer());
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &connContext_,
+        connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
+  }
+#endif // FOLLY_HAS_COROUTINES
+
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->connectionDestroyed(&connContext_);
   }

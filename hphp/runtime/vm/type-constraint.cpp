@@ -1918,7 +1918,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
 
   // Soft constraints aren't useful because they're not enforced.
   if (!tc.hasConstraint() || tc.isTypeVar() ||
-      tc.isTypeConstant() || tc.isSoft()) {
+      tc.isTypeConstant() || tc.isSoft() || tc.isUnion()) {
     return MK::None;
   }
 

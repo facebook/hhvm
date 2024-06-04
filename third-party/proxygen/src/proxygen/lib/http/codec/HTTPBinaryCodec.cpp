@@ -319,9 +319,8 @@ void HTTPBinaryCodec::onIngressEOF() {
         }
         parsed += *parseResult;
         // If the framing indicator is for a request, then the
-        // TransportDirection should be DOWNSTREAM and vice versa.
-        if ((transportDirection_ == TransportDirection::DOWNSTREAM) !=
-            request_) {
+        // TransportDirection should be UPSTREAM and vice versa.
+        if ((transportDirection_ == TransportDirection::UPSTREAM) != request_) {
           parseError_ =
               fmt::format("Invalid Framing Indicator '{}' for {} codec",
                           request_ ? "request" : "response",
@@ -484,7 +483,7 @@ void HTTPBinaryCodec::generateHeader(
     HTTPHeaderSize* size,
     const folly::Optional<HTTPHeaders>& extraHeaders) {
   folly::io::QueueAppender appender(&writeBuf, queueAppenderMaxGrowth);
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (transportDirection_ == TransportDirection::UPSTREAM) {
     // Encode Framing Indicator for Request
     encodeInteger(folly::to<uint64_t>(
                       HTTPBinaryCodec::FramingIndicator::REQUEST_KNOWN_LENGTH),

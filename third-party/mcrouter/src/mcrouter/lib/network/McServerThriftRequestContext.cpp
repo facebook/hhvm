@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 
 #include <mcrouter/lib/network/McSSLUtil.h>
@@ -35,7 +36,8 @@ McServerThriftRequestContext::McServerThriftRequestContext(
           nullptr /* manager */,
           nullptr /* peerCert */,
           McSSLUtil::getClientIdentityHook(),
-          &gDummyCpp2Worker),
+          &gDummyCpp2Worker,
+          0 /* numServiceInterceptors */),
       reqCtx_(&connCtx_) {}
 
 } // namespace memcache

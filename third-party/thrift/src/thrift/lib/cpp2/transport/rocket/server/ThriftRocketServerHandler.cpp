@@ -100,7 +100,10 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
           nullptr, /* eventBaseManager */
           nullptr, /* x509PeerCert */
           worker_->getServer()->getClientIdentityHook(),
-          worker_.get()),
+          worker_.get(),
+          apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+              *worker_->getServer())
+              .size()),
       setupFrameHandlers_(handlers),
       version_(static_cast<int32_t>(std::min(
           kRocketServerMaxVersion, THRIFT_FLAG(rocket_server_max_version)))),

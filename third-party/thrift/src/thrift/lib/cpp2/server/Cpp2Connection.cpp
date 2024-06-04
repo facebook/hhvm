@@ -146,7 +146,10 @@ Cpp2Connection::Cpp2Connection(
           worker_->getServer()->getEventBaseManager(),
           nullptr,
           worker_->getServer()->getClientIdentityHook(),
-          worker_.get()),
+          worker_.get(),
+          apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
+              *worker_->getServer())
+              .size()),
       transport_(transport),
       executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()),
       metricCollector_{worker_->getServer()->getMetricCollector()} {

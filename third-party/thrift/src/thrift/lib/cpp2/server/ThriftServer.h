@@ -234,6 +234,14 @@ namespace detail {
  * dynamic Server Attributes
  */
 ThriftServerConfig& getThriftServerConfig(ThriftServer&);
+/**
+ * The set of service interceptors are not fully known until
+ * ThriftServer::setup(). However, unit tests can mock objects such that the
+ * setup is bypassed. This is a safe alternative to
+ * ThriftServer::getServiceInterceptors() which returns 0 for such unit tests.
+ */
+const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+getServiceInterceptorsIfServerIsSetUp(ThriftServer&);
 } // namespace detail
 
 /**
@@ -864,6 +872,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
  private:
   friend ThriftServerConfig& detail::getThriftServerConfig(ThriftServer&);
+  friend const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+  detail::getServiceInterceptorsIfServerIsSetUp(ThriftServer&);
 
   ThriftServerConfig thriftConfig_;
 
@@ -3160,6 +3170,18 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 inline ThriftServerConfig& getThriftServerConfig(ThriftServer& server) {
   return server.thriftConfig_;
 }
+
+inline const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+getServiceInterceptorsIfServerIsSetUp(ThriftServer& server) {
+  if (auto* description = server.processedServiceDescription_.get()) {
+    return description->modules.coalescedServiceInterceptors;
+  }
+  static const folly::Indestructible<
+      std::vector<std::shared_ptr<ServiceInterceptorBase>>>
+      kEmpty;
+  return *kEmpty;
+}
+
 } // namespace detail
 
 } // namespace thrift

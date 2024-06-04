@@ -104,11 +104,13 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       apache::thrift::ClientIdentityHook clientIdentityHook,
       const Cpp2Worker* worker,
       const IOWorkerContext* workerContext,
+      std::size_t numServiceInterceptors,
       detail::ConnectionInternalFieldsT internalFields)
       : transport_(transport),
         manager_(manager),
         worker_(worker),
         workerContext_(workerContext),
+        serviceInterceptorsStorage_(numServiceInterceptors),
         internalFields_(std::move(internalFields)) {
     if (address) {
       transportInfo_.peerAddress = *address;
@@ -153,6 +155,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       std::shared_ptr<X509> peerCert /*overridden from socket*/,
       apache::thrift::ClientIdentityHook clientIdentityHook,
       const WorkerT* worker,
+      std::size_t numServiceInterceptors,
       detail::ConnectionInternalFieldsT internalFields)
       : Cpp2ConnContext(
             address,
@@ -162,6 +165,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
             std::move(clientIdentityHook),
             worker,
             worker,
+            numServiceInterceptors,
             std::move(internalFields)) {}
 
  public:
@@ -176,7 +180,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       const folly::AsyncTransport* transport = nullptr,
       folly::EventBaseManager* manager = nullptr,
       std::shared_ptr<X509> peerCert = nullptr /*overridden from socket*/,
-      apache::thrift::ClientIdentityHook clientIdentityHook = nullptr)
+      apache::thrift::ClientIdentityHook clientIdentityHook = nullptr,
+      std::size_t numServiceInterceptors = 0)
       : Cpp2ConnContext(
             address,
             transport,
@@ -185,6 +190,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
             std::move(clientIdentityHook),
             nullptr,
             nullptr,
+            numServiceInterceptors,
             detail::createPerConnectionInternalFields()) {}
 
   template <typename WorkerT>
@@ -194,7 +200,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       folly::EventBaseManager* manager,
       std::shared_ptr<X509> peerCert /*overridden from socket*/,
       apache::thrift::ClientIdentityHook clientIdentityHook,
-      const WorkerT* worker)
+      const WorkerT* worker,
+      std::size_t numServiceInterceptors)
       : Cpp2ConnContext(
             address,
             transport,
@@ -203,6 +210,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
             std::move(clientIdentityHook),
             worker,
             worker,
+            numServiceInterceptors,
             detail::createPerConnectionInternalFields()) {}
 
   ~Cpp2ConnContext() override { DCHECK(tiles_.empty()); }
@@ -363,6 +371,12 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       return {};
     }
     return ClientMetadataRef{*clientMetadata_};
+  }
+
+  detail::ServiceInterceptorOnConnectionStorage*
+  getStorageForServiceInterceptorOnConnectionByIndex(std::size_t index) {
+    DCHECK_LT(index, serviceInterceptorsStorage_.size());
+    return &serviceInterceptorsStorage_[index];
   }
 
   template <class T>
@@ -536,6 +550,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   std::optional<TransportType> transportType_;
   std::optional<CLIENT_TYPE> clientType_;
   std::optional<ClientMetadata> clientMetadata_;
+  std::vector<detail::ServiceInterceptorOnConnectionStorage>
+      serviceInterceptorsStorage_;
   detail::ConnectionInternalFieldsT internalFields_;
 };
 

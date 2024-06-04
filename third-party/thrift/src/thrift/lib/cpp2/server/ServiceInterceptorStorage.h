@@ -32,4 +32,7 @@ struct ServiceInterceptorRequestStorageContext {
       onRequest = nullptr;
 };
 
+using ServiceInterceptorOnConnectionStorage =
+    util::TypeErasedValue<128, alignof(std::max_align_t)>;
+
 } // namespace apache::thrift::detail

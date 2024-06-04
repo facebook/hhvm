@@ -2679,9 +2679,4 @@ module Predicates = struct
     match r with
     | Rshape_literal p -> Some p
     | _ -> None
-
-  let unpack_dynamic_coercion_opt r =
-    match r with
-    | Rdynamic_coercion r -> Some r
-    | _ -> None
 end

@@ -5684,26 +5684,6 @@ end = struct
     in
     (Error_code.TypeArityMismatch, reasons, User_error_flags.empty)
 
-  (* In typing_coercion.ml we sometimes check t1 <: t2 by adding dynamic
-     to check t1 < t|dynamic. In that case, we use the Rdynamic_coercion
-     reason so that we can detect it here and not print the dynamic if there
-     is a type error. *)
-  let detect_attempting_dynamic_coercion_reason r ty =
-    let open Typing_defs_core in
-    match Reason.Predicates.unpack_dynamic_coercion_opt r with
-    | Some r ->
-      (match ty with
-      | LoclType lty ->
-        (match get_node lty with
-        | Tunion [t1; t2] ->
-          (match (get_node t1, get_node t2) with
-          | (Tdynamic, _) -> (r, LoclType t2)
-          | (_, Tdynamic) -> (r, LoclType t1)
-          | _ -> (r, ty))
-        | _ -> (r, ty))
-      | _ -> (r, ty))
-    | _ -> (r, ty)
-
   let describe_coeffect env ty =
     lazy
       (let (env, ty) = Typing_utils.simplify_intersections env ty in
@@ -5842,9 +5822,6 @@ end = struct
     lazy
       (let r_super = Typing_defs.reason ty_sup in
        let r_sub = Typing_defs.reason ty_sub in
-       let (r_super, ty_sup) =
-         detect_attempting_dynamic_coercion_reason r_super ty_sup
-       in
        let ty_super_descr = describe_ty_super ~is_coeffect env ty_sup in
        let ty_sub_descr = describe_ty_sub ~is_coeffect env ty_sub in
        let (ty_super_descr, ty_sub_descr) =

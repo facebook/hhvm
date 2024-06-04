@@ -401,6 +401,4 @@ module Predicates : sig
   val unpack_cstr_on_generics_opt : 'phase t_ -> (Pos_or_decl.t * pos_id) option
 
   val unpack_shape_literal_opt : t -> Pos.t option
-
-  val unpack_dynamic_coercion_opt : t -> t option
 end

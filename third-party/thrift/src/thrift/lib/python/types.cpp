@@ -839,12 +839,12 @@ void MapTypeInfo::read(
   if (!map) {
     THRIFT_PY3_CHECK_ERROR();
   }
+  auto read = [=](auto reader) {
+    PyObject* obj = nullptr;
+    reader(context, &obj);
+    return UniquePyObjectPtr(obj);
+  };
   for (std::uint32_t i = 0; i < mapSize; ++i) {
-    auto read = [=](auto reader) {
-      PyObject* obj = nullptr;
-      reader(context, &obj);
-      return UniquePyObjectPtr(obj);
-    };
     UniquePyObjectPtr mkey = read(keyReader);
     UniquePyObjectPtr mvalue = read(valueReader);
     UniquePyObjectPtr elem{PyTuple_New(2)};

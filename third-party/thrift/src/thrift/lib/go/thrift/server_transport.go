@@ -21,7 +21,7 @@ import "net"
 // ServerTransport is an interface for server transports.
 type ServerTransport interface {
 	Listen() error
-	Accept() (Transport, error)
+	Accept() (Socket, error)
 	Close() error
 	Addr() net.Addr
 

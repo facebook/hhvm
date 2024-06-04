@@ -39,7 +39,7 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 type SimpleServer struct {
 	processorContext ProcessorContext
 	serverTransport  ServerTransport
-	newProtocol      func(Transport) Protocol
+	newProtocol      func(Socket) Protocol
 	*ServerOptions
 }
 
@@ -95,7 +95,7 @@ func (p *SimpleServer) AcceptLoopContext(ctx context.Context) error {
 		if client == nil {
 			continue
 		}
-		go func(ctx context.Context, client Transport) {
+		go func(ctx context.Context, client Socket) {
 			ctx = p.addConnInfo(ctx, client)
 			if err := p.processRequests(ctx, client); err != nil {
 				p.log.Println("thrift: error processing request:", err)
@@ -147,7 +147,7 @@ func (p *SimpleServer) Stop() error {
 	return nil
 }
 
-func (p *SimpleServer) processRequests(ctx context.Context, client Transport) error {
+func (p *SimpleServer) processRequests(ctx context.Context, client Socket) error {
 	processor := p.processorContext
 
 	protocol := p.newProtocol(client)

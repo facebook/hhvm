@@ -27,11 +27,11 @@ type headerProtocol struct {
 	protoID ProtocolID
 }
 
-func NewHeaderProtocol(trans Transport) Protocol {
+func NewHeaderProtocol(socket Socket) Protocol {
 	p := &headerProtocol{
 		protoID: ProtocolIDCompact,
 	}
-	p.trans = newHeaderTransport(trans)
+	p.trans = newHeaderTransport(socket)
 
 	// Effectively an invariant violation.
 	if err := p.ResetProtocol(); err != nil {

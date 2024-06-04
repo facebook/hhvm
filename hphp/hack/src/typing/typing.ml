@@ -1343,6 +1343,7 @@ let fun_type_of_id env x tal el =
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_top_level_access
+           ~ignore_package_errors:false
            ~in_signature:false
            ~use_pos:(fst x)
            ~def_pos:fd.fe_pos
@@ -4757,7 +4758,9 @@ end = struct
       typename_expr env p sid outer (fun env ty ->
           make_result env p (Aast.Nameof (ty, p, CI sid)) ty)
     | Nameof cid ->
-      let (env, _tal, ce, cty) = Class_id.class_expr env [] cid in
+      let (env, _tal, ce, cty) =
+        Class_id.class_expr ~inside_nameof:true env [] cid
+      in
       make_result
         env
         p
@@ -9597,6 +9600,7 @@ and Class_id : sig
     ?is_attribute_param:is_variadic ->
     ?exact:exact ->
     ?check_explicit_targs:is_variadic ->
+    ?inside_nameof:bool ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
@@ -9660,6 +9664,7 @@ end = struct
       ?(is_attribute_param = false)
       ?(exact = nonexact)
       ?(check_explicit_targs = false)
+      ?(inside_nameof = false)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -9771,17 +9776,19 @@ end = struct
           let (env, ty) = Env.fresh_type_error env p in
           make_result env [] (Aast.CI c) ty
         | Decl_entry.Found class_ ->
-          if not is_attribute_param then
+          (if not is_attribute_param then
+            let ignore_package_errors = Env.package_v2 env && inside_nameof in
             Option.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
               (TVis.check_top_level_access
                  ~in_signature:false
+                 ~ignore_package_errors
                  ~use_pos:p
                  ~def_pos:(Cls.pos class_)
                  env
                  (Cls.internal class_)
                  (Cls.get_module class_)
-                 (Cls.get_package_override class_));
+                 (Cls.get_package_override class_)));
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then

@@ -411,6 +411,7 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
+             ~ignore_package_errors:false
              ~in_signature
              ~use_pos
              ~def_pos:(Cls.pos class_info)
@@ -424,6 +425,7 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
+             ~ignore_package_errors:false
              ~in_signature
              ~use_pos
              ~def_pos:typedef.td_pos
@@ -446,6 +448,7 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
+             ~ignore_package_errors:false
              ~in_signature
              ~use_pos
              ~def_pos:typedef.td_pos

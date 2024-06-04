@@ -154,7 +154,12 @@ let check_internal_access ~in_signature env target pos decl_pos =
   Option.map ~f:Typing_error.modules module_err_opt
 
 let check_public_access
-    env use_pos def_pos target_module target_package_override =
+    ~ignore_package_errors
+    env
+    use_pos
+    def_pos
+    target_module
+    target_package_override =
   match
     Typing_packages.can_access_public
       ~env
@@ -193,18 +198,21 @@ let check_public_access
           current_package_name;
           target_package_name;
         } ->
-    Some
-      (Typing_error.package
-         (Cross_pkg_access
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              current_filename;
-              target_filename = Pos_or_decl.filename def_pos;
-              package_pos = current_package_pos;
-              current_package_opt = current_package_name;
-              target_package_opt = target_package_name;
-            }))
+    if ignore_package_errors then
+      None
+    else
+      Some
+        (Typing_error.package
+           (Cross_pkg_access
+              {
+                pos = use_pos;
+                decl_pos = def_pos;
+                current_filename;
+                target_filename = Pos_or_decl.filename def_pos;
+                package_pos = current_package_pos;
+                current_package_opt = current_package_name;
+                target_package_opt = target_package_name;
+              }))
   | `PackageSoftIncludes
       Typing_packages.
         {
@@ -234,18 +242,21 @@ let check_public_access
           current_package_name;
           target_package_name;
         } ->
-    Some
-      (Typing_error.package
-         (Soft_included_access
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              current_filename;
-              target_filename = Pos_or_decl.filename def_pos;
-              package_pos = current_package_pos;
-              current_package_opt = current_package_name;
-              target_package_opt = target_package_name;
-            }))
+    if ignore_package_errors then
+      None
+    else
+      Some
+        (Typing_error.package
+           (Soft_included_access
+              {
+                pos = use_pos;
+                decl_pos = def_pos;
+                current_filename;
+                target_filename = Pos_or_decl.filename def_pos;
+                package_pos = current_package_pos;
+                current_package_opt = current_package_name;
+                target_package_opt = target_package_name;
+              }))
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
@@ -328,6 +339,7 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
 
 let is_visible_for_top_level
     ~in_signature
+    ~ignore_package_errors
     env
     is_internal
     target_module
@@ -337,7 +349,13 @@ let is_visible_for_top_level
   if is_internal then
     check_internal_access ~in_signature env target_module pos decl_pos
   else
-    check_public_access env pos decl_pos target_module target_package_override
+    check_public_access
+      ~ignore_package_errors
+      env
+      pos
+      decl_pos
+      target_module
+      target_package_override
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
@@ -362,6 +380,7 @@ let check_obj_access ~is_method ~is_receiver_interface ~use_pos ~def_pos env vis
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_top_level_access
+    ~ignore_package_errors
     ~in_signature
     ~use_pos
     ~def_pos
@@ -371,6 +390,7 @@ let check_top_level_access
     target_package_override =
   is_visible_for_top_level
     ~in_signature
+    ~ignore_package_errors
     env
     is_internal
     target_module

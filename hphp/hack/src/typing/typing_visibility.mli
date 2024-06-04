@@ -30,6 +30,7 @@ val check_obj_access :
   Typing_error.t option
 
 val check_top_level_access :
+  ignore_package_errors:bool ->
   in_signature:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->

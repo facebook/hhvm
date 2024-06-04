@@ -36,6 +36,7 @@ constexpr auto kRustRequestContextUri =
 constexpr auto kRustCopyUri = "facebook.com/thrift/annotation/rust/Copy";
 constexpr auto kRustNameUri = "facebook.com/thrift/annotation/rust/Name";
 constexpr auto kRustModUri = "facebook.com/thrift/annotation/rust/Mod";
+constexpr auto kRustSerdeUri = "facebook.com/thrift/annotation/rust/Serde";
 
 } // namespace rust
 } // namespace compiler

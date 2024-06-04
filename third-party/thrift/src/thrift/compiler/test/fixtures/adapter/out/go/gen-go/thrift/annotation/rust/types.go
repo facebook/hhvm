@@ -785,6 +785,134 @@ func (x *Type) String() string {
     return sb.String()
 }
 
+type Serde struct {
+    Enabled bool `thrift:"enabled,1" json:"enabled" db:"enabled"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*Serde)(nil)
+
+func NewSerde() *Serde {
+    return (&Serde{}).
+        SetEnabledNonCompat(false)
+}
+
+func (x *Serde) GetEnabled() bool {
+    return x.Enabled
+}
+
+func (x *Serde) SetEnabledNonCompat(value bool) *Serde {
+    x.Enabled = value
+    return x
+}
+
+func (x *Serde) SetEnabled(value bool) *Serde {
+    x.Enabled = value
+    return x
+}
+
+func (x *Serde) writeField1(p thrift.Format) error {  // Enabled
+    if err := p.WriteFieldBegin("enabled", thrift.BOOL, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Enabled
+    if err := p.WriteBool(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Serde) readField1(p thrift.Format) error {  // Enabled
+    result, err := p.ReadBool()
+if err != nil {
+    return err
+}
+
+    x.Enabled = result
+    return nil
+}
+
+func (x *Serde) toString1() string {  // Enabled
+    return fmt.Sprintf("%v", x.Enabled)
+}
+
+
+
+func (x *Serde) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("Serde"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Serde) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // enabled
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Serde) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Serde({")
+    sb.WriteString(fmt.Sprintf("Enabled:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Mod struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -1347,6 +1475,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/rust/Ord", func() any { return NewOrd() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/NewType", func() any { return NewNewType_() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Type", func() any { return NewType() })
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Serde", func() any { return NewSerde() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Mod", func() any { return NewMod() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Derive", func() any { return NewDerive() })

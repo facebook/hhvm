@@ -656,6 +656,94 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 /**
  * Original thrift struct:-
+ * Serde
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/rust/Serde'))>>
+class Serde implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'enabled',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'enabled' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'enabled' => ?bool,
+  );
+
+  const int STRUCTURAL_ID = 4995308257187856564;
+  /**
+   * Original thrift field:-
+   * 1: bool enabled
+   */
+  public bool $enabled;
+
+  public function __construct(?bool $enabled = null)[] {
+    $this->enabled = $enabled ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'enabled'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Serde';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "rust.Serde",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "enabled",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * Mod
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/rust/Mod'))>>

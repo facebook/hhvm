@@ -253,6 +253,31 @@
         "is_union" : false,
         "lineno" : 110
       },
+      "Serde" : {
+        "name" : "Serde",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "enabled" : {
+            "name" : "enabled",
+            "key" : 1,
+            "lineno" : 273,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 271
+      },
       "Mod" : {
         "name" : "Mod",
         "structured_annotations": {
@@ -269,14 +294,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 273,
+            "lineno" : 282,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 271
+        "lineno" : 280
       },
       "Adapter" : {
         "name" : "Adapter",
@@ -310,14 +335,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 321,
+            "lineno" : 330,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 276
+        "lineno" : 285
       },
       "Derive" : {
         "name" : "Derive",
@@ -343,7 +368,7 @@
           "derives" : {
             "name" : "derives",
             "key" : 1,
-            "lineno" : 347,
+            "lineno" : 356,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -353,7 +378,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 324
+        "lineno" : 333
       },
       "ServiceExn" : {
         "name" : "ServiceExn",
@@ -379,14 +404,14 @@
           "anyhow_to_application_exn" : {
             "name" : "anyhow_to_application_exn",
             "key" : 1,
-            "lineno" : 401,
+            "lineno" : 410,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 350
+        "lineno" : 359
       }
       },
   "source_path" : "thrift/annotation/rust",

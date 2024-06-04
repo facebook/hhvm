@@ -29,12 +29,12 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
     premadeThriftType_list_string = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_string),
-            )
-    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
             )
 )
 
@@ -82,6 +82,18 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("name").
     SetIsOptional(false).
     SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("rust.Serde").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("enabled").
+    SetIsOptional(false).
+    SetType(premadeThriftType_bool),
         },
     ),
     metadata.NewThriftStruct().

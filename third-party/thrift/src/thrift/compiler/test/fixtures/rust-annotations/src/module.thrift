@@ -97,6 +97,18 @@ struct T9 {
 
 // --
 
+@rust.Serde{enabled = true}
+struct T12 {
+  1: i64 data;
+}
+
+@rust.Serde{enabled = false}
+struct T13 {
+  1: i64 data;
+}
+
+// --
+
 @rust.Mod{name = "s2_proxy"}
 service S2 {
   @rust.Name{name = "s"}

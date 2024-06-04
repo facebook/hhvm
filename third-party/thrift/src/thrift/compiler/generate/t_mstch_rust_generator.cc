@@ -135,25 +135,33 @@ bool can_derive_ord(const t_type* type) {
   return false;
 }
 
-bool validate_rust_serde(const t_node& node) {
-  const std::string* ann = node.find_annotation_or_null("rust.serde");
-
-  return ann == nullptr || *ann == "true" || *ann == "false";
+bool validate_rust_serde(const t_named& node) {
+  if (const std::string* ann = node.find_annotation_or_null("rust.serde")) {
+    return ann == nullptr || *ann == "true" || *ann == "false";
+  }
+  // The structued form `@rust.Serde { enabled = ... }` if it exists, does not
+  // require further validation.
+  return true;
 }
 
 bool rust_serde_enabled(
-    const rust_codegen_options& options, const t_node& node) {
-  const std::string* ann = node.find_annotation_or_null("rust.serde");
+    const rust_codegen_options& options, const t_named& node) {
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kRustSerdeUri)) {
+    return get_annotation_property_bool(annot, "enabled");
+  }
 
-  if (ann == nullptr) {
-    return options.serde;
-  } else if (*ann == "true") {
-    return true;
-  } else if (*ann == "false") {
-    return false;
-  } else {
+  if (const std::string* ann = node.find_annotation_or_null("rust.serde")) {
+    if (*ann == "true") {
+      return true;
+    }
+    if (*ann == "false") {
+      return false;
+    }
     throw std::runtime_error("rust.serde should be `true` or `false`");
   }
+
+  return options.serde;
 }
 
 std::string get_types_import_name(

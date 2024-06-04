@@ -25,6 +25,8 @@ val print_decl_ty : ?msg:bool -> env -> Typing_defs.decl_ty -> string
 val print_error_ty :
   ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
 
+val print_hint : env -> Aast.hint -> string
+
 (** Return a string representation of the given type using Hack-like syntax,
     formatted with limited width and line breaks, including additional
     information from the {!SymbolOccurrence.t} and (if provided)

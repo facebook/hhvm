@@ -37,6 +37,7 @@ let warning_checks =
     (module Is_check : Handler.Warning.S);
     (module Sketchy_null_check);
     (module Disjoint_types);
+    (module Cast_non_primitive);
   ]
 
 let visitor ctx =

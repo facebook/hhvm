@@ -11,6 +11,10 @@ module A = Aast_defs
 module TUtils = Typing_utils
 module Env = Tast_env
 
+let warning_kind = Typing_warning.Cast_non_primitive
+
+let error_code = Typing_warning_utils.code warning_kind
+
 let is_always_castable env ty =
   let open Typing_make_type in
   let r = Reason.Rnone in
@@ -48,7 +52,19 @@ let is_not_castable_but_leads_to_too_many_false_positives env ty =
     true
   | _ -> false
 
-let handler =
+(** This linter catches dangerous uses of `(int)`, `(string)`, `(bool)`, and
+    `(float)` casts. These are safe to perform on the following inductive set
+    - primitives
+    - format strings
+    - nullables of safe types to perform casts.
+
+    Additionally, collections can be cast using `(bool)`.
+
+    Although, it is not known to be safe to perform casts on `mixed`,
+    `dynamic`, `nothing`, or genericly typed values, we do not lint against
+    them to prevent excessive false positives.
+  *)
+let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
@@ -64,6 +80,19 @@ let handler =
              && not
                   (is_not_castable_but_leads_to_too_many_false_positives env ty)
         ->
-        Lints_errors.cast_non_primitive pos
+        Typing_warning_utils.add_for_migration
+          (Env.get_tcopt env)
+          ~as_lint:
+            (if as_lint then
+              Some None
+            else
+              None)
+          ( pos,
+            Typing_warning.Cast_non_primitive,
+            {
+              Typing_warning.CastNonPrimitive.cast_hint =
+                Env.print_hint env hint;
+              ty = Env.print_ty env ty;
+            } )
       | _ -> ()
   end

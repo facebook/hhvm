@@ -61,10 +61,18 @@ module SketchyEquality = struct
   }
 end
 
+module CastNonPrimitive = struct
+  type t = {
+    cast_hint: string;
+    ty: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (SketchyEquality.t, warn) kind
   | Is_as_always : (IsAsAlways.t, migrated) kind
   | Sketchy_null_check : (SketchyNullCheck.t, migrated) kind
   | Non_disjoint_check : (NonDisjointCheck.t, migrated) kind
+  | Cast_non_primitive : (CastNonPrimitive.t, migrated) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

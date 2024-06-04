@@ -18,4 +18,4 @@
     `dynamic`, `nothing`, or genericly typed values, we do not lint against
     them to prevent excessive false positives.
   *)
-val handler : Tast_visitor.handler
+include Handler.Warning.S

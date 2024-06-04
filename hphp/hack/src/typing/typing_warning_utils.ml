@@ -28,6 +28,8 @@ module type Lint = sig
 
   val lint_code : t -> int
 
+  val lint_severity : Lints_core.severity
+
   val lint_quickfix : t -> Typing_warning.quickfix option
 end
 
@@ -66,6 +68,8 @@ module IsAsAlways = struct
   type t = Typing_warning.IsAsAlways.t
 
   let code = Codes.IsAsAlways
+
+  let lint_severity = Lints_core.Lint_warning
 
   let claim { Typing_warning.IsAsAlways.kind; lhs_ty; rhs_ty } =
     Printf.sprintf
@@ -112,6 +116,8 @@ module SketchyNullCheck = struct
 
   let lint_code _ = Lints_codes.Codes.sketchy_null_check
 
+  let lint_severity = Lints_core.Lint_warning
+
   let claim { Typing_warning.SketchyNullCheck.name; kind } =
     let name = Option.value name ~default:"$x" in
     "This is a sketchy null check.\nIt detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\nIf you want to test for them, please consider doing so explicitly.\nIf you only meant to test for `null`, "
@@ -141,6 +147,8 @@ module NonDisjointCheck = struct
 
   let lint_code _ = Lints_codes.Codes.invalid_disjointness_check
 
+  let lint_severity = Lints_core.Lint_warning
+
   let claim { Typing_warning.NonDisjointCheck.name; ty1; ty2; dynamic } =
     Printf.sprintf
       "%s to '%s' will always return the same value, because type %s is disjoint from type %s."
@@ -159,6 +167,30 @@ module NonDisjointCheck = struct
   let lint_quickfix _ = None
 end
 
+module CastNonPrimitive = struct
+  type t = Typing_warning.CastNonPrimitive.t
+
+  let code = Codes.CastNonPrimitive
+
+  let lint_code _ = Lints_codes.Codes.cast_non_primitive
+
+  let lint_severity = Lints_core.Lint_error
+
+  let claim { Typing_warning.CastNonPrimitive.cast_hint; ty } =
+    Printf.sprintf
+      ("Casting %s to %s: casting a non-primitive type to a primitive rarely yields a useful value. "
+      ^^ "Did you mean to extract a value from this object before casting it, or to do a null-check?"
+      )
+      ty
+      cast_hint
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+
+  let lint_quickfix _ = None
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -166,6 +198,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Is_as_always -> (module IsAsAlways)
   | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
+  | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
@@ -174,6 +207,7 @@ let module_of_migrated
   | Typing_warning.Is_as_always -> (module IsAsAlways)
   | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
+  | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with
@@ -211,7 +245,7 @@ let add_for_migration
       ~autofix:(M.lint_quickfix warning |> Option.map ~f:Lints_errors.quickfix)
       (M.lint_code warning)
       ~check_status
-      Lints_core.Lint_warning
+      M.lint_severity
       pos
       (M.claim warning)
 

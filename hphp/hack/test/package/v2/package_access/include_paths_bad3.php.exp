@@ -1,0 +1,21 @@
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
+-> This is from //hphp/hack/test/package/v2/package_access/include_paths_bad3.php--foo.php, which belongs to package pkg1 [2]
+-> But //hphp/hack/test/package/v2/package_access/include_paths_bad3.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+
+include_paths_bad3.php--bar.php:4:24
+2 | // package pkg2
+3 | <<file: __EnableUnstableFeatures('package_v2'), __PackageOverride('pkg2')>>
+[1] 4 | function bar(): void { foo (); }
+
+include_paths_bad3.php--foo.php:3:10
+1 | <?hh
+2 | // package pkg1
+[2] 3 | function foo(): void {}
+
+../PACKAGES.toml:6:11
+4 | include_paths=["./package_access/*"]
+5 |
+[3] 6 | [packages.pkg2]
+7 | include_paths=["package_access/include_paths_bad1.php--foo.php"]
+
+1 error found.

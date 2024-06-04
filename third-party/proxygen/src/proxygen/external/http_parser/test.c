@@ -2516,6 +2516,7 @@ test_simple (const char *buf, enum http_errno err_expected)
         http_errno_name(err_expected), http_errno_name(err), buf);
     exit(1);
   }
+  (void)pass;
 }
 
 #if HTTP_PARSER_STRICT_URL
@@ -2547,6 +2548,7 @@ test_lax_in_strict_mode (const char *buf, enum http_errno err_expected)
         http_errno_name(err_expected), http_errno_name(err), buf);
     exit(1);
   }
+  (void)pass;
 }
 #endif
 

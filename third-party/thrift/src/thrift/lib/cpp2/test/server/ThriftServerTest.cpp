@@ -3864,6 +3864,16 @@ TEST(ThriftServer, AddRemoveWorker) {
   ThriftServer server;
   server.setInterface(std::make_shared<TestInterface>());
   server.setupThreadManager();
+
+  // Under normal operation, ThriftServer will lock the ResourcePoolSet on
+  // startup. The server instance never starts here, so that doesn't happen. The
+  // TM adapter for ResourcePools requires the ResourcePoolSet to be locked for
+  // ::workerCount() to report the correct number, so we need to manually lock
+  // it here.
+  if (server.useResourcePools()) {
+    server.resourcePoolSet().lock();
+  }
+
   auto tm = server.getThreadManager_deprecated();
   auto tc = tm->workerCount();
   tm->addWorker(10);

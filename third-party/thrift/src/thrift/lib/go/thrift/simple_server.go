@@ -104,12 +104,8 @@ func (p *SimpleServer) AcceptLoopContext(ctx context.Context) error {
 	}
 }
 
-func (p *SimpleServer) addConnInfo(ctx context.Context, client Transport) context.Context {
+func (p *SimpleServer) addConnInfo(ctx context.Context, conn net.Conn) context.Context {
 	if p.processorContext == nil {
-		return ctx
-	}
-	conn, ok := client.(net.Conn)
-	if !ok {
 		return ctx
 	}
 	return WithConnInfo(ctx, conn)

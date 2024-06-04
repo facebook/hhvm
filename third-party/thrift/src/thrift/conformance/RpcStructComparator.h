@@ -57,4 +57,21 @@ inline bool equal(
   }
 }
 
+inline bool equal(
+    const ServerTestResult& actual, const ServerTestResult& expected) {
+  if (actual.getType() != expected.getType()) {
+    return false;
+  }
+  switch (expected.getType()) {
+    case ServerTestResult::Type::sinkUndeclaredException: {
+      auto& actualMsg =
+          *actual.sinkUndeclaredException_ref()->exceptionMessage();
+      auto& expectedMsg =
+          *expected.sinkUndeclaredException_ref()->exceptionMessage();
+      return actualMsg.find(expectedMsg) != std::string::npos;
+    }
+    default:
+      return actual == expected;
+  }
+}
 } // namespace apache::thrift::conformance

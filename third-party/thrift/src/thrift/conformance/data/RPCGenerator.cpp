@@ -896,6 +896,83 @@ Test createSinkInitialResponseTest() {
   return ret;
 }
 
+Test createSinkDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "SinkDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-declared-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "SinkDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .sinkDeclaredException_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "request";
+  clientInstruction.userException().emplace().msg() = "user_exception";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .sinkDeclaredException_ref()
+      .emplace()
+      .sinkThrew() = true;
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .sinkDeclaredException_ref()
+      .emplace()
+      .bufferSize() = kDefaultBufferSize;
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .sinkDeclaredException_ref()
+                           .emplace();
+  serverResult.request().emplace().data() = "request";
+  serverResult.userException().copy_from(clientInstruction.userException());
+
+  return ret;
+}
+
+Test createSinkUndeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "SinkUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-undeclared-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "SinkUndeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .sinkUndeclaredException_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "request";
+  clientInstruction.exceptionMessage() = "undeclared_exception";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .sinkUndeclaredException_ref()
+      .emplace()
+      .sinkThrew() = true;
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .sinkUndeclaredException_ref()
+      .emplace()
+      .bufferSize() = kDefaultBufferSize;
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .sinkUndeclaredException_ref()
+                           .emplace();
+  serverResult.request().copy_from(clientInstruction.request());
+  serverResult.exceptionMessage().copy_from(
+      clientInstruction.exceptionMessage());
+
+  return ret;
+}
+
 // =================== Interactions ===================
 Test createInteractionConstructorTest() {
   Test ret;
@@ -1113,6 +1190,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkFragmentationTest());
   suite.tests()->push_back(createSinkSubsequentCreditsTest());
   suite.tests()->push_back(createSinkInitialResponseTest());
+  suite.tests()->push_back(createSinkDeclaredExceptionTest());
+  suite.tests()->push_back(createSinkUndeclaredExceptionTest());
   // =================== Interactions ===================
   suite.tests()->push_back(createInteractionConstructorTest());
   suite.tests()->push_back(createInteractionFactoryFunctionTest());

@@ -187,6 +187,52 @@ RPCServerConformanceHandler::sinkInitialResponse(std::unique_ptr<Request> req) {
                                      ->bufferSize())}};
 }
 
+apache::thrift::SinkConsumer<Request, Response>
+RPCServerConformanceHandler::sinkDeclaredException(
+    std::unique_ptr<Request> req) {
+  auto& result = result_.sinkDeclaredException_ref().emplace();
+  result.request() = *req;
+  return {
+      [&](folly::coro::AsyncGenerator<Request&&> gen)
+          -> folly::coro::Task<Response> {
+        try {
+          std::ignore = co_await gen.next();
+        } catch (const UserException& e) {
+          result.userException() = e;
+          throw;
+        }
+        throw std::logic_error("Publisher didn't throw");
+      },
+      static_cast<uint64_t>(*testCase_->serverInstruction()
+                                 ->sinkDeclaredException_ref()
+                                 ->bufferSize())};
+}
+
+apache::thrift::SinkConsumer<Request, Response>
+RPCServerConformanceHandler::sinkUndeclaredException(
+    std::unique_ptr<Request> req) {
+  auto& result = result_.sinkUndeclaredException_ref().emplace();
+  result.request() = *req;
+  return {
+      [&](folly::coro::AsyncGenerator<Request&&> gen)
+          -> folly::coro::Task<Response> {
+        try {
+          std::ignore = co_await gen.next();
+          throw std::logic_error("Publisher didn't throw");
+        } catch (const TApplicationException& e) {
+          result.exceptionMessage() = e.getMessage();
+          throw;
+        } catch (...) {
+          result.exceptionMessage() =
+              folly::exceptionStr(std::current_exception());
+          throw;
+        }
+      },
+      static_cast<uint64_t>(*testCase_->serverInstruction()
+                                 ->sinkUndeclaredException_ref()
+                                 ->bufferSize())};
+}
+
 // =================== Interactions ===================
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {

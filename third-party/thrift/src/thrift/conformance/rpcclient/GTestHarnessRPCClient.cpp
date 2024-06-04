@@ -236,6 +236,49 @@ class ConformanceVerificationServer
                                        ->bufferSize())}};
   }
 
+  apache::thrift::SinkConsumer<Request, Response> sinkDeclaredException(
+      std::unique_ptr<Request> req) override {
+    auto& result = serverResult_.sinkDeclaredException_ref().emplace();
+    result.request() = *req;
+    return {
+        [&](folly::coro::AsyncGenerator<Request&&> gen)
+            -> folly::coro::Task<Response> {
+          try {
+            std::ignore = co_await gen.next();
+            throw std::logic_error("Publisher didn't throw");
+          } catch (const UserException& e) {
+            result.userException() = e;
+            throw;
+          } catch (...) {
+            throw std::logic_error(fmt::format(
+                "Publisher threw undeclared exception: {}",
+                folly::exception_wrapper(std::current_exception()).what()));
+          }
+        },
+        static_cast<uint64_t>(*testCase_.serverInstruction()
+                                   ->sinkDeclaredException_ref()
+                                   ->bufferSize())};
+  }
+
+  apache::thrift::SinkConsumer<Request, Response> sinkUndeclaredException(
+      std::unique_ptr<Request> req) override {
+    auto& result = serverResult_.sinkUndeclaredException_ref().emplace();
+    result.request() = *req;
+    return {
+        [&](folly::coro::AsyncGenerator<Request&&> gen)
+            -> folly::coro::Task<Response> {
+          try {
+            std::ignore = co_await gen.next();
+            throw std::logic_error("Publisher didn't throw");
+          } catch (const TApplicationException& e) {
+            result.exceptionMessage() = e.getMessage();
+            throw;
+          }
+        },
+        static_cast<uint64_t>(*testCase_.serverInstruction()
+                                   ->sinkUndeclaredException_ref()
+                                   ->bufferSize())};
+  }
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:
@@ -428,7 +471,7 @@ class RPCClientConformanceTest : public testing::Test {
 
     auto& actualServerResult = handler_->serverResult();
     auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
-    if (actualServerResult != expectedServerResult) {
+    if (!equal(actualServerResult, expectedServerResult)) {
       return testing::AssertionFailure()
           << "\nExpected server result: " << jsonify(expectedServerResult)
           << "\nActual server result: " << jsonify(actualServerResult);

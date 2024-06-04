@@ -337,6 +337,42 @@ SinkInitialResponseClientTestResult sinkInitialResponseTest(
       }());
 }
 
+SinkDeclaredExceptionClientTestResult sinkDeclaredExceptionTest(
+    SinkDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkDeclaredExceptionClientTestResult> {
+        auto sink =
+            co_await client->co_sinkDeclaredException(*instruction.request());
+        auto finalResponse = co_await folly::coro::co_awaitTry(
+            sink.sink([&]() -> folly::coro::AsyncGenerator<Request&&> {
+              throw UserException(*instruction.userException());
+              co_return;
+            }()));
+        SinkDeclaredExceptionClientTestResult result;
+        result.sinkThrew() = finalResponse.hasException<SinkThrew>();
+        co_return result;
+      }());
+}
+
+SinkUndeclaredExceptionClientTestResult sinkUndeclaredExceptionTest(
+    SinkUndeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkUndeclaredExceptionClientTestResult> {
+        auto sink =
+            co_await client->co_sinkUndeclaredException(*instruction.request());
+        auto finalResponse = co_await folly::coro::co_awaitTry(
+            sink.sink([&]() -> folly::coro::AsyncGenerator<Request&&> {
+              throw std::runtime_error(*instruction.exceptionMessage());
+              co_return;
+            }()));
+        SinkUndeclaredExceptionClientTestResult result;
+        result.sinkThrew() = finalResponse.hasException<SinkThrew>();
+        co_return result;
+      }());
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult interactionConstructorTest(
     InteractionConstructorClientInstruction&) {
@@ -463,6 +499,14 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::sinkInitialResponse:
       result.sinkInitialResponse_ref() =
           sinkInitialResponseTest(*clientInstruction.sinkInitialResponse_ref());
+      break;
+    case ClientInstruction::Type::sinkDeclaredException:
+      result.sinkDeclaredException_ref() = sinkDeclaredExceptionTest(
+          *clientInstruction.sinkDeclaredException_ref());
+      break;
+    case ClientInstruction::Type::sinkUndeclaredException:
+      result.sinkUndeclaredException_ref() = sinkUndeclaredExceptionTest(
+          *clientInstruction.sinkUndeclaredException_ref());
       break;
     case ClientInstruction::Type::interactionConstructor:
       result.interactionConstructor_ref() = interactionConstructorTest(

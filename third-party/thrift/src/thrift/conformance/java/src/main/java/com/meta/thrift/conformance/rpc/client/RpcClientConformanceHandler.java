@@ -47,7 +47,11 @@ import org.apache.thrift.conformance.RpcTestCase;
 import org.apache.thrift.conformance.SinkBasicClientInstruction;
 import org.apache.thrift.conformance.SinkBasicClientTestResult;
 import org.apache.thrift.conformance.SinkChunkTimeoutClientInstruction;
+import org.apache.thrift.conformance.SinkDeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.SinkDeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.SinkInitialResponseClientInstruction;
+import org.apache.thrift.conformance.SinkUndeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.SinkUndeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.StreamBasicClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientTestResult;
 import org.apache.thrift.conformance.StreamChunkTimeoutClientInstruction;
@@ -313,6 +317,41 @@ public class RpcClientConformanceHandler {
   public Mono<ClientTestResult> testSinkInitialResponse(
       SinkInitialResponseClientInstruction instruction) {
     throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testSinkDeclaredException(
+      SinkDeclaredExceptionClientInstruction instruction) {
+    Publisher<Request> publisher = Flux.error(instruction.getUserException());
+
+    return client
+        .sinkDeclaredException(instruction.getRequest(), publisher)
+        .map(
+            _r ->
+                ClientTestResult.fromSinkDeclaredException(
+                    new SinkDeclaredExceptionClientTestResult(false)))
+        .onErrorResume(
+            _e ->
+                Mono.just(
+                    ClientTestResult.fromSinkDeclaredException(
+                        new SinkDeclaredExceptionClientTestResult(true))));
+  }
+
+  public Mono<ClientTestResult> testSinkUndeclaredException(
+      SinkUndeclaredExceptionClientInstruction instruction) {
+    Publisher<Request> publisher =
+        Flux.error(new RuntimeException(instruction.getExceptionMessage()));
+
+    return client
+        .sinkDeclaredException(instruction.getRequest(), publisher)
+        .map(
+            _r ->
+                ClientTestResult.fromSinkUndeclaredException(
+                    new SinkUndeclaredExceptionClientTestResult(false)))
+        .onErrorResume(
+            e ->
+                Mono.just(
+                    ClientTestResult.fromSinkUndeclaredException(
+                        new SinkUndeclaredExceptionClientTestResult(true))));
   }
 
   public Mono<ClientTestResult> testInteractionConstructor(

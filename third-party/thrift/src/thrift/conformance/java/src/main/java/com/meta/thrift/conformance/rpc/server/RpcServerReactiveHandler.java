@@ -231,6 +231,16 @@ public class RpcServerReactiveHandler implements RPCConformanceService.Reactive 
   }
 
   @Override
+  public Mono<Response> sinkDeclaredException(Request request, Publisher<Request> publisher) {
+    return null;
+  }
+
+  @Override
+  public Mono<Response> sinkUndeclaredException(Request request, Publisher<Request> publisher) {
+    return null;
+  }
+
+  @Override
   public BasicInteraction createBasicInteraction() {
     return null;
   }

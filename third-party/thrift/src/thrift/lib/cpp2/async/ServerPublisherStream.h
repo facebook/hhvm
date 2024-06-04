@@ -32,6 +32,10 @@ template <typename T, bool WithHeader>
 class ServerStreamMultiPublisher;
 
 namespace detail {
+namespace test {
+class TestStreamClientCallbackService;
+} // namespace test
+
 template <typename T, bool WithHeader = false>
 class ServerPublisherStream : private StreamServerCallback {
   struct Deleter {
@@ -437,6 +441,7 @@ class ServerPublisherStream : private StreamServerCallback {
   TileStreamGuard interaction_;
 
   friend class ServerStreamMultiPublisher<T, WithHeader>;
+  friend class test::TestStreamClientCallbackService;
 };
 
 } // namespace detail
@@ -471,6 +476,8 @@ class ServerStreamPublisher {
  private:
   typename apache::thrift::detail::ServerPublisherStream<T, WithHeader>::Ptr
       impl_;
+
+  friend class detail::test::TestStreamClientCallbackService;
 };
 
 } // namespace thrift

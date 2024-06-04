@@ -427,3 +427,14 @@ TYPED_TEST(MultiStreamServiceTest, UncompletedPublisherMoveAssignment) {
             RpcOptions().setTimeout(std::chrono::seconds{10}));
       });
 }
+
+class StreamClientCallbackTest : public AsyncTestSetup<
+                                     TestStreamClientCallbackService,
+                                     Client<TestStreamService>> {};
+TEST_F(StreamClientCallbackTest, RpcMethodName) {
+  connectToServer(
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
+        auto gen = (co_await client.co_range(0, 0)).toAsyncGenerator();
+        EXPECT_EQ(0, co_await client.co_test());
+      });
+}

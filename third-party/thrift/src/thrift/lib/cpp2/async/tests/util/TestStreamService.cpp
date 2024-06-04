@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/async/tests/util/TestStreamService.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/portability/GTest.h>
@@ -418,6 +419,25 @@ ServerStream<int32_t> TestStreamProducerCallbackService::rangeThrowUDE(
                 executor,
                 encoder));
       });
+}
+
+ServerStream<int32_t> TestStreamClientCallbackService::range(
+    int32_t from, int32_t to) {
+  auto [stream, publisher] = ServerStream<int32_t>::createPublisher([] {});
+  for (int i = from; i <= to; i++) {
+    publisher.next(i);
+  }
+  streamPublisher_ = std::move(publisher);
+  return std::move(stream);
+}
+
+folly::coro::Task<int32_t> TestStreamClientCallbackService::co_test() {
+  rocket::RocketStreamClientCallback* cb =
+      static_cast<rocket::RocketStreamClientCallback*>(
+          streamPublisher_->impl_->streamClientCallback_);
+  EXPECT_EQ("range", cb->getRpcMethodName());
+  std::move(*streamPublisher_).complete();
+  co_return 0;
 }
 
 } // namespace apache::thrift::detail::test

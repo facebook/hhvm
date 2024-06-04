@@ -69,6 +69,11 @@ class RocketStreamClientCallback final : public StreamClientCallback {
     serverCallbackOrCancelled_ = kCancelledFlag;
   }
 
+  void setRpcMethodName(std::string rpcMethodName) {
+    rpcMethodName_ = std::move(rpcMethodName);
+  }
+  std::string_view getRpcMethodName() const { return rpcMethodName_; }
+
  private:
   StreamServerCallback* serverCallback() const {
     return reinterpret_cast<StreamServerCallback*>(serverCallbackOrCancelled_);
@@ -82,6 +87,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   std::unique_ptr<folly::HHWheelTimer::Callback> timeoutCallback_;
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
+  std::string rpcMethodName_{"<unknown_stream_method>"};
 
   void scheduleTimeout();
   void cancelTimeout();

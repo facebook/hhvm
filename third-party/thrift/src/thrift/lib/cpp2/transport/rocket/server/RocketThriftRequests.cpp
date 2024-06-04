@@ -605,6 +605,7 @@ ThriftServerRequestStream::ThriftServerRequestStream(
   if (auto compressionConfig = getCompressionConfig()) {
     clientCallback_->setCompressionConfig(*compressionConfig);
   }
+  clientCallback_->setRpcMethodName(getMethodName());
   scheduleTimeouts();
 }
 

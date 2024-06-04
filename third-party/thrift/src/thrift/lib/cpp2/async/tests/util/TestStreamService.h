@@ -159,4 +159,14 @@ class TestStreamProducerCallbackService
       int32_t from, int32_t to) override;
 };
 
+class TestStreamClientCallbackService
+    : public ServiceHandler<TestStreamService> {
+ public:
+  ServerStream<int32_t> range(int32_t from, int32_t to) override;
+  folly::coro::Task<int32_t> co_test() override;
+
+ private:
+  std::optional<ServerStreamPublisher<int32_t>> streamPublisher_;
+};
+
 } // namespace apache::thrift::detail::test

@@ -5813,7 +5813,7 @@ end = struct
           ~obj_pos:p1
           ~is_method:true
           ~meth_caller:false
-          ~nullsafe:(Option.map ~f:(fun p -> Reason.nullsafe_op p) nullsafe)
+          ~nullsafe
           ~coerce_from_ty:None
           ~explicit_targs
           ~class_id:(CIexpr e1)
@@ -10814,7 +10814,7 @@ end = struct
         let nullsafe =
           match nullflavor with
           | OG_nullthrows -> None
-          | OG_nullsafe -> Some (Reason.nullsafe_op pobj)
+          | OG_nullsafe -> Some pobj
         in
         let (env, tobj, obj_ty) =
           Expr.expr

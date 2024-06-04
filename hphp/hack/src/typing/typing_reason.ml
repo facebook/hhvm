@@ -2660,11 +2660,6 @@ module Predicates = struct
     | Rhint _ -> true
     | _ -> false
 
-  let unpack_nullsafe_op_opt r =
-    match r with
-    | Rnullsafe_op p -> Some p
-    | _ -> None
-
   let unpack_expr_dep_type_opt r =
     match r with
     | Rexpr_dep_type (r, p, e) -> Some (r, p, e)

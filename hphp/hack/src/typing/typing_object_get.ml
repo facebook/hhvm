@@ -42,7 +42,7 @@ type obj_get_args = {
   meth_caller: bool;
   is_method: bool;
   is_nonnull: bool;
-  nullsafe: Reason.t option;
+  nullsafe: Pos.t option;
   obj_pos: pos;
   coerce_from_ty:
     (MakeType.Nast.pos * Reason.ureason * Typing_defs.locl_ty) option;
@@ -1032,20 +1032,12 @@ and nullable_obj_get
   in
 
   match args.nullsafe with
-  | Some r_null ->
+  | Some p1 ->
     let (env, ty_errs, (method_, tal), lval_mismatch, rval_mismatch) =
       obj_get_inner args env ty id on_error
     in
     let (env, ty) =
-      match Reason.Predicates.unpack_nullsafe_op_opt r_null with
-      | Some p1 ->
-        make_nullable_member_type
-          ~is_method:args.is_method
-          env
-          id_pos
-          p1
-          method_
-      | None -> (env, method_)
+      make_nullable_member_type ~is_method:args.is_method env id_pos p1 method_
     in
     (env, ty_errs, (ty, tal), lval_mismatch, rval_mismatch)
   | None when rcv_is_option ->

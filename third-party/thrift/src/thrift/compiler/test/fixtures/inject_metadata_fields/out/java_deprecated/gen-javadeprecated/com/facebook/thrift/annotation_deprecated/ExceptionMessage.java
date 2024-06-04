@@ -38,7 +38,7 @@ import com.facebook.thrift.protocol.*;
  * This annotation can be specified on at most one field of an
  * [exception definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#exceptions),
  * whose type must be `string`. The thrift compiler will generate an error
- * if this annotion is specied on a field in any other structured definition,
+ * if this annotation is specified on a field in any other structured definition,
  * like a [struct definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#structs)
  * or an [union definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#unions)
  * 

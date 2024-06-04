@@ -199,6 +199,7 @@ struct
       dc_docs_url = dc.dc_docs_url;
       dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
       dc_sort_text = dc.dc_sort_text;
+      dc_package_override = dc.dc_package_override;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
@@ -260,6 +261,7 @@ struct
       sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
       sc_docs_url = sc.sc_docs_url;
+      sc_package_override = sc.sc_package_override;
     }
 
   and shallow_class_const scc =

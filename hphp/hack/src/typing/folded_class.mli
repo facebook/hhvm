@@ -54,6 +54,8 @@ val get_docs_url : t -> string option
 
 val get_module : t -> string option
 
+val get_package_override : t -> string option
+
 val internal : t -> bool
 
 val is_module_level_trait : t -> bool

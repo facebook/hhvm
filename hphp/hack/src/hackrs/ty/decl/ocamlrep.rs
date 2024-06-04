@@ -81,10 +81,11 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             sort_text,
+            package_override,
         } = self;
         let need_init = self.has_concrete_constructor();
         let abstract_ = self.is_abstract();
-        let mut block = alloc.block_with_size(38);
+        let mut block = alloc.block_with_size(39);
         alloc.set_field(&mut block, 0, alloc.add_copy(need_init));
         alloc.set_field(&mut block, 1, alloc.add_copy(abstract_));
         alloc.set_field(&mut block, 2, alloc.add(is_final));
@@ -123,6 +124,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         alloc.set_field(&mut block, 35, alloc.add(docs_url));
         alloc.set_field(&mut block, 36, alloc.add(allow_multiple_instantiations));
         alloc.set_field(&mut block, 37, alloc.add(sort_text));
+        alloc.set_field(&mut block, 38, alloc.add(package_override));
         block.build()
     }
 }
@@ -131,7 +133,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
 // See comment on impl of ToOcamlRep for FoldedClass.
 impl<R: Reason> FromOcamlRep for FoldedClass<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let block = ocamlrep::from::expect_tuple(value, 38)?;
+        let block = ocamlrep::from::expect_tuple(value, 39)?;
         Ok(Self {
             is_final: ocamlrep::from::field(block, 2)?,
             is_const: ocamlrep::from::field(block, 3)?,
@@ -169,6 +171,7 @@ impl<R: Reason> FromOcamlRep for FoldedClass<R> {
             docs_url: ocamlrep::from::field(block, 35)?,
             allow_multiple_instantiations: ocamlrep::from::field(block, 36)?,
             sort_text: ocamlrep::from::field(block, 37)?,
+            package_override: ocamlrep::from::field(block, 38)?,
         })
     }
 }

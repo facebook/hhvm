@@ -4526,6 +4526,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             user_attributes,
             enum_type: None,
             docs_url,
+            package_override: self.package_override,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name, cls);
@@ -4996,6 +4997,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 includes,
             })),
             docs_url,
+            package_override: self.package_override,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(key, cls);
@@ -5199,6 +5201,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 includes,
             })),
             docs_url,
+            package_override: self.package_override,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name.1, cls);

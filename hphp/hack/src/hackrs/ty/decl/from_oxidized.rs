@@ -427,6 +427,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             user_attributes,
             enum_type,
             docs_url,
+            package_override,
         } = sc;
         Self {
             mode: *mode,
@@ -462,6 +463,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             user_attributes: slice(user_attributes),
             enum_type: enum_type.map(Into::into),
             docs_url: docs_url.map(Into::into),
+            package_override: package_override.map(Into::into),
         }
     }
 }
@@ -708,6 +710,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             docs_url,
             allow_multiple_instantiations,
             sort_text,
+            package_override,
         } = cls;
         Self {
             name: (*name).into(),
@@ -758,6 +761,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             docs_url: docs_url.map(Into::into),
             allow_multiple_instantiations: *allow_multiple_instantiations,
             sort_text: sort_text.map(Into::into),
+            package_override: package_override.map(Into::into),
         }
     }
 }

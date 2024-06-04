@@ -37,7 +37,8 @@ File root|module_static_prop.php--A.php
           }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package_override = None }));
   ("\\a",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([5:8-9], "A"));

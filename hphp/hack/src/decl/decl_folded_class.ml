@@ -1009,6 +1009,7 @@ and class_decl
           SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
           c.sc_user_attributes;
       dc_sort_text = ua_sort_text;
+      dc_package_override = c.sc_package_override;
     }
   in
   let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in

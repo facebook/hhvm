@@ -48,6 +48,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             user_attributes,
             enum_type,
             docs_url,
+            package_override,
         } = self;
 
         let mut s = f.debug_struct("ShallowClass");
@@ -147,6 +148,10 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             s.field("docs_url", docs_url);
         }
 
+        if let Some(package_override) = package_override {
+            s.field("package_override", package_override);
+        }
+
         s.finish()
     }
 }
@@ -190,6 +195,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             sort_text,
+            package_override,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -304,6 +310,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if let Some(sort_text) = sort_text {
             s.field("sort_text", sort_text);
+        }
+        if let Some(package_override) = package_override {
+            s.field("package_override", package_override);
         }
 
         s.finish()

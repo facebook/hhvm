@@ -280,5 +280,6 @@
              ];
            sm_sort_text = None }
          ];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package_override = None }))
   ]

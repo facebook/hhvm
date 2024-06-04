@@ -15,7 +15,7 @@
        [{ Typing_defs_core.ua_name = ([3:3-24], "__ConsistentConstruct");
           ua_params = []; ua_raw_val = None }
          ];
-       sc_enum_type = None; sc_docs_url = None }));
+       sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
   ("\\C2",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -68,7 +68,7 @@
                   support_dynamic_type = false };
                 sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None }));
+        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
   ("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -82,5 +82,5 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
   ]

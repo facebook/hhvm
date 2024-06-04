@@ -19,7 +19,7 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None }));
+        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
   ("\\test",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -61,5 +61,5 @@
            ua_params = [(Typing_defs_core.Classname "\\NS1\\NS2\\C")];
            ua_raw_val = None }
           ];
-        sc_enum_type = None; sc_docs_url = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
   ]

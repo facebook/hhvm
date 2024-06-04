@@ -20,7 +20,7 @@
        [{ Typing_defs_core.ua_name = ([4:3-23], "__SupportDynamicType");
           ua_params = []; ua_raw_val = None }
          ];
-       sc_enum_type = None; sc_docs_url = None }));
+       sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -80,7 +80,8 @@
              php_std_lib = false; support_dynamic_type = true };
            sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }));
   ("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -168,5 +169,5 @@
         [{ Typing_defs_core.ua_name = ([15:3-23], "__SupportDynamicType");
            ua_params = []; ua_raw_val = None }
           ];
-        sc_enum_type = None; sc_docs_url = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
   ]

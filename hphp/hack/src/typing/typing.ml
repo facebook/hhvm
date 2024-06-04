@@ -9781,7 +9781,7 @@ end = struct
                  env
                  (Cls.internal class_)
                  (Cls.get_module class_)
-                 None (* TODO(milliechen): add package_override to Cls.t *));
+                 (Cls.get_package_override class_));
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then

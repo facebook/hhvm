@@ -56,7 +56,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
          ];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package_override = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -117,7 +118,8 @@
               php_std_lib = false; support_dynamic_type = false };
             sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -155,7 +157,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -195,7 +198,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -235,7 +239,8 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }));
   ("\\F",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -277,5 +282,6 @@
              php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package_override = None }))
   ]

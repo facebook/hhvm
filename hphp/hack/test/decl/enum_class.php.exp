@@ -76,7 +76,7 @@
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([5:14-22]), (Tprim Tarraykey));
                 te_constraint = None; te_includes = [] });
-        sc_docs_url = None }));
+        sc_docs_url = None; sc_package_override = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -119,7 +119,7 @@
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([11:14-20]), (Tprim Tstring));
                 te_constraint = None; te_includes = [] });
-        sc_docs_url = None }));
+        sc_docs_url = None; sc_package_override = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -166,5 +166,5 @@
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-        sc_docs_url = None }))
+        sc_docs_url = None; sc_package_override = None }))
   ]

@@ -483,6 +483,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             sort_text,
+            package_override,
         } = self;
         arena.alloc(obr::decl_defs::DeclClassType {
             name: name.to_oxidized(arena),
@@ -526,6 +527,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             docs_url: docs_url.as_deref().to_oxidized(arena),
             allow_multiple_instantiations: *allow_multiple_instantiations,
             sort_text: sort_text.as_deref().to_oxidized(arena),
+            package_override: package_override.as_deref().to_oxidized(arena),
         })
     }
 }
@@ -716,6 +718,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
             user_attributes,
             enum_type,
             docs_url,
+            package_override,
         } = self;
 
         arena.alloc(obr::shallow_decl_defs::ClassDecl {
@@ -753,6 +756,9 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
             user_attributes: user_attributes.to_oxidized(arena),
             enum_type: enum_type.as_ref().map(|e| e.to_oxidized(arena)),
             docs_url: docs_url
+                .as_ref()
+                .map(|s| bumpalo::collections::String::from_str_in(s, arena).into_bump_str()),
+            package_override: package_override
                 .as_ref()
                 .map(|s| bumpalo::collections::String::from_str_in(s, arena).into_bump_str()),
         })

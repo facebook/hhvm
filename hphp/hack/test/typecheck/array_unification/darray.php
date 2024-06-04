@@ -9,7 +9,7 @@ function ok_lit2(): darray<int, bool> {
 }
 
 function ok_func(KeyedTraversable<int, bool> $kt): dict<int, bool> {
-  return darray($kt);
+  return dict($kt);
 }
 
 function ok_hint(darray<int, bool> $v): dict<int, bool> {

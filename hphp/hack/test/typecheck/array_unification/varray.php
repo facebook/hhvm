@@ -9,7 +9,7 @@ function ok_lit2(): varray<int> {
 }
 
 function ok_func(Traversable<int> $t): vec<int> {
-  return varray($t);
+  return vec($t);
 }
 
 function ok_hint(varray<int> $v): vec<int> {

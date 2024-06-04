@@ -45,7 +45,7 @@ async function testit(Map<arraykey, Vector<C>> $m, varray<int> $user_ids):Awaita
   $result = dict[];
    foreach ($m as $id => $profiles) {
       $result[$id] = array_create_set_from_values(
-        darray(maybe_varray_map($x1 ==> $x1->getID(), $profiles)),
+        dict(maybe_varray_map($x1 ==> $x1->getID(), $profiles)),
       );
    }
 }

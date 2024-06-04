@@ -112,12 +112,12 @@ namespace HH {
   <<__NoAutoLikes>>
   function keyset<<<__NoAutoBound>> Tv as arraykey>(Traversable<Tv> $arr)[]: keyset<Tv>;
 
-  <<__NoAutoLikes>>
+  <<__NoAutoLikes, __Deprecated('use dict', 1000000)>>
   function darray<<<__NoAutoBound>> Tk as arraykey, Tv>(
     KeyedTraversable<Tk, Tv> $arr,
   )[]: darray<Tk, Tv>;
 
-  <<__NoAutoLikes>>
+  <<__NoAutoLikes, __Deprecated('use vec', 1000000)>>
   function varray<Tv>(Traversable<Tv> $arr)[]: varray<Tv>;
 
   function is_php_array(readonly mixed $input)[]: bool;

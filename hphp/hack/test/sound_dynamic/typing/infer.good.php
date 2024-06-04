@@ -2,11 +2,11 @@
 <<file:__EnableUnstableFeatures('upcast_expression')>>
 
 function test(Traversable<int> $e) : void {
-  varray($e) upcast dynamic;
+  vec($e) upcast dynamic;
 }
 
 function test2(Traversable<int> $e) : void {
-  $v = varray($e);
+  $v = vec($e);
   $v upcast dynamic;
 }
 

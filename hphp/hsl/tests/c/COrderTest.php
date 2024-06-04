@@ -68,9 +68,7 @@ final class COrderTest extends HackTest {
       expect(C\is_sorted($t))->toEqual(
         $expect,
         'Sorting failed for a Traversable of type %s',
-        is_object($t)
-          ? get_class($t)
-          : gettype($t),
+        is_object($t) ? get_class($t) : gettype($t),
       );
     }
   }
@@ -112,9 +110,7 @@ final class COrderTest extends HackTest {
       expect(C\is_sorted($t, $cmp))->toEqual(
         $expect,
         'Sorting failed for a Traversable of type %s',
-        is_object($t)
-          ? get_class($t)
-          : gettype($t),
+        is_object($t) ? get_class($t) : gettype($t),
       );
     }
   }
@@ -165,9 +161,7 @@ final class COrderTest extends HackTest {
       expect(C\is_sorted_by($cubes, $cube_to_volume))->toEqual(
         $expect,
         'Sorting failed for a Traversable of type %s',
-        is_object($cubes)
-          ? get_class($cubes)
-          : gettype($cubes),
+        is_object($cubes) ? get_class($cubes) : gettype($cubes),
       );
     }
   }
@@ -190,8 +184,8 @@ final class COrderTest extends HackTest {
     return vec[
       $vec,
       $traversable_to_generator($vec),
-      HH\array_mark_legacy(varray($vec)),
-      HH\array_mark_legacy(darray($vec)),
+      HH\array_mark_legacy(vec($vec)),
+      HH\array_mark_legacy(dict($vec)),
       dict($vec),
       new Vector($vec),
       new ImmVector($vec),

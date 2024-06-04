@@ -17,7 +17,7 @@ let warning_kind = Typing_warning.Is_as_always
 
 let error_code = Typing_warning_utils.code warning_kind
 
-let nothing_ty = Typing_make_type.nothing Typing_reason.Rnone
+let nothing_ty = Typing_make_type.nothing Typing_reason.none
 
 (* To handle typechecking against placeholder, e.g., `... as C<_>`, we convert
    the generic the placeholder is elaborated to into a type variable so that
@@ -32,7 +32,7 @@ let replace_placeholders_with_tvars env ty =
   match T.get_node ty with
   | T.Tclass (id, exact, targs) ->
     let (env, targs) = List.fold_map ~f:replace_placeholder ~init:env targs in
-    (env, T.mk (Typing_reason.Rnone, T.Tclass (id, exact, targs)))
+    (env, T.mk (Typing_reason.none, T.Tclass (id, exact, targs)))
   | _ -> (env, ty)
 
 let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =

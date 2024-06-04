@@ -128,7 +128,7 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
           (* For implicit pessimisation, without <<__NoAutoLikes>>, wrap like around non-enforced inout parameters *)
           match (et_enforced, param.param_callconv) with
           | (Unenforced, Ast_defs.Pinout _) when not no_auto_likes ->
-            MakeType.like (Reason.Rpessimised_inout (get_pos ty)) ty
+            MakeType.like (Reason.pessimised_inout (get_pos ty)) ty
           | _ -> ty
         else
           ty
@@ -141,7 +141,7 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
       | t when param.param_is_variadic ->
         (* when checking the body of a function with a variadic
          * argument, "f(C ...$args)", $args is a vec<C> *)
-        let r = Reason.Rvar_param param.param_pos in
+        let r = Reason.var_param param.param_pos in
         let arr_values = mk (r, t) in
         MakeType.vec r arr_values
       | _ -> ty
@@ -159,7 +159,7 @@ let make_param_local_tys ~dynamic_mode ~no_auto_likes env decl_tys params =
            if dynamic_mode then
              let dyn_ty =
                MakeType.dynamic
-                 (Reason.Rsupport_dynamic_type
+                 (Reason.support_dynamic_type
                     (Pos_or_decl.of_raw_pos param.param_pos))
              in
              match hint with
@@ -171,7 +171,7 @@ let make_param_local_tys ~dynamic_mode ~no_auto_likes env decl_tys params =
                       ty ->
                Some
                  (MakeType.intersection
-                    (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+                    (Reason.support_dynamic_type Pos_or_decl.none)
                     [ty; dyn_ty])
              | _ -> Some dyn_ty
            else

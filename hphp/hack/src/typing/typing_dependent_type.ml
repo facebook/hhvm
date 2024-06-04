@@ -67,7 +67,7 @@ module ExprDepTy = struct
         let (ereason, dep) = new_ env in
         (Pos_or_decl.of_raw_pos p, ereason, dep)
     in
-    (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), dep)
+    (Reason.expr_dep_type (reason, pos, expr_dep_reason), dep)
 
   (****************************************************************************)
   (* A type access "this::T" is translated to "<this>::T" during the

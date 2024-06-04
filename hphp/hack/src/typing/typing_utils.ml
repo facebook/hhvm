@@ -252,19 +252,19 @@ let is_class_i ty =
   | LoclType ty -> is_class ty
 
 let is_mixed_i env ty =
-  let mixed = LoclType (MakeType.mixed Reason.Rnone) in
+  let mixed = LoclType (MakeType.mixed Reason.none) in
   is_sub_type_for_union_i env mixed ty
 
 let is_mixed env ty = is_mixed_i env (LoclType ty)
 
 let is_nothing_i env ty =
-  let nothing = LoclType (MakeType.nothing Reason.Rnone) in
+  let nothing = LoclType (MakeType.nothing Reason.none) in
   is_sub_type_for_union_i env ty nothing
 
 let is_nothing env ty = is_nothing_i env (LoclType ty)
 
 let is_dynamic env ty =
-  let dynamic = MakeType.dynamic Reason.Rnone in
+  let dynamic = MakeType.dynamic Reason.none in
   (is_sub_type_for_union env dynamic ty && not (is_mixed env ty))
   || (is_sub_type_for_union env ty dynamic && not (is_nothing env ty))
 
@@ -658,7 +658,7 @@ let default_fun_param ~readonly ?(pos = Pos_or_decl.none) ty : 'a fun_param =
 
 let tany = Env.tany
 
-let mk_tany env p = mk (Reason.Rwitness p, tany env)
+let mk_tany env p = mk (Reason.witness p, tany env)
 
 let collect_enum_class_upper_bounds env name =
   (* the boolean ok is here to see if we find anything at all,
@@ -677,7 +677,7 @@ let collect_enum_class_upper_bounds env name =
              * reason is not useful. We could add a dedicated reason
              * for more precise error reporting.
              *)
-            let r = Reason.Rnone in
+            let r = Reason.none in
             mk (r, Tintersection [result; lty])
           in
           (seen, true, result)
@@ -687,7 +687,7 @@ let collect_enum_class_upper_bounds env name =
       upper_bounds
       (seen, ok, result)
   in
-  let mixed = MakeType.mixed Reason.Rnone in
+  let mixed = MakeType.mixed Reason.none in
   let (_, ok, upper_bound) = collect SSet.empty false mixed name in
   if ok then
     let (env, upper_bound) = simplify_intersections env upper_bound in
@@ -825,7 +825,7 @@ and strip_dynamic env ty =
   | Some ty -> ty
 
 let is_supportdyn env ty =
-  is_sub_type_for_union env ty (MakeType.supportdyn_mixed Reason.Rnone)
+  is_sub_type_for_union env ty (MakeType.supportdyn_mixed Reason.none)
 
 let rec make_supportdyn r env ty =
   let (env, ty) = Env.expand_type env ty in

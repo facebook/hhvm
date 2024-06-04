@@ -139,7 +139,7 @@ let closed_shape r map = shape r (nothing r) map
 
 let open_shape ~kind r map = shape r kind map
 
-let supportdyn_mixed ?(mixed_reason = Reason.Rnone) r =
+let supportdyn_mixed ?(mixed_reason = Reason.none) r =
   supportdyn r (mixed mixed_reason)
 
 let hh_formatstring r ty =
@@ -219,7 +219,7 @@ let simple_variadic_splat r ty =
 let capability r name : locl_ty = class_type r name []
 
 let default_capability p : locl_ty =
-  let r = Reason.Rdefault_capability p in
+  let r = Reason.default_capability p in
   intersection
     r
     SN.Capabilities.
@@ -233,7 +233,7 @@ let default_capability p : locl_ty =
       ]
 
 let default_capability_decl p : decl_ty =
-  let r = Reason.Rdefault_capability p in
+  let r = Reason.default_capability p in
   intersection
     r
     SN.Capabilities.
@@ -246,4 +246,4 @@ let default_capability_decl p : decl_ty =
         apply r (p, io) [];
       ]
 
-let default_capability_unsafe p : locl_ty = mixed (Reason.Rhint p)
+let default_capability_unsafe p : locl_ty = mixed (Reason.hint p)

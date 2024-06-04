@@ -58,7 +58,7 @@ let coerce_type_impl
          dynamic *)
       let tunion =
         Typing_make_type.locl_like
-          (Reason.Rdynamic_coercion (get_reason ty_expect))
+          (Reason.dynamic_coercion (get_reason ty_expect))
           ty_expect
       in
       Typing_utils.sub_type

@@ -172,7 +172,7 @@ and get_spread_attributes env pos onto_xhp cty =
  * Typing rules for the body expressions of an XHP literal.
  *)
 let is_xhp_child env pos ty =
-  let r = Reason.Rwitness pos in
+  let r = Reason.witness pos in
   (* XHPChild *)
   let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
   (* Any Traversable *)

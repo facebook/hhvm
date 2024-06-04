@@ -5690,8 +5690,8 @@ end = struct
      is a type error. *)
   let detect_attempting_dynamic_coercion_reason r ty =
     let open Typing_defs_core in
-    match r with
-    | Typing_reason.Rdynamic_coercion r ->
+    match Reason.Predicates.unpack_dynamic_coercion_opt r with
+    | Some r ->
       (match ty with
       | LoclType lty ->
         (match get_node lty with
@@ -5857,7 +5857,7 @@ end = struct
        let left =
          Typing_reason.to_string
            ("Expected " ^ ty_super_descr)
-           (Typing_reason.Rrev r_super)
+           (Typing_reason.rev r_super)
        in
        let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
        let reasons = left @ right in
@@ -5866,10 +5866,10 @@ end = struct
            ~default:[]
            ~f:(function
              | GlobalOptions.Extended complexity ->
-               Typing_reason.(explain (Rflow (r_sub, r_super)) ~complexity)
+               Typing_reason.(explain (flow (r_sub, r_super)) ~complexity)
              | GlobalOptions.Debug
              | GlobalOptions.Yolo ->
-               Typing_reason.(debug (Rflow (r_sub, r_super))))
+               Typing_reason.(debug (flow (r_sub, r_super))))
            (TypecheckerOptions.tco_extended_reasons
               Typing_env_types.(env.genv.tcopt))
        in
@@ -5985,10 +5985,10 @@ end = struct
              ~f:(function
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
-                   explain (Rflow (reason_sub, reason_super)) ~complexity)
+                   explain (flow (reason_sub, reason_super)) ~complexity)
                | GlobalOptions.Debug
                | GlobalOptions.Yolo ->
-                 Typing_reason.(debug (Rflow (reason_sub, reason_super))))
+                 Typing_reason.(debug (flow (reason_sub, reason_super))))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in
@@ -6131,10 +6131,10 @@ end = struct
              ~f:(function
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
-                   explain (Rflow (reason_sub, reason_super)) ~complexity)
+                   explain (flow (reason_sub, reason_super)) ~complexity)
                | GlobalOptions.Debug
                | GlobalOptions.Yolo ->
-                 Typing_reason.(debug (Rflow (reason_sub, reason_super))))
+                 Typing_reason.(debug (flow (reason_sub, reason_super))))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in

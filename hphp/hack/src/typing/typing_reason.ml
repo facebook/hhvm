@@ -255,8 +255,8 @@ type _ t_ =
   | Rnullsafe_op : Pos.t -> locl_phase t_  (** ?-> operator is used *)
   | Rtconst_no_cstr : pos_id -> 'phase t_
   | Rpredicated : Pos.t * string -> locl_phase t_
-  | Ris : Pos.t -> locl_phase t_
-  | Ras : Pos.t -> locl_phase t_
+  | Ris_refinement : Pos.t -> locl_phase t_
+  | Ras_refinement : Pos.t -> locl_phase t_
   | Requal : Pos.t -> locl_phase t_
   | Rvarray_or_darray_key : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rvec_or_dict_key : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
@@ -265,7 +265,7 @@ type _ t_ =
   | Rdynamic_call : Pos.t -> locl_phase t_
   | Rdynamic_construct : Pos.t -> locl_phase t_
   | Ridx_dict : Pos.t -> locl_phase t_
-  | Rset_element : Pos.t -> locl_phase t_
+  | Ridx_set_element : Pos.t -> locl_phase t_
   | Rmissing_optional_field :
       (Pos_or_decl.t[@hash.ignore]) * string
       -> 'phase t_
@@ -404,15 +404,15 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Runpack_param (p, _, _)
   | Rnullsafe_op p
   | Rpredicated (p, _)
-  | Ris p
-  | Ras p
+  | Ris_refinement p
+  | Ras_refinement p
   | Requal p
   | Rusing p
   | Rdynamic_prop p
   | Rdynamic_call p
   | Rdynamic_construct p
   | Ridx_dict p
-  | Rset_element p
+  | Ridx_set_element p
   | Runset_field (p, _)
   | Rregex p
   | Rarith_ret_float (p, _, _)
@@ -465,6 +465,140 @@ and to_raw_pos_rev = function
   | r ->
     to_raw_pos r
 
+let positioned_id pos_or_decl (p, x) = (pos_or_decl p, x)
+
+let rec map_pos :
+    type ph.
+    (Pos.t -> Pos.t) -> (Pos_or_decl.t -> Pos_or_decl.t) -> ph t_ -> ph t_ =
+ fun pos pos_or_decl -> function
+  | Rnone -> Rnone
+  | Rmissing_field -> Rmissing_field
+  | Rwitness p -> Rwitness (pos p)
+  | Rwitness_from_decl p -> Rwitness_from_decl (pos_or_decl p)
+  | Ridx (p, r) -> Ridx (pos p, map_pos pos pos_or_decl r)
+  | Ridx_vector p -> Ridx_vector (pos p)
+  | Ridx_vector_from_decl p -> Ridx_vector_from_decl (pos_or_decl p)
+  | Rforeach p -> Rforeach (pos p)
+  | Rasyncforeach p -> Rasyncforeach (pos p)
+  | Rarith p -> Rarith (pos p)
+  | Rarith_ret p -> Rarith_ret (pos p)
+  | Rcomp p -> Rcomp (pos p)
+  | Rconcat_ret p -> Rconcat_ret (pos p)
+  | Rlogic_ret p -> Rlogic_ret (pos p)
+  | Rbitwise p -> Rbitwise (pos p)
+  | Rbitwise_ret p -> Rbitwise_ret (pos p)
+  | Rno_return p -> Rno_return (pos p)
+  | Rno_return_async p -> Rno_return_async (pos p)
+  | Rret_fun_kind (p, k) -> Rret_fun_kind (pos p, k)
+  | Rret_fun_kind_from_decl (p, k) -> Rret_fun_kind_from_decl (pos_or_decl p, k)
+  | Rhint p -> Rhint (pos_or_decl p)
+  | Rthrow p -> Rthrow (pos p)
+  | Rplaceholder p -> Rplaceholder (pos p)
+  | Rret_div p -> Rret_div (pos p)
+  | Ryield_gen p -> Ryield_gen (pos p)
+  | Ryield_asyncgen p -> Ryield_asyncgen (pos p)
+  | Ryield_asyncnull p -> Ryield_asyncnull (pos p)
+  | Ryield_send p -> Ryield_send (pos p)
+  | Rlost_info (s, r1, Blame (p2, l)) ->
+    Rlost_info (s, map_pos pos pos_or_decl r1, Blame (pos p2, l))
+  | Rformat (p1, s, r) -> Rformat (pos p1, s, map_pos pos pos_or_decl r)
+  | Rclass_class (p, s) -> Rclass_class (pos_or_decl p, s)
+  | Runknown_class p -> Runknown_class (pos p)
+  | Rvar_param p -> Rvar_param (pos p)
+  | Rvar_param_from_decl p -> Rvar_param_from_decl (pos_or_decl p)
+  | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos_or_decl p2, i)
+  | Rinout_param p -> Rinout_param (pos_or_decl p)
+  | Rinstantiate (r1, x, r2) ->
+    Rinstantiate (map_pos pos pos_or_decl r1, x, map_pos pos pos_or_decl r2)
+  | Rtypeconst (r1, (p, s1), s2, r2) ->
+    Rtypeconst
+      ( map_pos pos pos_or_decl r1,
+        (pos_or_decl p, s1),
+        s2,
+        map_pos pos pos_or_decl r2 )
+  | Rtype_access (r1, ls) ->
+    Rtype_access
+      ( map_pos pos pos_or_decl r1,
+        List.map ls ~f:(fun (r, s) -> (map_pos pos pos_or_decl r, s)) )
+  | Rexpr_dep_type (r, p, n) ->
+    Rexpr_dep_type (map_pos pos pos_or_decl r, pos_or_decl p, n)
+  | Rnullsafe_op p -> Rnullsafe_op (pos p)
+  | Rtconst_no_cstr id -> Rtconst_no_cstr (positioned_id pos_or_decl id)
+  | Rpredicated (p, f) -> Rpredicated (pos p, f)
+  | Ris_refinement p -> Ris_refinement (pos p)
+  | Ras_refinement p -> Ras_refinement (pos p)
+  | Requal p -> Requal (pos p)
+  | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos_or_decl p)
+  | Rvec_or_dict_key p -> Rvec_or_dict_key (pos_or_decl p)
+  | Rusing p -> Rusing (pos p)
+  | Rdynamic_prop p -> Rdynamic_prop (pos p)
+  | Rdynamic_call p -> Rdynamic_call (pos p)
+  | Rdynamic_construct p -> Rdynamic_construct (pos p)
+  | Ridx_dict p -> Ridx_dict (pos p)
+  | Ridx_set_element p -> Ridx_set_element (pos p)
+  | Rmissing_optional_field (p, n) -> Rmissing_optional_field (pos_or_decl p, n)
+  | Runset_field (p, n) -> Runset_field (pos p, n)
+  | Rcontravariant_generic (r1, n) ->
+    Rcontravariant_generic (map_pos pos pos_or_decl r1, n)
+  | Rinvariant_generic (r1, n) ->
+    Rcontravariant_generic (map_pos pos pos_or_decl r1, n)
+  | Rregex p -> Rregex (pos p)
+  | Rimplicit_upper_bound (p, s) -> Rimplicit_upper_bound (pos_or_decl p, s)
+  | Rarith_ret_int p -> Rarith_ret_int (pos p)
+  | Rarith_ret_float (p, r, s) ->
+    Rarith_ret_float (pos p, map_pos pos pos_or_decl r, s)
+  | Rarith_ret_num (p, r, s) ->
+    Rarith_ret_num (pos p, map_pos pos pos_or_decl r, s)
+  | Rarith_dynamic p -> Rarith_dynamic (pos p)
+  | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
+  | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
+  | Rtype_variable p -> Rtype_variable (pos p)
+  | Rtype_variable_error p -> Rtype_variable_error (pos p)
+  | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
+  | Rglobal_type_variable_generics (p, t, s) ->
+    Rglobal_type_variable_generics (pos_or_decl p, t, s)
+  | Rsolve_fail p -> Rsolve_fail (pos_or_decl p)
+  | Rcstr_on_generics (p, sid) ->
+    Rcstr_on_generics (pos_or_decl p, positioned_id pos_or_decl sid)
+  | Rlambda_param (p, r) -> Rlambda_param (pos p, map_pos pos pos_or_decl r)
+  | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
+  | Rshape_literal p -> Rshape_literal (pos p)
+  | Renforceable p -> Renforceable (pos_or_decl p)
+  | Rdestructure p -> Rdestructure (pos p)
+  | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)
+  | Rglobal_class_prop p -> Rglobal_class_prop (pos_or_decl p)
+  | Rglobal_fun_param p -> Rglobal_fun_param (pos_or_decl p)
+  | Rglobal_fun_ret p -> Rglobal_fun_ret (pos_or_decl p)
+  | Rsplice p -> Rsplice (pos p)
+  | Ret_boolean p -> Ret_boolean (pos p)
+  | Rdefault_capability p -> Rdefault_capability (pos_or_decl p)
+  | Rconcat_operand p -> Rconcat_operand (pos p)
+  | Rinterp_operand p -> Rinterp_operand (pos p)
+  | Rdynamic_coercion r -> Rdynamic_coercion (map_pos pos pos_or_decl r)
+  | Rsupport_dynamic_type p -> Rsupport_dynamic_type (pos_or_decl p)
+  | Rdynamic_partial_enforcement (p, cn, r) ->
+    Rdynamic_partial_enforcement (pos_or_decl p, cn, map_pos pos pos_or_decl r)
+  | Rrigid_tvar_escape (p, v, w, r) ->
+    Rrigid_tvar_escape (pos p, v, w, map_pos pos pos_or_decl r)
+  | Ropaque_type_from_module (p, m, r) ->
+    Ropaque_type_from_module (pos_or_decl p, m, map_pos pos pos_or_decl r)
+  | Rmissing_class p -> Rmissing_class (pos p)
+  | Rinvalid -> Rinvalid
+  | Rcaptured_like p -> Rcaptured_like (pos p)
+  | Rpessimised_inout p -> Rpessimised_inout (pos_or_decl p)
+  | Rpessimised_return p -> Rpessimised_return (pos_or_decl p)
+  | Rpessimised_prop p -> Rpessimised_prop (pos_or_decl p)
+  | Rpessimised_this p -> Rpessimised_this (pos_or_decl p)
+  | Runsafe_cast p -> Runsafe_cast (pos p)
+  | Rpattern p -> Rpattern (pos p)
+  | Rflow (from, into) ->
+    Rflow (map_pos pos pos_or_decl from, map_pos pos pos_or_decl into)
+  | Rrev t -> Rrev (map_pos pos pos_or_decl t)
+  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, map_pos pos pos_or_decl t)
+  | Rprj_asymm_right (prj, t) ->
+    Rprj_asymm_right (prj, map_pos pos pos_or_decl t)
+  | Rprj_symm (prj, t) -> Rprj_symm (prj, map_pos pos pos_or_decl t)
+
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
   | Rwitness _ -> "Rwitness"
@@ -508,8 +642,8 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rnullsafe_op _ -> "Rnullsafe_op"
   | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
   | Rpredicated _ -> "Rpredicated"
-  | Ris _ -> "Ris"
-  | Ras _ -> "Ras"
+  | Ris_refinement _ -> "Ris_refinement"
+  | Ras_refinement _ -> "Ras_refinement"
   | Requal _ -> "Requal"
   | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
   | Rvec_or_dict_key _ -> "Rvec_or_dict_key"
@@ -518,7 +652,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rdynamic_call _ -> "Rdynamic_call"
   | Rdynamic_construct _ -> "Rdynamic_construct"
   | Ridx_dict _ -> "Ridx_dict"
-  | Rset_element _ -> "Rset_element"
+  | Ridx_set_element _ -> "Ridx_set_element"
   | Rmissing_optional_field _ -> "Rmissing_optional_field"
   | Runset_field _ -> "Runset_field"
   | Rcontravariant_generic _ -> "Rcontravariant_generic"
@@ -710,15 +844,15 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Runknown_class p
     | Rvar_param p
     | Rnullsafe_op p
-    | Ris p
-    | Ras p
+    | Ris_refinement p
+    | Ras_refinement p
     | Requal p
     | Rusing p
     | Rdynamic_prop p
     | Rdynamic_call p
     | Rdynamic_construct p
     | Ridx_dict p
-    | Rset_element p
+    | Ridx_set_element p
     | Rregex p
     | Rarith_ret_int p
     | Rbitwise_dynamic p
@@ -1006,8 +1140,10 @@ let rec to_json : type a. a t_ -> Hh_json.json =
     Hh_json.(
       JSON_Object
         [("Rpredicated", JSON_Array [pos_to_json pos; JSON_String str])])
-  | Ris pos -> Hh_json.(JSON_Object [("Ris", JSON_Array [pos_to_json pos])])
-  | Ras pos -> Hh_json.(JSON_Object [("Ras", JSON_Array [pos_to_json pos])])
+  | Ris_refinement pos ->
+    Hh_json.(JSON_Object [("Ris_refinement", JSON_Array [pos_to_json pos])])
+  | Ras_refinement pos ->
+    Hh_json.(JSON_Object [("Ras_refinement", JSON_Array [pos_to_json pos])])
   | Requal pos ->
     Hh_json.(JSON_Object [("Requal", JSON_Array [pos_to_json pos])])
   | Rvarray_or_darray_key pos_or_decl ->
@@ -1028,8 +1164,8 @@ let rec to_json : type a. a t_ -> Hh_json.json =
     Hh_json.(JSON_Object [("Rdynamic_construct", JSON_Array [pos_to_json pos])])
   | Ridx_dict pos ->
     Hh_json.(JSON_Object [("Ridx_dict", JSON_Array [pos_to_json pos])])
-  | Rset_element pos ->
-    Hh_json.(JSON_Object [("Rset_element", JSON_Array [pos_to_json pos])])
+  | Ridx_set_element pos ->
+    Hh_json.(JSON_Object [("Ridx_set_element", JSON_Array [pos_to_json pos])])
   | Rmissing_optional_field (pos_or_decl, str) ->
     Hh_json.(
       JSON_Object
@@ -1332,7 +1468,7 @@ let explain_asymm_prj prj =
    and ensure we handle all cases statically *)
 let rec explain_witness = function
   | Rhint pos -> (pos, "this hint")
-  | Ris pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
+  | Ris_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
   | Rmissing_field -> (Pos_or_decl.none, "nothing")
   | Rwitness_from_decl pos -> (pos, "this declaration")
@@ -1506,10 +1642,6 @@ let pp : type ph. _ -> ph t_ -> unit = (fun fmt r -> pp_t_ fmt r)
 let show r = Format.asprintf "%a" pp r
 
 type decl_t = decl_phase t_
-
-let is_none = function
-  | Rnone -> true
-  | _ -> false
 
 let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rnone -> Rnone
@@ -1878,8 +2010,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     [(p, prefix ^ " because the type constant " ^ n ^ " lacks a constraint")]
   | Rpredicated (_, f) ->
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
-  | Ris _ -> [(p, prefix ^ " from this `is` expression test")]
-  | Ras _ -> [(p, prefix ^ " from this \"as\" assertion")]
+  | Ris_refinement _ -> [(p, prefix ^ " from this `is` expression test")]
+  | Ras_refinement _ -> [(p, prefix ^ " from this \"as\" assertion")]
   | Requal _ -> [(p, prefix ^ " from this equality test")]
   | Rvarray_or_darray_key _ ->
     [
@@ -1907,7 +2039,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         ^ " because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`"
       );
     ]
-  | Rset_element _ ->
+  | Ridx_set_element _ ->
     [
       ( p,
         prefix
@@ -2156,6 +2288,216 @@ let compare : type phase. phase t_ -> phase t_ -> int =
 
 let none = Rnone
 
+let witness p = Rwitness p
+
+let witness_from_decl p = Rwitness_from_decl p
+
+let idx (p, r) = Ridx (p, r)
+
+let idx_vector p = Ridx_vector p
+
+let idx_vector_from_decl p = Ridx_vector_from_decl p
+
+let foreach p = Rforeach p
+
+let asyncforeach p = Rasyncforeach p
+
+let arith p = Rarith p
+
+let arith_ret p = Rarith_ret p
+
+let arith_ret_float (p, r, a) = Rarith_ret_float (p, r, a)
+
+let arith_ret_num (p, r, a) = Rarith_ret_num (p, r, a)
+
+let arith_ret_int p = Rarith_ret_int p
+
+let arith_dynamic p = Rarith_dynamic p
+
+let bitwise_dynamic p = Rbitwise_dynamic p
+
+let incdec_dynamic p = Rincdec_dynamic p
+
+let comp p = Rcomp p
+
+let concat_ret p = Rconcat_ret p
+
+let logic_ret p = Rlogic_ret p
+
+let bitwise p = Rbitwise p
+
+let bitwise_ret p = Rbitwise_ret p
+
+let no_return p = Rno_return p
+
+let no_return_async p = Rno_return_async p
+
+let ret_fun_kind (p, k) = Rret_fun_kind (p, k)
+
+let ret_fun_kind_from_decl (p, k) = Rret_fun_kind_from_decl (p, k)
+
+let hint p = Rhint p
+
+let throw p = Rthrow p
+
+let placeholder p = Rplaceholder p
+
+let ret_div p = Rret_div p
+
+let yield_gen p = Ryield_gen p
+
+let yield_asyncgen p = Ryield_asyncgen p
+
+let yield_asyncnull p = Ryield_asyncnull p
+
+let yield_send p = Ryield_send p
+
+let lost_info (s, r, b) = Rlost_info (s, r, b)
+
+let format (p, s, r) = Rformat (p, s, r)
+
+let class_class (p, s) = Rclass_class (p, s)
+
+let unknown_class p = Runknown_class p
+
+let var_param p = Rvar_param p
+
+let var_param_from_decl p = Rvar_param_from_decl p
+
+let unpack_param (p1, p2, n) = Runpack_param (p1, p2, n)
+
+let inout_param p = Rinout_param p
+
+let instantiate (r1, s, r2) = Rinstantiate (r1, s, r2)
+
+let typeconst (r, p, s, r2) = Rtypeconst (r, p, s, r2)
+
+let type_access (r, l) = Rtype_access (r, l)
+
+let expr_dep_type (r, p, d) = Rexpr_dep_type (r, p, d)
+
+let nullsafe_op p = Rnullsafe_op p
+
+let tconst_no_cstr id = Rtconst_no_cstr id
+
+let predicated (p, s) = Rpredicated (p, s)
+
+let is_refinement p = Ris_refinement p
+
+let as_refinement p = Ras_refinement p
+
+let equal p = Requal p
+
+let varray_or_darray_key p = Rvarray_or_darray_key p
+
+let vec_or_dict_key p = Rvec_or_dict_key p
+
+let using p = Rusing p
+
+let dynamic_prop p = Rdynamic_prop p
+
+let dynamic_call p = Rdynamic_call p
+
+let dynamic_construct p = Rdynamic_construct p
+
+let idx_dict p = Ridx_dict p
+
+let idx_set_element p = Ridx_set_element p
+
+let missing_optional_field (p, s) = Rmissing_optional_field (p, s)
+
+let unset_field (p, s) = Runset_field (p, s)
+
+let contravariant_generic (r, s) = Rcontravariant_generic (r, s)
+
+let invariant_generic (r, s) = Rinvariant_generic (r, s)
+
+let regex p = Rregex p
+
+let implicit_upper_bound (p, s) = Rimplicit_upper_bound (p, s)
+
+let type_variable p = Rtype_variable p
+
+let type_variable_generics (p, n1, n2) = Rtype_variable_generics (p, n1, n2)
+
+let type_variable_error p = Rtype_variable_error p
+
+let global_type_variable_generics (p, n1, n2) =
+  Rglobal_type_variable_generics (p, n1, n2)
+
+let solve_fail p = Rsolve_fail p
+
+let cstr_on_generics (p, id) = Rcstr_on_generics (p, id)
+
+let lambda_param (p, r) = Rlambda_param (p, r)
+
+let shape (p, s) = Rshape (p, s)
+
+let shape_literal p = Rshape_literal p
+
+let enforceable p = Renforceable p
+
+let destructure p = Rdestructure p
+
+let key_value_collection_key p = Rkey_value_collection_key p
+
+let global_class_prop p = Rglobal_class_prop p
+
+let global_fun_param p = Rglobal_fun_param p
+
+let global_fun_ret p = Rglobal_fun_ret p
+
+let splice p = Rsplice p
+
+let et_boolean p = Ret_boolean p
+
+let default_capability p = Rdefault_capability p
+
+let concat_operand p = Rconcat_operand p
+
+let interp_operand p = Rinterp_operand p
+
+let dynamic_coercion r = Rdynamic_coercion r
+
+let support_dynamic_type p = Rsupport_dynamic_type p
+
+let dynamic_partial_enforcement (p, s, r) =
+  Rdynamic_partial_enforcement (p, s, r)
+
+let rigid_tvar_escape (p, n1, n2, r) = Rrigid_tvar_escape (p, n1, n2, r)
+
+let opaque_type_from_module (p, s, r) = Ropaque_type_from_module (p, s, r)
+
+let missing_class p = Rmissing_class p
+
+let invalid = Rinvalid
+
+let captured_like p = Rcaptured_like p
+
+let pessimised_inout p = Rpessimised_inout p
+
+let pessimised_return p = Rpessimised_return p
+
+let pessimised_prop p = Rpessimised_prop p
+
+let unsafe_cast p = Runsafe_cast p
+
+let pattern p = Rpattern p
+
+let flow (r1, r2) = Rflow (r1, r2)
+
+let rev r = Rrev r
+
+let prj_symm (p, r) = Rprj_symm (p, r)
+
+let prj_asymm_left (p, r) = Rprj_asymm_left (p, r)
+
+let prj_asymm_right (p, r) = Rprj_asymm_right (p, r)
+
+let missing_field = Rmissing_field
+
+let pessimised_this p = Rpessimised_this p
+
 module Visitor = struct
   class map =
     object (this)
@@ -2221,8 +2563,8 @@ module Visitor = struct
         | Rvar_param_from_decl x -> Rvar_param_from_decl x
         | Rnullsafe_op x -> Rnullsafe_op x
         | Rtconst_no_cstr x -> Rtconst_no_cstr x
-        | Ris x -> Ris x
-        | Ras x -> Ras x
+        | Ris_refinement x -> Ris_refinement x
+        | Ras_refinement x -> Ras_refinement x
         | Requal x -> Requal x
         | Rvarray_or_darray_key x -> Rvarray_or_darray_key x
         | Rvec_or_dict_key x -> Rvec_or_dict_key x
@@ -2231,7 +2573,7 @@ module Visitor = struct
         | Rdynamic_call x -> Rdynamic_call x
         | Rdynamic_construct x -> Rdynamic_construct x
         | Ridx_dict x -> Ridx_dict x
-        | Rset_element x -> Rset_element x
+        | Ridx_set_element x -> Ridx_set_element x
         | Rregex x -> Rregex x
         | Rtype_variable x -> Rtype_variable x
         | Rsolve_fail x -> Rsolve_fail x
@@ -2291,3 +2633,60 @@ let force_lazy_values r =
     end
   in
   visitor#on_reason r
+
+module Predicates = struct
+  let is_opaque_type_from_module r =
+    match r with
+    | Ropaque_type_from_module _ -> true
+    | _ -> false
+
+  let is_solve_fail r =
+    match r with
+    | Rsolve_fail _ -> true
+    | _ -> false
+
+  let is_none r =
+    match r with
+    | Rnone -> true
+    | _ -> false
+
+  let is_instantiate r =
+    match r with
+    | Rinstantiate _ -> true
+    | _ -> false
+
+  let is_hint r =
+    match r with
+    | Rhint _ -> true
+    | _ -> false
+
+  let unpack_nullsafe_op_opt r =
+    match r with
+    | Rnullsafe_op p -> Some p
+    | _ -> None
+
+  let unpack_expr_dep_type_opt r =
+    match r with
+    | Rexpr_dep_type (r, p, e) -> Some (r, p, e)
+    | _ -> None
+
+  let unpack_unpack_param_opt r =
+    match r with
+    | Runpack_param (p, p2, i) -> Some (p, p2, i)
+    | _ -> None
+
+  let unpack_cstr_on_generics_opt r =
+    match r with
+    | Rcstr_on_generics (p, sid) -> Some (p, sid)
+    | _ -> None
+
+  let unpack_shape_literal_opt r =
+    match r with
+    | Rshape_literal p -> Some p
+    | _ -> None
+
+  let unpack_dynamic_coercion_opt r =
+    match r with
+    | Rdynamic_coercion r -> Some r
+    | _ -> None
+end

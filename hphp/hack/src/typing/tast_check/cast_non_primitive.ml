@@ -17,7 +17,7 @@ let error_code = Typing_warning_utils.code warning_kind
 
 let is_always_castable env ty =
   let open Typing_make_type in
-  let r = Reason.Rnone in
+  let r = Reason.none in
   let mixed = mixed r in
   let castable_ty =
     locl_like r
@@ -28,7 +28,7 @@ let is_always_castable env ty =
 
 let is_bool_castable env ty =
   let open Typing_make_type in
-  let r = Reason.Rnone in
+  let r = Reason.none in
   let mixed = mixed r in
   let bool_castable_ty =
     locl_like r
@@ -40,7 +40,7 @@ let is_bool_castable env ty =
 let is_not_castable_but_leads_to_too_many_false_positives env ty =
   let (env, ty) = Env.expand_type env ty in
   let open Typing_make_type in
-  let r = Reason.Rnone in
+  let r = Reason.none in
   let nonnull = nonnull r in
   let dynamic = dynamic r in
   Env.is_sub_type env nonnull ty

@@ -87,7 +87,7 @@ let refine_key_exists field_name pos env shape =
   in
   let mixed =
     let r =
-      Reason.Rmissing_optional_field
+      Reason.missing_optional_field
         (get_pos shape, TUtils.get_printable_shape_field_name field_name)
     in
     mixed_for_refinement env r shape
@@ -97,10 +97,10 @@ let refine_key_exists field_name pos env shape =
     ~hint_first:false
     env
     ~is_class:false
-    (Reason.Rwitness pos)
+    (Reason.witness pos)
     shape
     (MakeType.open_shape
-       Reason.Rnone
+       Reason.none
        ~kind:mixed
        (TShapeMap.singleton field_name { sft_optional = false; sft_ty = mixed }))
 
@@ -111,7 +111,7 @@ let unset_field_shape_ty_entry pos field_name =
     sft_optional = true;
     sft_ty =
       MakeType.nothing
-        (Reason.Runset_field
+        (Reason.unset_field
            (pos, TUtils.get_printable_shape_field_name field_name));
   }
 
@@ -128,7 +128,7 @@ let refine_not_key_exists field_name pos env shape_ty =
       shape_ty
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
-  let r = Reason.Rwitness pos in
+  let r = Reason.witness pos in
   Typing_helpers.refine_and_simplify_intersection
     ~hint_first:false
     env
@@ -197,7 +197,7 @@ let refine_handle_unions_dyn pos refine_f env ~shape_ty field_name :
           ~f:(go ~supportdyn)
       in
       let tyl = List.filter tyl ~f:(fun ty -> not (is_nothing ty)) in
-      let result = mk (Reason.Rwitness pos, Tunion tyl) in
+      let result = mk (Reason.witness pos, Tunion tyl) in
       ((env, Option.merge e1 e2 ~f:Typing_error.both), result)
     | _ ->
       ( (env, e1),
@@ -227,7 +227,7 @@ let remove_key pos env shape_ty field =
         fields
   in
   mk
-    ( Reason.Rwitness pos,
+    ( Reason.witness pos,
       Tshape
         { s_origin = Missing_origin; s_unknown_value = shape_kind; s_fields } )
 
@@ -328,7 +328,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
   let (env, res) = Env.fresh_type env expr_pos in
   let ((env, ty_err_opt), res) =
     let fake_super_shape_ty =
-      let r = Reason.Rshape (shape_pos, "Shapes::idx") in
+      let r = Reason.shape (shape_pos, "Shapes::idx") in
       (* Since this shape is only used as a supertype, it is safe to use mixed
          as the kind, regardless of --everything-sdt *)
       MakeType.open_shape
@@ -336,10 +336,10 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
         ~kind:(MakeType.mixed r)
         (TShapeMap.singleton field_name { sft_optional = true; sft_ty = res })
     in
-    let nullable_super_shape = mk (Reason.Rnone, Toption fake_super_shape_ty) in
+    let nullable_super_shape = mk (Reason.none, Toption fake_super_shape_ty) in
     let super_shape =
       if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
+        MakeType.locl_like (Reason.witness shape_pos) nullable_super_shape
       else
         nullable_super_shape
     in
@@ -353,7 +353,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
         Unenforced
         Typing_error.Callback.unify_error
     in
-    let (env, res) = TUtils.union env res (MakeType.null Reason.Rnone) in
+    let (env, res) = TUtils.union env res (MakeType.null Reason.none) in
     ((env, ty_err_opt), res)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -385,9 +385,9 @@ let to_collection env pos shape_ty res return_type =
               List.map_env env keys ~f:(fun env key ->
                   match key with
                   | Typing_defs.TSFlit_int (p, _) ->
-                    (env, MakeType.int (Reason.Rwitness_from_decl p))
+                    (env, MakeType.int (Reason.witness_from_decl p))
                   | Typing_defs.TSFlit_str (p, _) ->
-                    (env, MakeType.string (Reason.Rwitness_from_decl p))
+                    (env, MakeType.string (Reason.witness_from_decl p))
                   | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
                     match Env.get_class env cid with
                     | Decl_entry.Found class_ -> begin
@@ -528,7 +528,7 @@ let check_shape_keys_validity env keys =
             Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-          let r = Reason.Rwitness key_pos in
+          let r = Reason.witness key_pos in
           let (env, e2) =
             Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
             @@ Typing_error.(
@@ -664,15 +664,15 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
   in
   let rret = get_reason fty.ft_ret in
   let field_ty : decl_ty =
-    MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
+    MakeType.generic (Reason.witness_from_decl param1.fp_pos) "Tv"
   in
   let (params, ret) =
-    let r = Reason.Rwitness_from_decl param1.fp_pos in
+    let r = Reason.witness_from_decl param1.fp_pos in
     let param1 =
       update_param
         param1
         (mk
-           ( Reason.Rnone,
+           ( Reason.none,
              Toption
                (* It is safe to use mixed as the kind, regardless of --everything-sdt, since
                   the idx function doesn't look at any of the other fields besides the explicitly
@@ -728,9 +728,9 @@ let transform_at_fun_ty (field_name : tshape_field_name) fty =
   let params =
     (* Return type should be Tv already, but first parameter is just shape(...) *)
     let field_ty : decl_ty =
-      MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
+      MakeType.generic (Reason.witness_from_decl param1.fp_pos) "Tv"
     in
-    let r = Reason.Rwitness_from_decl param1.fp_pos in
+    let r = Reason.witness_from_decl param1.fp_pos in
     let param1 =
       update_param
         param1

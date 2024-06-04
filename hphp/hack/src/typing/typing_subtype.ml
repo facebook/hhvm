@@ -360,9 +360,12 @@ module Subtype_env = struct
     {
       subtype_env with
       tparam_constraints =
-        (match (r_super, r_sub) with
-        | (Reason.Rcstr_on_generics (p, tparam), _)
-        | (_, Reason.Rcstr_on_generics (p, tparam)) ->
+        (match
+           ( Reason.Predicates.unpack_cstr_on_generics_opt r_super,
+             Reason.Predicates.unpack_cstr_on_generics_opt r_sub )
+         with
+        | (Some (p, tparam), _)
+        | (_, Some (p, tparam)) ->
           (match subtype_env.tparam_constraints with
           | (p_prev, tparam_prev) :: _
             when Pos_or_decl.equal p p_prev
@@ -953,7 +956,7 @@ end = struct
           env
     end
     | (r_sub, Tprim Nast.Tvoid) ->
-      let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "mixed") in
+      let r = Reason.implicit_upper_bound (Reason.to_pos r_sub, "mixed") in
       simplify
         ~subtype_env
         ~this_ty
@@ -1260,8 +1263,7 @@ end = struct
                 else
                   ITySet.map
                     (function
-                      | LoclType t ->
-                        LoclType (MakeType.nullable Reason.Rnone t)
+                      | LoclType t -> LoclType (MakeType.nullable Reason.none t)
                       | ConstraintType t -> ConstraintType t)
                     nonnulls
               in
@@ -2147,7 +2149,7 @@ end = struct
                           @@ flow ~from:r_super ~into:(rev r_sub)))
             else
               map_reason super ~f:(fun from ->
-                  Typing_reason.Rcontravariant_generic (from, nm))
+                  Typing_reason.contravariant_generic (from, nm))
           and ty_sub = child in
           simplify_subtype_help ~sub_supportdyn ty_super ty_sub env
         | Ast_defs.Invariant ->
@@ -2156,7 +2158,7 @@ end = struct
               if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
                 from
               else
-                Typing_reason.Rinvariant_generic (from, nm)
+                Typing_reason.invariant_generic (from, nm)
             in
             let ty_sub =
               Prov.(
@@ -2178,7 +2180,7 @@ end = struct
                       (prj ~nm ~idx ~var:Ast_defs.Contravariant
                       @@ flow ~from:r_super ~into:(rev r_sub)))
               else
-                Typing_reason.Rinvariant_generic (from, nm)
+                Typing_reason.invariant_generic (from, nm)
             in
             let ty_sub = Sd.liken ~super_like env child
             and ty_super = map_reason super ~f in
@@ -2618,7 +2620,7 @@ end = struct
                           ~fld_kind_sub:Typing_reason.Required
                           ~fld_kind_super:Typing_reason.Absent
                        @@ flow ~from:r_sub ~into:r_super)))
-        and r_field_super = Typing_reason.Rmissing_field in
+        and r_field_super = Typing_reason.missing_field in
         let ty_err_opt =
           Option.map
             subtype_env.Subtype_env.on_error
@@ -2649,7 +2651,7 @@ end = struct
                           ~fld_kind_sub:Typing_reason.Optional
                           ~fld_kind_super:Typing_reason.Absent
                        @@ flow ~from:r_sub ~into:r_super)))
-        and r_field_super = Typing_reason.Rmissing_field in
+        and r_field_super = Typing_reason.missing_field in
         let ty_err_opt =
           Option.map
             subtype_env.Subtype_env.on_error
@@ -2703,8 +2705,8 @@ end = struct
         Error ty_err_opt
       | (`Absent, `Required ty_super) ->
         let quickfixes_opt =
-          match r_sub with
-          | Reason.Rshape_literal p ->
+          match Reason.Predicates.unpack_shape_literal_opt r_sub with
+          | Some p ->
             let fix_pos =
               Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
             in
@@ -2715,10 +2717,10 @@ end = struct
                   ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
                   fix_pos;
               ]
-          | _ -> None
+          | None -> None
         in
         let r_field_sub =
-          let from = Typing_reason.Rmissing_field in
+          let from = Typing_reason.missing_field in
           if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
             Prov.(
               flow
@@ -2820,7 +2822,7 @@ end = struct
         let ty =
           with_reason
             shape_kind
-            (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
+            (Reason.missing_optional_field (Reason.to_pos r, printable_name))
         in
         `Optional (make_supportdyn ty)
 
@@ -3414,7 +3416,7 @@ end = struct
     (* If the type on the left is disjoint from null, then the Toption on the right is not
        doing anything helpful. *)
     | ((_, (Tintersection _ | Tunion _)), (_, Toption lty_inner))
-      when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.Rnone) ->
+      when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.none) ->
       simplify
         ~subtype_env
         ~this_ty
@@ -4292,7 +4294,7 @@ end = struct
         (_r_super, Tvec_or_dict (lty_key_sup, lty_val_sup)) )
       when String.equal n SN.Collections.cVec ->
       let pos = get_pos ty_sub in
-      let lty_key_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
+      let lty_key_sub = MakeType.int (Reason.idx_vector_from_decl pos) in
       let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
       let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
       env
@@ -4862,9 +4864,9 @@ end = struct
      *   f(...$v); // error
      * } *)
     let fpos =
-      match r_super with
-      | Reason.Runpack_param (_, fpos, _) -> fpos
-      | _ -> Reason.to_pos r_super
+      match Reason.Predicates.unpack_unpack_param_opt r_super with
+      | Some (_, fpos, _) -> fpos
+      | None -> Reason.to_pos r_super
     in
     match (d_kind, d_required, d_variadic) with
     | (SplatUnpack, _ :: _, _) ->
@@ -4997,10 +4999,9 @@ end = struct
     let len_required = List.length d_required in
     let arity_error f =
       let (epos, fpos, prefix) =
-        match r_super with
-        | Reason.Runpack_param (epos, fpos, c) ->
-          (Pos_or_decl.of_raw_pos epos, fpos, c)
-        | _ -> (Reason.to_pos r_super, Reason.to_pos reason_tuple, 0)
+        match Reason.Predicates.unpack_unpack_param_opt r_super with
+        | Some (epos, fpos, c) -> (Pos_or_decl.of_raw_pos epos, fpos, c)
+        | None -> (Reason.to_pos r_super, Reason.to_pos reason_tuple, 0)
       in
       invalid
         env
@@ -5681,7 +5682,7 @@ end = struct
         simplify_subtype_bound `As ty ~bound:memupty env
         &&& simplify_subtype_bound `Super ~bound:memloty ty
       | Typing_type_member.Abstract { name; lower = loty; upper = upty } ->
-        let r_bnd = Reason.Rtconst_no_cstr name in
+        let r_bnd = Reason.tconst_no_cstr name in
         let loty = Option.value ~default:(MakeType.nothing r_bnd) loty in
         let upty = Option.value ~default:(MakeType.mixed r_bnd) upty in
         (* In case the refinement is exact we check that upty <: loty;
@@ -6433,7 +6434,7 @@ end = struct
                E.g., if t is a generic type parameter T with nonnull as
                a lower bound.
             *)
-            let r = Reason.Rimplicit_upper_bound (get_pos lty_sub, "mixed") in
+            let r = Reason.implicit_upper_bound (get_pos lty_sub, "mixed") in
 
             let tmixed = MakeType.mixed r in
             let ty_sub = Prov.(update tmixed ~env ~f:update_reason) in
@@ -8114,24 +8115,24 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     List.for_all ~f:(is_type_disjoint_help visited env ty1) tyl
   | (Toption ty1, _) ->
     is_type_disjoint_help visited env ty1 ty2
-    && is_type_disjoint_help visited env (MakeType.null Reason.Rnone) ty2
+    && is_type_disjoint_help visited env (MakeType.null Reason.none) ty2
   | (_, Toption ty2) ->
     is_type_disjoint_help visited env ty1 ty2
-    && is_type_disjoint_help visited env ty1 (MakeType.null Reason.Rnone)
+    && is_type_disjoint_help visited env ty1 (MakeType.null Reason.none)
   | (Tnonnull, _) ->
-    is_sub_type_for_union_help env ty2 (MakeType.null Reason.Rnone)
+    is_sub_type_for_union_help env ty2 (MakeType.null Reason.none)
   | (_, Tnonnull) ->
-    is_sub_type_for_union_help env ty1 (MakeType.null Reason.Rnone)
+    is_sub_type_for_union_help env ty1 (MakeType.null Reason.none)
   | (Tneg (Neg_predicate pred1), _) ->
     is_sub_type_for_union_help
       env
       ty2
-      (Typing_refinement.TyPredicate.to_ty Reason.Rnone pred1)
+      (Typing_refinement.TyPredicate.to_ty Reason.none pred1)
   | (_, Tneg (Neg_predicate pred2)) ->
     is_sub_type_for_union_help
       env
       ty1
-      (Typing_refinement.TyPredicate.to_ty Reason.Rnone pred2)
+      (Typing_refinement.TyPredicate.to_ty Reason.none pred2)
   | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
   | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that

@@ -27,7 +27,7 @@ let shapes_key_exists env shape field_name =
       if not sft_optional then
         `DoesExist (get_pos sft_ty)
       else
-        let nothing = Typing_make_type.nothing Reason.Rnone in
+        let nothing = Typing_make_type.nothing Reason.none in
         if Tast_env.is_sub_type env sft_ty nothing then
           `DoesNotExist
             ( get_pos shape,

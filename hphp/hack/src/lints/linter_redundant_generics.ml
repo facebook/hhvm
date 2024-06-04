@@ -114,7 +114,7 @@ let check_redundant_generics_class_method env (_method_name, method_) =
   end
 
 let check_redundant_generics_fun env ft =
-  ft_redundant_tparams env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
+  ft_redundant_tparams env ft.ft_tparams (mk (Reason.none, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =
   Cls.methods class_type

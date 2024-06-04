@@ -59,7 +59,7 @@ let lookup_props env class_name props =
       fun name map ->
         let ty_opt =
           if String.equal name parent_init_prop then
-            Some (Typing_make_type.nonnull Typing_reason.Rnone)
+            Some (Typing_make_type.nonnull Typing_reason.none)
           else
             Typing_env.get_class env class_name
             |> Decl_entry.to_option
@@ -82,10 +82,10 @@ let type_does_not_require_init env ty_opt =
       Typing_phase.localize_no_subst env ~ignore_errors:true ty
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    let null = Typing_make_type.null Typing_reason.Rnone in
+    let null = Typing_make_type.null Typing_reason.none in
     Typing_subtype.is_sub_type env null ty
     ||
-    let dynamic = Typing_make_type.dynamic Typing_reason.Rnone in
+    let dynamic = Typing_make_type.dynamic Typing_reason.none in
     Typing_subtype.is_sub_type env dynamic ty
     && Typing_subtype.is_sub_type env ty dynamic
 

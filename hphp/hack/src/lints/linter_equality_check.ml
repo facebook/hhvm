@@ -54,7 +54,7 @@ let opaque_enum_expander =
   end
 
 let is_nothing env ty =
-  let nothing = MakeType.nothing Reason.Rnone in
+  let nothing = MakeType.nothing Reason.none in
   Tast_env.is_sub_type env ty nothing
 
 let error_if_inequatable env ty1 ty2 err =

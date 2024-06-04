@@ -186,34 +186,34 @@ module Prov = struct
     | LoclType lty -> LoclType (update lty ~f ~env)
     | ConstraintType cty -> ConstraintType (update_cty cty ~f ~env)
 
-  let flow ~from ~into = Typing_reason.Rflow (from, into)
+  let flow ~from ~into = Typing_reason.flow (from, into)
 
-  let rev r = Typing_reason.Rrev r
+  let rev r = Typing_reason.rev r
 
   let prj_fn_arg r ~idx_sub ~idx_super ~var =
-    Typing_reason.(Rprj_symm (Prj_symm_fn_arg (idx_sub, idx_super, var), r))
+    Typing_reason.(prj_symm (Prj_symm_fn_arg (idx_sub, idx_super, var), r))
 
-  let prj_fn_ret r = Typing_reason.(Rprj_symm (Prj_symm_fn_ret, r))
+  let prj_fn_ret r = Typing_reason.(prj_symm (Prj_symm_fn_ret, r))
 
-  let prj_union_left r = Typing_reason.(Rprj_asymm_left (Prj_asymm_union, r))
+  let prj_union_left r = Typing_reason.(prj_asymm_left (Prj_asymm_union, r))
 
-  let prj_union_right r = Typing_reason.(Rprj_asymm_right (Prj_asymm_union, r))
+  let prj_union_right r = Typing_reason.(prj_asymm_right (Prj_asymm_union, r))
 
   let prj_intersection_left r =
-    Typing_reason.(Rprj_asymm_left (Prj_asymm_inter, r))
+    Typing_reason.(prj_asymm_left (Prj_asymm_inter, r))
 
   let prj_intersection_right r =
-    Typing_reason.(Rprj_asymm_right (Prj_asymm_inter, r))
+    Typing_reason.(prj_asymm_right (Prj_asymm_inter, r))
 
   let prj_class r ~nm ~idx ~var =
-    Typing_reason.(Rprj_symm (Prj_symm_class (nm, idx, var), r))
+    Typing_reason.prj_symm (Typing_reason.Prj_symm_class (nm, idx, var), r)
 
   let prj_newtype r ~nm ~idx ~var =
-    Typing_reason.(Rprj_symm (Prj_symm_newtype (nm, idx, var), r))
+    Typing_reason.prj_symm (Typing_reason.Prj_symm_newtype (nm, idx, var), r)
 
   let prj_shape r ~fld_nm ~fld_kind_sub ~fld_kind_super =
     Typing_reason.(
-      Rprj_symm (Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super), r))
+      prj_symm (Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super), r))
 end
 
 (** [refine_and_simplify_intersection ~hint_first env p reason ivar_pos ty hint_ty]

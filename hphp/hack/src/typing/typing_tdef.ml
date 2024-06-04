@@ -85,7 +85,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
           match td_as_constraint with
           | None ->
             let r_cstr =
-              Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull")
+              Reason.implicit_upper_bound (Reason.to_pos r, "?nonnull")
             in
             let cstr = MakeType.mixed r_cstr in
             ((env, None), cstr)

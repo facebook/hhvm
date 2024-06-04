@@ -126,7 +126,7 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
       List.map ~f:(fun p ->
           let fp_type =
             p.fp_type
-            |> map_reason ~f:(fun r -> Reason.Rformat (pos, snippet, r))
+            |> map_reason ~f:(fun r -> Reason.format (pos, snippet, r))
           in
           { p with fp_type })
     in

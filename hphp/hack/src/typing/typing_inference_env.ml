@@ -358,7 +358,7 @@ let fresh_type ?variance env id_provider p =
     env
     id_provider
     p
-    (Reason.Rtype_variable p)
+    (Reason.type_variable p)
     ?variance
     ~is_error:false
 
@@ -424,7 +424,7 @@ let get_tyvar_eager_solve_fail env v =
 let expand_var env r v =
   let (env, ty) = get_type env r v in
   if get_tyvar_eager_solve_fail env v then
-    (env, mk (Reason.Rsolve_fail (Reason.to_pos r), get_node ty))
+    (env, mk (Reason.solve_fail (Reason.to_pos r), get_node ty))
   else
     (env, ty)
 

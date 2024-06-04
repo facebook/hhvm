@@ -288,7 +288,7 @@ let rec intersect env ~r ty1 ty2 =
                 Utils.is_sub_type_for_union
                   env
                   (mk ty_ak)
-                  (MkType.arraykey Reason.Rnone)
+                  (MkType.arraykey Reason.none)
               then
                 intersect env ~r (mk ty_ak) (MkType.int r)
               else
@@ -299,7 +299,7 @@ let rec intersect env ~r ty1 ty2 =
                 Utils.is_sub_type_for_union
                   env
                   (mk ty_ak)
-                  (MkType.arraykey Reason.Rnone)
+                  (MkType.arraykey Reason.none)
               then
                 intersect env ~r (mk ty_ak) (MkType.string r)
               else

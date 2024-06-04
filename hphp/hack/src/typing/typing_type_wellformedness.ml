@@ -42,7 +42,7 @@ let loclty_of_hint unchecked_tparams env h =
   in
   let tyl =
     List.map unchecked_tparams ~f:(fun t ->
-        mk (Reason.Rwitness_from_decl (fst t.tp_name), Typing_defs.make_tany ()))
+        mk (Reason.witness_from_decl (fst t.tp_name), Typing_defs.make_tany ()))
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in

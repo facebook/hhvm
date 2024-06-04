@@ -35,7 +35,7 @@ let make_locl tparams tyl =
     let (ty, tyl) =
       match tyl with
       | [] ->
-        ((Typing_defs.mk (Reason.Rnone, Typing_defs.make_tany ()) : locl_ty), [])
+        ((Typing_defs.mk (Reason.none, Typing_defs.make_tany ()) : locl_ty), [])
       | ty :: rl -> (ty, rl)
     in
     (SMap.add (snd t.tp_name) ty subst, tyl)
@@ -53,7 +53,7 @@ let make_decl tparams tyl =
     let (ty, tyl) =
       match tyl with
       | [] ->
-        ((Typing_defs.mk (Reason.Rnone, Typing_defs.make_tany ()) : decl_ty), [])
+        ((Typing_defs.mk (Reason.none, Typing_defs.make_tany ()) : decl_ty), [])
       | ty :: rl -> (ty, rl)
     in
     (SMap.add (snd t.tp_name) ty subst, tyl)

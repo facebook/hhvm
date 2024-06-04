@@ -26,7 +26,7 @@ let create_handler _ctx =
           Tast_env.is_sub_type
             env
             locl_ty
-            (Typing_make_type.nothing Typing_reason.Rnone)
+            (Typing_make_type.nothing Typing_reason.none)
         then
           let kind =
             match Typing_defs.get_node locl_ty with

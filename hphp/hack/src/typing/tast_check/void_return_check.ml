@@ -88,8 +88,8 @@ let validate_state fun_span fun_kind env s =
   let check_ret_type ret_type_hint_locl =
     (* Fixme: Should we use more precise logic to determine the expected
        return type hint by factoring it into a function in Typing_return? *)
-    let void = Typing_make_type.void Typing_reason.Rnone in
-    let aw_void = Typing_make_type.awaitable Typing_reason.Rnone void in
+    let void = Typing_make_type.void Typing_reason.none in
+    let aw_void = Typing_make_type.awaitable Typing_reason.none void in
     let is_void_super_ty = is_bad_supertype void ret_type_hint_locl in
     let is_awaitable_void_super_ty =
       is_bad_supertype aw_void ret_type_hint_locl

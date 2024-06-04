@@ -180,8 +180,8 @@ pub trait Reason:
                 OR::RnullsafeOp(pos) => RI::RnullsafeOp(pos.into()),
                 OR::RtconstNoCstr(&pos_id) => RI::RtconstNoCstr(pos_id.into()),
                 OR::Rpredicated(&(pos, s)) => RI::Rpredicated(pos.into(), Symbol::new(s)),
-                OR::Ris(pos) => RI::Ris(pos.into()),
-                OR::Ras(pos) => RI::Ras(pos.into()),
+                OR::RisRefinement(pos) => RI::RisRefinement(pos.into()),
+                OR::RasRefinement(pos) => RI::RasRefinement(pos.into()),
                 OR::Requal(pos) => RI::Requal(pos.into()),
                 OR::RvarrayOrDarrayKey(pos) => RI::RvarrayOrDarrayKey(pos.into()),
                 OR::RvecOrDictKey(pos) => RI::RvecOrDictKey(pos.into()),
@@ -190,7 +190,7 @@ pub trait Reason:
                 OR::RdynamicCall(pos) => RI::RdynamicCall(pos.into()),
                 OR::RdynamicConstruct(pos) => RI::RdynamicConstruct(pos.into()),
                 OR::RidxDict(pos) => RI::RidxDict(pos.into()),
-                OR::RsetElement(pos) => RI::RsetElement(pos.into()),
+                OR::RidxSetElement(pos) => RI::RidxSetElement(pos.into()),
                 OR::RmissingOptionalField(&(pos, s)) => {
                     RI::RmissingOptionalField(pos.into(), Symbol::new(s))
                 }
@@ -364,8 +364,8 @@ pub enum ReasonImpl<R, P> {
     RnullsafeOp(P),
     RtconstNoCstr(Positioned<TypeConstName, P>),
     Rpredicated(P, Symbol),
-    Ris(P),
-    Ras(P),
+    RisRefinement(P),
+    RasRefinement(P),
     Requal(P),
     RvarrayOrDarrayKey(P),
     RvecOrDictKey(P),
@@ -374,7 +374,7 @@ pub enum ReasonImpl<R, P> {
     RdynamicCall(P),
     RdynamicConstruct(P),
     RidxDict(P),
-    RsetElement(P),
+    RidxSetElement(P),
     RmissingOptionalField(P, Symbol),
     RunsetField(P, Symbol),
     RcontravariantGeneric(R, Symbol),
@@ -577,8 +577,8 @@ impl<'a> ToOxidized<'a> for BReason {
             RI::Rpredicated(pos, s) => {
                 OR::Rpredicated(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
             }
-            RI::Ris(pos) => OR::Ris(pos.to_oxidized(arena)),
-            RI::Ras(pos) => OR::Ras(pos.to_oxidized(arena)),
+            RI::RisRefinement(pos) => OR::RisRefinement(pos.to_oxidized(arena)),
+            RI::RasRefinement(pos) => OR::RasRefinement(pos.to_oxidized(arena)),
             RI::Requal(pos) => OR::Requal(pos.to_oxidized(arena)),
             RI::RvarrayOrDarrayKey(pos) => OR::RvarrayOrDarrayKey(pos.to_oxidized(arena)),
             RI::RvecOrDictKey(pos) => OR::RvecOrDictKey(pos.to_oxidized(arena)),
@@ -587,7 +587,7 @@ impl<'a> ToOxidized<'a> for BReason {
             RI::RdynamicCall(pos) => OR::RdynamicCall(pos.to_oxidized(arena)),
             RI::RdynamicConstruct(pos) => OR::RdynamicConstruct(pos.to_oxidized(arena)),
             RI::RidxDict(pos) => OR::RidxDict(pos.to_oxidized(arena)),
-            RI::RsetElement(pos) => OR::RsetElement(pos.to_oxidized(arena)),
+            RI::RidxSetElement(pos) => OR::RidxSetElement(pos.to_oxidized(arena)),
             RI::RmissingOptionalField(pos, s) => OR::RmissingOptionalField(
                 arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))),
             ),

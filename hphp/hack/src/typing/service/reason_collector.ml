@@ -39,11 +39,11 @@ type category =
   | Return
 [@@deriving ord, yojson_of]
 
-let dynamic = Typing_make_type.dynamic Typing_reason.Rnone
+let dynamic = Typing_make_type.dynamic Typing_reason.none
 
-let mixed = Typing_make_type.mixed Typing_reason.Rnone
+let mixed = Typing_make_type.mixed Typing_reason.none
 
-let supportdyn_of_mixed = Typing_make_type.supportdyn_mixed Typing_reason.Rnone
+let supportdyn_of_mixed = Typing_make_type.supportdyn_mixed Typing_reason.none
 
 let is_like_type env ty =
   let is_sub_type = Tast_env.is_sub_type env in

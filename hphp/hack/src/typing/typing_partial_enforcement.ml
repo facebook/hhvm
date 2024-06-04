@@ -22,7 +22,7 @@ module MakeType = Typing_make_type
  * Resolve type parameters wrt to class_def_opt, if present
  *)
 let rec get_enforced_type env class_def_opt ty =
-  let default () = MakeType.mixed Reason.Rnone in
+  let default () = MakeType.mixed Reason.none in
   match get_node ty with
   (* An enum type is enforced at its underlying type *)
   | Tapply ((_, name), _) when Env.is_enum env name -> begin
@@ -80,7 +80,7 @@ let rec get_enforced_type env class_def_opt ty =
             match bounds with
             | [] -> default ()
             | [t] -> t
-            | ts -> MakeType.intersection Reason.Rnone ts
+            | ts -> MakeType.intersection Reason.none ts
           end
       end
     (* This is enforced but only at its class, which we can't express
@@ -92,16 +92,16 @@ let rec get_enforced_type env class_def_opt ty =
     | None -> default ()
     | Some cd ->
       mk
-        ( Reason.Rnone,
+        ( Reason.none,
           Tapply
             ( (Cls.pos cd, Cls.name cd),
               List.map (Cls.tparams cd) ~f:(fun _ ->
                   (* TODO akenn *)
-                  mk (Reason.Rnone, Tunion [])) ) )
+                  mk (Reason.none, Tunion [])) ) )
   end
   | Toption t ->
     let ety = get_enforced_type env class_def_opt t in
-    MakeType.nullable Reason.Rnone ety
+    MakeType.nullable Reason.none ety
   | Tlike t -> get_enforced_type env class_def_opt t
   (* Special case for intersections, as these are used to describe partial enforcement *)
   | Tintersection tys ->
@@ -109,7 +109,7 @@ let rec get_enforced_type env class_def_opt ty =
     MakeType.intersection (get_reason ty) tys
   | Tshape _
   | Ttuple _ ->
-    MakeType.nonnull Reason.Rnone
+    MakeType.nonnull Reason.none
   | Tprim _
   | Tnonnull ->
     ty

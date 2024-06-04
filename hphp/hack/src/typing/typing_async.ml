@@ -21,7 +21,7 @@ module MakeType = Typing_make_type
      e : ?Awaitable<T> |- await e : ?T
 *)
 let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
-  let r = Reason.Rwitness p in
+  let r = Reason.witness p in
   let rec extract_inner env opt_ty_maybe =
     let ((env, e1), e_opt_ty) =
       Typing_solver.expand_type_and_solve

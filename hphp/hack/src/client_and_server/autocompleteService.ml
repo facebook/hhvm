@@ -329,11 +329,11 @@ let autocomplete_shape_key autocomplete_context env fields id =
       let (code, kind, ty) =
         match name with
         | Typing_defs.TSFlit_int (pos, str) ->
-          let reason = Typing_reason.Rwitness_from_decl pos in
+          let reason = Typing_reason.witness_from_decl pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
           (str, FileInfo.SI_Literal, Typing_defs.mk (reason, ty))
         | Typing_defs.TSFlit_str (pos, str) ->
-          let reason = Typing_reason.Rwitness_from_decl pos in
+          let reason = Typing_reason.witness_from_decl pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote =
             if have_prefix then
@@ -346,7 +346,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
           ( Printf.sprintf "%s::%s" cid mid,
             FileInfo.SI_ClassConstant,
             Typing_defs.mk
-              (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) )
+              (Reason.witness_from_decl pos, Typing_defs.make_tany ()) )
       in
       if (not have_prefix) || String.is_prefix code ~prefix then
         let ty = Phase.decl ty in
@@ -1003,7 +1003,7 @@ let compatible_enum_class_consts env cls pos (expected_ty : locl_ty option) =
         in
         match expected_ty with
         | Some expected_ty ->
-          let cc_other = Typing_make_type.locl_like Reason.Rnone expected_ty in
+          let cc_other = Typing_make_type.locl_like Reason.none expected_ty in
           let tenv = Tast_env.tast_env_as_typing_env env in
           (* The exact callback does not matter provided that `sub_type`
              does not discard errors *)
@@ -1214,7 +1214,7 @@ let autocomplete_shape_literal_in_call
     (args : (Ast_defs.param_kind * Tast.expr) list) : unit =
   let add_shape_key_result pos key =
     let ty = Tprim Aast_defs.Tstring in
-    let reason = Typing_reason.Rwitness pos in
+    let reason = Typing_reason.witness pos in
     let ty = mk (reason, ty) in
 
     let kind = FileInfo.SI_Literal in
@@ -1399,7 +1399,7 @@ let enum_consts env name : string list option =
 
 let add_enum_const_result env pos replace_pos prefix const_name =
   let ty = Tprim Aast_defs.Tstring in
-  let reason = Typing_reason.Rwitness pos in
+  let reason = Typing_reason.witness pos in
   let ty = mk (reason, ty) in
 
   let kind = FileInfo.SI_ClassConstant in

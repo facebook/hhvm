@@ -31,7 +31,7 @@ let hint_to_type ~default env hint =
   Option.value (hint_to_type_opt env hint) ~default
 
 let make_wildcard_ty pos =
-  mk (Reason.Rwitness_from_decl pos, Typing_defs.Twildcard)
+  mk (Reason.witness_from_decl pos, Typing_defs.Twildcard)
 
 let make_param_ty env param =
   let param_pos = Decl_env.make_decl_pos env param.param_pos in
@@ -46,7 +46,7 @@ let make_param_ty env param =
     | t when param.param_is_variadic ->
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      mk (Reason.Rvar_param_from_decl param_pos, t)
+      mk (Reason.var_param_from_decl param_pos, t)
     | _ -> ty
   in
   let mode = get_param_mode param.param_callconv in
@@ -75,7 +75,7 @@ let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =
   let pos = Decl_env.make_decl_pos env pos in
   let ret_ty () =
     if is_constructor then
-      mk (Reason.Rwitness_from_decl pos, Tprim Tvoid)
+      mk (Reason.witness_from_decl pos, Tprim Tvoid)
     else
       hint_to_type ~default:(make_wildcard_ty pos) env hint
   in
@@ -83,20 +83,20 @@ let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =
   | None ->
     (match kind with
     | Ast_defs.FGenerator ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk
         ( r,
           Tapply
             ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()]) )
     | Ast_defs.FAsyncGenerator ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk
         ( r,
           Tapply
             ( (pos, SN.Classes.cAsyncGenerator),
               [ret_ty (); ret_ty (); ret_ty ()] ) )
     | Ast_defs.FAsync ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
     | Ast_defs.FSync -> ret_ty ())
   | Some _ -> ret_ty ()

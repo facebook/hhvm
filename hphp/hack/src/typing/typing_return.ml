@@ -79,7 +79,7 @@ let make_wrapped_fresh_type env p r id =
 (* Create a return type with fresh type variables  *)
 let make_fresh_return_type env p =
   let fun_kind = Env.get_fn_kind env in
-  let r = Reason.Rret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
+  let r = Reason.ret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
   match fun_kind with
   | Ast_defs.FSync -> Env.fresh_type env p
   | Ast_defs.FAsync -> make_wrapped_fresh_type env p r SN.Classes.cAwaitable
@@ -140,16 +140,14 @@ let make_return_type
     in
     if supportdyn then
       TUtils.make_supportdyn
-        (Reason.Rsupport_dynamic_type (Pos_or_decl.of_raw_pos hint_pos))
+        (Reason.support_dynamic_type (Pos_or_decl.of_raw_pos hint_pos))
         env
         ty
     else
       (env, ty)
   | Some ty ->
     let wrap_awaitable p ty =
-      MakeType.awaitable
-        (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
-        ty
+      MakeType.awaitable (Reason.ret_fun_kind_from_decl (p, Ast_defs.FAsync)) ty
     in
     let localize ~wrap (env : env) (dty : decl_ty) =
       if TypecheckerOptions.everything_sdt env.genv.tcopt then (
@@ -164,7 +162,7 @@ let make_return_type
         (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
         let (env, ty) =
           if supportdyn then
-            TUtils.make_supportdyn (Reason.Rsupport_dynamic_type pos) env ty
+            TUtils.make_supportdyn (Reason.support_dynamic_type pos) env ty
           else
             (env, ty)
         in
@@ -187,7 +185,7 @@ let make_return_type
           | Tprim Aast.Tvoid when not wrap -> ty
           | _ ->
             if add_like then
-              TUtils.make_like ~reason:(Reason.Rpessimised_return pos) env ty
+              TUtils.make_like ~reason:(Reason.pessimised_return pos) env ty
             else
               ty
         in
@@ -245,7 +243,7 @@ let make_return_type
         let (env, ty) =
           if supportdyn then
             TUtils.make_supportdyn
-              (Reason.Rsupport_dynamic_type (get_pos ty))
+              (Reason.support_dynamic_type (get_pos ty))
               env
               ty
           else
@@ -334,7 +332,7 @@ let check_inout_return ret_pos env =
               param_pos
           in
           let param_ty =
-            mk (Reason.Rinout_param (get_pos out_ty), get_node out_ty)
+            mk (Reason.inout_param (get_pos out_ty), get_node out_ty)
           in
           let (env, ty_err_opt) =
             Typing_coercion.coerce_type
@@ -393,7 +391,7 @@ let fun_implicit_return env pos ret =
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
     let env = check_inout_return Pos.none env in
-    let r = Reason.Rno_return pos in
+    let r = Reason.no_return pos in
     let rty = MakeType.void r in
     implicit_return
       env
@@ -405,7 +403,7 @@ let fun_implicit_return env pos ret =
   | Ast_defs.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
-    let r = Reason.Rno_return_async pos in
+    let r = Reason.no_return_async pos in
     let rty = MakeType.awaitable r (MakeType.void r) in
     implicit_return
       env

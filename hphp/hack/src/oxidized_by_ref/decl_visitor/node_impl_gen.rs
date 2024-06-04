@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8719bc825952bc6a9a59dac253a6b330>>
+// @generated SignedSource<<1f8ac6ae0d2f0b2e753363ed5e923568>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1112,8 +1112,8 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RnullsafeOp(ref __binding_0) => __binding_0.accept(v),
             T_::RtconstNoCstr(ref __binding_0) => __binding_0.accept(v),
             T_::Rpredicated(ref __binding_0) => __binding_0.accept(v),
-            T_::Ris(ref __binding_0) => __binding_0.accept(v),
-            T_::Ras(ref __binding_0) => __binding_0.accept(v),
+            T_::RisRefinement(ref __binding_0) => __binding_0.accept(v),
+            T_::RasRefinement(ref __binding_0) => __binding_0.accept(v),
             T_::Requal(ref __binding_0) => __binding_0.accept(v),
             T_::RvarrayOrDarrayKey(ref __binding_0) => __binding_0.accept(v),
             T_::RvecOrDictKey(ref __binding_0) => __binding_0.accept(v),
@@ -1122,7 +1122,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RdynamicCall(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicConstruct(ref __binding_0) => __binding_0.accept(v),
             T_::RidxDict(ref __binding_0) => __binding_0.accept(v),
-            T_::RsetElement(ref __binding_0) => __binding_0.accept(v),
+            T_::RidxSetElement(ref __binding_0) => __binding_0.accept(v),
             T_::RmissingOptionalField(ref __binding_0) => __binding_0.accept(v),
             T_::RunsetField(ref __binding_0) => __binding_0.accept(v),
             T_::RcontravariantGeneric(ref __binding_0) => __binding_0.accept(v),

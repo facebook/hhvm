@@ -161,7 +161,7 @@ let is_bogus_taccess tp =
 let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
   let r =
     let (what, wpos) = renv.scope_kind in
-    Reason.Rrigid_tvar_escape (wpos, what, name, get_reason ty_orig)
+    Reason.rigid_tvar_escape (wpos, what, name, get_reason ty_orig)
   in
   match v with
   | Ast_defs.Contravariant ->

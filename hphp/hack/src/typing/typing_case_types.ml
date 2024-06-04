@@ -460,7 +460,7 @@ module DataType = struct
               let trail =
                 DataTypeReason.sealed_interface
                   ~trail
-                  (Reason.Rwitness_from_decl (Cls.pos cls))
+                  (Reason.witness_from_decl (Cls.pos cls))
                   name
               in
               SSet.fold

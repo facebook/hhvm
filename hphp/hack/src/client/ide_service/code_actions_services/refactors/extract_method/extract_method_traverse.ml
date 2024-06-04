@@ -246,7 +246,7 @@ See [selection region]
       | Aast.Return _ -> region := Region.{ !region with has_return = true }
       | _ -> ());
       let acc = super#on_stmt env stmt in
-      let ty = Typing_make_type.void Typing_reason.Rnone in
+      let ty = Typing_make_type.void Typing_reason.none in
       make acc pos (Code_action_types.Type_string.of_locl_ty env ty)
 
     method! on_fun_ env fun_ =

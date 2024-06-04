@@ -80,7 +80,7 @@ let intersect_truthiness tr1 tr2 =
   | (Possibly_falsy, Possibly_falsy) -> Possibly_falsy
 
 let (tclass_is_falsy_when_empty, is_traversable) =
-  let r = Typing_reason.Rnone in
+  let r = Typing_reason.none in
   let mixed = MakeType.mixed r in
   let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
   let container_type = MakeType.container r mixed in

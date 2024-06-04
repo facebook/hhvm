@@ -336,7 +336,7 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
       in
       (env, MakeType.supportdyn r ty)
     | (_, (Tdynamic | Tany _)) -> (env, ty)
-    | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
+    | (_, Tunion []) -> (env, MakeType.null (Reason.nullsafe_op pos))
     | _ ->
       (* Shouldn't happen *)
       make_nullable_member_type ~is_method:false env id_pos pos ty
@@ -344,7 +344,7 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
     let (env, ty) =
       Typing_solver.non_null env (Pos_or_decl.of_raw_pos id_pos) ty
     in
-    (env, MakeType.nullable (Reason.Rnullsafe_op pos) ty)
+    (env, MakeType.nullable (Reason.nullsafe_op pos) ty)
 
 (* Return true if the `this` type appears in a covariant
  * (resp. contravariant, if contra=true) position in ty.
@@ -451,16 +451,16 @@ let rec obj_get_concrete_ty
       else
         None
     in
-    let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
+    let ty = MakeType.dynamic (Reason.dynamic_prop id_pos) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
   | (_, Tany _) ->
     (env, None, (concrete_ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
   | (r, Tnonnull) ->
     let ty_reasons =
-      match r with
-      | Reason.Ropaque_type_from_module _ ->
+      if Reason.Predicates.is_opaque_type_from_module r then
         lazy (Reason.to_string "This type is mixed" r)
-      | _ -> lazy []
+      else
+        lazy []
     in
     let ty_err =
       Typing_error.(
@@ -528,7 +528,7 @@ and get_member_from_constraints
       ~combine_ty_errs:Typing_error.multiple_opt
   in
   let (env, inter_ty) =
-    Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
+    Inter.intersect_list env (Reason.witness id_pos) upper_bounds
   in
   merge_ty_err upper_ty_errs
   @@ obj_get_inner
@@ -555,7 +555,7 @@ and obj_get_concrete_class
   match Env.get_class env class_name with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
-    let ty = MakeType.nothing (Reason.Rmissing_class id_pos) in
+    let ty = MakeType.nothing (Reason.missing_class id_pos) in
     ( env,
       None,
       (ty, []),
@@ -862,11 +862,11 @@ and obj_get_concrete_class_with_member_info
         in
         match res with
         | (env, None, ty, _, _) -> (env, ty, true)
-        | _ -> (env, (MakeType.mixed Reason.Rnone, []), false)
+        | _ -> (env, (MakeType.mixed Reason.none, []), false)
       in
       if succeed then
         let (env, member_ty) =
-          Inter.intersect env ~r:(Reason.Rwitness id_pos) member_ty ty
+          Inter.intersect env ~r:(Reason.witness id_pos) member_ty ty
         in
         (env, (member_ty, tal))
       else
@@ -983,15 +983,15 @@ and obj_get_concrete_class_without_member_info
         ft_where_constraints = [];
         ft_params = [];
         ft_implicit_params =
-          { capability = CapTy (MakeType.intersection Reason.Rnone []) };
-        ft_ret = MakeType.void Reason.Rnone;
+          { capability = CapTy (MakeType.intersection Reason.none []) };
+        ft_ret = MakeType.void Reason.none;
         ft_flags = Typing_defs_flags.Fun.default;
         ft_cross_package = None;
       }
     in
     ( env,
       None,
-      (mk (Reason.Rnone, Tfun ft), []),
+      (mk (Reason.none, Tfun ft), []),
       dflt_lval_mismatch,
       dflt_rval_mismatch )
   else if String.equal id_str SN.Members.__construct then
@@ -1037,15 +1037,15 @@ and nullable_obj_get
       obj_get_inner args env ty id on_error
     in
     let (env, ty) =
-      match r_null with
-      | Reason.Rnullsafe_op p1 ->
+      match Reason.Predicates.unpack_nullsafe_op_opt r_null with
+      | Some p1 ->
         make_nullable_member_type
           ~is_method:args.is_method
           env
           id_pos
           p1
           method_
-      | _ -> (env, method_)
+      | None -> (env, method_)
     in
     (env, ty_errs, (ty, tal), lval_mismatch, rval_mismatch)
   | None when rcv_is_option ->
@@ -1089,10 +1089,10 @@ and nullable_obj_get
       let r = get_reason ety1 in
       if rcv_is_nothing then
         let ty_reasons =
-          match r with
-          | Reason.Ropaque_type_from_module _ ->
+          if Reason.Predicates.is_opaque_type_from_module r then
             lazy (Reason.to_string "This type is mixed" r)
-          | _ -> lazy []
+          else
+            lazy []
         in
         let ty_err =
           Typing_error.(
@@ -1496,7 +1496,7 @@ let obj_get_with_mismatches_helper
       obj_get_inner
         args
         env
-        (MakeType.dynamic (Reason.Rwitness obj_pos))
+        (MakeType.dynamic (Reason.witness obj_pos))
         member_id
         on_error
     else

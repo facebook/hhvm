@@ -210,7 +210,7 @@ let maybe_pessimise_typedef_decl ctx typedef_decl =
           Some
             (Decl_enforceability.supportdyn_mixed
                pos
-               (Reason.Rwitness_from_decl pos));
+               (Reason.witness_from_decl pos));
       }
   else
     typedef_decl

@@ -10,7 +10,7 @@
 module Eval = Custom_error_eval
 module Ty = Typing_defs_core
 
-let mk_ty ty_ = Ty.mk (Typing_reason.Rnone, ty_)
+let mk_ty ty_ = Ty.mk (Typing_reason.none, ty_)
 
 (* Pattern match over a `Violated_constraint` error matching exactly the tparam
    name for which the constraint is violated *)
@@ -24,8 +24,8 @@ let%test_unit "patt string exactly" =
       {
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
-        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
+        ty_sub = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
       }
   in
   let err =
@@ -96,8 +96,8 @@ let%test_unit "patt tysub" =
       {
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
+        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
       }
   in
   let err =
@@ -199,8 +199,8 @@ let%test_unit "patt tysub or pattern" =
       {
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
+        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
       }
   in
   let err =
@@ -313,8 +313,8 @@ let%test_unit "test namespace" =
       {
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, ty));
-        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
+        ty_sub = LoclType (Ty.mk (Typing_reason.none, ty));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
       }
   in
   let err =

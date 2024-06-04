@@ -16,7 +16,7 @@ open Typing_defs
 module SN = Naming_special_names
 
 let make_decl_ty env p ty_ =
-  mk (Typing_reason.Rhint (Decl_env.make_decl_pos env p), ty_)
+  mk (Typing_reason.hint (Decl_env.make_decl_pos env p), ty_)
 
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =
@@ -69,7 +69,7 @@ and aast_contexts_to_decl_capability env ctxs default_pos :
      * However the direct decl parser removes the intersection when the
      * context was a single Hfun_context. Let's do the same here
      *)
-    let reason = Reason.Rhint (Decl_env.make_decl_pos env pos) in
+    let reason = Reason.hint (Decl_env.make_decl_pos env pos) in
     let dty =
       match dtys with
       | [dty] -> begin
@@ -110,7 +110,7 @@ and hint_ p env = function
       | Some h -> hint env h
       | None ->
         mk
-          ( Typing_reason.Rvec_or_dict_key (Decl_env.make_decl_pos env p),
+          ( Typing_reason.vec_or_dict_key (Decl_env.make_decl_pos env p),
             Tprim Aast.Tarraykey )
     in
     Tvec_or_dict (t1, hint env h2)
@@ -214,7 +214,7 @@ and hint_ p env = function
       | id :: ids ->
         translate
           (Taccess
-             ( mk (Typing_reason.Rhint (Decl_env.make_decl_pos env p), res),
+             ( mk (Typing_reason.hint (Decl_env.make_decl_pos env p), res),
                Decl_env.make_decl_posed env id ))
           ids
     in

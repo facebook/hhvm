@@ -31,12 +31,11 @@ let get_self_from_c c =
   let tparams =
     List.map c.c_tparams ~f:(fun { tp_name = (p, s); _ } ->
         mk
-          ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
-            Tgeneric (s, []) ))
+          (Reason.witness_from_decl (Pos_or_decl.of_raw_pos p), Tgeneric (s, [])))
   in
   let (name_pos, name) = c.c_name in
   let name_pos = Pos_or_decl.of_raw_pos name_pos in
-  mk (Reason.Rwitness_from_decl name_pos, Tapply ((name_pos, name), tparams))
+  mk (Reason.witness_from_decl name_pos, Tapply ((name_pos, name), tparams))
 
 (** Set 'self' identifier and type in environment. *)
 let set_self env c =
@@ -49,8 +48,7 @@ let set_self env c =
     | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
       ( env,
-        MakeType.class_type (Reason.Rwitness (fst c.c_name)) (snd c.c_name) []
-      )
+        MakeType.class_type (Reason.witness (fst c.c_name)) (snd c.c_name) [] )
     | Ast_defs.Cinterface
     | Ast_defs.Cclass _
     | Ast_defs.Ctrait ->

@@ -315,7 +315,7 @@ let remove_lower_bound tpenv name bound =
 let remove tpenv name =
   (* TODO(T70068435) Revisit this function when implementing bounds on HK generic vars,
      in particular, look at the two Tgeneric below. *)
-  let tparam = mk (Typing_reason.Rnone, Tgeneric (name, [])) in
+  let tparam = mk (Typing_reason.none, Tgeneric (name, [])) in
   let lower_bounds = get_lower_bounds tpenv name [] in
   let remove_from_upper_bounds_of ty tpenv =
     match get_node ty with

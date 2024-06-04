@@ -74,7 +74,7 @@ and abstract = {
 }
 
 let make_reason env id root r =
-  Reason.Rtypeconst (r, id, lazy (Typing_print.error env root), get_reason root)
+  Reason.typeconst (r, id, lazy (Typing_print.error env root), get_reason root)
 
 (* FIXME: It is bogus to use strings here and put them in Tgeneric; one
    possible problem is when a type parameter has a name which conflicts
@@ -98,7 +98,7 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
        Here, $x->get() has type expr#1::T as T1::T (as Box::T).
        But T1::T is exactly equal to int, so $x->get() no longer needs
        to be expression dependent. Thus, $x->get() typechecks. *)
-    Exact (MakeType.generic Reason.Rnone tp_name)
+    Exact (MakeType.generic Reason.none tp_name)
   else
     Abstract abstr
 
@@ -296,7 +296,7 @@ let rec type_of_result ~ignore_errors ctx env root res =
       (env, tvar)
     | None ->
       let generic_name = tp_name name ctx.id in
-      let reason = make_reason env ctx.id root Reason.Rnone in
+      let reason = make_reason env ctx.id root Reason.none in
       let ty = MakeType.generic reason generic_name in
       let env =
         TySet.fold
@@ -366,9 +366,7 @@ let update_class_name env id new_name = function
       { abstr with name = new_name; names = name :: names }
 
 let is_opaque_internal ty =
-  match get_reason ty with
-  | Reason.Ropaque_type_from_module _ -> true
-  | _ -> false
+  Reason.Predicates.is_opaque_type_from_module (get_reason ty)
 
 let rec expand ctx env root =
   let (env, root) = Env.expand_type env root in

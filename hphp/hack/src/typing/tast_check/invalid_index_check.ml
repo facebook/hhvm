@@ -66,7 +66,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       || Env.can_subtype env ty_expect (MakeType.nothing (get_reason ty_expect))
       )
       (* If the key is not even an arraykey, we've already produced an error *)
-      || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
+      || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.none)))
          && should_enforce env
       (* Keytype of arraykey&dynamic happens when you assign a dynamic into a dict,
          but the above coercion doesn't work. *)
@@ -118,7 +118,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
        whilst allowing us to discern between it and errors which can be
        addressed with `UNSAFE_CAST`
     *)
-    let arraykey_ty = MakeType.arraykey (Reason.Ridx_dict array_pos) in
+    let arraykey_ty = MakeType.arraykey (Reason.idx_dict array_pos) in
     let array_key_res =
       type_index env index_ty arraykey_ty (Reason.index_class cn)
     in

@@ -66,7 +66,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
   let ft_flags = lambda_flags f in
   let fe_type =
     mk
-      ( Reason.Rwitness_from_decl fe_pos,
+      ( Reason.witness_from_decl fe_pos,
         Tfun
           {
             ft_tparams = [];

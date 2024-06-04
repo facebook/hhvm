@@ -84,8 +84,8 @@ impl<'a> Reason<'a> {
             | RnullsafeOp(p)
             | RtconstNoCstr((p, _))
             | Rpredicated((p, _))
-            | Ris(p)
-            | Ras(p)
+            | RisRefinement(p)
+            | RasRefinement(p)
             | Requal(p)
             | RvarrayOrDarrayKey(p)
             | RvecOrDictKey(p)
@@ -94,7 +94,7 @@ impl<'a> Reason<'a> {
             | RdynamicCall(p)
             | RdynamicConstruct(p)
             | RidxDict(p)
-            | RsetElement(p)
+            | RidxSetElement(p)
             | RmissingOptionalField((p, _))
             | RunsetField((p, _))
             | Rregex(p)
@@ -220,8 +220,8 @@ impl<'a> std::fmt::Debug for T_<'a> {
             RnullsafeOp(p) => f.debug_tuple("RnullsafeOp").field(p).finish(),
             RtconstNoCstr(p) => f.debug_tuple("RtconstNoCstr").field(p).finish(),
             Rpredicated(p) => f.debug_tuple("Rpredicated").field(p).finish(),
-            Ris(p) => f.debug_tuple("Ris").field(p).finish(),
-            Ras(p) => f.debug_tuple("Ras").field(p).finish(),
+            RisRefinement(p) => f.debug_tuple("RisRefinement").field(p).finish(),
+            RasRefinement(p) => f.debug_tuple("RasRefinement").field(p).finish(),
             Requal(p) => f.debug_tuple("Requal").field(p).finish(),
             RvarrayOrDarrayKey(p) => f.debug_tuple("RvarrayOrDarrayKey").field(p).finish(),
             RvecOrDictKey(p) => f.debug_tuple("RvecOrDictKey").field(p).finish(),
@@ -230,7 +230,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
             RdynamicCall(p) => f.debug_tuple("RdynamicCall").field(p).finish(),
             RdynamicConstruct(p) => f.debug_tuple("RdynamicConstruct").field(p).finish(),
             RidxDict(p) => f.debug_tuple("RidxDict").field(p).finish(),
-            RsetElement(p) => f.debug_tuple("RsetElement").field(p).finish(),
+            RidxSetElement(p) => f.debug_tuple("RsetElement").field(p).finish(),
             RmissingOptionalField(p) => f.debug_tuple("RmissingOptionalField").field(p).finish(),
             RunsetField(p) => f.debug_tuple("RunsetField").field(p).finish(),
             RcontravariantGeneric(p) => f.debug_tuple("RcontravariantGeneric").field(p).finish(),

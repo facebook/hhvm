@@ -46,7 +46,7 @@ let log level pos kind =
     in
     Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)
 
-let nothing_ty = Typing_make_type.nothing Typing_reason.Rnone
+let nothing_ty = Typing_make_type.nothing Typing_reason.none
 
 let replace_placeholders_with_tvars env ty =
   let replace_placeholder env ty =
@@ -58,7 +58,7 @@ let replace_placeholders_with_tvars env ty =
   match T.get_node ty with
   | T.Tclass (id, exact, targs) ->
     let (env, targs) = List.fold_map ~f:replace_placeholder ~init:env targs in
-    (env, T.mk (Typing_reason.Rnone, T.Tclass (id, exact, targs)))
+    (env, T.mk (Typing_reason.none, T.Tclass (id, exact, targs)))
   | _ -> (env, ty)
 
 let always_false level pos kind env lhs_ty rhs_ty =

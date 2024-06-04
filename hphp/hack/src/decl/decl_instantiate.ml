@@ -46,7 +46,7 @@ let rec instantiate subst (ty : decl_ty) =
         (* We could insist on args = [] here, everything else is a kinding error *)
         ty_
     in
-    mk (Reason.Rinstantiate (r, orig_var, orig_r), res_ty_)
+    mk (Reason.instantiate (r, orig_var, orig_r), res_ty_)
   in
 
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
@@ -140,7 +140,7 @@ and instantiate_ subst x =
           if SSet.mem name target_generics then
             (* Fresh only because we don't support nesting of generic function types *)
             let fresh_tp_name = name ^ "#0" in
-            let reason = Typing_reason.Rwitness_from_decl pos in
+            let reason = Typing_reason.witness_from_decl pos in
             ( SMap.add name (mk (reason, Tgeneric (fresh_tp_name, []))) subst,
               { tp with tp_name = (pos, fresh_tp_name) } )
           else

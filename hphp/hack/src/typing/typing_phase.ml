@@ -295,11 +295,14 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   | Tmixed -> ((env, None), MakeType.mixed r)
   | Tthis ->
     let ty =
-      map_reason ety_env.this_ty ~f:(function
-          | Reason.Rnone -> r
-          | Reason.Rexpr_dep_type (_, pos, s) ->
-            Reason.Rexpr_dep_type (r, pos, s)
-          | reason -> Reason.Rinstantiate (reason, SN.Typehints.this, r))
+      map_reason ety_env.this_ty ~f:(function reason ->
+          if Reason.Predicates.is_none reason then
+            r
+          else (
+            match Reason.Predicates.unpack_expr_dep_type_opt reason with
+            | Some (_, pos, s) -> Reason.expr_dep_type (r, pos, s)
+            | None -> Reason.instantiate (reason, SN.Typehints.this, r)
+          ))
     in
     (* When refining `as this`, insert a like type for generic or non-final
      * classes, because generics are not checked at runtime *)
@@ -310,7 +313,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           if Cls.final tc && List.is_empty (Cls.tparams tc) then
             ty
           else
-            MakeType.locl_like (Reason.Rpessimised_this (Reason.to_pos r)) ty
+            MakeType.locl_like (Reason.pessimised_this (Reason.to_pos r)) ty
         | _ -> ty
       else
         ty
@@ -361,7 +364,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           let rp = get_reason x_ty in
           if not @@ TypecheckerOptions.using_extended_reasons env.genv.tcopt
           then
-            Reason.Rinstantiate (rp, x, r)
+            Reason.instantiate (rp, x, r)
           else
             rp
         in
@@ -597,11 +600,13 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
          * the expression dependent type was derived from.
          *)
         let reason =
-          match get_reason root_ty with
-          | Reason.Rexpr_dep_type (_, p, e) -> Reason.Rexpr_dep_type (r, p, e)
-          | _ -> r
+          match
+            Reason.Predicates.unpack_expr_dep_type_opt (get_reason root_ty)
+          with
+          | Some (_, p, e) -> Reason.expr_dep_type (r, p, e)
+          | None -> r
         in
-        Reason.Rtype_access (expand_reason, [(reason, taccess_string)])
+        Reason.type_access (expand_reason, [(reason, taccess_string)])
       in
       let ty = map_reason ty ~f:elaborate_reason in
       ((env, ty_err_opt), ty))
@@ -837,7 +842,7 @@ and localize_class_instantiation
             | Decl_entry.Found None ->
               ( (env, None),
                 MakeType.arraykey
-                  (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
+                  (Reason.implicit_upper_bound (pos, "arraykey")) )
             | Decl_entry.Found (Some ty) -> localize ~ety_env env ty
           in
           let enum_ty = mk (r, Tnewtype (name, [], cstr)) in
@@ -876,7 +881,7 @@ and localize_class_instantiation
               "Internal error: module must exist for class to be not visible"
         in
         let new_r =
-          Reason.Ropaque_type_from_module (Cls.pos class_info, callee_module, r)
+          Reason.opaque_type_from_module (Cls.pos class_info, callee_module, r)
         in
         let cstr = MakeType.mixed new_r in
         (* If the class supports dynamic, reveal this in the newtype *)
@@ -994,7 +999,7 @@ and localize_cstr_ty ~ety_env env ty tp_name =
   let (env, ty) = localize ~ety_env env ty in
   let ty =
     map_reason ty ~f:(fun r ->
-        Reason.Rcstr_on_generics (Reason.to_pos r, tp_name))
+        Reason.cstr_on_generics (Reason.to_pos r, tp_name))
   in
   (env, ty)
 
@@ -1498,7 +1503,7 @@ let localize_targs_with_kinds
           Env.fresh_type_reason
             env
             use_pos
-            (Reason.Rtype_variable_generics (use_pos, snd kind_name, use_name))
+            (Reason.type_variable_generics (use_pos, snd kind_name, use_name))
         in
         Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
         ((env, None), (tvar, wildcard_hint))
@@ -1693,7 +1698,7 @@ let localize_and_add_generic_parameters_with_bounds
       env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
     (* TODO(T70068435) This may have to be touched when adding support for constraints on HK
        types *)
-    let tparam_ty = mk (Reason.Rwitness_from_decl pos, Tgeneric (name, [])) in
+    let tparam_ty = mk (Reason.witness_from_decl pos, Tgeneric (name, [])) in
     List.map_env_ty_err_opt
       env
       cstrl

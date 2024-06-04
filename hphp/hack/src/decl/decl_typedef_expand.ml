@@ -95,14 +95,14 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     (td_tparams, get_node ty, cycles)
   else
     let tparam_to_tgeneric tparam =
-      mk (Reason.Rhint (fst tparam.tp_name), Tgeneric (snd tparam.tp_name, []))
+      mk (Reason.hint (fst tparam.tp_name), Tgeneric (snd tparam.tp_name, []))
     in
     let (tyl : decl_ty list) = List.map td_tparams ~f:tparam_to_tgeneric in
     let cstr =
       match td_as_constraint with
       | Some cstr -> cstr
       | None ->
-        let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "mixed") in
+        let r_cstr = Reason.implicit_upper_bound (td_pos, "mixed") in
         MakeType.mixed r_cstr
     in
     (td_tparams, Tnewtype (name, tyl, cstr), [])

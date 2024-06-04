@@ -107,13 +107,13 @@ let check_implements
        * and its args satisfy the attribute class constructor *)
       let attr_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
-          (Rwitness_from_decl (Cls.pos attr_class))
+          (witness_from_decl (Cls.pos attr_class))
           (Cls.name attr_class)
           []
       in
       let interface_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
-          (Rwitness_from_decl (Cls.pos intf_class))
+          (witness_from_decl (Cls.pos intf_class))
           (Cls.name intf_class)
           []
       in

@@ -172,7 +172,7 @@ let check_arraykey_index error env pos container_ty index_ty =
     let info_of_type ty = (get_pos ty, lazy (Typing_print.error env ty)) in
     let container_info = info_of_type container_ty in
     let index_info = info_of_type index_ty in
-    let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
+    let ty_arraykey = MakeType.arraykey (Reason.idx_dict pos) in
     (* If we have an error in coercion here, we will add a `Hole` indicating the
        actual and expected type. The `Hole` may then be used in a codemod to
        add a call to `UNSAFE_CAST` so we need to consider what type we expect.
@@ -457,7 +457,7 @@ let rec array_get
             err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.int (Reason.Ridx_vector p2) in
+        let ty1 = MakeType.int (Reason.idx_vector p2) in
         let ((env, ty_err_opt), idx_err_res) =
           type_index env expr_pos ty2 ty1 Enforced (Reason.index_class cn)
         in
@@ -545,7 +545,7 @@ let rec array_get
             err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.int (Reason.Ridx (p2, r)) in
+        let ty1 = MakeType.int (Reason.idx (p2, r)) in
         let ((env, ty_err1), idx_err_res) =
           type_index env expr_pos ty2 ty1 Enforced (Reason.index_class cn)
         in
@@ -577,9 +577,9 @@ let rec array_get
       | Tany _ ->
         (env, (ty1, dflt_arr_res, Ok ty2))
       | Tprim Tstring ->
-        let ty = MakeType.string (Reason.Rwitness expr_pos) in
+        let ty = MakeType.string (Reason.witness expr_pos) in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.int (Reason.Ridx (p2, r)) in
+        let ty1 = MakeType.int (Reason.idx (p2, r)) in
         let ((env, ty_err1), idx_err_res) =
           type_index env expr_pos ty2 ty1 Enforced Reason.index_array
         in
@@ -749,7 +749,7 @@ let rec array_get
         if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
           got_dynamic ()
         else
-          let ty = MakeType.nothing Reason.Rnone in
+          let ty = MakeType.nothing Reason.none in
           let (env, (ty, err_opt_arr, err_opt_idx)) =
             nullable_container_get env ty
           in
@@ -822,7 +822,7 @@ let rec array_get
           let ty_nothing = MakeType.nothing Reason.none in
           let (env, ty_key) =
             MakeType.arraykey Reason.none
-            |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+            |> Typing_intersection.intersect ~r:Reason.none env ty2
           in
           let ty_keyedcontainer =
             MakeType.(keyed_container Reason.none ty_key ty_nothing)
@@ -847,7 +847,7 @@ let rec array_get
         let ty_nothing = MakeType.nothing Reason.none in
         let (env, ty_key) =
           MakeType.arraykey Reason.none
-          |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+          |> Typing_intersection.intersect ~r:Reason.none env ty2
         in
         let ty_keyedcontainer =
           MakeType.(keyed_container Reason.none ty_key ty_nothing)
@@ -862,7 +862,7 @@ let rec array_get
         let (env, value) = Env.fresh_type env expr_pos in
         let (env, ty_key) =
           MakeType.arraykey Reason.none
-          |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+          |> Typing_intersection.intersect ~r:Reason.none env ty2
         in
         let keyed_container = MakeType.keyed_container r ty_key value in
         let (env, arr_ty_err_opt) =
@@ -973,7 +973,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         when String.equal n SN.Collections.cKeyset ->
         let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
         let (env, tk') =
-          let r = Reason.Rkey_value_collection_key expr_pos in
+          let r = Reason.key_value_collection_key expr_pos in
           let ak_t = MakeType.arraykey r in
           let (env, ty2) = Typing_intersection.intersect env ~r ak_t ty2 in
           Typing_union.union env tv ty2
@@ -986,7 +986,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           | (_, Error _) as err_res -> err_res
           | (env, _) ->
             let (env, tv', enforced) =
-              let ak_t = MakeType.arraykey (Reason.Ridx_vector expr_pos) in
+              let ak_t = MakeType.arraykey (Reason.idx_vector expr_pos) in
               let (env, tv) = maybe_pessimise_type env tv in
               if TUtils.is_sub_type_for_union env ak_t tv then
                 (* hhvm will enforce that the key is an arraykey, so if
@@ -1150,7 +1150,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         in
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
         let (_, p, _) = key in
-        let tk = MakeType.int (Reason.Ridx_vector p) in
+        let tk = MakeType.int (Reason.idx_vector p) in
         let ((env, ty_err1), idx_err) =
           type_index env expr_pos tkey tk Enforced (Reason.index_class cn)
         in
@@ -1178,7 +1178,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             err_witness env expr_pos
         in
         let (_, p, _) = key in
-        let tk = MakeType.int (Reason.Ridx_vector p) in
+        let tk = MakeType.int (Reason.idx_vector p) in
         let ((env, ty_err1), idx_err) =
           type_index env expr_pos tkey tk Enforced (Reason.index_class cn)
         in
@@ -1202,7 +1202,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
         let (env, enforced, tk) =
           let (_, p, _) = key in
-          let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
+          let ak_t = MakeType.arraykey (Reason.idx_vector p) in
           let (env, tk) = maybe_pessimise_type env tk in
           if TUtils.is_sub_type_for_union env ak_t tk then
             (* hhvm will enforce that the key is an arraykey, so if
@@ -1254,15 +1254,11 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
         let (env, tk') =
           let (_, p, _) = key in
-          let ak_t = MakeType.arraykey (Reason.Ridx_dict p) in
+          let ak_t = MakeType.arraykey (Reason.idx_dict p) in
           match idx_err with
           | Ok _ ->
             let (env, tkey_new) =
-              Typing_intersection.intersect
-                env
-                ~r:(Reason.Ridx_dict p)
-                tkey
-                ak_t
+              Typing_intersection.intersect env ~r:(Reason.idx_dict p) tkey ak_t
             in
             Typing_union.union env tk tkey_new
           | _ -> Typing_union.union env tk tkey
@@ -1359,8 +1355,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         got_dynamic ()
       | Tprim Tstring ->
         let (_, p, _) = key in
-        let tk = MakeType.int (Reason.Ridx (p, r)) in
-        let tv = MakeType.string (Reason.Rwitness expr_pos) in
+        let tk = MakeType.int (Reason.idx (p, r)) in
+        let tv = MakeType.string (Reason.witness expr_pos) in
         let ((env, ty_err1), idx_err) =
           type_index env expr_pos tkey tk Enforced Reason.index_array
         in

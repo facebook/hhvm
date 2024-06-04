@@ -47,7 +47,7 @@ let make_supportdyn_type p r ty =
 let supportdyn_mixed p r = make_supportdyn_type p r (mk (r, Tmixed))
 
 let add_supportdyn_constraints p tparams =
-  let r = Reason.Rwitness_from_decl p in
+  let r = Reason.witness_from_decl p in
   List.map tparams ~f:(fun tparam ->
       if
         Naming_special_names.Coeffects.is_generated_generic (snd tparam.tp_name)
@@ -572,7 +572,7 @@ module Pessimize (Provider : ShallowProvider) = struct
         fp with
         fp_type =
           make_like_type
-            ~reason:(Reason.Rpessimised_inout fp.fp_pos)
+            ~reason:(Reason.pessimised_inout fp.fp_pos)
             ~intersect_with:None
             ~return_from_async:false
             fp.fp_type;
@@ -633,7 +633,7 @@ module Pessimize (Provider : ShallowProvider) = struct
                 (update_return_ty
                    ft
                    (make_like_type
-                      ~reason:(Reason.Rpessimised_return (get_pos ret_ty))
+                      ~reason:(Reason.pessimised_return (get_pos ret_ty))
                       ~intersect_with:None
                       ~return_from_async
                       ret_ty)) )
@@ -662,7 +662,7 @@ module Pessimize (Provider : ShallowProvider) = struct
                     (update_return_ty
                        ft
                        (make_like_type
-                          ~reason:(Reason.Rpessimised_return (get_pos ret_ty))
+                          ~reason:(Reason.pessimised_return (get_pos ret_ty))
                           ~intersect_with
                           ~return_from_async
                           ret_ty)) )

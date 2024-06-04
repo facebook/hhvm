@@ -24,7 +24,7 @@ let add_require_dynamic_bounds env cls =
       in
       let dtype =
         Typing_make_type.supportdyn_mixed
-          (Reason.Rwitness_from_decl (fst tp.tp_name))
+          (Reason.witness_from_decl (fst tp.tp_name))
       in
       let env = Env.add_upper_bound env (snd tp.tp_name) dtype in
       if
@@ -83,7 +83,7 @@ let check_property_sound_for_dynamic_write
         (Typing_utils.is_any env ty
         || Typing_utils.is_sub_type_for_union
              env
-             (Typing_make_type.dynamic Reason.Rnone)
+             (Typing_make_type.dynamic Reason.none)
              ty)
     then (
       let pos = get_pos decl_ty in
@@ -158,7 +158,7 @@ let make_like env changed ty =
 
 let maybe_wrap_with_supportdyn ~should_wrap locl_r ft =
   if should_wrap then
-    let r = Reason.Rsupport_dynamic_type (Reason.to_pos locl_r) in
+    let r = Reason.support_dynamic_type (Reason.to_pos locl_r) in
     let ft = Typing_defs_core.set_ft_support_dynamic_type ft false in
     Typing_make_type.supportdyn r (mk (locl_r, Tfun ft))
   else

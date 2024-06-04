@@ -103,7 +103,7 @@ let expand_var env r v =
       (not (is_tyvar ty_solution))
       && TypecheckerOptions.yolo_extended_reasons env.genv.tcopt
     then
-      map_reason ty_solution ~f:(fun from -> Typing_reason.Rflow (from, r))
+      map_reason ty_solution ~f:(fun from -> Typing_reason.flow (from, r))
     else
       ty_solution
   in
@@ -143,7 +143,7 @@ let fresh_type_error env p =
       env.inference_env
       env.tvar_id_provider
       p
-      (Reason.Rtype_variable_error p)
+      (Reason.type_variable_error p)
   in
   ({ env with inference_env }, res)
 
@@ -157,7 +157,7 @@ let fresh_type_error_contravariant env p =
       env.inference_env
       env.tvar_id_provider
       p
-      (Reason.Rtype_variable_error p)
+      (Reason.type_variable_error p)
   in
   ({ env with inference_env }, res)
 
@@ -1261,7 +1261,7 @@ let get_local_in_ctx ~undefined_err_fun env x ctx_opt =
     Some
       Typing_local_types.
         {
-          ty = Typing_make_type.nothing Reason.Rnone;
+          ty = Typing_make_type.nothing Reason.none;
           defined = false;
           bound_ty = None;
           pos = Pos.none;
@@ -1292,7 +1292,7 @@ let get_local_ty_in_ctx ~undefined_err_fun env x ctx_opt =
     ( false,
       Typing_local_types.
         {
-          ty = Typing_make_type.nothing Reason.Rnone;
+          ty = Typing_make_type.nothing Reason.none;
           defined = false;
           bound_ty = None;
           pos = Pos.none;
@@ -1304,7 +1304,7 @@ let get_local_ty_in_ctx ~undefined_err_fun env x ctx_opt =
       if local.defined then
         local.ty
       else
-        Typing_make_type.nothing Reason.Rnone
+        Typing_make_type.nothing Reason.none
     in
     (true, { local with ty })
 
@@ -1385,7 +1385,7 @@ let get_fake_members env =
   | Some next_cont -> next_cont.LEnvC.fake_members
 
 let update_lost_info name blame env ty =
-  let info r = Reason.Rlost_info (name, r, blame) in
+  let info r = Reason.lost_info (name, r, blame) in
   let rec update_ty (env, seen_tyvars) ty =
     let (env, ty) = expand_type env ty in
     match deref ty with

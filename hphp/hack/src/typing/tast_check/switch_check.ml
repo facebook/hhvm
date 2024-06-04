@@ -28,7 +28,7 @@ let is_common_enum_bound env ty =
   | Tprim Ast_defs.(Tarraykey | Tint | Tstring) -> true
   | _ -> false
 
-let is_dynamic env ty = Env.is_sub_type env ty (MakeType.dynamic Reason.Rnone)
+let is_dynamic env ty = Env.is_sub_type env ty (MakeType.dynamic Reason.none)
 
 let is_enum env ty =
   let (env, ty) = Env.expand_type env ty in

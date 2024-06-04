@@ -14,19 +14,17 @@ module Reason = Typing_reason
 module SN = Naming_special_names
 
 let is_sub_dynamic env t =
-  let (r, e) =
-    Typing_solver.is_sub_type env t (MakeType.dynamic Reason.Rnone)
-  in
+  let (r, e) = Typing_solver.is_sub_type env t (MakeType.dynamic Reason.none) in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
 let is_float env t =
-  let (r, e) = Typing_solver.is_sub_type env t (MakeType.float Reason.Rnone) in
+  let (r, e) = Typing_solver.is_sub_type env t (MakeType.float Reason.none) in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
 let is_int env t =
-  let (r, e) = Typing_solver.is_sub_type env t (MakeType.int Reason.Rnone) in
+  let (r, e) = Typing_solver.is_sub_type env t (MakeType.int Reason.none) in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
@@ -63,7 +61,7 @@ let check_like_num ?err p_exp p env ty =
     | None -> Typing_error.Callback.math_invalid_argument
     | Some err -> err
   in
-  let num_ty = MakeType.num (Reason.Rarith p_exp) in
+  let num_ty = MakeType.num (Reason.arith p_exp) in
   Typing_coercion.coerce_type_like_strip p Reason.URnone env ty num_ty err
 
 (** [expand_type_and_narrow_to_numeric ~allow_nothing env p ty] forces the
@@ -79,7 +77,7 @@ let expand_type_and_narrow_to_numeric ~allow_nothing env p ty =
       ((env, None), Some ty)
     | _ -> ((env, None), None)
   in
-  let default = MakeType.int (Reason.Rarith p) in
+  let default = MakeType.int (Reason.arith p) in
   Typing_solver.expand_type_and_narrow
     env
     ~default
@@ -141,9 +139,9 @@ let check_for_float_result p env p1 ty1 p2 ty2 =
     Some
       (MakeType.float
          (if use_ty1_reason then
-           Reason.Rarith_ret_float (p, get_reason ty1, Reason.Afirst)
+           Reason.arith_ret_float (p, get_reason ty1, Reason.Afirst)
          else
-           Reason.Rarith_ret_float (p, get_reason ty2, Reason.Asecond)))
+           Reason.arith_ret_float (p, get_reason ty2, Reason.Asecond)))
   in
   let float_no_reason = MakeType.float Reason.none in
   let ((env, ty_err_opt), ty1) =
@@ -166,7 +164,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result ?(is_like = false) env te1 err_opt1 te2 err_opt2 ty =
     let (env, ty) =
       if is_like then
-        Typing_union.union env ty (MakeType.dynamic (Reason.Rwitness p))
+        Typing_union.union env ty (MakeType.dynamic (Reason.witness p))
       else
         (env, ty)
     in
@@ -203,7 +201,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Minus
   | Ast_defs.Star
     when not contains_any ->
-    let make_int_type () = MakeType.int (Reason.Rarith_ret_int p) in
+    let make_int_type () = MakeType.int (Reason.arith_ret_int p) in
     let make_num_type ~use_ty1_reason =
       let (r, apos) =
         if use_ty1_reason then
@@ -211,7 +209,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         else
           (get_reason ty2, Reason.Asecond)
       in
-      MakeType.num (Reason.Rarith_ret_num (p, r, apos))
+      MakeType.num (Reason.arith_ret_num (p, r, apos))
     in
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
@@ -305,8 +303,8 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let make_num_type () =
       match bop with
-      | Ast_defs.Slash -> MakeType.num (Reason.Rret_div p)
-      | _ -> MakeType.num (Reason.Rarith_ret p)
+      | Ast_defs.Slash -> MakeType.num (Reason.ret_div p)
+      | _ -> MakeType.num (Reason.arith_ret p)
     in
     let (env, ty_mismatch1, is_like1, ty1) = check_like_num p p1 env ty1 in
     let (env, ty_mismatch2, is_like2, ty2) = check_like_num p p2 env ty2 in
@@ -351,15 +349,15 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       | _ -> Typing_error.Callback.bitwise_math_invalid_argument
     in
     let (env, _, err_opt1) =
-      check_dynamic_or_enforce_int env p1 ty1 (Reason.Rarith p) err
+      check_dynamic_or_enforce_int env p1 ty1 (Reason.arith p) err
     in
     let (env, _, err_opt2) =
-      check_dynamic_or_enforce_int env p2 ty2 (Reason.Rarith p) err
+      check_dynamic_or_enforce_int env p2 ty2 (Reason.arith p) err
     in
     let r =
       match bop with
-      | Ast_defs.Percent -> Reason.Rarith_ret_int p
-      | _ -> Reason.Rbitwise_ret p
+      | Ast_defs.Percent -> Reason.arith_ret_int p
+      | _ -> Reason.bitwise_ret p
     in
     make_result env te1 err_opt1 te2 err_opt2 (MakeType.int r)
   | Ast_defs.Xor
@@ -371,7 +369,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         env
         p
         ty1
-        (Reason.Rbitwise p1)
+        (Reason.bitwise p1)
         Typing_error.Callback.bitwise_math_invalid_argument
     in
     let (env, is_dynamic2, err_opt2) =
@@ -379,14 +377,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         env
         p
         ty2
-        (Reason.Rbitwise p2)
+        (Reason.bitwise p2)
         Typing_error.Callback.bitwise_math_invalid_argument
     in
     let result_ty =
       if is_dynamic1 && is_dynamic2 then
-        MakeType.dynamic (Reason.Rbitwise_dynamic p)
+        MakeType.dynamic (Reason.bitwise_dynamic p)
       else
-        MakeType.int (Reason.Rbitwise_ret p)
+        MakeType.int (Reason.bitwise_ret p)
     in
     make_result env te1 err_opt1 te2 err_opt2 result_ty
   | Ast_defs.Eqeq
@@ -465,30 +463,30 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                          Reason.to_string ("This is " ^ tys2) (get_reason ty2));
                  })
     end;
-    make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))
+    make_result env te1 None te2 None (MakeType.bool (Reason.comp p))
   | Ast_defs.Eqeqeq
   | Ast_defs.Diff2 ->
-    make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))
+    make_result env te1 None te2 None (MakeType.bool (Reason.comp p))
   | Ast_defs.Lt
   | Ast_defs.Lte
   | Ast_defs.Gt
   | Ast_defs.Gte
   | Ast_defs.Cmp ->
-    let ty_num = MakeType.num (Reason.Rcomp p) in
-    let ty_int = MakeType.int (Reason.Rcomp p) in
-    let ty_bool = MakeType.bool (Reason.Rcomp p) in
+    let ty_num = MakeType.num (Reason.comp p) in
+    let ty_int = MakeType.int (Reason.comp p) in
+    let ty_bool = MakeType.bool (Reason.comp p) in
     let ty_result =
       match bop with
       | Ast_defs.Cmp -> ty_int
       | _ -> ty_bool
     in
-    let ty_string = MakeType.string (Reason.Rcomp p) in
-    let ty_datetime = MakeType.datetime (Reason.Rcomp p) in
-    let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.Rcomp p) in
-    let ty_dynamic = MakeType.dynamic (Reason.Rcomp p) in
+    let ty_string = MakeType.string (Reason.comp p) in
+    let ty_datetime = MakeType.datetime (Reason.comp p) in
+    let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.comp p) in
+    let ty_dynamic = MakeType.dynamic (Reason.comp p) in
     let ty_all =
       MakeType.union
-        (Reason.Rcomp p)
+        (Reason.comp p)
         [ty_num; ty_string; ty_datetime; ty_datetimeimmutable; ty_dynamic]
     in
     let both_sub ty =
@@ -510,11 +508,11 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (if
      (not contains_any)
      && not
-          (both_sub (MakeType.union (Reason.Rcomp p) [ty_num; ty_dynamic])
-          || both_sub (MakeType.union (Reason.Rcomp p) [ty_string; ty_dynamic])
+          (both_sub (MakeType.union (Reason.comp p) [ty_num; ty_dynamic])
+          || both_sub (MakeType.union (Reason.comp p) [ty_string; ty_dynamic])
           || both_sub
                (MakeType.union
-                  (Reason.Rcomp p)
+                  (Reason.comp p)
                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]))
     then
       (* There is definitely an error if we get here *)
@@ -572,7 +570,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     if TypecheckerOptions.enable_strict_string_concat_interp (Env.get_tcopt env)
     then
       let sub_arraykey env p ty =
-        let r = Reason.Rconcat_operand p in
+        let r = Reason.concat_operand p in
         let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
         let stringlike =
           MakeType.union
@@ -601,16 +599,16 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
 
       let (env, err_opt1) = sub_arraykey env p1 ty1 in
       let (env, err_opt2) = sub_arraykey env p2 ty2 in
-      let ty = MakeType.string (Reason.Rconcat_ret p) in
+      let ty = MakeType.string (Reason.concat_ret p) in
       make_result env te1 err_opt1 te2 err_opt2 ty
     else
       let (env, err_opt1) = Typing_substring.sub_string_err p1 env ty1 in
       let (env, err_opt2) = Typing_substring.sub_string_err p2 env ty2 in
-      let ty = MakeType.string (Reason.Rconcat_ret p) in
+      let ty = MakeType.string (Reason.concat_ret p) in
       make_result env te1 err_opt1 te2 err_opt2 ty
   | Ast_defs.Barbar
   | Ast_defs.Ampamp ->
-    make_result env te1 None te2 None (MakeType.bool (Reason.Rlogic_ret p))
+    make_result env te1 None te2 None (MakeType.bool (Reason.logic_ret p))
   | Ast_defs.QuestionQuestion
   | Ast_defs.Eq _
     when not contains_any ->
@@ -642,7 +640,7 @@ let unop p env uop te ty =
     else
       (* args isn't any or a variant thereof so can actually do stuff *)
       (* !$x (logical not) works with any type, so we just return Tbool *)
-      make_result env te None (MakeType.bool (Reason.Rlogic_ret p))
+      make_result env te None (MakeType.bool (Reason.logic_ret p))
   | Ast_defs.Utild ->
     if is_any ty then
       make_result env te None ty
@@ -653,14 +651,14 @@ let unop p env uop te ty =
           env
           p
           ty
-          (Reason.Rbitwise p)
+          (Reason.bitwise p)
           Typing_error.Callback.bitwise_math_invalid_argument
       in
       let result_ty =
         if is_dynamic then
-          MakeType.dynamic (Reason.Rbitwise_dynamic p)
+          MakeType.dynamic (Reason.bitwise_dynamic p)
         else
-          MakeType.int (Reason.Rbitwise_ret p)
+          MakeType.int (Reason.bitwise_ret p)
       in
       make_result env te err_opt result_ty
   | Ast_defs.Uplus
@@ -697,11 +695,11 @@ let unop p env uop te ty =
           MakeType.nothing (get_reason ty)
         else if is_float env ty then
           MakeType.float
-            (Reason.Rarith_ret_float (p, get_reason ty, Reason.Aonly))
+            (Reason.arith_ret_float (p, get_reason ty, Reason.Aonly))
         else if is_int env ty then
-          MakeType.int (Reason.Rarith_ret_int p)
+          MakeType.int (Reason.arith_ret_int p)
         else
-          MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
+          MakeType.num (Reason.arith_ret_num (p, get_reason ty, Reason.Aonly))
       in
       let (env, result_ty) =
         if is_like then

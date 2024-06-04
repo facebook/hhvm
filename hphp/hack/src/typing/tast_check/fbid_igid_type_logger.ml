@@ -30,29 +30,29 @@ let rec find_ft ty =
 let is_int ty = Typing_defs.is_prim Aast.Tint ty
 
 let is_igid_of_meta_ent_instagram_user env ty =
-  let bound = TM.mixed TR.Rnone in
+  let bound = TM.mixed TR.none in
   let meta_ent_instagram_user =
-    TM.class_type TR.Rnone "\\IMETAEntInstagramUser" []
+    TM.class_type TR.none "\\IMETAEntInstagramUser" []
   in
-  let in_igid_range = TM.class_type TR.Rnone "\\InIGIDRange" [] in
+  let in_igid_range = TM.class_type TR.none "\\InIGIDRange" [] in
   let base_igid =
     T.mk
-      ( TR.Rnone,
+      ( TR.none,
         T.Tnewtype
           ("\\BaseIGID", [meta_ent_instagram_user; in_igid_range], bound) )
   in
   Tast_env.is_sub_type env ty base_igid
 
 let is_fbid_of_meta_ent_instagram_user env ty =
-  let bound = TM.mixed TR.Rnone in
+  let bound = TM.mixed TR.none in
   let meta_ent_instagram_user =
-    TM.class_type TR.Rnone "\\IMETAEntInstagramUser" []
+    TM.class_type TR.none "\\IMETAEntInstagramUser" []
   in
-  let in_fbid_range = TM.class_type TR.Rnone "\\IN_FBID_RANGE" [] in
-  let fbid_forbids_zero = TM.class_type TR.Rnone "\\FBID_FORBIDS_ZERO" [] in
+  let in_fbid_range = TM.class_type TR.none "\\IN_FBID_RANGE" [] in
+  let fbid_forbids_zero = TM.class_type TR.none "\\FBID_FORBIDS_ZERO" [] in
   let base_fbid =
     T.mk
-      ( TR.Rnone,
+      ( TR.none,
         T.Tnewtype
           ( "\\BaseFBID",
             [meta_ent_instagram_user; in_fbid_range; fbid_forbids_zero],
@@ -66,13 +66,13 @@ let is_fbid_of_meta_ent_instagram_user env ty =
      FBID_FORBIDS_ZERO
    > *)
 let is_fbid_or_igid_of_media_id env ty =
-  let bound = TM.mixed TR.Rnone in
-  let media_ent = TM.class_type TR.Rnone "\\IGEntMedia" [] in
-  let in_oid_range = TM.class_type TR.Rnone "\\IN_OID_RANGE" [] in
-  let fbid_forbids_zero = TM.class_type TR.Rnone "\\FBID_FORBIDS_ZERO" [] in
+  let bound = TM.mixed TR.none in
+  let media_ent = TM.class_type TR.none "\\IGEntMedia" [] in
+  let in_oid_range = TM.class_type TR.none "\\IN_OID_RANGE" [] in
+  let fbid_forbids_zero = TM.class_type TR.none "\\FBID_FORBIDS_ZERO" [] in
   let base_media_id =
     T.mk
-      ( TR.Rnone,
+      ( TR.none,
         T.Tnewtype
           ("\\BaseFBID", [media_ent; in_oid_range; fbid_forbids_zero], bound) )
   in

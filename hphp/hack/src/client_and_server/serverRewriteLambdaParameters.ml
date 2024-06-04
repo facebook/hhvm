@@ -63,7 +63,7 @@ let get_first_suggested_type_as_string file type_map node =
                     (Tast_env.print_ty
                        env
                        (Typing_defs.mk
-                          (Typing_reason.Rnone, Typing_defs.get_node ty)));
+                          (Typing_reason.none, Typing_defs.get_node ty)));
                   None
               end
             | _ -> None

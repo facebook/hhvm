@@ -35,7 +35,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
    * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
    * The code below must be kept in sync with with the method_def checks.
    *)
-  let make_dynamic pos = MakeType.dynamic (Reason.Rsupport_dynamic_type pos) in
+  let make_dynamic pos = MakeType.dynamic (Reason.support_dynamic_type pos) in
   let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
   let dynamic_return_info =
     Typing_env_return_info.{ return with return_type = dynamic_return_ty }
@@ -59,7 +59,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
       let this_local = Env.get_local env this in
       let this_ty =
         MakeType.intersection
-          (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+          (Reason.support_dynamic_type Pos_or_decl.none)
           [this_local.Typing_local_types.ty; make_dynamic Pos_or_decl.none]
       in
       Env.set_local
@@ -113,7 +113,7 @@ let method_return ~supportdyn env cls m ret_decl_ty =
   let default_ty =
     match ret_decl_ty with
     | None when String.equal (snd m.m_name) SN.Members.__construct ->
-      Some (MakeType.void (Reason.Rwitness (fst m.m_name)))
+      Some (MakeType.void (Reason.witness (fst m.m_name)))
     | _ -> None
   in
   let ety_env =
@@ -1427,7 +1427,7 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
     && check_support_dynamic_type
   then (
     let dynamic_ty =
-      MakeType.supportdyn_mixed (Reason.Rdynamic_coercion (Reason.Rwitness pc))
+      MakeType.supportdyn_mixed (Reason.dynamic_coercion (Reason.witness pc))
     in
     let (env, ty_errs) =
       List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, parent_ty) ->

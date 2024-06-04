@@ -28,7 +28,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       sp_type
     else
       Pessimize.maybe_pessimise_type
-        ~reason:(Typing_reason.Rpessimised_prop (Typing_defs.get_pos sp_type))
+        ~reason:(Typing_reason.pessimised_prop (Typing_defs.get_pos sp_type))
         ~is_xhp_attr
         ~this_class
         ctx

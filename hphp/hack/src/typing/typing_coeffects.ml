@@ -36,7 +36,7 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   let (env, ty) =
     Typing_intersection.intersect
       env
-      ~r:(Reason.Rhint cap_pos)
+      ~r:(Reason.hint cap_pos)
       cap_ty
       unsafe_cap_ty
   in

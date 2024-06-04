@@ -70,7 +70,7 @@ module Capabilities = struct
   include SN.Capabilities
 
   let mk special_name env =
-    let r = Reason.Rnone in
+    let r = Reason.none in
     let ((env, ty_err_opt), res) =
       Typing_make_type.apply r (Reason.to_pos r, special_name) []
       |> Typing_phase.localize_no_subst ~ignore_errors:true env
@@ -89,7 +89,7 @@ let enforce_memoize_object pos env =
   let (env, access_globals) = Capabilities.(mk accessGlobals) env in
 
   let mk_zoned_or_access_globals env =
-    let r = Reason.Rnone in
+    let r = Reason.none in
     (env, Typing_make_type.union r [zoned; access_globals])
   in
   check_local_capability

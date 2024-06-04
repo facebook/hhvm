@@ -22,7 +22,7 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
    * We test against ?(arraykey | bool | float | resource | dynamic |
    * HH\FormatString<T>).
    *)
-  let r = Reason.Rwitness p in
+  let r = Reason.witness p in
   let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
   let tyl =
     [

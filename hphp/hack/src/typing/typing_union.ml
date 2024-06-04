@@ -663,7 +663,7 @@ and union_shapes
               sft_ty
             else
               let r =
-                Reason.Rmissing_optional_field
+                Reason.missing_optional_field
                   (Reason.to_pos r, Utils.get_printable_shape_field_name k)
               in
               with_reason shape_kind_other r
@@ -690,9 +690,9 @@ and union_shape_kind ~approx_cancel_neg env shape_kind1 shape_kind2 =
 (* TODO: add a new reason with positions of merge point and possibly merged
  * envs.*)
 and union_reason r1 r2 =
-  if Reason.is_none r1 then
+  if Reason.Predicates.is_none r1 then
     r2
-  else if Reason.is_none r2 then
+  else if Reason.Predicates.is_none r2 then
     r1
   else if Reason.compare r1 r2 <= 0 then
     r1

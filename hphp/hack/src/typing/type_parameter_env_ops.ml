@@ -30,10 +30,10 @@ let join_lower_bounds env l1 l2 =
     (env, l2)
   else
     (* Convert upper bounds to equivalent union *)
-    let (env, union1) = union_lower_bounds env Reason.Rnone l1 in
-    let (env, union2) = union_lower_bounds env Reason.Rnone l2 in
+    let (env, union1) = union_lower_bounds env Reason.none l1 in
+    let (env, union2) = union_lower_bounds env Reason.none l2 in
     let (env, new_lower) =
-      Typing_intersection.intersect env ~r:Reason.Rnone union1 union2
+      Typing_intersection.intersect env ~r:Reason.none union1 union2
     in
     (env, TySet.singleton new_lower)
 
@@ -46,8 +46,8 @@ let join_upper_bounds env u1 u2 =
     (env, u2)
   else
     (* Convert upper bounds to equivalent intersection *)
-    let (env, inter1) = intersect_upper_bounds env Reason.Rnone u1 in
-    let (env, inter2) = intersect_upper_bounds env Reason.Rnone u2 in
+    let (env, inter1) = intersect_upper_bounds env Reason.none u1 in
+    let (env, inter2) = intersect_upper_bounds env Reason.none u2 in
     let (env, new_upper) = Typing_union.union env inter1 inter2 in
     (env, TySet.singleton new_upper)
 

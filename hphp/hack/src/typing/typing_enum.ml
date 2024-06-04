@@ -101,7 +101,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     TypecheckerOptions.enable_sound_dynamic (Typing_env.get_tcopt env)
   in
   let ty_arraykey =
-    MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
+    MakeType.arraykey (Reason.implicit_upper_bound (pos, "arraykey"))
   in
   (* Enforcement of case types for enum/enum classes is wonky.
    * Forbid for now until we can more thoroughly audit the behavior *)

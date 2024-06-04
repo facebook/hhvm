@@ -89,8 +89,8 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
       else
         Some (f (TySet.elements ts))
     in
-    ( dedup_then ~f:(Typing_make_type.union Reason.Rnone),
-      dedup_then ~f:(Typing_make_type.intersection Reason.Rnone) )
+    ( dedup_then ~f:(Typing_make_type.union Reason.none),
+      dedup_then ~f:(Typing_make_type.intersection Reason.none) )
   in
   let refined_type_member =
     match exact with
@@ -168,7 +168,7 @@ let make_type_member env ~on_error ~this_ty ucc_kind bnd_tys type_id =
     in
     ucc_string_id ^ "::" ^ snd type_id
   in
-  let reason = Reason.Rnone in
+  let reason = Reason.none in
   let ty = Typing_make_type.generic reason rigid_tvar_name in
   let (env, lower_bounds, upper_bounds) = collect_bounds env [] [] bnd_tys in
   let add_bounds bounds add env =

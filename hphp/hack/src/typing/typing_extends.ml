@@ -840,10 +840,10 @@ let maybe_poison_ancestors
         let tmp_env =
           let self_ty =
             MakeType.class_type
-              Reason.Rnone
+              Reason.none
               origin
               (List.map (Cls.tparams declared_class) ~f:(fun tp ->
-                   MakeType.generic Reason.Rnone (snd tp.tp_name)))
+                   MakeType.generic Reason.none (snd tp.tp_name)))
           in
           Env.env_with_tpenv
             env
@@ -1704,7 +1704,7 @@ let make_all_members ~parent_class =
  * determine whether a child class needs to call parent::__construct *)
 let default_constructor_ce class_ =
   let (pos, name) = (Cls.pos class_, Cls.name class_) in
-  let r = Reason.Rwitness_from_decl pos in
+  let r = Reason.witness_from_decl pos in
   (* reason doesn't get used in, e.g. arity checks *)
   let ft =
     {
@@ -1849,7 +1849,7 @@ let tconst_subsumption
      * Check that the child's assigned type satisifies parent constraint
      *)
     let default =
-      MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
+      MakeType.generic (Reason.tconst_no_cstr child_typeconst.ttc_name) name
     in
     let is_coeffect =
       parent_typeconst.ttc_is_ctx || child_typeconst.ttc_is_ctx

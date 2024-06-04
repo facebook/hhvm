@@ -425,7 +425,7 @@ let class_const_fold
  * allow accessing its fully qualified name as a string *)
 let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
   let (pos, name) = class_id in
-  let reason = Reason.Rclass_class (pos, name) in
+  let reason = Reason.class_class (pos, name) in
   let classname_ty =
     mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
   in
@@ -538,7 +538,7 @@ let typeconst_structure
     (c : Shallow_decl_defs.shallow_class)
     (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
   let pos = fst stc.stc_name in
-  let r = Reason.Rwitness_from_decl pos in
+  let r = Reason.witness_from_decl pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
   let ts_ty =
     mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
@@ -569,7 +569,7 @@ let maybe_add_supportdyn_bound ctx p kind =
             Some
               (Decl_enforceability.supportdyn_mixed
                  p
-                 (Typing_defs.Reason.Rwitness_from_decl p));
+                 (Typing_defs.Reason.witness_from_decl p));
           atc_super_constraint;
           atc_default;
         }
@@ -883,7 +883,7 @@ and class_decl
           SMap.add SN.Classes.cStringishObject stringish_cls parents
       in
       let ty =
-        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
+        mk (Reason.hint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
       in
       (ty :: impl, parents)
     | _ -> (impl, parents)

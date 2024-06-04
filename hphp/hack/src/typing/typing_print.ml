@@ -868,7 +868,7 @@ module Full = struct
         else
           (* Don't show "as mixed" if we're not printing supportdyn *)
           TySet.remove
-            Typing_make_type.(supportdyn Reason.Rnone (mixed Reason.Rnone))
+            Typing_make_type.(supportdyn Reason.none (mixed Reason.none))
             upper
       in
       (* If we have an equality we can ignore the other bounds *)
@@ -901,9 +901,10 @@ module Full = struct
         let (r, x) = deref ty in
         let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
         let d =
-          match r with
-          | Reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
-          | _ -> d
+          if Reason.Predicates.is_solve_fail r then
+            Concat [text "{suggest:"; d; text "}"]
+          else
+            d
         in
         (fuel, d))
 
@@ -941,7 +942,7 @@ module Full = struct
       let (_, ety) =
         Typing_inference_env.expand_type
           env.inference_env
-          (mk (Reason.Rnone, Tvar n))
+          (mk (Reason.none, Tvar n))
       in
       begin
         match deref ety with
@@ -1254,10 +1255,10 @@ module Full = struct
     let (r, x) = deref_constraint_type ty in
     let (fuel, constraint_ty_doc) = constraint_type_ ~fuel to_doc st penv x in
     let constraint_ty_doc =
-      match r with
-      | Reason.Rsolve_fail _ ->
+      if Reason.Predicates.is_solve_fail r then
         Concat [text "{suggest:"; constraint_ty_doc; text "}"]
-      | _ -> constraint_ty_doc
+      else
+        constraint_ty_doc
     in
     (fuel, constraint_ty_doc)
 
@@ -2069,9 +2070,9 @@ module Json = struct
             >>= fun (fields_known, _fields_known_keytrace) ->
             let shape_kind =
               if fields_known then
-                Typing_make_type.nothing Reason.Rnone
+                Typing_make_type.nothing Reason.none
               else
-                Typing_make_type.mixed Reason.Rnone
+                Typing_make_type.mixed Reason.none
             in
             let fields =
               List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->

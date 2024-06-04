@@ -77,9 +77,8 @@ let keys p s ~flags =
   keys_aux p count names_numbers_sorted []
 
 let type_match p s ~flags =
-  let sft =
-    { sft_optional = false; sft_ty = MakeType.string (Reason.Rregex p) }
-  in
+  let r = Reason.regex p in
+  let sft = { sft_optional = false; sft_ty = MakeType.string r } in
   let keys = keys p s ~flags in
   let shape_map =
     List.fold_left
@@ -91,7 +90,7 @@ let type_match p s ~flags =
   let shape_map =
     TShapeMap.add (TSFlit_int (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
   in
-  MakeType.closed_shape (Reason.Rregex p) shape_map
+  MakeType.closed_shape r shape_map
 
 let get_global_options s =
   List.fold_left (String.to_list_rev s) ~init:[] ~f:(fun acc x ->
@@ -173,10 +172,10 @@ let type_pattern (_, p, e_) =
   | String s ->
     let (s, flags) = check_and_strip_delimiters s in
     let match_type = type_match p s ~flags in
+    let r = Reason.regex p in
     mk
-      ( Reason.Rregex p,
+      ( r,
         Tnewtype
-          ( Naming_special_names.Regex.tPattern,
-            [match_type],
-            MakeType.string (Reason.Rregex p) ) )
+          (Naming_special_names.Regex.tPattern, [match_type], MakeType.string r)
+      )
   | _ -> failwith "Should have caught non-Ast_defs.String prefixed expression!"

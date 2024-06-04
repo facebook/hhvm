@@ -20,6 +20,18 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/id.thrift"
 
+// This is needed since generated Patch thrift file requires rust.Box
+// @lint-ignore THRIFTCHECKS
+include "thrift/annotation/rust.thrift"
+
+// This is needed since hack.Name is required to rename the Patch struct
+// @lint-ignore THRIFTCHECKS
+include "thrift/annotation/hack.thrift"
+
+// This is needed since python.Name is required to rename the Patch struct
+// @lint-ignore THRIFTCHECKS
+include "thrift/annotation/python.thrift"
+
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
 @thrift.TerseWrite

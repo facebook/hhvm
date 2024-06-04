@@ -19,12 +19,16 @@
 #include <folly/portability/GTest.h>
 
 #include <folly/experimental/coro/GtestHelpers.h>
+#include <thrift/lib/cpp2/async/HTTPClientChannel.h>
+#include <thrift/lib/cpp2/async/HeaderClientChannel.h>
+#include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptor.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_clients.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_handlers.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
+#include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace apache::thrift;
@@ -32,6 +36,60 @@ using apache::thrift::test::TrackingTProcessorEventHandler;
 using namespace ::testing;
 
 namespace {
+
+using TransportType = Cpp2ConnContext::TransportType;
+
+std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
+    ThriftServer& server) {
+  auto h2Options = std::make_unique<proxygen::HTTPServerOptions>();
+  h2Options->threads = static_cast<size_t>(server.getNumIOWorkerThreads());
+  h2Options->idleTimeout = server.getIdleTimeout();
+  h2Options->shutdownOn = {SIGINT, SIGTERM};
+  return std::make_unique<HTTP2RoutingHandler>(
+      std::move(h2Options), server.getThriftProcessor(), server);
+}
+
+class ServiceInterceptorTestP : public ::testing::TestWithParam<TransportType> {
+ public:
+  TransportType transportType() const { return GetParam(); }
+
+  std::unique_ptr<ScopedServerInterfaceThread> makeServer(
+      std::shared_ptr<AsyncProcessorFactory> service,
+      ScopedServerInterfaceThread::ServerConfigCb configureServer = {}) {
+    auto runner = std::make_unique<ScopedServerInterfaceThread>(
+        std::move(service), std::move(configureServer));
+    if (transportType() == TransportType::HTTP2) {
+      auto& thriftServer = runner->getThriftServer();
+      thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
+    }
+    return runner;
+  }
+
+  ScopedServerInterfaceThread::MakeChannelFunc channelFor(
+      TransportType transportType) {
+    return [transportType](
+               folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
+      switch (transportType) {
+        case TransportType::HEADER:
+          return HeaderClientChannel::newChannel(std::move(socket));
+        case TransportType::ROCKET:
+          return RocketClientChannel::newChannel(std::move(socket));
+        case TransportType::HTTP2: {
+          auto channel = HTTPClientChannel::newHTTP2Channel(std::move(socket));
+          channel->setProtocolId(protocol::T_COMPACT_PROTOCOL);
+          return channel;
+        }
+        default:
+          throw std::logic_error{"Unreachable!"};
+      }
+    };
+  }
+
+  template <typename ClientT>
+  std::unique_ptr<ClientT> makeClient(ScopedServerInterfaceThread& runner) {
+    return runner.newClient<ClientT>(nullptr, channelFor(transportType()));
+  }
+};
 
 struct TestHandler
     : apache::thrift::ServiceHandler<test::ServiceInterceptorTest> {
@@ -169,16 +227,16 @@ struct ServiceInterceptorThrowOnResponse
 
 } // namespace
 
-CO_TEST(ServiceInterceptorTest, BasicTM) {
+CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   co_await client->co_echo("");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
@@ -188,7 +246,7 @@ CO_TEST(ServiceInterceptorTest, BasicTM) {
   EXPECT_EQ(interceptor->onResponseCount, 2);
 }
 
-CO_TEST(ServiceInterceptorTest, BasicEB) {
+CO_TEST_P(ServiceInterceptorTestP, BasicEB) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   ScopedServerInterfaceThread runner(
@@ -209,20 +267,21 @@ CO_TEST(ServiceInterceptorTest, BasicEB) {
 
 // void return calls HandlerCallback::done() instead of
 // HandlerCallback::result()
-CO_TEST(ServiceInterceptorTest, BasicVoidReturn) {
+CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
   auto interceptor1 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  auto runner = std::make_unique<ScopedServerInterfaceThread>(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
   {
     auto client = runner->newStickyClient<
-        apache::thrift::Client<test::ServiceInterceptorTest>>();
+        apache::thrift::Client<test::ServiceInterceptorTest>>(
+        nullptr /* callbackExecutor */, channelFor(transportType()));
     co_await client->co_noop();
     for (auto& interceptor : {interceptor1, interceptor2}) {
       EXPECT_EQ(interceptor->onRequestCount, 1);
@@ -247,7 +306,7 @@ CO_TEST(ServiceInterceptorTest, BasicVoidReturn) {
   }
 }
 
-TEST(ServiceInterceptorTest, OnStartServing) {
+TEST_P(ServiceInterceptorTestP, OnStartServing) {
   struct ServiceInterceptorCountOnStartServing
       : public ServiceInterceptor<folly::Unit> {
    public:
@@ -282,18 +341,18 @@ TEST(ServiceInterceptorTest, OnStartServing) {
   }
 }
 
-CO_TEST(ServiceInterceptorTest, OnRequestException) {
+CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
   auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnRequest>();
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   EXPECT_THROW(
       {
         try {
@@ -316,15 +375,15 @@ CO_TEST(ServiceInterceptorTest, OnRequestException) {
   EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
-CO_TEST(ServiceInterceptorTest, OnRequestExceptionEB) {
+CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionEB) {
   auto interceptor = std::make_shared<ServiceInterceptorThrowOnRequest>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   EXPECT_THROW(
       {
         try {
@@ -345,15 +404,15 @@ CO_TEST(ServiceInterceptorTest, OnRequestExceptionEB) {
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
-CO_TEST(ServiceInterceptorTest, OnResponseException) {
+CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
   auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   EXPECT_THROW(
       {
         try {
@@ -408,7 +467,8 @@ CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
   EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
-CO_TEST(ServiceInterceptorTest, OnResponseBypassedForUnsafeReleasedCallback) {
+CO_TEST_P(
+    ServiceInterceptorTestP, OnResponseBypassedForUnsafeReleasedCallback) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
 
@@ -425,14 +485,14 @@ CO_TEST(ServiceInterceptorTest, OnResponseBypassedForUnsafeReleasedCallback) {
     }
   };
 
-  ScopedServerInterfaceThread runner(
+  auto runner = makeServer(
       std::make_shared<TestHandlerUnsafeReleaseCallback>(),
       [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   co_await client->co_echo("");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 0);
@@ -442,16 +502,16 @@ CO_TEST(ServiceInterceptorTest, OnResponseBypassedForUnsafeReleasedCallback) {
   EXPECT_EQ(interceptor->onResponseCount, 0);
 }
 
-CO_TEST(
-    ServiceInterceptorTest, OnResponseExceptionPreservesApplicationException) {
+CO_TEST_P(
+    ServiceInterceptorTestP, OnResponseExceptionPreservesApplicationException) {
   auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   EXPECT_THROW(
       {
         try {
@@ -466,19 +526,23 @@ CO_TEST(
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
-CO_TEST(ServiceInterceptorTest, BasicInteraction) {
+CO_TEST_P(ServiceInterceptorTestP, BasicInteraction) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
   auto interceptor1 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   {
     auto interaction = co_await client->co_createInteraction();
     for (auto& interceptor : {interceptor1, interceptor2}) {
@@ -505,19 +569,23 @@ CO_TEST(ServiceInterceptorTest, BasicInteraction) {
   }
 }
 
-CO_TEST(ServiceInterceptorTest, BasicStream) {
+CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
   auto interceptor1 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>();
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   {
     auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
     EXPECT_EQ((co_await stream.next()).value(), 1);
@@ -533,3 +601,8 @@ CO_TEST(ServiceInterceptorTest, BasicStream) {
     EXPECT_EQ(interceptor->onResponseCount, 1);
   }
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    ServiceInterceptorTestP,
+    ServiceInterceptorTestP,
+    ::testing::Values(TransportType::HEADER, TransportType::ROCKET));

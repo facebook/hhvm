@@ -547,8 +547,6 @@ struct Replayer::FactsStore final : public HPHP::FactsStore {
 
   void ensureUpdated() override {}
 
-  void validate(const std::set<std::string>&) override {}
-
   Array getBaseTypes(const String& derivedType, const Variant& filters)
       override {
     static constexpr auto m{&HPHP::FactsStore::getBaseTypes};

@@ -534,10 +534,6 @@ struct FactsStoreImpl final
     return clock.isInitial() ? m_symbolMap.dbClock() : clock;
   }
 
-  void validate(const std::set<std::string>& types_to_ignore) override {
-    m_symbolMap.validate(types_to_ignore);
-  }
-
   /**
    * Guarantee the map is at least as up-to-date as the codebase was
    * when update() was called.

@@ -21,7 +21,6 @@
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <set>
 #include <string>
 #include <thread>
 #include <vector>
@@ -378,13 +377,6 @@ struct SymbolMap {
    * This token originated from Watchman.
    */
   Clock getClock() const noexcept;
-
-  /**
-   * Throws an exception if facts sqlite database is corrupted/invalid.
-   *
-   * Currently only checks the sql DB for validation, not anything in map.
-   */
-  void validate(const std::set<std::string>& types_to_ignore);
 
   /**
    * Return an opaque token representing how up to date the SQLite DB is.

@@ -67,10 +67,6 @@ void FactsLogger::ensureUpdated() {
   return logPerf(__func__, "", [&]() { m_inner->ensureUpdated(); });
 }
 
-void FactsLogger::validate(const std::set<std::string>& types_to_ignore) {
-  return logPerf(__func__, "", [&]() { m_inner->validate(types_to_ignore); });
-}
-
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeOrTypeAliasFile(
     const String& typeName) {
   return logPerf(__func__, typeName.slice(), [&]() {

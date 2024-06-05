@@ -45,7 +45,6 @@ namespace HPHP::SystemLib {
   x(RuntimeException,,)                         \
   x(OutOfBoundsException,,)                     \
   x(InvalidOperationException,,)                \
-  x(ValidationException,,)                      \
   x(pinitSentinel,, __)                         \
   x(resource,, __)                              \
   x(Directory,,)                                \
@@ -119,7 +118,6 @@ Object AllocTypeAssertionExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
 Object AllocOutOfBoundsExceptionObject(const Variant& message);
 Object AllocInvalidOperationExceptionObject(const Variant& message);
-Object AllocValidationExceptionObject(const Variant& message);
 Object AllocDOMExceptionObject(const Variant& message);
 Object AllocDivisionByZeroExceptionObject();
 Object AllocDirectoryObject();
@@ -151,8 +149,6 @@ void throwInvalidArgumentExceptionObject(const Variant& message);
 [[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message);
 [[noreturn]]
 void throwInvalidOperationExceptionObject(const Variant& message);
-[[noreturn]]
-void throwValidationExceptionObject(const Variant& message);
 [[noreturn]]
 void throwDOMExceptionObject(const Variant& message);
 [[noreturn]] void throwDivisionByZeroExceptionObject();

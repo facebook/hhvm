@@ -40,8 +40,6 @@ struct FactsLogger final : public FactsStore,
   FactsLogger& operator=(FactsLogger&&) noexcept = delete;
 
   void ensureUpdated() override;
-
-  void validate(const std::set<std::string>& types_to_ignore) override;
   Holder getNativeHolder() noexcept override;
 
   Optional<FileResult> getTypeOrTypeAliasFile(const String&) override;

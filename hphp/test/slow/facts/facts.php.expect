@@ -107,18 +107,6 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants
 /this/path/does/not/exist.php has 0 type aliases
-
-exception 'ValidationException' %s
-%s
-Offending Types:  classWithDuplicateName
-%s
-Stack trace:
-%s: HH\Facts\validate()
-%s
-%s
-%s
-ValidationException thrown as expected
-ValidationException thrown as expected
 Finished.
 bool(true)
 string(5) "class"
@@ -229,16 +217,4 @@ this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants
 /this/path/does/not/exist.php has 0 type aliases
-
-exception 'ValidationException' %s
-%s
-Offending Types:  classWithDuplicateName
-%s
-Stack trace:
-%s: HH\Facts\validate()
-%s
-%s
-%s
-ValidationException thrown as expected
-ValidationException thrown as expected
 Finished.

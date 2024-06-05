@@ -20,8 +20,6 @@
 #include <exception>
 #include <filesystem>
 #include <memory>
-#include <numeric>
-#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -598,15 +596,6 @@ struct ConstantStmts {
   SQLiteStmt m_getPathConstants;
 };
 
-struct ValidateStmts {
-  explicit ValidateStmts(SQLite& db)
-      : m_validateNoDuplicateTypeEntries{
-            db.prepare("SELECT name from type_details"
-                       " GROUP BY name having count(*) > 1")} {}
-
-  SQLiteStmt m_validateNoDuplicateTypeEntries;
-};
-
 struct ModuleStmts {
   explicit ModuleStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -647,7 +636,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         m_fileStmts{m_db},
         m_functionStmts{m_db},
         m_constantStmts{m_db},
-        m_validateSmts{m_db},
         m_moduleStmts{m_db},
         m_clockStmts{m_db} {}
 
@@ -1269,30 +1257,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return constants;
   }
 
-  void validate(const std::set<std::string>& types_to_ignore) override {
-    auto query = m_txn.query(m_validateSmts.m_validateNoDuplicateTypeEntries);
-    XLOGF(DBG9, "Running Validation query {}", query.sql());
-    std::vector<std::string> invalidRows;
-    for (query.step(); query.row(); query.step()) {
-      if (!types_to_ignore.contains(std::string(query.getString(0)))) {
-        invalidRows.emplace_back(query.getString(0));
-      }
-    }
-    if (!invalidRows.empty()) {
-      std::string joined = std::accumulate(
-          invalidRows.begin(), invalidRows.end(), std::string(" "));
-      std::string exception_str = folly::sformat(
-          "Native Facts DB has duplicate entries!\n"
-#ifdef HHVM_FACEBOOK
-          "You may be able to fix this by running 'arc reset facts'\n"
-#endif
-          "Offending Types: {}\n",
-          joined);
-      XLOG(ERR, exception_str);
-      throw std::logic_error{exception_str};
-    }
-  }
-
   void insertModule(std::string_view module, const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_moduleStmts.m_insert);
@@ -1383,7 +1347,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   FileStmts m_fileStmts;
   FunctionStmts m_functionStmts;
   ConstantStmts m_constantStmts;
-  ValidateStmts m_validateSmts;
   ModuleStmts m_moduleStmts;
   ClockStmts m_clockStmts;
 };

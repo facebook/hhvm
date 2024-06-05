@@ -511,12 +511,6 @@ struct MockAutoloadDB : public AutoloadDB {
   MOCK_METHOD(Clock, getClock, (), (override));
   MOCK_METHOD(void, runPostBuildOptimizations, (), (override));
 
-  MOCK_METHOD(
-      void,
-      validate,
-      (const std::set<std::string>& types_to_ignore),
-      (override));
-
   void DelegateToFake() {
     ON_CALL(*this, isReadOnly()).WillByDefault(Return(false));
     ON_CALL(*this, insertClock(_)).WillByDefault(SaveArg<0>(&clock_));

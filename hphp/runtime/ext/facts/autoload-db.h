@@ -19,7 +19,6 @@
 #include <filesystem>
 #include <iterator>
 #include <memory>
-#include <set>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -245,15 +244,6 @@ struct AutoloadDB {
       std::string_view module) = 0;
   virtual std::vector<std::string> getPathModules(
       const std::filesystem::path& path) = 0;
-
-  /**
-   * Validates the current facts DB is not corrupted
-   *
-   * Throws a logic_error for corrupted DB
-   *
-   * Returns nothing (if valid)
-   */
-  virtual void validate(const std::set<std::string>& types_to_ignore) = 0;
 
   /**
    * Return a list of all paths defined in the given root, as absolute paths.

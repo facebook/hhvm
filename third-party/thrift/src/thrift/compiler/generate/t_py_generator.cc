@@ -610,6 +610,11 @@ void t_py_generator::generate_json_map_key(
   type = type->get_true_type();
   if (type->is_enum()) {
     indent(out) << parsed_key << " = int(" << raw_key << ")" << endl;
+    indent(out) << "if wrap_enum_constants:" << endl;
+    indent_up();
+    indent(out) << parsed_key << " = ThriftEnumWrapper(" << type_name(type)
+                << ", " << parsed_key << ")" << endl;
+    indent_down();
   } else if (type->is_primitive_type()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();

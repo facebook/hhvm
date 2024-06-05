@@ -23,12 +23,22 @@ namespace apache::thrift {
 
 template <class RequestState, class ConnectionState = folly::Unit>
 class ServiceInterceptor : public ServiceInterceptorBase {
+ private:
+  template <class T, std::size_t Size, std::size_t Align>
+  static T* getValueAsType(
+      apache::thrift::util::TypeErasedValue<Size, Align>& storage) {
+    return storage.has_value()
+        ? std::addressof(storage.template value_unchecked<ConnectionState>())
+        : nullptr;
+  }
+
  public:
   virtual folly::coro::Task<std::optional<RequestState>> onRequest(
-      RequestInfo) {
+      ConnectionState*, RequestInfo) {
     co_return std::nullopt;
   }
-  virtual folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) {
+  virtual folly::coro::Task<void> onResponse(
+      RequestState*, ConnectionState*, ResponseInfo) {
     co_return;
   }
 
@@ -46,26 +56,27 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
   void internal_onConnectionClosed(
       ConnectionInfo connectionInfo) noexcept final {
-    ConnectionState* connectionState = connectionInfo.storage->has_value()
-        ? std::addressof(
-              connectionInfo.storage->value_unchecked<ConnectionState>())
-        : nullptr;
+    auto* connectionState =
+        getValueAsType<ConnectionState>(*connectionInfo.storage);
     onConnectionClosed(connectionState, std::move(connectionInfo));
   }
 
   folly::coro::Task<void> internal_onRequest(
-      ConnectionInfo, RequestInfo requestInfo) final {
-    if (auto value = co_await onRequest(std::move(requestInfo))) {
+      ConnectionInfo connectionInfo, RequestInfo requestInfo) final {
+    auto* connectionState =
+        getValueAsType<ConnectionState>(*connectionInfo.storage);
+    if (auto value =
+            co_await onRequest(connectionState, std::move(requestInfo))) {
       requestInfo.storage->emplace<RequestState>(std::move(*value));
     }
   }
 
   folly::coro::Task<void> internal_onResponse(
-      ConnectionInfo, ResponseInfo responseInfo) final {
-    RequestState* requestState = responseInfo.storage->has_value()
-        ? std::addressof(responseInfo.storage->value_unchecked<RequestState>())
-        : nullptr;
-    co_await onResponse(requestState, std::move(responseInfo));
+      ConnectionInfo connectionInfo, ResponseInfo responseInfo) final {
+    auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
+    auto* connectionState =
+        getValueAsType<ConnectionState>(*connectionInfo.storage);
+    co_await onResponse(requestState, connectionState, std::move(responseInfo));
   }
 };
 

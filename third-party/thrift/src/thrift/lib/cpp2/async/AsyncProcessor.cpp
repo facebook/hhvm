@@ -992,8 +992,10 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest() {
   std::vector<std::exception_ptr> exceptions;
 
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
-    auto connectionInfo =
-        ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
+    auto* connectionCtx = reqCtx_->getConnectionContext();
+    auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
+        connectionCtx,
+        connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
     auto requestInfo = ServiceInterceptorBase::RequestInfo{
         reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
     try {
@@ -1026,8 +1028,10 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
   std::vector<std::exception_ptr> exceptions;
 
   for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
-    auto connectionInfo =
-        ServiceInterceptorBase::ConnectionInfo{reqCtx_->getConnectionContext()};
+    auto* connectionCtx = reqCtx_->getConnectionContext();
+    auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
+        connectionCtx,
+        connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
     auto responseInfo = ServiceInterceptorBase::ResponseInfo{
         reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
     try {

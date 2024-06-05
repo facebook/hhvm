@@ -168,13 +168,13 @@ struct ServiceInterceptorCountWithRequestState
   }
 
   folly::coro::Task<std::optional<RequestState>> onRequest(
-      RequestInfo) override {
+      ConnectionState*, RequestInfo) override {
     onRequestCount++;
     co_return 1;
   }
 
   folly::coro::Task<void> onResponse(
-      RequestState* requestState, ResponseInfo) override {
+      RequestState* requestState, ConnectionState*, ResponseInfo) override {
     onResponseCount += *requestState;
     co_return;
   }
@@ -189,14 +189,15 @@ struct ServiceInterceptorThrowOnRequest
     : public ServiceInterceptor<folly::Unit> {
  public:
   folly::coro::Task<std::optional<folly::Unit>> onRequest(
-      RequestInfo) override {
+      folly::Unit*, RequestInfo) override {
     onRequestCount++;
     throw std::runtime_error(
         "Exception from ServiceInterceptorThrowOnRequest::onRequest");
     co_return std::nullopt;
   }
 
-  folly::coro::Task<void> onResponse(folly::Unit*, ResponseInfo) override {
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo) override {
     onResponseCount++;
     co_return;
   }
@@ -209,12 +210,13 @@ struct ServiceInterceptorThrowOnResponse
     : public ServiceInterceptor<folly::Unit> {
  public:
   folly::coro::Task<std::optional<folly::Unit>> onRequest(
-      RequestInfo) override {
+      folly::Unit*, RequestInfo) override {
     onRequestCount++;
     co_return std::nullopt;
   }
 
-  folly::coro::Task<void> onResponse(folly::Unit*, ResponseInfo) override {
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo) override {
     onResponseCount++;
     throw std::runtime_error(
         "Exception from ServiceInterceptorThrowOnResponse::onResponse");
@@ -325,11 +327,12 @@ TEST_P(ServiceInterceptorTestP, OnStartServing) {
     }
 
     folly::coro::Task<std::optional<RequestState>> onRequest(
-        RequestInfo) override {
+        folly::Unit*, RequestInfo) override {
       co_return folly::unit;
     }
 
-    folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) override {
+    folly::coro::Task<void> onResponse(
+        RequestState*, folly::Unit*, ResponseInfo) override {
       co_return;
     }
 

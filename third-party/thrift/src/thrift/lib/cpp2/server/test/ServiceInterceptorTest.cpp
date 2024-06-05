@@ -278,6 +278,13 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
             InterceptorList{interceptor1, interceptor2}));
       });
 
+  // HTTP2 does not support onConnection and onConnectionClosed because
+  // ThriftProcessor creates & disposes the Cpp2ConnContext every request, not
+  // connection.
+  const auto valueIfNotHttp2 = [&](int value) -> int {
+    return transportType() == TransportType::HTTP2 ? 0 : value;
+  };
+
   {
     auto client = runner->newStickyClient<
         apache::thrift::Client<test::ServiceInterceptorTest>>(
@@ -286,23 +293,23 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
     for (auto& interceptor : {interceptor1, interceptor2}) {
       EXPECT_EQ(interceptor->onRequestCount, 1);
       EXPECT_EQ(interceptor->onResponseCount, 1);
-      EXPECT_EQ(interceptor->onConnectionCount, 1);
-      EXPECT_EQ(interceptor->onConnectionClosedCount, 0);
+      EXPECT_EQ(interceptor->onConnectionCount, valueIfNotHttp2(1));
+      EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(0));
     }
 
     co_await client->co_noop();
     for (auto& interceptor : {interceptor1, interceptor2}) {
       EXPECT_EQ(interceptor->onRequestCount, 2);
       EXPECT_EQ(interceptor->onResponseCount, 2);
-      EXPECT_EQ(interceptor->onConnectionCount, 1);
-      EXPECT_EQ(interceptor->onConnectionClosedCount, 0);
+      EXPECT_EQ(interceptor->onConnectionCount, valueIfNotHttp2(1));
+      EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(0));
     }
   }
 
   runner.reset();
   for (auto& interceptor : {interceptor1, interceptor2}) {
-    EXPECT_EQ(interceptor->onConnectionCount, 1);
-    EXPECT_EQ(interceptor->onConnectionClosedCount, 1);
+    EXPECT_EQ(interceptor->onConnectionCount, valueIfNotHttp2(1));
+    EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(1));
   }
 }
 
@@ -605,4 +612,5 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
 INSTANTIATE_TEST_SUITE_P(
     ServiceInterceptorTestP,
     ServiceInterceptorTestP,
-    ::testing::Values(TransportType::HEADER, TransportType::ROCKET));
+    ::testing::Values(
+        TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2));

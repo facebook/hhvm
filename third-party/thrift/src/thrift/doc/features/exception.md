@@ -35,12 +35,12 @@ language-dependent APIs of the generated code, such as:
         in Java.
 - etc.
 
-If an exception definition does not specify this anotation for any field, the exception message returned by the aforementioned APIs is unspecified.
+If an exception definition does not specify this annotation for any field, the exception message returned by the aforementioned APIs is unspecified.
 
 **Restrictions**
 
 The `@thrift.ExceptionMessage` annotation can be specified on at most one field of an
-[exception definition](/idl/index.md#exceptions), whose type must be `string`. The thrift compiler will generate an error if this annotion is specied on a field in any other structured definition, like a [struct definition](/idl/index.md#structs) or an [union definition](/idl/index.md#unions)
+[exception definition](/idl/index.md#exceptions), whose type must be `string`. The thrift compiler will generate an error if this annotation is specified on a field in any other structured definition, like a [struct definition](/idl/index.md#structs) or an [union definition](/idl/index.md#unions)
 
 
 ## Error Classification

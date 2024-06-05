@@ -1013,7 +1013,7 @@ class ExceptionMessage:
   like a [struct definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#structs)
   or an [union definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#unions)
   
-  If an exception definition does not specify this anotation for any field, the
+  If an exception definition does not specify this annotation for any field, the
   exception message returned by the aforementioned APIs is unspecified.
   """
 

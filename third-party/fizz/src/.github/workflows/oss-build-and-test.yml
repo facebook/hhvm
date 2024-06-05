@@ -2,7 +2,7 @@ name: Buck build and test
 on: [push, pull_request, workflow_dispatch]
 jobs:
   get-toolchains-to-install:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -10,7 +10,7 @@ jobs:
       - uses: facebook/install-dotslash@latest
       - name: get_buck_graph
         run: |
-          BUCK_GRAPH=$(./buck2 cquery ... --output-attribute '^buck.type$|^name$')
+          BUCK_GRAPH=$(./buck2 cquery //fizz/... --output-attribute '^buck.type$|^name$')
           echo "$BUCK_GRAPH" > buck_graph_results.json
         shell: bash
       - name: Check if rust_binary

@@ -26,7 +26,6 @@ import (
 // Socket is a Transport that can be opened and reopened.
 type Socket interface {
 	net.Conn
-	Transport
 	// Opens the socket for communication
 	Open() error
 }
@@ -215,16 +214,4 @@ func (s *socket) Write(buf []byte) (int, error) {
 	}
 	s.pushDeadline(false, true)
 	return s.conn.Write(buf)
-}
-
-// Flush is not implementable by lower-level transports but must still be kept
-// for interface compatibility with Thrift1.
-func (s *socket) Flush() error {
-	return nil
-}
-
-// RemainingBytes is not implementable by lower-level transports but must still
-// be kept for interface compatibility with Thrift1.
-func (s *socket) RemainingBytes() uint64 {
-	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

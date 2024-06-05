@@ -71,11 +71,7 @@ func (p *BufferedTransport) Flush() error {
 		p.buf.Writer.Reset(p.socket)
 		return err
 	}
-	return p.socket.Flush()
-}
-
-func (p *BufferedTransport) RemainingBytes() (num_bytes uint64) {
-	return p.socket.RemainingBytes()
+	return nil
 }
 
 // LocalAddr returns the local network address, if known.

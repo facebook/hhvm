@@ -31,7 +31,7 @@ from a multiplexing client.
 
 This example uses a single socket transport to invoke two services:
 
-socket := thrift.NewSocket(thrift.SocketAddr(addr), thrif.SocketTimeout(TIMEOUT))
+socket, err := thrift.NewSocket(thrift.SocketAddr(addr), thrif.SocketTimeout(TIMEOUT))
 transport := thrift.NewFramedTransport(socket)
 protocol := thrift.NewBinaryProtocolTransport(transport)
 
@@ -40,11 +40,6 @@ service := Calculator.NewCalculatorClient(mp)
 
 mp2 := thrift.NewMultiplexedProtocol(protocol, "WeatherReport")
 service2 := WeatherReport.NewWeatherReportClient(mp2)
-
-err := transport.Open()
-if err != nil {
-	t.Fatal("Unable to open client socket", err)
-}
 
 fmt.Println(service.Add(2,2))
 fmt.Println(service2.GetTemperature())

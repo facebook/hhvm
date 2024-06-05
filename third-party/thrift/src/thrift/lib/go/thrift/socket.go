@@ -49,17 +49,31 @@ func SocketTimeout(timeout time.Duration) SocketOption {
 	}
 }
 
+func resolveAddr(hostPort string) (net.Addr, error) {
+	addr, err := net.ResolveTCPAddr("tcp6", hostPort)
+	if err != nil {
+		return net.ResolveTCPAddr("tcp", hostPort)
+	}
+	return addr, nil
+}
+
 // SocketAddr sets the socket address
 func SocketAddr(hostPort string) SocketOption {
 	return func(socket *socket) error {
-		addr, err := net.ResolveTCPAddr("tcp6", hostPort)
+		addr, err := resolveAddr(hostPort)
 		if err != nil {
-			addr, err = net.ResolveTCPAddr("tcp", hostPort)
-			if err != nil {
-				return err
-			}
+			return err
 		}
 		socket.addr = addr
+		if len(socket.addr.Network()) == 0 {
+			return NewTransportException(NOT_OPEN, "Cannot open bad network name.")
+		}
+		if len(socket.addr.String()) == 0 {
+			return NewTransportException(NOT_OPEN, "Cannot open bad address.")
+		}
+		if socket.conn, err = net.Dial(socket.addr.Network(), socket.addr.String()); err != nil {
+			return NewTransportException(NOT_OPEN, err.Error())
+		}
 		return nil
 	}
 }
@@ -121,16 +135,6 @@ func (s *socket) Open() error {
 	}
 	if s.addr == nil {
 		return NewTransportException(NOT_OPEN, "Cannot open nil address.")
-	}
-	if len(s.addr.Network()) == 0 {
-		return NewTransportException(NOT_OPEN, "Cannot open bad network name.")
-	}
-	if len(s.addr.String()) == 0 {
-		return NewTransportException(NOT_OPEN, "Cannot open bad address.")
-	}
-	var err error
-	if s.conn, err = net.DialTimeout(s.addr.Network(), s.addr.String(), s.timeout); err != nil {
-		return NewTransportException(NOT_OPEN, err.Error())
 	}
 	return nil
 }

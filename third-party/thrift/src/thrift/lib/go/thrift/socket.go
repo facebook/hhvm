@@ -121,11 +121,6 @@ func (s *socket) pushDeadline(read, write bool) {
 	}
 }
 
-// Addr returns the address the Socket is listening on.
-func (s *socket) Addr() net.Addr {
-	return s.addr
-}
-
 // LocalAddr returns the local network address, if known.
 func (s *socket) LocalAddr() net.Addr {
 	return s.conn.LocalAddr()

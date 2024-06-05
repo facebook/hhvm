@@ -1194,6 +1194,7 @@ end = struct
       if avoid then
         invalid_env env
       else
+        let ( ||| ) = ( ||| ) ~fail in
         simplify_subtype_of_dynamic env ||| fun env ->
         if Typing_utils.is_tyvar env ty then
           invalid_env env
@@ -1338,6 +1339,7 @@ end = struct
                         ty_super = ty;
                       }
             in
+
             env |> simplify_pushed_like ||| dyn_finish ty
       in
       simplify
@@ -1365,6 +1367,7 @@ end = struct
               update ty ~env ~f:(fun into ->
                   flow ~from:(prj_union_right r_super) ~into))
           in
+          let ( ||| ) = ( ||| ) ~fail in
           simplify
             ~subtype_env
             ~this_ty
@@ -2430,6 +2433,7 @@ end = struct
                       env
                   | _ -> invalid env ~fail
                 in
+                let ( ||| ) = ( ||| ) ~fail in
 
                 env |> prop ||| try_upper_bounds_on_this up_objs
             in
@@ -3249,6 +3253,7 @@ end = struct
           in
           simplify ~subtype_env ~this_ty ~lhs ~rhs env
         | _ ->
+          let ( ||| ) = ( ||| ) ~fail in
           let simplify_super_intersection env tyl_sub ty_super =
             (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
              * not complete.
@@ -3472,6 +3477,7 @@ end = struct
           ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
           env
       else
+        let ( ||| ) = ( ||| ) ~fail in
         simplify
           ~subtype_env
           ~this_ty
@@ -3660,6 +3666,7 @@ end = struct
         let (_generic_lower_bounds, other_lower_bounds) =
           generic_lower_bounds env ty_super
         in
+        let ( ||| ) = ( ||| ) ~fail in
         let subtype_env = Subtype_env.set_visited subtype_env new_visited in
         (* Collect all the lower bounds ("super" constraints) on the
          * generic parameter, and check ty_sub against each of them in turn
@@ -4527,6 +4534,7 @@ end = struct
                   }
                 env
           in
+          let ( ||| ) = ( ||| ) ~fail in
           default_subtype
             ~subtype_env
             ~this_ty
@@ -5637,6 +5645,7 @@ end = struct
        * that fails, we mint a fresh rigid type variable to represent
        * the concrete type constant and try to solve the query using it *)
       let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
+      let ( ||| ) = ( ||| ) ~fail in
       simplify
         ~subtype_env
         ~this_ty
@@ -6386,6 +6395,7 @@ end = struct
       (sub_supportdyn, tys_sub)
       rhs
       env =
+    let ( ||| ) = ( ||| ) ~fail in
     List.fold_left
       tys_sub
       ~init:(env, TL.invalid ~fail)
@@ -6454,6 +6464,7 @@ end = struct
               env
           | ty :: tyl ->
             let ty_sub = Prov.(update ty ~env ~f:update_reason) in
+            let ( ||| ) = ( ||| ) ~fail in
             try_bounds tyl env
             ||| mk_prop
                   ~subtype_env
@@ -6678,6 +6689,7 @@ end = struct
           rhs
           env
       in
+      let ( ||| ) = ( ||| ) ~fail in
       mk_prop
         ~subtype_env
         ~this_ty:None
@@ -6702,6 +6714,7 @@ end = struct
         ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tunapplied_alias _
         | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _
           ) ) ->
+      let ( ||| ) = ( ||| ) ~fail in
       mk_prop
         ~subtype_env
         ~this_ty:None

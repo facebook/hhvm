@@ -21,6 +21,7 @@ val if_unsat :
   Typing_env_types.env * Typing_logic.subtype_prop
 
 val ( ||| ) :
+  fail:Typing_error.t option ->
   Typing_env_types.env * Typing_logic.subtype_prop ->
   (Typing_env_types.env -> Typing_env_types.env * Typing_logic.subtype_prop) ->
   Typing_env_types.env * Typing_logic.subtype_prop

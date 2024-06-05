@@ -7427,7 +7427,7 @@ end = struct
       tell_all ty_sub ty_super env ~ty_errs:[] ~remain:[] props on_error
     (* Encodes the invalid proposition with an accompanying error *)
     | TL.Disj (inf_err_opt, []) -> (env, inf_err_opt, [])
-    | TL.Disj (_, props) ->
+    | TL.Disj (inf_err_opt, props) ->
       log_non_singleton_disj
         ty_sub
         ty_super
@@ -7443,7 +7443,8 @@ end = struct
         "after simplification"
         prop
         props;
-      tell_exists ty_sub ty_super env ~ty_errs:[] ~remain:[] props on_error
+      let ty_errs = Option.to_list inf_err_opt in
+      tell_exists ty_sub ty_super env ~ty_errs ~remain:[] props on_error
     | TL.IsSubtype (coerce, ty_sub, ty_super) ->
       tell_cstr env (coerce, ty_sub, ty_super) on_error
 

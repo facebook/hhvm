@@ -843,15 +843,41 @@ struct Decode<type::list<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
-      // Do special treatments for lists of primitive types, as we found
-      // resize is more performant than reserve.
+#ifndef _MSC_VER
+      constexpr auto should_resize_without_initialization =
+          std::is_trivial_v<typename ListType::value_type> &&
+          folly::is_detected_v<
+              apache::thrift::detail::pm::detect_resize_without_initialization,
+              ListType,
+              decltype(s)>;
+#else
+      // For MSVC, vector layout is not fixed, so resizeWithoutInitialization
+      // is not supported yet
+      constexpr auto should_resize_without_initialization = false;
+#endif
       constexpr auto should_resize =
           folly::is_detected_v<
               apache::thrift::detail::pm::detect_resize,
               ListType,
               decltype(s)> &&
           std::is_trivial_v<typename ListType::value_type>;
-      if constexpr (should_resize) {
+      // Do special treatments for lists of primitive types, as we found
+      // resize is more performant than reserve.
+      if constexpr (should_resize_without_initialization) {
+        folly::resizeWithoutInitialization(list, s);
+        auto outIt = list.begin();
+        const auto outEnd = list.end();
+        try {
+          for (; outIt != outEnd; ++outIt) {
+            Decode<Tag>{}(prot, *outIt);
+          }
+        } catch (...) {
+          // For behaviour parity, initialize the leftover elements when
+          // exceptions happen
+          std::fill(outIt, outEnd, typename ListType::value_type());
+          throw;
+        }
+      } else if constexpr (should_resize) {
         list.resize(s);
         for (auto&& elem : list) {
           Decode<Tag>{}(prot, elem);

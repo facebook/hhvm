@@ -482,7 +482,7 @@ func (t *headerTransport) Flush() error {
 	// Remove the non-persistent headers on flush
 	t.clearRequestHeaders()
 
-	if b, ok := t.conn.(*BufferedTransport); ok {
+	if b, ok := t.conn.(*bufferedConn); ok {
 		err = b.Flush()
 	}
 

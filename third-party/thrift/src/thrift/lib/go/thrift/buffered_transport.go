@@ -22,17 +22,17 @@ import (
 	"time"
 )
 
-// BufferedTransport is a buffered transport that has Flush method.
-type BufferedTransport struct {
+// bufferedConn is a buffered net.Conn that has Flush method.
+type bufferedConn struct {
 	buf  bufio.ReadWriter
 	conn net.Conn
 }
 
-var _ net.Conn = (*BufferedTransport)(nil)
+var _ net.Conn = (*bufferedConn)(nil)
 
-// NewBufferedTransport creates a new buffered transport using bufio.ReadWriter for the provided bufferSize.
-func NewBufferedTransport(conn net.Conn, bufferSize int) *BufferedTransport {
-	return &BufferedTransport{
+// NewBufferedTransport creates a new buffered net.Conn using bufio.ReadWriter for the provided bufferSize.
+func NewBufferedTransport(conn net.Conn, bufferSize int) net.Conn {
+	return &bufferedConn{
 		buf: bufio.ReadWriter{
 			Reader: bufio.NewReaderSize(conn, bufferSize),
 			Writer: bufio.NewWriterSize(conn, bufferSize),
@@ -42,7 +42,7 @@ func NewBufferedTransport(conn net.Conn, bufferSize int) *BufferedTransport {
 }
 
 // Close closes the underlying conn and flushes the buffer.
-func (b *BufferedTransport) Close() (err error) {
+func (b *bufferedConn) Close() (err error) {
 	if err = b.buf.Flush(); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (b *BufferedTransport) Close() (err error) {
 }
 
 // Read reads the buffer and resets the underlying buffer if there was an error.
-func (b *BufferedTransport) Read(data []byte) (int, error) {
+func (b *bufferedConn) Read(data []byte) (int, error) {
 	n, err := b.buf.Read(data)
 	if err != nil {
 		b.buf.Reader.Reset(b.conn)
@@ -59,7 +59,7 @@ func (b *BufferedTransport) Read(data []byte) (int, error) {
 }
 
 // Write writes to the buffer and resets the underlying buffer if there was an error.
-func (b *BufferedTransport) Write(data []byte) (int, error) {
+func (b *bufferedConn) Write(data []byte) (int, error) {
 	n, err := b.buf.Write(data)
 	if err != nil {
 		b.buf.Writer.Reset(b.conn)
@@ -68,7 +68,7 @@ func (b *BufferedTransport) Write(data []byte) (int, error) {
 }
 
 // Flush flushes the buffer and resets the underlying buffer if there was an error.
-func (b *BufferedTransport) Flush() error {
+func (b *bufferedConn) Flush() error {
 	if err := b.buf.Flush(); err != nil {
 		b.buf.Writer.Reset(b.conn)
 		return err
@@ -77,26 +77,26 @@ func (b *BufferedTransport) Flush() error {
 }
 
 // LocalAddr returns the local network address, if known.
-func (b *BufferedTransport) LocalAddr() net.Addr {
+func (b *bufferedConn) LocalAddr() net.Addr {
 	return b.conn.LocalAddr()
 }
 
 // RemoteAddr returns the remote network address, if known.
-func (b *BufferedTransport) RemoteAddr() net.Addr {
+func (b *bufferedConn) RemoteAddr() net.Addr {
 	return b.conn.RemoteAddr()
 }
 
 // SetDeadline sets the read and write deadlines associated with the connection.
-func (b *BufferedTransport) SetDeadline(t time.Time) error {
+func (b *bufferedConn) SetDeadline(t time.Time) error {
 	return b.conn.SetDeadline(t)
 }
 
 // SetReadDeadline sets the deadline for future Read calls.
-func (b *BufferedTransport) SetReadDeadline(t time.Time) error {
+func (b *bufferedConn) SetReadDeadline(t time.Time) error {
 	return b.conn.SetReadDeadline(t)
 }
 
 // SetWriteDeadline sets the deadline for future Write calls.
-func (b *BufferedTransport) SetWriteDeadline(t time.Time) error {
+func (b *bufferedConn) SetWriteDeadline(t time.Time) error {
 	return b.conn.SetWriteDeadline(t)
 }

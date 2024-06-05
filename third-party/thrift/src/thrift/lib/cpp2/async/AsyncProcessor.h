@@ -1382,8 +1382,9 @@ class HandlerCallbackBase {
 
 #if FOLLY_HAS_COROUTINES
   template <class T>
-  void startOnExecutor(
-      folly::coro::Task<T>&& task, folly::Executor::KeepAlive<> executor) {
+  void startOnExecutor(folly::coro::Task<T>&& task) {
+    folly::Executor::KeepAlive<> executor =
+        executor_ ? executor_ : folly::getKeepAliveToken(eb_);
     if (executor.get() == eb_ && eb_->isInEventBaseThread()) {
       // Avoid rescheduling in the common case where result() is called inline
       // on the EB thread where request execution began
@@ -1402,8 +1403,9 @@ class HandlerCallbackBase {
       std::forward<DoExceptionFunc>(doException)(*this);
       return;
     }
-    auto task = [](Ptr callback,
-                   DoExceptionFunc doException) -> folly::coro::Task<void> {
+    const auto doProcess =
+        [](Ptr callback,
+           DoExceptionFunc doException) -> folly::coro::Task<void> {
       folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
           callback->processServiceInterceptorsOnResponse());
       if (onResponseResult.hasException()) {
@@ -1414,9 +1416,9 @@ class HandlerCallbackBase {
                    << folly::exceptionStr(onResponseResult.exception());
       }
       std::forward<DoExceptionFunc>(doException)(*callback);
-    }(sharedFromThis(), std::forward<DoExceptionFunc>(doException));
-    startOnExecutor(
-        std::move(task), executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+    };
+    startOnExecutor(doProcess(
+        sharedFromThis(), std::forward<DoExceptionFunc>(doException)));
 #else
     std::forward<DoExceptionFunc>(doException)(*this);
 #endif // FOLLY_HAS_COROUTINES
@@ -1545,7 +1547,8 @@ class HandlerCallback : public HandlerCallbackBase {
       // where they will be unused.
       doResult(std::forward<InputType>(r));
     } else {
-      auto task = [](Ptr callback, auto result) -> folly::coro::Task<void> {
+      const auto doProcess = [](Ptr callback,
+                                auto result) -> folly::coro::Task<void> {
         folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
             callback->processServiceInterceptorsOnResponse());
         if (onResponseResult.hasException()) {
@@ -1554,10 +1557,9 @@ class HandlerCallback : public HandlerCallbackBase {
         } else {
           callback->doResult(std::move(result));
         }
-      }(sharedFromThis(), std::decay_t<InputType>(std::move(r)));
+      };
       startOnExecutor(
-          std::move(task),
-          executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+          doProcess(sharedFromThis(), std::decay_t<InputType>(std::move(r))));
     }
 #else
     doResult(std::forward<InputType>(r));
@@ -1628,7 +1630,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       // where they will be unused.
       doDone();
     } else {
-      auto task = [](Ptr callback) -> folly::coro::Task<void> {
+      const auto doProcess = [](Ptr callback) -> folly::coro::Task<void> {
         folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
             callback->processServiceInterceptorsOnResponse());
         if (onResponseResult.hasException()) {
@@ -1637,10 +1639,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
         } else {
           callback->doDone();
         }
-      }(sharedFromThis());
-      startOnExecutor(
-          std::move(task),
-          executor_ ? executor_ : folly::getKeepAliveToken(eb_));
+      };
+      startOnExecutor(doProcess(sharedFromThis()));
     }
 #else
     doDone();

@@ -70,6 +70,7 @@ void FrameLengthParserStrategy<T>::drainReadBufQueue() {
       computeFrameLength();
 
       if (UNLIKELY(!owner_.incMemoryUsage(frameLengthAndFieldSize_))) {
+        frameLengthAndFieldSize_ = 0;
         return;
       }
 

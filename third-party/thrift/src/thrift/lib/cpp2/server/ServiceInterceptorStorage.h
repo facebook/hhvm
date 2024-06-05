@@ -19,7 +19,7 @@
 #include <cstddef>
 
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
-#include <thrift/lib/cpp2/util/TypeErasedStorage.h>
+#include <thrift/lib/cpp2/util/TypeErasedValue.h>
 
 namespace apache::thrift::detail {
 

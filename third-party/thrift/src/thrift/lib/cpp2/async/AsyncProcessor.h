@@ -59,7 +59,7 @@
 #include <thrift/lib/cpp2/server/ResourcePoolHandle.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
-#include <thrift/lib/cpp2/util/TypeErasedStorage.h>
+#include <thrift/lib/cpp2/util/TypeErasedValue.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 

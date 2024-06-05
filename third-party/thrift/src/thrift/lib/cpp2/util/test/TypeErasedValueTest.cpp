@@ -15,17 +15,17 @@
  */
 
 #include <gtest/gtest.h>
-#include <thrift/lib/cpp2/util/TypeErasedStorage.h>
+#include <thrift/lib/cpp2/util/TypeErasedValue.h>
 
 namespace apache::thrift::util::test {
 
-class TypeErasedStorageTest : public testing::Test {
+class TypeErasedValueTest : public testing::Test {
   void SetUp() override {}
 
  protected:
   class LifetimeOperationsTracker {
    public:
-    enum Ops {
+    enum class Ops {
       CONSTRUCT,
       MOVE,
       MOVE_ASSIGN,
@@ -122,7 +122,7 @@ class TypeErasedStorageTest : public testing::Test {
 };
 
 /* Basic test for the test class */
-TEST_F(TypeErasedStorageTest, lifetimeOperationsTrackerTest) {
+TEST_F(TypeErasedValueTest, lifetimeOperationsTrackerTest) {
   {
     LifetimeOperationsTracker tracker(sequence_);
     ASSERT_TRUE(tracker);
@@ -199,7 +199,7 @@ TEST_F(TypeErasedStorageTest, lifetimeOperationsTrackerTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, constructDestructTest) {
+TEST_F(TypeErasedValueTest, constructDestructTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_FALSE(storage.has_value());
@@ -219,7 +219,7 @@ TEST_F(TypeErasedStorageTest, constructDestructTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, moveTest) {
+TEST_F(TypeErasedValueTest, moveTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_FALSE(storage.has_value());
@@ -261,7 +261,7 @@ TEST_F(TypeErasedStorageTest, moveTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, emptyStorageTest) {
+TEST_F(TypeErasedValueTest, emptyStorageTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_FALSE(storage.has_value());
@@ -277,7 +277,7 @@ TEST_F(TypeErasedStorageTest, emptyStorageTest) {
   }
 }
 
-TEST_F(TypeErasedStorageTest, wrongTypeTest) {
+TEST_F(TypeErasedValueTest, wrongTypeTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_TRUE(storage.emplace<LifetimeOperationsTracker>(sequence_));
@@ -292,7 +292,7 @@ TEST_F(TypeErasedStorageTest, wrongTypeTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, replaceTypeTest) {
+TEST_F(TypeErasedValueTest, replaceTypeTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_FALSE(storage.holds_alternative<LifetimeOperationsTracker>());
@@ -315,7 +315,7 @@ TEST_F(TypeErasedStorageTest, replaceTypeTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, resetTest) {
+TEST_F(TypeErasedValueTest, resetTest) {
   {
     TypeErasedValueTestType storage;
     ASSERT_FALSE(storage.has_value());
@@ -331,7 +331,7 @@ TEST_F(TypeErasedStorageTest, resetTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, makeValueTest) {
+TEST_F(TypeErasedValueTest, makeValueTest) {
   {
     TypeErasedValueTestType storage{
         std::in_place_type<LifetimeOperationsTracker>, sequence_};
@@ -347,12 +347,12 @@ TEST_F(TypeErasedStorageTest, makeValueTest) {
   ASSERT_EQ(sequence_, expected);
 }
 
-TEST_F(TypeErasedStorageTest, makeEmptyTest) {
+TEST_F(TypeErasedValueTest, makeEmptyTest) {
   TypeErasedValueTestType storage{std::in_place_type<std::monostate>};
   ASSERT_THROW(storage.value<NoopStorage>(), std::bad_cast);
 }
 
-TEST_F(TypeErasedStorageTest, swapTest) {
+TEST_F(TypeErasedValueTest, swapTest) {
   TypeErasedValueTestType storageOne{std::in_place_type<CounterStorage>, 1};
   TypeErasedValueTestType storageTwo{std::in_place_type<CounterStorage>, 2};
   ASSERT_EQ(storageOne.value<CounterStorage>().getCount(), 1);

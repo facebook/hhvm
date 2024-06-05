@@ -542,6 +542,18 @@ bool HHVM_FUNCTION(facts_enabled) {
   return AutoloadHandler::s_instance->getFacts() != nullptr;
 }
 
+void HHVM_FUNCTION(facts_validate, const Array& types_to_ignore) {
+  std::set<std::string> types_to_ignore_str;
+  IterateV(types_to_ignore.get(), [&](TypedValue v) {
+    types_to_ignore_str.insert(v.m_data.pstr->toCppString());
+  });
+  try {
+    Facts::getFactsOrThrow().validate(types_to_ignore_str);
+  } catch (std::logic_error& e) {
+    SystemLib::throwValidationExceptionObject(e.what());
+  }
+}
+
 void HHVM_FUNCTION(facts_sync) {
   Facts::getFactsOrThrow().ensureUpdated();
 }
@@ -872,6 +884,7 @@ void FactsExtension::moduleInit() {
 
 void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
+  HHVM_NAMED_FE(HH\\Facts\\validate, HHVM_FN(facts_validate));
   HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
   HHVM_NAMED_FE(HH\\Facts\\schema_version, HHVM_FN(facts_schema_version));
   HHVM_NAMED_FE(HH\\Facts\\sync, HHVM_FN(facts_sync));

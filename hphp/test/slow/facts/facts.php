@@ -270,6 +270,29 @@ function print_module_file_relative_path(
   print "$module has relative path: $path\n";
 }
 
+function print_validation(): void {
+  //These shouldnt throw
+  HH\Facts\validate(vec["someClass1", "classWithDuplicateName", "classWithDuplicateName"]);
+  HH\Facts\validate(vec["classWithDuplicateName"]);
+
+  //This should throw
+  try {
+    HH\Facts\validate();
+  }
+  catch(ValidationException $e){
+    print "\n$e \n";
+    print "ValidationException thrown as expected\n";
+  }
+
+  //This should throw
+  try {
+    HH\Facts\validate(vec["someClass1", "someClass1"]);
+  }
+  catch(ValidationException $e){
+    print "ValidationException thrown as expected\n";
+  }
+}
+
 <<__EntryPoint>>
 function facts(): void {
     var_dump(HH\Facts\enabled());
@@ -545,5 +568,6 @@ function facts(): void {
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');
+  print_validation();
   print "Finished.\n";
 }

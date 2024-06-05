@@ -69,6 +69,15 @@ namespace HH\Facts {
   function enabled()[]: bool;
 
   /**
+   * Void method that Throws an exception if Facts DB is not valid
+   *
+   * Valid meaning each type corresponds to one path (as of now)
+   *
+   * As of now this only means a check on the SQLite Facts DB & not the in memory map
+   */
+  function validate(vec<string> $types_to_ignore = vec[]): void;
+
+  /**
    * Return the DB path corresponding to the given directory of Hack code.
    *
    * The given directory must be a valid path containing a `.hhvmconfig.hdf`

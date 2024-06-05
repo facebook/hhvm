@@ -90,4 +90,7 @@ class DivisionByZeroException extends Exception {
   use ExceptionWithPureGetMessageTrait;
 }
 
+class ValidationException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
+}
 }

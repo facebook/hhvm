@@ -95,6 +95,14 @@ struct AutoloadMap {
   virtual void ensureUpdated() = 0;
 
   /**
+   * Check the integrity of facts data
+   * This can mean duplicate Symbols pointing to the same file path
+   *
+   * Will throw a ValidationException is facts data is not seen as valid.
+   */
+  virtual void validate(const std::set<std::string>& types_to_ignore) = 0;
+
+  /**
    * Returns a Holder object which wraps a native AutoloadMap in a manner which
    * is safe to be shared across threads. For non-native or non-shareable maps
    * returns an empty holder.

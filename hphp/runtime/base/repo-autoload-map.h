@@ -78,6 +78,8 @@ struct RepoAutoloadMap final : AutoloadMap {
 
   void ensureUpdated() override {}
 
+  void validate(const std::set<std::string>&) override {}
+
   Holder getNativeHolder() noexcept override {
     return Holder{this, nullptr};
   }

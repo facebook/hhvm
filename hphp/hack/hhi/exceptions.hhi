@@ -160,6 +160,7 @@ namespace {
   final class ReadonlyViolationException extends LogicException {}
   final class CoeffectViolationException extends LogicException {}
   final class ModuleBoundaryViolationException extends LogicException {}
+  final class ValidationException extends LogicException {}
 
   class RuntimeException extends Exception {
     use ExceptionWithPureGetMessageTrait;

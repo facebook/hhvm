@@ -108,5 +108,10 @@ cdef class SyncClient:
     def set_persistent_header(SyncClient self, string key, string value):
         self._persistent_headers[key] = value
 
+    cdef add_event_handler(SyncClient self, const shared_ptr[cTProcessorEventHandler]& handler):
+        if not self._omni_client:
+            raise RuntimeError("Connection already closed")
+        deref(self._omni_client).addEventHandler(handler)
+
     def _at_exit(SyncClient self, callback):
         self._exit_callbacks.append(callback)

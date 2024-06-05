@@ -65,6 +65,9 @@ cdef class AsyncClient:
 
     async def __aenter__(AsyncClient self):
         await asyncio.shield(self._connect_future)
+        for handler in self._deferred_event_handlers:
+            self.add_event_handler(handler)
+        self._deferred_event_handlers.clear()
         return self
 
     async def __aexit__(AsyncClient self, exc_type, exc_value, traceback):
@@ -191,6 +194,12 @@ cdef class AsyncClient:
 
     def set_persistent_header(AsyncClient self, string key, string value):
         self._persistent_headers[key] = value
+
+    cdef add_event_handler(AsyncClient self, const shared_ptr[cTProcessorEventHandler]& handler):
+        if not self._omni_client:
+            self._deferred_event_handlers.push_back(handler)
+            return
+        deref(self._omni_client).addEventHandler(handler)
 
     def _at_aexit(AsyncClient self, callback):
         self._aexit_callbacks.append(callback)

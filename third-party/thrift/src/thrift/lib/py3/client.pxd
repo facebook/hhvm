@@ -35,7 +35,7 @@ from libcpp cimport bool
 from asyncio import InvalidStateError as asyncio_InvalidStateError
 from thrift.python.common cimport cThriftMetadata
 from thrift.python.protocol cimport Protocol as cProtocol
-from thrift.python.client.request_channel cimport cRequestChannel, cRequestChannel_ptr
+from thrift.python.client.request_channel cimport cRequestChannel, cRequestChannel_ptr, cTProcessorEventHandler
 from folly.executor cimport AsyncioExecutor
 
 cdef extern from "thrift/lib/cpp/transport/THeader.h":
@@ -74,10 +74,6 @@ cdef extern from "thrift/lib/py3/client_wrapper.h" namespace "::thrift::py3":
     cdef cppclass cClientWrapper "::thrift::py3::ClientWrapper":
         void setPersistentHeader(const string& key, const string& value)
         void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
-
-cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
-    cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
-        pass
 
 cdef class Client:
     cdef object __weakref__

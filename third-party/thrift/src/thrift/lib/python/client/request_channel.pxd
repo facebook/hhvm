@@ -34,6 +34,9 @@ cdef extern from "thrift/lib/cpp2/async/RequestChannel.h" namespace "::apache::t
     cdef cppclass cRequestChannel_ptr "::apache::thrift::RequestChannel::Ptr":
         pass
 
+cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
+    cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
+        pass
 
 cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::thrift::python::client":
     cdef cppclass ChannelFactory "::thrift::python::client::ChannelFactory":

@@ -21,7 +21,7 @@ from libcpp.memory cimport unique_ptr, shared_ptr
 from libcpp.string cimport string
 from libcpp.unordered_map cimport unordered_map
 from libcpp.pair cimport pair
-from thrift.python.client.request_channel cimport cRequestChannel_ptr, cRequestChannel
+from thrift.python.client.request_channel cimport cRequestChannel_ptr, cRequestChannel, cTProcessorEventHandler
 from thrift.python.common cimport cRpcOptions
 
 
@@ -102,6 +102,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
         shared_ptr[cRequestChannel] getChannelShared()
         uint16_t getChannelProtocolId()
         void clearEventHandlers()
+        void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
         void set_interaction_factory(cOmniClient *client)
 

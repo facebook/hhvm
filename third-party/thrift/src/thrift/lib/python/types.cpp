@@ -873,10 +873,10 @@ size_t MapTypeInfo::write(
     if (!seq) {
       THRIFT_PY3_CHECK_ERROR();
     }
-    map = seq.get();
-    if (PyList_Sort(map) == -1) {
+    if (PyList_Sort(seq.get()) == -1) {
       THRIFT_PY3_CHECK_ERROR();
     }
+    map = PySequence_Tuple(seq.get());
   }
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyTuple_GET_ITEM(map, i);

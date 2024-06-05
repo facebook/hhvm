@@ -153,10 +153,18 @@ void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
 }
 
 std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext() {
-  return FizzConfigUtil::createFizzContext(
+  return createFizzContext(
       accConfig_.sslContextConfigs,
       accConfig_.fizzConfig,
       accConfig_.strictSSL);
+}
+
+std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext(
+    const std::vector<SSLContextConfig>& sslContextConfigs,
+    const FizzConfig& fizzConfig,
+    bool strictSSL) {
+  return FizzConfigUtil::createFizzContext(
+      sslContextConfigs, fizzConfig, strictSSL);
 }
 
 std::shared_ptr<fizz::server::FizzServerContext>
@@ -191,10 +199,18 @@ std::shared_ptr<fizz::server::TicketCipher> Acceptor::createFizzTicketCipher(
 }
 
 std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager() {
-  return FizzConfigUtil::createCertManager(
+  return createFizzCertManager(
       accConfig_.sslContextConfigs,
       /* pwFactory = */ nullptr,
       accConfig_.strictSSL);
+}
+
+std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager(
+    const std::vector<SSLContextConfig>& sslContextConfigs,
+    const std::shared_ptr<PasswordInFileFactory>& pwFactory,
+    bool strictSSL) {
+  return FizzConfigUtil::createCertManager(
+      sslContextConfigs, pwFactory, strictSSL);
 }
 
 std::string Acceptor::getPskContext() {

@@ -40,6 +40,7 @@ namespace wangle {
 
 class AcceptObserver;
 class ManagedConnection;
+class PasswordInFileFactory;
 class SecurityProtocolContextManager;
 class SSLContextManager;
 
@@ -527,14 +528,36 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   virtual DefaultToFizzPeekingCallback* getFizzPeeker() {
     return &defaultFizzPeeker_;
   }
+  // DEPRECATED: Will be removed
   virtual std::shared_ptr<fizz::server::FizzServerContext> createFizzContext();
+
+  /**
+   * Subclasses can override `createFizzContext(...)` to to customize the Fizz
+   * context that will be used when accepting TLS 1.3 connections.
+   */
+  virtual std::shared_ptr<fizz::server::FizzServerContext> createFizzContext(
+      const std::vector<SSLContextConfig>& sslContextConfigs,
+      const FizzConfig& fizzConfig,
+      bool strictSSL);
+
   virtual std::shared_ptr<fizz::server::TicketCipher> createFizzTicketCipher(
       const TLSTicketKeySeeds& seeds,
       std::shared_ptr<fizz::Factory> factory,
       std::shared_ptr<fizz::server::CertManager> certManager,
       folly::Optional<std::string> pskContext);
 
+  // DEPRECATED: Will be removed
   virtual std::unique_ptr<fizz::server::CertManager> createFizzCertManager();
+
+  /**
+   * Subclasses can override `createFizzCertManager` to return a different
+   * implementation `fizz::server::CertManager` which stores the server side TLS
+   * certificates for each SNI hosted on this Acceptor.
+   */
+  virtual std::unique_ptr<fizz::server::CertManager> createFizzCertManager(
+      const std::vector<SSLContextConfig>& sslContextConfigs,
+      const std::shared_ptr<PasswordInFileFactory>& pwFactory,
+      bool strictSSL);
 
   /**
    * Socket options to apply to the client socket

@@ -126,6 +126,14 @@ let parse_options () =
       die usage
     | (x, Some ai_options) -> (x, ai_options)
   in
+  let ai_options =
+    Ai_options.
+      {
+        ai_options with
+        run_hh_distc_workers_locally = true;
+        compute_folded_class_decls_with_hh_distc = true;
+      }
+  in
 
   let popt =
     ParserOptions.
@@ -345,11 +353,20 @@ let decl_and_run_mode
     error_format
 
 let write_file_to_root ~(root : Path.t) ~file =
-  let contents = Sys_utils.cat_no_fail file in
-  let file = Path.make file in
-  Sys_utils.write_file
-    ~file:(Path.to_string (Path.concat root (Path.basename file)))
-    contents
+  let write (file, content) =
+    let file =
+      Relative_path.suffix file
+      |> Filename.basename
+      |> Path.concat root
+      |> Path.to_string
+    in
+    Sys_utils.write_file ~file content;
+    file
+  in
+  let files_and_content =
+    Relative_path.create Relative_path.Dummy file |> Multifile.file_to_file_list
+  in
+  List.map files_and_content ~f:write
 
 let main_hack
     ({ tcopt; _ } as opts)
@@ -386,20 +403,13 @@ let main_hack
           Sys_utils.write_file
             ~file:(Path.concat root ".hhconfig" |> Path.to_string)
             hh_config_options;
-          Sys_utils.(
-            try_touch
-              (Touch_existing_or_create_new
-                 { mkdir_if_new = false; perm_if_new = 0o666 })
-              (Path.concat root ".hhconfig" |> Path.to_string));
-          List.iter files ~f:(fun file -> write_file_to_root ~root ~file);
-
+          let files =
+            List.concat_map files ~f:(fun file ->
+                write_file_to_root ~root ~file)
+          in
           let opts =
             let ai_options =
               { opts.ai_options with Ai_options.unittest_hack_root = Some root }
-            in
-            let files =
-              List.map files ~f:(fun file ->
-                  Path.concat root (Filename.basename file) |> Path.to_string)
             in
             { opts with ai_options; files }
           in

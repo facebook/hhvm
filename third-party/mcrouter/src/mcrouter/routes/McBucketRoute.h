@@ -128,8 +128,6 @@ class McBucketRoute {
 
   template <class Request>
   ReplyT<Request> routeImpl(const Request& req, const size_t bucketId) const {
-    auto proxy = &fiber_local<RouterInfo>::getSharedCtx()->proxy();
-    proxy->stats().increment(bucketized_routing_stat);
     return fiber_local<RouterInfo>::runWithLocals([this, &req, bucketId]() {
       fiber_local<RouterInfo>::setBucketId(bucketId);
       return rh_->route(req);

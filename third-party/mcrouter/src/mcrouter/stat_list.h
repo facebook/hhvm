@@ -223,8 +223,6 @@ STUI(after_request_latency_injected, 0, 1)
 STUI(before_latency_injected, 0, 1)
 STUI(after_latency_injected, 0, 1)
 STUI(total_latency_injected, 0, 1)
-// number of request routed using McBucketRoute
-STUI(bucketized_routing, 0, 1)
 #undef GROUP
 #define GROUP ods_stats | count_stats
 STUI(result_error_count, 0, 1)

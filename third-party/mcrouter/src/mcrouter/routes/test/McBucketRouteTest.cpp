@@ -44,8 +44,6 @@ TEST(McBucketRouteTest, bucketIdShouldPropagate) {
   ASSERT_TRUE(rh);
   mockFiberContext();
   rh->route(McGetRequest("getReq")); // bucketId == 28
-  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  EXPECT_EQ(1, proxy->stats().getValue(bucketized_routing_stat));
   EXPECT_FALSE(srHandleVec[0]->sawBucketIds.empty());
   EXPECT_EQ(28, srHandleVec[0]->sawBucketIds[0]);
 }

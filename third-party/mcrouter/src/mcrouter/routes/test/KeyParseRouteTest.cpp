@@ -119,8 +119,6 @@ TEST(KeyParseRouteTest, keyParseWithBucketRoute) {
   mockFiberContext();
   keyParseRh->route(McGetRequest("cache:is:key:to:scaling")); // bucketId == 80
   keyParseRh->route(McGetRequest("cache:is:key:to:success")); // bucketId == 80
-  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  EXPECT_EQ(2, proxy->stats().getValue(bucketized_routing_stat));
   EXPECT_EQ(2, srHandleVec[0]->sawBucketIds.size());
   EXPECT_EQ(80, srHandleVec[0]->sawBucketIds[0]);
   EXPECT_EQ(80, srHandleVec[0]->sawBucketIds[1]);

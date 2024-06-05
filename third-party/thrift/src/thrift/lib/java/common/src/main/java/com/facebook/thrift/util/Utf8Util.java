@@ -37,6 +37,7 @@ public class Utf8Util {
   private static final Logger logger = LoggerFactory.getLogger(Utf8Util.class);
 
   private static final MethodHandle CREATE_STRING;
+  private static boolean useNewMethod = false;
 
   static {
     MethodHandle createStr = null;
@@ -48,10 +49,30 @@ public class Utf8Util {
       m.setAccessible(true);
       createStr = lookup.unreflect(m);
     } catch (Throwable t) {
+      // Ignore, validation will be done before creating the String
+    }
+
+    // Java 21+ String has a new method signature, we must use the new signature here by passing
+    // in true for noShare which is equivalent to the old API
+    if (createStr == null) {
+      try {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+        Method m =
+            String.class.getDeclaredMethod(
+                "newStringUTF8NoRepl", byte[].class, int.class, int.class, boolean.class);
+        m.setAccessible(true);
+        createStr = lookup.unreflect(m);
+        useNewMethod = true;
+      } catch (Throwable t) {
+        // Ignore, validation will be done before creating the String
+      }
+    }
+
+    if (createStr == null) {
       logger.warn(
           "Add JVM option for faster UTF-8 validation. --add-opens"
               + " java.base/java.lang=ALL-UNNAMED");
-      // Ignore, validation will be done before creating the String
     }
 
     CREATE_STRING = createStr;
@@ -111,7 +132,11 @@ public class Utf8Util {
     }
 
     try {
-      return (String) CREATE_STRING.invoke(array, offset, length);
+      if (useNewMethod) {
+        return (String) CREATE_STRING.invoke(array, offset, length, true);
+      } else {
+        return (String) CREATE_STRING.invoke(array, offset, length);
+      }
     } catch (Throwable t) {
       if (t.getCause() instanceof MalformedInputException) {
         throwException(src);

@@ -116,15 +116,18 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   }
 
   /*
-   * Updates the config and reloads shared fizz, SSL contexts data
+   * Updates the config and reloads shared fizz, SSL context data with the given
+   * SSL context config.
+   * If there exists SNI configs, existing SNIs will use the given ssl config.
    */
   void updateSSLConfigAndReloadContexts(SSLContextConfig ssl) override {
-    for (auto& sslContext : config_.sslContextConfigs) {
-      sslContext = ssl;
-    }
-    for (auto& sniConfig : config_.sniConfigs) {
-      sniConfig.contextConfig = ssl;
-    }
+    config_.sslContextConfigs = {std::move(ssl)};
+    // Clearing means all existing SNI configs uses the given ssl config.
+    // In case of a need to update SNI configs; the caller need to supply
+    // customized SSL context config for each SNI config; hence an API update is
+    // needed. This is not currently supported as SNI configs are not used in
+    // the contexts this API is used.
+    config_.sniConfigs.clear();
     reloadSSLContextConfigs();
   }
 

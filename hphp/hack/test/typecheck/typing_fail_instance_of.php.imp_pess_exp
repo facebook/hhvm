@@ -4,6 +4,18 @@ Typing error (Typing[4429])
   Expected `?num`
   File "typing_fail_instance_of.php", line 34, characters 16-20:
   But got `(not A & not B)`
+ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
+Typing error (Typing[4429])
+  File "typing_fail_instance_of.php", line 40, characters 10-15:
+  Expected `num` because this is used in an arithmetic operation
+  File "typing_fail_instance_of.php", line 35, characters 13-13:
+  But got `not A` from this `is` expression test
+ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
+Typing error (Typing[4429])
+  File "typing_fail_instance_of.php", line 40, characters 10-15:
+  Expected `num` because this is used in an arithmetic operation
+  File "typing_fail_instance_of.php", line 37, characters 20-20:
+  But got `not B` from this `is` expression test
 WARN: File "typing_fail_instance_of.php", line 29, characters 7-13:
 This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12002])
 WARN: File "typing_fail_instance_of.php", line 39, characters 14-15:

@@ -6395,14 +6395,25 @@ end = struct
       (sub_supportdyn, tys_sub)
       rhs
       env =
-    let ( ||| ) = ( ||| ) ~fail in
-    List.fold_left
-      tys_sub
-      ~init:(env, TL.invalid ~fail)
-      ~f:(fun res ty_sub ->
+    let rec aux ty_subs ~env ~errs ~props =
+      match ty_subs with
+      | [] ->
+        ( env,
+          TL.Disj (Typing_error.intersect_opt @@ List.filter_opt errs, props) )
+      | ty_sub :: ty_subs ->
         let ty_sub = update_reason ty_sub ~env in
-        res
-        ||| mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs)
+        let (env, prop) =
+          mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
+        in
+        if TL.is_valid prop then
+          (env, prop)
+        else (
+          match TL.get_error_if_unsat prop with
+          | Some err -> aux ty_subs ~env ~errs:(err :: errs) ~props
+          | _ -> aux ty_subs ~env ~errs ~props:(prop :: props)
+        )
+    in
+    aux tys_sub ~env ~errs:[fail] ~props:[]
 
   let simplify_generic_l
       ~subtype_env

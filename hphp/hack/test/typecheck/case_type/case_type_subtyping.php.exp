@@ -18,6 +18,12 @@ Invalid argument (Typing[4110])
   But got `vec<null>`
 ERROR: File "case_type_subtyping.php", line 20, characters 8-25:
 Invalid argument (Typing[4110])
+  File "case_type_subtyping.php", line 6, characters 13-19:
+  Expected `CT<int>`
+  File "case_type_subtyping.php", line 20, characters 8-25:
+  But got `Vector<_>`
+ERROR: File "case_type_subtyping.php", line 20, characters 8-25:
+Invalid argument (Typing[4110])
   File "case_type_subtyping.php", line 6, characters 16-18:
   Expected `int`
   File "case_type_subtyping.php", line 4, characters 48-48:

@@ -121,21 +121,57 @@ let add_prop p ps =
   else
     p :: ps
 
+type prop_result =
+  | Valid
+  | Invalid of Typing_error.t option
+  | Unknown
+
+let to_prop_result prop =
+  if is_valid prop then
+    Valid
+  else
+    match get_error_if_unsat prop with
+    | Some err -> Invalid err
+    | _ -> Unknown
+
+let append_disj ~fail p1 p2 =
+  match (p1, p2) with
+  | (Disj (err1, ps1), Disj (err2, ps2)) ->
+    let disj_err =
+      Typing_error.intersect_opt @@ List.filter_opt [fail; err1; err2]
+    in
+    Disj (disj_err, List.fold ps2 ~init:ps1 ~f:(fun ps p -> add_prop p ps))
+  | (p, Disj (err, ps))
+  | (Disj (err, ps), p) ->
+    let disj_err = Typing_error.intersect_opt @@ List.filter_opt [fail; err] in
+    Disj (disj_err, add_prop p ps)
+  | (_, _) -> Disj (fail, [p1; p2])
+
 (* Smart constructor for binary disjunction *)
 let disj ~fail p1 p2 =
   if equal_subtype_prop p1 p2 then
     p1
   else
-    match (p1, p2) with
-    | (_, _) when is_valid p1 || is_valid p2 -> Conj []
-    | (_, _) when is_unsat p1 && is_unsat p2 -> Disj (fail, [])
-    | (_, _) when is_unsat p1 -> Disj (fail, [p2])
-    | (_, _) when is_unsat p2 -> Disj (fail, [p1])
-    | (Disj (_, ps1), Disj (_, ps2)) ->
-      Disj (fail, List.fold ps2 ~init:ps1 ~f:(fun ps p -> add_prop p ps))
-    | (_, Disj (_, ps)) -> Disj (fail, add_prop p1 ps)
-    | (Disj (_, ps), _) -> Disj (fail, add_prop p2 ps)
-    | (_, _) -> Disj (fail, [p1; p2])
+    match (to_prop_result p1, to_prop_result p2) with
+    | (Valid, _)
+    | (_, Valid) ->
+      valid
+    | (Invalid err1, Invalid err2) ->
+      let disj_err =
+        Typing_error.intersect_opt @@ List.filter_opt [fail; err1; err2]
+      in
+      invalid ~fail:disj_err
+    | (Invalid err, Unknown) ->
+      let disj_err =
+        Typing_error.intersect_opt @@ List.filter_opt [fail; err]
+      in
+      Disj (disj_err, [p2])
+    | (Unknown, Invalid err) ->
+      let disj_err =
+        Typing_error.intersect_opt @@ List.filter_opt [fail; err]
+      in
+      Disj (disj_err, [p1])
+    | (Unknown, Unknown) -> append_disj ~fail p1 p2
 
 let rec force_lazy_values (prop : subtype_prop) =
   match prop with

@@ -260,12 +260,13 @@ void Acceptor::resetSSLContextConfigs(
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext = nullptr;
   try {
     if (accConfig_.fizzConfig.enableFizz) {
-      certManager = FizzConfigUtil::createCertManager(
+      certManager = createFizzCertManager(
           sslContextConfigs,
           /* pwFactory = */ nullptr,
           accConfig_.strictSSL);
       if (certManager) {
-        auto context = createFizzContext();
+        auto context = createFizzContext(
+            sslContextConfigs, accConfig_.fizzConfig, accConfig_.strictSSL);
         if (context) {
           context->setCertManager(certManager);
           std::string pskContext;

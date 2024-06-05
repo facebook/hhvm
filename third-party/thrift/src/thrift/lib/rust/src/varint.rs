@@ -20,7 +20,12 @@ use bytes::BufMut;
 use crate::errors::ProtocolError;
 use crate::Result;
 
-pub const MAX_VARINT_U64: usize = 64 / 7 + 1; // max number of bytes for a u64 varint
+// To encode a u64 we break the number up into groups of 7 bits. A given number
+// will require some number of these groups (smaller numbers use less than
+// larger ones). For each such group we use one byte and for those numbers >=
+// 9223372036854775807 (2^63 - 1 = 0b0 1111111 1111111 1111111 1111111 1111111
+// 1111111 1111111 1111111 1111111) a byte for the left over bit.
+pub const MAX_VARINT_U64: usize = 64 / 7 + 1; // Max. bytes used by a u64 varint.
 
 pub fn write_u64<B: BufMut>(buf: &mut B, v: u64) {
     let mut v = v;
@@ -62,17 +67,23 @@ pub fn read_u64<B: Buf>(buf: &mut B) -> Result<u64> {
     // Operate on byte slices
     fn inner<B: Buf>(off: usize, val: u64, buf: &mut B) -> Result<Complete> {
         let inp = buf.chunk();
-        let mut val = val;
-
         ensure_err!(!inp.is_empty(), ProtocolError::EOF);
+
+        let mut val = val;
 
         for (idx, v) in inp.iter().enumerate() {
             let shl = idx + off;
+            ensure_err!(shl < MAX_VARINT_U64, ProtocolError::InvalidValue);
+            let x = v & 0x7f;
+            if shl == (MAX_VARINT_U64 - 1) {
+                // If x is not `0x00` or `0x01` then, `(x as u64) << 63`
+                // will be `0b0` or indistinuishable from
+                // `0b1000000000000000000000000000000000000000000000000000000000000000`.
+                // Either way this is an overflow condition.
+                ensure_err!(x < 0x02, ProtocolError::InvalidValue);
+            }
 
-            // Make sure its not too long to fit into u64
-            ensure_err!(idx < MAX_VARINT_U64, ProtocolError::InvalidValue);
-
-            val += ((v & 0x7f) as u64) << (shl * 7);
+            val += (x as u64) << (shl * 7);
 
             if v & 0x80 == 0 {
                 return Ok(Done { used: idx + 1, val });
@@ -396,20 +407,53 @@ mod test {
 
     #[test]
     fn bad_toobig() {
-        let data = [
-            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
-        ];
-        let mut cur = Cursor::new(&data[..]);
-
-        match read_u64(&mut cur) {
-            Ok(bad) => panic!("Unexpected result {}", bad),
-            Err(err) => match err.downcast_ref::<ProtocolError>() {
-                Some(ProtocolError::InvalidValue) => {}
-                _ => panic!("Bad result {:?}", err),
-            },
+        let mut val = u64::MAX - 1;
+        for i in 0xfe..=0xff {
+            let data = [i, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01];
+            let mut cur = Cursor::new(&data[..]);
+            let u = read_u64(&mut cur);
+            assert!(u.is_ok());
+            assert_eq!(u.unwrap(), val);
+            assert_eq!(cur.position(), 10);
+            val = val.wrapping_add(1);
         }
 
-        assert_eq!(cur.position(), 0);
+        for i in 0x02..=0x7f {
+            let data = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, i];
+            let mut cur = Cursor::new(&data[..]);
+            match read_u64(&mut cur) {
+                Ok(bad) => panic!("Unexpected result {}", bad),
+                Err(err) => match err.downcast_ref::<ProtocolError>() {
+                    Some(ProtocolError::InvalidValue) => {}
+                    _ => panic!("Bad result {:?}", err),
+                },
+            }
+            assert_eq!(cur.position(), 0);
+        }
+
+        for i in 0x80..=0x81 {
+            let data = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, i];
+            let mut cur = Cursor::new(&data[..]);
+            match read_u64(&mut cur) {
+                Ok(bad) => panic!("Unexpected result {}", bad),
+                Err(err) => match err.downcast_ref::<ProtocolError>() {
+                    Some(ProtocolError::EOF) => {}
+                    _ => panic!("Bad result {:?}", err),
+                },
+            }
+        }
+
+        for i in 0x82..=0x8f {
+            let data = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, i];
+            let mut cur = Cursor::new(&data[..]);
+            match read_u64(&mut cur) {
+                Ok(bad) => panic!("Unexpected result {}", bad),
+                Err(err) => match err.downcast_ref::<ProtocolError>() {
+                    Some(ProtocolError::InvalidValue) => {}
+                    _ => panic!("Bad result {:?}", err),
+                },
+            }
+        }
     }
 
     static INT64_VALUES: &[i64] = &[

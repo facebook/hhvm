@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"

@@ -43,11 +43,6 @@ static std::size_t hashVector(const std::vector<std::size_t>& a) {
   return XXH3_64bits(a.data(), a.size() * sizeof(a[0]));
 }
 
-static std::size_t sortAndHash(std::vector<std::size_t>& a) {
-  std::sort(a.begin(), a.end());
-  return hashVector(a);
-}
-
 std::size_t hash_value(const Value& s) {
   auto value_type = s.getType();
   switch (value_type) {
@@ -82,36 +77,53 @@ std::size_t hash_value(const Value& s) {
     }
     case Value::Type::setValue: {
       const auto& set = *s.setValue_ref();
-      std::vector<std::size_t> hashes;
-      hashes.reserve(set.size() + 1);
-      hashes.push_back(static_cast<std::size_t>(value_type));
+      std::vector<std::size_t> hashes(set.size() + 1);
+      hashes[0] = static_cast<std::size_t>(value_type);
+      std::size_t* valueHashes = hashes.data() + 1;
+      std::size_t i = 0;
       for (auto&& v : set) {
-        hashes.push_back(hash_value(v));
+        valueHashes[i++] = hash_value(v);
       }
-      return sortAndHash(hashes);
+      std::sort(valueHashes, hashes.data() + hashes.size());
+      return hashVector(hashes);
     }
     case Value::Type::mapValue: {
+      // Keys and values are sorted independently, so this produces collisions
+      // between maps where the same values are mapped to the same keys
+      // differently.
       const auto& map = *s.mapValue_ref();
-      std::vector<std::size_t> hashes;
-      hashes.reserve(map.size() * 2 + 1);
-      hashes.push_back(static_cast<std::size_t>(value_type));
+      std::size_t size = map.size();
+      std::vector<std::size_t> hashes(size * 2 + 1);
+      hashes[0] = static_cast<std::size_t>(value_type);
+      std::size_t* keyHashes = hashes.data() + 1;
+      std::size_t* valueHashes = keyHashes + size;
+      std::size_t i = 0;
       for (auto&& [k, v] : map) {
-        hashes.push_back(hash_value(k));
-        hashes.push_back(hash_value(v));
+        hashes[i] = hash_value(k);
+        hashes[size + i] = hash_value(v);
+        ++i;
       }
-      return sortAndHash(hashes);
+      std::sort(keyHashes, valueHashes);
+      std::sort(valueHashes, hashes.data() + hashes.size());
+      return hashVector(hashes);
     }
     case Value::Type::objectValue: {
       const Object& object = *s.objectValue_ref();
-      std::vector<std::size_t> hashes;
-      hashes.reserve(object.size() * 2 + 2);
-      hashes.push_back(static_cast<std::size_t>(value_type));
-      hashes.push_back(std::hash<std::string>{}(*object.type()));
+      size_t size = object.size();
+      std::vector<std::size_t> hashes(size * 2 + 2);
+      hashes[0] = static_cast<std::size_t>(value_type);
+      hashes[1] = std::hash<std::string>{}(*object.type());
+      std::size_t* keyHashes = hashes.data() + 2;
+      std::size_t* valueHashes = keyHashes + size;
+      std::size_t i = 0;
       for (auto&& [k, v] : object) {
-        hashes.push_back(k);
-        hashes.push_back(hash_value(v));
+        keyHashes[i] = k; // hashing integer key is the identity
+        valueHashes[i] = hash_value(v);
+        ++i;
       }
-      return sortAndHash(hashes);
+      std::sort(keyHashes, valueHashes);
+      std::sort(valueHashes, hashes.data() + hashes.size());
+      return hashVector(hashes);
     }
     case Value::Type::__EMPTY__: {
       return 0;

@@ -89,7 +89,6 @@ let parse_options () =
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
-  let no_builtins = ref false in
   let ai_options = ref None in
   let set_ai_options x =
     let options = Ai_options.prepare ~server:false x in
@@ -98,13 +97,7 @@ let parse_options () =
     | Some existing ->
       ai_options := Some (Ai_options.merge_for_unit_tests existing options)
   in
-  let error_format = ref Errors.Highlighted in
-  let check_xhp_attribute = ref false in
-  let disable_xhp_element_mangling = ref false in
-  let disable_xhp_children_declarations = ref false in
-  let enable_xhp_class_modifier = ref false in
   let allowed_fixme_codes_strict = ref None in
-  let disable_hh_ignore_error = ref 0 in
   let allowed_decl_fixme_codes = ref None in
   let options =
     [
@@ -114,39 +107,10 @@ let parse_options () =
       ( "--ai",
         Arg.String set_ai_options,
         " Run the abstract interpreter (Zoncolan)" );
-      ( "--error-format",
-        Arg.String
-          (fun s ->
-            match s with
-            | "raw" -> error_format := Errors.Raw
-            | "plain" -> error_format := Errors.Plain
-            | "context" -> error_format := Errors.Context
-            | "highlighted" -> error_format := Errors.Highlighted
-            | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
-      );
-      ( "--check-xhp-attribute",
-        Arg.Set check_xhp_attribute,
-        " Typechecks xhp required attributes" );
-      ( "--disable-xhp-element-mangling",
-        Arg.Set disable_xhp_element_mangling,
-        "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
-      );
-      ( "--disable-xhp-children-declarations",
-        Arg.Set disable_xhp_children_declarations,
-        "Disable XHP children declarations, e.g. children (foo, bar+)" );
-      ( "--enable-xhp-class-modifier",
-        Arg.Set enable_xhp_class_modifier,
-        "Enable the XHP class modifier, xhp class name {} will define an xhp class."
-      );
       ( "--allowed-fixme-codes-strict",
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in strict mode." );
-      ( "--disable-hh-ignore-error",
-        Arg.Int (( := ) disable_hh_ignore_error),
-        " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
-      );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
@@ -168,11 +132,11 @@ let parse_options () =
       {
         default with
         keep_user_attributes = true;
-        disable_xhp_element_mangling = !disable_xhp_element_mangling;
-        disable_xhp_children_declarations = !disable_xhp_children_declarations;
-        enable_xhp_class_modifier = !enable_xhp_class_modifier;
+        disable_xhp_element_mangling = false;
+        disable_xhp_children_declarations = false;
+        enable_xhp_class_modifier = false;
         everything_sdt = true;
-        disable_hh_ignore_error = !disable_hh_ignore_error;
+        disable_hh_ignore_error = 0;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
       }
@@ -183,7 +147,7 @@ let parse_options () =
       ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~tco_check_xhp_attribute:!check_xhp_attribute
+      ~tco_check_xhp_attribute:false
       ~tco_enable_sound_dynamic:true
       GlobalOptions.default
   in
@@ -195,8 +159,8 @@ let parse_options () =
       files = fns;
       extra_builtins = !extra_builtins;
       ai_options;
-      error_format = !error_format;
-      no_builtins = !no_builtins;
+      error_format = Errors.Highlighted;
+      no_builtins = false;
       tcopt;
     },
     None,

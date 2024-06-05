@@ -25,7 +25,7 @@ type mockSocket struct {
 	Transport
 }
 
-var _ Socket = (*mockSocket)(nil)
+var _ net.Conn = (*mockSocket)(nil)
 
 func newMockSocket() *mockSocket {
 	return &mockSocket{

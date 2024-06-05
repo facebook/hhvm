@@ -24,12 +24,12 @@ import (
 
 type BufferedTransport struct {
 	buf    bufio.ReadWriter
-	socket Socket
+	socket net.Conn
 }
 
-var _ Socket = (*BufferedTransport)(nil)
+var _ net.Conn = (*BufferedTransport)(nil)
 
-func NewBufferedTransport(socket Socket, bufferSize int) *BufferedTransport {
+func NewBufferedTransport(socket net.Conn, bufferSize int) *BufferedTransport {
 	return &BufferedTransport{
 		buf: bufio.ReadWriter{
 			Reader: bufio.NewReaderSize(socket, bufferSize),

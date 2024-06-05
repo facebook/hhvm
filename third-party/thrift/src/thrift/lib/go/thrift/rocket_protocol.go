@@ -52,16 +52,16 @@ type rocketProtocol struct {
 }
 
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
-func NewRocketProtocol(socket Socket) Protocol {
+func NewRocketProtocol(conn net.Conn) Protocol {
 	p := &rocketProtocol{
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
 	}
-	if cc, ok := socket.(interface{ Conn() net.Conn }); ok {
+	if cc, ok := conn.(interface{ Conn() net.Conn }); ok {
 		p.conn = cc.Conn()
 	} else {
-		p.conn = socket
+		p.conn = conn
 	}
 	if err := p.resetProtocol(); err != nil {
 		panic(err)

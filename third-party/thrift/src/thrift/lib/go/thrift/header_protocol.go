@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"fmt"
+	"net"
 )
 
 type headerProtocol struct {
@@ -27,11 +28,11 @@ type headerProtocol struct {
 	protoID ProtocolID
 }
 
-func NewHeaderProtocol(socket Socket) Protocol {
+func NewHeaderProtocol(conn net.Conn) Protocol {
 	p := &headerProtocol{
 		protoID: ProtocolIDCompact,
 	}
-	p.trans = newHeaderTransport(socket)
+	p.trans = newHeaderTransport(conn)
 
 	// Effectively an invariant violation.
 	if err := p.ResetProtocol(); err != nil {

@@ -23,11 +23,6 @@ import (
 	"time"
 )
 
-// Socket is a Transport that can be opened and reopened.
-type Socket interface {
-	net.Conn
-}
-
 var _ net.Conn = (*socket)(nil)
 
 type socket struct {
@@ -89,7 +84,7 @@ func SocketConn(conn net.Conn) SocketOption {
 // or an existing connection.
 //
 //	trans, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
-func NewSocket(options ...SocketOption) (Socket, error) {
+func NewSocket(options ...SocketOption) (net.Conn, error) {
 	socket := &socket{}
 
 	for _, option := range options {

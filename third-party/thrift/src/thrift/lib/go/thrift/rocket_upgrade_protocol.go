@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"net"
 )
 
 type upgradeToRocketProtocol struct {
@@ -27,10 +28,10 @@ type upgradeToRocketProtocol struct {
 }
 
 // NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a socket.
-func NewUpgradeToRocketProtocol(socket Socket) Protocol {
+func NewUpgradeToRocketProtocol(conn net.Conn) Protocol {
 	return &upgradeToRocketProtocol{
-		rocketProtocol: NewRocketProtocol(socket),
-		headerProtocol: NewHeaderProtocol(socket),
+		rocketProtocol: NewRocketProtocol(conn),
+		headerProtocol: NewHeaderProtocol(conn),
 	}
 }
 

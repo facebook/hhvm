@@ -56,7 +56,7 @@ func (p *ServerSocket) Listen() error {
 	return nil
 }
 
-func (p *ServerSocket) Accept() (Socket, error) {
+func (p *ServerSocket) Accept() (net.Conn, error) {
 	p.mu.RLock()
 	interrupted := p.interrupted
 	p.mu.RUnlock()

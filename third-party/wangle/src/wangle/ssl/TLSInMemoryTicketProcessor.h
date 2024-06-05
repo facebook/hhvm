@@ -15,7 +15,7 @@
  */
 
 #include <folly/Synchronized.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
 #include <memory>
 

@@ -22,7 +22,7 @@
 
 #include <folly/SharedMutex.h>
 #include <folly/ThreadLocal.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 

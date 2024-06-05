@@ -528,8 +528,6 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   virtual DefaultToFizzPeekingCallback* getFizzPeeker() {
     return &defaultFizzPeeker_;
   }
-  // DEPRECATED: Will be removed
-  virtual std::shared_ptr<fizz::server::FizzServerContext> createFizzContext();
 
   /**
    * Subclasses can override `createFizzContext(...)` to to customize the Fizz
@@ -545,9 +543,6 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
       std::shared_ptr<fizz::Factory> factory,
       std::shared_ptr<fizz::server::CertManager> certManager,
       folly::Optional<std::string> pskContext);
-
-  // DEPRECATED: Will be removed
-  virtual std::unique_ptr<fizz::server::CertManager> createFizzCertManager();
 
   /**
    * Subclasses can override `createFizzCertManager` to return a different

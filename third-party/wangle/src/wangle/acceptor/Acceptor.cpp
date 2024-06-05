@@ -69,7 +69,10 @@ void Acceptor::init(
           accConfig_.initialTicketSeeds.newSeeds};
 
       if (!fizzCertManager_) {
-        fizzCertManager_ = createFizzCertManager();
+        fizzCertManager_ = createFizzCertManager(
+            accConfig_.sslContextConfigs,
+            /* pwFactory = */ nullptr,
+            accConfig_.strictSSL);
       }
 
       auto context = fizzContext ? fizzContext : recreateFizzContext();
@@ -152,13 +155,6 @@ void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
       this);
 }
 
-std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext() {
-  return createFizzContext(
-      accConfig_.sslContextConfigs,
-      accConfig_.fizzConfig,
-      accConfig_.strictSSL);
-}
-
 std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext(
     const std::vector<SSLContextConfig>& sslContextConfigs,
     const FizzConfig& fizzConfig,
@@ -172,7 +168,10 @@ Acceptor::recreateFizzContext() {
   if (fizzCertManager_ == nullptr) {
     return nullptr;
   }
-  auto ctx = createFizzContext();
+  auto ctx = createFizzContext(
+      accConfig_.sslContextConfigs,
+      accConfig_.fizzConfig,
+      accConfig_.strictSSL);
   if (ctx) {
     ctx->setCertManager(fizzCertManager_);
     ctx->setTicketCipher(createFizzTicketCipher(
@@ -198,13 +197,6 @@ std::shared_ptr<fizz::server::TicketCipher> Acceptor::createFizzTicketCipher(
       std::move(pskContext));
 }
 
-std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager() {
-  return createFizzCertManager(
-      accConfig_.sslContextConfigs,
-      /* pwFactory = */ nullptr,
-      accConfig_.strictSSL);
-}
-
 std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager(
     const std::vector<SSLContextConfig>& sslContextConfigs,
     const std::shared_ptr<PasswordInFileFactory>& pwFactory,
@@ -228,7 +220,11 @@ void Acceptor::resetSSLContextConfigs(
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext) {
   try {
     if (accConfig_.fizzConfig.enableFizz) {
-      auto manager = certManager ? certManager : createFizzCertManager();
+      auto manager = certManager ? std::move(certManager)
+                                 : createFizzCertManager(
+                                       accConfig_.sslContextConfigs,
+                                       /* pwFactory = */ nullptr,
+                                       accConfig_.strictSSL);
       if (manager) {
         fizzCertManager_ = std::move(manager);
         auto context = fizzContext ? fizzContext : recreateFizzContext();

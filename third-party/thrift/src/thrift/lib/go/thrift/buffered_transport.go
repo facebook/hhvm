@@ -39,10 +39,6 @@ func NewBufferedTransport(socket Socket, bufferSize int) *BufferedTransport {
 	}
 }
 
-func (p *BufferedTransport) Open() error {
-	return p.socket.Open()
-}
-
 func (p *BufferedTransport) Close() (err error) {
 	if err = p.buf.Flush(); err != nil {
 		return err

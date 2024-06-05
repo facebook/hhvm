@@ -26,8 +26,6 @@ import (
 // Socket is a Transport that can be opened and reopened.
 type Socket interface {
 	net.Conn
-	// Opens the socket for communication
-	Open() error
 }
 
 var _ net.Conn = (*socket)(nil)
@@ -126,17 +124,6 @@ func (s *socket) pushDeadline(read, write bool) {
 	} else if write {
 		s.conn.SetWriteDeadline(t)
 	}
-}
-
-// Open connects the socket to a server, creating a new socket object if necessary.
-func (s *socket) Open() error {
-	if s.conn != nil {
-		return NewTransportException(ALREADY_OPEN, "Socket already connected.")
-	}
-	if s.addr == nil {
-		return NewTransportException(NOT_OPEN, "Cannot open nil address.")
-	}
-	return nil
 }
 
 // Addr returns the address the Socket is listening on.

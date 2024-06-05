@@ -1189,7 +1189,7 @@ class HandlerCallbackBase;
 
 namespace detail {
 // These functions allow calling the function within generated code since
-// doException is protected
+// the corresponding functions are protected in HandlerCallbackBase
 
 bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&);
 

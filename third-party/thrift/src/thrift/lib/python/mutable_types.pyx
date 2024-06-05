@@ -41,7 +41,7 @@ cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
 
 
-def fill_specs(*struct_types):
+def fill_specs(*structured_thrift_classes):
     """
     Completes the initialization of the given Thrift-generated Struct (and
     Union) classes.
@@ -56,15 +56,18 @@ def fill_specs(*struct_types):
     class creation, hence this call.
 
     Args:
-        *struct_types: Sequence of class objects, each one of which corresponds
-        to a `Struct` (i.e., created by/instance of `MutableStructMeta`)
+        *structured_thrift_classes: Sequence of class objects, each one of which
+            corresponds to a `MutableStruct` (i.e., created by/instance of
+            `MutableStructMeta`) or a `MutableUnion` (i.e., created by/instance
+            of `MutableUnionMeta`).
     """
 
-    for cls in struct_types:
+    for cls in structured_thrift_classes:
         cls._fbthrift_fill_spec()
 
-    for cls in struct_types:
-        cls._fbthrift_store_field_values()
+    for cls in structured_thrift_classes:
+        if not isinstance(cls, MutableUnionMeta):
+            cls._fbthrift_store_field_values()
 
 
 class _MutableStructField:
@@ -364,6 +367,7 @@ cdef class MutableStructInfo:
 
             Py_INCREF(field_type_info)
             PyTuple_SET_ITEM(type_infos, idx, field_type_info)
+            field_info.type_info = field_type_info
             self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
                 field_info.id,
@@ -511,7 +515,7 @@ class MutableStructMeta(type):
 class MutableUnionMeta(type):
     """Metaclass for all generated (mutable) thrift-python Union types."""
 
-    def __new__(cls, cls_name, bases, dct):
+    def __new__(cls, union_name, bases, union_class_namespace):
         """
         Returns a new Thrift Union class with the given name and members.
         """

@@ -454,7 +454,10 @@ cdef class StructInfo:
             field_info.type_info = field_type_info
             self.name_to_index[field_info.py_name] = idx
             dynamic_struct_info.addFieldInfo(
-                field_info.id, field_info.qualifier, PyUnicode_AsUTF8(field_info.name), getCTypeInfo(field_type_info)
+                field_info.id,
+                field_info.qualifier,
+                PyUnicode_AsUTF8(field_info.name),
+                getCTypeInfo(field_type_info)
             )
 
     cdef void _initialize_default_values(self) except *:
@@ -1220,7 +1223,7 @@ cdef class Union(StructOrUnion):
 
     def __init__(self, **kwargs):
         if not kwargs:
-            self._fbthrift_load_cache()
+            self._fbthrift_union_copy_data_to_attributes()
             return
         # recommend calling with 1 kwarg.
         # ok to call with one not None kwarg and extra None kwargs.
@@ -1247,7 +1250,7 @@ cdef class Union(StructOrUnion):
     def _fbthrift_create(cls, data):
         cdef Union inst = cls.__new__(cls)
         inst._fbthrift_data = data
-        inst._fbthrift_load_cache()
+        inst._fbthrift_union_copy_data_to_attributes()
         return inst
 
     @staticmethod
@@ -1290,16 +1293,23 @@ cdef class Union(StructOrUnion):
         Py_INCREF(value)
         PyTuple_SET_ITEM(self._fbthrift_data, 1, value)
         Py_DECREF(old_value)
-        self._fbthrift_load_cache()
 
-    cdef void _fbthrift_load_cache(self) except *:
+        self._fbthrift_union_copy_data_to_attributes()
+
+    cdef void _fbthrift_union_copy_data_to_attributes(self) except *:
+        """
+        Updates the `type` and `value` attributes from the internal data tuple
+        of this union (`self._fbthrift_data`).
+        """
         self.type = type(self).Type(self._fbthrift_data[0])
         val = self._fbthrift_data[1]
         if val is None:
             self.value = None
             return
         cdef UnionInfo info = self._fbthrift_struct_info
-        self.value = info.type_infos[self._fbthrift_data[0]].to_python_value(val)
+        self.value = (
+            info.type_infos[self._fbthrift_data[0]].to_python_value(val)
+        )
 
     cdef folly.iobuf.IOBuf _serialize(self, Protocol proto):
         cdef UnionInfo info = self._fbthrift_struct_info
@@ -1310,7 +1320,7 @@ cdef class Union(StructOrUnion):
     cdef uint32_t _deserialize(self, folly.iobuf.IOBuf buf, Protocol proto) except? 0:
         cdef UnionInfo info = self._fbthrift_struct_info
         cdef uint32_t size = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
-        self._fbthrift_load_cache()
+        self._fbthrift_union_copy_data_to_attributes()
         return size
 
     cdef _fbthrift_get_field_value(self, int16_t index):

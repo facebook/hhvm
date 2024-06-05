@@ -56,10 +56,8 @@ struct OpenSSLInitializer {
 
 // CCM ciphers are not added by default, so let's add them!
 #if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && \
-    OPENSSL_VERSION_NUMBER < 0x100020000
-    EVP_add_cipher(EVP_aes_128_ccm());
-    EVP_add_cipher(EVP_aes_192_ccm());
-    EVP_add_cipher(EVP_aes_256_ccm());
+    OPENSSL_VERSION_NUMBER < 0x10002000
+#error "This old OpenSSL version is not supported"
 #endif
 
     ERR_load_ERR_strings();
@@ -2322,7 +2320,7 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   case OPENSSL_ALGO_MD2:  return EVP_md2();
 #endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-  case OPENSSL_ALGO_DSS1: return EVP_dss1();
+  #error "OpenSSL < 1.1.0 is not supported"
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
   case OPENSSL_ALGO_SHA224: return EVP_sha224();

@@ -85,7 +85,7 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   explicit SharedSSLContextManagerImpl(ServerSocketConfig config)
       : SharedSSLContextManager(config) {
     try {
-      reloadContexts();
+      createContextManagers(config_.sslContextConfigs, config_.sniConfigs);
       LOG(INFO) << "Initialized SSL context configs";
     } catch (const std::runtime_error& ex) {
       if (config_.strictSSL) {
@@ -105,7 +105,7 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   void updateTLSTicketKeys(TLSTicketKeySeeds seeds) override {
     try {
       seeds_ = seeds;
-      reloadContexts();
+      createContextManagers(config_.sslContextConfigs, config_.sniConfigs);
       updateAcceptors();
       LOG(INFO) << "Updated TLS ticket keys";
 
@@ -121,14 +121,19 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
    * If there exists SNI configs, existing SNIs will use the given ssl config.
    */
   void updateSSLConfigAndReloadContexts(SSLContextConfig ssl) override {
-    config_.sslContextConfigs = {std::move(ssl)};
-    // Clearing means all existing SNI configs uses the given ssl config.
-    // In case of a need to update SNI configs; the caller need to supply
-    // customized SSL context config for each SNI config; hence an API update is
-    // needed. This is not currently supported as SNI configs are not used in
-    // the contexts this API is used.
-    config_.sniConfigs.clear();
-    reloadSSLContextConfigs();
+    try {
+      // This API overwrites all existing SNI configs with the given ssl config.
+      // In case of a need to update SNI configs; the caller need to supply
+      // customized SSL context config for each SNI config; hence an API update
+      // is needed. This is not currently supported as SNI configs are not used
+      // in the contexts this API is used.
+      createContextManagers({std::move(ssl)}, {});
+      updateAcceptors();
+      LOG(INFO) << "Updated Fizz and SSL context configs";
+    } catch (const std::runtime_error& ex) {
+      LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                 << "will keep old config";
+    }
   }
 
   /*
@@ -136,10 +141,9 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
    */
   void reloadSSLContextConfigs() override {
     try {
-      reloadContexts();
+      createContextManagers(config_.sslContextConfigs, config_.sniConfigs);
       updateAcceptors();
       LOG(INFO) << "Reloaded Fizz and SSL context configs";
-
     } catch (const std::runtime_error& ex) {
       LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
                  << "will keep old config";
@@ -147,15 +151,20 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
   }
 
  protected:
-  // recreates contexts using config_ and seeds_
-  void reloadContexts() {
+  /*
+   * Creates certManager_, fizzContext_, and ctxManager_ with the given SSL
+   * context configs and sni configs.
+   */
+  void createContextManagers(
+      const std::vector<SSLContextConfig>& sslContextConfigs,
+      const std::vector<SNIConfig>& sniConfigs) {
     if (config_.fizzConfig.enableFizz) {
       certManager_ = FizzConfigUtilT::createCertManager(
-          config_.sslContextConfigs,
+          sslContextConfigs,
           /* pwFactory = */ nullptr,
           config_.strictSSL);
       fizzContext_ = FizzConfigUtilT::createFizzContext(
-          config_.sslContextConfigs, config_.fizzConfig, config_.strictSSL);
+          sslContextConfigs, config_.fizzConfig, config_.strictSSL);
       if (fizzContext_) {
         fizzContext_->setCertManager(certManager_);
         auto fizzTicketCipher = FizzConfigUtilT::createFizzTicketCipher(
@@ -172,15 +181,15 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
         "vip_" + config_.name,
         SSLContextManagerSettings().setStrict(config_.strictSSL),
         nullptr);
-    for (const auto& sslCtxConfig : config_.sslContextConfigs) {
+    for (const auto& sslContextConfig : sslContextConfigs) {
       ctxManager->addSSLContextConfig(
-          sslCtxConfig,
+          sslContextConfig,
           config_.sslCacheOptions,
           &seeds_,
           config_.bindAddress,
           cacheProvider_);
     }
-    for (const auto& sniConfig : config_.sniConfigs) {
+    for (const auto& sniConfig : sniConfigs) {
       ctxManager->addSSLContextConfig(
           sniConfig.snis,
           sniConfig.contextConfig,

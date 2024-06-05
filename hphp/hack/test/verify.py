@@ -306,6 +306,7 @@ def run_test_program(
     verify_pessimisation: VerifyPessimisationOptions,
     check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
+    filter_glog_failures: bool = False,
 ) -> List[Result]:
     """
     Run the program and return a list of results.
@@ -347,6 +348,9 @@ def run_test_program(
                 # we don't care about nonzero exit codes... for instance, type
                 # errors cause hh_single_type_check to produce them
                 output = str(e.output)
+        if filter_glog_failures:
+            glog_message_re = r"COULD NOT CREATE A LOGGINGFILE .+\!|Could not create logging file: No such file or directory\n"
+            output = re.sub(glog_message_re, r"", output)
         return check_result(
             test_case,
             default_expect_regex,
@@ -730,6 +734,7 @@ def run_tests(
     check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
     only_compare_error_lines: bool = False,
+    filter_glog_failures: bool = False,
 ) -> List[Result]:
 
     # for each file, create a test case
@@ -771,6 +776,7 @@ def run_tests(
             verify_pessimisation,
             check_expected_included_in_actual=check_expected_included_in_actual,
             timeout=timeout,
+            filter_glog_failures=filter_glog_failures,
         )
 
     failures = [result for result in results if result.is_failure]
@@ -960,6 +966,11 @@ def main() -> None:
         action="store_true",
         help="Match on normalized file paths in error messages",
     )
+    parser.add_argument(
+        "--filter-glog-failures",
+        action="store_true",
+        help='Filters out glog messages of the "COULD NOT CREATE A LOGGINGFILE" form.',
+    )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
         " as the test files it is executing. If found, the "
@@ -1029,6 +1040,7 @@ def main() -> None:
         check_expected_included_in_actual=args.check_expected_included_in_actual,
         timeout=args.timeout,
         only_compare_error_lines=args.only_compare_error_lines,
+        filter_glog_failures=args.filter_glog_failures,
     )
 
     # Doesn't make sense to check failures for idempotence

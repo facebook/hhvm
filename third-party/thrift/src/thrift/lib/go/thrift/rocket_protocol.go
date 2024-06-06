@@ -196,28 +196,32 @@ func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
 }
 
 func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) {
+	name := p.reqMetadata.Name
 	resp, err := p.readPayload()
 	if err != nil {
-		return "", EXCEPTION, 0, err
+		return name, EXCEPTION, p.seqID, err
 	}
 	metadataBytes, ok := resp.Metadata()
 	if ok {
 		metadata := &ResponseRpcMetadata{}
 		compactDeserializer := NewCompactDeserializer()
 		if err = compactDeserializer.Read(metadata, metadataBytes); err != nil {
-			return "", EXCEPTION, 0, err
+			return name, EXCEPTION, p.seqID, err
 		}
 		p.respMetadata = metadata
 		if p.respMetadata.PayloadMetadata != nil && p.respMetadata.PayloadMetadata.ExceptionMetadata != nil {
-			return "", EXCEPTION, 0, newRocketException(p.respMetadata.PayloadMetadata.ExceptionMetadata)
+			exception := newRocketException(p.respMetadata.PayloadMetadata.ExceptionMetadata)
+			exceptionMetadata := p.respMetadata.PayloadMetadata.ExceptionMetadata
+			if exceptionMetadata.Metadata != nil && exceptionMetadata.Metadata.AppUnknownException != nil {
+				return name, EXCEPTION, p.seqID, exception
+			}
 		}
 	}
-	name := p.reqMetadata.Name
 	dataBytes := resp.Data()
 	if p.respMetadata.Compression != nil && *p.respMetadata.Compression == CompressionAlgorithm_ZSTD {
 		dataBytes, err = decompressZstd(dataBytes)
 		if err != nil {
-			return name, EXCEPTION, 0, err
+			return name, EXCEPTION, p.seqID, err
 		}
 	}
 	p.buf.Buffer = bytes.NewBuffer(dataBytes)

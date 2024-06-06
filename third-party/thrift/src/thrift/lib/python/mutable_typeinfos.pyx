@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+cimport cython
+
 from libcpp.memory cimport make_unique
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
@@ -26,6 +28,7 @@ from thrift.python.exceptions cimport GeneratedError
 from thrift.python.types cimport getCTypeInfo
 
 
+@cython.final
 cdef class MutableStructTypeInfo(TypeInfoBase):
     """
     `MutableStructTypeInfo` is similar to `StructTypeInfo`. However, we had to
@@ -78,6 +81,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         return self._mutable_struct_class == (<MutableStructTypeInfo>other)._mutable_struct_class
 
 
+@cython.final
 cdef class MutableListTypeInfo(TypeInfoBase):
     """
     `MutableListTypeInfo` is similar to `ListTypeInfo`. However, the main
@@ -138,6 +142,7 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         return self.val_info.same_as((<MutableListTypeInfo>other).val_info)
 
 
+@cython.final
 cdef class MutableSetTypeInfo(TypeInfoBase):
     """
     `MutableSetTypeInfo` is similar to `SetTypeInfo`. However, the main

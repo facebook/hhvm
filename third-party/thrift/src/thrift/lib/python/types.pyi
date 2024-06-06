@@ -33,6 +33,9 @@ class IntegerTypeInfo:
 class StringTypeInfo:
     pass
 
+class IOBufTypeInfo:
+    pass
+
 class FieldQualifier(enum.Enum):
     Unqualified: FieldQualifier = ...
     Optional: FieldQualifier = ...

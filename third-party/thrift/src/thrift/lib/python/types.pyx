@@ -107,6 +107,7 @@ cdef class TypeInfoBase:
         """
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
+@cython.final
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, pytypes, str singleton_name):
@@ -147,6 +148,7 @@ cdef class TypeInfo(TypeInfoBase):
         # instead of repeatedly constructing TypeInfo instances
         return self.singleton_name
 
+@cython.final
 cdef class IntegerTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, min_value, max_value, str singleton_name):
@@ -190,6 +192,7 @@ cdef class IntegerTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return self.singleton_name
 
+@cython.final
 cdef class StringTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, str singleton_name):
@@ -244,6 +247,7 @@ cdef class StringTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return self.singleton_name
 
+@cython.final
 cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, str singleton_name):
@@ -543,6 +547,7 @@ cdef to_container_elements_no_convert(type_info):
     return isinstance(type_info, (TypeInfo, IntegerTypeInfo)) or type_info is typeinfo_iobuf
 
 
+@cython.final
 cdef class ListTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -599,6 +604,7 @@ cdef class ListTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (ListTypeInfo, (self.val_info,))
 
+@cython.final
 cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -649,6 +655,7 @@ cdef class SetTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (SetTypeInfo, (self.val_info,))
 
+@cython.final
 cdef class MapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
         self.key_info = key_info
@@ -715,6 +722,7 @@ cdef class MapTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (MapTypeInfo, (self.key_info, self.val_info))
 
+@cython.final
 cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
@@ -784,6 +792,7 @@ cdef class StructTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (StructTypeInfo, (self._class,))
 
+@cython.final
 cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
@@ -846,6 +855,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (EnumTypeInfo, (self._class,))
 
+@cython.final
 cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
         self._orig_type_info = orig_type_info

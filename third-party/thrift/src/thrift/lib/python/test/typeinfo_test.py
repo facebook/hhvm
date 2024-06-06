@@ -14,9 +14,30 @@
 
 # pyre-strict
 
+import typing
 import unittest
 
+from parameterized import parameterized
+
+from thrift.python.mutable_typeinfos import (
+    MutableListTypeInfo,
+    MutableSetTypeInfo,
+    MutableStructTypeInfo,
+)
+
 from thrift.python.test.typeinfo_test import TypeInfoTests as CTests
+from thrift.python.types import (
+    AdaptedTypeInfo,
+    EnumTypeInfo,
+    IntegerTypeInfo,
+    IOBufTypeInfo,
+    ListTypeInfo,
+    MapTypeInfo,
+    SetTypeInfo,
+    StringTypeInfo,
+    StructTypeInfo,
+    TypeInfo,
+)
 
 # This python file serves as a boilerplate code for executing tests written
 # in a Cython module. Simply import the Cython module containing the tests,
@@ -24,6 +45,32 @@ from thrift.python.test.typeinfo_test import TypeInfoTests as CTests
 
 
 class TypeInfoTests(unittest.TestCase):
+
+    @parameterized.expand(
+        [
+            AdaptedTypeInfo,
+            EnumTypeInfo,
+            IntegerTypeInfo,
+            IOBufTypeInfo,
+            ListTypeInfo,
+            MapTypeInfo,
+            MutableListTypeInfo,
+            MutableSetTypeInfo,
+            MutableStructTypeInfo,
+            SetTypeInfo,
+            StringTypeInfo,
+            StructTypeInfo,
+            TypeInfo,
+        ]
+    )
+    def test_TypeInfo_classes_are_final(self, base_type: typing.Type[object]) -> None:
+        with self.assertRaisesRegex(
+            TypeError, f"{base_type.__name__}' is not an acceptable base type"
+        ):
+
+            class Derived(base_type):
+                pass
+
     def test_IntegerTypeInfo(self) -> None:
         CTests(self).test_IntegerTypeInfo()
 

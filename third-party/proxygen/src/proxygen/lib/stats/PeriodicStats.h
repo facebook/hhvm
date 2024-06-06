@@ -12,7 +12,7 @@
 #include <chrono>
 #include <folly/Function.h>
 #include <folly/ThreadLocal.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <folly/synchronization/Rcu.h>
 
 namespace proxygen {

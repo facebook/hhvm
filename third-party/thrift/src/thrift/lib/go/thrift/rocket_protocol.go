@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
@@ -169,6 +170,9 @@ func (p *rocketProtocol) open() error {
 	}
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	p.client, err = rsocket.Connect().
+		// See T182939211. This copies the keep alives from Java Rocket.
+		// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
+		KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
 		SetupPayload(setupPayload).
 		Transport(transporter).
 		Start(p.ctx)

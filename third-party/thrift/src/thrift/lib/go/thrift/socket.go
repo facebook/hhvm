@@ -164,32 +164,18 @@ func (s *socket) Conn() net.Conn {
 	return s.conn
 }
 
-// Close cleans up all resources used by the Socket.
+// Close closes the underlying net.Conn
 func (s *socket) Close() error {
-	// Close the socket
-	if s.conn != nil {
-		err := s.conn.Close()
-		if err != nil {
-			return err
-		}
-		s.conn = nil
-	}
-	return nil
+	return s.conn.Close()
 }
 
 func (s *socket) Read(buf []byte) (int, error) {
-	if s.conn == nil {
-		return 0, NewTransportException(NOT_OPEN, "connection not open")
-	}
 	s.pushDeadline(true, false)
 	n, err := s.conn.Read(buf)
 	return n, NewTransportExceptionFromError(err)
 }
 
 func (s *socket) Write(buf []byte) (int, error) {
-	if s.conn == nil {
-		return 0, NewTransportException(NOT_OPEN, "connection not open")
-	}
 	s.pushDeadline(false, true)
 	return s.conn.Write(buf)
 }

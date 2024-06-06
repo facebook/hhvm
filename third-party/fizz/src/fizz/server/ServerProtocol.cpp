@@ -337,7 +337,8 @@ Actions handleAppClose(const State& state) {
   }
 }
 
-Actions handleInvalidEvent(const State& state, Event event, Param& param) {
+AsyncActions handleInvalidEvent(const State& state, Param& param) {
+  auto event = EventVisitor()(param);
   if (event == Event::Alert) {
     auto& alert = *param.asAlert();
     throw FizzException(

@@ -49,7 +49,7 @@ class EventHandler : public EventHandlerBase<SM, state, event> {
   static typename SM::Actions handle(
       const typename SM::State& curState,
       typename SM::Param& param) {
-    return SM::InvalidEventHandler(curState, event, param);
+    return SM::InvalidEventHandler(curState, param);
   }
 };
 

@@ -18,7 +18,6 @@ type options = {
   extra_builtins: string list;
   ai_options: Ai_options.t;
   error_format: Errors.format;
-  no_builtins: bool;
   tcopt: GlobalOptions.t;
 }
 
@@ -168,7 +167,6 @@ let parse_options () =
       extra_builtins = !extra_builtins;
       ai_options;
       error_format = Errors.Highlighted;
-      no_builtins = false;
       tcopt;
     },
     None,
@@ -242,58 +240,53 @@ let file_to_files filename =
 (*****************************************************************************)
 
 let decl_and_run_mode
-    { files; extra_builtins; ai_options; error_format; no_builtins; tcopt }
+    { files; extra_builtins; ai_options; error_format; tcopt }
     (popt : ParserOptions.t)
     (hhi_root : Path.t)
     (naming_table_path : string option) : unit =
   Ident.track_names := true;
   let builtins =
-    if no_builtins then
-      Relative_path.Map.empty
-    else
-      let extra_builtins =
-        let add_file_content map filename =
-          Relative_path.create Relative_path.Dummy filename
-          |> Multifile.file_to_file_list
-          |> List.map ~f:(fun (path, contents) ->
-                 (Filename.basename (Relative_path.suffix path), contents))
-          |> List.unordered_append map
-        in
-        extra_builtins
-        |> List.fold ~f:add_file_content ~init:[]
-        |> Array.of_list
+    let extra_builtins =
+      let add_file_content map filename =
+        Relative_path.create Relative_path.Dummy filename
+        |> Multifile.file_to_file_list
+        |> List.map ~f:(fun (path, contents) ->
+               (Filename.basename (Relative_path.suffix path), contents))
+        |> List.unordered_append map
       in
-      let magic_builtins = Array.append magic_builtins extra_builtins in
-      (* Check that magic_builtin filenames are unique *)
-      let () =
-        let n_of_builtins = Array.length magic_builtins in
-        let n_of_unique_builtins =
-          Array.to_list magic_builtins
-          |> List.map ~f:fst
-          |> SSet.of_list
-          |> SSet.cardinal
-        in
-        if n_of_builtins <> n_of_unique_builtins then
-          die "Multiple magic builtins share the same base name.\n"
+      extra_builtins |> List.fold ~f:add_file_content ~init:[] |> Array.of_list
+    in
+    let magic_builtins = Array.append magic_builtins extra_builtins in
+    (* Check that magic_builtin filenames are unique *)
+    let () =
+      let n_of_builtins = Array.length magic_builtins in
+      let n_of_unique_builtins =
+        Array.to_list magic_builtins
+        |> List.map ~f:fst
+        |> SSet.of_list
+        |> SSet.cardinal
       in
-      Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
-          let file_path = Path.concat hhi_root file_name in
-          let file = Path.to_string file_path in
-          Sys_utils.try_touch
-            (Sys_utils.Touch_existing { follow_symlinks = true })
-            file;
-          Sys_utils.write_file ~file file_contents);
+      if n_of_builtins <> n_of_unique_builtins then
+        die "Multiple magic builtins share the same base name.\n"
+    in
+    Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
+        let file_path = Path.concat hhi_root file_name in
+        let file = Path.to_string file_path in
+        Sys_utils.try_touch
+          (Sys_utils.Touch_existing { follow_symlinks = true })
+          file;
+        Sys_utils.write_file ~file file_contents);
 
-      (* Take the builtins (file, contents) array and create relative paths *)
-      Array.fold
-        (Array.append magic_builtins hhi_builtins)
-        ~init:Relative_path.Map.empty
-        ~f:(fun acc (f, src) ->
-          let f = Path.concat hhi_root f |> Path.to_string in
-          Relative_path.Map.add
-            acc
-            ~key:(Relative_path.create Relative_path.Hhi f)
-            ~data:src)
+    (* Take the builtins (file, contents) array and create relative paths *)
+    Array.fold
+      (Array.append magic_builtins hhi_builtins)
+      ~init:Relative_path.Map.empty
+      ~f:(fun acc (f, src) ->
+        let f = Path.concat hhi_root f |> Path.to_string in
+        Relative_path.Map.add
+          acc
+          ~key:(Relative_path.create Relative_path.Hhi f)
+          ~data:src)
   in
   let files =
     if use_canonical_filenames () then

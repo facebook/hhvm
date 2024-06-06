@@ -298,12 +298,31 @@ class t_const_value {
   const t_enum* enum_ = nullptr;
   const t_enum_value* enum_val_ = nullptr;
 
+  static std::string_view kind_to_string(t_const_value_kind kind) {
+    switch (kind) {
+      case CV_BOOL:
+        return "bool";
+      case CV_INTEGER:
+        return "integer";
+      case CV_DOUBLE:
+        return "double";
+      case CV_STRING:
+        return "string";
+      case CV_MAP:
+        return "map({})";
+      case CV_LIST:
+        return "list([])";
+      case CV_IDENTIFIER:
+        return "identifier";
+    }
+  }
+
   void check_kind(t_const_value_kind expected) const {
     if (kind_ != expected) {
       throw std::runtime_error(fmt::format(
-          "invalid const value access: {} != {}",
-          fmt::underlying(kind_),
-          fmt::underlying(expected)));
+          "invalid const value access: expected '{}', got '{}'",
+          kind_to_string(expected),
+          kind_to_string(kind_)));
     }
   }
 
